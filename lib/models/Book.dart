@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:anx_reader/dao/Book.dart';
 import 'package:epub_view/epub_view.dart';
 import 'package:path_provider/path_provider.dart';
 import '../utils/importBook.dart';
@@ -12,7 +13,7 @@ class Book {
   late String author;
   String? description;
 
-  Book(File file) {
+  Book.byFile(File file) {
     title = '';
     coverPath = '';
     filePath = '';
@@ -20,6 +21,15 @@ class Book {
     author = '';
     _initializeBook(file);
   }
+
+  Book(
+      {required this.id,
+      required this.title,
+      required this.coverPath,
+      required this.filePath,
+      required this.lastReadPosition,
+      required this.author,
+      this.description});
 
   Future<void> _initializeBook(File file) async {
     EpubBook epubBookRef = await EpubDocument.openFile(file);
@@ -55,5 +65,9 @@ class Book {
       'author': author,
       'description': description,
     };
+  }
+
+  Future<void> insertToSql() async {
+    await insertBook(this);
   }
 }
