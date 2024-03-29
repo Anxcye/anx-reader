@@ -2,11 +2,10 @@ import 'dart:io';
 
 import 'package:anx_reader/dao/Book.dart';
 import 'package:anx_reader/models/Book.dart';
-import 'package:anx_reader/utils/importBook.dart';
-import 'package:epub_view/epub_view.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
+
+import '../widgets.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -39,12 +38,34 @@ class HomePage extends StatelessWidget {
 
     final bookPath = selectedBook!.single.path!;
     File file = File(bookPath);
-    Book book = Book(file);
+    Book book = Book.byFile(file);
 
-    await insertBook(book);
+    book.insertToSql();
   }
 
   Widget _bookList() {
-    return const Text('data');
+    return FutureBuilder<List<Book>>(
+      future: getAllBooks(),
+      builder: (BuildContext context, AsyncSnapshot<List<Book>> snapshot) {
+        if (snapshot.hasData) {
+          return GridView.builder(
+            itemCount: snapshot.data!.length,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,
+              childAspectRatio: 0.6,
+              mainAxisSpacing: 10,
+              crossAxisSpacing: 10,
+            ),
+            itemBuilder: (BuildContext context, int index) {
+              Book book = snapshot.data![index];
+              return BookItem(book: book);
+            },
+          );
+        } else if (snapshot.hasError) {
+          return Text('Error: ${snapshot.error}');
+        }
+        return const CircularProgressIndicator();
+      },
+    );
   }
 }
