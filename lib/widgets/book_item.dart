@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 import '../models/book.dart';
 
@@ -18,26 +20,43 @@ class BookItem extends StatelessWidget {
       onTap: () {
         print('openbook');
       },
-      onLongPress: (){},
+      onLongPress: () {},
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(5),
-              image: DecorationImage(
-                image: FileImage(File(book.coverPath)),
-                fit: BoxFit.cover,
+          Expanded(
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(7),
+                border: Border.all(
+                  width: 0.3,
+                  color: Colors.grey,
+                ),
+                image: DecorationImage(
+                  image: FileImage(File(book.coverPath)),
+                  fit: BoxFit.cover,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.2),
+                    spreadRadius: 5,
+                    blurRadius: 10,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
             ),
-            height: 141,
-            width: 100,
           ),
           const SizedBox(height: 5),
           Text(
             book.title,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold
+            ),
           ),
+          // Text(book.author),
         ],
       ),
     );
