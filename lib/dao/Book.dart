@@ -9,6 +9,8 @@ Future<int> insertBook(Book book) async {
 Future<List<Book>> getAllBooks() async {
   final db = await DBHelper().database;
   final List<Map<String, dynamic>> maps = await db.query('tb_books');
+  print('get all booking');
+  print(maps);
   return List.generate(maps.length, (i) {
     return Book(
       id: maps[i]['id'],

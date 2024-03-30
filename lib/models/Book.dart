@@ -14,11 +14,13 @@ class Book {
   String? description;
 
   Book.byFile(File file) {
+    id = -1;
     title = '';
     coverPath = '';
     filePath = '';
     lastReadPosition = '';
     author = '';
+    description = '';
     _initializeBook(file);
   }
 
@@ -53,7 +55,8 @@ class Book {
     this.coverPath = coverPath;
 
     lastReadPosition = '';
-    print(this.toMap());
+    Future<int> id = insertToSql();
+    this.id = id as int;
   }
 
   Map<String, Object?> toMap() {
@@ -67,7 +70,7 @@ class Book {
     };
   }
 
-  Future<void> insertToSql() async {
-    await insertBook(this);
+  Future<int> insertToSql() async {
+    return await insertBook(this);
   }
 }
