@@ -1,11 +1,12 @@
 import 'dart:io';
 
-import 'package:anx_reader/dao/Book.dart';
-import 'package:anx_reader/models/Book.dart';
+import 'package:anx_reader/dao/book.dart';
+import 'package:anx_reader/models/book.dart';
+import 'package:anx_reader/service/book.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 
-import '../widgets.dart';
+import '../widgets/book_item.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -33,7 +34,7 @@ class _HomePageState extends State<HomePage> {
   Future<void> _importBook() async {
     final allowBookExtensions = ['epub'];
     final selectedBook = (await FilePicker.platform.pickFiles(
-        type: FileType.custom, allowedExtensions: allowBookExtensions))
+            type: FileType.custom, allowedExtensions: allowBookExtensions))
         ?.files;
 
     if (selectedBook?.isEmpty ?? true) {
@@ -42,7 +43,8 @@ class _HomePageState extends State<HomePage> {
 
     final bookPath = selectedBook!.single.path!;
     File file = File(bookPath);
-    Book book = Book.byFile(file);
+
+    await importBook(file);
 
     _refreshBookList();
   }

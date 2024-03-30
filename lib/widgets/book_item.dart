@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 
-import 'models/Book.dart';
+import '../models/book.dart';
 
 class BookItem extends StatelessWidget {
   const BookItem({
@@ -18,6 +18,7 @@ class BookItem extends StatelessWidget {
       onTap: () {
         print('openbook');
       },
+      onLongPress: (){},
       child: Column(
         children: [
           Container(
