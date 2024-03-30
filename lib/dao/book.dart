@@ -1,5 +1,5 @@
 import 'package:anx_reader/dao/database.dart';
-import 'package:anx_reader/models/Book.dart';
+import 'package:anx_reader/models/book.dart';
 
 Future<int> insertBook(Book book) async {
   final db = await DBHelper().database;
@@ -9,8 +9,6 @@ Future<int> insertBook(Book book) async {
 Future<List<Book>> getAllBooks() async {
   final db = await DBHelper().database;
   final List<Map<String, dynamic>> maps = await db.query('tb_books');
-  print('get all booking');
-  print(maps);
   return List.generate(maps.length, (i) {
     return Book(
       id: maps[i]['id'],
