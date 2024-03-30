@@ -8,14 +8,14 @@ import '../dao/book.dart';
 import '../models/book.dart';
 import '../service/book.dart';
 
-class BookShelf extends StatefulWidget {
-  const BookShelf({super.key});
+class BookshelfPage extends StatefulWidget {
+  const BookshelfPage({super.key});
 
   @override
-  State<BookShelf> createState() => _BookShelfState();
+  State<BookshelfPage> createState() => _BookshelfPageState();
 }
 
-class _BookShelfState extends State<BookShelf> {
+class _BookshelfPageState extends State<BookshelfPage> {
 
   List<Book> _books = [];
   int _currentIndex = 0;
