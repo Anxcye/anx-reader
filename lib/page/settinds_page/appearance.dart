@@ -1,9 +1,9 @@
-import 'package:anx_reader/config/preferences.dart';
+import 'package:anx_reader/l10n/localization_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../config/theme_data.dart';
+import '../../config/shared_preference_provider.dart';
+import '../../widgets/settings/setting_color_item.dart';
 import '../../widgets/settings/settings_group_title.dart';
 
 class AppearanceSetting extends StatelessWidget {
@@ -13,7 +13,7 @@ class AppearanceSetting extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       leading: const Icon(Icons.palette),
-      title: const Text('Appearance'),
+      title: Text(context.appearance),
       trailing: const Icon(Icons.chevron_right),
       onTap: () {
         Navigator.push(
@@ -39,20 +39,27 @@ class SubAppearanceSettings extends StatelessWidget {
             Navigator.pop(context);
           },
         ),
-        title: const Text('Appearance'),
+        title: Text(context.appearance),
       ),
       body: ListView(
         padding: const EdgeInsets.all(15),
         children: [
-          const SettingsGroupTitle(
-            title: 'Theme',
+          SettingsGroupTitle(
+            title: context.appearanceTheme,
           ),
           ListTile(
-            title: const Text('Theme Color'),
+            title: Text(context.appearanceThemeColor),
             onTap: () async {
               await _showColorPickerDialog(context);
             },
           ),
+          SettingsGroupTitle(title: context.appearanceDisplay),
+          ListTile(
+            title: Text(context.appearanceLanguage),
+            onTap: () {
+              _showLanguagePickerDialog(context);
+            },
+          )
         ],
       ),
     );
@@ -63,14 +70,14 @@ class SubAppearanceSettings extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return SimpleDialog(
-          title: const Text('Theme Color'),
+          title: Text(context.appearanceThemeColor),
           children: <Widget>[
             SettingsColorItem(
-              colorName: 'Blue',
+              // colorName: 'Blue',
               colorValue: Colors.blue.value,
             ),
             SettingsColorItem(
-              colorName: 'Green',
+              // colorName: 'Green',
               colorValue: Colors.green.value,
             ),
           ],
@@ -80,29 +87,42 @@ class SubAppearanceSettings extends StatelessWidget {
   }
 }
 
-class SettingsColorItem extends StatelessWidget {
-  const SettingsColorItem({
+_showLanguagePickerDialog(BuildContext context) {
+  return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return SimpleDialog(
+          title: Text(context.appearanceLanguage),
+          children: const <Widget>[
+            SettingLangItem(languageName: '简体中文', languageCode: 'zh'),
+            SettingLangItem(languageName: 'English', languageCode: 'en'),
+          ],
+        );
+      });
+}
+
+class SettingLangItem extends StatelessWidget {
+  const SettingLangItem({
     super.key,
-    required this.colorName,
-    required this.colorValue,
+    required this.languageName,
+    required this.languageCode,
   });
 
-  final String colorName;
-  final int colorValue;
+  final String languageName;
+  final String languageCode;
 
   @override
   Widget build(BuildContext context) {
     return SimpleDialogOption(
       onPressed: () async {
-        final themeNotifier = Provider.of<ThemeNotifier>(context, listen: false);
-        themeNotifier.themeColor = Color(colorValue);
-        await themeNotifier.saveThemeToPrefs();
-
+        final prefsProvider =
+            Provider.of<SharedPreferencesProvider>(context, listen: false);
+        await prefsProvider.saveLocaleToPrefs(languageCode);
         Navigator.pop(context);
       },
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 6),
-        child: Text(colorName),
+        child: Text(languageName),
       ),
     );
   }

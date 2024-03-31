@@ -1,8 +1,10 @@
 import 'dart:io';
 
+import 'package:anx_reader/l10n/localization_extension.dart';
 import 'package:anx_reader/widgets/book_list.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../dao/book.dart';
 import '../models/book.dart';
@@ -16,9 +18,7 @@ class BookshelfPage extends StatefulWidget {
 }
 
 class _BookshelfPageState extends State<BookshelfPage> {
-
   List<Book> _books = [];
-  int _currentIndex = 0;
 
   @override
   void initState() {
@@ -36,7 +36,7 @@ class _BookshelfPageState extends State<BookshelfPage> {
   Future<void> _importBook() async {
     final allowBookExtensions = ['epub'];
     final selectedBook = (await FilePicker.platform.pickFiles(
-        type: FileType.custom, allowedExtensions: allowBookExtensions))
+            type: FileType.custom, allowedExtensions: allowBookExtensions))
         ?.files;
 
     if (selectedBook?.isEmpty ?? true) {
@@ -50,11 +50,12 @@ class _BookshelfPageState extends State<BookshelfPage> {
 
     _refreshBookList();
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Anx Reader'),
+        title: Text(context.appName),
         actions: [
           IconButton(
             icon: const Icon(Icons.add),

@@ -10,6 +10,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
   cupertino_icons: ^1.0.6
   file_picker: ^8.0.0+1
   path_provider: ^2.1.2
@@ -20,6 +23,8 @@ dependencies:
   path: ^1.9.0
   shared_preferences: ^2.2.2
   provider: ^6.1.2
+  flutter_gen_runner: ^5.4.0
+  intl: ^0.18.1
 
 
 dev_dependencies:
@@ -29,6 +34,7 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  generate: true
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg
