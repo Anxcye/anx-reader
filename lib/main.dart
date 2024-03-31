@@ -29,12 +29,19 @@ class MyApp extends StatelessWidget {
           locale: prefsNotifier.locale,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          // title: AppLocalizations.of(context)!.appName,
           title: 'Anx',
+          themeMode: prefsNotifier.themeMode,
           theme: ThemeData(
-            useMaterial3: true,
-            colorScheme:
-                ColorScheme.fromSeed(seedColor: prefsNotifier.themeColor),
+            brightness: Brightness.light,
+            colorScheme: ColorScheme.fromSeed(
+                seedColor: prefsNotifier.themeColor,
+                brightness: Brightness.light),
+          ),
+          darkTheme: ThemeData(
+            brightness: Brightness.dark,
+            colorScheme: ColorScheme.fromSeed(
+                seedColor: prefsNotifier.themeColor,
+                brightness: Brightness.dark),
           ),
           home: const HomePage(),
         );

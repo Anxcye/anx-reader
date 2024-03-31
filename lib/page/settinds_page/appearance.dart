@@ -73,11 +73,9 @@ class SubAppearanceSettings extends StatelessWidget {
           title: Text(context.appearanceThemeColor),
           children: <Widget>[
             SettingsColorItem(
-              // colorName: 'Blue',
               colorValue: Colors.blue.value,
             ),
             SettingsColorItem(
-              // colorName: 'Green',
               colorValue: Colors.green.value,
             ),
           ],
