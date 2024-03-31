@@ -3,7 +3,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class SharedPreferencesProvider extends ChangeNotifier {
   late SharedPreferences prefs;
-  static final SharedPreferencesProvider _instance = SharedPreferencesProvider._internal();
+  static final SharedPreferencesProvider _instance =
+      SharedPreferencesProvider._internal();
 
   factory SharedPreferencesProvider() {
     return _instance;
@@ -39,4 +40,20 @@ class SharedPreferencesProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  ThemeMode get themeMode {
+    String themeMode = prefs.getString('themeMode') ?? 'system';
+    switch (themeMode) {
+      case 'dark':
+        return ThemeMode.dark;
+      case 'light':
+        return ThemeMode.light;
+      default:
+        return ThemeMode.system;
+    }
+  }
+
+  Future<void> saveThemeModeToPrefs(String themeMode) async {
+    await prefs.setString('themeMode', themeMode);
+    notifyListeners();
+  }
 }

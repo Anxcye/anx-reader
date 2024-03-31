@@ -15,13 +15,18 @@ extension LocalizationExtension on BuildContext {
   String get navBarSettings => AppLocalizations.of(this)?.navBar_settings ?? '';
 
   String get settingsDarkMode =>
-      AppLocalizations.of(this)?.settings_darkMode ?? '';
+      AppLocalizations.of(this)?.settings_dark_mode ?? '';
+
+  String get settingsSystemMode =>
+      AppLocalizations.of(this)?.settings_system_mode ?? '';
+
+  String get settingsLightMode =>
+      AppLocalizations.of(this)?.settings_light_mode ?? '';
 
   String get settingsMoreSettings =>
       AppLocalizations.of(this)?.settings_moreSettings ?? '';
 
-  String get appearance =>
-      AppLocalizations.of(this)?.settings_appearance ?? '';
+  String get appearance => AppLocalizations.of(this)?.settings_appearance ?? '';
 
   String get appearanceTheme =>
       AppLocalizations.of(this)?.settings_appearance_theme ?? '';

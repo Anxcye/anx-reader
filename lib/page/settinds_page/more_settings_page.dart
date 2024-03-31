@@ -1,7 +1,8 @@
 import 'package:anx_reader/l10n/localization_extension.dart';
 import 'package:anx_reader/page/settinds_page/appearance.dart';
-import 'package:anx_reader/page/settinds_page/settings_page.dart';
 import 'package:flutter/material.dart';
+
+import '../../widgets/settings/about.dart';
 
 class MoreSettings extends StatelessWidget {
   const MoreSettings({super.key});
