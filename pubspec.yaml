@@ -25,6 +25,8 @@ dependencies:
   provider: ^6.1.2
   flutter_gen_runner: ^5.4.0
   intl: ^0.18.1
+  settings_ui: ^2.0.2
+  flutter_colorpicker: ^1.0.3
 
 
 dev_dependencies:
