@@ -1,5 +1,6 @@
 import 'package:anx_reader/l10n/localization_extension.dart';
 import 'package:anx_reader/page/settinds_page/appearance.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../../widgets/settings/about.dart';
@@ -16,7 +17,9 @@ class MoreSettings extends StatelessWidget {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const SubMoreSettings()),
+          CupertinoPageRoute(
+              fullscreenDialog: false,
+              builder: (context) => const SubMoreSettings()),
         );
       },
     );

@@ -1,4 +1,6 @@
 import 'package:anx_reader/l10n/localization_extension.dart';
+import 'package:anx_reader/widgets/settings/theme_mode.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -18,7 +20,7 @@ class AppearanceSetting extends StatelessWidget {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(
+          CupertinoPageRoute(
               builder: (context) => const SubAppearanceSettings()),
         );
       },
@@ -46,6 +48,10 @@ class SubAppearanceSettings extends StatelessWidget {
         children: [
           SettingsGroupTitle(
             title: context.appearanceTheme,
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: ChangeThemeMode(),
           ),
           ListTile(
             title: Text(context.appearanceThemeColor),
