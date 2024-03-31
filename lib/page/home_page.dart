@@ -1,3 +1,4 @@
+import 'package:anx_reader/l10n/localization_extension.dart';
 import 'package:anx_reader/page/bookshelf_page.dart';
 import 'package:anx_reader/page/notes_page.dart';
 import 'package:anx_reader/page/settinds_page/settings_page.dart';
@@ -40,21 +41,21 @@ class _HomePageState extends State<HomePage> {
 
   List<NavigationDestination> _bottomBarItems() {
     return [
-      const NavigationDestination(
-        icon: Icon(Icons.book),
-        label: 'Bookshelf',
+      NavigationDestination(
+        icon: const Icon(Icons.book),
+        label: context.navBarBookshelf,
       ),
-      const NavigationDestination(
-        icon: Icon(Icons.show_chart),
-        label: 'Statistics',
+      NavigationDestination(
+        icon: const Icon(Icons.show_chart),
+        label: context.navBarStatistics,
       ),
-      const NavigationDestination(
-        icon: Icon(Icons.note),
-        label: 'Notes',
+      NavigationDestination(
+        icon: const Icon(Icons.note),
+        label: context.navBarNotes,
       ),
-      const NavigationDestination(
-        icon: Icon(Icons.settings),
-        label: 'Settings',
+      NavigationDestination(
+        icon: const Icon(Icons.settings),
+        label: context.navBarSettings,
       ),
     ];
 

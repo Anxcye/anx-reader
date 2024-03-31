@@ -1,0 +1,14 @@
+{
+  "appName": "Anx Reader",
+  "navBar_bookshelf": "Bookshelf",
+  "navBar_statistics": "Statistics",
+  "navBar_notes": "Notes",
+  "navBar_settings": "Settings",
+  "settings_darkMode": "Dark Mode",
+  "settings_moreSettings": "More Settings",
+  "settings_appearance": "Appearance",
+  "settings_appearance_theme": "Theme",
+  "settings_appearance_themeColor": "Theme Color",
+  "settings_appearance_display": "Display",
+  "settings_appearance_language": "Language"
+}
