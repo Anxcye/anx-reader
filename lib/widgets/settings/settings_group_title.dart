@@ -14,7 +14,7 @@ class SettingsGroupTitle extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Text(
         title,
-        style: TextStyle(fontSize: 12, color: Theme.of(context).primaryColor),
+        style: const TextStyle(fontSize: 12 ),
       ),
     );
   }
