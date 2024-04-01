@@ -8,7 +8,7 @@ Future<int> insertBook(Book book) async {
 
 Future<List<Book>> getAllBooks() async {
   final db = await DBHelper().database;
-  final List<Map<String, dynamic>> maps = await db.query('tb_books');
+  final List<Map<String, dynamic>> maps = await db.query('tb_books', orderBy: 'update_time DESC');
   return List.generate(maps.length, (i) {
     return Book(
       id: maps[i]['id'],
@@ -18,6 +18,18 @@ Future<List<Book>> getAllBooks() async {
       lastReadPosition: maps[i]['last_read_position'],
       author: maps[i]['author'],
       description: maps[i]['description'],
+      createTime: DateTime.parse(maps[i]['create_time']),
+      updateTime: DateTime.parse(maps[i]['update_time']),
     );
   });
+}
+
+Future<void> updateBook(Book book) async {
+  final db = await DBHelper().database;
+  await db.update(
+    'tb_books',
+    book.toMap(),
+    where: 'id = ?',
+    whereArgs: [book.id],
+  );
 }

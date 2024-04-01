@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:anx_reader/dao/book.dart';
 import 'package:anx_reader/models/book.dart';
+import 'package:anx_reader/widgets/book_list.dart';
 import 'package:epub_view/epub_view.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -34,7 +35,19 @@ Future<Book> importBook(File file) async {
       coverPath: coverPath,
       filePath: filePath,
       lastReadPosition: lastReadPosition,
-      author: author);
+      author: author,
+      createTime: DateTime.now(),
+      updateTime: DateTime.now());
   book.id = await insertBook(book);
   return book;
+}
+
+void openBook(Book book, Function updateBookList) {
+  book.updateTime = DateTime.now();
+  updateBook(book);
+  Future.delayed(Duration(seconds: 1), () {
+    updateBookList();
+  });
+
+  print('Open book: ${book.title}');
 }

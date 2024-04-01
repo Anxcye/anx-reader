@@ -202,7 +202,7 @@ Future<void> _showColorPickerDialog(BuildContext context) async {
   Provider.of<SharedPreferencesProvider>(context, listen: false);
   final currentColor = prefsProvider.themeColor;
 
-  Color pickedColor = currentColor; // Initialize pickedColor with currentColor
+  Color pickedColor = currentColor;
 
   await showDialog<void>(
     context: context,
@@ -211,9 +211,9 @@ Future<void> _showColorPickerDialog(BuildContext context) async {
         title: Text(context.appearanceThemeColor),
         content: SingleChildScrollView(
           child: ColorPicker(
-            pickerColor: pickedColor, // Use pickedColor here
+            pickerColor: pickedColor,
             onColorChanged: (color) {
-              pickedColor = color; // Update pickedColor when color changes
+              pickedColor = color;
             },
             enableAlpha: false,
             displayThumbColor: true,
@@ -230,7 +230,7 @@ Future<void> _showColorPickerDialog(BuildContext context) async {
           ElevatedButton(
             child: Text('OK'),
             onPressed: () {
-              prefsProvider.saveThemeToPrefs(pickedColor.value); // Save pickedColor here
+              prefsProvider.saveThemeToPrefs(pickedColor.value);
               Navigator.of(context).pop();
             },
           ),

@@ -7,9 +7,11 @@ class BookList extends StatelessWidget {
   const BookList({
     super.key,
     required List<Book> books,
+    required this.onRefresh,
   }) : _books = books;
 
   final List<Book> _books;
+  final Future<void> Function() onRefresh;
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +26,7 @@ class BookList extends StatelessWidget {
       ),
       itemBuilder: (BuildContext context, int index) {
         Book book = _books[index];
-        return BookItem(book: book);
+        return BookItem(book: book, onRefresh: onRefresh);
       },
     );
   }
