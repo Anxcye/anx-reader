@@ -9,7 +9,9 @@ CREATE TABLE tb_books (
   file_path TEXT,
   last_read_position TEXT,
   author TEXT,
-  description TEXT
+  description TEXT,
+  create_time TEXT,
+  update_time TEXT
 )
 ''';
 

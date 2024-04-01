@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:anx_reader/service/book.dart';
 import 'package:flutter/material.dart';
 
 import '../models/book.dart';
@@ -8,15 +9,17 @@ class BookItem extends StatelessWidget {
   const BookItem({
     super.key,
     required this.book,
+    required this.onRefresh,
   });
 
   final Book book;
-
+  final Future<void> Function() onRefresh;
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        print('openbook');
+        // print('openbook');
+        openBook(book, onRefresh);
       },
       onLongPress: () {},
       child: Column(
@@ -54,7 +57,12 @@ class BookItem extends StatelessWidget {
               fontWeight: FontWeight.bold
             ),
           ),
-          // Text(book.author),
+          Text(book.author,
+          style: const TextStyle(
+            fontWeight: FontWeight.w300,
+            fontSize: 9,
+            overflow: TextOverflow.ellipsis
+          ),),
         ],
       ),
     );

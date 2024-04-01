@@ -63,7 +63,7 @@ class _BookshelfPageState extends State<BookshelfPage> {
           ),
         ],
       ),
-      body: BookList(books: _books),
+      body: BookList(books: _books, onRefresh: _refreshBookList),
     );
   }
 }

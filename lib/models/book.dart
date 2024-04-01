@@ -1,11 +1,13 @@
 class Book {
-  late int id;
-  late String title;
-  late String coverPath;
-  late String filePath;
-  late String lastReadPosition;
-  late String author;
+  int id;
+  String title;
+  String coverPath;
+  String filePath;
+  String lastReadPosition;
+  String author;
   String? description;
+  DateTime createTime;
+  DateTime updateTime;
 
   Book(
       {required this.id,
@@ -14,7 +16,9 @@ class Book {
       required this.filePath,
       required this.lastReadPosition,
       required this.author,
-      this.description});
+      this.description,
+      required this.createTime,
+      required this.updateTime});
 
   Map<String, Object?> toMap() {
     return {
@@ -24,6 +28,9 @@ class Book {
       'last_read_position': lastReadPosition,
       'author': author,
       'description': description,
+      'create_time': createTime.toIso8601String(),
+      'update_time': updateTime.toIso8601String(),
     };
   }
+
 }
