@@ -10,32 +10,33 @@ import '../page/reading_page.dart';
 import '../utils/import_book.dart';
 
 Future<Book> importBook(File file) async {
-  EpubBook epubBookRef = await EpubReader.readBook(file.readAsBytesSync());
+  EpubBookRef epubBookRef = await EpubReader.openBook(file.readAsBytesSync());
   String author = epubBookRef.Author ?? 'Unknown Author';
   String title = epubBookRef.Title ?? 'Unknown';
-  final cover = epubBookRef.CoverImage;
-  final newDirName = '$title - $author';
-  final newFileName = '$newDirName.epub';
+  final cover = await epubBookRef.readCover();
+  final newBookName = '$title - $author - ${DateTime.now().toString()}';
 
   Directory appDocDir = await getApplicationDocumentsDirectory();
-  final subDir = Directory('${appDocDir.path}/$newDirName');
-  await subDir.create(recursive: true);
+  final fileDir = Directory('${appDocDir.path}/file');
+  final coverDir = Directory('${appDocDir.path}/cover');
+  if (!fileDir.existsSync()) {
+    fileDir.createSync();
+  }
+  if (!coverDir.existsSync()) {
+    coverDir.createSync();
+  }
+  final filePath = '${fileDir.path}/$newBookName.epub';
+  final coverPath = '${coverDir.path}/$newBookName.png';
 
-  final savePath = '${subDir.path}/$newFileName';
-  final coverPath = '${subDir.path}/cover.png';
+  await file.copy(filePath);
+  saveImageToLocal(cover, coverPath);
 
-  await file.copy(savePath);
-  String filePath = savePath;
-
-  saveImageToLocal(cover!, coverPath);
-
-  String lastReadPosition = '';
   Book book = Book(
       id: -1,
       title: title,
       coverPath: coverPath,
       filePath: filePath,
-      lastReadPosition: lastReadPosition,
+      lastReadPosition: '',
       author: author,
       createTime: DateTime.now(),
       updateTime: DateTime.now());

@@ -3,7 +3,10 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:image/image.dart';
 
-Future<bool> saveImageToLocal(Image imageFile, String path) async {
+Future<bool> saveImageToLocal(Image? imageFile, String path) async {
+  if (imageFile == null) {
+    return false;
+  }
   try {
     Uint8List pngBytes = Uint8List.fromList(encodePng(imageFile));
 
