@@ -14,12 +14,13 @@ class BookItem extends StatelessWidget {
 
   final Book book;
   final Future<void> Function() onRefresh;
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
         // print('openbook');
-        openBook(book, onRefresh);
+        openBook(context, book, onRefresh);
       },
       onLongPress: () {},
       child: Column(
@@ -53,16 +54,15 @@ class BookItem extends StatelessWidget {
             book.title,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold
-            ),
+            style: const TextStyle(fontWeight: FontWeight.bold),
           ),
-          Text(book.author,
-          style: const TextStyle(
-            fontWeight: FontWeight.w300,
-            fontSize: 9,
-            overflow: TextOverflow.ellipsis
-          ),),
+          Text(
+            book.author,
+            style: const TextStyle(
+                fontWeight: FontWeight.w300,
+                fontSize: 9,
+                overflow: TextOverflow.ellipsis),
+          ),
         ],
       ),
     );

@@ -4,8 +4,10 @@ import 'package:anx_reader/dao/book.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/widgets/book_list.dart';
 import 'package:epub_view/epub_view.dart';
+import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 
+import '../page/reading_page.dart';
 import '../utils/import_book.dart';
 
 Future<Book> importBook(File file) async {
@@ -42,12 +44,18 @@ Future<Book> importBook(File file) async {
   return book;
 }
 
-void openBook(Book book, Function updateBookList) {
+void openBook(BuildContext context, Book book, Function updateBookList) {
   book.updateTime = DateTime.now();
   updateBook(book);
   Future.delayed(Duration(seconds: 1), () {
     updateBookList();
   });
 
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => ReadingPage(book: book),
+    ),
+  );
   print('Open book: ${book.title}');
 }
