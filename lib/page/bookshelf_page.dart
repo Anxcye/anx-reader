@@ -4,7 +4,6 @@ import 'package:anx_reader/l10n/localization_extension.dart';
 import 'package:anx_reader/widgets/book_list.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../dao/book.dart';
 import '../models/book.dart';

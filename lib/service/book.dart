@@ -6,7 +6,7 @@ import 'package:epubx/epubx.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 
-import '../page/epub_player.dart';
+import '../page/reading_page.dart';
 import '../utils/import_book.dart';
 
 Future<Book> importBook(File file) async {
@@ -54,7 +54,7 @@ void openBook(BuildContext context, Book book, Function updateBookList) {
   Navigator.push(
     context,
     MaterialPageRoute(
-      builder: (context) => EpubPlayer(book: book),
+      builder: (context) => ReadingPage(book: book),
     ),
   ).then((cfi) {
     if (cfi != null) {

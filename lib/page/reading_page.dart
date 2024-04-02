@@ -1,21 +1,20 @@
 import 'dart:io';
 
 import 'package:anx_reader/models/book.dart';
-import 'package:anx_reader/utils/epub_reader_screen.dart';
-import 'package:anx_reader/utils/epub_render.dart';
+import 'package:anx_reader/page/book_player/epub_render.dart';
 import 'package:epubx/epubx.dart';
 import 'package:flutter/material.dart';
 
-class EpubPlayer extends StatefulWidget {
+class ReadingPage extends StatefulWidget {
   final Book book;
 
-  const EpubPlayer({super.key, required this.book});
+  const ReadingPage({super.key, required this.book});
 
   @override
-  State<EpubPlayer> createState() => _EpubPlayerState();
+  State<ReadingPage> createState() => _ReadingPageState();
 }
 
-class _EpubPlayerState extends State<EpubPlayer> {
+class _ReadingPageState extends State<ReadingPage> {
   late Book _book;
   EpubContent? _content;
 
