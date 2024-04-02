@@ -48,31 +48,42 @@ class _EpubReaderScreenState extends State<EpubReaderScreen> {
     var content = chapter.HtmlContent;
 
     for (final image in _images!.values) {
+      if (content!.contains('../${image.FileName}') == false) continue;
       final imageData = base64Encode(image.Content!);
       final imageUrl = 'data:${image.ContentType};base64,$imageData';
-      content = content!.replaceAll('../${image.FileName}', imageUrl);
+      content = content.replaceAll('../${image.FileName}', imageUrl);
     }
 
-    final url = Uri.dataFromString(content!,
-            mimeType: 'text/html', encoding: Encoding.getByName('utf-8'))
-        .toString();
+    _cssContent += '''
+      body {
+        font-size: 3em;
+        font-family: Arial, sans-serif;
+        // line-height: 6em;
+        // margin: 3em;
+        padding: 1em;
+      }
+      
+      p {
+        font-family: Arial, sans-serif;
+        line-height: 2em !important;
+        // margin: 16em;
+        padding: 1em 0em;
+      }
+      
+      ''';
 
-    _injectCss();
+    // Inject CSS into the HTML content
+    content = '<style>$_cssContent</style>$content';
 
-    await _webViewController!.loadUrl(
-      urlRequest: URLRequest(url: Uri.parse(url)),
+    _webViewController?.setSettings(settings: InAppWebViewSettings(
+      builtInZoomControls: false,
+    ));
+
+    await _webViewController!.loadData(
+      data: content,
+      mimeType: "text/html",
+      encoding: "utf-8",
     );
-  }
-
-  Future<void> _injectCss() async {
-    if (_webViewController == null) return;
-
-    await _webViewController!.evaluateJavascript(source: '''
-    var style = document.createElement('style');
-    style.type = 'text/css';
-    style.innerHTML = `$_cssContent`;
-    document.head.appendChild(style);
-  ''');
   }
 
   @override
@@ -81,7 +92,7 @@ class _EpubReaderScreenState extends State<EpubReaderScreen> {
       future: _loadBook(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
+          return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
           return Text('Error: ${snapshot.error}');
         } else {
@@ -90,18 +101,9 @@ class _EpubReaderScreenState extends State<EpubReaderScreen> {
               children: [
                 Expanded(
                   child: InAppWebView(
-                    initialOptions: InAppWebViewGroupOptions(
-                      crossPlatform: InAppWebViewOptions(),
-                    ),
-                    initialUrlRequest: URLRequest(
-                      url: Uri.parse('about:blank'),
-                    ),
                     onWebViewCreated: (controller) {
                       _webViewController = controller;
                       _renderPage(_currentPage);
-                    },
-                    onLoadStop: (controller, url) {
-                      _injectCss();
                     },
                   ),
                 ),

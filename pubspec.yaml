@@ -31,7 +31,7 @@ dependencies:
   html: ^0.15.4
   flutter_html: ^3.0.0-beta.2
   archive: ^3.4.10
-  flutter_inappwebview: ^5.8.0
+  flutter_inappwebview: ^6.0.0
 
 
 dev_dependencies:
