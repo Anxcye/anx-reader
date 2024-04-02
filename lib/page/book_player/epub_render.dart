@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-// import 'dart:html';
 import 'dart:io';
 import 'package:epub_view/epub_view.dart';
 import 'package:flutter/material.dart';
@@ -19,7 +18,6 @@ class EpubReaderScreen extends StatefulWidget {
 class _EpubReaderScreenState extends State<EpubReaderScreen> {
   InAppWebViewController? _webViewController;
   EpubBook? _book;
-  int _currentPage = 0;
   String _cssContent = '';
   Map<String, EpubByteContentFile>? _images;
 
@@ -30,6 +28,7 @@ class _EpubReaderScreenState extends State<EpubReaderScreen> {
   }
 
   Future<void> _loadBook() async {
+    print('Loading book: ${widget.epubFilePath}');
     final file = File(widget.epubFilePath);
     _book = await EpubReader.readBook(file.readAsBytes());
 
@@ -75,7 +74,8 @@ class _EpubReaderScreenState extends State<EpubReaderScreen> {
     // Inject CSS into the HTML content
     content = '<style>$_cssContent</style>$content';
 
-    _webViewController?.setSettings(settings: InAppWebViewSettings(
+    _webViewController?.setSettings(
+        settings: InAppWebViewSettings(
       builtInZoomControls: false,
     ));
 
@@ -88,54 +88,10 @@ class _EpubReaderScreenState extends State<EpubReaderScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: _loadBook(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        } else if (snapshot.hasError) {
-          return Text('Error: ${snapshot.error}');
-        } else {
-          return Scaffold(
-            body: Column(
-              children: [
-                Expanded(
-                  child: InAppWebView(
-                    onWebViewCreated: (controller) {
-                      _webViewController = controller;
-                      _renderPage(_currentPage);
-                    },
-                  ),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.navigate_before),
-                      onPressed: () {
-                        setState(() {
-                          _currentPage = (_currentPage - 1)
-                              .clamp(0, _book!.Chapters!.length - 1);
-                        });
-                        _renderPage(_currentPage);
-                      },
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.navigate_next),
-                      onPressed: () {
-                        setState(() {
-                          _currentPage = (_currentPage + 1)
-                              .clamp(0, _book!.Chapters!.length - 1);
-                        });
-                        _renderPage(_currentPage);
-                      },
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          );
-        }
+    return InAppWebView(
+      onWebViewCreated: (controller) {
+        _webViewController = controller;
+        _renderPage(1);
       },
     );
   }
