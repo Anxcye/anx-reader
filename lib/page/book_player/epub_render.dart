@@ -19,6 +19,7 @@ class _EpubReaderScreenState extends State<EpubReaderScreen> {
   InAppWebViewController? _webViewController;
   EpubBook? _book;
   String _cssContent = '';
+  int _currentPage = 0;
   Map<String, EpubByteContentFile>? _images;
 
   @override
@@ -54,44 +55,114 @@ class _EpubReaderScreenState extends State<EpubReaderScreen> {
     }
 
     _cssContent += '''
-      body {
-        font-size: 3em;
-        font-family: Arial, sans-serif;
-        // line-height: 6em;
-        // margin: 3em;
-        padding: 1em;
-      }
-      
-      p {
-        font-family: Arial, sans-serif;
-        line-height: 2em !important;
-        // margin: 16em;
-        padding: 1em 0em;
-      }
-      
+       body {
+         width: 100vw; 
+         height: 100vh; 
+         box-sizing: border-box;
+         overflow: hidden;
+         hyphens: auto;
+         text-align: justify;
+         font-size: 7em; 
+         font-family: Arial, sans-serif;
+       
+         column-width: 100vw;
+         column-gap: 0;
+         column-fill: auto;
+         transform: translateX(-100vw);
+       }
+       
+       h2, p {
+         page-break-after: always; 
+       }
+       
+       img {
+         break-inside: avoid;
+       }
+       
+       p {
+           // font-size: 50em;
+           font-family: Arial, sans-serif;
+           line-height: 1.5em !important; 
+           margin: 0;
+           padding: 2em 0.2em;
+       }
       ''';
 
-    // Inject CSS into the HTML content
-    content = '<style>$_cssContent</style>$content';
+    content = '''
+     <meta name="viewport" content="width=device-width, height=device-height, initial-scale=0.1">
+     <style>$_cssContent</style>
+     $content
+     ''';
+
 
     _webViewController?.setSettings(
         settings: InAppWebViewSettings(
-      builtInZoomControls: false,
-    ));
+          enableViewportScale: true,
+            builtInZoomControls: false,
+            disableHorizontalScroll: true,
+            // disallowOverScroll: true,
+            // initialScale: 110,
+            // pageZoom: 1.0,
+            //useWideViewPort: true,
+            ));
 
     await _webViewController!.loadData(
       data: content,
       mimeType: "text/html",
-      encoding: "utf-8",
+      encoding: "utf8",
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return InAppWebView(
-      onWebViewCreated: (controller) {
-        _webViewController = controller;
-        _renderPage(1);
+    return FutureBuilder(
+      future: _loadBook(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Text('Error: ${snapshot.error}');
+        } else {
+          return Scaffold(
+            body: Column(
+              children: [
+                Expanded(
+                  child: InAppWebView(
+                    onWebViewCreated: (controller) {
+                      _webViewController = controller;
+                      _renderPage(_currentPage);
+                    },
+                  ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.navigate_before),
+                      onPressed: () {
+                        setState(() {
+                          _currentPage = (_currentPage - 1)
+                              .clamp(0, _book!.Chapters!.length - 1);
+                        });
+                        _renderPage(_currentPage);
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.navigate_next),
+                      onPressed: () {
+                        setState(() {
+                          _currentPage = (_currentPage + 1)
+                              .clamp(0, _book!.Chapters!.length - 1);
+                        });
+                        _renderPage(_currentPage);
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          );
+        }
       },
     );
   }
