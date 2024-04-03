@@ -1,6 +1,8 @@
 import 'dart:io';
 
+import 'package:anx_reader/models/EpubPosition.dart';
 import 'package:anx_reader/models/book.dart';
+import 'package:anx_reader/page/book_player/epub_player.dart';
 import 'package:anx_reader/page/book_player/epub_render.dart';
 import 'package:epubx/epubx.dart';
 import 'package:flutter/material.dart';
@@ -40,7 +42,7 @@ class _ReadingPageState extends State<ReadingPage> {
         appBar: AppBar(
           title: Text(_book.title),
         ),
-        body: EpubReaderScreen(epubFilePath: _book.filePath),
+        body: EpubPlayer(book: _book),
         // EpubRenderer(book: _book,),
       );
     }

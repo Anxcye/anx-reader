@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:anx_reader/dao/book.dart';
+import 'package:anx_reader/models/EpubPosition.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:epubx/epubx.dart';
 import 'package:flutter/material.dart';
@@ -31,12 +32,13 @@ Future<Book> importBook(File file) async {
   await file.copy(filePath);
   saveImageToLocal(cover, coverPath);
 
+
   Book book = Book(
       id: -1,
       title: title,
       coverPath: coverPath,
       filePath: filePath,
-      lastReadPosition: '',
+      lastReadPosition: EpubPosition(),
       author: author,
       createTime: DateTime.now(),
       updateTime: DateTime.now());

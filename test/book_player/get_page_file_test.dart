@@ -7,10 +7,13 @@ import 'package:epubx/epubx.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 getFilePageTest() async {
-      String path = '/home/axy/other/小王子.epub';
+      String path = '/home/axy/other/白夜行.epub';
       EpubBook epubBook = await EpubReader.readBook(File(path).readAsBytesSync());
-      int page = 2;
-      final file = await getPageFile(epubBook, page);
-      print(file);
-      expect(file, isNotNull);
+      for (int i = 0; i < epubBook.Chapters!.length; i++) {
+        EpubChapter chapter = epubBook.Chapters![i];
+      final file = await getChapterFileName(epubBook, i);
+
+        print(file);
+        // print(chapter.HtmlContent);
+      }
 }
