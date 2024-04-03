@@ -1,7 +1,7 @@
 import 'package:epub_view/epub_view.dart';
 
-String getPageFile(EpubBook epubBook, int page) {
-  return getFilesFromEpubSpine(epubBook)[page].FileName!;
+String getChapterFileName(EpubBook epubBook, int chapterIndex) {
+  return getFilesFromEpubSpine(epubBook)[chapterIndex].FileName!;
 }
 
 List<EpubContentFile> getFilesFromEpubSpine(EpubBook epubBook) {

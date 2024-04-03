@@ -1,9 +1,11 @@
+import 'package:anx_reader/models/EpubPosition.dart';
+
 class Book {
   int id;
   String title;
   String coverPath;
   String filePath;
-  String lastReadPosition;
+  EpubPosition lastReadPosition;
   String author;
   String? description;
   DateTime createTime;
@@ -25,7 +27,7 @@ class Book {
       'title': title,
       'cover_path': coverPath,
       'file_path': filePath,
-      'last_read_position': lastReadPosition,
+      'last_read_position': lastReadPosition.toJson(),
       'author': author,
       'description': description,
       'create_time': createTime.toIso8601String(),

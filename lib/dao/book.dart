@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:anx_reader/dao/database.dart';
+import 'package:anx_reader/models/EpubPosition.dart';
 import 'package:anx_reader/models/book.dart';
 
 Future<int> insertBook(Book book) async {
@@ -15,7 +18,8 @@ Future<List<Book>> selectBooks() async {
       title: maps[i]['title'],
       coverPath: maps[i]['cover_path'],
       filePath: maps[i]['file_path'],
-      lastReadPosition: maps[i]['last_read_position'],
+      lastReadPosition: EpubPosition.fromMap(json.decode(maps[i]['last_read_position'])),
+      // maps[i]['last_read_position'],
       author: maps[i]['author'],
       description: maps[i]['description'],
       createTime: DateTime.parse(maps[i]['create_time']),
