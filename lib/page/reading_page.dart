@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:anx_reader/models/EpubPosition.dart';
 import 'package:anx_reader/models/book.dart';
+import 'package:anx_reader/models/book_style.dart';
 import 'package:anx_reader/page/book_player/epub_player.dart';
 import 'package:anx_reader/page/book_player/epub_render.dart';
 import 'package:epubx/epubx.dart';
@@ -42,7 +43,7 @@ class _ReadingPageState extends State<ReadingPage> {
         appBar: AppBar(
           title: Text(_book.title),
         ),
-        body: EpubPlayer(book: _book),
+        body: EpubPlayer(book: _book, style: BookStyle(),),
         // EpubRenderer(book: _book,),
       );
     }

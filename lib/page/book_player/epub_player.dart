@@ -7,13 +7,15 @@ import 'package:epubx/epubx.dart';
 import 'package:flutter/material.dart';
 
 import '../../models/EpubPosition.dart';
+import '../../models/book_style.dart';
 import '../../service/book_player/book_player.dart';
 import 'epub_render.dart';
 
 class EpubPlayer extends StatefulWidget {
   Book book;
+  BookStyle style;
 
-  EpubPlayer({super.key, required this.book});
+  EpubPlayer({super.key, required this.book, required this.style});
 
   @override
   State<EpubPlayer> createState() => _EpubPlayerState();
@@ -79,8 +81,10 @@ class _EpubPlayerState extends State<EpubPlayer> {
 
     _cssContent += '''
        body {
-         font-size: 5em !important; 
-         padding: 0em 3vw !important;
+         font-size: ${widget.style.fontSize}em !important; 
+         padding: ${widget.style.topMargin}vh ${widget.style.sideMargin}vw ${widget.style.bottomMargin}vh ${widget.style.sideMargin}vw !important;
+         letter-spacing: ${widget.style.letterSpacing}px !important;
+          word-spacing: ${widget.style.wordSpacing}px !important;
          width: 100vw; 
          height: 100vh; 
          box-sizing: border-box;
@@ -90,7 +94,7 @@ class _EpubPlayerState extends State<EpubPlayer> {
          font-family: Arial, sans-serif;
          
          column-width: 100vw;
-         column-gap: 6vw;
+         column-gap: ${widget.style.sideMargin * 2}vw;
          column-fill: auto;
          transform: translateX(-${_currentPage * 100}vw);
        }
@@ -103,11 +107,11 @@ class _EpubPlayerState extends State<EpubPlayer> {
          break-inside: avoid;
        }
        
-       p {
+       p, .calibre7 {
            font-family: Arial, sans-serif;
-           line-height: 1.5em !important; 
+           line-height: ${widget.style.lineHeight}em !important; 
            margin: 0;
-           padding: 1.3em 60px !important;
+           padding: ${widget.style.paragraphSpacing}em 0px !important;
        }
       ''';
 
@@ -126,8 +130,7 @@ class _EpubPlayerState extends State<EpubPlayer> {
       return Center(child: CircularProgressIndicator());
     }
     // return _renders[0];
-    return Scaffold(
-      body: Column(
+    return Column(
         children: [
           Expanded(
             child: EpubRender(content: _currentContent),
@@ -156,7 +159,6 @@ class _EpubPlayerState extends State<EpubPlayer> {
             ],
           ),
         ],
-      ),
     );
   }
 }
