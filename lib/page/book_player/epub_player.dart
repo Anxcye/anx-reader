@@ -39,7 +39,7 @@ class _EpubPlayerState extends State<EpubPlayer> {
   Future<void> loadInitialState() async {
     await loadEpubBook();
     _initialPosition = widget.book.lastReadPosition;
-    _currentChapter = _initialPosition.chapterIndex ?? 4;
+    _currentChapter = _initialPosition.chapterIndex ?? 5;
     _currentPage = ((_initialPosition.chapterPageIndex ?? 0) /
             (_initialPosition.chapterLength ?? 1))
         .floor();
@@ -76,23 +76,23 @@ class _EpubPlayerState extends State<EpubPlayer> {
       final imageUrl = 'data:${image.ContentType};base64,$imageData';
       content = content.replaceAll('../${image.FileName}', imageUrl);
     }
-    int translateOffset = _currentPage * 100;
 
     _cssContent += '''
        body {
+         font-size: 5em !important; 
+         padding: 0em 3vw !important;
          width: 100vw; 
          height: 100vh; 
          box-sizing: border-box;
          overflow: hidden;
          hyphens: auto;
          text-align: justify;
-         font-size: 7em; 
          font-family: Arial, sans-serif;
-       
+         
          column-width: 100vw;
-         column-gap: 0;
+         column-gap: 6vw;
          column-fill: auto;
-         transform: translateX(-${translateOffset}vw);
+         transform: translateX(-${_currentPage * 100}vw);
        }
        
        h2, p {
@@ -104,11 +104,10 @@ class _EpubPlayerState extends State<EpubPlayer> {
        }
        
        p {
-           // font-size: 50em;
            font-family: Arial, sans-serif;
            line-height: 1.5em !important; 
            margin: 0;
-           padding: 1.3em 0.2em;
+           padding: 1.3em 60px !important;
        }
       ''';
 
@@ -150,7 +149,6 @@ class _EpubPlayerState extends State<EpubPlayer> {
                 onPressed: () {
                   setState(() {
                     _currentPage = (_currentPage + 1);
-                    print(_currentPage);
                     _currentContent = loadContent(_currentChapter);
                   });
                 },
