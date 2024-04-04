@@ -1,27 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
-class EpubRender extends StatelessWidget {
-  late final String content;
-  InAppWebViewController? _webViewController;
+class EpubRender extends StatefulWidget {
+  final String content;
 
-  EpubRender({super.key, required this.content});
+  EpubRender({Key? key, required this.content}) : super(key: key);
 
-  Future<void> _renderPage() async {
-    _webViewController?.setSettings(
-        settings: InAppWebViewSettings(
-      enableViewportScale: true,
-      builtInZoomControls: false,
-      disableHorizontalScroll: true,
-      disableVerticalScroll: true,
-    ));
+  @override
+  _EpubRenderState createState() => _EpubRenderState();
+}
 
-    await _webViewController!.loadData(
-      data: content,
-      mimeType: "text/html",
-      encoding: "utf8",
-    );
-  }
+class _EpubRenderState extends State<EpubRender> {
+  late InAppWebViewController _webViewController;
 
   @override
   Widget build(BuildContext context) {
@@ -39,5 +29,29 @@ class EpubRender extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _renderPage() async {
+    _webViewController.setSettings(
+        settings: InAppWebViewSettings(
+      enableViewportScale: true,
+      builtInZoomControls: false,
+      disableHorizontalScroll: true,
+      disableVerticalScroll: true,
+    ));
+
+    await _webViewController.loadData(
+      data: widget.content,
+      mimeType: "text/html",
+      encoding: "utf8",
+    );
+  }
+
+  @override
+  void didUpdateWidget(covariant EpubRender oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.content != oldWidget.content) {
+      _renderPage();
+    }
   }
 }
