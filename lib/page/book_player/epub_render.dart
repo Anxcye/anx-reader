@@ -3,8 +3,14 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 class EpubRender extends StatefulWidget {
   final String content;
+  final int currentPage;
+  final Function onTotalColumns;
 
-  EpubRender({Key? key, required this.content}) : super(key: key);
+  EpubRender(
+      {Key? key,
+      required this.content,
+      required this.onTotalColumns,
+      required this.currentPage});
 
   @override
   _EpubRenderState createState() => _EpubRenderState();
@@ -20,10 +26,14 @@ class _EpubRenderState extends State<EpubRender> {
         children: [
           Expanded(
             child: InAppWebView(
+              initialFile: 'assets/reader.html',
+              initialSettings: InAppWebViewSettings(
+                allowUniversalAccessFromFileURLs: true,
+              ),
               onWebViewCreated: (controller) {
                 _webViewController = controller;
-                _renderPage();
               },
+
             ),
           ),
         ],
@@ -31,27 +41,4 @@ class _EpubRenderState extends State<EpubRender> {
     );
   }
 
-  Future<void> _renderPage() async {
-    _webViewController.setSettings(
-        settings: InAppWebViewSettings(
-      enableViewportScale: true,
-      builtInZoomControls: false,
-      disableHorizontalScroll: true,
-      disableVerticalScroll: true,
-    ));
-
-    await _webViewController.loadData(
-      data: widget.content,
-      mimeType: "text/html",
-      encoding: "utf8",
-    );
-  }
-
-  @override
-  void didUpdateWidget(covariant EpubRender oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.content != oldWidget.content) {
-      _renderPage();
-    }
-  }
 }

@@ -31,6 +31,7 @@ class _EpubPlayerState extends State<EpubPlayer> {
   int _currentChapter = 0;
   int _currentPage = 0;
   String _currentContent = '';
+  int _totalColumns = 1;
 
   @override
   void initState() {
@@ -41,14 +42,23 @@ class _EpubPlayerState extends State<EpubPlayer> {
   Future<void> loadInitialState() async {
     await loadEpubBook();
     _initialPosition = widget.book.lastReadPosition;
-    _currentChapter = _initialPosition.chapterIndex ?? 5;
+    _currentChapter = _initialPosition.chapterIndex ?? 0;
     _currentPage = ((_initialPosition.chapterPageIndex ?? 0) /
             (_initialPosition.chapterLength ?? 1))
         .floor();
 
     _currentContent = await loadContent(_currentChapter);
     setState(() {
-      _renders.add(EpubRender(content: _currentContent));
+      _renders.add(EpubRender(
+        currentPage: _currentPage,
+        content: _currentContent,
+        onTotalColumns: (totalColumns) {
+          print('Total Columns: $totalColumns');
+          setState(() {
+            _totalColumns = totalColumns;
+          });
+        },
+      ));
     });
   }
 
@@ -81,7 +91,7 @@ class _EpubPlayerState extends State<EpubPlayer> {
 
     _cssContent += '''
        body {
-         font-size: ${widget.style.fontSize}em !important; 
+         font-size: ${widget.style.fontSize}em !important;
          padding: ${widget.style.topMargin}vh ${widget.style.sideMargin}vw ${widget.style.bottomMargin}vh ${widget.style.sideMargin}vw !important;
          letter-spacing: ${widget.style.letterSpacing}px !important;
           word-spacing: ${widget.style.wordSpacing}px !important;
@@ -116,12 +126,56 @@ class _EpubPlayerState extends State<EpubPlayer> {
       ''';
 
     content = '''
-     <meta name="viewport" content="width=device-width, height=device-height, initial-scale=0.1">
-     <style>$_cssContent</style>
-     $content
+      <meta name="viewport" content="width=device-width, height=device-height, initial-scale=0.1">
+      <style>$_cssContent</style>
+      $content
+      <script>
+      // document.body.scrollLeft = ${_currentPage} * document.body.clientWidth; ;
+      </script>
      ''';
 
     return content;
+  }
+
+  loadNextContent() async {
+    // if (_totalColumns < 1){
+      if (_currentPage < _totalColumns - 1) {
+      setState(() {
+        _currentPage++;
+        _currentContent = loadContent(_currentChapter);
+      });
+    } else {
+      if (_currentChapter < _epubBook.Chapters!.length - 1) {
+        setState(() {
+          _currentChapter++;
+          _currentPage = 0;
+          _currentContent = loadContent(_currentChapter);
+        });
+      }
+    }
+  }
+
+  loadPreviousContent() async {
+    // if (_currentPage >= _totalColumns){
+    //   _currentPage = _totalColumns - 1;
+    // }
+    if (_currentPage > 0) {
+      setState(() {
+        _currentPage--;
+        _currentContent = loadContent(_currentChapter);
+      });
+    } else {
+
+      if (_currentChapter > 0) {
+        setState(() {
+          _currentChapter--;
+          _currentPage = _totalColumns - 1;
+          _currentContent = loadContent(_currentChapter);
+        });
+      } else {
+        print('No more content');
+      }
+    }
   }
 
   @override
@@ -131,34 +185,36 @@ class _EpubPlayerState extends State<EpubPlayer> {
     }
     // return _renders[0];
     return Column(
-        children: [
-          Expanded(
-            child: EpubRender(content: _currentContent),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              IconButton(
-                icon: const Icon(Icons.navigate_before),
-                onPressed: () {
-                  setState(() {
-                    _currentPage = (_currentPage - 1);
-                    _currentContent = loadContent(_currentChapter);
-                  });
+      children: [
+        Expanded(child:
+        // _renders[0]
+            EpubRender(
+              content: _currentContent,
+              onTotalColumns: (totalColumns) {
+                print('Total Columns: $totalColumns');
+                setState(() {
+                  _totalColumns = totalColumns;
                 },
-              ),
-              IconButton(
-                icon: const Icon(Icons.navigate_next),
-                onPressed: () {
-                  setState(() {
-                    _currentPage = (_currentPage + 1);
-                    _currentContent = loadContent(_currentChapter);
-                  });
-                },
-              ),
-            ],
-          ),
-        ],
+                );
+
+              },
+              currentPage: _currentPage,
+            )
+            ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            IconButton(
+              icon: const Icon(Icons.navigate_before),
+              onPressed: loadPreviousContent,
+            ),
+            IconButton(
+              icon: const Icon(Icons.navigate_next),
+              onPressed: loadNextContent,
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
