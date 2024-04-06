@@ -5,7 +5,7 @@ class Book {
   String title;
   String coverPath;
   String filePath;
-  EpubPosition lastReadPosition;
+  String lastReadPosition;
   String author;
   String? description;
   DateTime createTime;
@@ -27,7 +27,7 @@ class Book {
       'title': title,
       'cover_path': coverPath,
       'file_path': filePath,
-      'last_read_position': lastReadPosition.toJson(),
+      'last_read_position': lastReadPosition,
       'author': author,
       'description': description,
       'create_time': createTime.toIso8601String(),

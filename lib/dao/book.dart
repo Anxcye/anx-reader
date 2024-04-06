@@ -18,8 +18,7 @@ Future<List<Book>> selectBooks() async {
       title: maps[i]['title'],
       coverPath: maps[i]['cover_path'],
       filePath: maps[i]['file_path'],
-      lastReadPosition: EpubPosition.fromMap(json.decode(maps[i]['last_read_position'])),
-      // maps[i]['last_read_position'],
+      lastReadPosition: maps[i]['last_read_position'],
       author: maps[i]['author'],
       description: maps[i]['description'],
       createTime: DateTime.parse(maps[i]['create_time']),
@@ -31,6 +30,7 @@ Future<List<Book>> selectBooks() async {
 Future<void> updateBook(Book book) async {
   book.updateTime = DateTime.now();
   final db = await DBHelper().database;
+  print('update book: ${book.toMap()}');
   await db.update(
     'tb_books',
     book.toMap(),

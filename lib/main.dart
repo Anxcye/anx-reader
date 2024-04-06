@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:anx_reader/config/preferences.dart';
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/page/home_page.dart';
+import 'package:anx_reader/service/book_player/book_player_server.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -12,6 +13,8 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Preferences.init();
   await SharedPreferencesProvider().initPrefs();
+
+  Server().start();
 
   runApp(MyApp());
 }
