@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html>
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,31 +13,29 @@
 
   <style>
     body {
-      margin: 0;
-      padding: 0;
-      overflow: hidden;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
     }
   </style>
 </head>
-
 <body>
-  <div id="viewer"></div>
+<div id="viewer"></div>
 
-  <script>
-        // 使用相对路径加载epub文件
-        var book = ePub("book.epub");
+<script>
+  // 使用相对路径加载epub文件
+  var book = ePub("book.epub");
 
-        // 使用默认渲染方法
-        var rendition = book.renderTo("viewer", {
-            width: window.innerWidth,
-            height: window.innerHeight
-        });
+  // 使用默认渲染方法
+  var rendition = book.renderTo("viewer", {
+      width: window.innerWidth,
+      height: window.innerHeight
+  });
 
-        // 开启双页展示
-        rendition.display().then(function() {
-            rendition.setSpread("auto");
-        });
-  </script>
+  // 开启双页展示
+  rendition.display().then(function() {
+      rendition.setSpread("auto");
+  });
+</script>
 </body>
-
 </html>

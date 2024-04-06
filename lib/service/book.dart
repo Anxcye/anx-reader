@@ -38,7 +38,7 @@ Future<Book> importBook(File file) async {
       title: title,
       coverPath: coverPath,
       filePath: filePath,
-      lastReadPosition: EpubPosition(),
+      lastReadPosition: '',
       author: author,
       createTime: DateTime.now(),
       updateTime: DateTime.now());
@@ -63,7 +63,7 @@ void openBook(BuildContext context, Book book, Function updateBookList) {
       book.lastReadPosition = cfi;
       print(cfi);
       updateBook(book);
-      // updateBookList();
+      updateBookList();
     }
   });
   print('Open book: ${book.title}');
