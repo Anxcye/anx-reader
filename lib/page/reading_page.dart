@@ -20,7 +20,6 @@ class _ReadingPageState extends State<ReadingPage> {
   EpubContent? _content;
   final _epubPlayerKey = GlobalKey<EpubPlayerState>();
 
-
   @override
   void initState() {
     super.initState();
@@ -32,23 +31,19 @@ class _ReadingPageState extends State<ReadingPage> {
     EpubBookRef epubBookRef =
         await EpubReader.openBook(File(_book.filePath).readAsBytes());
     _content = await EpubReader.readContent(epubBookRef.Content!);
-    setState(
-        () {}); // Call setState to trigger a rebuild once _content is initialized
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
     if (_content == null) {
-      return CircularProgressIndicator(); // Show a loading spinner while _content is being initialized
+      return CircularProgressIndicator();
     } else {
       return PopScope(
         canPop: false,
         onPopInvoked: (bool didPop) async {
           if (didPop) return;
-          print('pop');
           String cfi = await _epubPlayerKey.currentState!.onReadingLocation();
-          print('cfi: $cfi');
-
           Navigator.pop(context, cfi);
         },
         child: Scaffold(
@@ -60,7 +55,6 @@ class _ReadingPageState extends State<ReadingPage> {
             book: _book,
             style: BookStyle(),
           ),
-          // EpubRenderer(book: _book,),
         ),
       );
     }
