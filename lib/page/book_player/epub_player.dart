@@ -1,10 +1,8 @@
-
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/utils/generate_index_html.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
-import '../../dao/book.dart';
 import '../../models/book_style.dart';
 
 class EpubPlayer extends StatefulWidget {
@@ -22,7 +20,6 @@ class EpubPlayerState extends State<EpubPlayer> {
   String _currentContent = '';
 
   Future<String> onReadingLocation() async {
-    print('xx');
     String currentCfi = '';
     _webViewController.addJavaScriptHandler(
         handlerName: 'onReadingLocation',
@@ -34,7 +31,6 @@ class EpubPlayerState extends State<EpubPlayer> {
       var currentCfi = currentLocation.start.cfi;
       window.flutter_inappwebview.callHandler('onReadingLocation', currentCfi);
       ''');
-    print('currentCfi: $currentCfi');
     return currentCfi;
   }
 
@@ -53,49 +49,56 @@ class EpubPlayerState extends State<EpubPlayer> {
   }
 
   String loadContent() {
-    var content = generateIndexHtml(widget.book, widget.style, widget.book.lastReadPosition);
+    var content = generateIndexHtml(
+        widget.book, widget.style, widget.book.lastReadPosition);
     return content;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          onReadingLocation();
-        },
-        child: Icon(Icons.location_on),
-      ),
-      body: Column(
+      body: Stack(
         children: [
-          Expanded(
-            child: InAppWebView(
-              initialSettings: InAppWebViewSettings(),
-              onWebViewCreated: (controller) {
-                _webViewController = controller;
-                _renderPage();
-              },
-            ),
+          InAppWebView(
+            initialSettings: InAppWebViewSettings(),
+            onWebViewCreated: (controller) {
+              _webViewController = controller;
+              _renderPage();
+            },
           ),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              IconButton(
-                icon: Icon(Icons.arrow_back),
-                onPressed: () {
-                  _webViewController.evaluateJavascript(
-                      source: 'rendition.prev()');
-                },
+              Expanded(
+                flex: 1,
+                child: GestureDetector(
+                  onTap: () {
+                    _webViewController.evaluateJavascript(
+                        source: 'rendition.prev()');
+                  },
+                  child: Container(color: Colors.transparent),
+                ),
               ),
-              IconButton(
-                icon: Icon(Icons.arrow_forward),
-                onPressed: () {
-                  _webViewController.evaluateJavascript(
-                      source: 'rendition.next()');
-                },
+              Expanded(
+                flex: 2,
+                child: GestureDetector(
+                  onTap: () {
+                    // Show or hide your AppBar and BottomBar here
+                  },
+                  child: Container(color: Colors.transparent),
+                ),
+              ),
+              Expanded(
+                flex: 1,
+                child: GestureDetector(
+                  onTap: () {
+                    _webViewController.evaluateJavascript(
+                        source: 'rendition.next()');
+                  },
+                  child: Container(color: Colors.transparent),
+                ),
               ),
             ],
-          )
+          ),
         ],
       ),
     );
