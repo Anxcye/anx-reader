@@ -1,15 +1,15 @@
-import 'package:anx_reader/models/book.dart';
-import 'package:anx_reader/utils/generate_index_html.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
-import '../../models/book_style.dart';
-
 class EpubPlayer extends StatefulWidget {
-  Book book;
-  BookStyle style;
+  final String content;
+  final Function showOrHideAppBarAndBottomBar;
 
-  EpubPlayer({super.key, required this.book, required this.style});
+  EpubPlayer(
+      {Key? key,
+      required this.content,
+      required this.showOrHideAppBarAndBottomBar})
+      : super(key: key);
 
   @override
   State<EpubPlayer> createState() => EpubPlayerState();
@@ -17,7 +17,6 @@ class EpubPlayer extends StatefulWidget {
 
 class EpubPlayerState extends State<EpubPlayer> {
   late InAppWebViewController _webViewController;
-  String _currentContent = '';
 
   Future<String> onReadingLocation() async {
     String currentCfi = '';
@@ -36,7 +35,7 @@ class EpubPlayerState extends State<EpubPlayer> {
 
   Future<void> _renderPage() async {
     await _webViewController.loadData(
-      data: _currentContent,
+      data: widget.content,
       mimeType: "text/html",
       encoding: "utf8",
     );
@@ -45,13 +44,6 @@ class EpubPlayerState extends State<EpubPlayer> {
   @override
   void initState() {
     super.initState();
-    _currentContent = loadContent();
-  }
-
-  String loadContent() {
-    var content = generateIndexHtml(
-        widget.book, widget.style, widget.book.lastReadPosition);
-    return content;
   }
 
   @override
@@ -83,6 +75,7 @@ class EpubPlayerState extends State<EpubPlayer> {
                 child: GestureDetector(
                   onTap: () {
                     // Show or hide your AppBar and BottomBar here
+                    widget.showOrHideAppBarAndBottomBar();
                   },
                   child: Container(color: Colors.transparent),
                 ),
