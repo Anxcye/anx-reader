@@ -4,11 +4,12 @@ import 'dart:convert';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/models/book_style.dart';
 import 'package:anx_reader/page/book_player/epub_player.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../models/toc_item.dart';
 import '../utils/generate_index_html.dart';
+import '../widgets/reading_page/progress_widget.dart';
+import '../widgets/reading_page/toc_widget.dart';
 
 class ReadingPage extends StatefulWidget {
   final Book book;
@@ -28,7 +29,6 @@ class _ReadingPageState extends State<ReadingPage> {
   double readProgress = 0.0;
   List<TocItem> _tocItems = [];
   Widget _currentPage = const SizedBox(height: 1);
-  Timer? _sliderTimer;
   final _epubPlayerKey = GlobalKey<EpubPlayerState>();
 
   @override
@@ -187,174 +187,5 @@ class _ReadingPageState extends State<ReadingPage> {
         ),
       );
     }
-  }
-}
-
-class ProgressDisplayer extends StatelessWidget {
-  const ProgressDisplayer({
-    super.key,
-    required this.mainText,
-    required this.subText,
-  });
-
-  final mainText;
-  final subText;
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: Container(
-        // width: 50,
-        child: Column(
-          children: [
-            Text(
-              mainText,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 20,
-                fontFamily: 'SourceHanSerif',
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Text(
-              subText,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 10,
-                fontFamily: 'SourceHanSerif',
-                fontWeight: FontWeight.w300,
-              ),
-            )
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class TocWidget extends StatelessWidget {
-  const TocWidget({
-    super.key,
-    required this.tocItems,
-    required this.epubPlayerKey,
-    required this.hideAppBarAndBottomBar,
-  });
-
-  final List<TocItem> tocItems;
-  final epubPlayerKey;
-  final hideAppBarAndBottomBar;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-        height: 700,
-        child: ListView.builder(
-          itemCount: tocItems.length,
-          itemBuilder: (context, index) {
-            return ListTile(
-              title: Text(tocItems[index].label),
-              onTap: () {
-                hideAppBarAndBottomBar(false);
-                epubPlayerKey.currentState!.goTo(tocItems[index].href);
-              },
-            );
-          },
-        ));
-  }
-}
-class ProgressWidget extends StatefulWidget {
-  final GlobalKey<EpubPlayerState> epubPlayerKey;
-  final Function(bool) showOrHideAppBarAndBottomBar;
-  final double readProgress;
-
-  const ProgressWidget({
-    Key? key,
-    required this.epubPlayerKey,
-    required this.showOrHideAppBarAndBottomBar,
-    required this.readProgress,
-  }) : super(key: key);
-
-  @override
-  State<ProgressWidget> createState() => _ProgressWidgetState();
-}
-
-class _ProgressWidgetState extends State<ProgressWidget> {
-  Timer? _sliderTimer;
-  double _readProgress = 0.0;
-  @override
-  void initState() {
-    super.initState();
-    _readProgress = widget.readProgress;
-  }
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      child: Column(
-        children: [
-          const SizedBox(height: 10),
-          Text(
-            widget.epubPlayerKey.currentState!.chapterTitle,
-            style: const TextStyle(
-              fontSize: 20,
-              fontFamily: 'SourceHanSerif',
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const Divider(),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              IconButton(
-                icon: const Icon(Icons.arrow_back),
-                onPressed: () {
-                  widget.epubPlayerKey.currentState!.prevChapter();
-                  widget.showOrHideAppBarAndBottomBar(false);
-                },
-              ),
-              Expanded(
-                child: Slider(
-                  inactiveColor: Colors.grey.shade300,
-                  value: _readProgress,
-                  onChanged: (value) {
-                    _sliderTimer?.cancel();
-                    _sliderTimer = Timer(
-                      const Duration(milliseconds: 300),
-                      () {
-                        widget.epubPlayerKey.currentState!.goToPersentage(value);
-                      },
-                    );
-                  },
-                ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.arrow_forward),
-                onPressed: () {
-                  widget.epubPlayerKey.currentState!.nextChapter();
-                  widget.showOrHideAppBarAndBottomBar(false);
-                },
-              ),
-            ],
-          ),
-          Row(
-            children: [
-              ProgressDisplayer(
-                mainText: widget.epubPlayerKey.currentState!.chapterCurrentPage.toString(),
-                subText: 'current page',
-              ),
-              ProgressDisplayer(
-                mainText: widget.epubPlayerKey.currentState!.chapterTotalPage.toString(),
-                subText: 'total page',
-              ),
-              ProgressDisplayer(
-                mainText: widget.epubPlayerKey.currentState!.progress.toStringAsFixed(2),
-                subText: 'percentage',
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          const Divider(),
-        ],
-      ),
-    );
   }
 }
