@@ -28,25 +28,44 @@ String generateIndexHtml(Book book, BookStyle style, String cfi) {
   <div id="viewer"></div>
 
   <script>
-    var book = ePub("$bookPath");
-    var rendition;
-
-    var renderBook = async function() {
-      rendition = book.renderTo("viewer", {
+    var book = ePub("$bookPath")
+    var rendition = book.renderTo("viewer", {
         width: window.innerWidth,
         height: window.innerHeight,
-      })
-      
+    })
+    
+    book.ready.then(function() {
+        return book.locations.generate(500); 
+    });
+    
+    getCurrentChapterTitle = function() {
+      let toc = book.navigation.toc;
+      let href = rendition.currentLocation().start.href;
+      let chapter = toc.filter(chapter => chapter.href === href)[0];
+      console.log(chapter.label);
+      return chapter.label.trim(); 
+    }
+    
+    refreshProgress = function() {
+      var progress = book.locations.percentageFromCfi(rendition.currentLocation().start.cfi);
+      window.flutter_inappwebview.callHandler('getProgress', progress);
+      window.flutter_inappwebview.callHandler('getChapterCurrentPage', rendition.location.start.displayed.page);
+      window.flutter_inappwebview.callHandler('getChapterTotalPage', rendition.location.end.displayed.total);
+      window.flutter_inappwebview.callHandler('getChapterTitle', getCurrentChapterTitle());
+    }
+
+    var renderBook = async function() {
       if ('$cfi' !== '') {
         await rendition.display('$cfi')
       } else {
         await rendition.display()
       }
+
+      rendition.on('relocated', function(locations) {
+        refreshProgress();
+      });
     };
-    renderBook();
-
-
-
+    renderBook()
   </script>
 </body>
 

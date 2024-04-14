@@ -50,7 +50,12 @@ flutter:
     - assets/book.epub
     # - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
-
+  fonts:
+    - family: SourceHanSerif
+      fonts:
+        - asset: fonts/SourceHanSerifSC-Regular.otf
+        - asset: fonts/SourceHanSerifSC-Bold.otf
+#          weight: 700
   # fonts:
   #   - family: Schyler
   #     fonts:
