@@ -15,6 +15,37 @@ CREATE TABLE tb_books (
 )
 ''';
 
+const CREATE_THEME_SQL = '''
+CREATE TABLE tb_themes (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  background_color TEXT,
+  text_color TEXT,
+  background_image_path TEXT
+)
+''';
+
+const CREATE_STYLE_SQL = '''
+CREATE TABLE tb_styles (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  font_size REAL,
+  font_family TEXT,
+  line_height REAL,
+  letter_spacing REAL,
+  word_spacing REAL,
+  paragraph_spacing REAL,
+  side_margin REAL,
+  top_margin REAL,
+  bottom_margin REAL
+)
+''';
+
+const PRIMARY_THEME_1 = '''
+INSERT INTO tb_themes (background_color, text_color, background_image_path) VALUES ('#00FFFF', '#FF0000', ''),
+''';
+const PRIMARY_THEME = '''
+INSERT INTO tb_themes (background_color, text_color, background_image_path) VALUES ('#FF0000', '#00FF00', '')
+''';
+
 const CREATE_NOTE_SQL = '''
 CREATE TABLE tb_notes (
   id INTEGER PRIMARY KEY,
@@ -48,6 +79,9 @@ class DBHelper {
     return await openDatabase(path, version: 1, onCreate: (db, version) async {
       await db.execute(CREATE_BOOK_SQL);
       await db.execute(CREATE_NOTE_SQL);
+      // await db.execute(CREATE_THEME_SQL);
+      // await db.execute(CREATE_STYLE_SQL);
+      // await db.execute(PRIMARY_THEME_1);
     });
   }
 }

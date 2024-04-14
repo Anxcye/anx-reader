@@ -1,4 +1,3 @@
-import 'package:anx_reader/models/EpubPosition.dart';
 
 class Book {
   int id;

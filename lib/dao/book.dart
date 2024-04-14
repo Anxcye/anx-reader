@@ -1,7 +1,5 @@
-import 'dart:convert';
 
 import 'package:anx_reader/dao/database.dart';
-import 'package:anx_reader/models/EpubPosition.dart';
 import 'package:anx_reader/models/book.dart';
 
 Future<int> insertBook(Book book) async {

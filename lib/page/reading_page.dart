@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:anx_reader/dao/theme.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/models/book_style.dart';
+import 'package:anx_reader/models/read_theme.dart';
 import 'package:anx_reader/page/book_player/epub_player.dart';
 import 'package:flutter/material.dart';
 
@@ -61,11 +63,7 @@ class _ReadingPageState extends State<ReadingPage> {
     });
   }
 
-  void onReadProgressChanged(double value) {
-    setState(() {
-      readProgress = value;
-    });
-  }
+
 
   Future<void> tocHandler() async {
     String toc = await _epubPlayerKey.currentState!.getToc();
@@ -87,7 +85,7 @@ class _ReadingPageState extends State<ReadingPage> {
     });
   }
 
-  Future<void> progressHandler() async {
+  void progressHandler() {
     readProgress = _epubPlayerKey.currentState!.progress;
     print(readProgress);
     setState(() {
@@ -97,6 +95,25 @@ class _ReadingPageState extends State<ReadingPage> {
         readProgress: readProgress,
       );
     });
+  }
+
+  Future<void> themeHandler() async {
+    List<ReadTheme> themes = await selectThemes();
+    _currentPage = Container(
+      // height: 700,
+      child: ListView.builder(
+        itemCount: themes.length,
+        scrollDirection: Axis.horizontal,
+        itemBuilder: (context, index) {
+          return ListTile(
+            title: Text('主题$index'),
+            onTap: () {
+            },
+          );
+        },
+      ),
+    );
+
   }
 
   @override
@@ -167,7 +184,7 @@ class _ReadingPageState extends State<ReadingPage> {
                             IconButton(
                               icon: const Icon(Icons.color_lens),
                               onPressed: () {
-                                // _epubPlayerKey.currentState!.nextPage();
+                                themeHandler();
                               },
                             ),
                             IconButton(
