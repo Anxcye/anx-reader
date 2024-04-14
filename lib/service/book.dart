@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:anx_reader/dao/book.dart';
-import 'package:anx_reader/models/EpubPosition.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:epubx/epubx.dart';
 import 'package:flutter/material.dart';

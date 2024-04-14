@@ -4,6 +4,9 @@ import '../service/book_player/book_player_server.dart';
 
 String generateIndexHtml(Book book, BookStyle style, String cfi) {
   String bookPath = 'http://localhost:${Server().port}/book/${book.filePath}';
+  String epubJs = 'http://localhost:${Server().port}/js/epub.min.js';
+  String zipJs = 'http://localhost:${Server().port}/js/jszip.min.js';
+
   return '''
   <!DOCTYPE html>
     <html lang="en">
@@ -12,10 +15,8 @@ String generateIndexHtml(Book book, BookStyle style, String cfi) {
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>Anx Reader</title>
 
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.5/jszip.min.js"></script>
-
-      <script src="https://cdn.jsdelivr.net/npm/epubjs/dist/epub.min.js"></script>
-
+      <script src="$zipJs"></script>
+      <script src="$epubJs"></script>
       <style>
         body {
           margin: 0;

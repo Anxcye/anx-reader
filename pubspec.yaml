@@ -46,10 +46,10 @@ flutter:
   generate: true
   # To add assets to your application, add an assets section, like this:
   assets:
-    - assets/reader.html
-    - assets/book.epub
+    - assets/js/epub.min.js
+    - assets/js/jszip.min.js
     # - images/a_dot_burr.jpeg
-  #   - images/a_dot_ham.jpeg
+    # - images/a_dot_ham.jpeg
   fonts:
     - family: SourceHanSerif
       fonts:
