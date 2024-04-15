@@ -60,6 +60,9 @@ class _ProgressWidgetState extends State<ProgressWidget> {
                   inactiveColor: Colors.grey.shade300,
                   value: _readProgress,
                   onChanged: (value) {
+                    setState(() {
+                      _readProgress = value;
+                    });
                     _sliderTimer?.cancel();
                     _sliderTimer = Timer(
                       const Duration(milliseconds: 300),
