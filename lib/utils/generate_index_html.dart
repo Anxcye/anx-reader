@@ -20,9 +20,9 @@ String generateIndexHtml(Book book, BookStyle style, String cfi) {
       <style>
         body {
           margin: 0;
-          padding: 0;
-          overflow: hidden;
+          padding: 0; 
         }
+       
       </style>
     </head>
 <body>
@@ -33,6 +33,7 @@ String generateIndexHtml(Book book, BookStyle style, String cfi) {
     var rendition = book.renderTo("viewer", {
         width: window.innerWidth,
         height: window.innerHeight,
+        allowScriptedContent: true,
     })
     
     book.ready.then(function() {

@@ -1,3 +1,4 @@
+import 'package:anx_reader/models/book_style.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -55,5 +56,16 @@ class SharedPreferencesProvider extends ChangeNotifier {
   Future<void> saveThemeModeToPrefs(String themeMode) async {
     await prefs.setString('themeMode', themeMode);
     notifyListeners();
+  }
+
+  Future<void> saveBookStyleToPrefs(BookStyle bookStyle) async {
+    await prefs.setString('readStyle', bookStyle.toJson());
+    notifyListeners();
+  }
+
+  BookStyle get bookStyle {
+    String? bookStyleJson = prefs.getString('readStyle');
+    if (bookStyleJson == null) return BookStyle();
+    return BookStyle.fromJson(bookStyleJson);
   }
 }

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 class BookStyle {
   double fontSize;
   String fontFamily;
@@ -10,15 +12,15 @@ class BookStyle {
   double bottomMargin;
 
   BookStyle({
-    this.fontSize = 5.0,
+    this.fontSize = 12.0,
     this.fontFamily = 'Arial',
-    this.lineHeight = 2,
-    this.letterSpacing = 2,
-    this.wordSpacing = 2,
-    this.paragraphSpacing = 0.55,
-    this.sideMargin = 3.0,
-    this.topMargin = 5,
-    this.bottomMargin = 5,
+    this.lineHeight = 1.8,
+    this.letterSpacing = 2.0,
+    this.wordSpacing = 2.0,
+    this.paragraphSpacing = 10.0,
+    this.sideMargin = 1.0,
+    this.topMargin = 40.0,
+    this.bottomMargin = 40.0,
   });
 
   BookStyle copyWith({
@@ -59,4 +61,50 @@ class BookStyle {
     };
   }
 
+  String toJson() {
+    return '''
+    {
+      "fontSize": $fontSize,
+      "fontFamily": "$fontFamily",
+      "lineHeight": $lineHeight,
+      "letterSpacing": $letterSpacing,
+      "wordSpacing": $wordSpacing,
+      "paragraphSpacing": $paragraphSpacing,
+      "sideMargin": $sideMargin,
+      "topMargin": $topMargin,
+      "bottomMargin": $bottomMargin
+    }
+    ''';
+  }
+
+  factory BookStyle.fromJson(String json) {
+    Map<String, dynamic> data = jsonDecode(json);
+    return BookStyle(
+      fontSize: data['fontSize'] is String
+          ? double.parse(data['fontSize'])
+          : data['fontSize'],
+      fontFamily: data['fontFamily'],
+      lineHeight: data['lineHeight'] is String
+          ? double.parse(data['lineHeight'])
+          : data['lineHeight'],
+      letterSpacing: data['letterSpacing'] is String
+          ? double.parse(data['letterSpacing'])
+          : data['letterSpacing'],
+      wordSpacing: data['wordSpacing'] is String
+          ? double.parse(data['wordSpacing'])
+          : data['wordSpacing'],
+      paragraphSpacing: data['paragraphSpacing'] is String
+          ? double.parse(data['paragraphSpacing'])
+          : data['paragraphSpacing'],
+      sideMargin: data['sideMargin'] is String
+          ? double.parse(data['sideMargin'])
+          : data['sideMargin'],
+      topMargin: data['topMargin'] is String
+          ? double.parse(data['topMargin'])
+          : data['topMargin'],
+      bottomMargin: data['bottomMargin'] is String
+          ? double.parse(data['bottomMargin'])
+          : data['bottomMargin'],
+    );
+  }
 }
