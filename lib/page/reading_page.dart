@@ -2,15 +2,18 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:anx_reader/dao/theme.dart';
+import 'package:anx_reader/main.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/models/book_style.dart';
 import 'package:anx_reader/models/read_theme.dart';
 import 'package:anx_reader/page/book_player/epub_player.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
 import '../models/toc_item.dart';
 import '../utils/generate_index_html.dart';
 import '../widgets/reading_page/progress_widget.dart';
+import '../widgets/reading_page/theme_widget.dart';
 import '../widgets/reading_page/toc_widget.dart';
 
 class ReadingPage extends StatefulWidget {
@@ -59,11 +62,12 @@ class _ReadingPageState extends State<ReadingPage> {
         _currentPage = const SizedBox(height: 1);
         _appBarTopPosition = -kToolbarHeight;
       }
+      if (!show) {
+        _currentPage = const SizedBox(height: 1);
+      }
       _isAppBarVisible = show;
     });
   }
-
-
 
   Future<void> tocHandler() async {
     String toc = await _epubPlayerKey.currentState!.getToc();
@@ -99,21 +103,17 @@ class _ReadingPageState extends State<ReadingPage> {
 
   Future<void> themeHandler() async {
     List<ReadTheme> themes = await selectThemes();
-    _currentPage = Container(
-      // height: 700,
-      child: ListView.builder(
-        itemCount: themes.length,
-        scrollDirection: Axis.horizontal,
-        itemBuilder: (context, index) {
-          return ListTile(
-            title: Text('主题$index'),
-            onTap: () {
-            },
-          );
+    setState(() {
+      _currentPage = ThemeWidget(
+        themes: themes,
+        epubPlayerKey: _epubPlayerKey,
+        setCurrentPage: (Widget page) {
+          setState(() {
+            _currentPage = page;
+          });
         },
-      ),
-    );
-
+      );
+    });
   }
 
   @override
@@ -158,7 +158,6 @@ class _ReadingPageState extends State<ReadingPage> {
                     child: Wrap(
                       children: [
                         _currentPage,
-
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           crossAxisAlignment: CrossAxisAlignment.center,

@@ -40,10 +40,10 @@ CREATE TABLE tb_styles (
 ''';
 
 const PRIMARY_THEME_1 = '''
-INSERT INTO tb_themes (background_color, text_color, background_image_path) VALUES ('#00FFFF', '#FF0000', ''),
+INSERT INTO tb_themes (background_color, text_color, background_image_path) VALUES ('ff121212', 'ffcccccc', '')
 ''';
-const PRIMARY_THEME = '''
-INSERT INTO tb_themes (background_color, text_color, background_image_path) VALUES ('#FF0000', '#00FF00', '')
+const PRIMARY_THEME_2 = '''
+INSERT INTO tb_themes (background_color, text_color, background_image_path) VALUES ('ffcccccc', 'ff121212', '')
 ''';
 
 const CREATE_NOTE_SQL = '''
@@ -79,9 +79,10 @@ class DBHelper {
     return await openDatabase(path, version: 1, onCreate: (db, version) async {
       await db.execute(CREATE_BOOK_SQL);
       await db.execute(CREATE_NOTE_SQL);
-      // await db.execute(CREATE_THEME_SQL);
-      // await db.execute(CREATE_STYLE_SQL);
-      // await db.execute(PRIMARY_THEME_1);
+      await db.execute(CREATE_THEME_SQL);
+      await db.execute(CREATE_STYLE_SQL);
+      await db.execute(PRIMARY_THEME_1);
+      await db.execute(PRIMARY_THEME_2);
     });
   }
 }

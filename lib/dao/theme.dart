@@ -28,3 +28,13 @@ void deleteTheme(int id) async {
     whereArgs: [id],
   );
 }
+
+Future<void> updateTheme(ReadTheme readTheme) async {
+  final db = await DBHelper().database;
+  await db.update(
+    'tb_themes',
+    readTheme.toMap(),
+    where: 'id = ?',
+    whereArgs: [readTheme.id],
+  );
+}
