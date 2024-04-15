@@ -9,6 +9,8 @@ import 'package:provider/provider.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+final navigatorKey = GlobalKey<NavigatorState>();
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Preferences.init();
@@ -29,6 +31,7 @@ class MyApp extends StatelessWidget {
       child: Consumer<SharedPreferencesProvider>(
           builder: (context, prefsNotifier, child) {
         return MaterialApp(
+          navigatorKey: navigatorKey,
           locale: prefsNotifier.locale,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,

@@ -1,3 +1,4 @@
+import 'package:anx_reader/models/read_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
@@ -65,7 +66,7 @@ class EpubPlayerState extends State<EpubPlayer> {
     _webViewController.addJavaScriptHandler(
         handlerName: 'getProgress',
         callback: (args) {
-          progress = args[0];
+          progress = args[0] as double;
         });
 
     _webViewController.addJavaScriptHandler(
@@ -83,7 +84,6 @@ class EpubPlayerState extends State<EpubPlayer> {
         handlerName: 'getChapterTitle',
         callback: (args) {
           chapterTitle = args[0];
-          print(chapterTitle);
         });
   }
 
@@ -153,8 +153,8 @@ class EpubPlayerState extends State<EpubPlayer> {
   void prevPage() {
     widget.showOrHideAppBarAndBottomBar(false);
     _webViewController.evaluateJavascript(source: 'rendition.prev()');
-
   }
+
   void nextPage() {
     widget.showOrHideAppBarAndBottomBar(false);
     _webViewController.evaluateJavascript(source: 'rendition.next()');
@@ -175,6 +175,7 @@ class EpubPlayerState extends State<EpubPlayer> {
       refreshProgress();
       ''');
   }
+
   void nextChapter() {
     _webViewController.evaluateJavascript(source: '''
     nextChapter = function() {
@@ -199,6 +200,26 @@ class EpubPlayerState extends State<EpubPlayer> {
       }
       goToPersentage($value);
       refreshProgress();
+      ''');
+  }
+
+  void changeTheme(ReadTheme readTheme) {
+    // convert color from AABBGGRR to RRGGBBAA
+    String backgroundColor = readTheme.backgroundColor.substring(2) +
+        readTheme.backgroundColor.substring(0, 2);
+    String textColor =
+        readTheme.textColor.substring(2) + readTheme.textColor.substring(0, 2);
+
+    _webViewController.evaluateJavascript(source: '''
+      changeTheme = function() {
+        rendition.themes.default({
+          'body': {
+            'background-color': '#$backgroundColor',
+            'color': '#$textColor'
+          }
+        });
+      }
+      changeTheme();
       ''');
   }
 }

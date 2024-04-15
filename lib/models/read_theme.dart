@@ -1,13 +1,13 @@
 import 'dart:core';
 
 class ReadTheme{
-  int id;
+  int? id;
   String backgroundColor;
   String textColor;
   String backgroundImagePath;
 
   ReadTheme({
-    required this.id,
+    this.id,
     required this.backgroundColor,
     required this.textColor,
     required this.backgroundImagePath
