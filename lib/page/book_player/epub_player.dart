@@ -1,3 +1,4 @@
+import 'package:anx_reader/models/book_style.dart';
 import 'package:anx_reader/models/read_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
@@ -119,7 +120,7 @@ class EpubPlayerState extends State<EpubPlayer> {
                 flex: 1,
                 child: GestureDetector(
                   onTap: () {
-                    nextPage();
+                    prevPage();
                   },
                   child: Container(color: Colors.transparent),
                 ),
@@ -212,14 +213,36 @@ class EpubPlayerState extends State<EpubPlayer> {
 
     _webViewController.evaluateJavascript(source: '''
       changeTheme = function() {
-        rendition.themes.default({
-          'body': {
-            'background-color': '#$backgroundColor',
-            'color': '#$textColor'
-          }
-        });
+        document.getElementById('viewer').style.backgroundColor = '#$backgroundColor';
+        document.getElementById('viewer').style.color = '#$textColor'; 
       }
       changeTheme();
       ''');
   }
+void changeStyle(BookStyle bookStyle) {
+  _webViewController.evaluateJavascript(source: '''
+    changeStyle = function() {
+      rendition.themes.fontSize('${bookStyle.fontSize * 10}%');
+      rendition.themes.font('${bookStyle.fontFamily}');
+
+      let viewer = document.getElementById('viewer');
+      rendition.themes.default({
+        'body': {
+          'padding-top': '${bookStyle.topMargin}px !important',
+          'padding-bottom': '${bookStyle.bottomMargin}px !important',
+          'line-height': '${bookStyle.lineHeight} !important',
+          'letter-spacing': '${bookStyle.letterSpacing}px !important',
+          'word-spacing': '${bookStyle.wordSpacing}px !important',
+        },
+        'p': {
+          'padding-top': '${bookStyle.paragraphSpacing}px !important',
+          'line-height': '${bookStyle.lineHeight} !important',
+        },
+      });
+    }
+    changeStyle();
+  ''');
+}
+
+
 }
