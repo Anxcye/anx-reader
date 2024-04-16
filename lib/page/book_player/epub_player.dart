@@ -1,3 +1,4 @@
+import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/models/book_style.dart';
 import 'package:anx_reader/models/read_theme.dart';
 import 'package:flutter/material.dart';
@@ -7,10 +8,9 @@ class EpubPlayer extends StatefulWidget {
   final String content;
   final Function showOrHideAppBarAndBottomBar;
 
-  EpubPlayer(
-      {Key? key,
-      required this.content,
-      required this.showOrHideAppBarAndBottomBar})
+  EpubPlayer({Key? key,
+    required this.content,
+    required this.showOrHideAppBarAndBottomBar})
       : super(key: key);
 
   @override
@@ -85,6 +85,14 @@ class EpubPlayerState extends State<EpubPlayer> {
         handlerName: 'getChapterTitle',
         callback: (args) {
           chapterTitle = args[0];
+        });
+    _webViewController.addJavaScriptHandler(
+        handlerName: 'onRelocated',
+        callback: (args) {
+          BookStyle bookStyle = SharedPreferencesProvider().bookStyle;
+          changeStyle(bookStyle);
+          ReadTheme readTheme = SharedPreferencesProvider().readTheme;
+          changeTheme(readTheme);
         });
   }
 
