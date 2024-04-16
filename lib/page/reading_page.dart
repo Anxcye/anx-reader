@@ -17,6 +17,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/toc_item.dart';
 import '../utils/generate_index_html.dart';
 import '../widgets/reading_page/progress_widget.dart';
+import '../widgets/reading_page/style_widget.dart';
 import '../widgets/reading_page/theme_widget.dart';
 import '../widgets/reading_page/toc_widget.dart';
 
@@ -32,7 +33,8 @@ class ReadingPage extends StatefulWidget {
 class _ReadingPageState extends State<ReadingPage> {
   late Book _book;
   String? _content;
-  BookStyle _bookStyle = BookStyle();
+  late BookStyle _bookStyle;
+  late ReadTheme _readTheme;
   bool _isAppBarVisible = false;
   double _appBarTopPosition = -kToolbarHeight;
   double readProgress = 0.0;
@@ -44,12 +46,14 @@ class _ReadingPageState extends State<ReadingPage> {
   void initState() {
     super.initState();
     _book = widget.book;
+    _bookStyle = SharedPreferencesProvider().bookStyle;
+    _readTheme = SharedPreferencesProvider().readTheme;
     loadContent();
   }
 
   void loadContent() {
     var content = generateIndexHtml(
-        widget.book, _bookStyle, widget.book.lastReadPosition);
+        widget.book, _bookStyle, _readTheme, widget.book.lastReadPosition);
     setState(() {
       _content = content;
     });
@@ -216,172 +220,5 @@ class _ReadingPageState extends State<ReadingPage> {
         ),
       );
     }
-  }
-}
-class StyleWidget extends StatefulWidget {
-  const StyleWidget({super.key, required this.epubPlayerKey});
-  final GlobalKey<EpubPlayerState> epubPlayerKey;
-  @override
-  State<StyleWidget> createState() => _StyleWidgetState();
-}
-
-class _StyleWidgetState extends State<StyleWidget> {
-  BookStyle bookStyle = SharedPreferencesProvider().bookStyle;
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        // font size
-        Row(
-          children: [
-            const Icon(Icons.format_size),
-            Expanded(
-              child: Slider(
-                value: bookStyle.fontSize,
-                onChanged: (double value) {
-                  setState(() {
-                    bookStyle.fontSize = value;
-                    widget.epubPlayerKey.currentState!.changeStyle(bookStyle);
-                    SharedPreferencesProvider().saveBookStyleToPrefs(bookStyle);
-                  });
-                },
-                min: 1,
-                max: 30,
-                divisions: 29,
-                label: (bookStyle.fontSize).round().toString(),
-              ),
-            ),
-          ],
-        ),
-
-        // side margin
-        Row(
-          children: [
-            const Icon(Icons.format_indent_increase),
-            Expanded(
-              child: Slider(
-                value: bookStyle.sideMargin,
-                onChanged: (double value) {
-                  setState(() {
-                    bookStyle.sideMargin = value;
-                    widget.epubPlayerKey.currentState!.changeStyle(bookStyle);
-                    SharedPreferencesProvider().saveBookStyleToPrefs(bookStyle);
-                  });
-                },
-                min: 0,
-                max: 10,
-                divisions: 30,
-                label: (bookStyle.sideMargin).round().toString(),
-              ),
-            ),
-          ],
-        ),
-        // top & bottom margin
-        Row(
-          children: [
-            const Icon(Icons.vertical_align_top_outlined),
-            Expanded(
-              child: Slider(
-                value: bookStyle.topMargin,
-                onChanged: (double value) {
-                  setState(() {
-                    bookStyle.topMargin = value;
-                    widget.epubPlayerKey.currentState!.changeStyle(bookStyle);
-                    SharedPreferencesProvider().saveBookStyleToPrefs(bookStyle);
-                  });
-                },
-                min: 0,
-                max: 100,
-                divisions: 10,
-                label: (bookStyle.topMargin).round().toString(),
-              ),
-            ),
-            const Icon(Icons.vertical_align_bottom_outlined),
-            Expanded(
-              child: Slider(
-                value: bookStyle.bottomMargin,
-                onChanged: (double value) {
-                  setState(() {
-                    bookStyle.bottomMargin = value;
-                    widget.epubPlayerKey.currentState!.changeStyle(bookStyle);
-                    SharedPreferencesProvider().saveBookStyleToPrefs(bookStyle);
-                  });
-                },
-                min: 0,
-                max: 100,
-                divisions: 10,
-                label: (bookStyle.bottomMargin).round().toString(),
-              ),
-            ),
-          ],
-        ),
-        // line height
-        Row(
-          children: [
-            const Icon(Icons.format_line_spacing),
-            Expanded(
-              child: Slider(
-                value: bookStyle.lineHeight,
-                onChanged: (double value) {
-                  setState(() {
-                    bookStyle.lineHeight = value;
-                    widget.epubPlayerKey.currentState!.changeStyle(bookStyle);
-                    SharedPreferencesProvider().saveBookStyleToPrefs(bookStyle);
-                  });
-                },
-                min: 0,
-                max: 3,
-                divisions: 10,
-                label: (bookStyle.lineHeight/3*10).round().toString()
-              ),
-            ),
-          ],
-        ),
-        // paragraph spacing
-        Row(
-          children: [
-            const Icon(Icons.height),
-            Expanded(
-              child: Slider(
-                value: bookStyle.paragraphSpacing,
-                onChanged: (double value) {
-                  setState(() {
-                    bookStyle.paragraphSpacing = value;
-                    widget.epubPlayerKey.currentState!.changeStyle(bookStyle);
-                    SharedPreferencesProvider().saveBookStyleToPrefs(bookStyle);
-                  });
-                },
-                min: 0,
-                max: 50,
-                divisions: 10,
-                label: (bookStyle.paragraphSpacing/50*10).round().toString(),
-              ),
-            ),
-          ],
-        ),
-        // letter & word spacing
-        Row(
-          children: [
-            const Icon(Icons.compare_arrows),
-            Expanded(
-              child: Slider(
-                value: bookStyle.letterSpacing,
-                onChanged: (double value) {
-                  setState(() {
-                    bookStyle.letterSpacing = value;
-                    widget.epubPlayerKey.currentState!.changeStyle(bookStyle);
-                    SharedPreferencesProvider().saveBookStyleToPrefs(bookStyle);
-                  });
-                },
-                min: -3,
-                max: 7,
-                divisions: 10,
-                label: (bookStyle.letterSpacing).toString(),
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
   }
 }

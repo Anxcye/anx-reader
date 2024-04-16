@@ -38,3 +38,20 @@ Future<void> updateTheme(ReadTheme readTheme) async {
     whereArgs: [readTheme.id],
   );
 }
+
+Future<ReadTheme> selectReadThemeById(int id) {
+  final db = DBHelper().database;
+  return db.then((value) async {
+    final List<Map<String, dynamic>> maps = await value.query(
+      'tb_themes',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+    return ReadTheme(
+      id: maps[0]['id'],
+      backgroundColor: maps[0]['background_color'],
+      textColor: maps[0]['text_color'],
+      backgroundImagePath: maps[0]['background_image_path'],
+    );
+  });
+}

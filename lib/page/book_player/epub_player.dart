@@ -67,7 +67,7 @@ class EpubPlayerState extends State<EpubPlayer> {
     _webViewController.addJavaScriptHandler(
         handlerName: 'getProgress',
         callback: (args) {
-          progress = args[0] as double;
+          progress = (args[0] as num).toDouble();
         });
 
     _webViewController.addJavaScriptHandler(
@@ -213,19 +213,23 @@ class EpubPlayerState extends State<EpubPlayer> {
 
     _webViewController.evaluateJavascript(source: '''
       changeTheme = function() {
-        document.getElementById('viewer').style.backgroundColor = '#$backgroundColor';
-        document.getElementById('viewer').style.color = '#$textColor'; 
+        rendition.themes.default({
+          'html': {
+            'background-color': '#$backgroundColor',
+            'color': '#$textColor',
+          },
+        }); 
       }
       changeTheme();
       ''');
   }
-void changeStyle(BookStyle bookStyle) {
-  _webViewController.evaluateJavascript(source: '''
+
+  void changeStyle(BookStyle bookStyle) {
+    _webViewController.evaluateJavascript(source: '''
     changeStyle = function() {
-      rendition.themes.fontSize('${bookStyle.fontSize * 10}%');
+      rendition.themes.fontSize('${bookStyle.fontSize}%');
       rendition.themes.font('${bookStyle.fontFamily}');
 
-      let viewer = document.getElementById('viewer');
       rendition.themes.default({
         'body': {
           'padding-top': '${bookStyle.topMargin}px !important',
@@ -242,7 +246,5 @@ void changeStyle(BookStyle bookStyle) {
     }
     changeStyle();
   ''');
-}
-
-
+  }
 }
