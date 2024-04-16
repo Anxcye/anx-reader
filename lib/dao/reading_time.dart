@@ -37,3 +37,31 @@ Future<List<ReadingTime>> selectAllReadingTime() async {
     );
   });
 }
+
+Future<int> selectTotalReadingTime() async {
+  final db = await DBHelper().database;
+  final List<Map<String, dynamic>> maps = await db
+      .rawQuery('SELECT SUM(reading_time) AS total_sum FROM tb_reading_time');
+  return maps[0]['total_sum'];
+}
+
+Future<int> selectTotalNumberOfBook() async {
+  final db = await DBHelper().database;
+  final List<Map<String, dynamic>> maps = await db.rawQuery(
+      'SELECT COUNT(DISTINCT book_id) AS total_count FROM tb_reading_time');
+  return maps[0]['total_count'];
+}
+
+Future<int> selectTotalNumberOfDate() async {
+  final db = await DBHelper().database;
+  final List<Map<String, dynamic>> maps = await db.rawQuery(
+      'SELECT COUNT(DISTINCT date) AS total_count FROM tb_reading_time');
+  return maps[0]['total_count'];
+}
+
+Future<int> selectTotalNumberOfNotes() async {
+  final db = await DBHelper().database;
+  final List<Map<String, dynamic>> maps = await db.rawQuery(
+      'SELECT COUNT(*) AS total_count FROM tb_notes');
+  return maps[0]['total_count'];
+}
