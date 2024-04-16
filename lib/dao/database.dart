@@ -56,6 +56,15 @@ CREATE TABLE tb_notes (
 )
 ''';
 
+const CREATE_READING_TIME_SQL = '''
+CREATE TABLE tb_reading_time (
+  id INTEGER PRIMARY KEY,
+  book_id INTEGER,
+  date TEXT,
+  reading_time INTEGER
+)
+''';
+
 class DBHelper {
   static final DBHelper _instance = DBHelper._internal();
   static Database? _database;
@@ -81,6 +90,7 @@ class DBHelper {
       await db.execute(CREATE_NOTE_SQL);
       await db.execute(CREATE_THEME_SQL);
       await db.execute(CREATE_STYLE_SQL);
+      await db.execute(CREATE_READING_TIME_SQL);
       await db.execute(PRIMARY_THEME_1);
       await db.execute(PRIMARY_THEME_2);
     });

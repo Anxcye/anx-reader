@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:anx_reader/config/shared_preference_provider.dart';
+import 'package:anx_reader/dao/reading_time.dart';
 import 'package:anx_reader/dao/theme.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/models/book_style.dart';
@@ -9,7 +10,7 @@ import 'package:anx_reader/models/read_theme.dart';
 import 'package:anx_reader/page/book_player/epub_player.dart';
 import 'package:flutter/material.dart';
 
-
+import '../models/reading_time.dart';
 import '../models/toc_item.dart';
 import '../utils/generate_index_html.dart';
 import '../widgets/reading_page/progress_widget.dart';
@@ -26,7 +27,7 @@ class ReadingPage extends StatefulWidget {
   State<ReadingPage> createState() => _ReadingPageState();
 }
 
-class _ReadingPageState extends State<ReadingPage> {
+class _ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
   late Book _book;
   String? _content;
   late BookStyle _bookStyle;
@@ -37,14 +38,38 @@ class _ReadingPageState extends State<ReadingPage> {
   List<TocItem> _tocItems = [];
   Widget _currentPage = const SizedBox(height: 1);
   final _epubPlayerKey = GlobalKey<EpubPlayerState>();
+  Stopwatch _readTimeWatch = Stopwatch();
 
   @override
   void initState() {
     super.initState();
+
+    WidgetsBinding.instance.addObserver(this);
+    _readTimeWatch.start();
+
     _book = widget.book;
     _bookStyle = SharedPreferencesProvider().bookStyle;
     _readTheme = SharedPreferencesProvider().readTheme;
     loadContent();
+  }
+
+  @override
+  void dispose() {
+    _readTimeWatch.stop();
+    WidgetsBinding.instance.removeObserver(this);
+    insertReadingTime(ReadingTime(
+        bookId: _book.id, readingTime: _readTimeWatch.elapsed.inSeconds));
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.paused) {
+      _readTimeWatch.stop();
+    } else if (state == AppLifecycleState.resumed) {
+      _readTimeWatch.start();
+    }
   }
 
   void loadContent() {
