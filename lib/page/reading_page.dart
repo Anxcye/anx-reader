@@ -163,7 +163,12 @@ class _ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
         onPopInvoked: (bool didPop) async {
           if (didPop) return;
           String cfi = await _epubPlayerKey.currentState!.onReadingLocation();
-          Navigator.pop(context, cfi);
+          double readProgress = _epubPlayerKey.currentState!.progress;
+          Map<String, dynamic> result = {
+            'cfi': cfi,
+            'readProgress': readProgress,
+          };
+          Navigator.pop(context, result);
         },
         child: Scaffold(
           body: Stack(
