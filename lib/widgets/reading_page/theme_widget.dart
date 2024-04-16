@@ -1,4 +1,4 @@
-
+import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
@@ -72,6 +72,8 @@ class _ThemeWidgetState extends State<ThemeWidget> {
             width: 90,
             child: GestureDetector(
               onTap: () {
+                SharedPreferencesProvider()
+                    .saveReadThemeToPrefs(widget.themes[index]);
                 widget.epubPlayerKey.currentState!
                     .changeTheme(widget.themes[index]);
               },
@@ -139,50 +141,50 @@ class _ThemeChangeWidgetState extends State<ThemeChangeWidget> {
   Widget build(BuildContext context) {
     return Container(
         child: Row(children: [
-          IconButton(
-            onPressed: () async {
-              print("hi");
-              String? pickingColor =
+      IconButton(
+        onPressed: () async {
+          print("hi");
+          String? pickingColor =
               await showColorPickerDialog(readTheme.backgroundColor);
-              if (pickingColor != '') {
-                setState(() {
-                  readTheme.backgroundColor = pickingColor!;
-                });
-                updateTheme(readTheme);
-              }
-            },
-            icon: Icon(Icons.circle,
-                size: 80,
-                color: Color(int.parse('0x${readTheme.backgroundColor}'))),
-          ),
-          IconButton(
-              onPressed: () async {
-                String? pickingColor =
+          if (pickingColor != '') {
+            setState(() {
+              readTheme.backgroundColor = pickingColor!;
+            });
+            updateTheme(readTheme);
+          }
+        },
+        icon: Icon(Icons.circle,
+            size: 80,
+            color: Color(int.parse('0x${readTheme.backgroundColor}'))),
+      ),
+      IconButton(
+          onPressed: () async {
+            String? pickingColor =
                 await showColorPickerDialog(readTheme.textColor);
-                if (pickingColor != '') {
-                  setState(() {
-                    readTheme.textColor = pickingColor!;
-                  });
-                  updateTheme(readTheme);
-                }
-              },
-              icon: Icon(Icons.text_fields,
-                  size: 60, color: Color(int.parse('0x${readTheme.textColor}')))),
-          const Expanded(
-            child: SizedBox(),
-          ),
-          IconButton(
-            onPressed: () {
-              deleteTheme(readTheme.id!);
-              widget.setCurrentPage(const SizedBox(height: 1));
-              // setState(() {});
-            },
-            icon: const Icon(
-              Icons.delete,
-              size: 40,
-            ),
-          ),
-        ]));
+            if (pickingColor != '') {
+              setState(() {
+                readTheme.textColor = pickingColor!;
+              });
+              updateTheme(readTheme);
+            }
+          },
+          icon: Icon(Icons.text_fields,
+              size: 60, color: Color(int.parse('0x${readTheme.textColor}')))),
+      const Expanded(
+        child: SizedBox(),
+      ),
+      IconButton(
+        onPressed: () {
+          deleteTheme(readTheme.id!);
+          widget.setCurrentPage(const SizedBox(height: 1));
+          // setState(() {});
+        },
+        icon: const Icon(
+          Icons.delete,
+          size: 40,
+        ),
+      ),
+    ]));
   }
 
   Future<String?> showColorPickerDialog(String currColor) async {

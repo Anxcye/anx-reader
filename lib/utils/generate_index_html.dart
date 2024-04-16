@@ -1,11 +1,32 @@
+import 'package:anx_reader/models/read_theme.dart';
+
 import '../models/book.dart';
 import '../models/book_style.dart';
 import '../service/book_player/book_player_server.dart';
 
-String generateIndexHtml(Book book, BookStyle style, String cfi) {
+String generateIndexHtml(
+    Book book, BookStyle style, ReadTheme theme, String cfi) {
   String bookPath = 'http://localhost:${Server().port}/book/${book.filePath}';
   String epubJs = 'http://localhost:${Server().port}/js/epub.min.js';
   String zipJs = 'http://localhost:${Server().port}/js/jszip.min.js';
+  String backgroundColor = theme.backgroundColor.substring(2) +
+      theme.backgroundColor.substring(0, 2);
+  String textColor =
+      theme.textColor.substring(2) + theme.textColor.substring(0, 2);
+print(textColor);
+  String customStyles = '''
+    body {
+      padding-top: ${style.topMargin}px !important;
+      padding-bottom: ${style.bottomMargin}px !important;
+      line-height: ${style.lineHeight} !important;
+      letter-spacing: ${style.letterSpacing}px !important;
+      word-spacing: ${style.wordSpacing}px !important;
+    }
+    p {
+      padding-top: ${style.paragraphSpacing}px !important;
+      line-height: ${style.lineHeight} !important;
+    }
+  ''';
 
   return '''
   <!DOCTYPE html>
@@ -22,7 +43,9 @@ String generateIndexHtml(Book book, BookStyle style, String cfi) {
           margin: 0;
           padding: 0; 
         }
-       
+        html {
+          background-color: #$backgroundColor;
+        }
       </style>
     </head>
 <body>
@@ -34,7 +57,33 @@ String generateIndexHtml(Book book, BookStyle style, String cfi) {
         width: window.innerWidth,
         height: window.innerHeight,
         allowScriptedContent: true,
+        gap: ${style.sideMargin},
     })
+    
+    defaultStyle = function() {
+      rendition.themes.fontSize('${style.fontSize}%');
+      rendition.themes.font('${style.fontFamily}');
+
+      rendition.themes.default({
+        'html': {
+          'background-color': '#$backgroundColor',
+          'color': '#$textColor',
+        },
+        'body': {
+          'padding-top': '${style.topMargin}px !important',
+          'padding-bottom': '${style.bottomMargin}px !important',
+          'line-height': '${style.lineHeight} !important',
+          'letter-spacing': '${style.letterSpacing}px !important',
+          'word-spacing': '${style.wordSpacing}px !important',
+        },
+        'p': {
+          'padding-top': '${style.paragraphSpacing}px !important',
+          'line-height': '${style.lineHeight} !important',
+        },
+      });
+    }
+    defaultStyle();
+    
     
     book.ready.then(function() {
         return book.locations.generate(500); 
@@ -44,7 +93,6 @@ String generateIndexHtml(Book book, BookStyle style, String cfi) {
       let toc = book.navigation.toc;
       let href = rendition.currentLocation().start.href;
       let chapter = toc.filter(chapter => chapter.href === href)[0];
-      console.log(chapter.label);
       return chapter.label.trim(); 
     }
     

@@ -1,4 +1,5 @@
 import 'package:anx_reader/models/book_style.dart';
+import 'package:anx_reader/models/read_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -67,5 +68,21 @@ class SharedPreferencesProvider extends ChangeNotifier {
     String? bookStyleJson = prefs.getString('readStyle');
     if (bookStyleJson == null) return BookStyle();
     return BookStyle.fromJson(bookStyleJson);
+  }
+
+  void saveReadThemeToPrefs(ReadTheme readTheme) {
+    prefs.setString('readTheme', readTheme.toJson());
+    notifyListeners();
+  }
+
+  ReadTheme get readTheme {
+    String? readThemeJson = prefs.getString('readTheme');
+    if (readThemeJson == null) {
+      return ReadTheme(
+          backgroundColor: 'ffFFFFFF',
+          textColor: 'ff000000',
+          backgroundImagePath: '');
+    }
+    return ReadTheme.fromJson(readThemeJson);
   }
 }
