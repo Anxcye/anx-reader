@@ -36,13 +36,13 @@ class _StatisticPageState extends State<StatisticPage> {
               children: [
                 Expanded(
                     child: _buildStatisticCard(
-                        'Read {} Books', selectTotalNumberOfBook())),
+                        '{} ${context.statisticBooksRead}', selectTotalNumberOfBook())),
                 Expanded(
                     child: _buildStatisticCard(
-                        'Read {} Days', selectTotalNumberOfDate())),
+                        '{} ${context.statisticDaysOfReading}', selectTotalNumberOfDate())),
                 Expanded(
                     child: _buildStatisticCard(
-                        'Write {} Notes', selectTotalNumberOfNotes())),
+                        '{} ${context.statisticNotes}', selectTotalNumberOfNotes())),
               ],
             ),
             const SizedBox(height: 30),
@@ -97,14 +97,14 @@ Widget _totalReadTime() {
                 style: DefaultTextStyle.of(context).style,
                 children: <TextSpan>[
                   TextSpan(text: '$H', style: totalReadTimeTextStyle()),
-                  TextSpan(text: ' h ', style: bigTextStyle()),
+                  TextSpan(text: ' ${context.statisticHours} ', style: bigTextStyle()),
                   TextSpan(text: '$M', style: totalReadTimeTextStyle()),
-                  TextSpan(text: ' m', style: bigTextStyle()),
+                  TextSpan(text: ' ${context.statisticMinutes}', style: bigTextStyle()),
                 ],
               ),
             ),
             Text(
-              '${SharedPreferencesProvider().beginDate.toString().substring(0, 10)} to now',
+              '${SharedPreferencesProvider().beginDate.toString().substring(0, 10)} ${context.statisticToPresent}',
               style: TextStyle(
                 fontSize: 16,
                 color: Colors.grey[600],
@@ -155,10 +155,11 @@ Widget _buildStatisticCard(String title, Future<int> value) {
 class ThisWeekBooks extends StatelessWidget {
   const ThisWeekBooks({super.key});
   final TextStyle titleStyle = const TextStyle(
-    fontSize: 24,
+    fontSize: 30,
     fontFamily: 'SourceHanSerif',
     fontWeight: FontWeight.bold,
     overflow: TextOverflow.ellipsis,
+
   );
 
   @override
@@ -174,7 +175,7 @@ class ThisWeekBooks extends StatelessWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('This Week', style: titleStyle,),
+                    Text(context.statisticThisWeek, style: titleStyle,),
                   ],
                 ),
               ),
@@ -215,10 +216,10 @@ class BookStatisticItem extends StatelessWidget {
     fontWeight: FontWeight.bold,
   );
 
-  String getReadingTime() {
+  String getReadingTime(BuildContext context) {
     int H = readingTime ~/ 3600;
     int M = (readingTime % 3600) ~/ 60;
-    return '$H h $M m';
+    return '$H ${context.statisticHours} $M ${context.statisticMinutes}';
   }
 
   @override
@@ -257,7 +258,7 @@ class BookStatisticItem extends StatelessWidget {
                                 Text(snapshot.data!.author,
                                     style: bookAuthorStyle),
                                 const Spacer(),
-                                Text(getReadingTime(),
+                                Text(getReadingTime(context),
                                     style: bookReadingTimeStyle),
                               ],
                             ),

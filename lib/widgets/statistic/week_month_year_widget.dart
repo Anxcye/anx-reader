@@ -1,3 +1,4 @@
+import 'package:anx_reader/l10n/localization_extension.dart';
 import 'package:anx_reader/widgets/statistic/statistic_chart.dart';
 import 'package:flutter/material.dart';
 
@@ -77,14 +78,14 @@ class WeekWidget extends StatelessWidget {
         if (snapshot.connectionState == ConnectionState.done) {
           return StatisticChart(
             readingTime: snapshot.data!,
-            xLabels: const [
-              'Mn',
-              'Te',
-              'Wd',
-              'Tu',
-              'Fr',
-              'St',
-              'Sn',
+            xLabels: [
+              context.statisticMonday,
+              context.statisticTuesday,
+              context.statisticWednesday,
+              context.statisticThursday,
+              context.statisticFriday,
+              context.statisticSaturday,
+              context.statisticSunday,
             ],
           );
         } else {

@@ -39,4 +39,50 @@ extension LocalizationExtension on BuildContext {
 
   String get appearanceLanguage =>
       AppLocalizations.of(this)?.settings_appearance_language ?? '';
+
+  String get statisticToPresent =>
+      AppLocalizations.of(this)?.statistic_to_present ?? '';
+
+  String get statisticBooksRead =>
+      AppLocalizations.of(this)?.statistic_books_read ?? '';
+
+  String get statisticDaysOfReading =>
+      AppLocalizations.of(this)?.statistic_days_of_reading ?? '';
+
+  String get statisticNotes => AppLocalizations.of(this)?.statistic_notes ?? '';
+
+  String get statisticWeek => AppLocalizations.of(this)?.statistic_week ?? '';
+
+  String get statisticMonth => AppLocalizations.of(this)?.statistic_month ?? '';
+
+  String get statisticYear => AppLocalizations.of(this)?.statistic_year ?? '';
+
+  String get statisticHours => AppLocalizations.of(this)?.statistic_hours ?? '';
+
+  String get statisticMinutes =>
+      AppLocalizations.of(this)?.statistic_minutes ?? '';
+
+  String get statisticThisWeek =>
+      AppLocalizations.of(this)?.statistic_this_week ?? '';
+
+  String get statisticMonday => AppLocalizations.of(this)?.statistic_monday ?? '';
+
+  String get statisticTuesday =>
+      AppLocalizations.of(this)?.statistic_tuesday ?? '';
+
+  String get statisticWednesday =>
+      AppLocalizations.of(this)?.statistic_wednesday ?? '';
+
+  String get statisticThursday =>
+      AppLocalizations.of(this)?.statistic_thursday ?? '';
+
+  String get statisticFriday =>
+      AppLocalizations.of(this)?.statistic_friday ?? '';
+
+  String get statisticSaturday =>
+      AppLocalizations.of(this)?.statistic_saturday ?? '';
+
+  String get statisticSunday =>
+      AppLocalizations.of(this)?.statistic_sunday ?? '';
 }
+
