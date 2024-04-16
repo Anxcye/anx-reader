@@ -1,3 +1,4 @@
+import 'package:anx_reader/l10n/localization_extension.dart';
 import 'package:flutter/material.dart';
 
 import 'week_month_year_widget.dart';
@@ -29,11 +30,11 @@ class _ChartCardState extends State<ChartCard> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  _chartModeButton(ChartMode.week, 'Week'),
+                  _chartModeButton(ChartMode.week, context.statisticWeek),
                   const SizedBox(width: 15),
-                  _chartModeButton(ChartMode.month, 'Month'),
+                  _chartModeButton(ChartMode.month, context.statisticMonth),
                   const SizedBox(width: 15),
-                  _chartModeButton(ChartMode.year, 'Year'),
+                  _chartModeButton(ChartMode.year, context.statisticYear),
                 ],
               ),
             ),

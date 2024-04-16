@@ -12,5 +12,22 @@
   "settings_appearance_theme": "主题",
   "settings_appearance_themeColor": "主题颜色",
   "settings_appearance_display": "显示",
-  "settings_appearance_language": "语言"
+  "settings_appearance_language": "语言",
+  "statistic_to_present": "至今",
+  "statistic_books_read": "本读过",
+  "statistic_days_of_reading": "天阅读",
+  "statistic_notes": "条笔记",
+  "statistic_week": "周",
+  "statistic_month": "月",
+  "statistic_year": "年",
+  "statistic_hours": "时",
+  "statistic_minutes": "分",
+  "statistic_this_week": "本周",
+  "statistic_monday": "一",
+  "statistic_tuesday": "二",
+  "statistic_wednesday": "三",
+  "statistic_thursday": "四",
+  "statistic_friday": "五",
+  "statistic_saturday": "六",
+  "statistic_sunday": "日"
 }
