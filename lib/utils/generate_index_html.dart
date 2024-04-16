@@ -113,6 +113,7 @@ print(textColor);
 
       rendition.on('relocated', function(locations) {
         refreshProgress();
+        window.flutter_inappwebview.callHandler('onRelocated', locations.start.index);
       });
     };
     renderBook()
