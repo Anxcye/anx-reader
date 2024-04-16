@@ -3,16 +3,12 @@ import 'dart:convert';
 
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/dao/theme.dart';
-import 'package:anx_reader/main.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/models/book_style.dart';
 import 'package:anx_reader/models/read_theme.dart';
 import 'package:anx_reader/page/book_player/epub_player.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+
 
 import '../models/toc_item.dart';
 import '../utils/generate_index_html.dart';
@@ -125,7 +121,6 @@ class _ReadingPageState extends State<ReadingPage> {
   }
 
   Future<void> styleHandler() async {
-
     setState(() {
       _currentPage = StyleWidget(
         epubPlayerKey: _epubPlayerKey,
@@ -180,35 +175,20 @@ class _ReadingPageState extends State<ReadingPage> {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             IconButton(
-                              icon: const Icon(Icons.toc),
-                              onPressed: () {
-                                tocHandler();
-                              },
-                            ),
+                                icon: const Icon(Icons.toc),
+                                onPressed: tocHandler),
                             IconButton(
-                              icon: const Icon(Icons.edit_note),
-                              onPressed: () {
-                                noteHandler();
-                              },
-                            ),
+                                icon: const Icon(Icons.edit_note),
+                                onPressed: noteHandler),
                             IconButton(
-                              icon: const Icon(Icons.data_usage),
-                              onPressed: () {
-                                progressHandler();
-                              },
-                            ),
+                                icon: const Icon(Icons.data_usage),
+                                onPressed: progressHandler),
                             IconButton(
-                              icon: const Icon(Icons.color_lens),
-                              onPressed: () {
-                                themeHandler();
-                              },
-                            ),
+                                icon: const Icon(Icons.color_lens),
+                                onPressed: themeHandler),
                             IconButton(
-                              icon: const Icon(Icons.text_fields),
-                              onPressed: () {
-                                styleHandler();
-                              },
-                            ),
+                                icon: const Icon(Icons.text_fields),
+                                onPressed: styleHandler),
                           ],
                         ),
                       ],
