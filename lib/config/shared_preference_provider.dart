@@ -18,6 +18,7 @@ class SharedPreferencesProvider extends ChangeNotifier {
 
   Future<void> initPrefs() async {
     prefs = await SharedPreferences.getInstance();
+    saveBeginDate();
     notifyListeners();
   }
 
@@ -84,5 +85,18 @@ class SharedPreferencesProvider extends ChangeNotifier {
           backgroundImagePath: '');
     }
     return ReadTheme.fromJson(readThemeJson);
+  }
+
+  void saveBeginDate() {
+    String? beginDate = prefs.getString('beginDate');
+    if (beginDate == null) {
+      prefs.setString('beginDate', DateTime.now().toIso8601String());
+    }
+  }
+
+  DateTime? get beginDate {
+    String? beginDateStr = prefs.getString('beginDate');
+    if (beginDateStr == null) return null;
+    return DateTime.parse(beginDateStr);
   }
 }
