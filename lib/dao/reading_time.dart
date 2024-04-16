@@ -61,7 +61,68 @@ Future<int> selectTotalNumberOfDate() async {
 
 Future<int> selectTotalNumberOfNotes() async {
   final db = await DBHelper().database;
-  final List<Map<String, dynamic>> maps = await db.rawQuery(
-      'SELECT COUNT(*) AS total_count FROM tb_notes');
+  final List<Map<String, dynamic>> maps =
+      await db.rawQuery('SELECT COUNT(*) AS total_count FROM tb_notes');
   return maps[0]['total_count'];
+}
+
+Future<List<int>> selectReadingTimeOfWeek(DateTime dateTime) async {
+  final db = await DBHelper().database;
+
+  List<int> result = List.generate(7, (i) => 0);
+
+  for (int i = 0; i < 7; i++) {
+    DateTime day = dateTime.subtract(Duration(days: dateTime.weekday - 1 - i));
+    String dayString = day.toString().substring(0, 10);
+
+    final List<Map<String, dynamic>> maps = await db.rawQuery(
+        'SELECT SUM(reading_time) AS total_sum FROM tb_reading_time WHERE date = ?',
+        [dayString]);
+
+    if (maps.isNotEmpty && maps[0]['total_sum'] != null) {
+      result[i] = maps[0]['total_sum'];
+    }
+  }
+  return result;
+}
+
+Future<List<int>> selectReadingTimeOfMonth(DateTime dateTime) async {
+  final db = await DBHelper().database;
+
+  int numberOfDays = DateTime(dateTime.year, dateTime.month + 1, 0).day;
+  List<int> result = List.generate(numberOfDays, (i) => 0);
+
+  for (int i = 0; i < numberOfDays; i++) {
+    DateTime day = DateTime(dateTime.year, dateTime.month, i + 1);
+    String dayString = day.toString().substring(0, 10);
+
+    final List<Map<String, dynamic>> maps = await db.rawQuery(
+        'SELECT SUM(reading_time) AS total_sum FROM tb_reading_time WHERE date = ?',
+        [dayString]);
+
+    if (maps.isNotEmpty && maps[0]['total_sum'] != null) {
+      result[i] = maps[0]['total_sum'];
+    }
+  }
+  return result;
+}
+
+Future<List<int>> selectReadingTimeOfYear(DateTime dateTime) async {
+  final db = await DBHelper().database;
+
+  List<int> result = List.generate(12, (i) => 0);
+
+  for (int i = 0; i < 12; i++) {
+    DateTime day = DateTime(dateTime.year, i + 1, 1);
+    String dayString = day.toString().substring(0, 7);
+
+    final List<Map<String, dynamic>> maps = await db.rawQuery(
+        'SELECT SUM(reading_time) AS total_sum FROM tb_reading_time WHERE date LIKE ?',
+        ['$dayString%']);
+
+    if (maps.isNotEmpty && maps[0]['total_sum'] != null) {
+      result[i] = maps[0]['total_sum'];
+    }
+  }
+  return result;
 }
