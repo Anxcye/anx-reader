@@ -8,6 +8,7 @@ CREATE TABLE tb_books (
   cover_path TEXT,
   file_path TEXT,
   last_read_position TEXT,
+  reading_percentage REAL,
   author TEXT,
   description TEXT,
   create_time TEXT,

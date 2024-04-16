@@ -38,6 +38,7 @@ Future<Book> importBook(File file) async {
       coverPath: coverPath,
       filePath: filePath,
       lastReadPosition: '',
+      readingPercentage: 0,
       author: author,
       createTime: DateTime.now(),
       updateTime: DateTime.now());
@@ -57,10 +58,12 @@ void openBook(BuildContext context, Book book, Function updateBookList) {
     MaterialPageRoute(
       builder: (context) => ReadingPage(book: book),
     ),
-  ).then((cfi) {
-    if (cfi != null) {
-      book.lastReadPosition = cfi;
-      print(cfi);
+  ).then((result) {
+    if (result != null) {
+      Map<String, dynamic> resultMap = result as Map<String, dynamic>;
+      book.lastReadPosition = resultMap['cfi'];
+      book.readingPercentage = resultMap['readProgress'];
+      print(resultMap);
       updateBook(book);
       updateBookList();
     }

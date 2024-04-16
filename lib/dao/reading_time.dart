@@ -126,3 +126,41 @@ Future<List<int>> selectReadingTimeOfYear(DateTime dateTime) async {
   }
   return result;
 }
+
+Future<List<ReadingTime>> selectReadingTimeByBookId(int bookId) async {
+  final db = await DBHelper().database;
+  final List<Map<String, dynamic>> maps = await db.query(
+    'tb_reading_time',
+    where: 'book_id = ?',
+    whereArgs: [bookId],
+  );
+  return List.generate(maps.length, (i) {
+    return ReadingTime(
+      id: maps[i]['id'],
+      bookId: maps[i]['book_id'],
+      date: maps[i]['date'],
+      readingTime: maps[i]['reading_time'],
+    );
+  });
+}
+
+Future<List<Map<int, int>>> selectThisWeekBooks() async {
+  // return the book id and time that has been read this week
+  // order by reading time desc
+
+  final db = await DBHelper().database;
+  final List<Map<String, dynamic>> maps = await db.rawQuery(
+      'SELECT book_id, SUM(reading_time) AS total_sum FROM tb_reading_time WHERE date >= ? GROUP BY book_id ORDER BY total_sum DESC',
+      [
+        DateTime.now()
+            .subtract(Duration(days: DateTime.now().weekday - 1))
+            .toString()
+            .substring(0, 10)
+      ]);
+
+
+  return List.generate(maps.length, (i) {
+    return {maps[i]['book_id']: maps[i]['total_sum']};
+  });
+
+}

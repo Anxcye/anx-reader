@@ -1,12 +1,15 @@
+import 'dart:io';
+
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/l10n/localization_extension.dart';
-import 'package:anx_reader/main.dart';
-import 'package:fl_chart/fl_chart.dart';
+import 'package:anx_reader/models/book.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
+import '../dao/book.dart';
 import '../dao/reading_time.dart';
+import '../widgets/statistic/chard_card.dart';
 
 class StatisticPage extends StatefulWidget {
   const StatisticPage({super.key});
@@ -43,7 +46,13 @@ class _StatisticPageState extends State<StatisticPage> {
               ],
             ),
             const SizedBox(height: 30),
-            Charts(),
+            Expanded(
+              child: ListView(children: const [
+                ChartCard(),
+                SizedBox(height: 20),
+                ThisWeekBooks(),
+              ]),
+            ),
           ],
         ),
       ),
@@ -85,9 +94,7 @@ Widget _totalReadTime() {
             RichText(
               textAlign: TextAlign.start,
               text: TextSpan(
-                style: DefaultTextStyle
-                    .of(context)
-                    .style,
+                style: DefaultTextStyle.of(context).style,
                 children: <TextSpan>[
                   TextSpan(text: '$H', style: totalReadTimeTextStyle()),
                   TextSpan(text: ' h ', style: bigTextStyle()),
@@ -97,8 +104,7 @@ Widget _totalReadTime() {
               ),
             ),
             Text(
-              '${SharedPreferencesProvider().beginDate.toString().substring(
-                  0, 10)} to now',
+              '${SharedPreferencesProvider().beginDate.toString().substring(0, 10)} to now',
               style: TextStyle(
                 fontSize: 16,
                 color: Colors.grey[600],
@@ -120,27 +126,25 @@ Widget _buildStatisticCard(String title, Future<int> value) {
       if (snapshot.connectionState == ConnectionState.done) {
         var parts = title.split('{}');
         return
-          // Card(
-          // child:
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Center(
-              child: RichText(
-                text: TextSpan(
-                  style: DefaultTextStyle
-                      .of(context)
-                      .style,
-                  children: <TextSpan>[
-                    TextSpan(text: parts[0], style: smallTextStyle()),
-                    TextSpan(text: '${snapshot.data}', style: bigTextStyle()),
-                    TextSpan(text: parts[1], style: smallTextStyle()),
-                  ],
-                ),
-                textAlign: TextAlign.center,
+            // Card(
+            // child:
+            Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Center(
+            child: RichText(
+              text: TextSpan(
+                style: DefaultTextStyle.of(context).style,
+                children: <TextSpan>[
+                  TextSpan(text: parts[0], style: smallTextStyle()),
+                  TextSpan(text: '${snapshot.data}', style: bigTextStyle()),
+                  TextSpan(text: parts[1], style: smallTextStyle()),
+                ],
               ),
+              textAlign: TextAlign.center,
             ),
-            // ),
-          );
+          ),
+          // ),
+        );
       } else {
         return const CircularProgressIndicator();
       }
@@ -148,340 +152,142 @@ Widget _buildStatisticCard(String title, Future<int> value) {
   );
 }
 
-enum ChartMode { week, month, year }
-
-class Charts extends StatefulWidget {
-  const Charts({super.key});
-
-  @override
-  _ChartsState createState() => _ChartsState();
-}
-
-class _ChartsState extends State<Charts> {
-  ChartMode _currentMode = ChartMode.week;
-  Widget currentChart = WeekWidget();
+class ThisWeekBooks extends StatelessWidget {
+  const ThisWeekBooks({super.key});
+  final TextStyle titleStyle = const TextStyle(
+    fontSize: 24,
+    fontFamily: 'SourceHanSerif',
+    fontWeight: FontWeight.bold,
+    overflow: TextOverflow.ellipsis,
+  );
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 300,
-      child: Card(
-        child: Column(
-          children: [
-            const SizedBox(height: 10),
-            SizedBox(
-              height: 30,
-              width: 300,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _chartModeButton(ChartMode.week, 'Week'),
-                  const SizedBox(width: 15),
-                  _chartModeButton(ChartMode.month, 'Month'),
-                  const SizedBox(width: 15),
-                  _chartModeButton(ChartMode.year, 'Year'),
-                ],
+    return FutureBuilder<List<Map<int, int>>>(
+      future: selectThisWeekBooks(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          return Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('This Week', style: titleStyle,),
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(height: 10),
-            Expanded(
-              child: currentChart,
-            )
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _chartModeButton(ChartMode mode, String text) {
-    return Expanded(
-      child: ElevatedButton(
-        onPressed: () {
-          setState(() {
-            _currentMode = mode;
-            switch (mode) {
-              case ChartMode.week:
-                currentChart = const WeekWidget();
-
-                break;
-              case ChartMode.month:
-                currentChart = const MonthWidget();
-                break;
-              case ChartMode.year:
-                currentChart = const YearWidget();
-                break;
-            }
-          });
-        },
-        style: ButtonStyle(
-          backgroundColor: MaterialStateProperty.resolveWith<Color>(
-                (Set<MaterialState> states) {
-              if (_currentMode == mode) {
-                return Theme
-                    .of(context)
-                    .colorScheme
-                    .primary;
-              }
-              return Theme
-                  .of(context)
-                  .colorScheme
-                  .surface;
-            },
-          ),
-          foregroundColor: MaterialStateProperty.resolveWith<Color>(
-                (Set<MaterialState> states) {
-              if (_currentMode == mode) {
-                return Theme
-                    .of(context)
-                    .colorScheme
-                    .onPrimary;
-              }
-              return Theme
-                  .of(context)
-                  .colorScheme
-                  .onSurface;
-            },
-          ),
-        ),
-        child: Text(text),
-      ),
-    );
-  }
-}
-
-class YearWidget extends StatelessWidget {
-  const YearWidget({
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<List<int>>(
-      future: selectReadingTimeOfYear(DateTime.now()),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.done) {
-          return StatisticChart(
-            readingTime: snapshot.data!,
-            xLabels: List.generate(12, (i) {
-              return (i + 1).toString();
-            }),
-          );
-        } else {
-          return
-            Container(
-              width: double.infinity,
-              child: const CircularProgressIndicator(),
-            );
-        }
-      },
-    );
-  }
-}
-
-class MonthWidget extends StatelessWidget {
-  const MonthWidget({
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<List<int>>(
-      future: selectReadingTimeOfMonth(DateTime.now()),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.done) {
-          return StatisticChart(
-            readingTime: snapshot.data!,
-            xLabels: List.generate(snapshot.data!.length, (i) {
-              if ((i + 1) % 5 == 0 || i == 0) {
-                return (i + 1).toString();
-              }
-              return '';
-            }),
-          );
-        } else {
-          return
-            const SizedBox(
-              width: double.infinity,
-              child: CircularProgressIndicator(),
-            );
-        }
-      },
-    );
-  }
-}
-
-class WeekWidget extends StatelessWidget {
-  const WeekWidget({
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<List<int>>(
-      future: selectReadingTimeOfWeek(DateTime.now()),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.done) {
-          return StatisticChart(
-            readingTime: snapshot.data!,
-            xLabels: const [
-              'Mn',
-              'Te',
-              'Wd',
-              'Tu',
-              'Fr',
-              'St',
-              'Sn',
+              Column(
+                children: snapshot.data!.map((e) {
+                  return BookStatisticItem(
+                      bookId: e.keys.first, readingTime: e.values.first);
+                }).toList(),
+              ),
             ],
           );
         } else {
-          return
-            const SizedBox(
-              width: double.infinity,
-              child: CircularProgressIndicator(),
-            );
+          return const CircularProgressIndicator();
         }
       },
     );
   }
 }
 
-class StatisticChart extends StatefulWidget {
-  final List<int> readingTime;
-  final List<String> xLabels;
+class BookStatisticItem extends StatelessWidget {
+  const BookStatisticItem(
+      {super.key, required this.bookId, required this.readingTime});
 
-  StatisticChart({super.key, required this.readingTime, required this.xLabels});
+  final int bookId;
+  final int readingTime;
+  final TextStyle bookTitleStyle = const TextStyle(
+    fontSize: 24,
+    fontFamily: 'SourceHanSerif',
+    fontWeight: FontWeight.bold,
+    overflow: TextOverflow.ellipsis,
+  );
+  final TextStyle bookAuthorStyle = const TextStyle(
+    fontSize: 12,
+    color: Colors.grey,
+  );
+  final TextStyle bookReadingTimeStyle = const TextStyle(
+    fontSize: 20,
+    fontWeight: FontWeight.bold,
+  );
 
-  @override
-  State<StatisticChart> createState() => _StatisticChartState();
-}
-
-class _StatisticChartState extends State<StatisticChart> {
-  int? touchedIndex;
-  final Color bottomColor =
-      Theme
-          .of(navigatorKey.currentState!.context)
-          .colorScheme
-          .primary;
-
-  final Color topColor = Theme
-      .of(navigatorKey.currentState!.context)
-      .colorScheme
-      .primary
-      .withOpacity(0.5);
+  String getReadingTime() {
+    int H = readingTime ~/ 3600;
+    int M = (readingTime % 3600) ~/ 60;
+    return '$H h $M m';
+  }
 
   @override
   Widget build(BuildContext context) {
-    return BarChart(
-      BarChartData(
-        barTouchData: barTouchData,
-        titlesData: titlesData,
-        borderData: borderData,
-        barGroups: barGroups,
-        gridData: const FlGridData(show: false),
-        alignment: BarChartAlignment.spaceAround,
-        maxY: widget.readingTime
-            .reduce((value, element) => value > element ? value : element) *
-            1.2,
-      ),
-    );
-  }
-
-  BarTouchData get barTouchData {
-    return BarTouchData(
-      enabled: true,
-      touchTooltipData: BarTouchTooltipData(
-        getTooltipColor: (BarChartGroupData group) {
-          return Colors.white.withOpacity(0);
-        },
-        getTooltipItem: (group, groupIndex, rod, rodIndex) {
-          if (touchedIndex != null && group.x.toInt() == touchedIndex) {
-            return BarTooltipItem(
-              '${widget.readingTime[group.x.toInt()] ~/ 60}m',
-              TextStyle(
-                color: topColor,
-                fontWeight: FontWeight.bold,
+    return FutureBuilder<Book>(
+      future: selectBookById(bookId),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          return Container(
+            height: 150,
+            child: Card(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.file(
+                        File(
+                          snapshot.data!.coverPath,
+                        ),
+                        height: 130,
+                        width: 100,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    const SizedBox(width: 15),
+                    Flexible(
+                      child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(snapshot.data!.title, style: bookTitleStyle),
+                            SizedBox(height: 10),
+                            Row(
+                              children: [
+                                Text(snapshot.data!.author,
+                                    style: bookAuthorStyle),
+                                const Spacer(),
+                                Text(getReadingTime(),
+                                    style: bookReadingTimeStyle),
+                              ],
+                            ),
+                            const SizedBox(height: 20),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: LinearProgressIndicator(
+                                    value: snapshot.data!.readingPercentage,
+                                    backgroundColor: Colors.grey[300],
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                        Theme.of(context).colorScheme.primary),
+                                  ),
+                                ),
+                                SizedBox(width: 10),
+                                Text(
+                                    '${(snapshot.data!.readingPercentage * 100).toInt()} %'),
+                              ],
+                            ),
+                          ]),
+                    ),
+                  ],
+                ),
               ),
-            );
-          }
-          return null;
-        },
-      ),
-      touchCallback: (FlTouchEvent event, BarTouchResponse? response) {
-        if (response?.spot != null) {
-          setState(() {
-            touchedIndex = response!.spot!.touchedBarGroupIndex;
-          });
+            ),
+          );
+        } else {
+          return const CircularProgressIndicator();
         }
       },
     );
-  }
-
-  FlTitlesData get titlesData =>
-      FlTitlesData(
-        show: true,
-        bottomTitles: AxisTitles(
-          sideTitles: SideTitles(
-            showTitles: true,
-            reservedSize: 30,
-            getTitlesWidget: getTitles,
-          ),
-        ),
-        leftTitles: const AxisTitles(
-          sideTitles: SideTitles(showTitles: false),
-        ),
-        topTitles: const AxisTitles(
-          sideTitles: SideTitles(showTitles: false),
-        ),
-        rightTitles: const AxisTitles(
-          sideTitles: SideTitles(showTitles: false),
-        ),
-      );
-
-  FlBorderData get borderData =>
-      FlBorderData(
-        show: false,
-      );
-
-  LinearGradient get _barsGradient =>
-      LinearGradient(
-        colors: [
-          bottomColor,
-          topColor,
-        ],
-        begin: Alignment.bottomCenter,
-        end: Alignment.topCenter,
-      );
-
-  List<BarChartGroupData> get barGroups {
-    List<BarChartGroupData> barGroups = [];
-    for (int i = 0; i < widget.readingTime.length; i++) {
-      barGroups.add(
-        BarChartGroupData(
-          x: i,
-          barRods: [
-            BarChartRodData(
-              toY: widget.readingTime[i].toDouble(),
-              gradient: _barsGradient,
-            ),
-          ],
-          showingTooltipIndicators: [0],
-        ),
-      );
-    }
-    return barGroups;
-  }
-
-  SideTitleWidget getTitles(double value, TitleMeta meta) {
-    var style = TextStyle(
-      color: bottomColor,
-      fontWeight: FontWeight.bold,
-      fontSize: 14,
-    );
-    return SideTitleWidget(
-        axisSide: meta.axisSide,
-        child: Text(
-          widget.xLabels[value.toInt()],
-          style: style,
-        ));
   }
 }

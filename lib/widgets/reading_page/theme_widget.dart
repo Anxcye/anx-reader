@@ -143,7 +143,6 @@ class _ThemeChangeWidgetState extends State<ThemeChangeWidget> {
         child: Row(children: [
       IconButton(
         onPressed: () async {
-          print("hi");
           String? pickingColor =
               await showColorPickerDialog(readTheme.backgroundColor);
           if (pickingColor != '') {
