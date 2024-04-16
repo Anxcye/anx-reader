@@ -151,14 +151,15 @@ Widget _buildStatisticCard(String title, Future<int> value) {
 enum ChartMode { week, month, year }
 
 class Charts extends StatefulWidget {
+  const Charts({super.key});
+
   @override
   _ChartsState createState() => _ChartsState();
 }
 
 class _ChartsState extends State<Charts> {
   ChartMode _currentMode = ChartMode.week;
-  Widget currentChart =
-  StatisticChart(); // You can change this based on _currentMode
+  Widget currentChart = WeekWidget();
 
   @override
   Widget build(BuildContext context) {
@@ -182,8 +183,10 @@ class _ChartsState extends State<Charts> {
                 ],
               ),
             ),
-            SizedBox(height: 10),
-            Expanded(child: currentChart)
+            const SizedBox(height: 10),
+            Expanded(
+              child: currentChart,
+            )
           ],
         ),
       ),
@@ -196,6 +199,18 @@ class _ChartsState extends State<Charts> {
         onPressed: () {
           setState(() {
             _currentMode = mode;
+            switch (mode) {
+              case ChartMode.week:
+                currentChart = const WeekWidget();
+
+                break;
+              case ChartMode.month:
+                currentChart = const MonthWidget();
+                break;
+              case ChartMode.year:
+                currentChart = const YearWidget();
+                break;
+            }
           });
         },
         style: ButtonStyle(
@@ -234,22 +249,125 @@ class _ChartsState extends State<Charts> {
   }
 }
 
-class StatisticChart extends StatelessWidget {
-  List<int> readingTime;
-  List<String> xLabels;
-  Color bottomColor =
+class YearWidget extends StatelessWidget {
+  const YearWidget({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<List<int>>(
+      future: selectReadingTimeOfYear(DateTime.now()),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          return StatisticChart(
+            readingTime: snapshot.data!,
+            xLabels: List.generate(12, (i) {
+              return (i + 1).toString();
+            }),
+          );
+        } else {
+          return
+            Container(
+              width: double.infinity,
+              child: const CircularProgressIndicator(),
+            );
+        }
+      },
+    );
+  }
+}
+
+class MonthWidget extends StatelessWidget {
+  const MonthWidget({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<List<int>>(
+      future: selectReadingTimeOfMonth(DateTime.now()),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          return StatisticChart(
+            readingTime: snapshot.data!,
+            xLabels: List.generate(snapshot.data!.length, (i) {
+              if ((i + 1) % 5 == 0 || i == 0) {
+                return (i + 1).toString();
+              }
+              return '';
+            }),
+          );
+        } else {
+          return
+            const SizedBox(
+              width: double.infinity,
+              child: CircularProgressIndicator(),
+            );
+        }
+      },
+    );
+  }
+}
+
+class WeekWidget extends StatelessWidget {
+  const WeekWidget({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<List<int>>(
+      future: selectReadingTimeOfWeek(DateTime.now()),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          return StatisticChart(
+            readingTime: snapshot.data!,
+            xLabels: const [
+              'Mn',
+              'Te',
+              'Wd',
+              'Tu',
+              'Fr',
+              'St',
+              'Sn',
+            ],
+          );
+        } else {
+          return
+            const SizedBox(
+              width: double.infinity,
+              child: CircularProgressIndicator(),
+            );
+        }
+      },
+    );
+  }
+}
+
+class StatisticChart extends StatefulWidget {
+  final List<int> readingTime;
+  final List<String> xLabels;
+
+  StatisticChart({super.key, required this.readingTime, required this.xLabels});
+
+  @override
+  State<StatisticChart> createState() => _StatisticChartState();
+}
+
+class _StatisticChartState extends State<StatisticChart> {
+  int? touchedIndex;
+  final Color bottomColor =
       Theme
           .of(navigatorKey.currentState!.context)
           .colorScheme
           .primary;
-  Color topColor = Theme
+
+  final Color topColor = Theme
       .of(navigatorKey.currentState!.context)
       .colorScheme
       .primary
       .withOpacity(0.5);
-
-  StatisticChart({this.readingTime = const [6, 10, 14, 15, 13, 10, 16, 17],
-    this.xLabels = const ['Mn', 'Te', 'Wd', 'Tu', 'Fr', 'St', 'Sn', 'xx']});
 
   @override
   Widget build(BuildContext context) {
@@ -261,31 +379,40 @@ class StatisticChart extends StatelessWidget {
         barGroups: barGroups,
         gridData: const FlGridData(show: false),
         alignment: BarChartAlignment.spaceAround,
-        maxY: 20,
+        maxY: widget.readingTime
+            .reduce((value, element) => value > element ? value : element) *
+            1.2,
       ),
     );
   }
 
   BarTouchData get barTouchData {
     return BarTouchData(
-      enabled: false,
+      enabled: true,
       touchTooltipData: BarTouchTooltipData(
-        getTooltipColor: (group) => Colors.transparent,
-        tooltipPadding: EdgeInsets.zero,
-        tooltipMargin: 8,
-        getTooltipItem: (BarChartGroupData group,
-            int groupIndex,
-            BarChartRodData rod,
-            int rodIndex,) {
-          return BarTooltipItem(
-            rod.toY.round().toString(),
-            TextStyle(
-              color: topColor,
-              fontWeight: FontWeight.bold,
-            ),
-          );
+        getTooltipColor: (BarChartGroupData group) {
+          return Colors.white.withOpacity(0);
+        },
+        getTooltipItem: (group, groupIndex, rod, rodIndex) {
+          if (touchedIndex != null && group.x.toInt() == touchedIndex) {
+            return BarTooltipItem(
+              '${widget.readingTime[group.x.toInt()] ~/ 60}m',
+              TextStyle(
+                color: topColor,
+                fontWeight: FontWeight.bold,
+              ),
+            );
+          }
+          return null;
         },
       ),
+      touchCallback: (FlTouchEvent event, BarTouchResponse? response) {
+        if (response?.spot != null) {
+          setState(() {
+            touchedIndex = response!.spot!.touchedBarGroupIndex;
+          });
+        }
+      },
     );
   }
 
@@ -327,13 +454,13 @@ class StatisticChart extends StatelessWidget {
 
   List<BarChartGroupData> get barGroups {
     List<BarChartGroupData> barGroups = [];
-    for (int i = 0; i < readingTime.length; i++) {
+    for (int i = 0; i < widget.readingTime.length; i++) {
       barGroups.add(
         BarChartGroupData(
           x: i,
           barRods: [
             BarChartRodData(
-              toY: readingTime[i].toDouble(),
+              toY: widget.readingTime[i].toDouble(),
               gradient: _barsGradient,
             ),
           ],
@@ -353,7 +480,7 @@ class StatisticChart extends StatelessWidget {
     return SideTitleWidget(
         axisSide: meta.axisSide,
         child: Text(
-          xLabels[value.toInt()],
+          widget.xLabels[value.toInt()],
           style: style,
         ));
   }
