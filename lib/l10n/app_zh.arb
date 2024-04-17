@@ -13,6 +13,9 @@
   "settings_appearance_themeColor": "主题颜色",
   "settings_appearance_display": "显示",
   "settings_appearance_language": "语言",
+
+  "reading_contents": "目录",
+
   "statistic_to_present": "至今",
   "statistic_books_read": "本读过",
   "statistic_days_of_reading": "天阅读",

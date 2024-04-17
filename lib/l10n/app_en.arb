@@ -13,6 +13,9 @@
   "settings_appearance_themeColor": "Theme Color",
   "settings_appearance_display": "Display",
   "settings_appearance_language": "Language",
+
+  "reading_contents": "Contents",
+
   "statistic_to_present": "To Present",
   "statistic_books_read": "books read",
   "statistic_days_of_reading": "days read",
@@ -22,7 +25,6 @@
   "statistic_year": "year",
   "statistic_hours": "h",
   "statistic_minutes": "m",
-
   "statistic_this_week": "This Week",
   "statistic_monday": "Mn",
   "statistic_tuesday": "Tu",

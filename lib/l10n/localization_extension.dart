@@ -40,6 +40,9 @@ extension LocalizationExtension on BuildContext {
   String get appearanceLanguage =>
       AppLocalizations.of(this)?.settings_appearance_language ?? '';
 
+  String get readingContents =>
+      AppLocalizations.of(this)?.reading_contents ?? '';
+
   String get statisticToPresent =>
       AppLocalizations.of(this)?.statistic_to_present ?? '';
 

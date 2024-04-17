@@ -3,9 +3,7 @@ import 'dart:io';
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/l10n/localization_extension.dart';
 import 'package:anx_reader/models/book.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 import '../dao/book.dart';
 import '../dao/reading_time.dart';
