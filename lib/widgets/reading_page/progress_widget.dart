@@ -103,7 +103,6 @@ class _ProgressWidgetState extends State<ProgressWidget> {
             ],
           ),
           const SizedBox(height: 10),
-          const Divider(),
         ],
       ),
     );
