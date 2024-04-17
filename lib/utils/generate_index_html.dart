@@ -59,6 +59,7 @@ print(textColor);
         allowScriptedContent: true,
         gap: ${style.sideMargin},
     })
+    var refreshProgress
     
     defaultStyle = function() {
       rendition.themes.fontSize('${style.fontSize}%');
@@ -86,22 +87,41 @@ print(textColor);
     
     
     book.ready.then(function() {
-        return book.locations.generate(500); 
-    });
+        return book.locations.generate(1000); 
+    }).then(function(){
+      refreshProgress();
+    })
     
+
     getCurrentChapterTitle = function() {
       let toc = book.navigation.toc;
       let href = rendition.currentLocation().start.href;
-      let chapter = toc.filter(chapter => chapter.href === href)[0];
-      return chapter.label.trim(); 
+    
+      function findChapterLabel(items, href) {
+        for (let item of items) {
+          if (item.href === href) {
+            return item.label.trim();
+          } else if (item.subitems.length > 0) {
+            const subitemLabel = findChapterLabel(item.subitems, href);
+            if (subitemLabel) {
+              return subitemLabel;
+            }
+          }
+        }
+        return null;
+      }
+    
+      const chapterLabel = findChapterLabel(toc, href);
+      return chapterLabel || 'Unknown Chapter';
     }
     
     refreshProgress = function() {
-      var progress = book.locations.percentageFromCfi(rendition.currentLocation().start.cfi);
+      let progress = book.locations.percentageFromCfi(rendition.currentLocation().start.cfi);
       window.flutter_inappwebview.callHandler('getProgress', progress);
       window.flutter_inappwebview.callHandler('getChapterCurrentPage', rendition.location.start.displayed.page);
       window.flutter_inappwebview.callHandler('getChapterTotalPage', rendition.location.end.displayed.total);
       window.flutter_inappwebview.callHandler('getChapterTitle', getCurrentChapterTitle());
+      window.flutter_inappwebview.callHandler('getChapterHref', rendition.currentLocation().start.href);
     }
 
     var renderBook = async function() {

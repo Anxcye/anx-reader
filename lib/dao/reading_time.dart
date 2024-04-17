@@ -42,7 +42,7 @@ Future<int> selectTotalReadingTime() async {
   final db = await DBHelper().database;
   final List<Map<String, dynamic>> maps = await db
       .rawQuery('SELECT SUM(reading_time) AS total_sum FROM tb_reading_time');
-  return maps[0]['total_sum'];
+  return maps[0]['total_sum'] ?? 0;
 }
 
 Future<int> selectTotalNumberOfBook() async {

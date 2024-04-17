@@ -8,9 +8,10 @@ class EpubPlayer extends StatefulWidget {
   final String content;
   final Function showOrHideAppBarAndBottomBar;
 
-  EpubPlayer({Key? key,
-    required this.content,
-    required this.showOrHideAppBarAndBottomBar})
+  EpubPlayer(
+      {Key? key,
+      required this.content,
+      required this.showOrHideAppBarAndBottomBar})
       : super(key: key);
 
   @override
@@ -23,6 +24,7 @@ class EpubPlayerState extends State<EpubPlayer> {
   int chapterCurrentPage = 0;
   int chapterTotalPage = 0;
   String chapterTitle = '';
+  String chapterHref = '';
 
   Future<String> onReadingLocation() async {
     String currentCfi = '';
@@ -85,6 +87,11 @@ class EpubPlayerState extends State<EpubPlayer> {
         handlerName: 'getChapterTitle',
         callback: (args) {
           chapterTitle = args[0];
+        });
+    _webViewController.addJavaScriptHandler(
+        handlerName: 'getChapterHref',
+        callback: (args) {
+          chapterHref = args[0];
         });
     _webViewController.addJavaScriptHandler(
         handlerName: 'onRelocated',
