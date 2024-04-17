@@ -194,12 +194,12 @@ class _ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
                   left: 0,
                   right: 0,
                   duration: const Duration(milliseconds: 3000),
-                  // child: BottomAppBar(
                   child: Container(
                     color: Theme.of(context).colorScheme.surfaceVariant,
                     child: Wrap(
                       children: [
                         _currentPage,
+                        const Divider(height: 1,),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           crossAxisAlignment: CrossAxisAlignment.center,

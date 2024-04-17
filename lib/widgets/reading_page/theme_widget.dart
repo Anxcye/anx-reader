@@ -33,8 +33,8 @@ class _ThemeWidgetState extends State<ThemeWidget> {
         itemBuilder: (context, index) {
           if (index == widget.themes.length) {
             return Container(
-                padding: const EdgeInsets.fromLTRB(10, 15, 10, 15),
-                height: 100,
+                padding: const EdgeInsets.fromLTRB(15, 20, 15, 20),
+                height: 90,
                 width: 90,
                 child: GestureDetector(
                   onTap: () async {
@@ -57,7 +57,7 @@ class _ThemeWidgetState extends State<ThemeWidget> {
                         borderRadius: BorderRadius.circular(50),
                         border: Border.all(
                           color: Colors.black45,
-                          width: 3,
+                          width: 1,
                         ),
                       ),
                       child: Icon(Icons.add,
@@ -67,8 +67,8 @@ class _ThemeWidgetState extends State<ThemeWidget> {
           }
 
           return Container(
-            padding: const EdgeInsets.fromLTRB(10, 15, 10, 15),
-            height: 100,
+            padding: const EdgeInsets.fromLTRB(15, 20, 15, 20),
+            height: 90,
             width: 90,
             child: GestureDetector(
               onTap: () {
@@ -92,16 +92,16 @@ class _ThemeWidgetState extends State<ThemeWidget> {
                     borderRadius: BorderRadius.circular(50),
                     border: Border.all(
                       color: Colors.black45,
-                      width: 3,
+                      width: 1,
                     ),
                   ),
                   child: Center(
                     child: Text(
-                      "Aa",
+                      "A",
                       style: TextStyle(
                         color: Color(
                             int.parse('0x${widget.themes[index].textColor}')),
-                        fontSize: 30,
+                        fontSize: 25,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
