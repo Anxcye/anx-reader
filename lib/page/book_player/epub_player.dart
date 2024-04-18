@@ -25,6 +25,7 @@ class EpubPlayerState extends State<EpubPlayer> {
   int chapterTotalPage = 0;
   String chapterTitle = '';
   String chapterHref = '';
+  late ContextMenu contextMenu;
 
   Future<String> onReadingLocation() async {
     String currentCfi = '';
@@ -103,6 +104,46 @@ class EpubPlayerState extends State<EpubPlayer> {
         });
   }
 
+  void clickHandlers() {
+    // window.flutter_inappwebview.callHandler('onTap', { x: x, y: y });
+    _webViewController.addJavaScriptHandler(
+        handlerName: 'onTap',
+        callback: (args) {
+          print(args[0]);
+
+          Map<String, dynamic> coordinates = args[0];
+          double x = coordinates['x'];
+          double y = coordinates['y'];
+          onViewrTap(x, y);
+        });
+
+    // window.flutter_inappwebview.callHandler('onSelected', { left: left, right: right, top: top, bottom: bottom, cfiRange: selectedCfiRange, text: selectedText });
+    _webViewController.addJavaScriptHandler(
+        handlerName: 'onSelected',
+        callback: (args) {
+          Map<String, dynamic> coordinates = args[0];
+          double left = coordinates['left'];
+          double right = coordinates['right'];
+          double top = coordinates['top'];
+          double bottom = coordinates['bottom'];
+          String cfiRange = coordinates['cfiRange'];
+          String text = coordinates['text'];
+
+          print(
+              'left: $left, right: $right, top: $top, bottom: $bottom, cfiRange: $cfiRange, text: $text');
+        });
+  }
+
+  void onViewrTap(double x, double y) {
+    if (x < 0.3) {
+      prevPage();
+    } else if (x > 0.7) {
+      nextPage();
+    } else {
+      widget.showOrHideAppBarAndBottomBar(true);
+    }
+  }
+
   Future<void> _renderPage() async {
     await _webViewController.loadData(
       data: widget.content,
@@ -114,6 +155,24 @@ class EpubPlayerState extends State<EpubPlayer> {
   @override
   void initState() {
     super.initState();
+    contextMenu = ContextMenu(
+      settings: ContextMenuSettings(hideDefaultSystemContextMenuItems: true),
+      menuItems: [
+        ContextMenuItem(
+          id: 1,
+          title: 'Copy',
+          action: () async {},
+        ),
+        ContextMenuItem(
+          id: 2,
+          title: 'excerpt',
+          action: () async {
+            _webViewController.evaluateJavascript(source: 'excerptHandler()');
+          },
+        ),
+      ],
+      // hide default system menu items
+    );
   }
 
   @override
@@ -123,43 +182,13 @@ class EpubPlayerState extends State<EpubPlayer> {
         children: [
           InAppWebView(
             initialSettings: InAppWebViewSettings(),
+            contextMenu: contextMenu,
             onWebViewCreated: (controller) {
               _webViewController = controller;
               _renderPage();
               progressSetter();
+              clickHandlers();
             },
-          ),
-          Row(
-            children: [
-              Expanded(
-                flex: 1,
-                child: GestureDetector(
-                  onTap: () {
-                    prevPage();
-                  },
-                  child: Container(color: Colors.transparent),
-                ),
-              ),
-              Expanded(
-                flex: 1,
-                child: GestureDetector(
-                  onTap: () {
-                    // Show or hide your AppBar and BottomBar here
-                    widget.showOrHideAppBarAndBottomBar(true);
-                  },
-                  child: Container(color: Colors.transparent),
-                ),
-              ),
-              Expanded(
-                flex: 1,
-                child: GestureDetector(
-                  onTap: () {
-                    nextPage();
-                  },
-                  child: Container(color: Colors.transparent),
-                ),
-              ),
-            ],
           ),
         ],
       ),
