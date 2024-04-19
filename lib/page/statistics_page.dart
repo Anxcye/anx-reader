@@ -215,6 +215,7 @@ class BookStatisticItem extends StatelessWidget {
   final TextStyle bookReadingTimeStyle = const TextStyle(
     fontSize: 20,
     fontWeight: FontWeight.bold,
+
   );
 
   String getReadingTime(BuildContext context) {
@@ -263,7 +264,9 @@ class BookStatisticItem extends StatelessWidget {
                                 ),
                                 Expanded(
                                   flex: 2,
-                                  child: Text(getReadingTime(context),
+                                  child: Text(
+                                      textAlign: TextAlign.end,
+                                      getReadingTime(context),
                                       style: bookReadingTimeStyle),
                                 ),
                               ],
