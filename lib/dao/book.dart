@@ -21,10 +21,17 @@ Future<List<Book>> selectBooks() async {
       lastReadPosition: maps[i]['last_read_position'],
       readingPercentage: maps[i]['reading_percentage'],
       author: maps[i]['author'],
+      isDeleted: maps[i]['is_deleted'] == 1 ? true : false,
       description: maps[i]['description'],
       createTime: DateTime.parse(maps[i]['create_time']),
       updateTime: DateTime.parse(maps[i]['update_time']),
     );
+  });
+}
+
+Future<List<Book>> selectNotDeleteBooks() {
+  return selectBooks().then((books) {
+    return books.where((book) => !book.isDeleted).toList();
   });
 }
 
@@ -55,6 +62,7 @@ Future<Book> selectBookById(int id) async {
     lastReadPosition: maps[0]['last_read_position'],
     readingPercentage: maps[0]['reading_percentage'],
     author: maps[0]['author'],
+    isDeleted: maps[0]['is_deleted'] == 1 ? true : false,
     description: maps[0]['description'],
     createTime: DateTime.parse(maps[0]['create_time']),
     updateTime: DateTime.parse(maps[0]['update_time']),

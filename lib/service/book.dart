@@ -40,6 +40,7 @@ Future<Book> importBook(File file) async {
       lastReadPosition: '',
       readingPercentage: 0,
       author: author,
+      isDeleted: false,
       createTime: DateTime.now(),
       updateTime: DateTime.now());
   book.id = await insertBook(book);

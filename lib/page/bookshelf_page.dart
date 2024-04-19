@@ -26,7 +26,7 @@ class _BookshelfPageState extends State<BookshelfPage> {
   }
 
   Future<void> _refreshBookList() async {
-    final books = await selectBooks();
+    final books = await selectNotDeleteBooks();
     setState(() {
       _books = books;
     });
