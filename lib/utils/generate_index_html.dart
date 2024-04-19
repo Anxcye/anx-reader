@@ -26,8 +26,10 @@ String generateIndexHtml(
       <script src="$epubJs"></script>
       <style>
         body {
+          overflow: hidden;
           margin: 0;
           padding: 0; 
+          column-fill: auto;
         }
         html {
           background-color: #$backgroundColor;

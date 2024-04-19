@@ -182,6 +182,10 @@ class _ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
         canPop: false,
         onPopInvoked: (bool didPop) async {
           if (didPop) return;
+          if (_isAppBarVisible){
+            showOrHideAppBarAndBottomBar(false);
+            return;
+          }
           String cfi = await _epubPlayerKey.currentState!.onReadingLocation();
           double readProgress = _epubPlayerKey.currentState!.progress;
           Map<String, dynamic> result = {
