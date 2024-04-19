@@ -47,13 +47,18 @@ const PRIMARY_THEME_2 = '''
 INSERT INTO tb_themes (background_color, text_color, background_image_path) VALUES ('ffcccccc', 'ff121212', '')
 ''';
 
+
 const CREATE_NOTE_SQL = '''
 CREATE TABLE tb_notes (
-  id INTEGER PRIMARY KEY,
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
   book_id INTEGER,
   content TEXT,
-  position TEXT
-  
+  cfi TEXT,
+  chapter TEXT,
+  type TEXT,
+  color TEXT,
+  create_time TEXT,
+  update_time TEXT
 )
 ''';
 

@@ -5,11 +5,13 @@ import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/dao/reading_time.dart';
 import 'package:anx_reader/dao/theme.dart';
 import 'package:anx_reader/models/book.dart';
+import 'package:anx_reader/models/book_note.dart';
 import 'package:anx_reader/models/book_style.dart';
 import 'package:anx_reader/models/read_theme.dart';
 import 'package:anx_reader/page/book_player/epub_player.dart';
 import 'package:flutter/material.dart';
 
+import '../dao/book_note.dart';
 import '../models/reading_time.dart';
 import '../models/toc_item.dart';
 import '../utils/generate_index_html.dart';
@@ -153,6 +155,7 @@ class _ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
     });
   }
 
+
   @override
   Widget build(BuildContext context) {
     if (_content == null) {
@@ -176,6 +179,7 @@ class _ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
               EpubPlayer(
                 key: _epubPlayerKey,
                 content: _content!,
+                bookId: _book.id,
                 showOrHideAppBarAndBottomBar: showOrHideAppBarAndBottomBar,
               ),
               if (_isAppBarVisible)
@@ -199,7 +203,9 @@ class _ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
                     child: Wrap(
                       children: [
                         _currentPage,
-                        const Divider(height: 1,),
+                        const Divider(
+                          height: 1,
+                        ),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           crossAxisAlignment: CrossAxisAlignment.center,

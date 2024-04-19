@@ -1,17 +1,25 @@
+import 'dart:convert';
+
 import 'package:anx_reader/config/shared_preference_provider.dart';
+import 'package:anx_reader/dao/book_note.dart';
 import 'package:anx_reader/models/book_style.dart';
 import 'package:anx_reader/models/read_theme.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+
+import '../../models/book_note.dart';
 
 class EpubPlayer extends StatefulWidget {
   final String content;
+  final int bookId;
   final Function showOrHideAppBarAndBottomBar;
 
-  EpubPlayer(
-      {Key? key,
-      required this.content,
-      required this.showOrHideAppBarAndBottomBar})
+  EpubPlayer({Key? key,
+    required this.content,
+    required this.showOrHideAppBarAndBottomBar,
+    required this.bookId})
       : super(key: key);
 
   @override
@@ -26,6 +34,8 @@ class EpubPlayerState extends State<EpubPlayer> {
   String chapterTitle = '';
   String chapterHref = '';
   late ContextMenu contextMenu;
+  String selectedColor = '66ccff';
+  String selectedType = 'highlight';
 
   Future<String> onReadingLocation() async {
     String currentCfi = '';
@@ -114,27 +124,125 @@ class EpubPlayerState extends State<EpubPlayer> {
           Map<String, dynamic> coordinates = args[0];
           double x = coordinates['x'];
           double y = coordinates['y'];
-          onViewrTap(x, y);
+          onViewerTap(x, y);
         });
 
     // window.flutter_inappwebview.callHandler('onSelected', { left: left, right: right, top: top, bottom: bottom, cfiRange: selectedCfiRange, text: selectedText });
     _webViewController.addJavaScriptHandler(
         handlerName: 'onSelected',
-        callback: (args) {
+        callback: (args) async {
           Map<String, dynamic> coordinates = args[0];
           double left = coordinates['left'];
           double right = coordinates['right'];
           double top = coordinates['top'];
           double bottom = coordinates['bottom'];
-          String cfiRange = coordinates['cfiRange'];
-          String text = coordinates['text'];
+          String annoCfi = coordinates['cfiRange'];
+          String annoContent = coordinates['text'];
 
-          print(
-              'left: $left, right: $right, top: $top, bottom: $bottom, cfiRange: $cfiRange, text: $text');
+          Size screenSize = MediaQuery
+              .of(context)
+              .size;
+
+          double actualLeft = left * screenSize.width;
+          double actualBottom = bottom * screenSize.height;
+
+          Offset colorMenuPosition = Offset(actualLeft, actualBottom);
+          // setState(() {
+          //   isColorMenuVisible = true;
+          // });
+          Map<String, dynamic>? result =
+          await showColorAndTypeSelection(context, colorMenuPosition);
+          if (result != null) {
+            int id = await insertBookNote(BookNote(
+              bookId: widget.bookId,
+              content: annoContent,
+              cfi: annoCfi,
+              chapter: chapterTitle,
+              type: result['type'],
+              color: result['color'],
+              createTime: DateTime.now(),
+              updateTime: DateTime.now(),
+            ));
+            renderNote(BookNote(
+              id: id,
+              bookId: widget.bookId,
+              content: annoContent,
+              cfi: annoCfi,
+              chapter: chapterTitle,
+              type: result['type'],
+              color: result['color'],
+              createTime: DateTime.now(),
+              updateTime: DateTime.now(),
+            ));
+          }
+        });
+    _webViewController.addJavaScriptHandler(
+        handlerName: 'getAllAnnotations',
+        callback: (args) async {
+          List<BookNote> annotations =
+          await selectBookNotesByBookId(widget.bookId);
+
+          List<String> annotationsJson = annotations
+              .map((annotation) => jsonEncode(annotation.toMap()))
+              .toList();
+
+          for (String annotationJson in annotationsJson) {
+            _webViewController.evaluateJavascript(
+                source: 'addABookNote($annotationJson);');
+          }
+        });
+    _webViewController.addJavaScriptHandler(
+        handlerName: 'onAnnotationClicked',
+        callback: (args) async {
+          Map<String, dynamic> coordinates = args[0];
+          Size screenSize = MediaQuery
+              .of(context)
+              .size;
+          double x = coordinates['x'] * screenSize.width;
+          double y = coordinates['y'] * screenSize.height;
+          int id = coordinates['id'];
+          Offset colorMenuPosition = Offset(x, y);
+
+          Map<String, dynamic>? result =
+          await showColorAndTypeSelection(context, colorMenuPosition);
+          BookNote oldNote = await selectBookNoteById(id);
+          if (result != null) {
+            updateBookNoteById(
+              BookNote(
+                id: id,
+                bookId: widget.bookId,
+                content: oldNote.content,
+                cfi: oldNote.cfi,
+                chapter: oldNote.chapter,
+                type: result['type'],
+                color: result['color'],
+                createTime: oldNote.createTime,
+                updateTime: DateTime.now(),
+              ),
+            );
+            _webViewController.evaluateJavascript(source: 'removeCurrentAnnotations()');
+            renderNote(BookNote(
+              id: id,
+              bookId: widget.bookId,
+              content: oldNote.content,
+              cfi: oldNote.cfi,
+              chapter: oldNote.chapter,
+              type: result['type'],
+              color: result['color'],
+              createTime: oldNote.createTime,
+              updateTime: DateTime.now(),
+            ));
+          }
         });
   }
 
-  void onViewrTap(double x, double y) {
+  void renderNote(BookNote bookNote) {
+    _webViewController.evaluateJavascript(source: '''
+      addABookNote(${jsonEncode(bookNote.toMap())});
+      ''');
+  }
+
+  void onViewerTap(double x, double y) {
     if (x < 0.3) {
       prevPage();
     } else if (x > 0.7) {
@@ -192,6 +300,139 @@ class EpubPlayerState extends State<EpubPlayer> {
           ),
         ],
       ),
+    );
+  }
+
+  Future<Map<String, dynamic>?> showColorAndTypeSelection(BuildContext context,
+      Offset colorMenuPosition) async {
+    return await showCupertinoModalPopup<Map<String, dynamic>>(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            final screenSize = MediaQuery
+                .of(context)
+                .size;
+
+            final widgetSize = Size(288.0, 48.0);
+
+            double dx = colorMenuPosition.dx;
+            double dy = colorMenuPosition.dy;
+
+            if (dx + widgetSize.width > screenSize.width) {
+              dx = screenSize.width - widgetSize.width;
+            }
+
+            if (dy + widgetSize.height > screenSize.height) {
+              dy = screenSize.height - widgetSize.height;
+            }
+
+            return Stack(children: [
+              Positioned(
+                left: dx,
+                top: dy,
+                child: colorMenuWidget(
+                    colorMenuPosition: Offset(dx, dy),
+                    color: selectedColor,
+                    type: selectedType,
+                    onColorSelected: (color) {
+                      setState(() {
+                        selectedColor = color;
+                      });
+                    },
+                    onTypeSelected: (type) {
+                      setState(() {
+                        selectedType = type;
+                      });
+                    },
+                    onClose: () {
+                      Navigator.pop(context, {
+                        'color': selectedColor,
+                        'type': selectedType,
+                      });
+                    }),
+              ),
+            ]);
+          },
+        );
+      },
+    );
+  }
+
+  Widget colorMenuWidget({required Offset colorMenuPosition,
+    required Null Function() onClose,
+    required String color,
+    required String type,
+    required ValueChanged<String> onColorSelected,
+    required ValueChanged<String> onTypeSelected}) {
+    String annoType = type;
+    String annoColor = color;
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.5),
+            spreadRadius: 5,
+            blurRadius: 7,
+            offset: Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Row(children: [
+        IconButton(
+          icon: Icon(
+            Icons.format_underline,
+            color: annoType == 'underline'
+                ? Color(int.parse('0xff$annoColor'))
+                : null,
+          ),
+          onPressed: () {
+            onTypeSelected('underline');
+          },
+        ),
+        IconButton(
+          icon: Icon(
+            Icons.highlight,
+            color: annoType == 'highlight'
+                ? Color(int.parse('0xff$annoColor'))
+                : null,
+          ),
+          onPressed: () {
+            onTypeSelected('highlight');
+          },
+        ),
+        Divider(),
+        IconButton(
+          icon: Icon(Icons.circle, color: Color(int.parse('0x8866ccff'))),
+          onPressed: () {
+            onColorSelected('66ccff');
+            onClose();
+          },
+        ),
+        IconButton(
+          icon: Icon(Icons.circle, color: Color(int.parse('0x88ff0000'))),
+          onPressed: () {
+            onColorSelected('ff0000');
+            onClose();
+          },
+        ),
+        IconButton(
+          icon: Icon(Icons.circle, color: Color(int.parse('0x8800ff00'))),
+          onPressed: () {
+            onColorSelected('00ff00');
+            onClose();
+          },
+        ),
+        IconButton(
+          icon: Icon(Icons.circle, color: Color(int.parse('0x88EB3BFF'))),
+          onPressed: () {
+            onColorSelected('EB3BFF');
+            onClose();
+          },
+        ),
+      ]),
     );
   }
 
