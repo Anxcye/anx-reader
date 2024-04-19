@@ -19,6 +19,7 @@ dependencies:
   epub_view: ^3.2.0
   image_picker: ^1.0.7
   image: ^3.3.0
+#  image: ^4.1.7
   sqflite: ^2.3.2
   path: ^1.9.0
   shared_preferences: ^2.2.2
@@ -41,6 +42,7 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^3.0.0
   test: any
+  flutter_launcher_icons: ^0.11.0
 
 flutter:
   uses-material-design: true
@@ -55,3 +57,4 @@ flutter:
     - family: SourceHanSerif
       fonts:
         - asset: fonts/SourceHanSerifSC-Regular.otf
+
