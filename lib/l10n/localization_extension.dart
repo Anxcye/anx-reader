@@ -87,5 +87,20 @@ extension LocalizationExtension on BuildContext {
 
   String get statisticSunday =>
       AppLocalizations.of(this)?.statistic_sunday ?? '';
+
+  String get notesNotesAcross =>
+      AppLocalizations.of(this)?.notes_notes_across ?? '';
+
+  String get notesBooks => AppLocalizations.of(this)?.notes_books ?? '';
+
+  String get notesNotes => AppLocalizations.of(this)?.notes_notes ?? '';
+
+  String get notesMinutes => AppLocalizations.of(this)?.notes_minutes ?? '';
+
+  String get readingPageCopy =>
+      AppLocalizations.of(this)?.reading_page_copy ?? '';
+
+  String get readingPageExcerpt =>
+      AppLocalizations.of(this)?.reading_page_excerpt ?? '';
 }
 

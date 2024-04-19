@@ -240,7 +240,7 @@ class BookStatisticItem extends StatelessWidget {
                           snapshot.data!.coverPath,
                         ),
                         height: 130,
-                        width: 100,
+                        width: 90,
                         fit: BoxFit.cover,
                       ),
                     ),

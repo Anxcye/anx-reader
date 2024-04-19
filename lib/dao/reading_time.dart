@@ -145,9 +145,6 @@ Future<List<ReadingTime>> selectReadingTimeByBookId(int bookId) async {
 }
 
 Future<List<Map<int, int>>> selectThisWeekBooks() async {
-  // return the book id and time that has been read this week
-  // order by reading time desc
-
   final db = await DBHelper().database;
   final List<Map<String, dynamic>> maps = await db.rawQuery(
       'SELECT book_id, SUM(reading_time) AS total_sum FROM tb_reading_time WHERE date >= ? GROUP BY book_id ORDER BY total_sum DESC',
@@ -163,4 +160,12 @@ Future<List<Map<int, int>>> selectThisWeekBooks() async {
     return {maps[i]['book_id']: maps[i]['total_sum']};
   });
 
+}
+
+Future<int> selectTotalReadingTimeByBookId(int bookId) async {
+  final db = await DBHelper().database;
+  final List<Map<String, dynamic>> maps = await db.rawQuery(
+      'SELECT SUM(reading_time) AS total_sum FROM tb_reading_time WHERE book_id = ?',
+      [bookId]);
+  return maps[0]['total_sum'] ?? 0;
 }

@@ -9,6 +9,7 @@ import 'package:anx_reader/models/book_note.dart';
 import 'package:anx_reader/models/book_style.dart';
 import 'package:anx_reader/models/read_theme.dart';
 import 'package:anx_reader/page/book_player/epub_player.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../dao/book_note.dart';
@@ -19,6 +20,7 @@ import '../widgets/reading_page/progress_widget.dart';
 import '../widgets/reading_page/style_widget.dart';
 import '../widgets/reading_page/theme_widget.dart';
 import '../widgets/reading_page/toc_widget.dart';
+import 'book_notes_page.dart';
 
 class ReadingPage extends StatefulWidget {
   final Book book;
@@ -116,6 +118,22 @@ class _ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
     setState(() {
       _currentPage = Container(
         height: 700,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 15, top: 10),
+              child: Text('Notes', style: TextStyle(
+                fontSize: 28,
+                fontFamily: 'SourceHanSerif',
+                fontWeight: FontWeight.bold,
+              ),),
+            ),
+            Expanded(
+              child: ListView(children: [bookNotesList(_book.id)]),
+            ),
+          ],
+        ),
       );
     });
   }
@@ -154,7 +172,6 @@ class _ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
       );
     });
   }
-
 
   @override
   Widget build(BuildContext context) {
