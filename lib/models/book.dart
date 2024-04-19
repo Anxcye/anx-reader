@@ -6,6 +6,7 @@ class Book {
   String lastReadPosition;
   double readingPercentage;
   String author;
+  bool isDeleted;
   String? description;
   DateTime createTime;
   DateTime updateTime;
@@ -18,6 +19,7 @@ class Book {
       required this.lastReadPosition,
       required this.readingPercentage,
       required this.author,
+      required this.isDeleted,
       this.description,
       required this.createTime,
       required this.updateTime});
@@ -30,6 +32,7 @@ class Book {
       'last_read_position': lastReadPosition,
       'reading_percentage': readingPercentage,
       'author': author,
+      'is_deleted': isDeleted ? 1 : 0,
       'description': description,
       'create_time': createTime.toIso8601String(),
       'update_time': updateTime.toIso8601String(),

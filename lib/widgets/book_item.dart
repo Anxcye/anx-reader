@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:anx_reader/dao/book.dart';
 import 'package:anx_reader/service/book.dart';
 import 'package:flutter/material.dart';
 
@@ -22,7 +23,40 @@ class BookItem extends StatelessWidget {
         // print('openbook');
         openBook(context, book, onRefresh);
       },
-      onLongPress: () {},
+      onLongPress: () {
+        // print('deletebook');
+        showModalBottomSheet(
+            context: context,
+            builder: (BuildContext context) {
+              return Container(
+                // height: 100,
+                child: Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.delete),
+                      onPressed: () {
+                        Navigator.pop(context);
+                        updateBook(Book(
+                          id: book.id,
+                          title: book.title,
+                          coverPath: book.coverPath,
+                          filePath: book.filePath,
+                          lastReadPosition: book.lastReadPosition,
+                          readingPercentage: book.readingPercentage,
+                          author: '',
+                          isDeleted: true,
+                          createTime: book.createTime,
+                          updateTime: DateTime.now(),
+                        ));
+                        onRefresh();
+                        File(book.filePath).delete();
+                      },
+                    ),
+                  ],
+                ),
+              );
+            });
+      },
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

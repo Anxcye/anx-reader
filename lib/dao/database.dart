@@ -10,6 +10,7 @@ CREATE TABLE tb_books (
   last_read_position TEXT,
   reading_percentage REAL,
   author TEXT,
+  is_deleted INTEGER,
   description TEXT,
   create_time TEXT,
   update_time TEXT
