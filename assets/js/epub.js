@@ -7121,7 +7121,7 @@ var Underline = exports.Underline = function (_Highlight) {
                 rect.setAttribute('y', r.top - offset.top + container.top);
                 rect.setAttribute('height', r.height);
                 rect.setAttribute('width', r.width);
-                rect.setAttribute('fill', 'none');
+                rect.setAttribute('fill', 'transparent');
                 rect.setAttribute('stroke', 'transparent');
 
                 var line = _svg2.default.createElement('line');

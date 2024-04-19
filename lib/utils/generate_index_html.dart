@@ -199,27 +199,40 @@ String generateIndexHtml(
         
         
         // set annotations
-
+        const getSelections = () => rendition.getContents()
+            .map(contents => contents.window.getSelection())
+        
+        const clearSelection = () => getSelections().forEach(s => s.removeAllRanges())
+        
+        const selectByCfi = cfi => getSelections().forEach(s => s.addRange(rendition.getRange(cfi)))
+        
         var setAllAnnotations = function () {
-          // 已知的 cfiRange
-          var cfiRange = "epubcfi(/6/4!/4/12,/1:0,/1:9)";
-    
-          // 添加高亮
-          rendition.annotations.highlight(cfiRange, {}, (e) => {
-            console.log("highlight clicked", e.target);
-          }, 'anx-js-anno', { fill: '#66ccff', 'fill-opacity': '0.3', 'mix-blend-mode': 'multiply' });
-    
-          var cfiRange2 = "epubcfi(/6/4!/4/6,/2/1:2,/1:7)";
-    
-          rendition.annotations.add('underline', cfiRange2, {}, (e) => {
-            console.log("underline clicked", e.target);
-          }, 'anx-js-anno', {
-            stroke: 'red',
-            'stroke-width': '2px',
-            'stroke-opacity': '0.5'
-          }
-          );
+          window.flutter_inappwebview.callHandler('getAllAnnotations', null);
         };
+        
+        var addABookNote = function(bookNote){
+          var style = bookNote.type === 'highlight'
+              ? { fill: '#' + bookNote.color, 'fill-opacity': '0.3', 'mix-blend-mode': 'multiply' }
+              : { stroke: '#' + bookNote.color, 'stroke-width': '2px', 'stroke-opacity': '0.8' };
+        
+          rendition.annotations.add(bookNote.type, bookNote.cfi, {}, function(e) {
+            handleAnnoClick(e, bookNote);
+          }, 'anx-js-anno', style);
+          setClickEvent();
+        }
+        var eventOfCurrentAnnotation = null;
+        var handleAnnoClick = function(e, bookNote) {
+          console.log('annotation clicked', e.target);
+          x = e.target.getBoundingClientRect().left / window.innerWidth;
+          y = e.target.getBoundingClientRect().top / window.innerHeight;
+          selectByCfi(bookNote.cfi);
+          eventOfCurrentAnnotation = e;
+          window.flutter_inappwebview.callHandler('onAnnotationClicked', { x: x, y: y, id: bookNote.id});
+        }
+        var removeCurrentAnnotations = function() {
+          eventOfCurrentAnnotation.target.remove();
+        }
+        
         
         // set click event
         var setClickEvent = function (annotations) {
