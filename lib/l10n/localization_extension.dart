@@ -68,7 +68,8 @@ extension LocalizationExtension on BuildContext {
   String get statisticThisWeek =>
       AppLocalizations.of(this)?.statistic_this_week ?? '';
 
-  String get statisticMonday => AppLocalizations.of(this)?.statistic_monday ?? '';
+  String get statisticMonday =>
+      AppLocalizations.of(this)?.statistic_monday ?? '';
 
   String get statisticTuesday =>
       AppLocalizations.of(this)?.statistic_tuesday ?? '';
@@ -102,5 +103,20 @@ extension LocalizationExtension on BuildContext {
 
   String get readingPageExcerpt =>
       AppLocalizations.of(this)?.reading_page_excerpt ?? '';
-}
 
+  String get bookshelfTips1 =>
+      AppLocalizations.of(this)?.bookshelf_tips_1 ?? '';
+
+  String get bookshelfTips2 =>
+      AppLocalizations.of(this)?.bookshelf_tips_2 ?? '';
+
+  String get statisticsTips1 =>
+      AppLocalizations.of(this)?.statistics_tips_1 ?? '';
+
+  String get statisticsTips2 =>
+      AppLocalizations.of(this)?.statistics_tips_2 ?? '';
+
+  String get notesTips1 => AppLocalizations.of(this)?.notes_tips_1 ?? '';
+
+  String get notesTips2 => AppLocalizations.of(this)?.notes_tips_2 ?? '';
+}

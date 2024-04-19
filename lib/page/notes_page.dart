@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:anx_reader/dao/book_note.dart';
 import 'package:anx_reader/l10n/localization_extension.dart';
+import 'package:anx_reader/widgets/tips/notes_tips.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -88,14 +89,18 @@ Widget bookNotesList() {
       future: selectAllBookIdAndNotes(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
-          return Expanded(
-            child: ListView.builder(
-                itemCount: snapshot.data!.length,
-                itemBuilder: (context, index) {
-                  return bookNotes(context, snapshot.data![index]['bookId']!,
-                      snapshot.data![index]['numberOfNotes']!);
-                }),
-          );
+          return snapshot.data!.isEmpty
+              ? Expanded(child: const Center(child: NotesTips()))
+              : Expanded(
+                  child: ListView.builder(
+                      itemCount: snapshot.data!.length,
+                      itemBuilder: (context, index) {
+                        return bookNotes(
+                            context,
+                            snapshot.data![index]['bookId']!,
+                            snapshot.data![index]['numberOfNotes']!);
+                      }),
+                );
         } else {
           return const CircularProgressIndicator();
         }

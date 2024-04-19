@@ -36,5 +36,11 @@
   "notes_notes": "Notes",
   "notes_minutes": "minutes",
   "reading_page_copy": "Copy",
-  "reading_page_excerpt": "Excerpt"
+  "reading_page_excerpt": "Excerpt",
+  "bookshelf_tips_1": "There are no books.",
+  "bookshelf_tips_2": "Click the add button to add a book!",
+  "statistics_tips_1": "This week you have read",
+  "statistics_tips_2": "A book is a dream that you hold in your hands.",
+  "notes_tips_1": "There are no notes.",
+  "notes_tips_2": "Add a note while reading!"
 }

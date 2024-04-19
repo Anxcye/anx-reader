@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/l10n/localization_extension.dart';
 import 'package:anx_reader/models/book.dart';
+import 'package:anx_reader/widgets/tips/statistic_tips.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -36,13 +37,15 @@ class _StatisticPageState extends State<StatisticPage> {
               children: [
                 Expanded(
                     child: _buildStatisticCard(
-                        '{} ${context.statisticBooksRead}', selectTotalNumberOfBook())),
+                        '{} ${context.statisticBooksRead}',
+                        selectTotalNumberOfBook())),
                 Expanded(
                     child: _buildStatisticCard(
-                        '{} ${context.statisticDaysOfReading}', selectTotalNumberOfDate())),
+                        '{} ${context.statisticDaysOfReading}',
+                        selectTotalNumberOfDate())),
                 Expanded(
-                    child: _buildStatisticCard(
-                        '{} ${context.statisticNotes}', selectTotalNumberOfNotes())),
+                    child: _buildStatisticCard('{} ${context.statisticNotes}',
+                        selectTotalNumberOfNotes())),
               ],
             ),
             const SizedBox(height: 30),
@@ -97,9 +100,13 @@ Widget _totalReadTime() {
                 style: DefaultTextStyle.of(context).style,
                 children: <TextSpan>[
                   TextSpan(text: '$H', style: totalReadTimeTextStyle()),
-                  TextSpan(text: ' ${context.statisticHours} ', style: bigTextStyle()),
+                  TextSpan(
+                      text: ' ${context.statisticHours} ',
+                      style: bigTextStyle()),
                   TextSpan(text: '$M', style: totalReadTimeTextStyle()),
-                  TextSpan(text: ' ${context.statisticMinutes}', style: bigTextStyle()),
+                  TextSpan(
+                      text: ' ${context.statisticMinutes}',
+                      style: bigTextStyle()),
                 ],
               ),
             ),
@@ -154,12 +161,12 @@ Widget _buildStatisticCard(String title, Future<int> value) {
 
 class ThisWeekBooks extends StatelessWidget {
   const ThisWeekBooks({super.key});
+
   final TextStyle titleStyle = const TextStyle(
     fontSize: 30,
     fontFamily: 'SourceHanSerif',
     fontWeight: FontWeight.bold,
     overflow: TextOverflow.ellipsis,
-
   );
 
   @override
@@ -175,16 +182,24 @@ class ThisWeekBooks extends StatelessWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(context.statisticThisWeek, style: titleStyle,),
+                    Text(
+                      context.statisticThisWeek,
+                      style: titleStyle,
+                    ),
                   ],
                 ),
               ),
-              Column(
-                children: snapshot.data!.map((e) {
-                  return BookStatisticItem(
-                      bookId: e.keys.first, readingTime: e.values.first);
-                }).toList(),
-              ),
+              snapshot.data!.isEmpty
+                  ? const Padding(
+                      padding: EdgeInsets.only(top: 50),
+                      child: StatisticsTips(),
+                    )
+                  : Column(
+                      children: snapshot.data!.map((e) {
+                        return BookStatisticItem(
+                            bookId: e.keys.first, readingTime: e.values.first);
+                      }).toList(),
+                    ),
             ],
           );
         } else {
@@ -215,7 +230,6 @@ class BookStatisticItem extends StatelessWidget {
   final TextStyle bookReadingTimeStyle = const TextStyle(
     fontSize: 20,
     fontWeight: FontWeight.bold,
-
   );
 
   String getReadingTime(BuildContext context) {
@@ -258,7 +272,7 @@ class BookStatisticItem extends StatelessWidget {
                             Row(
                               children: [
                                 Expanded(
-                                  flex:3,
+                                  flex: 3,
                                   child: Text(snapshot.data!.author,
                                       style: bookAuthorStyle),
                                 ),

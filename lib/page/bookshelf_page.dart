@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import '../dao/book.dart';
 import '../models/book.dart';
 import '../service/book.dart';
+import '../widgets/tips/bookshelf_tips.dart';
 
 class BookshelfPage extends StatefulWidget {
   const BookshelfPage({super.key});
@@ -62,7 +63,9 @@ class _BookshelfPageState extends State<BookshelfPage> {
           ),
         ],
       ),
-      body: BookList(books: _books, onRefresh: _refreshBookList),
+      body: _books.isEmpty
+          ? const BookshelfTips()
+          : BookList(books: _books, onRefresh: _refreshBookList),
     );
   }
 }
