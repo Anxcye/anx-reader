@@ -264,25 +264,29 @@ class EpubPlayerState extends State<EpubPlayer> {
   @override
   void initState() {
     super.initState();
-    contextMenu = ContextMenu(
-      settings: ContextMenuSettings(hideDefaultSystemContextMenuItems: true),
-      menuItems: [
-        ContextMenuItem(
-          id: 1,
-          title: context.readingPageCopy,
-          action: () async {},
-        ),
-        ContextMenuItem(
-          id: 2,
-          title: context.readingPageExcerpt,
-          action: () async {
-            _webViewController.evaluateJavascript(source: 'excerptHandler()');
-          },
-        ),
-      ],
-      // hide default system menu items
-    );
   }
+
+  @override
+void didChangeDependencies() {
+  super.didChangeDependencies();
+  contextMenu = ContextMenu(
+    settings: ContextMenuSettings(hideDefaultSystemContextMenuItems: true),
+    menuItems: [
+      ContextMenuItem(
+        id: 1,
+        title: context.readingPageCopy,
+        action: () async {},
+      ),
+      ContextMenuItem(
+        id: 2,
+        title: context.readingPageExcerpt,
+        action: () async {
+          _webViewController.evaluateJavascript(source: 'excerptHandler()');
+        },
+      ),
+    ],
+  );
+}
 
   @override
   Widget build(BuildContext context) {
@@ -515,7 +519,7 @@ class EpubPlayerState extends State<EpubPlayer> {
     changeStyle = function() {
       rendition.themes.fontSize('${bookStyle.fontSize}%');
       rendition.themes.font('${bookStyle.fontFamily}');
-
+      
       rendition.themes.default({
         'body': {
           'padding-top': '${bookStyle.topMargin}px !important',
@@ -531,6 +535,7 @@ class EpubPlayerState extends State<EpubPlayer> {
       });
     }
     changeStyle();
+    setClickEvent();
   ''');
   }
 }

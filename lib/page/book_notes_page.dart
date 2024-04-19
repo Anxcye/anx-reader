@@ -42,12 +42,12 @@ Widget notesStatistic(BuildContext context, int numberOfNotes) {
     fontSize: 28,
     fontWeight: FontWeight.bold,
     // fontFamily: 'SourceHanSerif',
-    color: Colors.black,
+    // color: Colors.black,
   );
   TextStyle textStyle = const TextStyle(
       fontSize: 18,
       // fontWeight: FontWeight.bold,
-      color: Colors.black,
+      // color: Colors.black,
       fontFamily: 'SourceHanSerif');
   return Padding(
     padding: const EdgeInsets.fromLTRB(20, 20, 20, 60),

@@ -26,22 +26,21 @@ class TocWidget extends StatelessWidget {
           padding: const EdgeInsets.all(8.0),
           child: Text(
             context.readingContents,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 30,
-              color: Colors.grey.shade800,
               fontWeight: FontWeight.bold,
               fontFamily: 'SourceHanSerif'
             ),
           ),
         ),
         Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(20),
-              topRight: Radius.circular(20),
-            ),
-          ),
+          // decoration: const BoxDecoration(
+          //   color: Colors.white,
+          //   borderRadius: BorderRadius.only(
+          //     topLeft: Radius.circular(20),
+          //     topRight: Radius.circular(20),
+          //   ),
+          // ),
           height: 600,
           child: ListView.builder(
             itemCount: tocItems.length,
@@ -75,9 +74,9 @@ class TocItemWidget extends StatefulWidget {
 
 class _TocItemWidgetState extends State<TocItemWidget> {
   bool _isExpanded = false;
-  final TextStyle tocStyle = const TextStyle(
+  TextStyle tocStyle(content) => TextStyle(
     fontSize: 16,
-    color: Colors.black87,
+    color: Theme.of(context).colorScheme.onSurface,
   );
   TextStyle tocStyleSelected(context) => TextStyle(
     fontSize: 20,
@@ -109,7 +108,7 @@ class _TocItemWidgetState extends State<TocItemWidget> {
                   '     ${widget.tocItem.label.trim()}',
                     style: _isSelected(widget.tocItem)
                       ? tocStyleSelected(context)
-                      : tocStyle,
+                      : tocStyle(context),
                 ),
               ),
               if (widget.tocItem.subitems.isNotEmpty)
@@ -134,7 +133,7 @@ class _TocItemWidgetState extends State<TocItemWidget> {
                   hideAppBarAndBottomBar: widget.hideAppBarAndBottomBar,
                   epubPlayerKey: widget.epubPlayerKey),
             ),
-        Divider(indent: 20, endIndent: 20, thickness: 1, color: Colors.grey.shade300),
+        Divider(indent: 20, endIndent: 20, thickness: 1, color: Colors.grey.shade400),
       ],
 
     );
