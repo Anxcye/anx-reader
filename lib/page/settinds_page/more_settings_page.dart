@@ -46,7 +46,7 @@ class SubMoreSettings extends StatelessWidget {
       body: ListView(
         children: const [
           AppearanceSetting(),
-          BookshelfSettings(),
+          // BookshelfSettings(),
           About(),
         ],
       ),
