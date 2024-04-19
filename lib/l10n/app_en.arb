@@ -13,9 +13,7 @@
   "settings_appearance_themeColor": "Theme Color",
   "settings_appearance_display": "Display",
   "settings_appearance_language": "Language",
-
   "reading_contents": "Contents",
-
   "statistic_to_present": "To Present",
   "statistic_books_read": "books read",
   "statistic_days_of_reading": "days read",
@@ -32,5 +30,11 @@
   "statistic_thursday": "Th",
   "statistic_friday": "Fr",
   "statistic_saturday": "Sa",
-  "statistic_sunday": "Su"
+  "statistic_sunday": "Su",
+  "notes_notes_across": "Notes Across",
+  "notes_books": "Books",
+  "notes_notes": "Notes",
+  "notes_minutes": "minutes",
+  "reading_page_copy": "Copy",
+  "reading_page_excerpt": "Excerpt"
 }
