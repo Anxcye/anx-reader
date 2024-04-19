@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/dao/book_note.dart';
+import 'package:anx_reader/l10n/localization_extension.dart';
 import 'package:anx_reader/models/book_style.dart';
 import 'package:anx_reader/models/read_theme.dart';
 import 'package:flutter/cupertino.dart';
@@ -268,12 +269,12 @@ class EpubPlayerState extends State<EpubPlayer> {
       menuItems: [
         ContextMenuItem(
           id: 1,
-          title: 'Copy',
+          title: context.readingPageCopy,
           action: () async {},
         ),
         ContextMenuItem(
           id: 2,
-          title: 'excerpt',
+          title: context.readingPageExcerpt,
           action: () async {
             _webViewController.evaluateJavascript(source: 'excerptHandler()');
           },

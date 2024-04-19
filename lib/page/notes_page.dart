@@ -33,7 +33,7 @@ Widget notesStatistic() {
   TextStyle digitStyle = const TextStyle(
     fontSize: 24,
     fontWeight: FontWeight.bold,
-    fontFamily: 'SourceHanSerif',
+    // fontFamily: 'SourceHanSerif',
   );
   TextStyle textStyle = const TextStyle(
       fontSize: 18,
@@ -56,7 +56,7 @@ Widget notesStatistic() {
                       style: digitStyle,
                     ),
                     TextSpan(
-                      text: ' notes across ',
+                      text: ' ${context.notesNotesAcross} ',
                       style: textStyle,
                     ),
                   ],
@@ -71,7 +71,7 @@ Widget notesStatistic() {
                       style: digitStyle,
                     ),
                     TextSpan(
-                      text: ' books',
+                      text: ' ${context.notesBooks}',
                       style: textStyle,
                     ),
                   ]))
@@ -151,7 +151,7 @@ Widget bookNotes(BuildContext context, int bookId, int numberOfNotes) {
                                 style: numberStyle,
                               ),
                               TextSpan(
-                                text: ' notes',
+                                text: ' ${context.notesNotes}',
                                 style: numberText,
                               ),
                             ],
@@ -167,7 +167,7 @@ Widget bookNotes(BuildContext context, int bookId, int numberOfNotes) {
                             if (snapshot.connectionState ==
                                 ConnectionState.done) {
                               return Text(
-                                '${snapshot.data! ~/ 60} m',
+                                '${snapshot.data! ~/ 60} ${context.notesMinutes}',
                                 style: readingTimeStyle,
                               );
                             } else {

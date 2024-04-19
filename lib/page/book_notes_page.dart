@@ -1,3 +1,4 @@
+import 'package:anx_reader/l10n/localization_extension.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -59,7 +60,7 @@ Widget notesStatistic(BuildContext context, int numberOfNotes) {
               style: digitStyle,
             ),
             TextSpan(
-              text: '  notes',
+              text: '  ${context.notesNotes}',
               style: textStyle,
             ),
           ],
