@@ -26,14 +26,14 @@ class _ChartCardState extends State<ChartCard> {
             const SizedBox(height: 10),
             SizedBox(
               height: 30,
-              width: 300,
+              width: 350,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   _chartModeButton(ChartMode.week, context.statisticWeek),
-                  const SizedBox(width: 15),
+                  const SizedBox(width: 10),
                   _chartModeButton(ChartMode.month, context.statisticMonth),
-                  const SizedBox(width: 15),
+                  const SizedBox(width: 10),
                   _chartModeButton(ChartMode.year, context.statisticYear),
                 ],
               ),

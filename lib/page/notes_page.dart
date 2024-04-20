@@ -5,6 +5,7 @@ import 'package:anx_reader/l10n/localization_extension.dart';
 import 'package:anx_reader/widgets/tips/notes_tips.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 import '../dao/book.dart';
 import '../dao/reading_time.dart';
@@ -143,55 +144,62 @@ Widget bookNotes(BuildContext context, int bookId, int numberOfNotes) {
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        RichText(
-                          text: TextSpan(
-                            style: DefaultTextStyle.of(context).style,
-                            children: [
-                              TextSpan(
-                                text: '$numberOfNotes',
-                                style: numberStyle,
-                              ),
-                              TextSpan(
-                                text: ' ${context.notesNotes}',
-                                style: numberText,
-                              ),
-                            ],
+                    Expanded(
+                      flex: 3,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          RichText(
+                            text: TextSpan(
+                              style: DefaultTextStyle.of(context).style,
+                              children: [
+                                TextSpan(
+                                  text: '$numberOfNotes',
+                                  style: numberStyle,
+                                ),
+                                TextSpan(
+                                  text: ' ${context.notesNotes}',
+                                  style: numberText,
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                        SizedBox(height: 8),
-                        Text(snapshot.data!.title, style: titleStyle),
-                        SizedBox(height: 18),
-                        // Reading time
-                        FutureBuilder<int>(
-                          future: selectTotalReadingTimeByBookId(bookId),
-                          builder: (context, snapshot) {
-                            if (snapshot.connectionState ==
-                                ConnectionState.done) {
-                              return Text(
-                                '${snapshot.data! ~/ 60} ${context.notesMinutes}',
-                                style: readingTimeStyle,
-                              );
-                            } else {
-                              return const CircularProgressIndicator();
-                            }
-                          },
-                        )
-                      ],
+                          SizedBox(height: 8),
+                          Text(snapshot.data!.title, style: titleStyle),
+                          SizedBox(height: 18),
+                          // Reading time
+                          FutureBuilder<int>(
+                            future: selectTotalReadingTimeByBookId(bookId),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.done) {
+                                return Text(
+                                  '${snapshot.data! ~/ 60} ${context.notesMinutes}',
+                                  style: readingTimeStyle,
+                                );
+                              } else {
+                                return const CircularProgressIndicator();
+                              }
+                            },
+                          )
+                        ],
+                      ),
                     ),
-                    Expanded(child: SizedBox()),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Image.file(
-                        File(
-                          snapshot.data!.coverPath,
+                    // Expanded(child: SizedBox()),
+                    Expanded(
+                      flex: 1,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.file(
+                          File(
+                            snapshot.data!.coverPath,
+                          ),
+                          height: 130,
+                          width: 90,
+                          fit: BoxFit.cover,
                         ),
-                        height: 130,
-                        width: 90,
-                        fit: BoxFit.cover,
                       ),
                     ),
                   ],
