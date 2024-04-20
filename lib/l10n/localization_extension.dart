@@ -119,4 +119,10 @@ extension LocalizationExtension on BuildContext {
   String get notesTips1 => AppLocalizations.of(this)?.notes_tips_1 ?? '';
 
   String get notesTips2 => AppLocalizations.of(this)?.notes_tips_2 ?? '';
+
+  String get readingPageChapterPages =>
+      AppLocalizations.of(this)?.reading_page_chapter_pages ?? '';
+
+  String get readingPageCurrentPage =>
+      AppLocalizations.of(this)?.reading_page_current_page ?? '';
 }
