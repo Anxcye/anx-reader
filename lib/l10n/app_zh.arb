@@ -46,6 +46,9 @@
   "statistics_tips_1": "这周还没有阅读",
   "statistics_tips_2": "问渠哪得清如许，为有源头活水来",
   "notes_tips_1": "还没有笔记",
-  "notes_tips_2": "在书中划线，记录你的思绪！"
+  "notes_tips_2": "在书中划线，记录你的思绪！",
+
+  "reading_page_chapter_pages": "本章页数",
+  "reading_page_current_page": "当前页"
 
 }

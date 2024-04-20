@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:anx_reader/l10n/localization_extension.dart';
 import 'package:flutter/material.dart';
 
 import '../../page/book_player/epub_player.dart';
@@ -88,17 +89,17 @@ class _ProgressWidgetState extends State<ProgressWidget> {
               ProgressDisplayer(
                 mainText: widget.epubPlayerKey.currentState!.chapterCurrentPage
                     .toString(),
-                subText: 'current page',
+                subText: context.readingPageCurrentPage,
               ),
               ProgressDisplayer(
                 mainText: widget.epubPlayerKey.currentState!.chapterTotalPage
                     .toString(),
-                subText: 'total page',
+                subText: context.readingPageChapterPages,
               ),
               ProgressDisplayer(
                 mainText: (widget.epubPlayerKey.currentState!.progress * 100)
                     .toStringAsFixed(2),
-                subText: 'percentage',
+                subText: '%',
               ),
             ],
           ),

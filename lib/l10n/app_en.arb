@@ -42,5 +42,8 @@
   "statistics_tips_1": "This week you have read",
   "statistics_tips_2": "A book is a dream that you hold in your hands.",
   "notes_tips_1": "There are no notes.",
-  "notes_tips_2": "Add a note while reading!"
+  "notes_tips_2": "Add a note while reading!",
+  "reading_page_chapter_pages": "Chapter Pages",
+  "reading_page_current_page": "Current Page"
+
 }
