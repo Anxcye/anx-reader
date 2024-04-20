@@ -38,29 +38,28 @@ class _BookNotesPageState extends State<BookNotesPage> {
 }
 
 Widget notesStatistic(BuildContext context, int numberOfNotes) {
-  TextStyle digitStyle = const TextStyle(
+  TextStyle digitStyle = TextStyle(
     fontSize: 28,
     fontWeight: FontWeight.bold,
-    // fontFamily: 'SourceHanSerif',
-    // color: Colors.black,
+    color: Theme.of(context).textTheme.bodyLarge!.color,
   );
-  TextStyle textStyle = const TextStyle(
+  TextStyle textStyle = TextStyle(
       fontSize: 18,
-      // fontWeight: FontWeight.bold,
-      // color: Colors.black,
+      color: Theme.of(context).textTheme.bodyLarge!.color,
       fontFamily: 'SourceHanSerif');
   return Padding(
     padding: const EdgeInsets.fromLTRB(20, 20, 20, 60),
     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       RichText(
         text: TextSpan(
+          // style: DefaultTextStyle.of(context).style,
           children: <TextSpan>[
             TextSpan(
               text: '$numberOfNotes',
               style: digitStyle,
             ),
             TextSpan(
-              text: '  ${context.notesNotes}',
+              text: ' ${context.notesNotes}',
               style: textStyle,
             ),
           ],
