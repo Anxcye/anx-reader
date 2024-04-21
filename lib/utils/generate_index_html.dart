@@ -63,7 +63,7 @@ String generateIndexHtml(
               'padding-bottom': '${style.bottomMargin}px !important',
               'line-height': '${style.lineHeight} !important',
               'letter-spacing': '${style.letterSpacing}px !important',
-              'word-spacing': '${style.wordSpacing}px !important',
+              // 'word-spacing': '${style.wordSpacing}px !important',
             },
             'p': {
               'padding-top': '${style.paragraphSpacing}px !important',

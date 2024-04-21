@@ -526,7 +526,7 @@ void didChangeDependencies() {
           'padding-bottom': '${bookStyle.bottomMargin}px !important',
           'line-height': '${bookStyle.lineHeight} !important',
           'letter-spacing': '${bookStyle.letterSpacing}px !important',
-          'word-spacing': '${bookStyle.wordSpacing}px !important',
+          // 'word-spacing': '${bookStyle.wordSpacing}px !important',
         },
         'p': {
           'padding-top': '${bookStyle.paragraphSpacing}px !important',
