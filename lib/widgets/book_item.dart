@@ -38,7 +38,7 @@ class BookItem extends StatelessWidget {
                   color: Colors.grey,
                 ),
                 image: DecorationImage(
-                  image: FileImage(File(book.coverPath)),
+                  image: Image.file(File(book.coverPath)).image,
                   fit: BoxFit.cover,
                 ),
                 boxShadow: [
