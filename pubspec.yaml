@@ -35,6 +35,7 @@ dependencies:
   flutter_inappwebview: ^6.0.0
   shelf: ^1.4.1
   fl_chart: ^0.67.0
+  flutter_rating_bar: ^4.0.1
 
 
 dev_dependencies:
