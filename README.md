@@ -24,8 +24,8 @@
 
 ### TODO
 - [ ] 支持更多文件类型（目前仅支持导入 epub）
-- [ ] UI适配 Tab 端
-- [ ] 支持Windows，Linux
+- [ ] UI 适配 Tab 端
+- [ ] 支持 Windows，Linux
 - [ ] 自部署的同步服务
 
 ## 构建
