@@ -5,6 +5,7 @@ import 'package:anx_reader/service/book.dart';
 import 'package:flutter/material.dart';
 
 import '../models/book.dart';
+import '../page/book_detail.dart';
 
 class BookItem extends StatelessWidget {
   const BookItem({
@@ -20,42 +21,10 @@ class BookItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        // print('openbook');
         openBook(context, book, onRefresh);
       },
       onLongPress: () {
-        // print('deletebook');
-        showModalBottomSheet(
-            context: context,
-            builder: (BuildContext context) {
-              return Container(
-                // height: 100,
-                child: Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.delete),
-                      onPressed: () {
-                        Navigator.pop(context);
-                        updateBook(Book(
-                          id: book.id,
-                          title: book.title,
-                          coverPath: book.coverPath,
-                          filePath: book.filePath,
-                          lastReadPosition: book.lastReadPosition,
-                          readingPercentage: book.readingPercentage,
-                          author: '',
-                          isDeleted: true,
-                          createTime: book.createTime,
-                          updateTime: DateTime.now(),
-                        ));
-                        onRefresh();
-                        File(book.filePath).delete();
-                      },
-                    ),
-                  ],
-                ),
-              );
-            });
+        handleLongPress(context);
       },
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -98,6 +67,63 @@ class BookItem extends StatelessWidget {
                 overflow: TextOverflow.ellipsis),
           ),
         ],
+      ),
+    );
+  }
+
+  Future<dynamic> handleLongPress(BuildContext context) {
+    return showModalBottomSheet(
+        context: context,
+        builder: (BuildContext context) {
+          return Container(
+            // height: 100,
+            child: Row(
+              children: [
+                IconButton(
+                  // TODO
+                  tooltip: 'detail',
+                    onPressed: (){
+                      handleDetail(context);
+                    },
+                    icon: const Icon(Icons.details)),
+                IconButton(
+                  // TODO
+                  tooltip: 'delete',
+                  icon: const Icon(Icons.delete),
+                  onPressed: () {
+                    handleDelete(context);
+                  },
+                ),
+              ],
+            ),
+          );
+        });
+  }
+
+  void handleDelete(BuildContext context) {
+    Navigator.pop(context);
+    updateBook(Book(
+      id: book.id,
+      title: book.title,
+      coverPath: book.coverPath,
+      filePath: book.filePath,
+      lastReadPosition: book.lastReadPosition,
+      readingPercentage: book.readingPercentage,
+      author: '',
+      isDeleted: true,
+      createTime: book.createTime,
+      updateTime: DateTime.now(),
+    ));
+    onRefresh();
+    File(book.filePath).delete();
+  }
+
+  void handleDetail(BuildContext context) {
+    Navigator.pop(context);
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => BookDetail(book: book, onRefresh: onRefresh),
       ),
     );
   }
