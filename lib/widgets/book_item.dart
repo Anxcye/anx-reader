@@ -76,23 +76,39 @@ class BookItem extends StatelessWidget {
         context: context,
         builder: (BuildContext context) {
           return Container(
-            // height: 100,
+            padding: EdgeInsets.all(20),
+            height: 100,
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                IconButton(
-                  // TODO
-                  tooltip: 'detail',
-                    onPressed: (){
-                      handleDetail(context);
-                    },
-                    icon: const Icon(Icons.details)),
-                IconButton(
-                  // TODO
-                  tooltip: 'delete',
-                  icon: const Icon(Icons.delete),
-                  onPressed: () {
+                GestureDetector(
+                  onTap: () {
+                    handleDetail(context);
+                  },
+                  child: Column(
+                    // mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Icon(Icons.details),
+                      Spacer(),
+                      // TODO
+                      Text('details'),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 20),
+                GestureDetector(
+                  onTap: () {
                     handleDelete(context);
                   },
+                  child: Column(
+                    // mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Icon(Icons.delete),
+                      Spacer(),
+                      // TODO
+                      Text('delete'),
+                    ],
+                  ),
                 ),
               ],
             ),
