@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/dao/reading_time.dart';
 import 'package:anx_reader/dao/theme.dart';
+import 'package:anx_reader/l10n/localization_extension.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/models/book_note.dart';
 import 'package:anx_reader/models/book_style.dart';
@@ -123,7 +124,7 @@ class _ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
           children: [
             Padding(
               padding: const EdgeInsets.only(left: 15, top: 10),
-              child: Text('Notes', style: TextStyle(
+              child: Text(context.notesNotes, style: const TextStyle(
                 fontSize: 28,
                 fontFamily: 'SourceHanSerif',
                 fontWeight: FontWeight.bold,
