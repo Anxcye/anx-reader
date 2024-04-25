@@ -1,11 +1,14 @@
 import 'dart:io';
 
+import 'package:anx_reader/dao/book.dart';
 import 'package:anx_reader/dao/reading_time.dart';
 import 'package:anx_reader/l10n/localization_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../models/book.dart';
+import '../models/reading_time.dart';
 
 class BookDetail extends StatefulWidget {
   BookDetail({super.key, required this.book, required this.onRefresh});
@@ -20,6 +23,14 @@ class BookDetail extends StatefulWidget {
 class _BookDetailState extends State<BookDetail> {
   // TODO: Replace this with the actual rating
   double rating = 3.5;
+  bool isEditing = false;
+  late Image coverImage;
+
+  @override
+  void initState() {
+    super.initState();
+    coverImage = Image.file(File(widget.book.coverPath));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,11 +42,12 @@ class _BookDetailState extends State<BookDetail> {
         child: ListView(
           padding: const EdgeInsets.all(0),
           children: [
-            const SizedBox(
-              height: 60,
-            ),
+            // const SizedBox(
+            //   height: 60,
+            // ),
             bookBaseDetail(context, widget.book),
-            SizedBox(height: 15),
+            editButton(),
+            SizedBox(height: 5),
             bookStatistics(context, widget.book),
             SizedBox(height: 15),
             moreDetail(),
@@ -64,7 +76,7 @@ class _BookDetailState extends State<BookDetail> {
       child: Image(
         width: MediaQuery.of(context).size.width,
         height: 600,
-        image: FileImage(File(widget.book.coverPath)),
+        image: coverImage.image,
         fit: BoxFit.cover,
         filterQuality: FilterQuality.high,
         alignment: Alignment.topCenter,
@@ -73,24 +85,27 @@ class _BookDetailState extends State<BookDetail> {
   }
 
   Widget bookBaseDetail(BuildContext context, Book book) {
-    TextStyle bookTitleStyle = const TextStyle(
+    TextStyle bookTitleStyle = TextStyle(
       fontSize: 24,
       fontFamily: 'SourceHanSerif',
       fontWeight: FontWeight.bold,
+      color: Theme.of(context).textTheme.bodyLarge!.color,
     );
-    TextStyle bookAuthorStyle = const TextStyle(
+    TextStyle bookAuthorStyle = TextStyle(
       fontSize: 15,
       fontFamily: 'SourceHanSerif',
+      color: Theme.of(context).textTheme.bodyLarge!.color,
     );
+    double top = 60;
 
     return Container(
-      height: 270,
+      height: 270 + top,
       child: Stack(
         children: [
           // background card
           Positioned(
             left: 0,
-            top: 150,
+            top: 150 + top,
             child: Container(
                 height: 120,
                 width: MediaQuery.of(context).size.width - 30,
@@ -133,28 +148,63 @@ class _BookDetailState extends State<BookDetail> {
           // book cover
           Positioned(
             left: 20,
-            top: 0,
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                boxShadow: [
-                  // Set the shadow
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.5),
-                    spreadRadius: 6,
-                    blurRadius: 30,
-                    offset: const Offset(0, 3),
+            top: 0 + top,
+            child: GestureDetector(
+              onTap: () async {
+                if (!isEditing) {
+                  return;
+                }
+
+                final ImagePicker picker = ImagePicker();
+                final XFile? image =
+                    await picker.pickImage(source: ImageSource.gallery);
+
+                if (image != null) {
+                  print('Image path: ${image.path}');
+                  // Delete the existing cover image file
+                  final File oldCoverImageFile = File(widget.book.coverPath);
+                  if (await oldCoverImageFile.exists()) {
+                    await oldCoverImageFile.delete();
+                  }
+
+                  String newPath =
+                      '${widget.book.coverPath.split('/').sublist(0, widget.book.coverPath.split('/').length - 1).join('/')}/${widget.book.title} - ${widget.book.author} - ${DateTime.now().toString()}.png';
+                  print('New path: $newPath');
+
+
+                  final File newCoverImageFile = File(newPath);
+                  await newCoverImageFile
+                      .writeAsBytes(await image.readAsBytes());
+                  widget.book.coverPath = newPath;
+
+                  setState(() {
+                    coverImage = Image.file(File(image.path));
+                    updateBook(widget.book);
+                    widget.onRefresh();
+                  });
+                }
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    // Set the shadow
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.5),
+                      spreadRadius: 6,
+                      blurRadius: 30,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: Image(
+                    image: coverImage.image,
+                    fit: BoxFit.cover,
+                    width: 160,
+                    height: 230,
                   ),
-                ],
-              ),
-              child: ClipRRect(
-                // Clip the image to match the border radius
-                borderRadius: BorderRadius.circular(10),
-                child: Image.file(
-                  File(book.coverPath),
-                  fit: BoxFit.cover,
-                  width: 160,
-                  height: 230,
                 ),
               ),
             ),
@@ -162,7 +212,7 @@ class _BookDetailState extends State<BookDetail> {
           // rating bar
           Positioned(
             left: 30,
-            top: 240,
+            top: 240 + top,
             child: RatingBar.builder(
               initialRating: rating,
               minRating: 0,
@@ -182,25 +232,44 @@ class _BookDetailState extends State<BookDetail> {
               },
             ),
           ),
-
           // book title and author
           Positioned(
             left: 190,
-            top: 5,
-            child: Container(
-              width: MediaQuery.of(context).size.width - 200,
+            top: 5 + top,
+            child: SizedBox(
+              width: MediaQuery.of(context).size.width - 220,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    book.title,
-                    softWrap: true,
+                  TextFormField(
+                    autofocus: true,
+                    initialValue: book.title,
+                    enabled: isEditing,
                     style: bookTitleStyle,
+                    maxLines: null,
+                    minLines: 1,
+                    decoration: const InputDecoration(
+                      border: InputBorder.none,
+                      isCollapsed: true,
+                    ),
+                    onChanged: (value) {
+                      book.title = value;
+                    },
                   ),
                   const SizedBox(height: 5),
-                  Text(
-                    book.author,
+                  TextFormField(
+                    initialValue: book.author,
+                    enabled: isEditing,
                     style: bookAuthorStyle,
+                    maxLines: null,
+                    minLines: 1,
+                    decoration: const InputDecoration(
+                      border: InputBorder.none,
+                      isCollapsed: true,
+                    ),
+                    onChanged: (value) {
+                      book.author = value;
+                    },
                   ),
                 ],
               ),
@@ -208,6 +277,46 @@ class _BookDetailState extends State<BookDetail> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget editButton() {
+    return Row(
+      children: [
+        Spacer(),
+        isEditing
+            ? ElevatedButton(
+                child: Row(
+                  children: const [
+                    Icon(Icons.save),
+                    SizedBox(width: 5),
+                    // TODO
+                    Text('Save'),
+                  ],
+                ),
+                onPressed: () {
+                  setState(() {
+                    isEditing = false;
+                    updateBook(widget.book);
+                    widget.onRefresh();
+                  });
+                },
+              )
+            : ElevatedButton(
+                child: Row(
+                  children: const [
+                    Icon(Icons.edit),
+                    SizedBox(width: 5),
+                    // TODO
+                    Text('Edit'),
+                  ],
+                ),
+                onPressed: () {
+                  setState(() {
+                    isEditing = true;
+                  });
+                }),
+      ],
     );
   }
 
@@ -350,7 +459,7 @@ class _BookDetailState extends State<BookDetail> {
   Widget moreDetail() {
     TextStyle textStyle = const TextStyle(
       fontSize: 15,
-      // color: Colors.black,
+      fontWeight: FontWeight.bold,
     );
     return Container(
 
@@ -372,10 +481,54 @@ class _BookDetailState extends State<BookDetail> {
                   style: textStyle,
                 ),
                 Divider(),
-
+                Container(
+                  height: 200,
+                  child: readingDetail(),
+                ),
               ],
             ),
           ),
         ));
+  }
+
+  Widget readingDetail() {
+    return FutureBuilder<List<ReadingTime>>(
+      future: selectReadingTimeByBookId(widget.book.id),
+      builder:
+          (BuildContext context, AsyncSnapshot<List<ReadingTime>> snapshot) {
+        if (snapshot.hasData) {
+          List<ReadingTime> readingTimes = snapshot.data!;
+          return ListView.builder(
+            itemCount: readingTimes.length,
+            itemBuilder: (BuildContext context, int index) {
+              int totalReadingTime = readingTimes[index].readingTime;
+              int hours = totalReadingTime ~/ 60;
+              int minutes = totalReadingTime % 60;
+              return Row(
+                children: [
+                  Text(
+                    readingTimes[index].date!,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      // color: Colors.black,
+                    ),
+                  ),
+                  const Spacer(),
+                  Text(
+                    '$hours ${context.statisticHours} $minutes ${context.statisticMinutes}',
+                    style: const TextStyle(
+                      fontSize: 15,
+                      // color: Colors.black,
+                    ),
+                  ),
+                ],
+              );
+            },
+          );
+        } else {
+          return const CircularProgressIndicator();
+        }
+      },
+    );
   }
 }
