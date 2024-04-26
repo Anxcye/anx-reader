@@ -39,19 +39,48 @@ class _BookDetailState extends State<BookDetail> {
       background(context),
       Padding(
         padding: const EdgeInsets.all(15.0),
-        child: ListView(
-          padding: const EdgeInsets.all(0),
-          children: [
-            // const SizedBox(
-            //   height: 60,
-            // ),
-            bookBaseDetail(context, widget.book),
-            editButton(),
-            SizedBox(height: 5),
-            bookStatistics(context, widget.book),
-            SizedBox(height: 15),
-            moreDetail(),
-          ],
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            if (constraints.maxWidth > 600) {
+              return Row(
+                children: [
+                  Expanded(
+                    flex: 1,
+                    child: ListView(
+                      padding: const EdgeInsets.all(0),
+                      children: [
+                        bookBaseDetail(context, widget.book, constraints.maxWidth / 2 - 20),
+                        editButton(),
+                        SizedBox(height: 5),
+                        bookStatistics(context, widget.book),
+
+                      ],
+                    ),
+                  ),
+                  SizedBox(width: 20),
+                  Expanded(
+                    flex: 1,
+                    child:Padding(
+                      padding: const EdgeInsets.only(top: 20, bottom: 20),
+                      child: moreDetail(),
+                    ),
+                  ),
+                ],
+              );
+            } else {
+              return ListView(
+                padding: const EdgeInsets.all(0),
+                children: [
+                  bookBaseDetail(context, widget.book, constraints.maxWidth),
+                  editButton(),
+                  SizedBox(height: 5),
+                  bookStatistics(context, widget.book),
+                  SizedBox(height: 15),
+                  moreDetail(),
+                ],
+              );
+            }
+          },
         ),
       ),
     ]));
@@ -84,7 +113,7 @@ class _BookDetailState extends State<BookDetail> {
     );
   }
 
-  Widget bookBaseDetail(BuildContext context, Book book) {
+  Widget bookBaseDetail(BuildContext context, Book book, double width) {
     TextStyle bookTitleStyle = TextStyle(
       fontSize: 24,
       fontFamily: 'SourceHanSerif',
@@ -108,7 +137,7 @@ class _BookDetailState extends State<BookDetail> {
             top: 150 + top,
             child: Container(
                 height: 120,
-                width: MediaQuery.of(context).size.width - 30,
+                width: width,
                 child: Card(
                   child: Row(
                     children: [
@@ -170,7 +199,6 @@ class _BookDetailState extends State<BookDetail> {
                   String newPath =
                       '${widget.book.coverPath.split('/').sublist(0, widget.book.coverPath.split('/').length - 1).join('/')}/${widget.book.title} - ${widget.book.author} - ${DateTime.now().toString()}.png';
                   print('New path: $newPath');
-
 
                   final File newCoverImageFile = File(newPath);
                   await newCoverImageFile
@@ -237,7 +265,7 @@ class _BookDetailState extends State<BookDetail> {
             left: 190,
             top: 5 + top,
             child: SizedBox(
-              width: MediaQuery.of(context).size.width - 220,
+              width: width - 190,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
