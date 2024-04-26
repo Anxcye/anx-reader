@@ -3,7 +3,6 @@ import 'package:anx_reader/widgets/settings/theme_mode.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-import 'package:path/path.dart';
 import 'package:provider/provider.dart';
 import 'package:settings_ui/settings_ui.dart';
 
@@ -11,7 +10,11 @@ import '../../config/shared_preference_provider.dart';
 import '../../widgets/settings/settings_app_bar.dart';
 
 class AppearanceSetting extends StatelessWidget {
-  const AppearanceSetting({super.key});
+  const AppearanceSetting(
+      {super.key, required this.isMobile, required this.setDetail});
+
+  final bool isMobile;
+  final void Function(Widget detail) setDetail;
 
   @override
   Widget build(BuildContext context) {
@@ -20,10 +23,14 @@ class AppearanceSetting extends StatelessWidget {
       title: Text(context.appearance),
       trailing: const Icon(Icons.chevron_right),
       onTap: () {
+        if (!isMobile) {
+          setDetail(SubAppearanceSettings(isMobile: isMobile));
+          return;
+        }
         Navigator.push(
           context,
           CupertinoPageRoute(
-              builder: (context) => const SubAppearanceSettings()),
+              builder: (context) => SubAppearanceSettings(isMobile: isMobile)),
         );
       },
     );
@@ -31,12 +38,14 @@ class AppearanceSetting extends StatelessWidget {
 }
 
 class SubAppearanceSettings extends StatelessWidget {
-  const SubAppearanceSettings({super.key});
+  const SubAppearanceSettings({super.key, required this.isMobile});
+
+  final bool isMobile;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: settingsAppBar(context.appearance, context),
+      appBar: isMobile ? settingsAppBar(context.appearance, context) : null,
       body: SettingsList(
         lightTheme: SettingsThemeData(
           settingsListBackground: Theme.of(context).scaffoldBackgroundColor,
@@ -60,48 +69,18 @@ class SubAppearanceSettings extends StatelessWidget {
               const CustomSettingsTile(child: Divider()),
             ],
           ),
-          SettingsSection(
-              title: Text(context.appearanceDisplay),
-              tiles: [
-                SettingsTile.navigation(
-                    title: Text(context.appearanceLanguage),
-                    leading: Icon(Icons.language),
-                    onPressed: (context) {
-                      _showLanguagePickerDialog(context);
-                    })
-              ])
+          SettingsSection(title: Text(context.appearanceDisplay), tiles: [
+            SettingsTile.navigation(
+                title: Text(context.appearanceLanguage),
+                leading: Icon(Icons.language),
+                onPressed: (context) {
+                  _showLanguagePickerDialog(context);
+                })
+          ])
         ],
       ),
-
-      // ListView(
-      //   padding: const EdgeInsets.all(15),
-      //   children: [
-      //     SettingsGroupTitle(
-      //       title: context.appearanceTheme,
-      //     ),
-      //     Padding(
-      //       padding: const EdgeInsets.all(8.0),
-      //       child: ChangeThemeMode(),
-      //     ),
-      //     ListTile(
-      //       title: Text(context.appearanceThemeColor),
-      //       onTap: () async {
-      //         await _showColorPickerDialog(context);
-      //       },
-      //     ),
-      //     SettingsGroupTitle(title: context.appearanceDisplay),
-      //     ListTile(
-      //       title: Text(context.appearanceLanguage),
-      //       onTap: () {
-      //         _showLanguagePickerDialog(context);
-      //       },
-      //     )
-      //   ],
-      // ),
     );
   }
-
-
 }
 
 _showLanguagePickerDialog(BuildContext context) {
@@ -145,61 +124,9 @@ class SettingLangItem extends StatelessWidget {
   }
 }
 
-// Future<int?> _showColorPickerDialog(BuildContext context) {
-//   return showDialog(
-//     context: context,
-//     builder: (BuildContext context) {
-//       return SimpleDialog(
-//         title: Text(context.appearanceThemeColor),
-//         children: <Widget>[
-//           SettingsColorItem(
-//             colorValue: Colors.blue.value,
-//           ),
-//           SettingsColorItem(
-//             colorValue: Colors.green.value,
-//           ),
-//         ],
-//       );
-//     },
-//   );
-// }
-//
-//
-// class SettingsColorItem extends StatelessWidget {
-//   const SettingsColorItem({
-//     super.key,
-//     // required this.colorName,
-//     required this.colorValue,
-//   });
-//
-//   // final String colorName;
-//   final int colorValue;
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return SimpleDialogOption(
-//       onPressed: () async {
-//         final prefsProvider =
-//             Provider.of<SharedPreferencesProvider>(context, listen: false);
-//         // prefsProvider.themeColor = Color(colorValue);
-//         await prefsProvider.saveThemeToPrefs(colorValue);
-//
-//         Navigator.pop(context);
-//       },
-//       child: Padding(
-//         padding: const EdgeInsets.symmetric(vertical: 6),
-//         child: Container(
-//           color: Color(colorValue),
-//           height: 50,
-//         ),
-//       ),
-//     );
-//   }
-// }
-
 Future<void> _showColorPickerDialog(BuildContext context) async {
   final prefsProvider =
-  Provider.of<SharedPreferencesProvider>(context, listen: false);
+      Provider.of<SharedPreferencesProvider>(context, listen: false);
   final currentColor = prefsProvider.themeColor;
 
   Color pickedColor = currentColor;
