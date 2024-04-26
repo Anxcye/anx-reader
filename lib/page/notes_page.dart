@@ -30,17 +30,19 @@ class _NotesPageState extends State<NotesPage> {
   }
 
   void initialBook() async {
-    var currentBook = await selectAllBookIdAndNotes().then((value) {
-        return selectBookById(value[0]['bookId']!);
-    });
-    var currentNumberOfNotes = await selectNumberOfNotesAndBooks().then((value) {
-      return value['numberOfNotes']!;
-    });
-    setState(() {
-      _currentBook = currentBook;
-      _currentNumberOfNotes = currentNumberOfNotes;
 
-    });
+    List<Map<String, int>> bookIdAndNotes = await selectAllBookIdAndNotes();
+
+    if (bookIdAndNotes.isNotEmpty) {
+      Book book = await selectBookById(bookIdAndNotes[0]['bookId']!);
+      setState(() {
+        _currentBook = book;
+        _currentNumberOfNotes = bookIdAndNotes[0]['numberOfNotes']!;
+      });
+    }
+
+
+
   }
 
   @override

@@ -28,8 +28,15 @@ class MoreSettings extends StatelessWidget {
   }
 }
 
-class SubMoreSettings extends StatelessWidget {
+class SubMoreSettings extends StatefulWidget {
   const SubMoreSettings({super.key});
+
+  @override
+  State<SubMoreSettings> createState() => _SubMoreSettingsState();
+}
+
+class _SubMoreSettingsState extends State<SubMoreSettings> {
+  Widget settingsDetail = SubAppearanceSettings(isMobile: false);
 
   @override
   Widget build(BuildContext context) {
@@ -43,13 +50,42 @@ class SubMoreSettings extends StatelessWidget {
         ),
         title: Text(context.settingsMoreSettings),
       ),
-      body: ListView(
-        children: const [
-          AppearanceSetting(),
-          // BookshelfSettings(),
-          About(),
-        ],
-      ),
+      body: LayoutBuilder(builder: (context, constraints) {
+        if (constraints.maxWidth > 600) {
+          return Row(
+            children: [
+              Expanded(
+                flex: 1,
+                child: settingsList(false),
+              ),
+              const VerticalDivider(thickness: 1, width: 1),
+              Expanded(
+                flex: 2,
+                child: settingsDetail,
+              ),
+            ],
+          );
+        } else {
+          return settingsList(true);
+        }
+      }),
+    );
+  }
+
+  void setDetail(Widget Detail) {
+    setState(() {
+      settingsDetail = Detail;
+    });
+  }
+
+  Widget settingsList(bool isMobile) {
+    return ListView(
+      children: [
+        AppearanceSetting(
+            isMobile: isMobile, setDetail: setDetail),
+        // BookshelfSettings(),
+        About(),
+      ],
     );
   }
 }

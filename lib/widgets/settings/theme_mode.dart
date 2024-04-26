@@ -25,10 +25,20 @@ class _ChangeThemeModeState extends State<ChangeThemeMode> {
   @override
   Widget build(BuildContext context) {
     return Row(
-      children: <Widget>[
-        _buildThemeModeButton('auto', context.settingsSystemMode),
-        _buildThemeModeButton('dark', context.settingsDarkMode),
-        _buildThemeModeButton('light', context.settingsLightMode),
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Container(
+          constraints: const BoxConstraints(maxWidth: 400),
+          child: Row(
+            children: [
+              _buildThemeModeButton('auto', context.settingsSystemMode),
+              const SizedBox(width: 10),
+              _buildThemeModeButton('dark', context.settingsDarkMode),
+              const SizedBox(width: 10),
+              _buildThemeModeButton('light', context.settingsLightMode),
+            ],
+          ),
+        ),
       ],
     );
   }
