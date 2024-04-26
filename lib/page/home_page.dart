@@ -3,7 +3,9 @@ import 'package:anx_reader/page/bookshelf_page.dart';
 import 'package:anx_reader/page/notes_page.dart';
 import 'package:anx_reader/page/settinds_page/settings_page.dart';
 import 'package:anx_reader/page/statistics_page.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -24,11 +26,44 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _pages[_currentIndex],
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _currentIndex,
-        onDestinationSelected: _onBottomTap,
-        destinations: _bottomBarItems(),
+      // body: _pages[_currentIndex],
+      // bottomNavigationBar: NavigationBar(
+      //   selectedIndex: _currentIndex,
+      //   onDestinationSelected: _onBottomTap,
+      //   destinations: _bottomBarItems(),
+      // ),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          if (constraints.maxWidth > 600) {
+            return Row(
+              children: [
+                SafeArea(
+                  child: NavigationRail(
+                    extended: constraints.maxWidth > 800,
+                    selectedIndex: _currentIndex,
+                    onDestinationSelected: _onBottomTap,
+                    destinations: _railBarItems(),
+                  ),
+                ),
+                const VerticalDivider(thickness: 1, width: 1),
+                Expanded(child: _pages[_currentIndex]),
+              ],
+            );
+          } else {
+            return Column(
+              children: [
+                Expanded(child: _pages[_currentIndex]),
+                SafeArea(
+                  child: NavigationBar(
+                    selectedIndex: _currentIndex,
+                    onDestinationSelected: _onBottomTap,
+                    destinations: _bottomBarItems(),
+                  ),
+                ),
+              ],
+            );
+          }
+        },
       ),
     );
   }
@@ -39,25 +74,30 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  List<NavigationDestination> _bottomBarItems() {
+  List<Map<String, dynamic>> _navBarItems() {
     return [
-      NavigationDestination(
-        icon: const Icon(Icons.book),
-        label: context.navBarBookshelf,
-      ),
-      NavigationDestination(
-        icon: const Icon(Icons.show_chart),
-        label: context.navBarStatistics,
-      ),
-      NavigationDestination(
-        icon: const Icon(Icons.note),
-        label: context.navBarNotes,
-      ),
-      NavigationDestination(
-        icon: const Icon(Icons.settings),
-        label: context.navBarSettings,
-      ),
+      {'icon': Icons.book, 'label': context.navBarBookshelf},
+      {'icon': Icons.show_chart, 'label': context.navBarStatistics},
+      {'icon': Icons.note, 'label': context.navBarNotes},
+      {'icon': Icons.settings, 'label': context.navBarSettings},
     ];
+  }
 
+  List<NavigationRailDestination> _railBarItems() {
+    return _navBarItems().map((item) {
+      return NavigationRailDestination(
+        icon: Icon(item['icon'] as IconData),
+        label: Text(item['label'] as String),
+      );
+    }).toList();
+  }
+
+  List<NavigationDestination> _bottomBarItems() {
+    return _navBarItems().map((item) {
+      return NavigationDestination(
+        icon: Icon(item['icon'] as IconData),
+        label: item['label'] as String,
+      );
+    }).toList();
   }
 }
