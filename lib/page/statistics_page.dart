@@ -28,37 +28,69 @@ class _StatisticPageState extends State<StatisticPage> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(18.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _totalReadTime(),
-            const SizedBox(height: 20),
-            Row(
-              children: [
-                Expanded(
-                    child: _buildStatisticCard(
-                        '{} ${context.statisticBooksRead}',
-                        selectTotalNumberOfBook())),
-                Expanded(
-                    child: _buildStatisticCard(
-                        '{} ${context.statisticDaysOfReading}',
-                        selectTotalNumberOfDate())),
-                Expanded(
-                    child: _buildStatisticCard('{} ${context.statisticNotes}',
-                        selectTotalNumberOfNotes())),
-              ],
-            ),
-            const SizedBox(height: 30),
-            Expanded(
-              child: ListView(children: const [
-                ChartCard(),
-                SizedBox(height: 20),
-                ThisWeekBooks(),
-              ]),
-            ),
-          ],
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            if (constraints.maxWidth > 600) {
+              return Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _totalReadTime(),
+                        const SizedBox(height: 20),
+                        baseStatistic(context),
+                        const ChartCard(),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 20),
+                  Expanded(
+                    child: ListView(
+                      children: const [
+                        ThisWeekBooks(),
+                      ],
+                    ),
+                  ),
+                ],
+              );
+            } else {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _totalReadTime(),
+                  const SizedBox(height: 20),
+                  baseStatistic(context),
+                  const SizedBox(height: 30),
+                  Expanded(
+                    child: ListView(children: const [
+                      ChartCard(),
+                      SizedBox(height: 20),
+                      ThisWeekBooks(),
+                    ]),
+                  ),
+                ],
+              );
+            }
+          },
         ),
       ),
+    );
+  }
+
+  Row baseStatistic(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+            child: _buildStatisticCard(
+                '{} ${context.statisticBooksRead}', selectTotalNumberOfBook())),
+        Expanded(
+            child: _buildStatisticCard('{} ${context.statisticDaysOfReading}',
+                selectTotalNumberOfDate())),
+        Expanded(
+            child: _buildStatisticCard(
+                '{} ${context.statisticNotes}', selectTotalNumberOfNotes())),
+      ],
     );
   }
 }
