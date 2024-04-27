@@ -1,4 +1,5 @@
 import 'package:anx_reader/l10n/localization_extension.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../../main.dart';
@@ -19,33 +20,35 @@ class TocWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Text(
-            context.readingContents,
-            style: const TextStyle(
-              fontSize: 30,
-              fontWeight: FontWeight.bold,
-              fontFamily: 'SourceHanSerif'
+    return Container(
+      height: 700,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              context.readingContents,
+              style: const TextStyle(
+                fontSize: 30,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'SourceHanSerif'
+              ),
             ),
           ),
-        ),
-        Container(
-          height: 600,
-          child: ListView.builder(
-            itemCount: tocItems.length,
-            itemBuilder: (context, index) {
-              return TocItemWidget(
-                  tocItem: tocItems[index],
-                  hideAppBarAndBottomBar: hideAppBarAndBottomBar,
-                  epubPlayerKey: epubPlayerKey);
-            },
+          Expanded(
+            child: ListView.builder(
+              itemCount: tocItems.length,
+              itemBuilder: (context, index) {
+                return TocItemWidget(
+                    tocItem: tocItems[index],
+                    hideAppBarAndBottomBar: hideAppBarAndBottomBar,
+                    epubPlayerKey: epubPlayerKey);
+              },
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
