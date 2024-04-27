@@ -23,56 +23,58 @@ class _StatisticPageState extends State<StatisticPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(context.navBarStatistics),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.only(left: 10, right: 10, top: 10),
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            if (constraints.maxWidth > 600) {
-              return Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _totalReadTime(),
-                        const SizedBox(height: 20),
-                        baseStatistic(context),
-                        const ChartCard(),
-                      ],
+      // appBar: AppBar(
+      //   title: Text(context.navBarStatistics),
+      // ),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.only(left: 10, right: 10, top: 10),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              if (constraints.maxWidth > 600) {
+                return Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _totalReadTime(),
+                          const SizedBox(height: 20),
+                          baseStatistic(context),
+                          const ChartCard(),
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 20),
-                  Expanded(
-                    child: ListView(
-                      children: const [
+                    const SizedBox(width: 20),
+                    Expanded(
+                      child: ListView(
+                        children: const [
+                          ThisWeekBooks(),
+                        ],
+                      ),
+                    ),
+                  ],
+                );
+              } else {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _totalReadTime(),
+                    const SizedBox(height: 20),
+                    baseStatistic(context),
+                    const SizedBox(height: 30),
+                    Expanded(
+                      child: ListView(children: const [
+                        ChartCard(),
+                        SizedBox(height: 20),
                         ThisWeekBooks(),
-                      ],
+                      ]),
                     ),
-                  ),
-                ],
-              );
-            } else {
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _totalReadTime(),
-                  const SizedBox(height: 20),
-                  baseStatistic(context),
-                  const SizedBox(height: 30),
-                  Expanded(
-                    child: ListView(children: const [
-                      ChartCard(),
-                      SizedBox(height: 20),
-                      ThisWeekBooks(),
-                    ]),
-                  ),
-                ],
-              );
-            }
-          },
+                  ],
+                );
+              }
+            },
+          ),
         ),
       ),
     );
