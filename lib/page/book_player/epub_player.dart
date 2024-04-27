@@ -339,6 +339,10 @@ void didChangeDependencies() {
 
             double dx = colorMenuPosition.dx;
             double dy = colorMenuPosition.dy;
+            if (dx < 0) {
+              dx = 5;
+            }
+
 
             if (dx + widgetSize.width > screenSize.width) {
               dx = screenSize.width - widgetSize.width;
