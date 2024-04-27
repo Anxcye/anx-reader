@@ -240,6 +240,7 @@ class EpubPlayerState extends State<EpubPlayer> {
   void renderNote(BookNote bookNote) {
     _webViewController.evaluateJavascript(source: '''
       addABookNote(${jsonEncode(bookNote.toMap())});
+      
       ''');
   }
 
@@ -483,14 +484,15 @@ void didChangeDependencies() {
       ''');
   }
 
-  void goToPersentage(double value) {
-    _webViewController.evaluateJavascript(source: '''
+  Future<void> goToPersentage(double value) async {
+    await _webViewController.evaluateJavascript(source: '''
       goToPersentage = function(value) {
         let location = book.locations.cfiFromPercentage(value);
         rendition.display(location);
       }
       goToPersentage($value);
       refreshProgress();
+      
       ''');
   }
 
