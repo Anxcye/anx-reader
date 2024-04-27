@@ -80,42 +80,6 @@ String generateIndexHtml(
           refreshProgress();
         })
         
-    
-        // getCurrentChapterTitle = function() {
-        //   let toc = book.navigation.toc;
-        //   function removeSuffix(obj) {
-        //     if (obj.href && obj.href.includes('#')) {
-        //       obj.href = obj.href.split('#')[0];
-        //     }
-        //     if (obj.subitems) {
-        //       obj.subitems.forEach(removeSuffix);
-        //     }
-        //   }
-        //
-        //   toc = JSON.parse(JSON.stringify(toc));
-        //
-        //   toc.forEach(removeSuffix);
-        //  
-        //   let href = rendition.currentLocation().start.href;
-        //
-        //   function findChapterLabel(items, href) {
-        //     for (let item of items) {
-        //       if (item.href === href) {
-        //         return item.label.trim();
-        //       } else if (item.subitems.length > 0) {
-        //         const subitemLabel = findChapterLabel(item.subitems, href);
-        //         if (subitemLabel) {
-        //           return subitemLabel;
-        //         }
-        //       }
-        //     }
-        //     return null;
-        //   }
-        //
-        //   const chapterLabel = findChapterLabel(toc, href);
-        //   return chapterLabel || 'Unknown Chapter';
-        // }
-        
         getCurrentChapterTitle = function() {
           let toc = book.navigation.toc;
         
@@ -231,15 +195,6 @@ String generateIndexHtml(
           return { left, right, top, bottom }
         }
     
-        // rendition.hooks.content.register((contents, /*view*/) => {
-        //   const frame = contents.document.defaultView.frameElement
-        //   contents.document.onclick = e => {
-        //     const selection = contents.window.getSelection()
-        //     const range = selection.getRangeAt(0)
-        //     const { left, right, top, bottom } = getRect(range, frame)
-        //   }
-        // })  
-        
         var excerptHandler = function () {
           const frame = rendition.getContents()[0].document.defaultView.frameElement
           const selection = rendition.getContents()[0].window.getSelection()
