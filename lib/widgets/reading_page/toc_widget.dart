@@ -34,13 +34,6 @@ class TocWidget extends StatelessWidget {
           ),
         ),
         Container(
-          // decoration: const BoxDecoration(
-          //   color: Colors.white,
-          //   borderRadius: BorderRadius.only(
-          //     topLeft: Radius.circular(20),
-          //     topRight: Radius.circular(20),
-          //   ),
-          // ),
           height: 600,
           child: ListView.builder(
             itemCount: tocItems.length,
@@ -140,6 +133,8 @@ class _TocItemWidgetState extends State<TocItemWidget> {
   }
 
   bool _isSelected(TocItem tocItem) {
+    print('selected: ${widget.epubPlayerKey.currentState!.chapterHref}');
+    print('tocItem.href: ${tocItem.href}');
     if (tocItem.href == widget.epubPlayerKey.currentState!.chapterHref) {
       return true;
     }

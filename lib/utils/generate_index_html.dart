@@ -81,16 +81,65 @@ String generateIndexHtml(
         })
         
     
+        // getCurrentChapterTitle = function() {
+        //   let toc = book.navigation.toc;
+        //   function removeSuffix(obj) {
+        //     if (obj.href && obj.href.includes('#')) {
+        //       obj.href = obj.href.split('#')[0];
+        //     }
+        //     if (obj.subitems) {
+        //       obj.subitems.forEach(removeSuffix);
+        //     }
+        //   }
+        //
+        //   toc = JSON.parse(JSON.stringify(toc));
+        //
+        //   toc.forEach(removeSuffix);
+        //  
+        //   let href = rendition.currentLocation().start.href;
+        //
+        //   function findChapterLabel(items, href) {
+        //     for (let item of items) {
+        //       if (item.href === href) {
+        //         return item.label.trim();
+        //       } else if (item.subitems.length > 0) {
+        //         const subitemLabel = findChapterLabel(item.subitems, href);
+        //         if (subitemLabel) {
+        //           return subitemLabel;
+        //         }
+        //       }
+        //     }
+        //     return null;
+        //   }
+        //
+        //   const chapterLabel = findChapterLabel(toc, href);
+        //   return chapterLabel || 'Unknown Chapter';
+        // }
+        
         getCurrentChapterTitle = function() {
           let toc = book.navigation.toc;
+        
+          function removeSuffix(obj) {
+            if (obj.href && obj.href.includes('#')) {
+              obj.href = obj.href.split('#')[0];
+            }
+            if (obj.subitems) {
+              obj.subitems.forEach(removeSuffix);
+            }
+          }
+        
+          toc = JSON.parse(JSON.stringify(toc));
+          toc.forEach(removeSuffix);
+        
           let href = rendition.currentLocation().start.href;
         
-          function findChapterLabel(items, href) {
+          function findChapterLabel(items, href, parentLabels = []) {
             for (let item of items) {
               if (item.href === href) {
-                return item.label.trim();
+                const labels = [...parentLabels, item.label.trim()];
+                return labels.join(' / ');
               } else if (item.subitems.length > 0) {
-                const subitemLabel = findChapterLabel(item.subitems, href);
+                const subitemLabel = findChapterLabel(item.subitems, href, [...parentLabels, item.label.trim()]);
                 if (subitemLabel) {
                   return subitemLabel;
                 }
