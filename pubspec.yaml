@@ -36,6 +36,8 @@ dependencies:
   shelf: ^1.4.1
   fl_chart: ^0.67.0
   flutter_rating_bar: ^4.0.1
+  flutter_svg: ^2.0.10
+  permission_handler: ^11.3.1
 
 
 
@@ -51,6 +53,7 @@ flutter:
   generate: true
   # To add assets to your application, add an assets section, like this:
   assets:
+    - assets/icon/Markdown.svg
     - assets/js/epub.min.js
     - assets/js/epub.js
     - assets/js/jszip.min.js

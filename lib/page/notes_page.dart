@@ -262,9 +262,7 @@ class _NotesPageState extends State<NotesPage> {
                         ),
                       ),
                       // Expanded(child: SizedBox()),
-                      Expanded(
-                        flex: 1,
-                        child: ClipRRect(
+                    ClipRRect(
                           borderRadius: BorderRadius.circular(8),
                           child: Image.file(
                             File(
@@ -275,7 +273,6 @@ class _NotesPageState extends State<NotesPage> {
                             fit: BoxFit.cover,
                           ),
                         ),
-                      ),
                     ],
                   ),
                 ),

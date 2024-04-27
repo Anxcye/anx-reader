@@ -26,26 +26,21 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // body: _pages[_currentIndex],
-      // bottomNavigationBar: NavigationBar(
-      //   selectedIndex: _currentIndex,
-      //   onDestinationSelected: _onBottomTap,
-      //   destinations: _bottomBarItems(),
-      // ),
       body: LayoutBuilder(
         builder: (context, constraints) {
           if (constraints.maxWidth > 600) {
             return Row(
               children: [
-                SafeArea(
-                  child: NavigationRail(
-                    extended: constraints.maxWidth > 800,
-                    selectedIndex: _currentIndex,
-                    onDestinationSelected: _onBottomTap,
-                    destinations: _railBarItems(),
-                  ),
+                NavigationRail(
+                  extended: constraints.maxWidth > 800,
+                  selectedIndex: _currentIndex,
+                  onDestinationSelected: _onBottomTap,
+                  destinations: _railBarItems(),
+                  backgroundColor: ElevationOverlay.applySurfaceTint(
+                      Theme.of(context).colorScheme.surface,
+                      Theme.of(context).colorScheme.primary,
+                      1),
                 ),
-                const VerticalDivider(thickness: 1, width: 1),
                 Expanded(child: _pages[_currentIndex]),
               ],
             );
