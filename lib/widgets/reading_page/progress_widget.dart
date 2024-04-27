@@ -39,6 +39,7 @@ class _ProgressWidgetState extends State<ProgressWidget> {
           const SizedBox(height: 10),
           Text(
             widget.epubPlayerKey.currentState!.chapterTitle,
+            textAlign: TextAlign.center,
             style: const TextStyle(
               fontSize: 20,
               fontFamily: 'SourceHanSerif',

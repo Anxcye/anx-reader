@@ -67,13 +67,28 @@ class EpubPlayerState extends State<EpubPlayer> {
           toc = args[0];
         });
     await _webViewController.evaluateJavascript(source: '''
-      getToc = function() {
-        let toc = book.navigation.toc;
-        toc = JSON.stringify(toc);
-        window.flutter_inappwebview.callHandler('getToc', toc);
-      }
-      getToc();
+     getToc = function() {
+       let toc = book.navigation.toc;
+     
+       function removeSuffix(obj) {
+         if (obj.href && obj.href.includes('#')) {
+           obj.href = obj.href.split('#')[0];
+         }
+         if (obj.subitems) {
+           obj.subitems.forEach(removeSuffix);
+         }
+       }
+     
+       toc = JSON.parse(JSON.stringify(toc));
+     
+       toc.forEach(removeSuffix);
+     
+       toc = JSON.stringify(toc);
+       window.flutter_inappwebview.callHandler('getToc', toc);
+     }
+          getToc();
       ''');
+    print(toc);
     return toc;
   }
 
