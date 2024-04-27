@@ -13,8 +13,10 @@ Future<Book> importBook(File file) async {
   EpubBookRef epubBookRef = await EpubReader.openBook(file.readAsBytesSync());
   String author = epubBookRef.Author ?? 'Unknown Author';
   String title = epubBookRef.Title ?? 'Unknown';
+
+
   final cover = await epubBookRef.readCover();
-  final newBookName = '$title - $author - ${DateTime.now().toString()}';
+  final newBookName = '${title.substring(0,20)}-$author-${DateTime.now().toString()}';
 
   Directory appDocDir = await getApplicationDocumentsDirectory();
   final fileDir = Directory('${appDocDir.path}/file');

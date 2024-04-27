@@ -530,8 +530,8 @@ class _BookDetailState extends State<BookDetail> {
             itemCount: readingTimes.length,
             itemBuilder: (BuildContext context, int index) {
               int totalReadingTime = readingTimes[index].readingTime;
-              int hours = totalReadingTime ~/ 60;
-              int minutes = totalReadingTime % 60;
+              int hours = totalReadingTime ~/ 3600;
+              int minutes = totalReadingTime % 3600 ~/ 60;
               return Row(
                 children: [
                   Text(
