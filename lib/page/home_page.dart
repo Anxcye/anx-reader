@@ -48,13 +48,11 @@ class _HomePageState extends State<HomePage> {
             return Column(
               children: [
                 Expanded(child: _pages[_currentIndex]),
-                SafeArea(
-                  child: NavigationBar(
+                 NavigationBar(
                     selectedIndex: _currentIndex,
                     onDestinationSelected: _onBottomTap,
                     destinations: _bottomBarItems(),
                   ),
-                ),
               ],
             );
           }
