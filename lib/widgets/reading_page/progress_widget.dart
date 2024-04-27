@@ -66,10 +66,13 @@ class _ProgressWidgetState extends State<ProgressWidget> {
                     });
                     _sliderTimer?.cancel();
                     _sliderTimer = Timer(
-                      const Duration(milliseconds: 300),
-                      () {
-                        widget.epubPlayerKey.currentState!
+                      const Duration(milliseconds: 100),
+                      () async {
+                        await widget.epubPlayerKey.currentState!
                             .goToPersentage(value);
+                        Timer(const Duration(milliseconds: 300), () {
+                          setState(() {});
+                        });
                       },
                     );
                   },
