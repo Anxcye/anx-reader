@@ -12,6 +12,7 @@ import 'package:anx_reader/models/read_theme.dart';
 import 'package:anx_reader/page/book_player/epub_player.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 import '../dao/book_note.dart';
 import '../models/reading_time.dart';
@@ -98,6 +99,8 @@ class _ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
       }
       if (!show) {
         _currentPage = const SizedBox(height: 1);
+      } else{
+        showBottomBar(context);
       }
       _isAppBarVisible = show;
     });
@@ -118,7 +121,7 @@ class _ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
   void noteHandler() {
     setState(() {
       _currentPage = Container(
-        height: 700,
+        height: 550,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -174,6 +177,67 @@ class _ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
     });
   }
 
+  void showBottomBar(BuildContext context) {
+  showModalBottomSheet(
+    context: context,
+    builder: (BuildContext context) {
+      return StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return IntrinsicHeight(
+            child: Column(
+              children: [
+                const SizedBox(height: 10),
+                Expanded(child: _currentPage),
+                // const Divider(),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.toc),
+                      onPressed: () {
+                        tocHandler();
+                        setState(() {}); // This will rebuild the bottom sheet
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.edit_note),
+                      onPressed: () {
+                        noteHandler();
+                        setState(() {}); // This will rebuild the bottom sheet
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.data_usage),
+                      onPressed: () {
+                        progressHandler();
+                        setState(() {}); // This will rebuild the bottom sheet
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.color_lens),
+                      onPressed: () {
+                        themeHandler();
+                        setState(() {}); // This will rebuild the bottom sheet
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.text_fields),
+                      onPressed: () {
+                        styleHandler();
+                        setState(() {}); // This will rebuild the bottom sheet
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    },
+  );
+}
+
   @override
   Widget build(BuildContext context) {
     if (_content == null) {
@@ -183,7 +247,7 @@ class _ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
         canPop: false,
         onPopInvoked: (bool didPop) async {
           if (didPop) return;
-          if (_isAppBarVisible){
+          if (_isAppBarVisible) {
             showOrHideAppBarAndBottomBar(false);
             return;
           }
@@ -214,45 +278,46 @@ class _ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
                     title: Text(_book.title),
                   ),
                 ),
-              if (_isAppBarVisible)
-                AnimatedPositioned(
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  duration: const Duration(milliseconds: 3000),
-                  child: Container(
-                    color: Theme.of(context).colorScheme.surfaceVariant,
-                    child: Wrap(
-                      children: [
-                        _currentPage,
-                        const Divider(
-                          height: 1,
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            IconButton(
-                                icon: const Icon(Icons.toc),
-                                onPressed: tocHandler),
-                            IconButton(
-                                icon: const Icon(Icons.edit_note),
-                                onPressed: noteHandler),
-                            IconButton(
-                                icon: const Icon(Icons.data_usage),
-                                onPressed: progressHandler),
-                            IconButton(
-                                icon: const Icon(Icons.color_lens),
-                                onPressed: themeHandler),
-                            IconButton(
-                                icon: const Icon(Icons.text_fields),
-                                onPressed: styleHandler),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+
+              // if (_isAppBarVisible)
+              //   AnimatedPositioned(
+              //     bottom: 0,
+              //     left: 0,
+              //     right: 0,
+              //     duration: const Duration(milliseconds: 3000),
+              //     child: Container(
+              //       color: Theme.of(context).colorScheme.surfaceVariant,
+              //       child: Wrap(
+              //         children: [
+              //           _currentPage,
+              //           const Divider(
+              //             height: 1,
+              //           ),
+              //           Row(
+              //             mainAxisAlignment: MainAxisAlignment.spaceAround,
+              //             crossAxisAlignment: CrossAxisAlignment.center,
+              //             children: [
+              //               IconButton(
+              //                   icon: const Icon(Icons.toc),
+              //                   onPressed: tocHandler),
+              //               IconButton(
+              //                   icon: const Icon(Icons.edit_note),
+              //                   onPressed: noteHandler),
+              //               IconButton(
+              //                   icon: const Icon(Icons.data_usage),
+              //                   onPressed: progressHandler),
+              //               IconButton(
+              //                   icon: const Icon(Icons.color_lens),
+              //                   onPressed: themeHandler),
+              //               IconButton(
+              //                   icon: const Icon(Icons.text_fields),
+              //                   onPressed: styleHandler),
+              //             ],
+              //           ),
+              //         ],
+              //       ),
+              //     ),
+              //   ),
             ],
           ),
         ),
