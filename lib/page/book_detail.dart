@@ -281,7 +281,7 @@ class _BookDetailState extends State<BookDetail> {
                       isCollapsed: true,
                     ),
                     onChanged: (value) {
-                      book.title = value;
+                      book.title = value.replaceAll('\n', ' ');
                     },
                   ),
                   const SizedBox(height: 5),
