@@ -44,41 +44,43 @@ class _NotesPageState extends State<NotesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text(context.navBarNotes),
-        ),
-        body: LayoutBuilder(
-          builder: (context, constraints) {
-            if (constraints.maxWidth > 600) {
-              return Row(
-                children: [
-                  Expanded(
-                    flex: 1,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        notesStatistic(),
-                        bookNotesList(false),
-                      ],
+        // appBar: AppBar(
+        //   title: Text(context.navBarNotes),
+        // ),
+        body: SafeArea(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              if (constraints.maxWidth > 600) {
+                return Row(
+                  children: [
+                    Expanded(
+                      flex: 1,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          notesStatistic(),
+                          bookNotesList(false),
+                        ],
+                      ),
                     ),
-                  ),
-                  const VerticalDivider(thickness: 1, width: 1),
-                  Expanded(
-                    flex: 2,
-                    child: detailNotes(),
-                  ),
-                ],
-              );
-            } else {
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  notesStatistic(),
-                  bookNotesList(true),
-                ],
-              );
-            }
-          },
+                    const VerticalDivider(thickness: 1, width: 1),
+                    Expanded(
+                      flex: 2,
+                      child: detailNotes(),
+                    ),
+                  ],
+                );
+              } else {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    notesStatistic(),
+                    bookNotesList(true),
+                  ],
+                );
+              }
+            },
+          ),
         ));
   }
 
