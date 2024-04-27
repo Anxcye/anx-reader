@@ -30,7 +30,6 @@ class _NotesPageState extends State<NotesPage> {
   }
 
   void initialBook() async {
-
     List<Map<String, int>> bookIdAndNotes = await selectAllBookIdAndNotes();
 
     if (bookIdAndNotes.isNotEmpty) {
@@ -40,9 +39,6 @@ class _NotesPageState extends State<NotesPage> {
         _currentNumberOfNotes = bookIdAndNotes[0]['numberOfNotes']!;
       });
     }
-
-
-
   }
 
   @override
@@ -87,7 +83,6 @@ class _NotesPageState extends State<NotesPage> {
   }
 
   Widget detailNotes() {
-
     return _currentBook == null
         ? const Center(child: NotesTips())
         : BookNotesPage(
@@ -262,17 +257,17 @@ class _NotesPageState extends State<NotesPage> {
                         ),
                       ),
                       // Expanded(child: SizedBox()),
-                    ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: Image.file(
-                            File(
-                              snapshot.data!.coverPath,
-                            ),
-                            height: 130,
-                            width: 90,
-                            fit: BoxFit.cover,
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.file(
+                          File(
+                            snapshot.data!.coverPath,
                           ),
+                          height: 130,
+                          width: 90,
+                          fit: BoxFit.cover,
                         ),
+                      ),
                     ],
                   ),
                 ),
