@@ -38,8 +38,9 @@ class _ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
   String? _content;
   late BookStyle _bookStyle;
   late ReadTheme _readTheme;
-  bool _isAppBarVisible = false;
-  double _appBarTopPosition = -kToolbarHeight;
+
+  // bool _isAppBarVisible = false;
+  // double _appBarTopPosition = -kToolbarHeight;
   double readProgress = 0.0;
   List<TocItem> _tocItems = [];
   Widget _currentPage = const SizedBox(height: 1);
@@ -87,23 +88,11 @@ class _ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
   }
 
   void showOrHideAppBarAndBottomBar(bool show) {
-    setState(() {
-      if (show) {
-        if (_isAppBarVisible) {
-          show = false;
-        }
-        _appBarTopPosition = 0;
-      } else {
-        _currentPage = const SizedBox(height: 1);
-        _appBarTopPosition = -kToolbarHeight;
-      }
-      if (!show) {
-        _currentPage = const SizedBox(height: 1);
-      } else{
-        showBottomBar(context);
-      }
-      _isAppBarVisible = show;
-    });
+    if (show) {
+      showBottomBar(context);
+    } else {
+      Navigator.pop(context);
+    }
   }
 
   Future<void> tocHandler() async {
@@ -127,11 +116,14 @@ class _ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
           children: [
             Padding(
               padding: const EdgeInsets.only(left: 15, top: 10),
-              child: Text(context.navBarNotes, style: const TextStyle(
-                fontSize: 28,
-                fontFamily: 'SourceHanSerif',
-                fontWeight: FontWeight.bold,
-              ),),
+              child: Text(
+                context.navBarNotes,
+                style: const TextStyle(
+                  fontSize: 28,
+                  fontFamily: 'SourceHanSerif',
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
             Expanded(
               child: ListView(children: [bookNotesList(_book.id)]),
@@ -154,20 +146,20 @@ class _ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
     });
   }
 
-  Future<void> themeHandler() async {
-    List<ReadTheme> themes = await selectThemes();
-    setState(() {
-      _currentPage = ThemeWidget(
-        themes: themes,
-        epubPlayerKey: _epubPlayerKey,
-        setCurrentPage: (Widget page) {
-          setState(() {
-            _currentPage = page;
-          });
-        },
-      );
-    });
-  }
+Future<void> themeHandler(StateSetter modalSetState) async {
+  List<ReadTheme> themes = await selectThemes();
+  modalSetState(() {
+    _currentPage = ThemeWidget(
+      themes: themes,
+      epubPlayerKey: _epubPlayerKey,
+      setCurrentPage: (Widget page) {
+        modalSetState(() {
+          _currentPage = page;
+        });
+      },
+    );
+  });
+}
 
   Future<void> styleHandler() async {
     setState(() {
@@ -178,65 +170,64 @@ class _ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
   }
 
   void showBottomBar(BuildContext context) {
-  showModalBottomSheet(
-    context: context,
-    builder: (BuildContext context) {
-      return StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
-          return IntrinsicHeight(
-            child: Column(
-              children: [
-                const SizedBox(height: 10),
-                Expanded(child: _currentPage),
-                // const Divider(),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.toc),
-                      onPressed: () {
-                        tocHandler();
-                        setState(() {}); // This will rebuild the bottom sheet
-                      },
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.edit_note),
-                      onPressed: () {
-                        noteHandler();
-                        setState(() {}); // This will rebuild the bottom sheet
-                      },
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.data_usage),
-                      onPressed: () {
-                        progressHandler();
-                        setState(() {}); // This will rebuild the bottom sheet
-                      },
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.color_lens),
-                      onPressed: () {
-                        themeHandler();
-                        setState(() {}); // This will rebuild the bottom sheet
-                      },
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.text_fields),
-                      onPressed: () {
-                        styleHandler();
-                        setState(() {}); // This will rebuild the bottom sheet
-                      },
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          );
-        },
-      );
-    },
-  );
-}
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return IntrinsicHeight(
+              child: Column(
+                children: [
+                  const SizedBox(height: 10),
+                  Expanded(child: _currentPage),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.toc),
+                        onPressed: () {
+                          tocHandler();
+                          setState(() {});
+                        },
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.edit_note),
+                        onPressed: () {
+                          noteHandler();
+                          setState(() {});
+                        },
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.data_usage),
+                        onPressed: () {
+                          progressHandler();
+                          setState(() {});
+                        },
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.color_lens),
+                        onPressed: () {
+                          themeHandler(setState);
+                          setState(() {});
+                        },
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.text_fields),
+                        onPressed: () {
+                          styleHandler();
+                          setState(() {});
+                        },
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -247,10 +238,6 @@ class _ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
         canPop: false,
         onPopInvoked: (bool didPop) async {
           if (didPop) return;
-          if (_isAppBarVisible) {
-            showOrHideAppBarAndBottomBar(false);
-            return;
-          }
           String cfi = await _epubPlayerKey.currentState!.onReadingLocation();
           double readProgress = _epubPlayerKey.currentState!.progress;
           Map<String, dynamic> result = {
@@ -268,56 +255,6 @@ class _ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
                 bookId: _book.id,
                 showOrHideAppBarAndBottomBar: showOrHideAppBarAndBottomBar,
               ),
-              // if (_isAppBarVisible)
-              //   AnimatedPositioned(
-              //     top: _appBarTopPosition,
-              //     left: 0,
-              //     right: 0,
-              //     duration: const Duration(milliseconds: 3000),
-              //     child: AppBar(
-              //       title: Text(_book.title),
-              //     ),
-              //   ),
-
-              // if (_isAppBarVisible)
-              //   AnimatedPositioned(
-              //     bottom: 0,
-              //     left: 0,
-              //     right: 0,
-              //     duration: const Duration(milliseconds: 3000),
-              //     child: Container(
-              //       color: Theme.of(context).colorScheme.surfaceVariant,
-              //       child: Wrap(
-              //         children: [
-              //           _currentPage,
-              //           const Divider(
-              //             height: 1,
-              //           ),
-              //           Row(
-              //             mainAxisAlignment: MainAxisAlignment.spaceAround,
-              //             crossAxisAlignment: CrossAxisAlignment.center,
-              //             children: [
-              //               IconButton(
-              //                   icon: const Icon(Icons.toc),
-              //                   onPressed: tocHandler),
-              //               IconButton(
-              //                   icon: const Icon(Icons.edit_note),
-              //                   onPressed: noteHandler),
-              //               IconButton(
-              //                   icon: const Icon(Icons.data_usage),
-              //                   onPressed: progressHandler),
-              //               IconButton(
-              //                   icon: const Icon(Icons.color_lens),
-              //                   onPressed: themeHandler),
-              //               IconButton(
-              //                   icon: const Icon(Icons.text_fields),
-              //                   onPressed: styleHandler),
-              //             ],
-              //           ),
-              //         ],
-              //       ),
-              //     ),
-              //   ),
             ],
           ),
         ),
