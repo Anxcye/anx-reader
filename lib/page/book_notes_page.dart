@@ -29,13 +29,15 @@ class _BookNotesPageState extends State<BookNotesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ListView(
-        padding: const EdgeInsets.all(20),
-        children: [
-          bookInfo(context, widget.book, widget.numberOfNotes),
-          const SizedBox(height: 170),
-          bookNotesList(widget.book.id),
-        ],
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.all(20),
+          children: [
+            bookInfo(context, widget.book, widget.numberOfNotes),
+            const SizedBox(height: 170),
+            bookNotesList(widget.book.id),
+          ],
+        ),
       ),
     );
   }

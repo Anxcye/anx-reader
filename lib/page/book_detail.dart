@@ -369,7 +369,7 @@ class _BookDetailState extends State<BookDetail> {
               verticalDivider,
               rankItem(),
               verticalDivider,
-              readingTimeItem(),
+              readingTimeItem(context),
             ],
           ),
         ],
@@ -388,7 +388,6 @@ class _BookDetailState extends State<BookDetail> {
               style: const TextStyle(
                 fontSize: 30,
                 fontWeight: FontWeight.bold,
-                color: Colors.black,
               ),
             ),
             const TextSpan(
@@ -416,7 +415,6 @@ class _BookDetailState extends State<BookDetail> {
               style: const TextStyle(
                 fontSize: 30,
                 fontWeight: FontWeight.bold,
-                color: Colors.black,
               ),
             ),
             const TextSpan(
@@ -432,11 +430,10 @@ class _BookDetailState extends State<BookDetail> {
     );
   }
 
-  Widget readingTimeItem() {
+  Widget readingTimeItem(BuildContext context) {
     TextStyle digitStyle = const TextStyle(
       fontSize: 30,
       fontWeight: FontWeight.bold,
-      color: Colors.black,
     );
     TextStyle textStyle = const TextStyle(
       fontSize: 15,
@@ -447,8 +444,8 @@ class _BookDetailState extends State<BookDetail> {
       builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
         if (snapshot.hasData) {
           int totalReadingTime = snapshot.data!;
-          int hours = totalReadingTime ~/ 60;
-          int minutes = totalReadingTime % 60;
+          int hours = totalReadingTime ~/ 3600;
+          int minutes = totalReadingTime % 3600 ~/ 60;
           return Padding(
             padding: const EdgeInsets.only(left: 20, right: 20),
             child: RichText(
