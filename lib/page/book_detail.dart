@@ -365,9 +365,9 @@ class _BookDetailState extends State<BookDetail> {
         children: [
           Row(
             children: [
-              nthBooksItem(),
+              nthBooksItem(context),
               verticalDivider,
-              rankItem(),
+              rankItem(context),
               verticalDivider,
               readingTimeItem(context),
             ],
@@ -377,7 +377,7 @@ class _BookDetailState extends State<BookDetail> {
     );
   }
 
-  Widget nthBooksItem() {
+  Widget nthBooksItem(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(left: 20, right: 20),
       child: RichText(
@@ -385,9 +385,10 @@ class _BookDetailState extends State<BookDetail> {
           children: [
             TextSpan(
               text: widget.book.id.toString(),
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 30,
                 fontWeight: FontWeight.bold,
+                color: Theme.of(context).textTheme.bodyLarge!.color,
               ),
             ),
             const TextSpan(
@@ -404,7 +405,7 @@ class _BookDetailState extends State<BookDetail> {
     );
   }
 
-  Widget rankItem() {
+  Widget rankItem(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(left: 20, right: 20),
       child: RichText(
@@ -412,9 +413,10 @@ class _BookDetailState extends State<BookDetail> {
           children: [
             TextSpan(
               text: rating.toString(),
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 30,
                 fontWeight: FontWeight.bold,
+                color: Theme.of(context).textTheme.bodyLarge!.color,
               ),
             ),
             const TextSpan(
@@ -431,9 +433,10 @@ class _BookDetailState extends State<BookDetail> {
   }
 
   Widget readingTimeItem(BuildContext context) {
-    TextStyle digitStyle = const TextStyle(
+    TextStyle digitStyle = TextStyle(
       fontSize: 30,
       fontWeight: FontWeight.bold,
+      color: Theme.of(context).textTheme.bodyLarge!.color,
     );
     TextStyle textStyle = const TextStyle(
       fontSize: 15,
