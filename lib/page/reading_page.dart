@@ -268,16 +268,16 @@ class _ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
                 bookId: _book.id,
                 showOrHideAppBarAndBottomBar: showOrHideAppBarAndBottomBar,
               ),
-              if (_isAppBarVisible)
-                AnimatedPositioned(
-                  top: _appBarTopPosition,
-                  left: 0,
-                  right: 0,
-                  duration: const Duration(milliseconds: 3000),
-                  child: AppBar(
-                    title: Text(_book.title),
-                  ),
-                ),
+              // if (_isAppBarVisible)
+              //   AnimatedPositioned(
+              //     top: _appBarTopPosition,
+              //     left: 0,
+              //     right: 0,
+              //     duration: const Duration(milliseconds: 3000),
+              //     child: AppBar(
+              //       title: Text(_book.title),
+              //     ),
+              //   ),
 
               // if (_isAppBarVisible)
               //   AnimatedPositioned(

@@ -14,9 +14,9 @@ Future<Book> importBook(File file) async {
   String author = epubBookRef.Author ?? 'Unknown Author';
   String title = epubBookRef.Title ?? 'Unknown';
 
-
   final cover = await epubBookRef.readCover();
-  final newBookName = '${title.substring(0,20)}-$author-${DateTime.now().toString()}';
+  final newBookName =
+      '${title.length > 20 ? title.substring(0, 20) : title}-$author-${DateTime.now().toString()}';
 
   Directory appDocDir = await getApplicationDocumentsDirectory();
   final fileDir = Directory('${appDocDir.path}/file');
@@ -32,7 +32,6 @@ Future<Book> importBook(File file) async {
 
   await file.copy(filePath);
   saveImageToLocal(cover, coverPath);
-
 
   Book book = Book(
       id: -1,
