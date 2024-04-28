@@ -26,37 +26,39 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          if (constraints.maxWidth > 600) {
-            return Row(
-              children: [
-                NavigationRail(
-                  extended: constraints.maxWidth > 800,
-                  selectedIndex: _currentIndex,
-                  onDestinationSelected: _onBottomTap,
-                  destinations: _railBarItems(),
-                  backgroundColor: ElevationOverlay.applySurfaceTint(
-                      Theme.of(context).colorScheme.surface,
-                      Theme.of(context).colorScheme.primary,
-                      1),
-                ),
-                Expanded(child: _pages[_currentIndex]),
-              ],
-            );
-          } else {
-            return Column(
-              children: [
-                Expanded(child: _pages[_currentIndex]),
-                 NavigationBar(
+      body: SafeArea(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            if (constraints.maxWidth > 600) {
+              return Row(
+                children: [
+                  NavigationRail(
+                    extended: constraints.maxWidth > 800,
                     selectedIndex: _currentIndex,
                     onDestinationSelected: _onBottomTap,
-                    destinations: _bottomBarItems(),
+                    destinations: _railBarItems(),
+                    backgroundColor: ElevationOverlay.applySurfaceTint(
+                        Theme.of(context).colorScheme.surface,
+                        Theme.of(context).colorScheme.primary,
+                        1),
                   ),
-              ],
-            );
-          }
-        },
+                  Expanded(child: _pages[_currentIndex]),
+                ],
+              );
+            } else {
+              return Column(
+                children: [
+                  Expanded(child: _pages[_currentIndex]),
+                   NavigationBar(
+                      selectedIndex: _currentIndex,
+                      onDestinationSelected: _onBottomTap,
+                      destinations: _bottomBarItems(),
+                    ),
+                ],
+              );
+            }
+          },
+        ),
       ),
     );
   }
