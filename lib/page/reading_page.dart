@@ -127,7 +127,7 @@ class _ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
           children: [
             Padding(
               padding: const EdgeInsets.only(left: 15, top: 10),
-              child: Text(context.notesNotes, style: const TextStyle(
+              child: Text(context.navBarNotes, style: const TextStyle(
                 fontSize: 28,
                 fontFamily: 'SourceHanSerif',
                 fontWeight: FontWeight.bold,
