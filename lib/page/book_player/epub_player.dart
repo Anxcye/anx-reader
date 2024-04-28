@@ -462,12 +462,10 @@ void didChangeDependencies() {
   }
 
   void prevPage() {
-    widget.showOrHideAppBarAndBottomBar(false);
     _webViewController.evaluateJavascript(source: 'rendition.prev()');
   }
 
   void nextPage() {
-    widget.showOrHideAppBarAndBottomBar(false);
     _webViewController.evaluateJavascript(source: 'rendition.next()');
   }
 
