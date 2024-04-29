@@ -17,10 +17,11 @@ class EpubPlayer extends StatefulWidget {
   final int bookId;
   final Function showOrHideAppBarAndBottomBar;
 
-  EpubPlayer({Key? key,
-    required this.content,
-    required this.showOrHideAppBarAndBottomBar,
-    required this.bookId})
+  EpubPlayer(
+      {Key? key,
+      required this.content,
+      required this.showOrHideAppBarAndBottomBar,
+      required this.bookId})
       : super(key: key);
 
   @override
@@ -155,9 +156,7 @@ class EpubPlayerState extends State<EpubPlayer> {
           String annoCfi = coordinates['cfiRange'];
           String annoContent = coordinates['text'];
 
-          Size screenSize = MediaQuery
-              .of(context)
-              .size;
+          Size screenSize = MediaQuery.of(context).size;
 
           double actualLeft = left * screenSize.width;
           double actualBottom = bottom * screenSize.height;
@@ -167,7 +166,7 @@ class EpubPlayerState extends State<EpubPlayer> {
           //   isColorMenuVisible = true;
           // });
           Map<String, dynamic>? result =
-          await showColorAndTypeSelection(context, colorMenuPosition);
+              await showColorAndTypeSelection(context, colorMenuPosition);
           if (result != null) {
             int id = await insertBookNote(BookNote(
               bookId: widget.bookId,
@@ -196,7 +195,7 @@ class EpubPlayerState extends State<EpubPlayer> {
         handlerName: 'getAllAnnotations',
         callback: (args) async {
           List<BookNote> annotations =
-          await selectBookNotesByBookId(widget.bookId);
+              await selectBookNotesByBookId(widget.bookId);
 
           List<String> annotationsJson = annotations
               .map((annotation) => jsonEncode(annotation.toMap()))
@@ -211,16 +210,14 @@ class EpubPlayerState extends State<EpubPlayer> {
         handlerName: 'onAnnotationClicked',
         callback: (args) async {
           Map<String, dynamic> coordinates = args[0];
-          Size screenSize = MediaQuery
-              .of(context)
-              .size;
+          Size screenSize = MediaQuery.of(context).size;
           double x = coordinates['x'] * screenSize.width;
           double y = coordinates['y'] * screenSize.height;
           int id = coordinates['id'];
           Offset colorMenuPosition = Offset(x, y);
 
           Map<String, dynamic>? result =
-          await showColorAndTypeSelection(context, colorMenuPosition);
+              await showColorAndTypeSelection(context, colorMenuPosition);
           BookNote oldNote = await selectBookNoteById(id);
           if (result != null) {
             updateBookNoteById(
@@ -236,7 +233,8 @@ class EpubPlayerState extends State<EpubPlayer> {
                 updateTime: DateTime.now(),
               ),
             );
-            _webViewController.evaluateJavascript(source: 'removeCurrentAnnotations()');
+            _webViewController.evaluateJavascript(
+                source: 'removeCurrentAnnotations()');
             renderNote(BookNote(
               id: id,
               bookId: widget.bookId,
@@ -249,6 +247,11 @@ class EpubPlayerState extends State<EpubPlayer> {
               updateTime: DateTime.now(),
             ));
           }
+        });
+    _webViewController.addJavaScriptHandler(
+        handlerName: 'showMenu',
+        callback: (args) async {
+          widget.showOrHideAppBarAndBottomBar(true);
         });
   }
 
@@ -283,26 +286,26 @@ class EpubPlayerState extends State<EpubPlayer> {
   }
 
   @override
-void didChangeDependencies() {
-  super.didChangeDependencies();
-  contextMenu = ContextMenu(
-    settings: ContextMenuSettings(hideDefaultSystemContextMenuItems: true),
-    menuItems: [
-      ContextMenuItem(
-        id: 1,
-        title: context.readingPageCopy,
-        action: () async {},
-      ),
-      ContextMenuItem(
-        id: 2,
-        title: context.readingPageExcerpt,
-        action: () async {
-          _webViewController.evaluateJavascript(source: 'excerptHandler()');
-        },
-      ),
-    ],
-  );
-}
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    contextMenu = ContextMenu(
+      settings: ContextMenuSettings(hideDefaultSystemContextMenuItems: true),
+      menuItems: [
+        ContextMenuItem(
+          id: 1,
+          title: context.readingPageCopy,
+          action: () async {},
+        ),
+        ContextMenuItem(
+          id: 2,
+          title: context.readingPageExcerpt,
+          action: () async {
+            _webViewController.evaluateJavascript(source: 'excerptHandler()');
+          },
+        ),
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -324,16 +327,14 @@ void didChangeDependencies() {
     );
   }
 
-  Future<Map<String, dynamic>?> showColorAndTypeSelection(BuildContext context,
-      Offset colorMenuPosition) async {
+  Future<Map<String, dynamic>?> showColorAndTypeSelection(
+      BuildContext context, Offset colorMenuPosition) async {
     return await showCupertinoModalPopup<Map<String, dynamic>>(
       context: context,
       builder: (BuildContext context) {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
-            final screenSize = MediaQuery
-                .of(context)
-                .size;
+            final screenSize = MediaQuery.of(context).size;
 
             final widgetSize = Size(288.0, 48.0);
 
@@ -342,7 +343,6 @@ void didChangeDependencies() {
             if (dx < 0) {
               dx = 5;
             }
-
 
             if (dx + widgetSize.width > screenSize.width) {
               dx = screenSize.width - widgetSize.width;
@@ -384,12 +384,13 @@ void didChangeDependencies() {
     );
   }
 
-  Widget colorMenuWidget({required Offset colorMenuPosition,
-    required Null Function() onClose,
-    required String color,
-    required String type,
-    required ValueChanged<String> onColorSelected,
-    required ValueChanged<String> onTypeSelected}) {
+  Widget colorMenuWidget(
+      {required Offset colorMenuPosition,
+      required Null Function() onClose,
+      required String color,
+      required String type,
+      required ValueChanged<String> onColorSelected,
+      required ValueChanged<String> onTypeSelected}) {
     String annoType = type;
     String annoColor = color;
     return Container(
