@@ -14,9 +14,6 @@ String generateIndexHtml(
   String textColor =
       theme.textColor.substring(2) + theme.textColor.substring(0, 2);
 // language=HTML
-        // html {
-        //   background-color: #$backgroundColor;
-        // }
   return '''
   <!DOCTYPE html>
     <html lang="en">
@@ -33,9 +30,14 @@ String generateIndexHtml(
           margin: 0;
           padding: 0; 
           column-fill: auto;
+          font-family: 'SourceHanSerif';
         }
         #viewer {
           background-color: #$backgroundColor;
+        }
+        @font-face {
+          font-family: 'SourceHanSerif';
+          src: url('http://localhost:${Server().port}/fonts/SourceHanSerifSC-Regular.otf');
         }
 
       </style>
@@ -55,9 +57,13 @@ String generateIndexHtml(
         
         defaultStyle = function() {
           rendition.themes.fontSize('${style.fontSize}%');
-          rendition.themes.font('${style.fontFamily}');
-    
+          // rendition.themes.font('SourceHanSerif !important');
+          
           rendition.themes.default({
+          '@font-face': {
+            'font-family': 'SourceHanSerif',
+            'src': 'url(http://localhost:${Server().port}/fonts/SourceHanSerifSC-Regular.otf)',
+          },
             'html': {
               'background-color': '#$backgroundColor',
               'color': '#$textColor',
@@ -67,6 +73,9 @@ String generateIndexHtml(
               'padding-bottom': '${style.bottomMargin}px !important',
               'line-height': '${style.lineHeight} !important',
               'letter-spacing': '${style.letterSpacing}px !important',
+            },
+            '*': {
+              'font-family': 'SourceHanSerif !important',
             },
             'p': {
               'padding-top': '${style.paragraphSpacing}px !important',
