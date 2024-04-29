@@ -30,6 +30,7 @@ class _BookNotesPageState extends State<BookNotesPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
+        top: false,
         child: ListView(
           padding: const EdgeInsets.all(20),
           children: [
