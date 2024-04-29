@@ -394,7 +394,7 @@ void didChangeDependencies() {
     String annoColor = color;
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).scaffoldBackgroundColor,
         borderRadius: BorderRadius.circular(10),
         boxShadow: [
           BoxShadow(
@@ -539,7 +539,7 @@ void didChangeDependencies() {
       rendition.themes.fontSize('${bookStyle.fontSize}%');
       rendition.themes.font('${bookStyle.fontFamily}');
       
-      rendition.themes.default({
+      rendition.themes.overrides({
         'body': {
           'padding-top': '${bookStyle.topMargin}px !important',
           'padding-bottom': '${bookStyle.bottomMargin}px !important',

@@ -14,6 +14,9 @@ String generateIndexHtml(
   String textColor =
       theme.textColor.substring(2) + theme.textColor.substring(0, 2);
 // language=HTML
+        // html {
+        //   background-color: #$backgroundColor;
+        // }
   return '''
   <!DOCTYPE html>
     <html lang="en">
@@ -31,9 +34,10 @@ String generateIndexHtml(
           padding: 0; 
           column-fill: auto;
         }
-        html {
+        #viewer {
           background-color: #$backgroundColor;
         }
+
       </style>
     </head>
     <body>
@@ -63,19 +67,25 @@ String generateIndexHtml(
               'padding-bottom': '${style.bottomMargin}px !important',
               'line-height': '${style.lineHeight} !important',
               'letter-spacing': '${style.letterSpacing}px !important',
-              // 'word-spacing': '${style.wordSpacing}px !important',
             },
             'p': {
               'padding-top': '${style.paragraphSpacing}px !important',
               'line-height': '${style.lineHeight} !important',
             },
+            'pre':{
+              'white-space': 'pre-wrap',
+            },
+            'img':{
+              'max-width':'-webkit-fill-available !important',
+            }
           });
         }
         defaultStyle();
         
         
         book.ready.then(function() {
-            return book.locations.generate(1000); 
+          defaultStyle();
+          return book.locations.generate(1000); 
         }).then(function(){
           refreshProgress();
         })
@@ -137,6 +147,7 @@ String generateIndexHtml(
           }
     
           rendition.on('relocated', function(locations) {
+            defaultStyle();
             refreshProgress();
             setClickEvent();
             window.flutter_inappwebview.callHandler('onRelocated', locations.start.index);

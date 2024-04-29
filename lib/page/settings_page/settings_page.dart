@@ -1,9 +1,5 @@
-import 'package:anx_reader/config/shared_preference_provider.dart';
-import 'package:anx_reader/l10n/localization_extension.dart';
-import 'package:anx_reader/page/settinds_page/more_settings_page.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:anx_reader/page/settings_page/more_settings_page.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../widgets/settings/about.dart';
 import '../../widgets/settings/theme_mode.dart';
@@ -16,7 +12,6 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  String _themeModeSetting = 'auto';
 
   @override
   Widget build(BuildContext context) {
