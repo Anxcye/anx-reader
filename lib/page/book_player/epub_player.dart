@@ -539,7 +539,7 @@ void didChangeDependencies() {
       rendition.themes.fontSize('${bookStyle.fontSize}%');
       rendition.themes.font('${bookStyle.fontFamily}');
       
-      rendition.themes.overrides({
+      rendition.themes.default({
         'body': {
           'padding-top': '${bookStyle.topMargin}px !important',
           'padding-bottom': '${bookStyle.bottomMargin}px !important',
