@@ -145,14 +145,14 @@ String generateIndexHtml(
               'text-align': 'justify !important',
             },
             '*': {
-              // 'font-family': 'SourceHanSerif !important',
-              'white-space': 'pre-wrap',
+              'font-family': 'SourceHanSerif !important',
             },
             'p': {
               'padding-top': '${style.paragraphSpacing}px !important',
               'line-height': '${style.lineHeight} !important',
             },
             'pre':{
+              'white-space': 'pre-wrap',
             },
             'img':{
               'max-width':'-webkit-fill-available !important',
@@ -257,7 +257,7 @@ String generateIndexHtml(
           }
     
           rendition.on('relocated', function(locations) {
-            // defaultStyle();
+            defaultStyle();
             refreshProgress();
             setClickEvent();
             window.flutter_inappwebview.callHandler('onRelocated', locations.start.index);
