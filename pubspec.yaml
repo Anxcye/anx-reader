@@ -58,7 +58,6 @@ flutter:
     - assets/js/epub.js
     - assets/js/jszip.min.js
     - assets/fonts/SourceHanSerifSC-Regular.otf
-    - assets/fonts/SourceHanSerifSC-VF.otf.woff2
 
 
   fonts:

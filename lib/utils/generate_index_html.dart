@@ -73,6 +73,7 @@ String generateIndexHtml(
               'padding-bottom': '${style.bottomMargin}px !important',
               'line-height': '${style.lineHeight} !important',
               'letter-spacing': '${style.letterSpacing}px !important',
+              'text-align': 'justify !important',
             },
             '*': {
               'font-family': 'SourceHanSerif !important',
@@ -97,6 +98,37 @@ String generateIndexHtml(
           return book.locations.generate(1000); 
         }).then(function(){
           refreshProgress();
+        })
+        
+        // touch event
+        var touchStarX = 0;
+        var touchStarY = 0;
+        var touchStartTime = 0;
+        rendition.on('touchstart', event => {   //通过on方法将事件绑定到渲染上
+          console.log(event)
+          touchStarX = event.changedTouches[0].clientX;
+          touchStarY = event.changedTouches[0].clientY;
+          touchStartTime = event.timeStamp
+        })
+        rendition.on('touchend', event => {
+          console.log(event)
+          const offsetX = event.changedTouches[0].clientX - touchStarX
+          const offsetY = event.changedTouches[0].clientY - touchStarY
+          const time = event.timeStamp - touchStartTime
+          console.log(offsetX, time)
+          if (Math.abs(offsetX) > Math.abs(offsetY)) {
+            if (time < 500 && offsetX > 40) {
+              rendition.prev();
+            } else if (time < 500 && offsetX < -40) {
+              rendition.next();
+            } 
+          } else {
+            if (time < 500 && offsetY > 40) {
+            } else if (time < 500 && offsetY < -40) {
+              window.flutter_inappwebview.callHandler('showMenu');
+            } 
+          }
+          event.stopPropagation();
         })
         
         getCurrentChapterTitle = function() {
