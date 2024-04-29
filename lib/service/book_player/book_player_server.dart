@@ -16,13 +16,15 @@ class Server {
   HttpServer? _server;
 
   Future start() async {
-    var handler = const shelf.Pipeline().addMiddleware(shelf.logRequests()).addHandler(_handleRequests);
+    var handler = const shelf.Pipeline()
+        .addMiddleware(shelf.logRequests())
+        .addHandler(_handleRequests);
 
     _server = await io.serve(handler, 'localhost', 0);
     print('Serving at http://${_server?.address.host}:${_server?.port}');
   }
 
-  int get port  {
+  int get port {
     return _server!.port;
   }
 
@@ -31,29 +33,38 @@ class Server {
     print('Server stopped');
   }
 
- Future<String> loadAsset(String path) async {
-  return await rootBundle.loadString(path);
-}
-Future<shelf.Response> _handleRequests(shelf.Request request) async {
-  final uriPath = request.requestedUri.path;
+  Future<String> loadAsset(String path) async {
+    return await rootBundle.loadString(path);
+  }
 
-  if (uriPath.startsWith('/book/')) {
-    return _handleBookRequest(request);
+  Future<shelf.Response> _handleRequests(shelf.Request request) async {
+    final uriPath = request.requestedUri.path;
+
+    if (uriPath.startsWith('/book/')) {
+      return _handleBookRequest(request);
+    } else if (uriPath.startsWith('/js/')) {
+      String content = await loadAsset('assets/js/${path.basename(uriPath)}');
+      return shelf.Response.ok(
+        content,
+        headers: {'Content-Type': 'application/javascript'},
+      );
+    } else if (uriPath.startsWith('/fonts/')) {
+      final file =
+          await rootBundle.load('assets/fonts/${path.basename(uriPath)}');
+      return shelf.Response.ok(
+        file.buffer.asUint8List(),
+        headers: {
+          'Content-Type': 'font/opentype',
+          'Access-Control-Allow-Origin': '*', // Add this line
+        },
+      );
+    } else {
+      return shelf.Response.ok(
+        'Request for "${request.url}"',
+        headers: {'Access-Control-Allow-Origin': '*'},
+      );
+    }
   }
-  else if (uriPath.startsWith('/js/')) {
-    String content = await loadAsset('assets/js/${path.basename(uriPath)}');
-    return shelf.Response.ok(
-      content,
-      headers: {'Content-Type': 'application/javascript'},
-    );
-  }
-  else {
-    return shelf.Response.ok(
-      'Request for "${request.url}"',
-      headers: {'Access-Control-Allow-Origin': '*'},
-    );
-  }
-}
 
   shelf.Response _handleBookRequest(shelf.Request request) {
     final bookPath = Uri.decodeComponent(request.url.path.substring(5));
