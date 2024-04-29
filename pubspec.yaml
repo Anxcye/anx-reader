@@ -57,9 +57,11 @@ flutter:
     - assets/js/epub.min.js
     - assets/js/epub.js
     - assets/js/jszip.min.js
+    - assets/fonts/SourceHanSerifSC-Regular.otf
+
 
   fonts:
     - family: SourceHanSerif
       fonts:
-        - asset: fonts/SourceHanSerifSC-Regular.otf
+        - asset: assets/fonts/SourceHanSerifSC-Regular.otf
 

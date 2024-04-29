@@ -14,9 +14,6 @@ String generateIndexHtml(
   String textColor =
       theme.textColor.substring(2) + theme.textColor.substring(0, 2);
 // language=HTML
-        // html {
-        //   background-color: #$backgroundColor;
-        // }
   return '''
   <!DOCTYPE html>
     <html lang="en">
@@ -33,9 +30,14 @@ String generateIndexHtml(
           margin: 0;
           padding: 0; 
           column-fill: auto;
+          font-family: 'SourceHanSerif';
         }
         #viewer {
           background-color: #$backgroundColor;
+        }
+        @font-face {
+          font-family: 'SourceHanSerif';
+          src: url('http://localhost:${Server().port}/fonts/SourceHanSerifSC-Regular.otf');
         }
 
       </style>
@@ -53,11 +55,84 @@ String generateIndexHtml(
         })
         var refreshProgress
         
+        // rendition.hooks.render.register(function(contents, view) {
+        //   var doc = contents.document;
+        //   doc.body.style.backgroundColor = '#$backgroundColor';
+        //   doc.body.style.paddingTop = '${style.topMargin}px';
+        //   doc.body.style.paddingBottom = '${style.bottomMargin}px';
+        //   doc.body.style.lineHeight = '${style.lineHeight}';
+        //   doc.body.style.letterSpacing = '${style.letterSpacing}px';
+        //   doc.body.style.textAlign = 'justify';
+        //   // image
+        //   var images = doc.querySelectorAll('img');
+        //   images.forEach(function(img) {
+        //     img.style.maxWidth = '-webkit-fill-available';
+        //   });
+        //   // p
+        //   var paragraphs = doc.querySelectorAll('p');
+        //   paragraphs.forEach(function(p) {
+        //     p.style.paddingTop = '${style.paragraphSpacing}px';
+        //     p.style.lineHeight = '${style.lineHeight}';
+        //   });
+        //   // pre
+        //   var pres = doc.querySelectorAll('pre');
+        //   pres.forEach(function(pre) {
+        //     pre.style.whiteSpace = 'pre-wrap';
+        //   });
+        //   // *
+        //   var all = doc.querySelectorAll('*');
+        //   all.forEach(function(e) {
+        //     // e.style.fontFamily = 'SourceHanSerif';
+        //   });
+        // });
+        
+// rendition.hooks.render.register(function(contents, view) {
+// // book.spine.hooks.content.register(function(contents, view) {
+//   var doc = contents.document;
+//   var styleEl = doc.createElement('style');
+//
+//   styleEl.textContent = `
+//     @font-face {
+//       font-family: 'SourceHanSerif';
+//       src: url('http://localhost:${Server().port}/fonts/SourceHanSerifSC-Regular.otf');
+//     }
+//     html {
+//       background-color: '#$backgroundColor';
+//       color: '#$textColor';
+//     }
+//     body {
+//       padding-top: '${style.topMargin}px !important';
+//       padding-bottom: '${style.bottomMargin}px !important';
+//       line-height: '${style.lineHeight} !important';
+//       letter-spacing: '${style.letterSpacing}px !important';
+//       text-align: 'justify !important';
+//     }
+//     * {
+//       font-family: 'SourceHanSerif !important';
+//     }
+//     p {
+//       padding-top: '${style.paragraphSpacing}px !important';
+//       line-height: '${style.lineHeight} !important';
+//     }
+//     pre {
+//       white-space: 'pre-wrap' !important;
+//     }
+//     img {
+//       max-width: '-webkit-fill-available !important';
+//     }
+//   `;
+//
+//   doc.head.appendChild(styleEl);
+// });    
+        
         defaultStyle = function() {
           rendition.themes.fontSize('${style.fontSize}%');
-          rendition.themes.font('${style.fontFamily}');
-    
+          
           rendition.themes.default({
+          '@font-face': {
+            'font-family': 'SourceHanSerif',
+            'src': 'url(http://localhost:${Server().port}/fonts/SourceHanSerifSC-Regular.otf)',
+          },
             'html': {
               'background-color': '#$backgroundColor',
               'color': '#$textColor',
@@ -67,13 +142,17 @@ String generateIndexHtml(
               'padding-bottom': '${style.bottomMargin}px !important',
               'line-height': '${style.lineHeight} !important',
               'letter-spacing': '${style.letterSpacing}px !important',
+              'text-align': 'justify !important',
+            },
+            '*': {
+              // 'font-family': 'SourceHanSerif !important',
+              'white-space': 'pre-wrap',
             },
             'p': {
               'padding-top': '${style.paragraphSpacing}px !important',
               'line-height': '${style.lineHeight} !important',
             },
             'pre':{
-              'white-space': 'pre-wrap',
             },
             'img':{
               'max-width':'-webkit-fill-available !important',
@@ -84,11 +163,42 @@ String generateIndexHtml(
         
         
         book.ready.then(function() {
-          defaultStyle();
           return book.locations.generate(1000); 
         }).then(function(){
           refreshProgress();
         })
+        
+        // touch event
+        var touchStarX = 0;
+        var touchStarY = 0;
+        var touchStartTime = 0;
+        rendition.on('touchstart', event => {   //通过on方法将事件绑定到渲染上
+          console.log(event)
+          touchStarX = event.changedTouches[0].clientX;
+          touchStarY = event.changedTouches[0].clientY;
+          touchStartTime = event.timeStamp
+        })
+        rendition.on('touchend', event => {
+          console.log(event)
+          const offsetX = event.changedTouches[0].clientX - touchStarX
+          const offsetY = event.changedTouches[0].clientY - touchStarY
+          const time = event.timeStamp - touchStartTime
+          console.log(offsetX, time)
+          if (Math.abs(offsetX) > Math.abs(offsetY)) {
+            if (time < 500 && offsetX > 40) {
+              rendition.prev();
+            } else if (time < 500 && offsetX < -40) {
+              rendition.next();
+            } 
+          } else {
+            if (time < 500 && offsetY > 40) {
+            } else if (time < 500 && offsetY < -40) {
+              window.flutter_inappwebview.callHandler('showMenu');
+            } 
+          }
+          event.stopPropagation();
+        })
+        
         
         getCurrentChapterTitle = function() {
           let toc = book.navigation.toc;
@@ -147,7 +257,7 @@ String generateIndexHtml(
           }
     
           rendition.on('relocated', function(locations) {
-            defaultStyle();
+            // defaultStyle();
             refreshProgress();
             setClickEvent();
             window.flutter_inappwebview.callHandler('onRelocated', locations.start.index);
