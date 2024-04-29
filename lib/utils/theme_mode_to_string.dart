@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 String themeModeToString(ThemeMode themeMode) {
-  print(themeMode.toString());
   switch (themeMode) {
     case ThemeMode.dark:
       return 'dark';

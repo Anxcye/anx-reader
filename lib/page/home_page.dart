@@ -1,11 +1,9 @@
 import 'package:anx_reader/l10n/localization_extension.dart';
 import 'package:anx_reader/page/bookshelf_page.dart';
 import 'package:anx_reader/page/notes_page.dart';
-import 'package:anx_reader/page/settinds_page/settings_page.dart';
+import 'package:anx_reader/page/settings_page/settings_page.dart';
 import 'package:anx_reader/page/statistics_page.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});

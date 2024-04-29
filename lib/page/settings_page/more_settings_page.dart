@@ -1,7 +1,5 @@
 import 'package:anx_reader/l10n/localization_extension.dart';
-import 'package:anx_reader/page/bookshelf_page.dart';
-import 'package:anx_reader/page/settinds_page/appearance.dart';
-import 'package:anx_reader/page/settinds_page/bookshelf.dart';
+import 'package:anx_reader/page/settings_page/appearance.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
