@@ -10,6 +10,7 @@ class Book {
   String author;
   bool isDeleted;
   String? description;
+  double rating;
   DateTime createTime;
   DateTime updateTime;
 
@@ -23,6 +24,7 @@ class Book {
       required this.author,
       required this.isDeleted,
       this.description,
+      required this.rating,
       required this.createTime,
       required this.updateTime});
 
@@ -44,6 +46,7 @@ class Book {
       'author': author,
       'is_deleted': isDeleted ? 1 : 0,
       'description': description,
+      'rating': rating,
       'create_time': createTime.toIso8601String(),
       'update_time': updateTime.toIso8601String(),
     };

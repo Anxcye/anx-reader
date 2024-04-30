@@ -9,6 +9,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../models/book.dart';
 import '../models/reading_time.dart';
+import '../service/book.dart';
 import '../utils/get_base_path.dart';
 
 class BookDetail extends StatefulWidget {
@@ -22,14 +23,14 @@ class BookDetail extends StatefulWidget {
 }
 
 class _BookDetailState extends State<BookDetail> {
-  // TODO: Replace this with the actual rating
-  double rating = 3.5;
+  late double rating;
   bool isEditing = false;
   late Image coverImage;
 
   @override
   void initState() {
     super.initState();
+    rating = widget.book.rating;
     coverImage = Image.file(File(widget.book.coverFullPath));
   }
 
@@ -262,6 +263,7 @@ class _BookDetailState extends State<BookDetail> {
               onRatingUpdate: (rating) {
                 setState(() {
                   this.rating = rating;
+                  updateBookRating(widget.book, rating);
                 });
               },
             ),

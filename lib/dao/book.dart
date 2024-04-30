@@ -23,6 +23,7 @@ Future<List<Book>> selectBooks() async {
       author: maps[i]['author'],
       isDeleted: maps[i]['is_deleted'] == 1 ? true : false,
       description: maps[i]['description'],
+      rating: maps[i]['rating'] ?? 0.0,
       createTime: DateTime.parse(maps[i]['create_time']),
       updateTime: DateTime.parse(maps[i]['update_time']),
     );
@@ -64,6 +65,7 @@ Future<Book> selectBookById(int id) async {
     author: maps[0]['author'],
     isDeleted: maps[0]['is_deleted'] == 1 ? true : false,
     description: maps[0]['description'],
+    rating: maps[0]['rating'] ?? 0.0,
     createTime: DateTime.parse(maps[0]['create_time']),
     updateTime: DateTime.parse(maps[0]['update_time']),
   );
