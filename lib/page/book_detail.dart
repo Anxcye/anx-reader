@@ -9,6 +9,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../models/book.dart';
 import '../models/reading_time.dart';
+import '../utils/get_base_path.dart';
 
 class BookDetail extends StatefulWidget {
   BookDetail({super.key, required this.book, required this.onRefresh});
@@ -29,7 +30,7 @@ class _BookDetailState extends State<BookDetail> {
   @override
   void initState() {
     super.initState();
-    coverImage = Image.file(File(widget.book.coverPath));
+    coverImage = Image.file(File(widget.book.coverFullPath));
   }
 
   @override
@@ -49,18 +50,18 @@ class _BookDetailState extends State<BookDetail> {
                     child: ListView(
                       padding: const EdgeInsets.all(0),
                       children: [
-                        bookBaseDetail(context, widget.book, constraints.maxWidth / 2 - 20),
+                        bookBaseDetail(context, widget.book,
+                            constraints.maxWidth / 2 - 20),
                         editButton(),
                         SizedBox(height: 5),
                         bookStatistics(context, widget.book),
-
                       ],
                     ),
                   ),
                   SizedBox(width: 20),
                   Expanded(
                     flex: 1,
-                    child:Padding(
+                    child: Padding(
                       padding: const EdgeInsets.only(top: 20, bottom: 20),
                       child: moreDetail(),
                     ),
@@ -191,16 +192,21 @@ class _BookDetailState extends State<BookDetail> {
                 if (image != null) {
                   print('Image path: ${image.path}');
                   // Delete the existing cover image file
-                  final File oldCoverImageFile = File(widget.book.coverPath);
+                  final File oldCoverImageFile =
+                      File(widget.book.coverFullPath);
                   if (await oldCoverImageFile.exists()) {
                     await oldCoverImageFile.delete();
                   }
 
+                  // String newPath =
+                  //     '${widget.book.coverPath.split('/').sublist(0, widget.book.coverPath.split('/').length - 1).join('/')}/${widget.book.title} - ${widget.book.author} - ${DateTime.now().toString()}.png';
                   String newPath =
-                      '${widget.book.coverPath.split('/').sublist(0, widget.book.coverPath.split('/').length - 1).join('/')}/${widget.book.title} - ${widget.book.author} - ${DateTime.now().toString()}.png';
-                  print('New path: $newPath');
+                      '${widget.book.coverPath.split('/').sublist(0, widget.book.coverPath.split('/').length - 1).join('/')}/${widget.book.title.length > 20 ? widget.book.title.substring(0, 20) : widget.book.title} - ${widget.book.author} - ${DateTime.now().toString()}.png';
 
-                  final File newCoverImageFile = File(newPath);
+                  print('New path: $newPath');
+                  String newFullPath = getBasePath(newPath);
+
+                  final File newCoverImageFile = File(newFullPath);
                   await newCoverImageFile
                       .writeAsBytes(await image.readAsBytes());
                   widget.book.coverPath = newPath;

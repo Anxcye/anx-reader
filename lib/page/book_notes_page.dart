@@ -118,7 +118,7 @@ ClipRRect bookCover(Book book) {
     borderRadius: BorderRadius.circular(8),
     child: Image.file(
       File(
-        book.coverPath,
+        book.coverFullPath,
       ),
       height: 180,
       width: 120,

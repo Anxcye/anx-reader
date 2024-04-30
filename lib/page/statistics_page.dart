@@ -290,7 +290,7 @@ class BookStatisticItem extends StatelessWidget {
                       borderRadius: BorderRadius.circular(8),
                       child: Image.file(
                         File(
-                          snapshot.data!.coverPath,
+                          snapshot.data!.coverFullPath,
                         ),
                         height: 130,
                         width: 90,
