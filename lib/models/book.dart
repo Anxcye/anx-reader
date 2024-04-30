@@ -1,3 +1,5 @@
+import '../utils/get_base_path.dart';
+
 class Book {
   int id;
   String title;
@@ -23,6 +25,14 @@ class Book {
       this.description,
       required this.createTime,
       required this.updateTime});
+
+  String get coverFullPath {
+    return getBasePath(coverPath);
+  }
+  String get fileFullPath {
+    return getBasePath(filePath);
+  }
+
 
   Map<String, Object?> toMap() {
     return {

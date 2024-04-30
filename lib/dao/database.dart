@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
@@ -48,7 +50,6 @@ const PRIMARY_THEME_2 = '''
 INSERT INTO tb_themes (background_color, text_color, background_image_path) VALUES ('ffcccccc', 'ff121212', '')
 ''';
 
-
 const CREATE_NOTE_SQL = '''
 CREATE TABLE tb_notes (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -92,14 +93,32 @@ class DBHelper {
     final databasePath = await getDatabasesPath();
     final path = join(databasePath, 'app_database.db');
 
-    return await openDatabase(path, version: 1, onCreate: (db, version) async {
-      await db.execute(CREATE_BOOK_SQL);
-      await db.execute(CREATE_NOTE_SQL);
-      await db.execute(CREATE_THEME_SQL);
-      await db.execute(CREATE_STYLE_SQL);
-      await db.execute(CREATE_READING_TIME_SQL);
-      await db.execute(PRIMARY_THEME_1);
-      await db.execute(PRIMARY_THEME_2);
-    });
+    return await openDatabase(
+      path,
+      version: 2,
+      onCreate: (db, version) async {
+        await db.execute(CREATE_BOOK_SQL);
+        await db.execute(CREATE_NOTE_SQL);
+        await db.execute(CREATE_THEME_SQL);
+        await db.execute(CREATE_STYLE_SQL);
+        await db.execute(CREATE_READING_TIME_SQL);
+        await db.execute(PRIMARY_THEME_1);
+        await db.execute(PRIMARY_THEME_2);
+      },
+      onUpgrade: onUpgradeDatabase,
+    );
+  }
+
+  void onUpgradeDatabase(Database db, int oldVersion, int newVersion) {
+    switch (oldVersion) {
+      case 1:
+        print('upgrade database from $oldVersion to $newVersion');
+        // add a column (rating) to tb_books
+        db.execute('ALTER TABLE tb_books ADD COLUMN rating REAL');
+        // remove '/data/user/0/com.anxcye.anx_reader/app_flutter/' from file_path & cover_path
+        db.execute('UPDATE tb_books SET file_path = REPLACE(file_path, "/data/user/0/com.anxcye.anx_reader/app_flutter/", "")');
+        db.execute('UPDATE tb_books SET cover_path = REPLACE(cover_path, "/data/user/0/com.anxcye.anx_reader/app_flutter/", "")');
+        break;
+    }
   }
 }

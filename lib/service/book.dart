@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:anx_reader/dao/book.dart';
 import 'package:anx_reader/models/book.dart';
+import 'package:anx_reader/utils/get_base_path.dart';
 import 'package:epubx/epubx.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
@@ -18,17 +19,19 @@ Future<Book> importBook(File file) async {
   final newBookName =
       '${title.length > 20 ? title.substring(0, 20) : title}-$author-${DateTime.now().toString()}';
 
-  Directory appDocDir = await getApplicationDocumentsDirectory();
-  final fileDir = Directory('${appDocDir.path}/file');
-  final coverDir = Directory('${appDocDir.path}/cover');
-  if (!fileDir.existsSync()) {
-    fileDir.createSync();
-  }
-  if (!coverDir.existsSync()) {
-    coverDir.createSync();
-  }
-  final filePath = '${fileDir.path}/$newBookName.epub';
-  final coverPath = '${coverDir.path}/$newBookName.png';
+  // Directory appDocDir = await getApplicationDocumentsDirectory();
+  // final fileDir = Directory('${appDocDir.path}/file');
+  // final coverDir = Directory('${appDocDir.path}/cover');
+  // if (!fileDir.existsSync()) {
+  //   fileDir.createSync();
+  // }
+  // if (!coverDir.existsSync()) {
+  //   coverDir.createSync();
+  // }
+  final relativeFilePath = 'file/$newBookName.epub';
+  final filePath = getBasePath(relativeFilePath);
+  final relativeCoverPath = 'cover/$newBookName.png';
+  final coverPath = getBasePath(relativeCoverPath);
 
   await file.copy(filePath);
   saveImageToLocal(cover, coverPath);
@@ -36,8 +39,8 @@ Future<Book> importBook(File file) async {
   Book book = Book(
       id: -1,
       title: title,
-      coverPath: coverPath,
-      filePath: filePath,
+      coverPath: relativeCoverPath,
+      filePath: relativeFilePath,
       lastReadPosition: '',
       readingPercentage: 0,
       author: author,

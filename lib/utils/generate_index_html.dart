@@ -1,4 +1,5 @@
 import 'package:anx_reader/models/read_theme.dart';
+import 'package:anx_reader/utils/get_base_path.dart';
 
 import '../models/book.dart';
 import '../models/book_style.dart';
@@ -6,7 +7,8 @@ import '../service/book_player/book_player_server.dart';
 
 String generateIndexHtml(
     Book book, BookStyle style, ReadTheme theme, String cfi) {
-  String bookPath = 'http://localhost:${Server().port}/book/${book.filePath}';
+  String bookPath =
+      'http://localhost:${Server().port}/book/${getBasePath(book.filePath)}';
   String epubJs = 'http://localhost:${Server().port}/js/epub.js';
   String zipJs = 'http://localhost:${Server().port}/js/jszip.min.js';
   String backgroundColor = theme.backgroundColor.substring(2) +
