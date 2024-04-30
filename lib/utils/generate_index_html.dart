@@ -30,10 +30,10 @@ String generateIndexHtml(
           margin: 0;
           padding: 0; 
           column-fill: auto;
-          font-family: 'SourceHanSerif';
         }
         #viewer {
           background-color: #$backgroundColor;
+          font-family: 'SourceHanSerif' !important;
         }
         @font-face {
           font-family: 'SourceHanSerif';
@@ -55,36 +55,36 @@ String generateIndexHtml(
         })
         var refreshProgress
         
-        // rendition.hooks.render.register(function(contents, view) {
-        //   var doc = contents.document;
-        //   doc.body.style.backgroundColor = '#$backgroundColor';
-        //   doc.body.style.paddingTop = '${style.topMargin}px';
-        //   doc.body.style.paddingBottom = '${style.bottomMargin}px';
-        //   doc.body.style.lineHeight = '${style.lineHeight}';
-        //   doc.body.style.letterSpacing = '${style.letterSpacing}px';
-        //   doc.body.style.textAlign = 'justify';
-        //   // image
-        //   var images = doc.querySelectorAll('img');
-        //   images.forEach(function(img) {
-        //     img.style.maxWidth = '-webkit-fill-available';
-        //   });
-        //   // p
-        //   var paragraphs = doc.querySelectorAll('p');
-        //   paragraphs.forEach(function(p) {
-        //     p.style.paddingTop = '${style.paragraphSpacing}px';
-        //     p.style.lineHeight = '${style.lineHeight}';
-        //   });
-        //   // pre
-        //   var pres = doc.querySelectorAll('pre');
-        //   pres.forEach(function(pre) {
-        //     pre.style.whiteSpace = 'pre-wrap';
-        //   });
-        //   // *
-        //   var all = doc.querySelectorAll('*');
-        //   all.forEach(function(e) {
-        //     // e.style.fontFamily = 'SourceHanSerif';
-        //   });
-        // });
+        rendition.hooks.render.register(function(contents, view) {
+          var doc = contents.document;
+          doc.body.style.backgroundColor = '#$backgroundColor';
+          doc.body.style.paddingTop = '${style.topMargin}px';
+          doc.body.style.paddingBottom = '${style.bottomMargin}px';
+          doc.body.style.lineHeight = '${style.lineHeight}';
+          doc.body.style.letterSpacing = '${style.letterSpacing}px';
+          doc.body.style.textAlign = 'justify';
+          // image
+          var images = doc.querySelectorAll('img');
+          images.forEach(function(img) {
+            img.style.maxWidth = '-webkit-fill-available';
+          });
+          // p
+          var paragraphs = doc.querySelectorAll('p');
+          paragraphs.forEach(function(p) {
+            p.style.paddingTop = '${style.paragraphSpacing}px';
+            p.style.lineHeight = '${style.lineHeight}';
+          });
+          // pre
+          var pres = doc.querySelectorAll('pre');
+          pres.forEach(function(pre) {
+            pre.style.whiteSpace = 'pre-wrap';
+          });
+          // *
+          var all = doc.querySelectorAll('*');
+          all.forEach(function(e) {
+            e.style.fontFamily = 'SourceHanSerif';
+          });
+        });
         
 // rendition.hooks.render.register(function(contents, view) {
 // // book.spine.hooks.content.register(function(contents, view) {
@@ -129,10 +129,10 @@ String generateIndexHtml(
           rendition.themes.fontSize('${style.fontSize}%');
           
           rendition.themes.default({
-          '@font-face': {
-            'font-family': 'SourceHanSerif',
-            'src': 'url(http://localhost:${Server().port}/fonts/SourceHanSerifSC-Regular.otf)',
-          },
+          // '@font-face': {
+          //   'font-family': 'SourceHanSerif',
+          //   'src': 'url(http://localhost:${Server().port}/fonts/SourceHanSerifSC-Regular.otf)',
+          // },
             'html': {
               'background-color': '#$backgroundColor',
               'color': '#$textColor',
