@@ -125,4 +125,20 @@ extension LocalizationExtension on BuildContext {
 
   String get readingPageCurrentPage =>
       AppLocalizations.of(this)?.reading_page_current_page ?? '';
+
+  String get bookDetailSave =>
+      AppLocalizations.of(this)?.book_detail_save ?? '';
+
+  String get bookDetailEdit =>
+      AppLocalizations.of(this)?.book_detail_edit ?? '';
+
+  String get bookDetailNthBookRead =>
+      AppLocalizations.of(this)?.book_detail_nth_book ?? '';
+
+  String get notesPageDetail =>
+      AppLocalizations.of(this)?.notes_page_detail ?? '';
+
+  String get notesPageExport =>
+      AppLocalizations.of(this)?.notes_page_export ?? '';
+
 }
