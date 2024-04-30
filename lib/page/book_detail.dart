@@ -323,11 +323,10 @@ class _BookDetailState extends State<BookDetail> {
         isEditing
             ? ElevatedButton(
                 child: Row(
-                  children: const [
-                    Icon(Icons.save),
-                    SizedBox(width: 5),
-                    // TODO
-                    Text('Save'),
+                  children: [
+                    const Icon(Icons.save),
+                    const SizedBox(width: 5),
+                    Text(context.bookDetailSave),
                   ],
                 ),
                 onPressed: () {
@@ -340,11 +339,10 @@ class _BookDetailState extends State<BookDetail> {
               )
             : ElevatedButton(
                 child: Row(
-                  children: const [
-                    Icon(Icons.edit),
-                    SizedBox(width: 5),
-                    // TODO
-                    Text('Edit'),
+                  children: [
+                    const Icon(Icons.edit),
+                    const SizedBox(width: 5),
+                    Text(context.bookDetailEdit),
                   ],
                 ),
                 onPressed: () {
@@ -399,10 +397,9 @@ class _BookDetailState extends State<BookDetail> {
                 color: Theme.of(context).textTheme.bodyLarge!.color,
               ),
             ),
-            const TextSpan(
-              // TODO
-              text: ' books',
-              style: TextStyle(
+            TextSpan(
+              text: context.bookDetailNthBookRead,
+              style: const TextStyle(
                 fontSize: 15,
                 color: Colors.grey,
               ),

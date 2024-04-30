@@ -49,6 +49,13 @@
   "notes_tips_2": "在书中划线，记录你的思绪！",
 
   "reading_page_chapter_pages": "本章页数",
-  "reading_page_current_page": "当前页"
+  "reading_page_current_page": "当前页",
+
+  "book_detail_save": "保存",
+  "book_detail_edit": "编辑",
+    "book_detail_nth_book": "第本读过的书",
+
+  "notes_page_detail": "详情",
+  "notes_page_export": "导出"
 
 }

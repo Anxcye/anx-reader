@@ -44,6 +44,14 @@
   "notes_tips_1": "There are no notes.",
   "notes_tips_2": "Add a note while reading!",
   "reading_page_chapter_pages": "Chapter Pages",
-  "reading_page_current_page": "Current Page"
+  "reading_page_current_page": "Current Page",
+
+  "book_detail_save": "Save",
+  "book_detail_edit": "Edit",
+    "book_detail_nth_book": "th book read",
+
+  "notes_page_detail": "Detail",
+  "notes_page_export": "Export"
+
 
 }

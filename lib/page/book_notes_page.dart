@@ -163,16 +163,18 @@ Row opetators(BuildContext context, Book book) {
 
   return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
     // TODO
-    operateButton(context, const Icon(Icons.details), 'Detail', () {
+    operateButton(context, const Icon(Icons.details), context.notesPageDetail,
+        () {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => BookDetail(book: book, onRefresh: (){}),
+          builder: (context) => BookDetail(book: book, onRefresh: () {}),
         ),
       );
     }),
     // operateButton(context, Icons.search, 'Search', () {}),
-    operateButton(context, const Icon(Icons.ios_share), 'Export', () {
+    operateButton(context, const Icon(Icons.ios_share), context.notesPageExport,
+        () {
       handleExportNotes();
     }),
     // operateButton(context, Icons.ios_share, 'Export', () {}),
