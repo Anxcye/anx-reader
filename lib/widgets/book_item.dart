@@ -127,6 +127,8 @@ class BookItem extends StatelessWidget {
       readingPercentage: book.readingPercentage,
       author: '',
       isDeleted: true,
+      description: book.description,
+      rating: 0.0,
       createTime: book.createTime,
       updateTime: DateTime.now(),
     ));

@@ -45,6 +45,7 @@ Future<Book> importBook(File file) async {
       readingPercentage: 0,
       author: author,
       isDeleted: false,
+      rating: 0.0,
       createTime: DateTime.now(),
       updateTime: DateTime.now());
   book.id = await insertBook(book);
@@ -74,4 +75,8 @@ void openBook(BuildContext context, Book book, Function updateBookList) {
     }
   });
   print('Open book: ${book.title}');
+}
+void updateBookRating(Book book, double rating) {
+  book.rating = rating;
+  updateBook(book);
 }
