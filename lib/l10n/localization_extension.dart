@@ -135,6 +135,13 @@ extension LocalizationExtension on BuildContext {
   String get bookDetailNthBookRead =>
       AppLocalizations.of(this)?.book_detail_nth_book ?? '';
 
+  String get bookDetailLastReadDate =>
+      AppLocalizations.of(this)?.book_detail_last_read_date ?? '';
+
+  String get bookDetailImportDate =>
+      AppLocalizations.of(this)?.book_detail_import_date ?? '';
+
+
   String get notesPageDetail =>
       AppLocalizations.of(this)?.notes_page_detail ?? '';
 
