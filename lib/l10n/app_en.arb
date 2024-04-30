@@ -48,10 +48,13 @@
 
   "book_detail_save": "Save",
   "book_detail_edit": "Edit",
-    "book_detail_nth_book": "th book read",
+  "book_detail_nth_book": "th book read",
+  "book_detail_last_read_date": "Last read: ",
+  "book_detail_import_date": "Import date: ",
 
   "notes_page_detail": "Detail",
   "notes_page_export": "Export"
+
 
 
 }

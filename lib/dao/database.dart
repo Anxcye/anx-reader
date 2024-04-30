@@ -126,6 +126,7 @@ class DBHelper {
             'UPDATE tb_books SET file_path = REPLACE(file_path, "/data/user/0/com.anxcye.anx_reader/app_flutter/", "")');
         await db.execute(
             'UPDATE tb_books SET cover_path = REPLACE(cover_path, "/data/user/0/com.anxcye.anx_reader/app_flutter/", "")');
+
     }
   }
 }

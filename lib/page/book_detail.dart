@@ -505,12 +505,12 @@ class _BookDetailState extends State<BookDetail> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Import Time: ${widget.book.createTime.toString().substring(0, 10)}',
+                  '${context.bookDetailImportDate}${widget.book.createTime.toString().substring(0, 10)}',
                   style: textStyle,
                 ),
-                Divider(),
+                const Divider(),
                 Text(
-                  'Last Read: ${widget.book.updateTime.toString().substring(0, 10)}',
+                  '${context.bookDetailLastReadDate}${widget.book.updateTime.toString().substring(0, 10)}',
                   style: textStyle,
                 ),
                 Divider(),
