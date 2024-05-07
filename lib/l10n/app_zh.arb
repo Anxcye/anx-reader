@@ -58,6 +58,7 @@
   "book_detail_import_date": "首次导入",
 
   "notes_page_detail": "详情",
-  "notes_page_export": "导出"
+  "notes_page_export": "导出",
+  "common_delete": "删除"
 
 }

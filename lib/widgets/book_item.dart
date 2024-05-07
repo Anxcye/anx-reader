@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:anx_reader/dao/book.dart';
+import 'package:anx_reader/l10n/localization_extension.dart';
 import 'package:anx_reader/service/book.dart';
 import 'package:flutter/material.dart';
 
@@ -87,11 +88,10 @@ class BookItem extends StatelessWidget {
                   },
                   child: Column(
                     // mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
-                      Icon(Icons.details),
-                      Spacer(),
-                      // TODO
-                      Text('details'),
+                    children: [
+                      const Icon(Icons.details),
+                      const Spacer(),
+                      Text(context.notesPageDetail),
                     ],
                   ),
                 ),
@@ -102,11 +102,10 @@ class BookItem extends StatelessWidget {
                   },
                   child: Column(
                     // mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
+                    children: [
                       Icon(Icons.delete),
                       Spacer(),
-                      // TODO
-                      Text('delete'),
+                      Text(context.commonDelete),
                     ],
                   ),
                 ),

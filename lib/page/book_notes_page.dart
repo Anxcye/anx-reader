@@ -162,7 +162,6 @@ Row opetators(BuildContext context, Book book) {
   }
 
   return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-    // TODO
     operateButton(context, const Icon(Icons.details), context.notesPageDetail,
         () {
       Navigator.push(
