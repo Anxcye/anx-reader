@@ -53,7 +53,8 @@
   "book_detail_import_date": "Import date: ",
 
   "notes_page_detail": "Detail",
-  "notes_page_export": "Export"
+  "notes_page_export": "Export",
+  "common_delete": "Delete"
 
 
 

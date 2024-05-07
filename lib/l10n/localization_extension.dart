@@ -148,4 +148,6 @@ extension LocalizationExtension on BuildContext {
   String get notesPageExport =>
       AppLocalizations.of(this)?.notes_page_export ?? '';
 
+  String get commonDelete =>
+      AppLocalizations.of(this)?.common_delete ?? '';
 }
