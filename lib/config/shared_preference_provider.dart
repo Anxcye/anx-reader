@@ -3,16 +3,16 @@ import 'package:anx_reader/models/read_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class SharedPreferencesProvider extends ChangeNotifier {
+class Prefs extends ChangeNotifier {
   late SharedPreferences prefs;
-  static final SharedPreferencesProvider _instance =
-      SharedPreferencesProvider._internal();
+  static final Prefs _instance =
+      Prefs._internal();
 
-  factory SharedPreferencesProvider() {
+  factory Prefs() {
     return _instance;
   }
 
-  SharedPreferencesProvider._internal() {
+  Prefs._internal() {
     initPrefs();
   }
 

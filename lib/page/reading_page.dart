@@ -55,8 +55,8 @@ class _ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
     _readTimeWatch.start();
 
     _book = widget.book;
-    _bookStyle = SharedPreferencesProvider().bookStyle;
-    _readTheme = SharedPreferencesProvider().readTheme;
+    _bookStyle = Prefs().bookStyle;
+    _readTheme = Prefs().readTheme;
     loadContent();
   }
 

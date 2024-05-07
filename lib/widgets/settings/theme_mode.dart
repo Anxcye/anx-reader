@@ -12,14 +12,12 @@ class ChangeThemeMode extends StatefulWidget {
 }
 
 class _ChangeThemeModeState extends State<ChangeThemeMode> {
-  late SharedPreferencesProvider prefs;
   late String _themeMode;
 
   @override
   void initState() {
     super.initState();
-    prefs = SharedPreferencesProvider();
-    _themeMode = themeModeToString(prefs.themeMode);
+    _themeMode = themeModeToString(Prefs().themeMode);
   }
 
   @override
@@ -39,7 +37,7 @@ class _ChangeThemeModeState extends State<ChangeThemeMode> {
     return Expanded(
       child: ElevatedButton(
         onPressed: () {
-          prefs.saveThemeModeToPrefs(mode);
+          Prefs().saveThemeModeToPrefs(mode);
           setState(() {
             _themeMode = mode;
           });
