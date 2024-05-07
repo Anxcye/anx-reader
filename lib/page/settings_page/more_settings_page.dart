@@ -1,5 +1,6 @@
 import 'package:anx_reader/l10n/localization_extension.dart';
 import 'package:anx_reader/page/settings_page/appearance.dart';
+import 'package:anx_reader/page/settings_page/sync.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -34,7 +35,14 @@ class SubMoreSettings extends StatefulWidget {
 }
 
 class _SubMoreSettingsState extends State<SubMoreSettings> {
-  Widget settingsDetail = SubAppearanceSettings(isMobile: false);
+  int selectedIndex = 0;
+  late Widget settingsDetail;
+
+  @override
+  void initState() {
+    super.initState();
+    settingsDetail = const SubAppearanceSettings(isMobile: false);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -70,9 +78,10 @@ class _SubMoreSettingsState extends State<SubMoreSettings> {
     );
   }
 
-  void setDetail(Widget Detail) {
+  void setDetail(Widget Detail, int id) {
     setState(() {
       settingsDetail = Detail;
+      selectedIndex = id;
     });
   }
 
@@ -80,9 +89,18 @@ class _SubMoreSettingsState extends State<SubMoreSettings> {
     return ListView(
       children: [
         AppearanceSetting(
-            isMobile: isMobile, setDetail: setDetail),
-        // BookshelfSettings(),
-        About(),
+          isMobile: isMobile,
+          id: 0,
+          selectedIndex: selectedIndex,
+          setDetail: setDetail,
+        ),
+        SyncSetting(
+          isMobile: isMobile,
+          id: 1,
+          selectedIndex: selectedIndex,
+          setDetail: setDetail,
+        ),
+        About()
       ],
     );
   }
