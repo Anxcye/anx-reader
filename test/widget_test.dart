@@ -5,23 +5,28 @@
 // gestures. You can also use WidgetTester to find child widgets in the widget
 // tree, read text, and verify that the values of widget properties are correct.
 
+import 'package:anx_reader/utils/webdav/convert_db_to_json.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 
 
-void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    int a = 1;
-    switch (a) {
-      case 1:
-        print('1');
-    continue go1;
-    go1:
-      case 2:
-        print('2');
-        break;
-      default:
-        print('default');
-    }
-  });
+// void main() {
+//   testWidgets('Counter increments smoke test', (WidgetTester tester) async {
+//     int a = 1;
+//     switch (a) {
+//       case 1:
+//         print('1');
+//     continue go1;
+//     go1:
+//       case 2:
+//         print('2');
+//         break;
+//       default:
+//         print('default');
+//     }
+//   });
+// }
+void main() async {
+  final json = await convertDbToJson();
+  print(json);
 }
