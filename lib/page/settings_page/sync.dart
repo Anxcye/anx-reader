@@ -68,7 +68,7 @@ class SubSyncSettings extends StatelessWidget {
             title: Text('WebDAV'),
             tiles: [
               SettingsTile.switchTile(
-                leading: const Icon(Icons.cached),
+                  leading: const Icon(Icons.cached),
                   initialValue: true,
                   onToggle: (bool value) {
                     // TODO
@@ -123,16 +123,18 @@ void showWebdavDialog(BuildContext context) {
           buildTextField('URL', webdavUrlController),
           buildTextField('Username', webdavUsernameController),
           buildTextField('Password', webdavPasswordController),
+
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               TextButton(
-                onPressed: () {
+                onPressed: () async {
                   webdavInfo['url'] = webdavUrlController.text;
                   webdavInfo['username'] = webdavUsernameController.text;
                   webdavInfo['password'] = webdavPasswordController.text;
-                  testWebdav(webdavInfo);
+                 testWebdav(webdavInfo);
                 },
+
                 // TODO l10n
                 child: const Text('Test'),
               ),
