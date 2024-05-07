@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:anx_reader/dao/book_note.dart';
 import 'package:anx_reader/l10n/localization_extension.dart';
+import 'package:anx_reader/utils/convert_seconds.dart';
 import 'package:anx_reader/widgets/tips/notes_tips.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -141,7 +142,7 @@ class _NotesPageState extends State<NotesPage> {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
             return snapshot.data!.isEmpty
-                ? Expanded(child: const Center(child: NotesTips()))
+                ? const Expanded(child: Center(child: NotesTips()))
                 : Expanded(
                     child: ListView.builder(
                         itemCount: snapshot.data!.length,
@@ -224,9 +225,9 @@ class _NotesPageState extends State<NotesPage> {
                                 ],
                               ),
                             ),
-                            SizedBox(height: 8),
+                            const SizedBox(height: 8),
                             Text(snapshot.data!.title, style: titleStyle),
-                            SizedBox(height: 18),
+                            const SizedBox(height: 18),
                             // Reading time
                             FutureBuilder<int>(
                               future: selectTotalReadingTimeByBookId(bookId),
@@ -234,7 +235,7 @@ class _NotesPageState extends State<NotesPage> {
                                 if (snapshot.connectionState ==
                                     ConnectionState.done) {
                                   return Text(
-                                    '${snapshot.data! ~/ 60} ${context.notesMinutes}',
+                                    convertSeconds(snapshot.data!),
                                     style: readingTimeStyle,
                                   );
                                 } else {

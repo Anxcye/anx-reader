@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/l10n/localization_extension.dart';
 import 'package:anx_reader/models/book.dart';
+import 'package:anx_reader/utils/convert_seconds.dart';
 import 'package:anx_reader/widgets/tips/statistic_tips.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -135,11 +136,11 @@ Widget _totalReadTime() {
                 children: <TextSpan>[
                   TextSpan(text: '$H', style: totalReadTimeTextStyle()),
                   TextSpan(
-                      text: ' ${context.statisticHours} ',
+                      text: ' ${context.commonHours} ',
                       style: bigTextStyle()),
                   TextSpan(text: '$M', style: totalReadTimeTextStyle()),
                   TextSpan(
-                      text: ' ${context.statisticMinutes}',
+                      text: ' ${context.commonMinutes}',
                       style: bigTextStyle()),
                 ],
               ),
@@ -267,11 +268,7 @@ class BookStatisticItem extends StatelessWidget {
     fontWeight: FontWeight.bold,
   );
 
-  String getReadingTime(BuildContext context) {
-    int H = readingTime ~/ 3600;
-    int M = (readingTime % 3600) ~/ 60;
-    return '$H ${context.statisticHours} $M ${context.statisticMinutes}';
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -303,21 +300,20 @@ class BookStatisticItem extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(snapshot.data!.title, style: bookTitleStyle),
-                            SizedBox(height: 10),
+                            const SizedBox(height: 10),
                             Row(
                               children: [
                                 Expanded(
                                   flex: 3,
-                                  child: Text(snapshot.data!.author,
+                                  child:
+                                  Text(snapshot.data!.author,
                                       style: bookAuthorStyle),
                                 ),
-                                Expanded(
-                                  flex: 2,
-                                  child: Text(
+                                  Text(
+                                      // getReadingTime(context),
+                                    convertSeconds(readingTime),
                                       textAlign: TextAlign.end,
-                                      getReadingTime(context),
                                       style: bookReadingTimeStyle),
-                                ),
                               ],
                             ),
                             const SizedBox(height: 20),
@@ -331,7 +327,7 @@ class BookStatisticItem extends StatelessWidget {
                                         Theme.of(context).colorScheme.primary),
                                   ),
                                 ),
-                                SizedBox(width: 10),
+                                const SizedBox(width: 10),
                                 Text(
                                     '${(snapshot.data!.readingPercentage * 100).toInt()} %'),
                               ],

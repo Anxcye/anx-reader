@@ -21,8 +21,6 @@
   "statistic_week": "week",
   "statistic_month": "month",
   "statistic_year": "year",
-  "statistic_hours": "h",
-  "statistic_minutes": "m",
   "statistic_this_week": "This Week",
   "statistic_monday": "Mn",
   "statistic_tuesday": "Tu",
@@ -54,7 +52,13 @@
 
   "notes_page_detail": "Detail",
   "notes_page_export": "Export",
-  "common_delete": "Delete"
+  "common_delete": "Delete",
+
+  "common_hours_full": "hours",
+  "common_hours": "h",
+  "common_minutes_full": "minutes",
+  "common_minutes": "m",
+  "common_seconds_full": "seconds"
 
 
 

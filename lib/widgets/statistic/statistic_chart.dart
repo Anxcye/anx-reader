@@ -1,4 +1,5 @@
 import 'package:anx_reader/l10n/localization_extension.dart';
+import 'package:anx_reader/utils/convert_seconds.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
@@ -55,7 +56,8 @@ class _StatisticChartState extends State<StatisticChart> {
         getTooltipItem: (group, groupIndex, rod, rodIndex) {
           if (touchedIndex != null && group.x.toInt() == touchedIndex) {
             return BarTooltipItem(
-              '${widget.readingTime[group.x.toInt()] ~/ 60}${context.statisticMinutes}',
+              // '${widget.readingTime[group.x.toInt()] ~/ 60}${context.statisticMinutes}',
+              convertSeconds(widget.readingTime[group.x.toInt()]),
               TextStyle(
                 color: topColor,
                 fontWeight: FontWeight.bold,

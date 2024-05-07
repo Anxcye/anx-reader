@@ -60,10 +60,6 @@ extension LocalizationExtension on BuildContext {
 
   String get statisticYear => AppLocalizations.of(this)?.statistic_year ?? '';
 
-  String get statisticHours => AppLocalizations.of(this)?.statistic_hours ?? '';
-
-  String get statisticMinutes =>
-      AppLocalizations.of(this)?.statistic_minutes ?? '';
 
   String get statisticThisWeek =>
       AppLocalizations.of(this)?.statistic_this_week ?? '';
@@ -150,4 +146,18 @@ extension LocalizationExtension on BuildContext {
 
   String get commonDelete =>
       AppLocalizations.of(this)?.common_delete ?? '';
+
+  String get commonHoursFull =>
+      AppLocalizations.of(this)?.common_hours_full ?? '';
+
+  String get commonHours => AppLocalizations.of(this)?.common_hours ?? '';
+
+  String get commonMinutesFull =>
+      AppLocalizations.of(this)?.common_minutes_full ?? '';
+
+  String get commonMinutes =>
+      AppLocalizations.of(this)?.common_minutes ?? '';
+
+  String get commonSecondsFull =>
+      AppLocalizations.of(this)?.common_seconds_full ?? '';
 }

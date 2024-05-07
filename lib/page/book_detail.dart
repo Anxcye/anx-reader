@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:anx_reader/dao/book.dart';
 import 'package:anx_reader/dao/reading_time.dart';
 import 'package:anx_reader/l10n/localization_extension.dart';
+import 'package:anx_reader/utils/convert_seconds.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:image_picker/image_picker.dart';
@@ -437,6 +438,7 @@ class _BookDetailState extends State<BookDetail> {
     );
   }
 
+  // Big statistic item. It shows the total reading time of the book.
   Widget readingTimeItem(BuildContext context) {
     TextStyle digitStyle = TextStyle(
       fontSize: 30,
@@ -464,7 +466,7 @@ class _BookDetailState extends State<BookDetail> {
                     style: digitStyle,
                   ),
                   TextSpan(
-                    text: ' ${context.statisticHours} ',
+                    text: ' ${context.commonHours} ',
                     style: textStyle,
                   ),
                   TextSpan(
@@ -472,7 +474,7 @@ class _BookDetailState extends State<BookDetail> {
                     style: digitStyle,
                   ),
                   TextSpan(
-                    text: ' ${context.statisticMinutes}',
+                    text: ' ${context.commonMinutes}',
                     style: textStyle,
                   ),
                 ],
@@ -548,7 +550,8 @@ class _BookDetailState extends State<BookDetail> {
                   ),
                   const Spacer(),
                   Text(
-                    '$hours ${context.statisticHours} $minutes ${context.statisticMinutes}',
+                    // '$hours ${context.statisticHours} $minutes ${context.statisticMinutes}',
+                    convertSeconds(totalReadingTime),
                     style: const TextStyle(
                       fontSize: 15,
                       // color: Colors.black,
