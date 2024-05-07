@@ -72,7 +72,7 @@ class _ThemeWidgetState extends State<ThemeWidget> {
             width: 90,
             child: GestureDetector(
               onTap: () {
-                SharedPreferencesProvider()
+                Prefs()
                     .saveReadThemeToPrefs(widget.themes[index]);
                 widget.epubPlayerKey.currentState!
                     .changeTheme(widget.themes[index]);

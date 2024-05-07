@@ -124,9 +124,9 @@ class EpubPlayerState extends State<EpubPlayer> {
     _webViewController.addJavaScriptHandler(
         handlerName: 'onRelocated',
         callback: (args) {
-          BookStyle bookStyle = SharedPreferencesProvider().bookStyle;
+          BookStyle bookStyle = Prefs().bookStyle;
           changeStyle(bookStyle);
-          ReadTheme readTheme = SharedPreferencesProvider().readTheme;
+          ReadTheme readTheme = Prefs().readTheme;
           changeTheme(readTheme);
         });
   }

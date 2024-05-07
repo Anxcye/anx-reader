@@ -12,7 +12,7 @@ class StyleWidget extends StatefulWidget {
 }
 
 class _StyleWidgetState extends State<StyleWidget> {
-  BookStyle bookStyle = SharedPreferencesProvider().bookStyle;
+  BookStyle bookStyle = Prefs().bookStyle;
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -30,7 +30,7 @@ class _StyleWidgetState extends State<StyleWidget> {
                     setState(() {
                       bookStyle.fontSize = value;
                       widget.epubPlayerKey.currentState!.changeStyle(bookStyle);
-                      SharedPreferencesProvider().saveBookStyleToPrefs(bookStyle);
+                      Prefs().saveBookStyleToPrefs(bookStyle);
                     });
                   },
                   min: 10,
@@ -53,7 +53,7 @@ class _StyleWidgetState extends State<StyleWidget> {
                     setState(() {
                       bookStyle.sideMargin = value;
                       widget.epubPlayerKey.currentState!.changeStyle(bookStyle);
-                      SharedPreferencesProvider().saveBookStyleToPrefs(bookStyle);
+                      Prefs().saveBookStyleToPrefs(bookStyle);
                     });
                   },
                   min: 0,
@@ -75,7 +75,7 @@ class _StyleWidgetState extends State<StyleWidget> {
                     setState(() {
                       bookStyle.topMargin = value;
                       widget.epubPlayerKey.currentState!.changeStyle(bookStyle);
-                      SharedPreferencesProvider().saveBookStyleToPrefs(bookStyle);
+                      Prefs().saveBookStyleToPrefs(bookStyle);
                     });
                   },
                   min: 0,
@@ -92,7 +92,7 @@ class _StyleWidgetState extends State<StyleWidget> {
                     setState(() {
                       bookStyle.bottomMargin = value;
                       widget.epubPlayerKey.currentState!.changeStyle(bookStyle);
-                      SharedPreferencesProvider().saveBookStyleToPrefs(bookStyle);
+                      Prefs().saveBookStyleToPrefs(bookStyle);
                     });
                   },
                   min: 0,
@@ -114,7 +114,7 @@ class _StyleWidgetState extends State<StyleWidget> {
                       setState(() {
                         bookStyle.lineHeight = value;
                         widget.epubPlayerKey.currentState!.changeStyle(bookStyle);
-                        SharedPreferencesProvider().saveBookStyleToPrefs(bookStyle);
+                        Prefs().saveBookStyleToPrefs(bookStyle);
                       });
                     },
                     min: 0,
@@ -136,7 +136,7 @@ class _StyleWidgetState extends State<StyleWidget> {
                     setState(() {
                       bookStyle.paragraphSpacing = value;
                       widget.epubPlayerKey.currentState!.changeStyle(bookStyle);
-                      SharedPreferencesProvider().saveBookStyleToPrefs(bookStyle);
+                      Prefs().saveBookStyleToPrefs(bookStyle);
                     });
                   },
                   min: 0,
@@ -158,7 +158,7 @@ class _StyleWidgetState extends State<StyleWidget> {
                     setState(() {
                       bookStyle.letterSpacing = value;
                       widget.epubPlayerKey.currentState!.changeStyle(bookStyle);
-                      SharedPreferencesProvider().saveBookStyleToPrefs(bookStyle);
+                      Prefs().saveBookStyleToPrefs(bookStyle);
                     });
                   },
                   min: -3,

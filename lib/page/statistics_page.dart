@@ -146,7 +146,7 @@ Widget _totalReadTime() {
               ),
             ),
             Text(
-              '${SharedPreferencesProvider().beginDate.toString().substring(0, 10)} ${context.statisticToPresent}',
+              '${Prefs().beginDate.toString().substring(0, 10)} ${context.statisticToPresent}',
               style: TextStyle(
                 fontSize: 16,
                 color: Colors.grey[600],
