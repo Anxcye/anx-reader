@@ -7,7 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:settings_ui/settings_ui.dart';
 
 import '../../config/shared_preference_provider.dart';
-import '../../widgets/settings/dialog_option.dart';
+import '../../widgets/settings/simple_dialog.dart';
 import '../../widgets/settings/settings_app_bar.dart';
 
 class AppearanceSetting extends StatelessWidget {
@@ -92,14 +92,14 @@ class SubAppearanceSettings extends StatelessWidget {
   }
 }
 
-showLanguagePickerDialog(BuildContext context) {
+void showLanguagePickerDialog(BuildContext context) {
   final title = context.appearanceLanguage;
   final saveToPrefs = Prefs().saveLocaleToPrefs;
   final children = [
     dialogOption('简体中文', 'zh', saveToPrefs),
     dialogOption('English', 'en', saveToPrefs),
   ];
-  return showSimpleDialog(title, saveToPrefs, children);
+  showSimpleDialog(title, saveToPrefs, children);
 }
 
 
