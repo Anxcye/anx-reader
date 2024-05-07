@@ -9,8 +9,8 @@ import 'package:settings_ui/settings_ui.dart';
 import '../../config/shared_preference_provider.dart';
 import '../../widgets/settings/settings_app_bar.dart';
 
-class AppearanceSetting extends StatelessWidget {
-  const AppearanceSetting(
+class SyncSetting extends StatelessWidget {
+  const SyncSetting(
       {super.key,
       required this.isMobile,
       required this.id,
@@ -26,26 +26,27 @@ class AppearanceSetting extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       leading: const Icon(Icons.palette),
-      title: Text(context.appearance),
+      // TODO l10n
+      title: Text('Sync'),
       trailing: const Icon(Icons.chevron_right),
       selected: selectedIndex == id,
       onTap: () {
         if (!isMobile) {
-          setDetail(SubAppearanceSettings(isMobile: isMobile), id);
+          setDetail(SubSyncSettings(isMobile: isMobile), id);
           return;
         }
         Navigator.push(
           context,
           CupertinoPageRoute(
-              builder: (context) => SubAppearanceSettings(isMobile: isMobile)),
+              builder: (context) => SubSyncSettings(isMobile: isMobile)),
         );
       },
     );
   }
 }
 
-class SubAppearanceSettings extends StatelessWidget {
-  const SubAppearanceSettings({super.key, required this.isMobile});
+class SubSyncSettings extends StatelessWidget {
+  const SubSyncSettings({super.key, required this.isMobile});
 
   final bool isMobile;
 
@@ -62,11 +63,6 @@ class SubAppearanceSettings extends StatelessWidget {
           SettingsSection(
             title: Text(context.appearanceTheme),
             tiles: [
-              CustomSettingsTile(
-                  child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
-                child: ChangeThemeMode(),
-              )),
               SettingsTile.navigation(
                   title: Text(context.appearanceThemeColor),
                   leading: const Icon(Icons.color_lens),
