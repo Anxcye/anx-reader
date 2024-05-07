@@ -5,21 +5,6 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:path_provider/path_provider.dart' as path;
 import 'package:permission_handler/permission_handler.dart';
 
-// Future<String?> getDownloadPath() async {
-//   Directory? downloadDirectory;
-//
-//   if (Platform.isAndroid) {
-//     downloadDirectory = await getDownloadsDirectory();
-//   } else if (Platform.isIOS) {
-//     downloadDirectory = await getApplicationDocumentsDirectory();
-//   }else if (Platform.isWindows) {
-//     downloadDirectory = Directory('C:/Downloads');
-//   } else {
-//     throw UnimplementedError('This platform is not supported');
-//   }
-//
-//   return downloadDirectory?.path;
-// }
 
 Future<String> getDownloadPath() async {
   switch (defaultTargetPlatform) {
