@@ -8,7 +8,8 @@ import 'package:provider/provider.dart';
 import 'package:settings_ui/settings_ui.dart';
 
 import '../../config/shared_preference_provider.dart';
-import '../../widgets/settings/dialog_option.dart';
+import '../../utils/webdav/common.dart';
+import '../../widgets/settings/simple_dialog.dart';
 import '../../widgets/settings/settings_app_bar.dart';
 
 class SyncSetting extends StatelessWidget {
@@ -63,85 +64,89 @@ class SubSyncSettings extends StatelessWidget {
         ),
         sections: [
           SettingsSection(
-            title: Text(context.appearanceTheme),
+            // TODO l10n
+            title: Text('WebDAV'),
             tiles: [
+              SettingsTile.switchTile(
+                leading: const Icon(Icons.cached),
+                  initialValue: true,
+                  onToggle: (bool value) {
+                    // TODO
+                  },
+                  title: const Text('Enable WebDAV')),
               SettingsTile.navigation(
-                  title: Text(context.appearanceThemeColor),
-                  leading: const Icon(Icons.color_lens),
+                  // TODO l10n
+                  title: Text('WebDAV'),
+                  leading: const Icon(Icons.cloud),
                   onPressed: (context) async {
-                    await _showColorPickerDialog(context);
+                    showWebdavDialog(context);
                   }),
               // const CustomSettingsTile(child: Divider()),
             ],
           ),
-          SettingsSection(title: Text(context.appearanceDisplay), tiles: [
-            SettingsTile.navigation(
-                title: Text(context.appearanceLanguage),
-                leading: Icon(Icons.language),
-                value: Text('ZH'),
-                onPressed: (context) {
-                  _showLanguagePickerDialog(context);
-                })
-          ])
         ],
       ),
     );
   }
 }
 
-_showLanguagePickerDialog(BuildContext context) {
-  final saveToPrefs = Prefs().saveLocaleToPrefs;
-  return showDialog(
-      context: context,
-      builder: (BuildContext context) {
+void showWebdavDialog(BuildContext context) {
+  // TODO l10n
+  final title = 'WebDAV';
+  final prefs = Prefs().saveWebdavInfo;
+  final webdavInfo = Prefs().webdavInfo;
+  final webdavUrlController = TextEditingController(text: webdavInfo['url']);
+  final webdavUsernameController =
+      TextEditingController(text: webdavInfo['username']);
+  final webdavPasswordController =
+      TextEditingController(text: webdavInfo['password']);
+  Widget buildTextField(String labelText, TextEditingController controller) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: TextField(
+        obscureText: labelText == 'Password' ? true : false,
+        controller: controller,
+        decoration: InputDecoration(
+            border: const OutlineInputBorder(), labelText: labelText),
+      ),
+    );
+  }
 
-        return SimpleDialog(
-          title: Text(context.appearanceLanguage),
-          children: [
-            dialogOption('简体中文', 'zh', saveToPrefs),
-            dialogOption('English', 'en', saveToPrefs),
-          ],
-        );
-      });
-}
-
-
-Future<void> _showColorPickerDialog(BuildContext context) async {
-  final prefsProvider =
-      Provider.of<Prefs>(context, listen: false);
-  final currentColor = prefsProvider.themeColor;
-
-  Color pickedColor = currentColor;
-
-  await showDialog<void>(
+  showDialog(
     context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: Text(context.appearanceThemeColor),
-        content: SingleChildScrollView(
-          child: ColorPicker(
-            pickerColor: pickedColor,
-            onColorChanged: (color) {
-              pickedColor = color;
-            },
-            enableAlpha: false,
-            displayThumbColor: true,
-            pickerAreaHeightPercent: 0.8,
-          ),
-        ),
-        actions: <Widget>[
-          ElevatedButton(
-            child: Text('CANCEL'),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          ),
-          ElevatedButton(
-            child: Text('OK'),
-            onPressed: () {
-              prefsProvider.saveThemeToPrefs(pickedColor.value);
-              Navigator.of(context).pop();
-            },
+    builder: (context) {
+      return SimpleDialog(
+        title: Text(title),
+        contentPadding: const EdgeInsets.all(20),
+        children: [
+          // TODO l10n
+          buildTextField('URL', webdavUrlController),
+          buildTextField('Username', webdavUsernameController),
+          buildTextField('Password', webdavPasswordController),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              TextButton(
+                onPressed: () {
+                  webdavInfo['url'] = webdavUrlController.text;
+                  webdavInfo['username'] = webdavUsernameController.text;
+                  webdavInfo['password'] = webdavPasswordController.text;
+                  testWebdav(webdavInfo);
+                },
+                // TODO l10n
+                child: const Text('Test'),
+              ),
+              TextButton(
+                onPressed: () {
+                  webdavInfo['url'] = webdavUrlController.text;
+                  webdavInfo['username'] = webdavUsernameController.text;
+                  webdavInfo['password'] = webdavPasswordController.text;
+                  prefs(webdavInfo);
+                  Navigator.pop(context);
+                },
+                child: const Text('Save'),
+              ),
+            ],
           ),
         ],
       );

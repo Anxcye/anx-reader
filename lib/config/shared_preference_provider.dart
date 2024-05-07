@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:anx_reader/models/book_style.dart';
 import 'package:anx_reader/models/read_theme.dart';
 import 'package:flutter/material.dart';
@@ -99,4 +101,17 @@ class Prefs extends ChangeNotifier {
     if (beginDateStr == null) return null;
     return DateTime.parse(beginDateStr);
   }
+  void saveWebdavInfo(Map webdavInfo) {
+  prefs.setString('webdavInfo', jsonEncode(webdavInfo));
+    notifyListeners();
+  }
+
+  Map get webdavInfo {
+    String? webdavInfoJson = prefs.getString('webdavInfo');
+    if (webdavInfoJson == null) {
+      return {};
+    }
+    return jsonDecode(webdavInfoJson);
+  }
+
 }
