@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:webdav_client/webdav_client.dart';
 
+import '../../config/shared_preference_provider.dart';
 import '../../main.dart';
+import '../toast/common.dart';
 
-Future<void> testWebdav(Map webdavInfo) async {
+Future<Map<String, dynamic>> testWebdavInfo(Map webdavInfo) async {
   final context = navigatorKey.currentContext!;
   var client = newClient(
     webdavInfo['url'],
@@ -17,6 +19,16 @@ Future<void> testWebdav(Map webdavInfo) async {
   client.setSendTimeout(8000);
   client.setReceiveTimeout(8000);
 
+  try {
+    await client.ping();
+    return {'status': true};
+  } catch (e) {
+    return {'status': false, 'error': e.toString()};
+  }
+}
+
+Future<void> testWebdav(Map webdavInfo) async {
+  final context = navigatorKey.currentContext!;
   Widget buildAlertDialog(String title, String content) {
     return AlertDialog(
       title: Text(title),
@@ -33,8 +45,9 @@ Future<void> testWebdav(Map webdavInfo) async {
     );
   }
 
-  try {
-    await client.ping();
+  final result = await testWebdavInfo(webdavInfo);
+
+  if (result['status']) {
     showDialog(
       context: context,
       builder: (context) {
@@ -42,13 +55,31 @@ Future<void> testWebdav(Map webdavInfo) async {
         return buildAlertDialog('success', 'Connection successful');
       },
     );
-  } catch (e) {
+  } else {
     showDialog(
       context: context,
       builder: (context) {
         // TODO l10n
-        return buildAlertDialog('failed', e.toString());
+        return buildAlertDialog('failed', result['error']);
       },
     );
   }
+}
+
+Future<bool> testEnableWebdav() async {
+  final webdavInfo = Prefs().webdavInfo;
+  if (webdavInfo['url'] != null &&
+      webdavInfo['username'] != null &&
+      webdavInfo['password'] != null) {
+    final result = await testWebdavInfo(webdavInfo);
+    if (result['status']) {
+      return true;
+    } else {
+      Toast.show('WebDAV connection failed');
+    }
+  } else {
+    // TODO l10n
+    Toast.show('Please set WebDAV information first');
+  }
+  return false;
 }

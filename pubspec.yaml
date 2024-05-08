@@ -39,7 +39,7 @@ dependencies:
   flutter_svg: ^2.0.10
   permission_handler: ^11.3.1
   webdav_client: ^1.2.1
-
+  fluttertoast: ^8.2.5
 
 
 dev_dependencies:
