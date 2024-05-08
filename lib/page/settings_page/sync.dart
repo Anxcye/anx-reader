@@ -1,3 +1,4 @@
+import 'package:anx_reader/utils/toast/common.dart';
 import 'package:flutter/material.dart';
 import 'package:settings_ui/settings_ui.dart';
 
@@ -56,10 +57,18 @@ class _SubSyncSettingsState extends State<SubSyncSettings> {
             SettingsTile.switchTile(
                 leading: const Icon(Icons.cached),
                 initialValue: Prefs().webdavStatus,
-                onToggle: (bool value) {
+                onToggle: (bool value) async {
                   setState(() {
                     Prefs().saveWebdavStatus(value);
                   });
+                  if (value) {
+                    bool result = await testEnableWebdav();
+                    if (!result) {
+                      setState(() {
+                        Prefs().saveWebdavStatus(!value);
+                      });
+                    }
+                  }
                 },
                 // TODO l10n
                 title: const Text('Enable WebDAV')),
@@ -67,7 +76,8 @@ class _SubSyncSettingsState extends State<SubSyncSettings> {
                 // TODO l10n
                 title: Text('WebDAV'),
                 leading: const Icon(Icons.cloud),
-                enabled: Prefs().webdavStatus,
+                value: Text(Prefs().webdavInfo['url']),
+                // enabled: Prefs().webdavStatus,
                 onPressed: (context) async {
                   showWebdavDialog(context);
                 }),

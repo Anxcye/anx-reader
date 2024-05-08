@@ -5,6 +5,8 @@ import 'package:anx_reader/page/home_page/settings_page.dart';
 import 'package:anx_reader/page/home_page/statistics_page.dart';
 import 'package:flutter/material.dart';
 
+import '../utils/toast/common.dart';
+
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -20,6 +22,12 @@ class _HomePageState extends State<HomePage> {
     const NotesPage(),
     const SettingsPage(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    Toast.init(context);
+  }
 
   @override
   Widget build(BuildContext context) {
