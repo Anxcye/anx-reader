@@ -9,6 +9,7 @@ import 'package:settings_ui/settings_ui.dart';
 
 import '../../config/shared_preference_provider.dart';
 import '../../utils/webdav/common.dart';
+import '../../widgets/settings/settings_title.dart';
 import '../../widgets/settings/simple_dialog.dart';
 import '../../widgets/settings/settings_app_bar.dart';
 
@@ -27,24 +28,15 @@ class SyncSetting extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      leading: const Icon(Icons.sync),
-      // TODO l10n
-      title: Text('Sync'),
-      trailing: const Icon(Icons.chevron_right),
-      selected: selectedIndex == id,
-      onTap: () {
-        if (!isMobile) {
-          setDetail(SubSyncSettings(isMobile: isMobile), id);
-          return;
-        }
-        Navigator.push(
-          context,
-          CupertinoPageRoute(
-              builder: (context) => SubSyncSettings(isMobile: isMobile)),
-        );
-      },
-    );
+    return settingsTitle(
+        icon: const Icon(Icons.sync),
+        // TODO l10n
+        title: 'Sync',
+        isMobile: isMobile,
+        id: id,
+        selectedIndex: selectedIndex,
+        setDetail: setDetail,
+        subPage: SubSyncSettings(isMobile: isMobile));
   }
 }
 
@@ -55,37 +47,33 @@ class SubSyncSettings extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: isMobile ? settingsAppBar(context.appearance, context) : null,
-      body: SettingsList(
-        lightTheme: SettingsThemeData(
-          settingsListBackground: Theme.of(context).scaffoldBackgroundColor,
-          titleTextColor: Theme.of(context).colorScheme.primary,
+    return settingsBody(
+      // TODO l10n
+      title: 'Sync',
+      isMobile: isMobile,
+      sections: [
+        SettingsSection(
+          // TODO l10n
+          title: Text('WebDAV'),
+          tiles: [
+            SettingsTile.switchTile(
+                leading: const Icon(Icons.cached),
+                initialValue: true,
+                onToggle: (bool value) {
+                  // TODO
+                },
+                title: const Text('Enable WebDAV')),
+            SettingsTile.navigation(
+                // TODO l10n
+                title: Text('WebDAV'),
+                leading: const Icon(Icons.cloud),
+                onPressed: (context) async {
+                  showWebdavDialog(context);
+                }),
+            // const CustomSettingsTile(child: Divider()),
+          ],
         ),
-        sections: [
-          SettingsSection(
-            // TODO l10n
-            title: Text('WebDAV'),
-            tiles: [
-              SettingsTile.switchTile(
-                  leading: const Icon(Icons.cached),
-                  initialValue: true,
-                  onToggle: (bool value) {
-                    // TODO
-                  },
-                  title: const Text('Enable WebDAV')),
-              SettingsTile.navigation(
-                  // TODO l10n
-                  title: Text('WebDAV'),
-                  leading: const Icon(Icons.cloud),
-                  onPressed: (context) async {
-                    showWebdavDialog(context);
-                  }),
-              // const CustomSettingsTile(child: Divider()),
-            ],
-          ),
-        ],
-      ),
+      ],
     );
   }
 }
@@ -132,7 +120,7 @@ void showWebdavDialog(BuildContext context) {
                   webdavInfo['url'] = webdavUrlController.text;
                   webdavInfo['username'] = webdavUsernameController.text;
                   webdavInfo['password'] = webdavPasswordController.text;
-                 testWebdav(webdavInfo);
+                  testWebdav(webdavInfo);
                 },
 
                 // TODO l10n
