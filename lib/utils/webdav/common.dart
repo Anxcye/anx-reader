@@ -75,11 +75,11 @@ Future<bool> testEnableWebdav() async {
     if (result['status']) {
       return true;
     } else {
-      Toast.show('WebDAV connection failed');
+      AnxToast.show('WebDAV connection failed');
     }
   } else {
     // TODO l10n
-    Toast.show('Please set WebDAV information first');
+    AnxToast.show('Please set WebDAV information first');
   }
   return false;
 }
