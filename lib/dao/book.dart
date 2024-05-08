@@ -70,3 +70,14 @@ Future<Book> selectBookById(int id) async {
     updateTime: DateTime.parse(maps[0]['update_time']),
   );
 }
+
+Future<List<String>> getCurrentBooks() async {
+  final books = await selectNotDeleteBooks();
+  return books.map((book) => book.filePath).toList();
+
+}
+
+Future<List<String>> getCurrentCover() async {
+  final books = await selectNotDeleteBooks();
+  return books.map((book) => book.coverPath).toList();
+}

@@ -200,10 +200,9 @@ class _BookDetailState extends State<BookDetail> {
                     await oldCoverImageFile.delete();
                   }
 
-                  // String newPath =
-                  //     '${widget.book.coverPath.split('/').sublist(0, widget.book.coverPath.split('/').length - 1).join('/')}/${widget.book.title} - ${widget.book.author} - ${DateTime.now().toString()}.png';
                   String newPath =
-                      '${widget.book.coverPath.split('/').sublist(0, widget.book.coverPath.split('/').length - 1).join('/')}/${widget.book.title.length > 20 ? widget.book.title.substring(0, 20) : widget.book.title} - ${widget.book.author} - ${DateTime.now().toString()}.png';
+                      '${widget.book.coverPath.split('/').sublist(0, widget.book.coverPath.split('/').length - 1).join('/')}/${widget.book.title.length > 20 ? widget.book.title.substring(0, 20) : widget.book.title}-${DateTime.now().millisecond.toString()}.png'
+                          .replaceAll(' ', '_');
 
                   print('New path: $newPath');
                   String newFullPath = getBasePath(newPath);

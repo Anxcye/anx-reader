@@ -20,7 +20,7 @@ Future<Book> importBook(File file) async {
 
     final cover = await epubBookRef.readCover();
     final newBookName =
-        '${title.length > 20 ? title.substring(0, 20) : title}-$author-${DateTime.now().toString()}';
+        '${title.length > 20 ? title.substring(0, 20) : title}-${DateTime.now().millisecond.toString()}'.replaceAll(' ', '_');
 
     final relativeFilePath = 'file/$newBookName.epub';
     final filePath = getBasePath(relativeFilePath);

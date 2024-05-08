@@ -2,7 +2,7 @@ name: anx_reader
 description: "A e-book reader."
 publish_to: 'none'
 
-version: 1.0.2+2000
+version: 1.1.0+2001
 
 environment:
   sdk: '>=3.3.2 <4.0.0'
@@ -40,6 +40,7 @@ dependencies:
   permission_handler: ^11.3.1
   webdav_client: ^1.2.1
   fluttertoast: ^8.2.5
+  dio: ^5.4.3+1
 
 
 dev_dependencies:

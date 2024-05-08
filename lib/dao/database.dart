@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:io';
 
+import 'package:anx_reader/utils/get_base_path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
@@ -95,12 +97,17 @@ class DBHelper {
 
     return await openDatabase(
       path,
-      version: 2,
+      version: 3,
       onCreate: (db, version) async {
         onUpgradeDatabase(db, 0, version);
       },
       onUpgrade: onUpgradeDatabase,
     );
+  }
+
+  static void close() {
+    _database?.close();
+    _database = null;
   }
 
   Future<void> onUpgradeDatabase(
@@ -126,7 +133,54 @@ class DBHelper {
             'UPDATE tb_books SET file_path = REPLACE(file_path, "/data/user/0/com.anxcye.anx_reader/app_flutter/", "")');
         await db.execute(
             'UPDATE tb_books SET cover_path = REPLACE(cover_path, "/data/user/0/com.anxcye.anx_reader/app_flutter/", "")');
+        continue case2;
+      case2:
+      case 2:
+        print('//////////////////////////////////');
+        // replave ' ' with '_' in db and cut file name to 25
+        await db.execute(
+            'UPDATE tb_books SET file_path = REPLACE(file_path, " ", "_")');
+        await db.execute(
+            'UPDATE tb_books SET cover_path = REPLACE(cover_path, " ", "_")');
+        // cut file name to 25
+        await db.execute(
+            'UPDATE tb_books SET file_path = SUBSTR(file_path, 0, 25)');
+        await db.execute(
+            'UPDATE tb_books SET cover_path = SUBSTR(cover_path, 0, 25)');
+        // add extension name
+        await db.execute(
+            'UPDATE tb_books SET file_path = file_path || ".epub"');
+        await db.execute(
+            'UPDATE tb_books SET cover_path = cover_path || ".png"');
 
+
+
+        // replace local file path
+        final basePath = getBasePath('');
+        final fileDir = Directory('$basePath/file');
+        final coverDir = Directory('$basePath/cover');
+        fileDir.listSync().forEach((element) {
+          if (element is File) {
+            final path = element.path;
+            String pathAfterReplace = path.replaceAll(' ', '_');
+            int endIndex =
+                (pathAfterReplace.length < 72) ? pathAfterReplace.length : 72;
+            final newPath = '${pathAfterReplace.substring(0, endIndex)}.epub';
+            print('/////////rename $path to $newPath');
+            element.rename(newPath);
+          }
+        });
+        coverDir.listSync().forEach((element) {
+          if (element is File) {
+            final path = element.path;
+            String pathAfterReplace = path.replaceAll(' ', '_');
+            int endIndex =
+                (pathAfterReplace.length < 72) ? pathAfterReplace.length : 72;
+            final newPath = '${pathAfterReplace.substring(0, endIndex)}.png';
+            print('/////////rename $path to $newPath');
+            element.rename(newPath);
+          }
+        });
     }
   }
 }

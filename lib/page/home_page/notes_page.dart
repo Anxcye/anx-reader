@@ -239,7 +239,10 @@ class _NotesPageState extends State<NotesPage> {
                                     style: readingTimeStyle,
                                   );
                                 } else {
-                                  return const CircularProgressIndicator();
+                                  return Text(
+                                    convertSeconds(0),
+                                    style: readingTimeStyle,
+                                  );
                                 }
                               },
                             )

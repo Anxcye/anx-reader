@@ -66,7 +66,7 @@ class SubAppearanceSettings extends StatelessWidget {
         SettingsSection(title: Text(context.appearanceDisplay), tiles: [
           SettingsTile.navigation(
               title: Text(context.appearanceLanguage),
-              value: Text(Prefs().locale!.languageCode),
+              value: Text(Prefs().locale?.languageCode ?? 'system'),
               leading: const Icon(Icons.language),
               onPressed: (context) {
                 showLanguagePickerDialog(context);
