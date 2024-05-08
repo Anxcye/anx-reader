@@ -1,9 +1,10 @@
 import 'package:anx_reader/utils/toast/common.dart';
+import 'package:anx_reader/utils/webdav/common.dart';
 import 'package:flutter/material.dart';
 import 'package:settings_ui/settings_ui.dart';
 
 import '../../config/shared_preference_provider.dart';
-import '../../utils/webdav/common.dart';
+import '../../utils/webdav/test_webdav.dart';
 import '../../widgets/settings/settings_title.dart';
 
 class SyncSetting extends StatelessWidget {
@@ -67,6 +68,8 @@ class _SubSyncSettingsState extends State<SubSyncSettings> {
                       setState(() {
                         Prefs().saveWebdavStatus(!value);
                       });
+                    } else {
+                      AnxWebdav.init();
                     }
                   }
                 },
@@ -76,7 +79,7 @@ class _SubSyncSettingsState extends State<SubSyncSettings> {
                 // TODO l10n
                 title: Text('WebDAV'),
                 leading: const Icon(Icons.cloud),
-                value: Text(Prefs().webdavInfo['url']),
+                value: Text(Prefs().webdavInfo['url'] ?? 'Not set'),
                 // enabled: Prefs().webdavStatus,
                 onPressed: (context) async {
                   showWebdavDialog(context);

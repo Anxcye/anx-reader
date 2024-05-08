@@ -3,8 +3,10 @@ import 'package:anx_reader/page/home_page/bookshelf_page.dart';
 import 'package:anx_reader/page/home_page/notes_page.dart';
 import 'package:anx_reader/page/home_page/settings_page.dart';
 import 'package:anx_reader/page/home_page/statistics_page.dart';
+import 'package:anx_reader/utils/webdav/common.dart';
 import 'package:flutter/material.dart';
 
+import '../config/shared_preference_provider.dart';
 import '../utils/toast/common.dart';
 
 class HomePage extends StatefulWidget {
@@ -27,6 +29,9 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     AnxToast.init(context);
+    if (Prefs().webdavStatus){
+      AnxWebdav.init();
+    }
   }
 
   @override
@@ -35,6 +40,12 @@ class _HomePageState extends State<HomePage> {
       builder: (context, constraints) {
         if (constraints.maxWidth > 600) {
           return Scaffold(
+            floatingActionButton: FloatingActionButton(
+              onPressed: () {
+                AnxWebdav.syncData();
+              },
+              child: const Icon(Icons.search),
+            ),
             body: Row(
               children: [
                 NavigationRail(
