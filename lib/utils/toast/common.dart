@@ -2,7 +2,7 @@ import 'package:anx_reader/main.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-class Toast {
+class AnxToast {
   static FToast fToast = FToast();
 
   static void init(BuildContext context) {
@@ -11,7 +11,7 @@ class Toast {
     });
   }
 
-  static void show(String message, {Icon? icon}) {
+  static void show(String message, {Icon? icon, int duration = 2000}) {
     Widget toast = Container(
       padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
       decoration: BoxDecoration(
@@ -40,7 +40,7 @@ class Toast {
     fToast.showToast(
       child: toast,
       gravity: ToastGravity.BOTTOM,
-      toastDuration: Duration(seconds: 2),
+      toastDuration: Duration(milliseconds: duration),
     );
 
     // // Custom Toast Position
