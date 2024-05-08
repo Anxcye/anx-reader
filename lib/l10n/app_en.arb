@@ -58,7 +58,19 @@
   "common_hours": "h",
   "common_minutes_full": "minutes",
   "common_minutes": "m",
-  "common_seconds_full": "seconds"
+  "common_seconds_full": "seconds",
+  "common_seconds": "s",
+  "common_save": "Save",
+    "common_cancel": "Cancel",
+    "common_ok": "OK",
+
+  "settings_sync": "Sync",
+    "settings_sync_webdav": "WebDAV",
+    "settings_sync_enable_webdav": "Enable WebDAV",
+    "settings_sync_webdav_url": "WebDAV URL",
+    "settings_sync_webdav_username": "Username",
+    "settings_sync_webdav_password": "Password",
+    "settings_sync_webdav_test_connection": "Test Connection"
 
 
 
