@@ -9,9 +9,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
-import '../dao/book.dart';
-import '../dao/reading_time.dart';
-import '../widgets/statistic/chard_card.dart';
+import '../../dao/book.dart';
+import '../../dao/reading_time.dart';
+import '../../widgets/statistic/chard_card.dart';
 
 class StatisticPage extends StatefulWidget {
   const StatisticPage({super.key});

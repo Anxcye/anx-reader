@@ -2,7 +2,7 @@ import 'dart:ui';
 
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/page/home_page.dart';
-import 'package:anx_reader/page/notes_page.dart';
+import 'package:anx_reader/page/home_page/notes_page.dart';
 import 'package:anx_reader/service/book_player/book_player_server.dart';
 import 'package:anx_reader/utils/get_base_path.dart';
 import 'package:flutter/material.dart';

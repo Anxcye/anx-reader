@@ -1,7 +1,6 @@
 import 'package:anx_reader/l10n/localization_extension.dart';
 import 'package:anx_reader/widgets/settings/settings_title.dart';
 import 'package:anx_reader/widgets/settings/theme_mode.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:provider/provider.dart';
@@ -9,7 +8,6 @@ import 'package:settings_ui/settings_ui.dart';
 
 import '../../config/shared_preference_provider.dart';
 import '../../widgets/settings/simple_dialog.dart';
-import '../../widgets/settings/settings_app_bar.dart';
 
 class AppearanceSetting extends StatelessWidget {
   const AppearanceSetting(
@@ -112,13 +110,15 @@ Future<void> showColorPickerDialog(BuildContext context) async {
           ),
         ),
         actions: <Widget>[
-          ElevatedButton(
+          TextButton(
+            // TODO l10n
             child: Text('CANCEL'),
             onPressed: () {
               Navigator.of(context).pop();
             },
           ),
-          ElevatedButton(
+          TextButton(
+            // TODO l10n
             child: Text('OK'),
             onPressed: () {
               prefsProvider.saveThemeToPrefs(pickedColor.value);
