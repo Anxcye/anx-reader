@@ -5,10 +5,10 @@ import 'package:anx_reader/widgets/book_list.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 
-import '../dao/book.dart';
-import '../models/book.dart';
-import '../service/book.dart';
-import '../widgets/tips/bookshelf_tips.dart';
+import '../../dao/book.dart';
+import '../../models/book.dart';
+import '../../service/book.dart';
+import '../../widgets/tips/bookshelf_tips.dart';
 
 class BookshelfPage extends StatefulWidget {
   const BookshelfPage({super.key});

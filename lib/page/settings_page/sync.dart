@@ -1,17 +1,9 @@
-import 'package:anx_reader/l10n/localization_extension.dart';
-import 'package:anx_reader/main.dart';
-import 'package:anx_reader/widgets/settings/theme_mode.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-import 'package:provider/provider.dart';
 import 'package:settings_ui/settings_ui.dart';
 
 import '../../config/shared_preference_provider.dart';
 import '../../utils/webdav/common.dart';
 import '../../widgets/settings/settings_title.dart';
-import '../../widgets/settings/simple_dialog.dart';
-import '../../widgets/settings/settings_app_bar.dart';
 
 class SyncSetting extends StatelessWidget {
   const SyncSetting(
@@ -40,17 +32,22 @@ class SyncSetting extends StatelessWidget {
   }
 }
 
-class SubSyncSettings extends StatelessWidget {
+class SubSyncSettings extends StatefulWidget {
   const SubSyncSettings({super.key, required this.isMobile});
 
   final bool isMobile;
 
   @override
+  State<SubSyncSettings> createState() => _SubSyncSettingsState();
+}
+
+class _SubSyncSettingsState extends State<SubSyncSettings> {
+  @override
   Widget build(BuildContext context) {
     return settingsBody(
       // TODO l10n
       title: 'Sync',
-      isMobile: isMobile,
+      isMobile: widget.isMobile,
       sections: [
         SettingsSection(
           // TODO l10n
@@ -58,15 +55,19 @@ class SubSyncSettings extends StatelessWidget {
           tiles: [
             SettingsTile.switchTile(
                 leading: const Icon(Icons.cached),
-                initialValue: true,
+                initialValue: Prefs().webdavStatus,
                 onToggle: (bool value) {
-                  // TODO
+                  setState(() {
+                    Prefs().saveWebdavStatus(value);
+                  });
                 },
+                // TODO l10n
                 title: const Text('Enable WebDAV')),
             SettingsTile.navigation(
                 // TODO l10n
                 title: Text('WebDAV'),
                 leading: const Icon(Icons.cloud),
+                enabled: Prefs().webdavStatus,
                 onPressed: (context) async {
                   showWebdavDialog(context);
                 }),

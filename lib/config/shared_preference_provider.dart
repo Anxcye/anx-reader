@@ -101,6 +101,7 @@ class Prefs extends ChangeNotifier {
     if (beginDateStr == null) return null;
     return DateTime.parse(beginDateStr);
   }
+
   void saveWebdavInfo(Map webdavInfo) {
   prefs.setString('webdavInfo', jsonEncode(webdavInfo));
     notifyListeners();
@@ -112,6 +113,15 @@ class Prefs extends ChangeNotifier {
       return {};
     }
     return jsonDecode(webdavInfoJson);
+  }
+
+  void saveWebdavStatus(bool status) {
+    prefs.setBool('webdavStatus', status);
+    notifyListeners();
+  }
+
+  bool get webdavStatus {
+    return prefs.getBool('webdavStatus') ?? false;
   }
 
 }

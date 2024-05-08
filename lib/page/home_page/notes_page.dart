@@ -9,10 +9,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 
-import '../dao/book.dart';
-import '../dao/reading_time.dart';
-import '../models/book.dart';
-import 'book_notes_page.dart';
+import '../../dao/book.dart';
+import '../../dao/reading_time.dart';
+import '../../models/book.dart';
+import '../book_notes_page.dart';
 
 class NotesPage extends StatefulWidget {
   const NotesPage({super.key});
