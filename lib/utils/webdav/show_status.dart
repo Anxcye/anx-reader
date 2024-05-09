@@ -4,12 +4,82 @@ import 'package:flutter/material.dart';
 
 import '../../main.dart';
 
-void showWebdavStatus(
-    SyncDirection direction, String fileName, int count, int total) {
+void showWebdavStatus() {
   final context = navigatorKey.currentContext!;
-  String dir = direction == SyncDirection.upload
-      ? context.commonUploading
-      : context.commonDownloading;
+  showDialog(
+    context: context,
+    builder: (context) {
+      return SyncStatusDialog();
+    },
+  );
+}
+
+class SyncStatusDialog extends StatefulWidget {
+  SyncStatusDialog();
+
+  @override
+  _SyncStatusDialogState createState() => _SyncStatusDialogState();
+}
+
+class _SyncStatusDialogState extends State<SyncStatusDialog> {
+  late int count;
+  late int total;
+  late String fileName;
+  late SyncDirection direction;
+
+  @override
+  void initState() {
+    super.initState();
+    AnxWebdav.syncing.listen((syncing) {
+      if (syncing) {
+        setState(() {
+          fileName = AnxWebdav.fileName;
+          direction = AnxWebdav.direction;
+          count = AnxWebdav.count;
+          total = AnxWebdav.total;
+        });
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    String dir = direction == SyncDirection.upload
+        ? context.commonUploading
+        : context.commonDownloading;
+    return AlertDialog(
+      title: Text(dir),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: Text(
+                  fileName,
+                ),
+              ),
+            ],
+          ),
+          LinearProgressIndicator(
+            value: count / total,
+          ),
+          Text('${byteToHuman(count)} / ${byteToHuman(total)}'),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          child: Text(context.commonOk),
+        ),
+      ],
+    );
+  }
+
   String byteToHuman(int byte) {
     if (byte < 1024) {
       return '$byte B';
@@ -21,41 +91,4 @@ void showWebdavStatus(
       return '${(byte / 1024 / 1024 / 1024).toStringAsFixed(2)} GB';
     }
   }
-
-  showDialog(
-    context: context,
-    builder: (context) {
-      return AlertDialog(
-        title: Text(dir),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 10),
-                  child: Text(
-                    fileName,
-                  ),
-                ),
-              ],
-            ),
-            LinearProgressIndicator(
-              value: AnxWebdav.count / AnxWebdav.total,
-            ),
-            Text('${byteToHuman(count)} / ${byteToHuman(total)}'),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            child: Text(context.commonOk),
-          ),
-        ],
-      );
-    },
-  );
 }
