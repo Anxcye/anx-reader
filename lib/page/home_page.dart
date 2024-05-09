@@ -44,7 +44,7 @@ class _HomePageState extends State<HomePage> {
               onPressed: () {
                 AnxWebdav.syncData();
               },
-              child: const Icon(Icons.search),
+              child: const Icon(Icons.sync),
             ),
             body: Row(
               children: [

@@ -1,3 +1,5 @@
+import 'package:anx_reader/utils/webdav/common.dart';
+import 'package:anx_reader/utils/webdav/safe_read.dart';
 import 'package:flutter/material.dart';
 import 'package:webdav_client/webdav_client.dart';
 
@@ -81,4 +83,46 @@ Future<bool> testEnableWebdav() async {
     AnxToast.show('Please set WebDAV information first');
   }
   return false;
+}
+
+void chooseDirection(){
+   showDialog(
+      context: navigatorKey.currentContext!,
+      builder: (context) {
+        return SimpleDialog(
+          // TODO l10n
+          title: Text('Choose Direction'),
+          children: [
+            SimpleDialogOption(
+              onPressed: () async {
+                Navigator.pop(context);
+                await AnxWebdav.uploadData();
+
+              },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 6),
+                // TODO l10n
+                child: Text('Upload Data'),
+              ),
+            ),
+            SimpleDialogOption(
+              onPressed: () async {
+                Navigator.pop(context);
+                await AnxWebdav.downloadData();
+              },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 6),
+                child: Text('Download Data'),
+              ),
+            ),
+          ],
+        );
+      });
+
+
+
+
+
+
+
 }

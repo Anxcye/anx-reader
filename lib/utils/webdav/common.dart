@@ -11,6 +11,8 @@ import 'package:webdav_client/webdav_client.dart';
 import '../../config/shared_preference_provider.dart';
 import '../../dao/book.dart';
 
+enum SyncDirection { upload, download, both }
+
 class AnxWebdav {
   static late Client client;
 
@@ -43,12 +45,25 @@ class AnxWebdav {
     await client.mkdir('anx');
   }
 
-  static Future<void> syncData() async {
-    // await uploadFile(
-    //     '/data/data/com.anxcye.anx_reader/app_flutter/file/小王子-[法国]圣埃克苏佩里-2024-05-08 18:07:37.534323.epub',
-    //     'anx/data/华丽人生.epub');
+  static Future<void> uploadData() async {
+    AnxToast.show('Uploading');
     await client.mkdir('/anx/data');
-    await syncDatabase();
+    await syncDatabase(SyncDirection.upload);
+    await syncFiles();
+    AnxToast.show('Upload completed');
+  }
+
+  static Future<void> downloadData() async {
+    AnxToast.show('Downloading');
+    await client.mkdir('/anx/data');
+    await syncDatabase(SyncDirection.download);
+    await syncFiles();
+    AnxToast.show('Download completed');
+  }
+
+  static Future<void> syncData() async {
+    await client.mkdir('/anx/data');
+    await syncDatabase(SyncDirection.both);
     await syncFiles();
   }
 
@@ -63,15 +78,17 @@ class AnxWebdav {
       if (file.name == 'file') {
         final remoteBooks = await client.readDir('/anx/data/file');
         remoteBooksName = List.generate(
-            remoteBooks.length, (index) => remoteBooks[index].name!);
+            remoteBooks.length, (index) => 'file/${remoteBooks[index].name!}');
       } else if (file.name == 'cover') {
         final remoteCovers = await client.readDir('/anx/data/cover');
         remoteCoversName = List.generate(
-            remoteCovers.length, (index) => remoteCovers[index].name!);
+            remoteCovers.length, (index) => 'cover/${remoteCovers[index].name!}');
       }
     }
 
     for (var books in currentBooks) {
+      print('remote: ${remoteBooksName}');
+      print('element: ${books}');
       if (!remoteBooksName.contains(books)) {
         print('/////////remotenot');
         print('uploading $books');
@@ -79,38 +96,51 @@ class AnxWebdav {
       }
       // if local file not exist, download it
       if (!io.File(getBasePath(books)).existsSync()) {
-        print('/////////localnot');
         await downloadFile('anx/data/$books', getBasePath(books));
       }
     }
 
-    // for (var covers in currentCover) {
-    //   if (!remoteCoversName.contains(covers)) {
-    //     await uploadFile(getBasePath(covers), 'anx/data/$covers');
-    //   }
-    //   // if local file not exist, download it
-    //   if (!io.File(getBasePath(covers)).existsSync()) {
-    //     await downloadFile('anx/data/$covers', getBasePath(covers));
-    //   }
-    // }
+    for (var covers in currentCover) {
+      if (!remoteCoversName.contains(covers)) {
+        await uploadFile(getBasePath(covers), 'anx/data/$covers');
+      }
+      // if local file not exist, download it
+      if (!io.File(getBasePath(covers)).existsSync()) {
+        await downloadFile('anx/data/$covers', getBasePath(covers));
+      }
+    }
   }
 
-  static Future<void> syncDatabase() async {
+  static Future<void> syncDatabase(SyncDirection direction) async {
     File? remoteDb = await safeReadProps('anx/app_database.db');
 
     final databasePath = await getDatabasesPath();
     final path = join(databasePath, 'app_database.db');
 
     io.File localDb = io.File(path);
-    if (remoteDb == null ||
-        remoteDb.mTime!.isBefore(localDb.lastModifiedSync())) {
-      DBHelper.close();
-      await uploadFile(path, 'anx/app_database.db');
-      DBHelper().initDB();
-    } else {
-      DBHelper.close();
-      await downloadFile('anx/app_database.db', path);
-      DBHelper().initDB();
+    switch (direction) {
+      case SyncDirection.upload:
+        DBHelper.close();
+        await uploadFile(path, 'anx/app_database.db');
+        DBHelper().initDB();
+        break;
+      case SyncDirection.download:
+        DBHelper.close();
+        await downloadFile('anx/app_database.db', path);
+        DBHelper().initDB();
+        break;
+      case SyncDirection.both:
+        if (remoteDb == null ||
+            remoteDb.mTime!.isBefore(localDb.lastModifiedSync())) {
+          DBHelper.close();
+          await uploadFile(path, 'anx/app_database.db');
+          DBHelper().initDB();
+        } else {
+          DBHelper.close();
+          await downloadFile('anx/app_database.db', path);
+          DBHelper().initDB();
+        }
+        break;
     }
   }
 
@@ -132,31 +162,10 @@ class AnxWebdav {
     }, cancelToken: c);
   }
 
-  // static Future uploadFile(String localPath, String remotePath,
-  //     [bool replace = false]) async {
-  //   print('uploading///////////////');
-  //   print(localPath);
-  //
-  //   String encodedRemotePath = Uri.encodeComponent(remotePath);
-  //   print(encodedRemotePath);
-  //
-  //   CancelToken c = CancelToken();
-  //
-  //   if (replace) {
-  //     try {
-  //       await client.remove(encodedRemotePath);
-  //     } catch (e) {
-  //       print(e);
-  //     }
-  //   }
-  //
-  //   await client.writeFromFile(localPath, encodedRemotePath,
-  //       onProgress: (c, t) {
-  //     print(c / t);
-  //   }, cancelToken: c);
-  // }
-
   static Future<void> downloadFile(String remotePath, String localPath) async {
+    print('downloading///////////');
+    print(remotePath);
+    print(localPath);
     print('downloading');
     await client.read2File(remotePath, localPath, onProgress: (c, t) {
       print(c / t);
