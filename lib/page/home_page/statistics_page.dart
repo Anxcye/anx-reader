@@ -276,7 +276,7 @@ class BookStatisticItem extends StatelessWidget {
       future: selectBookById(bookId),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
-          return Container(
+          return SizedBox(
             height: 150,
             child: Card(
               child: Padding(
