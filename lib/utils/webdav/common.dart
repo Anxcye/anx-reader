@@ -60,6 +60,7 @@ class AnxWebdav {
     }
     await client.mkdir('anx');
   }
+
   static void setSyncing(bool value) {
     isSyncing = value;
     _syncingController.add(value);
@@ -69,7 +70,7 @@ class AnxWebdav {
     BuildContext context = navigatorKey.currentContext!;
     // if is  syncing
     if (isSyncing) {
-      showWebdavStatus(direction, fileName, count, total);
+      showWebdavStatus();
       return;
     }
     if (!Prefs().webdavStatus) {
@@ -186,9 +187,9 @@ class AnxWebdav {
 
   static Future<void> uploadFile(String localPath, String remotePath,
       [bool replace = false]) async {
+    CancelToken c = CancelToken();
     direction = SyncDirection.upload;
     fileName = localPath.split('/').last;
-    CancelToken c = CancelToken();
     if (replace) {
       try {
         await client.remove(remotePath);
