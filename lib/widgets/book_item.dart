@@ -132,7 +132,7 @@ class BookItem extends StatelessWidget {
       updateTime: DateTime.now(),
     ));
     onRefresh();
-    File(book.filePath).delete();
+    File(book.fileFullPath).delete();
   }
 
   void handleDetail(BuildContext context) {
