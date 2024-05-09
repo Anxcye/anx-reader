@@ -1,3 +1,4 @@
+import 'package:anx_reader/l10n/localization_extension.dart';
 import 'package:anx_reader/utils/webdav/common.dart';
 import 'package:flutter/material.dart';
 import 'package:webdav_client/webdav_client.dart';
@@ -38,8 +39,7 @@ Future<void> testWebdav(Map webdavInfo) async {
           onPressed: () {
             Navigator.pop(context);
           },
-          // TODO l10n
-          child: const Text('OK'),
+          child: Text(context.commonOk),
         ),
       ],
     );
@@ -51,22 +51,23 @@ Future<void> testWebdav(Map webdavInfo) async {
     showDialog(
       context: context,
       builder: (context) {
-        // TODO l10n
-        return buildAlertDialog('success', 'Connection successful');
+        return buildAlertDialog(
+            context.commonSuccess, context.webdavConnectionSuccess);
       },
     );
   } else {
     showDialog(
       context: context,
       builder: (context) {
-        // TODO l10n
-        return buildAlertDialog('failed', result['error']);
+        return buildAlertDialog(context.commonFailed,
+            '${context.webdavConnectionFailed}\n${result['error']}');
       },
     );
   }
 }
 
 Future<bool> testEnableWebdav() async {
+  BuildContext context = navigatorKey.currentContext!;
   final webdavInfo = Prefs().webdavInfo;
   if (webdavInfo['url'] != null &&
       webdavInfo['username'] != null &&
@@ -75,32 +76,30 @@ Future<bool> testEnableWebdav() async {
     if (result['status']) {
       return true;
     } else {
-      AnxToast.show('WebDAV connection failed');
+      AnxToast.show(context.webdavConnectionFailed);
     }
   } else {
-    // TODO l10n
-    AnxToast.show('Please set WebDAV information first');
+    AnxToast.show(context.webdavSetInfoFirst);
   }
   return false;
 }
 
-void chooseDirection(){
-   showDialog(
+void chooseDirection() {
+  BuildContext context = navigatorKey.currentContext!;
+  showDialog(
       context: navigatorKey.currentContext!,
       builder: (context) {
         return SimpleDialog(
-          // TODO l10n
-          title: Text('Choose Direction'),
+          title: Text(context.webdavChooseSources),
           children: [
             SimpleDialogOption(
               onPressed: () async {
                 Navigator.pop(context);
                 await AnxWebdav.syncData(SyncDirection.upload);
               },
-              child: const Padding(
-                padding: EdgeInsets.symmetric(vertical: 6),
-                // TODO l10n
-                child: Text('Upload Data'),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 6),
+                child: Text(context.webdavUpload),
               ),
             ),
             SimpleDialogOption(
@@ -108,19 +107,12 @@ void chooseDirection(){
                 Navigator.pop(context);
                 await AnxWebdav.syncData(SyncDirection.download);
               },
-              child: const Padding(
-                padding: EdgeInsets.symmetric(vertical: 6),
-                child: Text('Download Data'),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 6),
+                child: Text(context.webdavDownload),
               ),
             ),
           ],
         );
       });
-
-
-
-
-
-
-
 }

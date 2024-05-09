@@ -2,6 +2,9 @@ import 'dart:io';
 
 import 'package:anx_reader/dao/book.dart';
 import 'package:anx_reader/dao/book_note.dart';
+import 'package:anx_reader/l10n/localization_extension.dart';
+import 'package:anx_reader/main.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 
 import '../../utils/get_download_path.dart';
@@ -10,6 +13,7 @@ import '../../utils/toast/common.dart';
 enum ExportType { copy, md, txt }
 
 Future<void> exportNotes(int bookId, ExportType exportType) async {
+  BuildContext context = navigatorKey.currentContext!;
   var notesList = await selectBookNotesByBookId(bookId);
   var book = await selectBookById(bookId);
   if (notesList.isEmpty) {
@@ -26,8 +30,7 @@ Future<void> exportNotes(int bookId, ExportType exportType) async {
         return '${note.chapter}\n\t${note.content}';
       }).join('\n');
       await Clipboard.setData(ClipboardData(text: notes));
-      // TODO l10n
-      AnxToast.show('Notes copied to clipboard');
+      AnxToast.show(context.notesPageCopied);
       break;
 
     case ExportType.md:
@@ -42,8 +45,7 @@ Future<void> exportNotes(int bookId, ExportType exportType) async {
       }
 
       await file.writeAsString(notes);
-      // TODO l10n
-      AnxToast.show('Exported to $savePath');
+      AnxToast.show('${context.notesPageExportedTo} $savePath');
       break;
 
     case ExportType.txt:
@@ -52,8 +54,7 @@ Future<void> exportNotes(int bookId, ExportType exportType) async {
       }).join('');
       final file = File('$savePath/${book.title}.txt');
       await file.writeAsString(notes);
-      // TODO l10n
-      AnxToast.show('Exported to $savePath');
+      AnxToast.show('${context.notesPageExportedTo} $savePath');
       break;
   }
 }
