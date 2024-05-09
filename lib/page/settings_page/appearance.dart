@@ -26,7 +26,7 @@ class AppearanceSetting extends StatelessWidget {
   Widget build(BuildContext context) {
     return settingsTitle(
         icon: const Icon(Icons.palette),
-        title: context.appearance,
+        title: context.settingsAppearance,
         isMobile: isMobile,
         id: id,
         selectedIndex: selectedIndex,
@@ -43,11 +43,11 @@ class SubAppearanceSettings extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return settingsBody(
-      title: context.appearance,
+      title: context.settingsAppearance,
       isMobile: isMobile,
       sections: [
         SettingsSection(
-          title: Text(context.appearanceTheme),
+          title: Text(context.settingsAppearanceTheme),
           tiles: [
             CustomSettingsTile(
                 child: Padding(
@@ -55,7 +55,7 @@ class SubAppearanceSettings extends StatelessWidget {
               child: ChangeThemeMode(),
             )),
             SettingsTile.navigation(
-                title: Text(context.appearanceThemeColor),
+                title: Text(context.settingsAppearanceThemeColor),
                 leading: const Icon(Icons.color_lens),
                 onPressed: (context) async {
                   await showColorPickerDialog(context);
@@ -63,9 +63,9 @@ class SubAppearanceSettings extends StatelessWidget {
             const CustomSettingsTile(child: Divider()),
           ],
         ),
-        SettingsSection(title: Text(context.appearanceDisplay), tiles: [
+        SettingsSection(title: Text(context.settingsAppearanceDisplay), tiles: [
           SettingsTile.navigation(
-              title: Text(context.appearanceLanguage),
+              title: Text(context.settingsAppearanceLanguage),
               value: Text(Prefs().locale?.languageCode ?? 'system'),
               leading: const Icon(Icons.language),
               onPressed: (context) {
@@ -78,7 +78,7 @@ class SubAppearanceSettings extends StatelessWidget {
 }
 
 void showLanguagePickerDialog(BuildContext context) {
-  final title = context.appearanceLanguage;
+  final title = context.settingsAppearanceLanguage;
   final saveToPrefs = Prefs().saveLocaleToPrefs;
   final children = [
     dialogOption('简体中文', 'zh', saveToPrefs),
@@ -97,7 +97,7 @@ Future<void> showColorPickerDialog(BuildContext context) async {
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
-        title: Text(context.appearanceThemeColor),
+        title: Text(context.settingsAppearanceThemeColor),
         content: SingleChildScrollView(
           child: ColorPicker(
             pickerColor: pickedColor,
@@ -111,15 +111,13 @@ Future<void> showColorPickerDialog(BuildContext context) async {
         ),
         actions: <Widget>[
           TextButton(
-            // TODO l10n
-            child: Text('CANCEL'),
+            child: Text(context.commonCancel),
             onPressed: () {
               Navigator.of(context).pop();
             },
           ),
           TextButton(
-            // TODO l10n
-            child: Text('OK'),
+            child: Text(context.commonOk),
             onPressed: () {
               prefsProvider.saveThemeToPrefs(pickedColor.value);
               Navigator.of(context).pop();

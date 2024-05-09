@@ -12,7 +12,7 @@ class BookshelfSettings extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       leading: const Icon(Icons.palette),
-      title: Text(context.appearance),
+      title: Text(context.settingsAppearance),
       trailing: const Icon(Icons.chevron_right),
       onTap: () {
         Navigator.push(
@@ -31,7 +31,7 @@ class SubBookshelfSettings extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: settingsAppBar(context.appearance, context),
+      appBar: settingsAppBar(context.settingsAppearance, context),
       body: SettingsList(
         sections: [
           SettingsSection(

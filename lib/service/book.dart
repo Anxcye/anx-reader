@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:anx_reader/dao/book.dart';
+import 'package:anx_reader/l10n/localization_extension.dart';
+import 'package:anx_reader/main.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/utils/get_base_path.dart';
 import 'package:epubx/epubx.dart';
@@ -11,7 +13,6 @@ import '../utils/import_book.dart';
 import '../utils/toast/common.dart';
 
 Future<Book> importBook(File file) async {
-  // TODO l10n
   try {
     EpubBookRef epubBookRef = await EpubReader.openBook(file.readAsBytesSync());
     String author = epubBookRef.Author ?? 'Unknown Author';
@@ -43,10 +44,9 @@ Future<Book> importBook(File file) async {
         createTime: DateTime.now(),
         updateTime: DateTime.now());
     book.id = await insertBook(book);
-    AnxToast.show('Imported book successfully');
+    AnxToast.show(navigatorKey.currentContext!.serviceImportSuccess);
     return book;
   } catch (e) {
-    // TODO l10n
     AnxToast.show(
         'Failed to import book, please check if the book is valid\n[$e]',
         duration: 5000);

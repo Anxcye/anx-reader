@@ -398,7 +398,7 @@ class _BookDetailState extends State<BookDetail> {
               ),
             ),
             TextSpan(
-              text: context.bookDetailNthBookRead,
+              text: context.bookDetailNthBook,
               style: const TextStyle(
                 fontSize: 15,
                 color: Colors.grey,

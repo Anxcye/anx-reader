@@ -13,7 +13,9 @@
   "settings_appearance_themeColor": "Theme Color",
   "settings_appearance_display": "Display",
   "settings_appearance_language": "Language",
+
   "reading_contents": "Contents",
+
   "statistic_to_present": "To Present",
   "statistic_books_read": "books read",
   "statistic_days_of_reading": "days read",
@@ -29,18 +31,21 @@
   "statistic_friday": "Fr",
   "statistic_saturday": "Sa",
   "statistic_sunday": "Su",
+
   "notes_notes_across": "Notes Across",
   "notes_books": "Books",
   "notes_notes": "Notes",
   "notes_minutes": "minutes",
   "reading_page_copy": "Copy",
   "reading_page_excerpt": "Excerpt",
+
   "bookshelf_tips_1": "There are no books.",
   "bookshelf_tips_2": "Click the add button to add a book!",
   "statistics_tips_1": "This week you have read",
   "statistics_tips_2": "A book is a dream that you hold in your hands.",
   "notes_tips_1": "There are no notes.",
   "notes_tips_2": "Add a note while reading!",
+
   "reading_page_chapter_pages": "Chapter Pages",
   "reading_page_current_page": "Current Page",
 
@@ -52,8 +57,10 @@
 
   "notes_page_detail": "Detail",
   "notes_page_export": "Export",
-  "common_delete": "Delete",
+  "notes_page_copied": "Copied",
+  "notes_page_exported_to": "Exported to",
 
+  "common_delete": "Delete",
   "common_hours_full": "hours",
   "common_hours": "h",
   "common_minutes_full": "minutes",
@@ -61,16 +68,37 @@
   "common_seconds_full": "seconds",
   "common_seconds": "s",
   "common_save": "Save",
-    "common_cancel": "Cancel",
-    "common_ok": "OK",
+  "common_cancel": "Cancel",
+  "common_ok": "OK",
+  "common_success": "Success",
+  "common_failed": "Failed",
+
+  "service_import_success": "Import success",
+
+  "webdav_webdav_not_enabled": "WebDAV is not enabled",
+  "webdav_syncing": "Syncing",
+  "webdav_syncing_files": "Syncing files",
+  "webdav_sync_complete": "Sync complete",
+  "webdav_connection_success": "Connection success",
+  "webdav_connection_failed": "Connection failed",
+  "webdav_set_info_first": "Please set WebDAV information first",
+  "webdav_choose_Sources": "Choose Sources",
+  "webdav_download": "Download from WebDAV",
+  "webdav_upload": "Upload to WebDAV",
+
+
 
   "settings_sync": "Sync",
-    "settings_sync_webdav": "WebDAV",
-    "settings_sync_enable_webdav": "Enable WebDAV",
-    "settings_sync_webdav_url": "WebDAV URL",
-    "settings_sync_webdav_username": "Username",
-    "settings_sync_webdav_password": "Password",
-    "settings_sync_webdav_test_connection": "Test Connection"
+  "settings_sync_webdav": "WebDAV",
+  "settings_sync_enable_webdav": "Enable WebDAV",
+  "settings_sync_webdav_url": "WebDAV URL",
+  "settings_sync_webdav_username": "Username",
+  "settings_sync_webdav_password": "Password",
+  "settings_sync_webdav_test_connection": "Test Connection",
+  "settings_sync_webdav_sync_now": "Sync Now"
+
+
+
 
 
 

@@ -4,8 +4,8 @@
   "navBar_statistics": "统计",
   "navBar_notes": "笔记",
   "navBar_settings": "设置",
-  "settings_dark_mode": "暗黑模式",
-  "settings_light_mode": "明亮模式",
+  "settings_dark_mode": "深色模式",
+  "settings_light_mode": "浅色模式",
   "settings_system_mode": "系统模式",
   "settings_moreSettings": "更多设置",
   "settings_appearance": "外观",
@@ -57,12 +57,44 @@
 
   "notes_page_detail": "详情",
   "notes_page_export": "导出",
-  "common_delete": "删除",
+  "notes_page_copied": "已复制",
+  "notes_page_exported_to": "导出至",
 
+  "common_delete": "删除",
   "common_hours_full": "小时",
   "common_hours": "时",
   "common_minutes_full": "分钟",
   "common_minutes": "分",
-  "common_seconds_full": "秒"
+  "common_seconds_full": "秒",
+  "common_seconds": "秒",
+  "common_save": "保存",
+  "common_cancel": "取消",
+  "common_ok": "好",
+  "common_success": "成功",
+  "common_failed": "失败",
+
+  "service_import_success":"导入成功",
+
+  "webdav_webdav_not_enabled": "WebDav 未启用",
+  "webdav_syncing": "同步中",
+  "webdav_syncing_files": "同步文件",
+  "webdav_sync_complete": "同步完成",
+  "webdav_connection_success": "连接成功",
+  "webdav_connection_failed": "连接失败",
+  "webdav_set_info_first": "请先设置 WebDAV 信息",
+  "webdav_choose_Sources": "选择源",
+  "webdav_download": "从 WebDAV 下载",
+  "webdav_upload": "上传到 WebDAV",
+
+
+
+  "settings_sync": "同步",
+  "settings_sync_webdav": "WebDAV",
+  "settings_sync_enable_webdav": "启用 WebDAV",
+  "settings_sync_webdav_url": "WebDAV 地址（URL）",
+  "settings_sync_webdav_username": "用户名",
+  "settings_sync_webdav_password": "密码",
+  "settings_sync_webdav_test_connection": "测试连接",
+  "settings_sync_webdav_sync_now": "立即同步"
 
 }

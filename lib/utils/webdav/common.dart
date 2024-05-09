@@ -1,10 +1,13 @@
 import 'dart:async';
 import 'dart:io' as io;
 import 'package:anx_reader/dao/database.dart';
+import 'package:anx_reader/l10n/localization_extension.dart';
+import 'package:anx_reader/main.dart';
 import 'package:anx_reader/utils/get_base_path.dart';
 import 'package:anx_reader/utils/toast/common.dart';
 import 'package:anx_reader/utils/webdav/safe_read.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:webdav_client/webdav_client.dart';
@@ -52,22 +55,22 @@ class AnxWebdav {
   }
 
   static Future<void> syncData(SyncDirection direction) async {
+    BuildContext context = navigatorKey.currentContext!;
     if (syncing == true) {
       return;
     }
     _syncingController.add(true);
     if (!Prefs().webdavStatus) {
-      // TODO l10n
-      AnxToast.show('WebDAV is not enabled');
+      AnxToast.show(context.webdavWebdavNotEnabled);
       return;
     }
-    AnxToast.show('Syncing...');
+    AnxToast.show(context.webdavSyncing);
     try {
       await client.mkdir('/anx/data');
       await syncDatabase(direction);
-      AnxToast.show('Syncing Files');
+      AnxToast.show(context.webdavSyncingFiles);
       await syncFiles();
-      AnxToast.show('Sync completed');
+      AnxToast.show(context.webdavSyncComplete);
     } catch (e) {
       if (e is DioException && e.type == DioExceptionType.connectionError) {
         AnxToast.show('WebDAV connection failed, check your network');
