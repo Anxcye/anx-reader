@@ -36,8 +36,8 @@ class AnxWebdav {
       'Content-Type': 'application/octet-stream'
     });
     client.setConnectTimeout(8000);
-    client.setSendTimeout(8000);
-    client.setReceiveTimeout(8000);
+    // client.setSendTimeout(8000);
+    // client.setReceiveTimeout(8000);
 
     try {
       await client.ping();
@@ -66,11 +66,14 @@ class AnxWebdav {
     _syncingController.add(true);
     AnxToast.show(context.webdavSyncing);
     try {
-      await client.mkdir('/anx/data');
-      await syncDatabase(direction);
-      AnxToast.show(context.webdavSyncingFiles);
-      await syncFiles();
-      AnxToast.show(context.webdavSyncComplete);
+      client.mkdir('anx/data').then((value) {
+        syncDatabase(direction).then((value) {
+          AnxToast.show(context.webdavSyncingFiles);
+          syncFiles().then((value) {
+            AnxToast.show(context.webdavSyncComplete);
+          });
+        });
+      });
     } catch (e) {
       if (e is DioException && e.type == DioExceptionType.connectionError) {
         AnxToast.show('WebDAV connection failed, check your network');
