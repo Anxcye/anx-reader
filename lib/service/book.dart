@@ -5,7 +5,6 @@ import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/utils/get_base_path.dart';
 import 'package:epubx/epubx.dart';
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
 
 import '../page/reading_page.dart';
 import '../utils/import_book.dart';
@@ -20,7 +19,8 @@ Future<Book> importBook(File file) async {
 
     final cover = await epubBookRef.readCover();
     final newBookName =
-        '${title.length > 20 ? title.substring(0, 20) : title}-${DateTime.now().millisecond.toString()}'.replaceAll(' ', '_');
+        '${title.length > 20 ? title.substring(0, 20) : title}-${DateTime.now().millisecond.toString()}'
+            .replaceAll(' ', '_');
 
     final relativeFilePath = 'file/$newBookName.epub';
     final filePath = getBasePath(relativeFilePath);
@@ -43,10 +43,12 @@ Future<Book> importBook(File file) async {
         createTime: DateTime.now(),
         updateTime: DateTime.now());
     book.id = await insertBook(book);
+    AnxToast.show('Imported book successfully');
     return book;
   } catch (e) {
     // TODO l10n
-    AnxToast.show('Failed to import book, please check if the book is valid\n[$e]',
+    AnxToast.show(
+        'Failed to import book, please check if the book is valid\n[$e]',
         duration: 5000);
     return Book(
       id: -1,
@@ -67,7 +69,7 @@ Future<Book> importBook(File file) async {
 void openBook(BuildContext context, Book book, Function updateBookList) {
   book.updateTime = DateTime.now();
   updateBook(book);
-  Future.delayed(Duration(seconds: 1), () {
+  Future.delayed(const Duration(seconds: 1), () {
     updateBookList();
   });
 
@@ -81,12 +83,10 @@ void openBook(BuildContext context, Book book, Function updateBookList) {
       Map<String, dynamic> resultMap = result as Map<String, dynamic>;
       book.lastReadPosition = resultMap['cfi'];
       book.readingPercentage = resultMap['readProgress'];
-      print(resultMap);
       updateBook(book);
       updateBookList();
     }
   });
-  print('Open book: ${book.title}');
 }
 
 void updateBookRating(Book book, double rating) {

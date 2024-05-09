@@ -40,12 +40,12 @@ class _HomePageState extends State<HomePage> {
       builder: (context, constraints) {
         if (constraints.maxWidth > 600) {
           return Scaffold(
-            floatingActionButton: FloatingActionButton(
-              onPressed: () {
-                AnxWebdav.syncData(SyncDirection.both);
-              },
-              child: const Icon(Icons.sync),
-            ),
+            // floatingActionButton: FloatingActionButton(
+            //   onPressed: () {
+            //     AnxWebdav.syncData(SyncDirection.both);
+            //   },
+            //   child: const Icon(Icons.sync),
+            // ),
             body: Row(
               children: [
                 NavigationRail(

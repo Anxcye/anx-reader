@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io' as io;
 import 'package:anx_reader/dao/database.dart';
 import 'package:anx_reader/utils/get_base_path.dart';
@@ -15,6 +16,10 @@ enum SyncDirection { upload, download, both }
 
 class AnxWebdav {
   static late Client client;
+  static final StreamController<bool> _syncingController =
+      StreamController<bool>.broadcast();
+
+  static Stream<bool> get syncing => _syncingController.stream;
 
   static Future<void> init() async {
     client = newClient(
@@ -34,7 +39,8 @@ class AnxWebdav {
     try {
       await client.ping();
     } catch (e) {
-      AnxToast.show('WebDAV connection failed\n${e.toString()}', duration: 5000);
+      AnxToast.show('WebDAV connection failed\n${e.toString()}',
+          duration: 5000);
     }
     List<File> files = await client.readDir('/');
     for (var element in files) {
@@ -46,20 +52,30 @@ class AnxWebdav {
   }
 
   static Future<void> syncData(SyncDirection direction) async {
+    if (syncing == true) {
+      return;
+    }
+    _syncingController.add(true);
+    if (!Prefs().webdavStatus) {
+      // TODO l10n
+      AnxToast.show('WebDAV is not enabled');
+      return;
+    }
     AnxToast.show('Syncing...');
-    // try {
+    try {
       await client.mkdir('/anx/data');
       await syncDatabase(direction);
-      AnxToast.show('Downloading Files');
+      AnxToast.show('Syncing Files');
       await syncFiles();
       AnxToast.show('Sync completed');
-    // } catch (e) {
-    //   if (e is DioException && e.type == DioExceptionType.connectionError) {
-    //     AnxToast.show('WebDAV connection failed');
-    //   } else {
-    //     AnxToast.show('Sync failed');
-    //   }
-    // }
+    } catch (e) {
+      if (e is DioException && e.type == DioExceptionType.connectionError) {
+        AnxToast.show('WebDAV connection failed, check your network');
+      } else {
+        AnxToast.show('Sync failed');
+      }
+    }
+    _syncingController.add(false);
   }
 
   static Future<void> syncFiles() async {
