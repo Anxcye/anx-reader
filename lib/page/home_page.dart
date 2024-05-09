@@ -42,7 +42,7 @@ class _HomePageState extends State<HomePage> {
           return Scaffold(
             floatingActionButton: FloatingActionButton(
               onPressed: () {
-                AnxWebdav.syncData();
+                AnxWebdav.syncData(SyncDirection.both);
               },
               child: const Icon(Icons.sync),
             ),

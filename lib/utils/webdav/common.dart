@@ -34,7 +34,7 @@ class AnxWebdav {
     try {
       await client.ping();
     } catch (e) {
-      AnxToast.show('WebDAV connection failed\n${e.toString()}');
+      AnxToast.show('WebDAV connection failed\n${e.toString()}', duration: 5000);
     }
     List<File> files = await client.readDir('/');
     for (var element in files) {
@@ -45,26 +45,21 @@ class AnxWebdav {
     await client.mkdir('anx');
   }
 
-  static Future<void> uploadData() async {
-    AnxToast.show('Uploading');
-    await client.mkdir('/anx/data');
-    await syncDatabase(SyncDirection.upload);
-    await syncFiles();
-    AnxToast.show('Upload completed');
-  }
-
-  static Future<void> downloadData() async {
-    AnxToast.show('Downloading');
-    await client.mkdir('/anx/data');
-    await syncDatabase(SyncDirection.download);
-    await syncFiles();
-    AnxToast.show('Download completed');
-  }
-
-  static Future<void> syncData() async {
-    await client.mkdir('/anx/data');
-    await syncDatabase(SyncDirection.both);
-    await syncFiles();
+  static Future<void> syncData(SyncDirection direction) async {
+    AnxToast.show('Syncing...');
+    try {
+      await client.mkdir('/anx/data');
+      await syncDatabase(direction);
+      AnxToast.show('Downloading Files');
+      await syncFiles();
+      AnxToast.show('Sync completed');
+    } catch (e) {
+      if (e is DioException && e.type == DioExceptionType.connectionError) {
+        AnxToast.show('WebDAV connection failed');
+      } else {
+        AnxToast.show('Sync failed');
+      }
+    }
   }
 
   static Future<void> syncFiles() async {
@@ -81,32 +76,41 @@ class AnxWebdav {
             remoteBooks.length, (index) => 'file/${remoteBooks[index].name!}');
       } else if (file.name == 'cover') {
         final remoteCovers = await client.readDir('/anx/data/cover');
-        remoteCoversName = List.generate(
-            remoteCovers.length, (index) => 'cover/${remoteCovers[index].name!}');
+        remoteCoversName = List.generate(remoteCovers.length,
+            (index) => 'cover/${remoteCovers[index].name!}');
       }
     }
+    List<String> totalCurrentFiles = [...currentBooks, ...currentCover];
 
-    for (var books in currentBooks) {
-      print('remote: ${remoteBooksName}');
-      print('element: ${books}');
-      if (!remoteBooksName.contains(books)) {
-        print('/////////remotenot');
-        print('uploading $books');
-        await uploadFile(getBasePath(books), 'anx/data/$books');
+    for (var file in totalCurrentFiles) {
+      if (!currentBooks.contains(file) && !currentCover.contains(file)) {
+        await client.remove('anx/data/$file');
       }
       // if local file not exist, download it
-      if (!io.File(getBasePath(books)).existsSync()) {
-        await downloadFile('anx/data/$books', getBasePath(books));
+      if (!io.File(getBasePath(file)).existsSync()) {
+        await downloadFile('anx/data/$file', getBasePath(file));
       }
     }
-
-    for (var covers in currentCover) {
-      if (!remoteCoversName.contains(covers)) {
-        await uploadFile(getBasePath(covers), 'anx/data/$covers');
+    // remove remote files not in database
+    List<String> totalRemoteFiles = [...remoteBooksName, ...remoteCoversName];
+    for (var file in totalRemoteFiles) {
+      if (!totalCurrentFiles.contains(file)) {
+        await client.remove('anx/data/$file');
       }
-      // if local file not exist, download it
-      if (!io.File(getBasePath(covers)).existsSync()) {
-        await downloadFile('anx/data/$covers', getBasePath(covers));
+    }
+    // remove local files not in database
+    List<String> localBooks =
+        io.Directory(getBasePath('file')).listSync().map((e) {
+      return 'file/${basename(e.path)}';
+    }).toList();
+    List<String> localCovers =
+        io.Directory(getBasePath('cover')).listSync().map((e) {
+      return 'cover/${basename(e.path)}';
+    }).toList();
+    List<String> totalLocalFiles = [...localBooks, ...localCovers];
+    for (var file in totalLocalFiles) {
+      if (!totalCurrentFiles.contains(file)) {
+        await io.File(getBasePath(file)).delete();
       }
     }
   }
@@ -146,9 +150,6 @@ class AnxWebdav {
 
   static Future<void> uploadFile(String localPath, String remotePath,
       [bool replace = false]) async {
-    print('uploading///////////////');
-    print(localPath);
-    print(remotePath);
     CancelToken c = CancelToken();
     if (replace) {
       try {
@@ -163,10 +164,6 @@ class AnxWebdav {
   }
 
   static Future<void> downloadFile(String remotePath, String localPath) async {
-    print('downloading///////////');
-    print(remotePath);
-    print(localPath);
-    print('downloading');
     await client.read2File(remotePath, localPath, onProgress: (c, t) {
       print(c / t);
     });

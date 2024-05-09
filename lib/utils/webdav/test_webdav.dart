@@ -1,5 +1,4 @@
 import 'package:anx_reader/utils/webdav/common.dart';
-import 'package:anx_reader/utils/webdav/safe_read.dart';
 import 'package:flutter/material.dart';
 import 'package:webdav_client/webdav_client.dart';
 
@@ -96,11 +95,10 @@ void chooseDirection(){
             SimpleDialogOption(
               onPressed: () async {
                 Navigator.pop(context);
-                await AnxWebdav.uploadData();
-
+                await AnxWebdav.syncData(SyncDirection.upload);
               },
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 6),
+              child: const Padding(
+                padding: EdgeInsets.symmetric(vertical: 6),
                 // TODO l10n
                 child: Text('Upload Data'),
               ),
@@ -108,10 +106,10 @@ void chooseDirection(){
             SimpleDialogOption(
               onPressed: () async {
                 Navigator.pop(context);
-                await AnxWebdav.downloadData();
+                await AnxWebdav.syncData(SyncDirection.download);
               },
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 6),
+              child: const Padding(
+                padding: EdgeInsets.symmetric(vertical: 6),
                 child: Text('Download Data'),
               ),
             ),
