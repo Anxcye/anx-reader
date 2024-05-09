@@ -70,6 +70,7 @@ class _SubSyncSettingsState extends State<SubSyncSettings> {
                       });
                     } else {
                       AnxWebdav.init();
+                      chooseDirection();
                     }
                   }
                 },
