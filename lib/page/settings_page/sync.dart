@@ -109,7 +109,7 @@ void showWebdavDialog(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: TextField(
-        obscureText: labelText == 'Password' ? true : false,
+        obscureText: labelText == context.settingsSyncWebdavPassword ? true : false,
         controller: controller,
         decoration: InputDecoration(
             border: const OutlineInputBorder(), labelText: labelText),
