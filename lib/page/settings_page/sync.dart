@@ -85,7 +85,15 @@ class _SubSyncSettingsState extends State<SubSyncSettings> {
                 onPressed: (context) async {
                   showWebdavDialog(context);
                 }),
-            // const CustomSettingsTile(child: Divider()),
+            SettingsTile.navigation(
+                // TODO l10n
+                title: Text('Sync Now'),
+                leading: const Icon(Icons.sync_alt),
+                // value: Text(Prefs().syncDirection),
+                enabled: Prefs().webdavStatus,
+                onPressed: (context) {
+                  chooseDirection();
+                })
           ],
         ),
       ],
