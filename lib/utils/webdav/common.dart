@@ -47,19 +47,19 @@ class AnxWebdav {
 
   static Future<void> syncData(SyncDirection direction) async {
     AnxToast.show('Syncing...');
-    try {
+    // try {
       await client.mkdir('/anx/data');
       await syncDatabase(direction);
       AnxToast.show('Downloading Files');
       await syncFiles();
       AnxToast.show('Sync completed');
-    } catch (e) {
-      if (e is DioException && e.type == DioExceptionType.connectionError) {
-        AnxToast.show('WebDAV connection failed');
-      } else {
-        AnxToast.show('Sync failed');
-      }
-    }
+    // } catch (e) {
+    //   if (e is DioException && e.type == DioExceptionType.connectionError) {
+    //     AnxToast.show('WebDAV connection failed');
+    //   } else {
+    //     AnxToast.show('Sync failed');
+    //   }
+    // }
   }
 
   static Future<void> syncFiles() async {
@@ -81,24 +81,7 @@ class AnxWebdav {
       }
     }
     List<String> totalCurrentFiles = [...currentBooks, ...currentCover];
-
-    for (var file in totalCurrentFiles) {
-      if (!currentBooks.contains(file) && !currentCover.contains(file)) {
-        await client.remove('anx/data/$file');
-      }
-      // if local file not exist, download it
-      if (!io.File(getBasePath(file)).existsSync()) {
-        await downloadFile('anx/data/$file', getBasePath(file));
-      }
-    }
-    // remove remote files not in database
     List<String> totalRemoteFiles = [...remoteBooksName, ...remoteCoversName];
-    for (var file in totalRemoteFiles) {
-      if (!totalCurrentFiles.contains(file)) {
-        await client.remove('anx/data/$file');
-      }
-    }
-    // remove local files not in database
     List<String> localBooks =
         io.Directory(getBasePath('file')).listSync().map((e) {
       return 'file/${basename(e.path)}';
@@ -108,6 +91,23 @@ class AnxWebdav {
       return 'cover/${basename(e.path)}';
     }).toList();
     List<String> totalLocalFiles = [...localBooks, ...localCovers];
+
+    // sync files
+    for (var file in totalCurrentFiles) {
+      if (!totalRemoteFiles.contains(file)) {
+        await uploadFile(getBasePath(file), 'anx/data/$file');
+      }
+      if (!io.File(getBasePath(file)).existsSync()) {
+        await downloadFile('anx/data/$file', getBasePath(file));
+      }
+    }
+    // remove remote files not in database
+    for (var file in totalRemoteFiles) {
+      if (!totalCurrentFiles.contains(file)) {
+        await client.remove('anx/data/$file');
+      }
+    }
+    // remove local files not in database
     for (var file in totalLocalFiles) {
       if (!totalCurrentFiles.contains(file)) {
         await io.File(getBasePath(file)).delete();
