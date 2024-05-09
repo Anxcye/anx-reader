@@ -44,11 +44,14 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
+
   @override
   Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
-
-    if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
-      await AnxWebdav.syncData(SyncDirection.both);
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive) {
+      if (Prefs().webdavStatus) {
+        await AnxWebdav.syncData(SyncDirection.upload);
+      }
     }
   }
 

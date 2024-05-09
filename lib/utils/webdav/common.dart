@@ -59,11 +59,11 @@ class AnxWebdav {
     if (syncing == true) {
       return;
     }
-    _syncingController.add(true);
     if (!Prefs().webdavStatus) {
       AnxToast.show(context.webdavWebdavNotEnabled);
       return;
     }
+    _syncingController.add(true);
     AnxToast.show(context.webdavSyncing);
     try {
       await client.mkdir('/anx/data');
