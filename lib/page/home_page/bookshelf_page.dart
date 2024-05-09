@@ -24,6 +24,12 @@ class _BookshelfPageState extends State<BookshelfPage>
   AnimationController? _syncAnimationController;
 
   @override
+  void dispose() {
+    _syncAnimationController?.dispose();
+    super.dispose();
+  }
+
+  @override
   void initState() {
     super.initState();
     _syncAnimationController = AnimationController(
