@@ -69,6 +69,8 @@ extension LocalizationExtension on BuildContext {
   String get commonOk => AppLocalizations.of(this)?.common_ok ?? '';
   String get commonSuccess => AppLocalizations.of(this)?.common_success ?? '';
   String get commonFailed => AppLocalizations.of(this)?.common_failed ?? '';
+  String get commonUploading => AppLocalizations.of(this)?.common_uploading ?? '';
+  String get commonDownloading => AppLocalizations.of(this)?.common_downloading ?? '';
   String get serviceImportSuccess => AppLocalizations.of(this)?.service_import_success ?? '';
   String get webdavWebdavNotEnabled => AppLocalizations.of(this)?.webdav_webdav_not_enabled ?? '';
   String get webdavSyncing => AppLocalizations.of(this)?.webdav_syncing ?? '';
