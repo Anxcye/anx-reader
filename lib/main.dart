@@ -11,6 +11,8 @@ import 'package:provider/provider.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+import 'utils/webdav/common.dart';
+
 final navigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> main() async {
@@ -20,11 +22,35 @@ Future<void> main() async {
   Server().start();
   initBasePath();
 
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+  @override
+  Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
+
+    if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
+      await AnxWebdav.syncData(SyncDirection.both);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

@@ -28,9 +28,14 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    initAnx();
+  }
+
+  Future<void> initAnx() async {
     AnxToast.init(context);
     if (Prefs().webdavStatus){
-      AnxWebdav.init();
+      await AnxWebdav.init();
+      await AnxWebdav.syncData(SyncDirection.both);
     }
   }
 
