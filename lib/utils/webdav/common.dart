@@ -6,6 +6,7 @@ import 'package:anx_reader/main.dart';
 import 'package:anx_reader/utils/get_base_path.dart';
 import 'package:anx_reader/utils/toast/common.dart';
 import 'package:anx_reader/utils/webdav/safe_read.dart';
+import 'package:anx_reader/utils/webdav/show_status.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:path/path.dart';
@@ -23,6 +24,12 @@ class AnxWebdav {
       StreamController<bool>.broadcast();
 
   static Stream<bool> get syncing => _syncingController.stream;
+  static bool isSyncing = false;
+
+  static SyncDirection direction = SyncDirection.both;
+  static int count = 0;
+  static int total = 0;
+  static String fileName = '';
 
   static Future<void> init() async {
     client = newClient(
@@ -53,17 +60,23 @@ class AnxWebdav {
     }
     await client.mkdir('anx');
   }
+  static void setSyncing(bool value) {
+    isSyncing = value;
+    _syncingController.add(value);
+  }
 
   static Future<void> syncData(SyncDirection direction) async {
     BuildContext context = navigatorKey.currentContext!;
-    if (syncing == true) {
+    // if is  syncing
+    if (isSyncing) {
+      showWebdavStatus(direction, fileName, count, total);
       return;
     }
     if (!Prefs().webdavStatus) {
       AnxToast.show(context.webdavWebdavNotEnabled);
       return;
     }
-    _syncingController.add(true);
+    setSyncing(true);
     AnxToast.show(context.webdavSyncing);
     try {
       client.mkdir('anx/data').then((value) {
@@ -71,6 +84,7 @@ class AnxWebdav {
           AnxToast.show(context.webdavSyncingFiles);
           syncFiles().then((value) {
             AnxToast.show(context.webdavSyncComplete);
+            setSyncing(false);
           });
         });
       });
@@ -80,8 +94,8 @@ class AnxWebdav {
       } else {
         AnxToast.show('Sync failed');
       }
+      setSyncing(false);
     }
-    _syncingController.add(false);
   }
 
   static Future<void> syncFiles() async {
@@ -102,7 +116,7 @@ class AnxWebdav {
             (index) => 'cover/${remoteCovers[index].name!}');
       }
     }
-    List<String> totalCurrentFiles = [...currentBooks, ...currentCover];
+    List<String> totalCurrentFiles = [...currentCover, ...currentBooks];
     List<String> totalRemoteFiles = [...remoteBooksName, ...remoteCoversName];
     List<String> localBooks =
         io.Directory(getBasePath('file')).listSync().map((e) {
@@ -172,6 +186,8 @@ class AnxWebdav {
 
   static Future<void> uploadFile(String localPath, String remotePath,
       [bool replace = false]) async {
+    direction = SyncDirection.upload;
+    fileName = localPath.split('/').last;
     CancelToken c = CancelToken();
     if (replace) {
       try {
@@ -182,12 +198,20 @@ class AnxWebdav {
     }
     await client.writeFromFile(localPath, remotePath, onProgress: (c, t) {
       print(c / t);
+      count = c;
+      total = t;
+      setSyncing(true);
     }, cancelToken: c);
   }
 
   static Future<void> downloadFile(String remotePath, String localPath) async {
+    direction = SyncDirection.download;
+    fileName = remotePath.split('/').last;
     await client.read2File(remotePath, localPath, onProgress: (c, t) {
       print(c / t);
+      count = c;
+      total = t;
+      setSyncing(true);
     });
   }
 }

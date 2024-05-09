@@ -72,10 +72,13 @@ class _BookshelfPageState extends State<BookshelfPage>
           _syncAnimationController?.repeat();
           return IconButton(
             icon: RotationTransition(
-              turns: Tween(begin: 1.0, end: 0.0).animate(_syncAnimationController!),
+              turns: Tween(begin: 1.0, end: 0.0)
+                  .animate(_syncAnimationController!),
               child: const Icon(Icons.sync),
             ),
-            onPressed: null,
+            onPressed: () {
+              AnxWebdav.syncData(SyncDirection.both);
+            },
           );
         } else {
           return IconButton(

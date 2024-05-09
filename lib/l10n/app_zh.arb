@@ -72,6 +72,8 @@
   "common_ok": "好",
   "common_success": "成功",
   "common_failed": "失败",
+  "common_uploading": "上传中",
+  "common_downloading": "下载中",
 
   "service_import_success":"导入成功",
 

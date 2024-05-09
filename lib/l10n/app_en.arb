@@ -72,6 +72,8 @@
   "common_ok": "OK",
   "common_success": "Success",
   "common_failed": "Failed",
+  "common_uploading": "Uploading",
+  "common_downloading": "Downloading",
 
   "service_import_success": "Import success",
 
