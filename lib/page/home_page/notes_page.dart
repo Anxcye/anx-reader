@@ -252,10 +252,10 @@ class _NotesPageState extends State<NotesPage> {
                       // Expanded(child: SizedBox()),
                       ClipRRect(
                         borderRadius: BorderRadius.circular(8),
-                        child: Image.memory(
+                        child: Image.file(
                           File(
                             snapshot.data!.coverFullPath,
-                          ).readAsBytesSync(),
+                          ),
                           height: 130,
                           width: 90,
                           fit: BoxFit.cover,
