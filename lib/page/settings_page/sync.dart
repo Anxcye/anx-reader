@@ -137,6 +137,7 @@ void showWebdavDialog(BuildContext context) {
                   webdavInfo['username'] = webdavUsernameController.text;
                   webdavInfo['password'] = webdavPasswordController.text;
                   testWebdav(webdavInfo);
+
                 },
 
                 child: Text(context.settingsSyncWebdavTestConnection),
