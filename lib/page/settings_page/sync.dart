@@ -133,7 +133,7 @@ void showWebdavDialog(BuildContext context) {
             children: [
               TextButton(
                 onPressed: () async {
-                  webdavInfo['url'] = webdavUrlController.text;
+                  webdavInfo['url'] = webdavUrlController.text.trim();
                   webdavInfo['username'] = webdavUsernameController.text;
                   webdavInfo['password'] = webdavPasswordController.text;
                   testWebdav(webdavInfo);
@@ -143,7 +143,7 @@ void showWebdavDialog(BuildContext context) {
               ),
               TextButton(
                 onPressed: () {
-                  webdavInfo['url'] = webdavUrlController.text;
+                  webdavInfo['url'] = webdavUrlController.text.trim();
                   webdavInfo['username'] = webdavUsernameController.text;
                   webdavInfo['password'] = webdavPasswordController.text;
                   prefs(webdavInfo);

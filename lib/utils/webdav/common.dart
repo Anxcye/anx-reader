@@ -88,7 +88,6 @@ class AnxWebdav {
           AnxToast.show(context.webdavSyncingFiles);
           syncFiles().then((value) {
             // refresh book list
-            evictImageFromCache();
             const BookshelfPage().refreshBookList();
             AnxToast.show(context.webdavSyncComplete);
             setSyncing(false);
@@ -221,9 +220,4 @@ class AnxWebdav {
       setSyncing(true);
     });
   }
-}
-
-void evictImageFromCache() {
-  // print('clear cache/////////');
-  // ImageCache().clear();
 }

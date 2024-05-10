@@ -17,6 +17,7 @@ class BookshelfPage extends StatefulWidget {
 
   @override
   State<BookshelfPage> createState() => BookshelfPageState();
+
   void refreshBookList() {
     BookshelfPageState().refreshBookList();
   }
@@ -45,9 +46,11 @@ class BookshelfPageState extends State<BookshelfPage>
 
   Future<void> refreshBookList() async {
     final books = await selectNotDeleteBooks();
-    setState(() {
-      _books = books;
-    });
+    if (mounted) {
+      setState(() {
+        _books = books;
+      });
+    }
   }
 
   Future<void> _importBook() async {
