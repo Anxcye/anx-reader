@@ -32,7 +32,7 @@ class _BookDetailState extends State<BookDetail> {
   void initState() {
     super.initState();
     rating = widget.book.rating;
-    coverImage = Image.file(File(widget.book.coverFullPath));
+    coverImage = Image.memory(File(widget.book.coverFullPath).readAsBytesSync());
   }
 
   @override
@@ -213,7 +213,7 @@ class _BookDetailState extends State<BookDetail> {
                   widget.book.coverPath = newPath;
 
                   setState(() {
-                    coverImage = Image.file(File(image.path));
+                    coverImage = Image.memory(File(image.path).readAsBytesSync());
                     updateBook(widget.book);
                     widget.onRefresh();
                   });

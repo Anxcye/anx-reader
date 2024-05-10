@@ -116,10 +116,10 @@ Widget bookInfo(BuildContext context, Book book, int numberOfNotes) {
 ClipRRect bookCover(Book book) {
   return ClipRRect(
     borderRadius: BorderRadius.circular(8),
-    child: Image.file(
+    child: Image.memory(
       File(
         book.coverFullPath,
-      ),
+      ).readAsBytesSync(),
       height: 180,
       width: 120,
       fit: BoxFit.cover,
