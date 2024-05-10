@@ -109,7 +109,8 @@ void showWebdavDialog(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: TextField(
-        obscureText: labelText == context.settingsSyncWebdavPassword ? true : false,
+        obscureText:
+            labelText == context.settingsSyncWebdavPassword ? true : false,
         controller: controller,
         decoration: InputDecoration(
             border: const OutlineInputBorder(), labelText: labelText),
@@ -125,9 +126,10 @@ void showWebdavDialog(BuildContext context) {
         contentPadding: const EdgeInsets.all(20),
         children: [
           buildTextField(context.settingsSyncWebdavUrl, webdavUrlController),
-          buildTextField(context.settingsSyncWebdavUsername, webdavUsernameController),
-          buildTextField(context.settingsSyncWebdavPassword, webdavPasswordController),
-
+          buildTextField(
+              context.settingsSyncWebdavUsername, webdavUsernameController),
+          buildTextField(
+              context.settingsSyncWebdavPassword, webdavPasswordController),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
@@ -137,9 +139,7 @@ void showWebdavDialog(BuildContext context) {
                   webdavInfo['username'] = webdavUsernameController.text;
                   webdavInfo['password'] = webdavPasswordController.text;
                   testWebdav(webdavInfo);
-
                 },
-
                 child: Text(context.settingsSyncWebdavTestConnection),
               ),
               TextButton(
