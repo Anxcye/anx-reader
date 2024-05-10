@@ -21,7 +21,7 @@
 ### TODO
 - [X] UI 适配 Tab 端
 - [ ] 支持更多文件类型（目前仅支持导入 epub）
-- [ ] 支持 WebDAV 同步
+- [X] 支持 WebDAV 同步
 - [ ] 支持 Windows，Linux
 - [ ] 自部署的同步服务
 
