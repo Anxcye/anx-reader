@@ -3,6 +3,17 @@
 </p>
 <h1 align="center">安读 - 让阅读更专注</h1>
 
+<p align="center">
+  <a href="https://github.com/Anxcye/anx-reader/blob/main/LICENSE">
+    <img src="https://img.shields.io/github/license/anxcye/anx-reader" alt="License">
+  </a>
+  <a href="https://github.com/Anxcye/anx-reader/releases">
+    <img src="https://img.shields.io/github/downloads/anxcye/anx-reader/total" alt="Downloads">
+  </a>
+  <a href="https://github.com/anxcye/anx-reader/stargazers">
+    <img src="https://img.shields.io/github/stars/anxcye/anx-reader" alt="stars">
+  </a>
+</p>
 
 
 安读是一款专注于阅读的应用，不包含任何在线推广内容，它可以帮助你更专注于阅读，提高阅读效率。
