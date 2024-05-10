@@ -87,6 +87,8 @@ class AnxWebdav {
         syncDatabase(direction).then((value) {
           AnxToast.show(context.webdavSyncingFiles);
           syncFiles().then((value) {
+            imageCache.clear();
+            imageCache.clearLiveImages();
             // refresh book list
             const BookshelfPage().refreshBookList();
             AnxToast.show(context.webdavSyncComplete);
