@@ -3,6 +3,7 @@ import 'dart:io' as io;
 import 'package:anx_reader/dao/database.dart';
 import 'package:anx_reader/l10n/localization_extension.dart';
 import 'package:anx_reader/main.dart';
+import 'package:anx_reader/page/home_page/bookshelf_page.dart';
 import 'package:anx_reader/utils/get_base_path.dart';
 import 'package:anx_reader/utils/toast/common.dart';
 import 'package:anx_reader/utils/webdav/safe_read.dart';
@@ -12,6 +13,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:webdav_client/webdav_client.dart';
+
+import 'package:flutter/services.dart';
+import 'package:flutter/painting.dart';
 
 import '../../config/shared_preference_provider.dart';
 import '../../dao/book.dart';
@@ -70,7 +74,6 @@ class AnxWebdav {
     BuildContext context = navigatorKey.currentContext!;
     // if is  syncing
     if (isSyncing) {
-      showWebdavStatus();
       return;
     }
     if (!Prefs().webdavStatus) {
@@ -84,6 +87,9 @@ class AnxWebdav {
         syncDatabase(direction).then((value) {
           AnxToast.show(context.webdavSyncingFiles);
           syncFiles().then((value) {
+            // refresh book list
+            evictImageFromCache();
+            const BookshelfPage().refreshBookList();
             AnxToast.show(context.webdavSyncComplete);
             setSyncing(false);
           });
@@ -215,4 +221,9 @@ class AnxWebdav {
       setSyncing(true);
     });
   }
+}
+
+void evictImageFromCache() {
+  // print('clear cache/////////');
+  // ImageCache().clear();
 }

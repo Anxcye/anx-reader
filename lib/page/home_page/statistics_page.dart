@@ -285,10 +285,10 @@ class BookStatisticItem extends StatelessWidget {
                   children: [
                     ClipRRect(
                       borderRadius: BorderRadius.circular(8),
-                      child: Image.file(
+                      child: Image.memory(
                         File(
                           snapshot.data!.coverFullPath,
-                        ),
+                        ).readAsBytesSync(),
                         height: 130,
                         width: 90,
                         fit: BoxFit.cover,

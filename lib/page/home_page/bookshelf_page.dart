@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:anx_reader/l10n/localization_extension.dart';
 import 'package:anx_reader/utils/webdav/common.dart';
+import 'package:anx_reader/utils/webdav/show_status.dart';
 import 'package:anx_reader/widgets/book_list.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -15,10 +16,13 @@ class BookshelfPage extends StatefulWidget {
   const BookshelfPage({super.key});
 
   @override
-  State<BookshelfPage> createState() => _BookshelfPageState();
+  State<BookshelfPage> createState() => BookshelfPageState();
+  void refreshBookList() {
+    BookshelfPageState().refreshBookList();
+  }
 }
 
-class _BookshelfPageState extends State<BookshelfPage>
+class BookshelfPageState extends State<BookshelfPage>
     with SingleTickerProviderStateMixin {
   List<Book> _books = [];
   AnimationController? _syncAnimationController;
@@ -36,10 +40,10 @@ class _BookshelfPageState extends State<BookshelfPage>
       vsync: this,
       duration: const Duration(seconds: 1),
     )..repeat();
-    _refreshBookList();
+    refreshBookList();
   }
 
-  Future<void> _refreshBookList() async {
+  Future<void> refreshBookList() async {
     final books = await selectNotDeleteBooks();
     setState(() {
       _books = books;
@@ -61,7 +65,7 @@ class _BookshelfPageState extends State<BookshelfPage>
 
     await importBook(file);
 
-    _refreshBookList();
+    refreshBookList();
   }
 
   Widget syncButton() {
@@ -77,7 +81,8 @@ class _BookshelfPageState extends State<BookshelfPage>
               child: const Icon(Icons.sync),
             ),
             onPressed: () {
-              AnxWebdav.syncData(SyncDirection.both);
+              // AnxWebdav.syncData(SyncDirection.both);
+              showWebdavStatus();
             },
           );
         } else {
@@ -107,7 +112,7 @@ class _BookshelfPageState extends State<BookshelfPage>
       ),
       body: _books.isEmpty
           ? const BookshelfTips()
-          : BookList(books: _books, onRefresh: _refreshBookList),
+          : BookList(books: _books, onRefresh: refreshBookList),
     );
   }
 }
