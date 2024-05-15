@@ -34,7 +34,7 @@ String generateIndexHtml(
           column-fill: auto;
         }
         #viewer {
-          background-color: #$backgroundColor;
+          // background-color: #$backgroundColor;
           font-family: 'SourceHanSerif' !important;
         }
         @font-face {
@@ -59,7 +59,7 @@ String generateIndexHtml(
         
         rendition.hooks.render.register(function(contents, view) {
           var doc = contents.document;
-          doc.body.style.backgroundColor = '#$backgroundColor';
+          doc.body.style.backgroundColor = 'transparent';
           doc.body.style.paddingTop = '${style.topMargin}px';
           doc.body.style.paddingBottom = '${style.bottomMargin}px';
           doc.body.style.lineHeight = '${style.lineHeight}';
@@ -88,44 +88,6 @@ String generateIndexHtml(
           });
         });
         
-// rendition.hooks.render.register(function(contents, view) {
-// // book.spine.hooks.content.register(function(contents, view) {
-//   var doc = contents.document;
-//   var styleEl = doc.createElement('style');
-//
-//   styleEl.textContent = `
-//     @font-face {
-//       font-family: 'SourceHanSerif';
-//       src: url('http://localhost:${Server().port}/fonts/SourceHanSerifSC-Regular.otf');
-//     }
-//     html {
-//       background-color: '#$backgroundColor';
-//       color: '#$textColor';
-//     }
-//     body {
-//       padding-top: '${style.topMargin}px !important';
-//       padding-bottom: '${style.bottomMargin}px !important';
-//       line-height: '${style.lineHeight} !important';
-//       letter-spacing: '${style.letterSpacing}px !important';
-//       text-align: 'justify !important';
-//     }
-//     * {
-//       font-family: 'SourceHanSerif !important';
-//     }
-//     p {
-//       padding-top: '${style.paragraphSpacing}px !important';
-//       line-height: '${style.lineHeight} !important';
-//     }
-//     pre {
-//       white-space: 'pre-wrap' !important;
-//     }
-//     img {
-//       max-width: '-webkit-fill-available !important';
-//     }
-//   `;
-//
-//   doc.head.appendChild(styleEl);
-// });    
         
         defaultStyle = function() {
           rendition.themes.fontSize('${style.fontSize}%');
@@ -136,7 +98,7 @@ String generateIndexHtml(
           //   'src': 'url(http://localhost:${Server().port}/fonts/SourceHanSerifSC-Regular.otf)',
           // },
             'html': {
-              'background-color': '#$backgroundColor',
+              'background-color': 'transparent',
               'color': '#$textColor',
             },
             'body': {
