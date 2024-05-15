@@ -5,6 +5,7 @@ import 'package:anx_reader/page/home_page.dart';
 import 'package:anx_reader/page/home_page/notes_page.dart';
 import 'package:anx_reader/service/book_player/book_player_server.dart';
 import 'package:anx_reader/utils/get_base_path.dart';
+import 'package:anx_reader/utils/log/common.dart';
 import 'package:anx_reader/utils/toast/common.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -17,6 +18,8 @@ final navigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  AnxLog.init();
   await Prefs().initPrefs();
 
   Server().start();
