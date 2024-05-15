@@ -4,6 +4,7 @@ import 'package:anx_reader/l10n/localization_extension.dart';
 import 'package:anx_reader/utils/get_path/log_file.dart';
 import 'package:anx_reader/utils/toast/common.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_file_dialog/flutter_file_dialog.dart';
 
 import '../../utils/log/common.dart';
@@ -27,7 +28,7 @@ class _LogPageState extends State<LogPage> {
   Future<void> initData() async {
     File logFile = await getLogFile();
     setState(() {
-      logs = logFile.readAsLinesSync();
+      logs = logFile.readAsLinesSync().reversed.toList();
     });
   }
 
@@ -50,7 +51,7 @@ class _LogPageState extends State<LogPage> {
       ),
       body: ListView(
         children: [
-          for (final log in logs) logItem(log),
+          for (final log in logs) logItem(log, context)
         ],
       ),
     );
@@ -87,8 +88,7 @@ class _LogPageState extends State<LogPage> {
 
   Future<void> clearLog() async {
     Navigator.pop(context);
-    File logFile = await getLogFile();
-    logFile.writeAsStringSync('');
+    AnxLog.clear();
     initData();
   }
 
@@ -103,11 +103,11 @@ class _LogPageState extends State<LogPage> {
   }
 }
 
-Widget logItem(String logstr) {
-  final log = AnxLog.parse(logstr);
+Widget logItem(String logStr, BuildContext context) {
+  final log = AnxLog.parse(logStr);
   return SelectionArea(
       child: Container(
-    padding: const EdgeInsets.all(10),
+    padding: const EdgeInsets.all(20),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -124,8 +124,20 @@ Widget logItem(String logstr) {
                   fontWeight: FontWeight.bold)),
         ),
         Text(log.time.toString()),
-        SizedBox(height: 5),
+        const SizedBox(height: 5),
         Text(log.message),
+        Row(
+          children: [
+            const Spacer(),
+            TextButton(
+              onPressed: () {
+                Clipboard.setData(ClipboardData(text: logStr));
+              },
+              // TODO l10n
+              child: Text('Copy'),
+            ),
+          ],
+        ),
         const Divider(),
       ],
     ),

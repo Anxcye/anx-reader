@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:anx_reader/utils/log/string_to_level.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
@@ -36,12 +37,19 @@ class AnxLog {
 
     Logger.root.level = Level.ALL;
     Logger.root.onRecord.listen((record) {
-      print('${record.level.name}: ${record.time}: ${record.message}');
-      // file
+      if (kDebugMode) {
+        print('${record.level.name}: ${record.time}: ${record.message}');
+      }
       logFile.writeAsStringSync(
           '${record.level.name}^*^ ${record.time}^*^ ${record.message}\n',
           mode: FileMode.append);
     });
+    clear();
     log.info('Log file: ${logFile.path}');
+  }
+
+  static clear() async {
+    File logFile = await getLogFile();
+    logFile.writeAsStringSync('');
   }
 }

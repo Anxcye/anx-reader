@@ -25,7 +25,7 @@ class AppearanceSetting extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return settingsTitle(
-        icon: const Icon(Icons.palette),
+        icon: const Icon(Icons.palette_outlined),
         title: context.settingsAppearance,
         isMobile: isMobile,
         id: id,
