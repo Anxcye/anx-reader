@@ -26,7 +26,7 @@ class AdvancedSetting extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return settingsTitle(
-        icon: const Icon(Icons.sync),
+        icon: const Icon(Icons.shield_outlined),
         title: context.settingsAdvanced,
         isMobile: isMobile,
         id: id,

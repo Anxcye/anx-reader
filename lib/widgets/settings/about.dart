@@ -32,7 +32,7 @@ class _AboutState extends State<About> {
   @override
   Widget build(BuildContext context) {
     return AboutListTile(
-      icon: const Icon(Icons.info),
+      icon: const Icon(Icons.info_outline),
       applicationName: context.appName,
       applicationVersion: version,
       applicationLegalese: '© 2023 ${context.appName}',
