@@ -1,4 +1,5 @@
 import 'package:anx_reader/l10n/localization_extension.dart';
+import 'package:anx_reader/page/settings_page/advanced.dart';
 import 'package:anx_reader/page/settings_page/appearance.dart';
 import 'package:anx_reader/page/settings_page/sync.dart';
 import 'package:flutter/cupertino.dart';
@@ -100,6 +101,11 @@ class _SubMoreSettingsState extends State<SubMoreSettings> {
           selectedIndex: selectedIndex,
           setDetail: setDetail,
         ),
+        AdvancedSetting(
+            isMobile: isMobile,
+            id: 2,
+            selectedIndex: selectedIndex,
+            setDetail: setDetail),
         About()
       ],
     );

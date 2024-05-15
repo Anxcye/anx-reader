@@ -97,6 +97,9 @@
   "settings_sync_webdav_username": "用户名",
   "settings_sync_webdav_password": "密码",
   "settings_sync_webdav_test_connection": "测试连接",
-  "settings_sync_webdav_sync_now": "立即同步"
+  "settings_sync_webdav_sync_now": "立即同步",
+
+  "settings_advanced": "高级",
+  "settings_advanced_log": "日志"
 
 }

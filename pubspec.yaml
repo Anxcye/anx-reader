@@ -43,6 +43,7 @@ dependencies:
   dio: ^5.4.3+1
   pubspec_parse: ^1.2.3
   logging: ^1.2.0
+  flutter_file_dialog: ^3.0.2
 
 dev_dependencies:
   flutter_test:
