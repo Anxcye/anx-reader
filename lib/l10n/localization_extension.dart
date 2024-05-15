@@ -90,4 +90,6 @@ extension LocalizationExtension on BuildContext {
   String get settingsSyncWebdavPassword => AppLocalizations.of(this)?.settings_sync_webdav_password ?? '';
   String get settingsSyncWebdavTestConnection => AppLocalizations.of(this)?.settings_sync_webdav_test_connection ?? '';
   String get settingsSyncWebdavSyncNow => AppLocalizations.of(this)?.settings_sync_webdav_sync_now ?? '';
+  String get settingsAdvanced => AppLocalizations.of(this)?.settings_advanced ?? '';
+  String get settingsAdvancedLog => AppLocalizations.of(this)?.settings_advanced_log ?? '';
 }

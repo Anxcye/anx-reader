@@ -1,0 +1,133 @@
+import 'dart:io';
+
+import 'package:anx_reader/l10n/localization_extension.dart';
+import 'package:anx_reader/utils/get_path/log_file.dart';
+import 'package:anx_reader/utils/toast/common.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_file_dialog/flutter_file_dialog.dart';
+
+import '../../utils/log/common.dart';
+
+class LogPage extends StatefulWidget {
+  const LogPage({super.key});
+
+  @override
+  State<LogPage> createState() => _LogPageState();
+}
+
+class _LogPageState extends State<LogPage> {
+  List<String> logs = [];
+
+  @override
+  void initState() {
+    initData();
+    super.initState();
+  }
+
+  Future<void> initData() async {
+    File logFile = await getLogFile();
+    setState(() {
+      logs = logFile.readAsLinesSync();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(context.settingsAdvancedLog),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () {
+              initData();
+            },
+          ),
+          IconButton(
+              onPressed: () => showMoreAction(context),
+              icon: const Icon(Icons.more_vert)),
+        ],
+      ),
+      body: ListView(
+        children: [
+          for (final log in logs) logItem(log),
+        ],
+      ),
+    );
+  }
+
+  void showMoreAction(BuildContext context) {
+    showMenu(
+      context: context,
+      position: RelativeRect.fromLTRB(
+        MediaQuery.of(context).size.width,
+        MediaQuery.of(context).padding.top + kToolbarHeight,
+        0.0,
+        0.0,
+      ),
+      items: [
+        PopupMenuItem(
+          child: ListTile(
+            leading: const Icon(Icons.delete),
+            // TODO lq0n
+            title: Text('Clear log'),
+            onTap: () => clearLog(),
+          ),
+        ),
+        PopupMenuItem(
+            child: ListTile(
+          leading: const Icon(Icons.file_upload_outlined),
+          // TODO lq0n
+          title: Text('Export log'),
+          onTap: () => exportLog(),
+        ))
+      ],
+    );
+  }
+
+  Future<void> clearLog() async {
+    Navigator.pop(context);
+    File logFile = await getLogFile();
+    logFile.writeAsStringSync('');
+    initData();
+  }
+
+  Future<void> exportLog() async {
+    Navigator.pop(context);
+    File logFile = await getLogFile();
+    SaveFileDialogParams params = SaveFileDialogParams(
+      sourceFilePath: logFile.path,
+    );
+    await FlutterFileDialog.saveFile(params: params);
+    AnxToast.show("saved");
+  }
+}
+
+Widget logItem(String logstr) {
+  final log = AnxLog.parse(logstr);
+  return SelectionArea(
+      child: Container(
+    padding: const EdgeInsets.all(10),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.fromLTRB(8, 1, 8, 1),
+          decoration: BoxDecoration(
+            color: log.color,
+            borderRadius: BorderRadius.circular(100),
+          ),
+          child: Text(log.level.name,
+              style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold)),
+        ),
+        Text(log.time.toString()),
+        SizedBox(height: 5),
+        Text(log.message),
+        const Divider(),
+      ],
+    ),
+  ));
+}

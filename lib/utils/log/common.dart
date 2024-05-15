@@ -16,11 +16,17 @@ class AnxLog {
 
   AnxLog(this.level, this.time, this.message);
 
+  get color => level == Level.SEVERE
+      ? Colors.red
+      : level == Level.WARNING
+          ? Colors.orange
+          : Colors.grey;
+
   static AnxLog parse(String log) {
     // INFO: 2024-05-15 15:55:15.003495: Log file: /data/user/0/com.anxcye.anx_reader/app_flutter/anx_reader.log
     final logParts = log.split('^*^');
     final level = stringToLevel(logParts[0]);
-    final time = DateTime.parse(logParts[1]);
+    final time = DateTime.parse(logParts[1].trim());
     final message = logParts[2];
     return AnxLog(level, time, message);
   }

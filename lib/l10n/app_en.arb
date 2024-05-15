@@ -97,7 +97,10 @@
   "settings_sync_webdav_username": "Username",
   "settings_sync_webdav_password": "Password",
   "settings_sync_webdav_test_connection": "Test Connection",
-  "settings_sync_webdav_sync_now": "Sync Now"
+  "settings_sync_webdav_sync_now": "Sync Now",
+
+  "settings_advanced": "Advanced",
+  "settings_advanced_log": "Log"
 
 
 
