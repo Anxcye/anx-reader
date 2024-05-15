@@ -523,10 +523,14 @@ class EpubPlayerState extends State<EpubPlayer> {
 
     _webViewController.evaluateJavascript(source: '''
       changeTheme = function() {
+      const body = document.querySelector('body');
+      body.style.backgroundColor = '#$backgroundColor';
+      body.style.color = '#$textColor'; 
+      
         rendition.themes.default({
           'html': {
-            'background-color': '#$backgroundColor',
-            'color': '#$textColor',
+            'background-color': 'transparent !important',
+            'color': '#$textColor !important',
           },
         }); 
       }
@@ -537,6 +541,9 @@ class EpubPlayerState extends State<EpubPlayer> {
   void changeStyle(BookStyle bookStyle) {
     _webViewController.evaluateJavascript(source: '''
     changeStyle = function() {
+      const body = document.querySelector('body');
+      
+      
       rendition.themes.fontSize('${bookStyle.fontSize}%');
       rendition.themes.font('${bookStyle.fontFamily}');
       
