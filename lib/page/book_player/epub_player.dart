@@ -97,7 +97,9 @@ class EpubPlayerState extends State<EpubPlayer> {
     _webViewController.addJavaScriptHandler(
         handlerName: 'getProgress',
         callback: (args) {
-          progress = (args[0] as num).toDouble();
+          if (args[0] != null) {
+            progress = (args[0] as num).toDouble();
+          }
         });
 
     _webViewController.addJavaScriptHandler(

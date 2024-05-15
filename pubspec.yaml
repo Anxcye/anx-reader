@@ -41,7 +41,8 @@ dependencies:
   webdav_client: ^1.2.1
   fluttertoast: ^8.2.5
   dio: ^5.4.3+1
-
+  pubspec_parse: ^1.2.3
+  logging: ^1.2.0
 
 dev_dependencies:
   flutter_test:
@@ -60,6 +61,7 @@ flutter:
     - assets/js/epub.js
     - assets/js/jszip.min.js
     - assets/fonts/SourceHanSerifSC-Regular.otf
+    - pubspec.yaml
 
 
   fonts:
