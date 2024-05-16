@@ -55,6 +55,15 @@ class _SubAdvancedSettingsState extends State<SubAdvancedSettings> {
         SettingsSection(
           title: Text(context.settingsAdvancedLog),
           tiles: [
+            SettingsTile.switchTile(
+              title: Text(context.settingsAdvancedClearLogWhenStart),
+              leading: const Icon(Icons.delete_forever_outlined),
+              initialValue: Prefs().clearLogWhenStart,
+              onToggle: (value) {
+                Prefs().saveClearLogWhenStart(value);
+                setState(() {});
+              },
+            ),
             SettingsTile.navigation(
                 leading: const Icon(Icons.bug_report),
                 title: Text(context.settingsAdvancedLog),

@@ -4,6 +4,7 @@ import 'package:anx_reader/dao/book.dart';
 import 'package:anx_reader/dao/reading_time.dart';
 import 'package:anx_reader/l10n/localization_extension.dart';
 import 'package:anx_reader/utils/convert_seconds.dart';
+import 'package:anx_reader/utils/log/common.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:image_picker/image_picker.dart';
@@ -192,7 +193,7 @@ class _BookDetailState extends State<BookDetail> {
                     await picker.pickImage(source: ImageSource.gallery);
 
                 if (image != null) {
-                  print('Image path: ${image.path}');
+                  AnxLog.info('BookDetail: Image path: ${image.path}');
                   // Delete the existing cover image file
                   final File oldCoverImageFile =
                       File(widget.book.coverFullPath);
@@ -204,7 +205,7 @@ class _BookDetailState extends State<BookDetail> {
                       '${widget.book.coverPath.split('/').sublist(0, widget.book.coverPath.split('/').length - 1).join('/')}/${widget.book.title.length > 20 ? widget.book.title.substring(0, 20) : widget.book.title}-${DateTime.now().millisecond.toString()}.png'
                           .replaceAll(' ', '_');
 
-                  print('New path: $newPath');
+                  AnxLog.info('BookDetail: New path: $newPath');
                   String newFullPath = getBasePath(newPath);
 
                   final File newCoverImageFile = File(newFullPath);

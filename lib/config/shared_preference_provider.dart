@@ -124,5 +124,21 @@ class Prefs extends ChangeNotifier {
     return prefs.getBool('webdavStatus') ?? false;
   }
 
+  void saveClearLogWhenStart(bool status) {
+    prefs.setBool('clearLogWhenStart', status);
+    notifyListeners();
+  }
+
+  bool get clearLogWhenStart {
+    return prefs.getBool('clearLogWhenStart') ?? true;
+  }
+
+
+
+
+
+
+
+
 
 }

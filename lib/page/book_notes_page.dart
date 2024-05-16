@@ -129,7 +129,6 @@ ClipRRect bookCover(Book book) {
 
 Row opetators(BuildContext context, Book book) {
   void handleExportNotes() {
-    print("Export notes");
     showModalBottomSheet(
         context: context,
         builder: (context) {

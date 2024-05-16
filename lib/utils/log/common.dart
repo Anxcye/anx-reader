@@ -1,10 +1,10 @@
 import 'dart:io';
 
+import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/utils/log/string_to_level.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:path_provider/path_provider.dart';
 
 import '../get_path/log_file.dart';
 
@@ -38,13 +38,24 @@ class AnxLog {
     Logger.root.level = Level.ALL;
     Logger.root.onRecord.listen((record) {
       if (kDebugMode) {
-        print('${record.level.name}: ${record.time}: ${record.message}');
+        String colorCode = '';
+        if (record.level == Level.SEVERE) {
+          colorCode = '\x1B[31m';
+        } else if (record.level == Level.WARNING) {
+          colorCode = '\x1B[33m';
+        } else if (record.level == Level.INFO) {
+          colorCode = '\x1B[34m';
+        }
+        print('$colorCode${record.level.name}: ${record.time}: ${record.message} ');
+        print('${record.error} \x1B[0m');
       }
       logFile!.writeAsStringSync(
-          '${record.level.name}^*^ ${record.time}^*^ ${record.message}\n',
+          '${record.level.name}^*^ ${record.time}^*^ [${record.message}]:${record.error}',
           mode: FileMode.append);
     });
-    clear();
+    if (Prefs().clearLogWhenStart) {
+      clear();
+    }
     info('Log file: ${logFile!.path}');
   }
 

@@ -136,7 +136,6 @@ class _ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
 
   void progressHandler() {
     readProgress = _epubPlayerKey.currentState!.progress;
-    print(readProgress);
     setState(() {
       _currentPage = ProgressWidget(
         epubPlayerKey: _epubPlayerKey,

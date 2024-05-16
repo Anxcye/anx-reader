@@ -100,7 +100,8 @@
   "settings_sync_webdav_sync_now": "Sync Now",
 
   "settings_advanced": "Advanced",
-  "settings_advanced_log": "Log"
+  "settings_advanced_log": "Log",
+  "settings_advanced_clear_log_when_start": "Clear log when start"
 
 
 

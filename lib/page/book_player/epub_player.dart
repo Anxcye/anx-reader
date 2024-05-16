@@ -5,6 +5,7 @@ import 'package:anx_reader/dao/book_note.dart';
 import 'package:anx_reader/l10n/localization_extension.dart';
 import 'package:anx_reader/models/book_style.dart';
 import 'package:anx_reader/models/read_theme.dart';
+import 'package:anx_reader/utils/log/common.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -89,7 +90,7 @@ class EpubPlayerState extends State<EpubPlayer> {
      }
           getToc();
       ''');
-    print(toc);
+    AnxLog.info('BookPlayer: $toc');
     return toc;
   }
 
@@ -138,8 +139,6 @@ class EpubPlayerState extends State<EpubPlayer> {
     _webViewController.addJavaScriptHandler(
         handlerName: 'onTap',
         callback: (args) {
-          print(args[0]);
-
           Map<String, dynamic> coordinates = args[0];
           double x = coordinates['x'];
           double y = coordinates['y'];
