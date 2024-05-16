@@ -137,17 +137,17 @@ String generateIndexHtml(
         var touchStarY = 0;
         var touchStartTime = 0;
         rendition.on('touchstart', event => {   //通过on方法将事件绑定到渲染上
-          console.log(event)
+          // console.log(event)
           touchStarX = event.changedTouches[0].clientX;
           touchStarY = event.changedTouches[0].clientY;
           touchStartTime = event.timeStamp
         })
         rendition.on('touchend', event => {
-          console.log(event)
+          // console.log(event)
           const offsetX = event.changedTouches[0].clientX - touchStarX
           const offsetY = event.changedTouches[0].clientY - touchStarY
           const time = event.timeStamp - touchStartTime
-          console.log(offsetX, time)
+          // console.log(offsetX, time)
           if (Math.abs(offsetX) > Math.abs(offsetY)) {
             if (time < 500 && offsetX > 40) {
               rendition.prev();
@@ -313,7 +313,7 @@ String generateIndexHtml(
         }
         var eventOfCurrentAnnotation = null;
         var handleAnnoClick = function(e, bookNote) {
-          console.log('annotation clicked', e.target);
+          // console.log('annotation clicked', e.target);
           x = e.target.getBoundingClientRect().left / window.innerWidth;
           y = e.target.getBoundingClientRect().top / window.innerHeight;
           selectByCfi(bookNote.cfi);
@@ -339,8 +339,8 @@ String generateIndexHtml(
         };
         function handleClick(e) {
           var selectedText = e.view.getSelection().toString().length;
-          console.log(selectedText);
-          console.log(e.target);
+          // console.log(selectedText);
+          // console.log(e.target);
       
           if (e.defaultPrevented || selectedText > 0) {
             return;
@@ -353,7 +353,7 @@ String generateIndexHtml(
           let x = (e.clientX + iframeRect.left + window.screenX) / width;
           let y = (e.clientY + iframeRect.top + window.screenY) / height;
       
-          console.log('Clicked outside iframe', x, y);
+          // console.log('Clicked outside iframe', x, y);
           window.flutter_inappwebview.callHandler('onTap', { x: x, y: y });
         }
          
