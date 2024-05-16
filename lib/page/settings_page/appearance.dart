@@ -81,6 +81,7 @@ void showLanguagePickerDialog(BuildContext context) {
   final title = context.settingsAppearanceLanguage;
   final saveToPrefs = Prefs().saveLocaleToPrefs;
   final children = [
+    dialogOption('System', '', saveToPrefs),
     dialogOption('简体中文', 'zh', saveToPrefs),
     dialogOption('English', 'en', saveToPrefs),
   ];

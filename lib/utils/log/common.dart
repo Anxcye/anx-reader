@@ -46,11 +46,13 @@ class AnxLog {
         } else if (record.level == Level.INFO) {
           colorCode = '\x1B[34m';
         }
-        print('$colorCode${record.level.name}: ${record.time}: ${record.message} ');
+        print(
+            '$colorCode${record.level.name}: ${record.time}: ${record.message} ');
         print('${record.error} \x1B[0m');
       }
       logFile!.writeAsStringSync(
-          '${record.level.name}^*^ ${record.time}^*^ [${record.message}]:${record.error}',
+          '${'${record.level.name}^*^ ${record.time}^*^ [${record.message}]:${record.error}'
+                  .replaceAll('\n', ' ')}\n',
           mode: FileMode.append);
     });
     if (Prefs().clearLogWhenStart) {
