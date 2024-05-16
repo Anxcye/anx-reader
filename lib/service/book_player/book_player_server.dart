@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:anx_reader/utils/log/common.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart' as path;
 import 'package:shelf/shelf.dart' as shelf;
@@ -21,7 +22,7 @@ class Server {
         .addHandler(_handleRequests);
 
     _server = await io.serve(handler, 'localhost', 0);
-    print('Serving at http://${_server?.address.host}:${_server?.port}');
+    AnxLog.info('Server: Serving at http://${_server?.address.host}:${_server?.port}');
   }
 
   int get port {
@@ -30,7 +31,7 @@ class Server {
 
   Future stop() async {
     await _server?.close(force: true);
-    print('Server stopped');
+    AnxLog.info('Server: Server stopped');
   }
 
   Future<String> loadAsset(String path) async {
@@ -70,6 +71,7 @@ class Server {
     final bookPath = Uri.decodeComponent(request.url.path.substring(5));
     final file = File(bookPath);
     print('Request for book: $bookPath');
+    AnxLog.info('Server: Request for book: $bookPath');
     if (!file.existsSync()) {
       return shelf.Response.notFound('Book not found');
     }

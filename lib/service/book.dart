@@ -5,6 +5,7 @@ import 'package:anx_reader/l10n/localization_extension.dart';
 import 'package:anx_reader/main.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/utils/get_base_path.dart';
+import 'package:anx_reader/utils/log/common.dart';
 import 'package:epubx/epubx.dart';
 import 'package:flutter/material.dart';
 
@@ -50,6 +51,7 @@ Future<Book> importBook(File file) async {
     AnxToast.show(
         'Failed to import book, please check if the book is valid\n[$e]',
         duration: 5000);
+    AnxLog.severe('Failed to import book\n$e');
     return Book(
       id: -1,
       title: 'Unknown',

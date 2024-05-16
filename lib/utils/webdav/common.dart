@@ -5,6 +5,7 @@ import 'package:anx_reader/l10n/localization_extension.dart';
 import 'package:anx_reader/main.dart';
 import 'package:anx_reader/page/home_page/bookshelf_page.dart';
 import 'package:anx_reader/utils/get_base_path.dart';
+import 'package:anx_reader/utils/log/common.dart';
 import 'package:anx_reader/utils/toast/common.dart';
 import 'package:anx_reader/utils/webdav/safe_read.dart';
 import 'package:anx_reader/utils/webdav/show_status.dart';
@@ -55,6 +56,7 @@ class AnxWebdav {
     } catch (e) {
       AnxToast.show('WebDAV connection failed\n${e.toString()}',
           duration: 5000);
+      AnxLog.severe('WebDAV connection failed, ping failed\n${e.toString()}');
     }
     List<File> files = await client.readDir('/');
     for (var element in files) {
@@ -99,8 +101,10 @@ class AnxWebdav {
     } catch (e) {
       if (e is DioException && e.type == DioExceptionType.connectionError) {
         AnxToast.show('WebDAV connection failed, check your network');
+        AnxLog.severe('WebDAV connection failed, connection error\n$e');
       } else {
         AnxToast.show('Sync failed');
+        AnxLog.severe('Sync failed\n$e');
       }
       setSyncing(false);
     }
@@ -201,11 +205,10 @@ class AnxWebdav {
       try {
         await client.remove(remotePath);
       } catch (e) {
-        print(e);
+        AnxLog.severe('Failed to remove file\n$e');
       }
     }
     await client.writeFromFile(localPath, remotePath, onProgress: (c, t) {
-      print(c / t);
       count = c;
       total = t;
       setSyncing(true);
@@ -216,7 +219,6 @@ class AnxWebdav {
     direction = SyncDirection.download;
     fileName = remotePath.split('/').last;
     await client.read2File(remotePath, localPath, onProgress: (c, t) {
-      print(c / t);
       count = c;
       total = t;
       setSyncing(true);
