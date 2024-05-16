@@ -13,7 +13,7 @@ class MoreSettings extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: const Icon(Icons.settings),
+      leading: const Icon(Icons.settings_outlined),
       title: Text(context.settingsMoreSettings),
       trailing: const Icon(Icons.chevron_right),
       onTap: () {
@@ -79,9 +79,9 @@ class _SubMoreSettingsState extends State<SubMoreSettings> {
     );
   }
 
-  void setDetail(Widget Detail, int id) {
+  void setDetail(Widget detail, int id) {
     setState(() {
-      settingsDetail = Detail;
+      settingsDetail = detail;
       selectedIndex = id;
     });
   }
@@ -106,7 +106,7 @@ class _SubMoreSettingsState extends State<SubMoreSettings> {
             id: 2,
             selectedIndex: selectedIndex,
             setDetail: setDetail),
-        About()
+        const About()
       ],
     );
   }

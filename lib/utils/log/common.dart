@@ -10,6 +10,7 @@ import '../get_path/log_file.dart';
 
 class AnxLog {
   static final log = Logger('AnxReader');
+  static late File? logFile;
 
   Level level;
   DateTime time;
@@ -24,7 +25,6 @@ class AnxLog {
           : Colors.grey;
 
   static AnxLog parse(String log) {
-    // INFO: 2024-05-15 15:55:15.003495: Log file: /data/user/0/com.anxcye.anx_reader/app_flutter/anx_reader.log
     final logParts = log.split('^*^');
     final level = stringToLevel(logParts[0]);
     final time = DateTime.parse(logParts[1].trim());
@@ -33,23 +33,34 @@ class AnxLog {
   }
 
   static init() async {
-    final logFile = await getLogFile();
+    logFile = await getLogFile();
 
     Logger.root.level = Level.ALL;
     Logger.root.onRecord.listen((record) {
       if (kDebugMode) {
         print('${record.level.name}: ${record.time}: ${record.message}');
       }
-      logFile.writeAsStringSync(
+      logFile!.writeAsStringSync(
           '${record.level.name}^*^ ${record.time}^*^ ${record.message}\n',
           mode: FileMode.append);
     });
     clear();
-    log.info('Log file: ${logFile.path}');
+    info('Log file: ${logFile!.path}');
   }
 
-  static clear() async {
-    File logFile = await getLogFile();
-    logFile.writeAsStringSync('');
+  static void clear() {
+    logFile!.writeAsStringSync('');
+  }
+
+  static info(String message, [Object? error, StackTrace? stackTrace]) {
+    log.info(message, error, stackTrace);
+  }
+
+  static warning(String message, [Object? error, StackTrace? stackTrace]) {
+    log.warning(message, error, stackTrace);
+  }
+
+  static severe(String message, [Object? error, StackTrace? stackTrace]) {
+    log.severe(message, error, stackTrace);
   }
 }

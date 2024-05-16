@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:anx_reader/utils/log/common.dart';
 import 'package:image/image.dart';
 
 Future<bool> saveImageToLocal(Image? imageFile, String path) async {
@@ -15,7 +16,7 @@ Future<bool> saveImageToLocal(Image? imageFile, String path) async {
 
     return true;
   } catch (e) {
-    print('Error saving image: $e');
+    AnxLog.severe('Error saving image\n$e');
     return false;
   }
 }
