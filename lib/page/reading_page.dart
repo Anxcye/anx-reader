@@ -145,20 +145,20 @@ class _ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
     });
   }
 
-Future<void> themeHandler(StateSetter modalSetState) async {
-  List<ReadTheme> themes = await selectThemes();
-  modalSetState(() {
-    _currentPage = ThemeWidget(
-      themes: themes,
-      epubPlayerKey: _epubPlayerKey,
-      setCurrentPage: (Widget page) {
-        modalSetState(() {
-          _currentPage = page;
-        });
-      },
-    );
-  });
-}
+  Future<void> themeHandler(StateSetter modalSetState) async {
+    List<ReadTheme> themes = await selectThemes();
+    modalSetState(() {
+      _currentPage = ThemeWidget(
+        themes: themes,
+        epubPlayerKey: _epubPlayerKey,
+        setCurrentPage: (Widget page) {
+          modalSetState(() {
+            _currentPage = page;
+          });
+        },
+      );
+    });
+  }
 
   Future<void> styleHandler() async {
     setState(() {
@@ -225,7 +225,11 @@ Future<void> themeHandler(StateSetter modalSetState) async {
           },
         );
       },
-    );
+    ).then((value) {
+      setState(() {
+        _currentPage = const SizedBox(height: 1);
+      });
+    });
   }
 
   @override
