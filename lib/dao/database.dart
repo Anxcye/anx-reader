@@ -47,10 +47,10 @@ CREATE TABLE tb_styles (
 ''';
 
 const PRIMARY_THEME_1 = '''
-INSERT INTO tb_themes (background_color, text_color, background_image_path) VALUES ('ff121212', 'ffcccccc', '')
+INSERT INTO tb_themes (background_color, text_color, background_image_path) VALUES ('fffbfbf3', 'ff343434', '')
 ''';
 const PRIMARY_THEME_2 = '''
-INSERT INTO tb_themes (background_color, text_color, background_image_path) VALUES ('ffcccccc', 'ff121212', '')
+INSERT INTO tb_themes (background_color, text_color, background_image_path) VALUES ('ff040404', 'fffeffeb', '')
 ''';
 
 const CREATE_NOTE_SQL = '''

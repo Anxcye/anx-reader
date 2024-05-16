@@ -25,7 +25,7 @@ class Prefs extends ChangeNotifier {
   }
 
   Color get themeColor {
-    int colorValue = prefs.getInt('themeColor') ?? Colors.green.value;
+    int colorValue = prefs.getInt('themeColor') ?? Colors.blue.value;
     return Color(colorValue);
   }
 
@@ -82,8 +82,8 @@ class Prefs extends ChangeNotifier {
     String? readThemeJson = prefs.getString('readTheme');
     if (readThemeJson == null) {
       return ReadTheme(
-          backgroundColor: 'ffFFFFFF',
-          textColor: 'ff000000',
+          backgroundColor: 'FFFBFBF3',
+          textColor: 'FF343434',
           backgroundImagePath: '');
     }
     return ReadTheme.fromJson(readThemeJson);
