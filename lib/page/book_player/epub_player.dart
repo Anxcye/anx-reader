@@ -151,8 +151,8 @@ class EpubPlayerState extends State<EpubPlayer> {
         callback: (args) async {
           Map<String, dynamic> coordinates = args[0];
           double left = coordinates['left'];
-          double right = coordinates['right'];
-          double top = coordinates['top'];
+          // double right = coordinates['right'];
+          // double top = coordinates['top'];
           double bottom = coordinates['bottom'];
           String annoCfi = coordinates['cfiRange'];
           String annoContent = coordinates['text'];
@@ -308,6 +308,7 @@ class EpubPlayerState extends State<EpubPlayer> {
     );
   }
 
+// ConsoleMessage? mmmmmmmmmmmmmmmme     ;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -321,6 +322,17 @@ class EpubPlayerState extends State<EpubPlayer> {
               _renderPage();
               progressSetter();
               clickHandlers();
+            },
+            onConsoleMessage: (controller, consoleMessage) {
+              if (consoleMessage.messageLevel == ConsoleMessageLevel.LOG) {
+                AnxLog.info('Webview: ${consoleMessage.message}');
+              } else if (consoleMessage.messageLevel ==
+                  ConsoleMessageLevel.WARNING) {
+                AnxLog.warning('Webview: ${consoleMessage.message}');
+              } else if (consoleMessage.messageLevel ==
+                  ConsoleMessageLevel.ERROR) {
+                AnxLog.severe('Webview: ${consoleMessage.message}');
+              }
             },
           ),
         ],
@@ -337,7 +349,7 @@ class EpubPlayerState extends State<EpubPlayer> {
           builder: (BuildContext context, StateSetter setState) {
             final screenSize = MediaQuery.of(context).size;
 
-            final widgetSize = Size(288.0, 48.0);
+            const widgetSize = Size(288.0, 48.0);
 
             double dx = colorMenuPosition.dx;
             double dy = colorMenuPosition.dy;
@@ -403,7 +415,7 @@ class EpubPlayerState extends State<EpubPlayer> {
             color: Colors.black.withOpacity(0.5),
             spreadRadius: 5,
             blurRadius: 7,
-            offset: Offset(0, 3),
+            offset: const Offset(0, 3),
           ),
         ],
       ),
@@ -430,7 +442,7 @@ class EpubPlayerState extends State<EpubPlayer> {
             onTypeSelected('highlight');
           },
         ),
-        Divider(),
+        const Divider(),
         IconButton(
           icon: Icon(Icons.circle, color: Color(int.parse('0x8866ccff'))),
           onPressed: () {
