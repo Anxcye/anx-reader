@@ -92,4 +92,5 @@ extension LocalizationExtension on BuildContext {
   String get settingsSyncWebdavSyncNow => AppLocalizations.of(this)?.settings_sync_webdav_sync_now ?? '';
   String get settingsAdvanced => AppLocalizations.of(this)?.settings_advanced ?? '';
   String get settingsAdvancedLog => AppLocalizations.of(this)?.settings_advanced_log ?? '';
+  String get settingsAdvancedClearLogWhenStart => AppLocalizations.of(this)?.settings_advanced_clear_log_when_start ?? '';
 }

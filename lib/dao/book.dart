@@ -3,6 +3,7 @@ import 'dart:ffi';
 
 import 'package:anx_reader/dao/database.dart';
 import 'package:anx_reader/models/book.dart';
+import 'package:anx_reader/utils/log/common.dart';
 
 Future<int> insertBook(Book book) async {
   final db = await DBHelper().database;
@@ -39,7 +40,7 @@ Future<List<Book>> selectNotDeleteBooks() {
 Future<void> updateBook(Book book) async {
   book.updateTime = DateTime.now();
   final db = await DBHelper().database;
-  print('update book: ${book.toMap()}');
+  AnxLog.info('dao: update book: ${book.toMap()}');
   await db.update(
     'tb_books',
     book.toMap(),

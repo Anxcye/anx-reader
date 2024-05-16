@@ -20,9 +20,9 @@ final navigatorKey = GlobalKey<NavigatorState>();
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  await Prefs().initPrefs();
   AnxLog.init();
   AnxError.init();
-  await Prefs().initPrefs();
 
   Server().start();
   initBasePath();

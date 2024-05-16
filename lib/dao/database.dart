@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:anx_reader/utils/get_base_path.dart';
+import 'package:anx_reader/utils/log/common.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
@@ -112,9 +113,10 @@ class DBHelper {
 
   Future<void> onUpgradeDatabase(
       Database db, int oldVersion, int newVersion) async {
+    AnxLog.info('Database: upgrade database from $oldVersion to $newVersion');
     switch (oldVersion) {
       case 0:
-        print('create database version $newVersion');
+        AnxLog.info('Database: create database version $newVersion');
         await db.execute(CREATE_BOOK_SQL);
         await db.execute(CREATE_NOTE_SQL);
         await db.execute(CREATE_THEME_SQL);
@@ -125,7 +127,6 @@ class DBHelper {
         continue case1;
       case1:
       case 1:
-        print('upgrade database from $oldVersion to $newVersion');
         // add a column (rating) to tb_books
         await db.execute('ALTER TABLE tb_books ADD COLUMN rating REAL');
         // remove '/data/user/0/com.anxcye.anx_reader/app_flutter/' from file_path & cover_path
@@ -136,26 +137,20 @@ class DBHelper {
         continue case2;
       case2:
       case 2:
-        print('//////////////////////////////////');
         // replave ' ' with '_' in db and cut file name to 25
         await db.execute(
             'UPDATE tb_books SET file_path = REPLACE(file_path, " ", "_")');
         await db.execute(
             'UPDATE tb_books SET cover_path = REPLACE(cover_path, " ", "_")');
-        // cut file name to 25
         await db.execute(
             'UPDATE tb_books SET file_path = SUBSTR(file_path, 0, 25)');
         await db.execute(
             'UPDATE tb_books SET cover_path = SUBSTR(cover_path, 0, 25)');
-        // add extension name
-        await db.execute(
-            'UPDATE tb_books SET file_path = file_path || ".epub"');
-        await db.execute(
-            'UPDATE tb_books SET cover_path = cover_path || ".png"');
+        await db
+            .execute('UPDATE tb_books SET file_path = file_path || ".epub"');
+        await db
+            .execute('UPDATE tb_books SET cover_path = cover_path || ".png"');
 
-
-
-        // replace local file path
         final basePath = getBasePath('');
         final fileDir = Directory('$basePath/file');
         final coverDir = Directory('$basePath/cover');
@@ -166,7 +161,6 @@ class DBHelper {
             int endIndex =
                 (pathAfterReplace.length < 72) ? pathAfterReplace.length : 72;
             final newPath = '${pathAfterReplace.substring(0, endIndex)}.epub';
-            print('/////////rename $path to $newPath');
             element.rename(newPath);
           }
         });
@@ -177,7 +171,6 @@ class DBHelper {
             int endIndex =
                 (pathAfterReplace.length < 72) ? pathAfterReplace.length : 72;
             final newPath = '${pathAfterReplace.substring(0, endIndex)}.png';
-            print('/////////rename $path to $newPath');
             element.rename(newPath);
           }
         });

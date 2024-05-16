@@ -70,7 +70,6 @@ class Server {
   shelf.Response _handleBookRequest(shelf.Request request) {
     final bookPath = Uri.decodeComponent(request.url.path.substring(5));
     final file = File(bookPath);
-    print('Request for book: $bookPath');
     AnxLog.info('Server: Request for book: $bookPath');
     if (!file.existsSync()) {
       return shelf.Response.notFound('Book not found');
