@@ -1,5 +1,6 @@
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/main.dart';
+import 'package:anx_reader/page/reading_page.dart';
 import 'package:contentsize_tabbarview/contentsize_tabbarview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -9,13 +10,16 @@ enum ReadingSettings { theme, font }
 void showMoreSettings(ReadingSettings settings) {
   BuildContext context = navigatorKey.currentContext!;
   Navigator.of(context).pop();
-  TabController? tabController =
-      TabController(length: 2, vsync: Navigator.of(context));
+  TabController? tabController = TabController(
+    length: 2,
+    vsync: Navigator.of(context),
+    initialIndex: settings == ReadingSettings.theme ? 0 : 1,
+  );
 
   Widget themeSettings = StatefulBuilder(
     builder: (context, setState) => SingleChildScrollView(
       child: Container(
-        padding: EdgeInsets.all(8.0),
+        padding: const EdgeInsets.all(8.0),
         child: Column(
           children: [
             ListTile(
@@ -31,8 +35,28 @@ void showMoreSettings(ReadingSettings settings) {
                               SystemUiMode.edgeToEdge);
                         }
                       })),
+              // TODO l10n
               title: Text('full screen'),
-            )
+            ),
+            ListTile(
+              // title: Text('Awake time'),
+              title: Padding(
+                padding: const EdgeInsets.only(left: 10.0),
+                child: Text('Turn off after ${Prefs().awakeTime} minutes'),
+              ),
+              subtitle: Slider(
+                  min: 0,
+                  max: 60,
+                  label: Prefs().awakeTime.toString(),
+                  value: Prefs().awakeTime.toDouble(),
+                  onChangeEnd: (value) => setState(() {
+                        readingPageKey.currentState!
+                            .setAwakeTimer(value.toInt());
+                      }),
+                  onChanged: (value) => setState(() {
+                        Prefs().awakeTime = value.toInt();
+                      })),
+            ),
           ],
         ),
       ),
@@ -119,10 +143,12 @@ void showMoreSettings(ReadingSettings settings) {
             TabBar(
               controller: tabController,
               tabs: const [
+                // TODO l10n
                 Tab(text: 'Theme'),
                 Tab(text: 'Font'),
               ],
             ),
+            const Divider(height: 0),
             ConstrainedBox(
               constraints: BoxConstraints(
                 maxHeight: MediaQuery.of(context).size.height * 0.5,

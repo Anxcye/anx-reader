@@ -7,8 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class Prefs extends ChangeNotifier {
   late SharedPreferences prefs;
-  static final Prefs _instance =
-  Prefs._internal();
+  static final Prefs _instance = Prefs._internal();
 
   factory Prefs() {
     return _instance;
@@ -142,5 +141,12 @@ class Prefs extends ChangeNotifier {
     return prefs.getBool('hideStatusBar') ?? true;
   }
 
+  set awakeTime(int minutes) {
+    prefs.setInt('awakeTime', minutes);
+    notifyListeners();
+  }
 
+  int get awakeTime {
+    return prefs.getInt('awakeTime') ?? 5;
+  }
 }
