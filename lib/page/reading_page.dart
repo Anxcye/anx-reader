@@ -10,8 +10,10 @@ import 'package:anx_reader/models/book_note.dart';
 import 'package:anx_reader/models/book_style.dart';
 import 'package:anx_reader/models/read_theme.dart';
 import 'package:anx_reader/page/book_player/epub_player.dart';
+import 'package:anx_reader/utils/log/common.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import '../dao/book_note.dart';
@@ -39,18 +41,18 @@ class _ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
   late BookStyle _bookStyle;
   late ReadTheme _readTheme;
 
-  // bool _isAppBarVisible = false;
-  // double _appBarTopPosition = -kToolbarHeight;
   double readProgress = 0.0;
   List<TocItem> _tocItems = [];
   Widget _currentPage = const SizedBox(height: 1);
   final _epubPlayerKey = GlobalKey<EpubPlayerState>();
-  Stopwatch _readTimeWatch = Stopwatch();
+  final Stopwatch _readTimeWatch = Stopwatch();
 
   @override
   void initState() {
     super.initState();
-
+    if (Prefs().hideStatusBar) {
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    }
     WidgetsBinding.instance.addObserver(this);
     _readTimeWatch.start();
 

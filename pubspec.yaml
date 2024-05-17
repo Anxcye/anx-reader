@@ -44,6 +44,10 @@ dependencies:
   pubspec_parse: ^1.2.3
   logging: ^1.2.0
   flutter_file_dialog: ^3.0.2
+  contentsize_tabbarview:
+    git:
+      url: https://github.com/Anxcye/contentsize_tabbarview.git
+      ref: feat/animation
 
 dev_dependencies:
   flutter_test:
