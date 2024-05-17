@@ -1,4 +1,5 @@
 import 'package:anx_reader/config/shared_preference_provider.dart';
+import 'package:anx_reader/widgets/reading_page/more_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
@@ -25,91 +26,103 @@ class ThemeWidget extends StatefulWidget {
 class _ThemeWidgetState extends State<ThemeWidget> {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 100, // specify the height
-      child: ListView.builder(
-        itemCount: widget.themes.length + 1,
-        scrollDirection: Axis.horizontal,
-        itemBuilder: (context, index) {
-          if (index == widget.themes.length) {
-            return Container(
+    return Column(
+      children: [
+        Row(
+          children: [
+            const Spacer(),
+            IconButton(
+                onPressed: () => showMoreSettings(ReadingSettings.theme),
+                icon: const Icon(Icons.settings)),
+          ],
+        ),
+        const Divider(),
+        SizedBox(
+          height: 100, // specify the height
+          child: ListView.builder(
+            itemCount: widget.themes.length + 1,
+            scrollDirection: Axis.horizontal,
+            itemBuilder: (context, index) {
+              if (index == widget.themes.length) {
+                return Container(
+                    padding: const EdgeInsets.fromLTRB(15, 20, 15, 20),
+                    height: 90,
+                    width: 90,
+                    child: GestureDetector(
+                      onTap: () async {
+                        int currId = await insertTheme(ReadTheme(
+                            backgroundColor: 'ff121212',
+                            textColor: 'ffcccccc',
+                            backgroundImagePath: ''));
+                        widget.setCurrentPage(ThemeChangeWidget(
+                          readTheme: ReadTheme(
+                              id: currId,
+                              backgroundColor: 'ff121212',
+                              textColor: 'ffcccccc',
+                              backgroundImagePath: ''),
+                          setCurrentPage: widget.setCurrentPage,
+                        ));
+                      },
+                      child: Container(
+                          decoration: BoxDecoration(
+                            // color: Color(int.parse('0x${'ff121212'}')),
+                            borderRadius: BorderRadius.circular(50),
+                            border: Border.all(
+                              color: Colors.black45,
+                              width: 1,
+                            ),
+                          ),
+                          child: Icon(Icons.add,
+                              size: 50,
+                              color: Color(int.parse('0x${'ffcccccc'}')))),
+                    ));
+              }
+
+              return Container(
                 padding: const EdgeInsets.fromLTRB(15, 20, 15, 20),
                 height: 90,
                 width: 90,
                 child: GestureDetector(
-                  onTap: () async {
-                    int currId = await insertTheme(ReadTheme(
-                        backgroundColor: 'ff121212',
-                        textColor: 'ffcccccc',
-                        backgroundImagePath: ''));
-                    widget.setCurrentPage(ThemeChangeWidget(
-                      readTheme: ReadTheme(
-                          id: currId,
-                          backgroundColor: 'ff121212',
-                          textColor: 'ffcccccc',
-                          backgroundImagePath: ''),
-                      setCurrentPage: widget.setCurrentPage,
-                    ));
+                  onTap: () {
+                    Prefs().saveReadThemeToPrefs(widget.themes[index]);
+                    widget.epubPlayerKey.currentState!
+                        .changeTheme(widget.themes[index]);
+                  },
+                  onLongPress: () {
+                    setState(() {
+                      widget.setCurrentPage(ThemeChangeWidget(
+                        readTheme: widget.themes[index],
+                        setCurrentPage: widget.setCurrentPage,
+                      ));
+                    });
                   },
                   child: Container(
                       decoration: BoxDecoration(
-                        // color: Color(int.parse('0x${'ff121212'}')),
+                        color: Color(int.parse(
+                            '0x${widget.themes[index].backgroundColor}')),
                         borderRadius: BorderRadius.circular(50),
                         border: Border.all(
                           color: Colors.black45,
                           width: 1,
                         ),
                       ),
-                      child: Icon(Icons.add,
-                          size: 50,
-                          color: Color(int.parse('0x${'ffcccccc'}')))),
-                ));
-          }
-
-          return Container(
-            padding: const EdgeInsets.fromLTRB(15, 20, 15, 20),
-            height: 90,
-            width: 90,
-            child: GestureDetector(
-              onTap: () {
-                Prefs()
-                    .saveReadThemeToPrefs(widget.themes[index]);
-                widget.epubPlayerKey.currentState!
-                    .changeTheme(widget.themes[index]);
-              },
-              onLongPress: () {
-                setState(() {
-                  widget.setCurrentPage(ThemeChangeWidget(
-                    readTheme: widget.themes[index],
-                    setCurrentPage: widget.setCurrentPage,
-                  ));
-                });
-              },
-              child: Container(
-                  decoration: BoxDecoration(
-                    color: Color(
-                        int.parse('0x${widget.themes[index].backgroundColor}')),
-                    borderRadius: BorderRadius.circular(50),
-                    border: Border.all(
-                      color: Colors.black45,
-                      width: 1,
-                    ),
-                  ),
-                  child: Center(
-                    child: Text(
-                      "A",
-                      style: TextStyle(
-                        color: Color(
-                            int.parse('0x${widget.themes[index].textColor}')),
-                        fontSize: 25,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  )),
-            ),
-          );
-        },
-      ),
+                      child: Center(
+                        child: Text(
+                          "A",
+                          style: TextStyle(
+                            color: Color(int.parse(
+                                '0x${widget.themes[index].textColor}')),
+                            fontSize: 25,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      )),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }

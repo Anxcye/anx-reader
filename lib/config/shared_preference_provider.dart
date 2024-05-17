@@ -8,7 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class Prefs extends ChangeNotifier {
   late SharedPreferences prefs;
   static final Prefs _instance =
-      Prefs._internal();
+  Prefs._internal();
 
   factory Prefs() {
     return _instance;
@@ -103,7 +103,7 @@ class Prefs extends ChangeNotifier {
   }
 
   void saveWebdavInfo(Map webdavInfo) {
-  prefs.setString('webdavInfo', jsonEncode(webdavInfo));
+    prefs.setString('webdavInfo', jsonEncode(webdavInfo));
     notifyListeners();
   }
 
@@ -133,12 +133,14 @@ class Prefs extends ChangeNotifier {
     return prefs.getBool('clearLogWhenStart') ?? true;
   }
 
+  void saveHideStatusBar(bool status) {
+    prefs.setBool('hideStatusBar', status);
+    notifyListeners();
+  }
 
-
-
-
-
-
+  bool get hideStatusBar {
+    return prefs.getBool('hideStatusBar') ?? true;
+  }
 
 
 }
