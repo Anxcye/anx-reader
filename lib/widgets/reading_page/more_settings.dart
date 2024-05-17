@@ -1,7 +1,9 @@
 import 'package:anx_reader/config/shared_preference_provider.dart';
+import 'package:anx_reader/l10n/localization_extension.dart';
 import 'package:anx_reader/main.dart';
 import 'package:anx_reader/page/reading_page.dart';
 import 'package:contentsize_tabbarview/contentsize_tabbarview.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -22,41 +24,8 @@ void showMoreSettings(ReadingSettings settings) {
         padding: const EdgeInsets.all(8.0),
         child: Column(
           children: [
-            ListTile(
-              leading: Checkbox(
-                  value: Prefs().hideStatusBar,
-                  onChanged: (bool? value) => setState(() {
-                        Prefs().saveHideStatusBar(value!);
-                        if (value) {
-                          SystemChrome.setEnabledSystemUIMode(
-                              SystemUiMode.immersiveSticky);
-                        } else {
-                          SystemChrome.setEnabledSystemUIMode(
-                              SystemUiMode.edgeToEdge);
-                        }
-                      })),
-              // TODO l10n
-              title: Text('full screen'),
-            ),
-            ListTile(
-              // title: Text('Awake time'),
-              title: Padding(
-                padding: const EdgeInsets.only(left: 10.0),
-                child: Text('Turn off after ${Prefs().awakeTime} minutes'),
-              ),
-              subtitle: Slider(
-                  min: 0,
-                  max: 60,
-                  label: Prefs().awakeTime.toString(),
-                  value: Prefs().awakeTime.toDouble(),
-                  onChangeEnd: (value) => setState(() {
-                        readingPageKey.currentState!
-                            .setAwakeTimer(value.toInt());
-                      }),
-                  onChanged: (value) => setState(() {
-                        Prefs().awakeTime = value.toInt();
-                      })),
-            ),
+            fullScreen(setState),
+            screenTimeout(context, setState),
           ],
         ),
       ),
@@ -168,4 +137,55 @@ void showMoreSettings(ReadingSettings settings) {
       );
     },
   );
+}
+
+Widget screenTimeout(BuildContext context, StateSetter setState) {
+  return Padding(
+    padding: const EdgeInsets.only(left: 10.0, right: 10.0),
+    child: ListTile(
+              title: Text('Screen Timeout'),
+              leadingAndTrailingTextStyle: TextStyle(
+                fontSize: 16,
+                color: Theme.of(context).textTheme.bodyLarge!.color,
+              ),
+              subtitle: Row(
+                children: [
+                  Text(Prefs().awakeTime.toString() + context.commonMinutes),
+                  Expanded(
+                    child: Slider(
+                        min: 0,
+                        max: 60,
+                        label: Prefs().awakeTime.toString(),
+                        value: Prefs().awakeTime.toDouble(),
+                        onChangeEnd: (value) => setState(() {
+                              readingPageKey.currentState!
+                                  .setAwakeTimer(value.toInt());
+                            }),
+                        onChanged: (value) => setState(() {
+                              Prefs().awakeTime = value.toInt();
+                            })),
+                  ),
+                ],
+              ),
+            ),
+  );
+}
+
+ListTile fullScreen(StateSetter setState) {
+  return ListTile(
+            leading: Checkbox(
+                value: Prefs().hideStatusBar,
+                onChanged: (bool? value) => setState(() {
+                      Prefs().saveHideStatusBar(value!);
+                      if (value) {
+                        SystemChrome.setEnabledSystemUIMode(
+                            SystemUiMode.immersiveSticky);
+                      } else {
+                        SystemChrome.setEnabledSystemUIMode(
+                            SystemUiMode.edgeToEdge);
+                      }
+                    })),
+            // TODO l10n
+            title: Text('full screen'),
+          );
 }
