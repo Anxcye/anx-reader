@@ -5,6 +5,7 @@ import 'package:anx_reader/dao/book_note.dart';
 import 'package:anx_reader/l10n/localization_extension.dart';
 import 'package:anx_reader/models/book_style.dart';
 import 'package:anx_reader/models/read_theme.dart';
+import 'package:anx_reader/page/reading_page.dart';
 import 'package:anx_reader/utils/log/common.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -271,6 +272,7 @@ class EpubPlayerState extends State<EpubPlayer> {
     } else {
       widget.showOrHideAppBarAndBottomBar(true);
     }
+    readingPageKey.currentState!.setAwakeTimer(Prefs().awakeTime);
   }
 
   Future<void> _renderPage() async {

@@ -48,6 +48,7 @@ dependencies:
     git:
       url: https://github.com/Anxcye/contentsize_tabbarview.git
       ref: feat/animation
+  wakelock_plus: ^1.2.5
 
 dev_dependencies:
   flutter_test:

@@ -78,7 +78,7 @@ void openBook(BuildContext context, Book book, Function updateBookList) {
   Navigator.push(
     context,
     MaterialPageRoute(
-      builder: (context) => ReadingPage(book: book),
+      builder: (context) => ReadingPage(key: readingPageKey, book: book),
     ),
   ).then((result) {
     if (result != null) {

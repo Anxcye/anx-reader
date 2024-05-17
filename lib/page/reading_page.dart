@@ -15,6 +15,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '../dao/book_note.dart';
 import '../models/reading_time.dart';
@@ -32,10 +33,12 @@ class ReadingPage extends StatefulWidget {
   const ReadingPage({super.key, required this.book});
 
   @override
-  State<ReadingPage> createState() => _ReadingPageState();
+  State<ReadingPage> createState() => ReadingPageState();
 }
 
-class _ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
+final GlobalKey<ReadingPageState> readingPageKey = GlobalKey<ReadingPageState>();
+
+class ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
   late Book _book;
   String? _content;
   late BookStyle _bookStyle;
@@ -46,25 +49,28 @@ class _ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
   Widget _currentPage = const SizedBox(height: 1);
   final _epubPlayerKey = GlobalKey<EpubPlayerState>();
   final Stopwatch _readTimeWatch = Stopwatch();
+  Timer? _awakeTimer;
 
   @override
   void initState() {
-    super.initState();
     if (Prefs().hideStatusBar) {
       SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     }
     WidgetsBinding.instance.addObserver(this);
     _readTimeWatch.start();
+    setAwakeTimer(Prefs().awakeTime);
 
     _book = widget.book;
     _bookStyle = Prefs().bookStyle;
     _readTheme = Prefs().readTheme;
     loadContent();
+    super.initState();
   }
 
   @override
   void dispose() {
     _readTimeWatch.stop();
+    _awakeTimer?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     insertReadingTime(ReadingTime(
         bookId: _book.id, readingTime: _readTimeWatch.elapsed.inSeconds));
@@ -79,6 +85,17 @@ class _ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
     } else if (state == AppLifecycleState.resumed) {
       _readTimeWatch.start();
     }
+  }
+
+  Future<void> setAwakeTimer(int minutes) async {
+    _awakeTimer?.cancel();
+    _awakeTimer = null;
+    WakelockPlus.enable();
+    _awakeTimer = Timer.periodic(Duration(minutes: minutes), (timer) {
+      WakelockPlus.disable();
+      _awakeTimer?.cancel();
+      _awakeTimer = null;
+    });
   }
 
   void loadContent() {
