@@ -40,6 +40,10 @@ extension LocalizationExtension on BuildContext {
   String get notesMinutes => AppLocalizations.of(this)?.notes_minutes ?? '';
   String get readingPageCopy => AppLocalizations.of(this)?.reading_page_copy ?? '';
   String get readingPageExcerpt => AppLocalizations.of(this)?.reading_page_excerpt ?? '';
+  String get readingPageTheme => AppLocalizations.of(this)?.reading_page_theme ?? '';
+  String get readingPageStyle => AppLocalizations.of(this)?.reading_page_style ?? '';
+  String get readingPageFullScreen => AppLocalizations.of(this)?.reading_page_full_screen ?? '';
+  String get readingPageScreenTimeout => AppLocalizations.of(this)?.reading_page_screen_timeout ?? '';
   String get bookshelfTips1 => AppLocalizations.of(this)?.bookshelf_tips_1 ?? '';
   String get bookshelfTips2 => AppLocalizations.of(this)?.bookshelf_tips_2 ?? '';
   String get statisticsTips1 => AppLocalizations.of(this)?.statistics_tips_1 ?? '';
@@ -71,6 +75,7 @@ extension LocalizationExtension on BuildContext {
   String get commonFailed => AppLocalizations.of(this)?.common_failed ?? '';
   String get commonUploading => AppLocalizations.of(this)?.common_uploading ?? '';
   String get commonDownloading => AppLocalizations.of(this)?.common_downloading ?? '';
+  String get commonCopy => AppLocalizations.of(this)?.common_copy ?? '';
   String get serviceImportSuccess => AppLocalizations.of(this)?.service_import_success ?? '';
   String get webdavWebdavNotEnabled => AppLocalizations.of(this)?.webdav_webdav_not_enabled ?? '';
   String get webdavSyncing => AppLocalizations.of(this)?.webdav_syncing ?? '';
@@ -92,5 +97,7 @@ extension LocalizationExtension on BuildContext {
   String get settingsSyncWebdavSyncNow => AppLocalizations.of(this)?.settings_sync_webdav_sync_now ?? '';
   String get settingsAdvanced => AppLocalizations.of(this)?.settings_advanced ?? '';
   String get settingsAdvancedLog => AppLocalizations.of(this)?.settings_advanced_log ?? '';
+  String get settingsAdvancedLogClearLog => AppLocalizations.of(this)?.settings_advanced_log_clear_log ?? '';
+  String get settingsAdvancedLogExportLog => AppLocalizations.of(this)?.settings_advanced_log_export_log ?? '';
   String get settingsAdvancedClearLogWhenStart => AppLocalizations.of(this)?.settings_advanced_clear_log_when_start ?? '';
 }
