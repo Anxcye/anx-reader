@@ -2,9 +2,9 @@ import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/l10n/localization_extension.dart';
 import 'package:anx_reader/main.dart';
 import 'package:anx_reader/page/reading_page.dart';
+import 'package:anx_reader/utils/ui/status_bar.dart';
 import 'package:contentsize_tabbarview/contentsize_tabbarview.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 enum ReadingSettings { theme, style }
 
@@ -117,9 +117,9 @@ ListTile fullScreen(BuildContext context, StateSetter setState) {
         onChanged: (bool? value) => setState(() {
               Prefs().saveHideStatusBar(value!);
               if (value) {
-                SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+                hideStatusBar();
               } else {
-                SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+                showStatusBar();
               }
             })),
     title: Text(context.readingPageFullScreen),
