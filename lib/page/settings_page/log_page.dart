@@ -70,16 +70,14 @@ class _LogPageState extends State<LogPage> {
         PopupMenuItem(
           child: ListTile(
             leading: const Icon(Icons.delete),
-            // TODO lq0n
-            title: Text('Clear log'),
+            title: Text(context.settingsAdvancedLogClearLog),
             onTap: () => clearLog(),
           ),
         ),
         PopupMenuItem(
             child: ListTile(
           leading: const Icon(Icons.file_upload_outlined),
-          // TODO lq0n
-          title: Text('Export log'),
+          title: Text(context.settingsAdvancedLogExportLog),
           onTap: () => exportLog(),
         ))
       ],
@@ -133,8 +131,7 @@ Widget logItem(String logStr, BuildContext context) {
               onPressed: () {
                 Clipboard.setData(ClipboardData(text: logStr));
               },
-              // TODO l10n
-              child: Text('Copy'),
+              child: Text(context.commonCopy),
             ),
           ],
         ),

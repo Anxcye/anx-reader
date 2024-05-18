@@ -38,6 +38,10 @@
   "notes_minutes": "minutes",
   "reading_page_copy": "Copy",
   "reading_page_excerpt": "Excerpt",
+  "reading_page_theme": "Theme",
+  "reading_page_style": "Style",
+  "reading_page_full_screen": "Full Screen",
+  "reading_page_screen_timeout": "Screen Timeout",
 
   "bookshelf_tips_1": "There are no books.",
   "bookshelf_tips_2": "Click the add button to add a book!",
@@ -74,6 +78,7 @@
   "common_failed": "Failed",
   "common_uploading": "Uploading",
   "common_downloading": "Downloading",
+  "common_copy": "Copy",
 
   "service_import_success": "Import success",
 
@@ -101,6 +106,8 @@
 
   "settings_advanced": "Advanced",
   "settings_advanced_log": "Log",
+  "settings_advanced_log_clear_log": "Clear Log",
+  "settings_advanced_log_export_log": "Export Log",
   "settings_advanced_clear_log_when_start": "Clear log when start"
 
 

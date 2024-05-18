@@ -30,7 +30,7 @@ class TocWidget extends StatelessWidget {
             child: Text(
               context.readingContents,
               style: const TextStyle(
-                fontSize: 30,
+                fontSize: 24,
                 fontWeight: FontWeight.bold,
                 fontFamily: 'SourceHanSerif'
               ),

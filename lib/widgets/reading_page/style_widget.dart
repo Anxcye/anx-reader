@@ -1,24 +1,49 @@
+import 'package:anx_reader/l10n/localization_extension.dart';
 import 'package:flutter/material.dart';
 
 import '../../config/shared_preference_provider.dart';
 import '../../models/book_style.dart';
 import '../../page/book_player/epub_player.dart';
+import 'more_settings.dart';
 
 class StyleWidget extends StatefulWidget {
   const StyleWidget({super.key, required this.epubPlayerKey});
+
   final GlobalKey<EpubPlayerState> epubPlayerKey;
+
   @override
   State<StyleWidget> createState() => _StyleWidgetState();
 }
 
 class _StyleWidgetState extends State<StyleWidget> {
   BookStyle bookStyle = Prefs().bookStyle;
+
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(10.0),
       child: Column(
         children: [
+          Row(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  context.readingPageStyle,
+                  style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'SourceHanSerif'
+                  ),
+                ),
+              ),
+              const Spacer(),
+              IconButton(
+                  onPressed: () => showMoreSettings(ReadingSettings.style),
+                  icon: const Icon(Icons.settings)),
+            ],
+          ),
+          const Divider(),
           // font size
           Row(
             children: [
@@ -36,7 +61,7 @@ class _StyleWidgetState extends State<StyleWidget> {
                   min: 10,
                   max: 300,
                   divisions: 29,
-                  label: (bookStyle.fontSize/10).round().toString(),
+                  label: (bookStyle.fontSize / 10).round().toString(),
                 ),
               ),
             ],
@@ -59,7 +84,7 @@ class _StyleWidgetState extends State<StyleWidget> {
                   min: 0,
                   max: 200,
                   divisions: 20,
-                  label: (bookStyle.sideMargin/10).round().toString(),
+                  label: (bookStyle.sideMargin / 10).round().toString(),
                 ),
               ),
             ],
@@ -113,15 +138,15 @@ class _StyleWidgetState extends State<StyleWidget> {
                     onChanged: (double value) {
                       setState(() {
                         bookStyle.lineHeight = value;
-                        widget.epubPlayerKey.currentState!.changeStyle(bookStyle);
+                        widget.epubPlayerKey.currentState!
+                            .changeStyle(bookStyle);
                         Prefs().saveBookStyleToPrefs(bookStyle);
                       });
                     },
                     min: 0,
                     max: 3,
                     divisions: 10,
-                    label: (bookStyle.lineHeight/3*10).round().toString()
-                ),
+                    label: (bookStyle.lineHeight / 3 * 10).round().toString()),
               ),
             ],
           ),
@@ -142,7 +167,8 @@ class _StyleWidgetState extends State<StyleWidget> {
                   min: 0,
                   max: 50,
                   divisions: 10,
-                  label: (bookStyle.paragraphSpacing/50*10).round().toString(),
+                  label:
+                      (bookStyle.paragraphSpacing / 50 * 10).round().toString(),
                 ),
               ),
             ],

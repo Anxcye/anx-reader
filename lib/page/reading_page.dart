@@ -54,7 +54,7 @@ class ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
   @override
   void initState() {
     if (Prefs().hideStatusBar) {
-      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.leanBack);
     }
     WidgetsBinding.instance.addObserver(this);
     _readTimeWatch.start();
@@ -71,6 +71,7 @@ class ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
   void dispose() {
     _readTimeWatch.stop();
     _awakeTimer?.cancel();
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     WidgetsBinding.instance.removeObserver(this);
     insertReadingTime(ReadingTime(
         bookId: _book.id, readingTime: _readTimeWatch.elapsed.inSeconds));
@@ -138,7 +139,7 @@ class ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
               child: Text(
                 context.navBarNotes,
                 style: const TextStyle(
-                  fontSize: 28,
+                  fontSize: 24,
                   fontFamily: 'SourceHanSerif',
                   fontWeight: FontWeight.bold,
                 ),
