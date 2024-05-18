@@ -11,6 +11,7 @@ import 'package:anx_reader/models/book_style.dart';
 import 'package:anx_reader/models/read_theme.dart';
 import 'package:anx_reader/page/book_player/epub_player.dart';
 import 'package:anx_reader/utils/log/common.dart';
+import 'package:anx_reader/utils/ui/status_bar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -36,7 +37,8 @@ class ReadingPage extends StatefulWidget {
   State<ReadingPage> createState() => ReadingPageState();
 }
 
-final GlobalKey<ReadingPageState> readingPageKey = GlobalKey<ReadingPageState>();
+final GlobalKey<ReadingPageState> readingPageKey =
+    GlobalKey<ReadingPageState>();
 
 class ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
   late Book _book;
@@ -54,7 +56,7 @@ class ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
   @override
   void initState() {
     if (Prefs().hideStatusBar) {
-      SystemChrome.setEnabledSystemUIMode(SystemUiMode.leanBack);
+      hideStatusBar();
     }
     WidgetsBinding.instance.addObserver(this);
     _readTimeWatch.start();
@@ -71,7 +73,8 @@ class ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
   void dispose() {
     _readTimeWatch.stop();
     _awakeTimer?.cancel();
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    WakelockPlus.disable();
+    showStatusBar();
     WidgetsBinding.instance.removeObserver(this);
     insertReadingTime(ReadingTime(
         bookId: _book.id, readingTime: _readTimeWatch.elapsed.inSeconds));
