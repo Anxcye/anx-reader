@@ -11,7 +11,8 @@ void hideStatusBar() {
 void showStatusBar() {
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   SystemChrome.setSystemUIChangeCallback((systemOverlaysAreVisible) =>
-      Future.delayed(const Duration(seconds: 1), () {
-          SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-      }));
+      // Future.delayed(const Duration(seconds: 1), () {
+          SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge)
+      // })
+      );
 }
