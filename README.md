@@ -33,6 +33,7 @@
 - [X] UI 适配 Tab 端
 - [ ] TTS 语音朗读
 - [ ] 阅读字体
+- [ ] 翻译
 - [ ] 支持更多文件类型（目前仅支持导入 epub）
 - [X] 支持 WebDAV 同步
 - [ ] 支持 Windows，Linux
