@@ -108,4 +108,6 @@ extension LocalizationExtension on BuildContext {
   String get settingsAdvancedLogExportLog => AppLocalizations.of(this)?.settings_advanced_log_export_log ?? '';
   String get settingsAdvancedClearLogWhenStart => AppLocalizations.of(this)?.settings_advanced_clear_log_when_start ?? '';
   String get aboutCheckForUpdates => AppLocalizations.of(this)?.about_check_for_updates ?? '';
+  String get updateNewVersion => AppLocalizations.of(this)?.update_new_version ?? '';
+  String get updateCurrentVersion => AppLocalizations.of(this)?.update_current_version ?? '';
 }

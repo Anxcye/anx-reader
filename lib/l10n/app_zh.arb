@@ -2,8 +2,8 @@
   "appName": "安读",
   "app_about": "关于安读",
   "app_version": "版本",
-  "app_license": "许可",
-  "app_author": "作者",
+  "app_license": "开源许可",
+  "app_author": "开发者",
 
   "navBar_bookshelf": "书架",
   "navBar_statistics": "统计",
@@ -118,6 +118,8 @@
   "settings_advanced_log_export_log": "导出日志",
   "settings_advanced_clear_log_when_start": "启动时清空日志",
 
-  "about_check_for_updates": "检查更新"
+  "about_check_for_updates": "检查更新",
+  "update_new_version": "新版本：",
+  "update_current_version": "当前版本："
 
 }

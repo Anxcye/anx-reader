@@ -26,13 +26,12 @@ Future<void> checkUpdate(bool manualCheck) async {
     if (manualCheck) {
       AnxToast.show(context.commonFailed);
     }
-    throw Exception('Failed to check for updates');
+    throw Exception('Update: Failed to check for updates $e');
   }
-  AnxLog.info(response.toString());
   String newVersion = response.data['tag_name'].toString().substring(1);
   String currentVersion =
       (await getAppVersion()).substring(0, newVersion.length);
-  AnxLog.info(newVersion);
+  AnxLog.info('Update: new version $newVersion');
   if (newVersion != currentVersion) {
     if (manualCheck) {
       Navigator.of(context).pop();
@@ -42,7 +41,16 @@ Future<void> checkUpdate(bool manualCheck) async {
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text(context.commonNewVersion),
-          content: Text(response.data['body'].toString()),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(context.updateCurrentVersion + currentVersion),
+              Text(context.updateNewVersion + newVersion),
+              const Divider(),
+              Text(response.data['body'].toString()),
+            ],
+          ),
           actions: <Widget>[
             TextButton(
               onPressed: () {
@@ -52,8 +60,10 @@ Future<void> checkUpdate(bool manualCheck) async {
             ),
             TextButton(
               onPressed: () {
-                launchUrl(Uri.parse(
-                    'https://github.com/Anxcye/anx-reader/releases/latest'));
+                launchUrl(
+                    Uri.parse(
+                        'https://github.com/Anxcye/anx-reader/releases/latest'),
+                    mode: LaunchMode.externalApplication);
               },
               child: Text(context.commonUpdate),
             ),
