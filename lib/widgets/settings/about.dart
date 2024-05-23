@@ -51,15 +51,15 @@ class _AboutState extends State<About> {
 
             // title: Text(context.appName),
             content: ConstrainedBox(
-              constraints: const BoxConstraints(
-                maxWidth: 500,
-                minWidth: 300,
-              ),
-              child: SizedBox(
-                width: MediaQuery.of(context).size.width * 0.8,
-                child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
+          constraints: const BoxConstraints(
+            maxWidth: 500,
+            minWidth: 300,
+          ),
+          child: SizedBox(
+            width: MediaQuery.of(context).size.width * 0.8,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
                 Padding(
                   padding: const EdgeInsets.fromLTRB(0, 0, 0, 5),
                   child: Center(
@@ -94,7 +94,11 @@ class _AboutState extends State<About> {
                 ListTile(
                   title: Text(context.appAuthor),
                   onTap: () {
-                    launchUrl(Uri.parse('https://github.com/Anxcye/anx-reader/graphs/contributors'));
+                    launchUrl(
+                      Uri.parse(
+                          'https://github.com/Anxcye/anx-reader/graphs/contributors'),
+                      mode: LaunchMode.externalApplication,
+                    );
                   },
                 ),
                 const Divider(),
@@ -111,10 +115,10 @@ class _AboutState extends State<About> {
                         mode: LaunchMode.externalApplication),
                   ],
                 ),
-                          ],
-                        ),
-              ),
-            ));
+              ],
+            ),
+          ),
+        ));
       },
     );
   }

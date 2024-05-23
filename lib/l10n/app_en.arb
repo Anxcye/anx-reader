@@ -118,7 +118,9 @@
   "settings_advanced_log_export_log": "Export Log",
   "settings_advanced_clear_log_when_start": "Clear log when start",
 
-  "about_check_for_updates": "Check for updates"
+  "about_check_for_updates": "Check for updates",
+  "update_new_version": "New version: ",
+  "update_current_version": "Current version: "
 
 
 
