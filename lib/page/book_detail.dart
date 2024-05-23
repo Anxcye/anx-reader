@@ -39,10 +39,14 @@ class _BookDetailState extends State<BookDetail> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+      ),
+        extendBodyBehindAppBar: true,
         body: Stack(children: [
       background(context),
       Padding(
-        padding: const EdgeInsets.all(15.0),
+        padding: const EdgeInsets.fromLTRB(20, 80, 20, 20),
         child: LayoutBuilder(
           builder: (context, constraints) {
             if (constraints.maxWidth > 600) {
@@ -98,7 +102,6 @@ class _BookDetailState extends State<BookDetail> {
           end: Alignment.bottomCenter,
           colors: [
             Theme.of(context).colorScheme.background.withOpacity(0.20),
-            Theme.of(context).colorScheme.background.withOpacity(0.18),
             Colors.transparent,
           ],
         ).createShader(

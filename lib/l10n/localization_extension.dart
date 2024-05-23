@@ -5,6 +5,10 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 extension LocalizationExtension on BuildContext {
   String get appName => AppLocalizations.of(this)?.appName ?? '';
+  String get appAbout => AppLocalizations.of(this)?.app_about ?? '';
+  String get appVersion => AppLocalizations.of(this)?.app_version ?? '';
+  String get appLicense => AppLocalizations.of(this)?.app_license ?? '';
+  String get appAuthor => AppLocalizations.of(this)?.app_author ?? '';
   String get navBarBookshelf => AppLocalizations.of(this)?.navBar_bookshelf ?? '';
   String get navBarStatistics => AppLocalizations.of(this)?.navBar_statistics ?? '';
   String get navBarNotes => AppLocalizations.of(this)?.navBar_notes ?? '';
@@ -76,6 +80,9 @@ extension LocalizationExtension on BuildContext {
   String get commonUploading => AppLocalizations.of(this)?.common_uploading ?? '';
   String get commonDownloading => AppLocalizations.of(this)?.common_downloading ?? '';
   String get commonCopy => AppLocalizations.of(this)?.common_copy ?? '';
+  String get commonNewVersion => AppLocalizations.of(this)?.common_new_version ?? '';
+  String get commonUpdate => AppLocalizations.of(this)?.common_update ?? '';
+  String get commonNoNewVersion => AppLocalizations.of(this)?.common_no_new_version ?? '';
   String get serviceImportSuccess => AppLocalizations.of(this)?.service_import_success ?? '';
   String get webdavWebdavNotEnabled => AppLocalizations.of(this)?.webdav_webdav_not_enabled ?? '';
   String get webdavSyncing => AppLocalizations.of(this)?.webdav_syncing ?? '';
@@ -100,4 +107,5 @@ extension LocalizationExtension on BuildContext {
   String get settingsAdvancedLogClearLog => AppLocalizations.of(this)?.settings_advanced_log_clear_log ?? '';
   String get settingsAdvancedLogExportLog => AppLocalizations.of(this)?.settings_advanced_log_export_log ?? '';
   String get settingsAdvancedClearLogWhenStart => AppLocalizations.of(this)?.settings_advanced_clear_log_when_start ?? '';
+  String get aboutCheckForUpdates => AppLocalizations.of(this)?.about_check_for_updates ?? '';
 }

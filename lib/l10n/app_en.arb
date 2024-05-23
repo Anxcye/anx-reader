@@ -1,5 +1,10 @@
 {
   "appName": "Anx Reader",
+  "app_about": "About Anx Reader",
+  "app_version": "Version",
+  "app_license": "License",
+  "app_author": "Author",
+
   "navBar_bookshelf": "Bookshelf",
   "navBar_statistics": "Statistics",
   "navBar_notes": "Notes",
@@ -79,6 +84,9 @@
   "common_uploading": "Uploading",
   "common_downloading": "Downloading",
   "common_copy": "Copy",
+  "common_new_version": "New version!",
+  "common_update": "Update",
+  "common_no_new_version": "No new version",
 
   "service_import_success": "Import success",
 
@@ -108,9 +116,9 @@
   "settings_advanced_log": "Log",
   "settings_advanced_log_clear_log": "Clear Log",
   "settings_advanced_log_export_log": "Export Log",
-  "settings_advanced_clear_log_when_start": "Clear log when start"
+  "settings_advanced_clear_log_when_start": "Clear log when start",
 
-
+  "about_check_for_updates": "Check for updates"
 
 
 
