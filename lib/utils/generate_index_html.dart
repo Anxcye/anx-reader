@@ -110,6 +110,7 @@ String generateIndexHtml(
             },
             '*': {
               'font-family': 'SourceHanSerif !important',
+              'scroll-behavior': 'smooth',
             },
             'p': {
               'padding-top': '${style.paragraphSpacing}px !important',
