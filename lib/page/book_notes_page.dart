@@ -29,6 +29,10 @@ class _BookNotesPageState extends State<BookNotesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.book.title),
+      ),
+      extendBodyBehindAppBar: true,
       body: SafeArea(
         // top: false,
         child: ListView(

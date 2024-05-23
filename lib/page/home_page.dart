@@ -3,6 +3,7 @@ import 'package:anx_reader/page/home_page/bookshelf_page.dart';
 import 'package:anx_reader/page/home_page/notes_page.dart';
 import 'package:anx_reader/page/home_page/settings_page.dart';
 import 'package:anx_reader/page/home_page/statistics_page.dart';
+import 'package:anx_reader/utils/check_update.dart';
 import 'package:anx_reader/utils/webdav/common.dart';
 import 'package:flutter/material.dart';
 
@@ -47,7 +48,7 @@ class _HomePageState extends State<HomePage> {
           return Scaffold(
             // floatingActionButton: FloatingActionButton(
             //   onPressed: () {
-            //     AnxWebdav.syncData(SyncDirection.both);
+            //     checkUpdate(false);
             //   },
             //   child: const Icon(Icons.sync),
             // ),

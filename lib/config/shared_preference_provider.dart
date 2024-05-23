@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'dart:core';
+import 'dart:core';
 
 import 'package:anx_reader/models/book_style.dart';
 import 'package:anx_reader/models/read_theme.dart';
@@ -148,5 +150,17 @@ class Prefs extends ChangeNotifier {
 
   int get awakeTime {
     return prefs.getInt('awakeTime') ?? 5;
+  }
+
+  set lastShowUpdate(DateTime time) {
+    prefs.setString('lastShowUpdate', time.toIso8601String());
+    notifyListeners();
+  }
+
+  DateTime get lastShowUpdate {
+    String? lastShowUpdateStr = prefs.getString('lastShowUpdate');
+    // the oldest time is 1970-01-01, so
+    if (lastShowUpdateStr == null) return DateTime(1970, 1, 1);
+    return DateTime.parse(lastShowUpdateStr);
   }
 }
