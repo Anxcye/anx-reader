@@ -39,6 +39,8 @@
 - [X] 支持 WebDAV 同步
 - [ ] 支持 Windows，Linux
 
+Telegram 群组：[https://t.me/AnxReader](https://t.me/Anx_Reader)
+
 ## 构建
 希望从源码构建安读？请参考以下步骤：
 - 安装 [Flutter](https://flutter.dev)。
