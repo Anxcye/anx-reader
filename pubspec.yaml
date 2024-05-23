@@ -2,7 +2,7 @@ name: anx_reader
 description: "A e-book reader."
 publish_to: 'none'
 
-version: 1.1.1+2009
+version: 1.1.2+2011
 
 environment:
   sdk: '>=3.3.2 <4.0.0'
@@ -49,6 +49,9 @@ dependencies:
       url: https://github.com/Anxcye/contentsize_tabbarview.git
       ref: feat/animation
   wakelock_plus: ^1.2.5
+  icons_plus: ^5.0.0
+  url_launcher: ^6.2.6
+
 
 dev_dependencies:
   flutter_test:
