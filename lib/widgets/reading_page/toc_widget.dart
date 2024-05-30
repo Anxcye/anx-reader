@@ -1,4 +1,5 @@
 import 'package:anx_reader/l10n/localization_extension.dart';
+import 'package:anx_reader/widgets/reading_page/widget_title.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -20,22 +21,11 @@ class TocWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       height: 700,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(
-              context.readingContents,
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                fontFamily: 'SourceHanSerif'
-              ),
-            ),
-          ),
+          widgetTitle(context.readingContents, null),
           Expanded(
             child: ListView.builder(
               itemCount: tocItems.length,
@@ -70,15 +60,17 @@ class TocItemWidget extends StatefulWidget {
 
 class _TocItemWidgetState extends State<TocItemWidget> {
   bool _isExpanded = false;
+
   TextStyle tocStyle(content) => TextStyle(
-    fontSize: 16,
-    color: Theme.of(context).colorScheme.onSurface,
-  );
+        fontSize: 16,
+        color: Theme.of(context).colorScheme.onSurface,
+      );
+
   TextStyle tocStyleSelected(context) => TextStyle(
-    fontSize: 20,
-    color: Theme.of(context).colorScheme.primary,
-    fontWeight: FontWeight.bold,
-  );
+        fontSize: 20,
+        color: Theme.of(context).colorScheme.primary,
+        fontWeight: FontWeight.bold,
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -102,7 +94,7 @@ class _TocItemWidgetState extends State<TocItemWidget> {
                 ),
                 child: Text(
                   '     ${widget.tocItem.label.trim()}',
-                    style: _isSelected(widget.tocItem)
+                  style: _isSelected(widget.tocItem)
                       ? tocStyleSelected(context)
                       : tocStyle(context),
                 ),
@@ -129,9 +121,12 @@ class _TocItemWidgetState extends State<TocItemWidget> {
                   hideAppBarAndBottomBar: widget.hideAppBarAndBottomBar,
                   epubPlayerKey: widget.epubPlayerKey),
             ),
-        Divider(indent: 20, endIndent: 20, thickness: 1, color: Colors.grey.shade400),
+        Divider(
+            indent: 20,
+            endIndent: 20,
+            thickness: 1,
+            color: Colors.grey.shade400),
       ],
-
     );
   }
 
@@ -148,5 +143,4 @@ class _TocItemWidgetState extends State<TocItemWidget> {
     }
     return false;
   }
-
 }
