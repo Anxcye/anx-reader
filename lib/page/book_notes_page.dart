@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:anx_reader/l10n/localization_extension.dart';
 import 'package:anx_reader/service/notes/export_notes.dart';
+import 'package:anx_reader/widgets/tips/notes_tips.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -49,7 +50,7 @@ class _BookNotesPageState extends State<BookNotesPage> {
 }
 
 Widget bookInfo(BuildContext context, Book book, int numberOfNotes) {
-  TextStyle titleStyle = TextStyle(
+  TextStyle titleStyle = const TextStyle(
     fontSize: 24,
     fontWeight: FontWeight.bold,
     overflow: TextOverflow.ellipsis,
@@ -72,14 +73,14 @@ Widget bookInfo(BuildContext context, Book book, int numberOfNotes) {
                       maxLines: 1,
                     ),
                     notesStatistic(context, numberOfNotes),
-                    SizedBox(
+                    const SizedBox(
                       height: 25,
                     ),
-                    opetators(context, book),
+                    operators(context, book),
                   ],
                 ),
               ),
-              SizedBox(width: 30),
+              const SizedBox(width: 30),
               bookCover(book),
             ],
           );
@@ -108,7 +109,7 @@ Widget bookInfo(BuildContext context, Book book, int numberOfNotes) {
                   bookCover(book),
                 ],
               ),
-              opetators(context, book),
+              operators(context, book),
             ],
           );
         }
@@ -131,7 +132,7 @@ ClipRRect bookCover(Book book) {
   );
 }
 
-Row opetators(BuildContext context, Book book) {
+Row operators(BuildContext context, Book book) {
   void handleExportNotes() {
     showModalBottomSheet(
         context: context,
@@ -234,6 +235,9 @@ Widget bookNotesList(int bookId) {
     future: selectBookNotesByBookId(bookId),
     builder: (context, snapshot) {
       if (snapshot.connectionState == ConnectionState.done) {
+        if (snapshot.data!.isEmpty) {
+          return const Center(child: NotesTips());
+        }
         return Column(
           children: snapshot.data!.map((bookNote) {
             return bookNoteItem(context, bookNote);

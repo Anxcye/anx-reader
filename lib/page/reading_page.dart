@@ -12,6 +12,7 @@ import 'package:anx_reader/models/read_theme.dart';
 import 'package:anx_reader/page/book_player/epub_player.dart';
 import 'package:anx_reader/utils/log/common.dart';
 import 'package:anx_reader/utils/ui/status_bar.dart';
+import 'package:anx_reader/widgets/reading_page/notes_widget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -132,28 +133,7 @@ class ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
 
   void noteHandler() {
     setState(() {
-      _currentPage = Container(
-        height: 550,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 15, top: 10),
-              child: Text(
-                context.navBarNotes,
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontFamily: 'SourceHanSerif',
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            Expanded(
-              child: ListView(children: [bookNotesList(_book.id)]),
-            ),
-          ],
-        ),
-      );
+      _currentPage = ReadingNotes(book: _book);
     });
   }
 

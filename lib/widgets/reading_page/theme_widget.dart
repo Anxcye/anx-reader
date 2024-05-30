@@ -1,6 +1,7 @@
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/l10n/localization_extension.dart';
 import 'package:anx_reader/widgets/reading_page/more_settings.dart';
+import 'package:anx_reader/widgets/reading_page/widget_title.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
@@ -29,26 +30,7 @@ class _ThemeWidgetState extends State<ThemeWidget> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Row(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                context.readingPageTheme,
-                style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'SourceHanSerif'
-                ),
-              ),
-            ),
-            const Spacer(),
-            IconButton(
-                onPressed: () => showMoreSettings(ReadingSettings.theme),
-                icon: const Icon(Icons.settings)),
-          ],
-        ),
-        const Divider(),
+        widgetTitle(context.readingPageTheme, ReadingSettings.theme),
         SizedBox(
           height: 100, // specify the height
           child: ListView.builder(
