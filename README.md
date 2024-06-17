@@ -31,7 +31,6 @@
 
 
 
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FAnxcye%2Fanx-reader.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FAnxcye%2Fanx-reader?ref=badge_large)
 
 ### TODO
 - [X] UI 适配 Tab 端
@@ -54,3 +53,6 @@ Telegram 群组：[https://t.me/AnxReader](https://t.me/AnxReader)
 - 运行 `flutter run` 启动应用。
 
 您可能遇到 Flutter 版本不兼容的问题，请参考 [Flutter 文档](https://flutter.dev/docs/get-started/install)。
+
+
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FAnxcye%2Fanx-reader.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FAnxcye%2Fanx-reader?ref=badge_large)
