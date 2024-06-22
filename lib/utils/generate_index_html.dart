@@ -41,15 +41,13 @@ String generateIndexHtml(
           font-family: 'SourceHanSerif';
           src: url('http://localhost:${Server().port}/fonts/SourceHanSerifSC-Regular.otf');
         }
-  .epub-container {
-    position: relative;
-    overflow: hidden;
-    touch-action: pan-y;
-  }
-  .epub-view {
-    will-change: transform;
-    transition: transform 0.5s ease;
-  }
+        .epub-container {
+          position: relative;
+          overflow: hidden;
+        }
+        .epub-view {
+          transition: transform 0.3s ease;
+        } 
       </style>
     </head>
     <body>
@@ -145,79 +143,65 @@ String generateIndexHtml(
 
         let touchStartX = 0;
         let touchStartY = 0;
+        let touchStartTime = 0;
         let currentOffset = 0;
         let viewWidth = 0;
-        let isDragging = false;
-        let lastTouchX = 0;
         
         rendition.on('rendered', () => {
           viewWidth = document.querySelector('.epub-container').offsetWidth;
         });
         
-        function updatePosition(x) {
-          if (!isDragging) return;
-          const deltaX = x - lastTouchX;
-          currentOffset += deltaX;
-          currentOffset = Math.max(Math.min(currentOffset, viewWidth), -viewWidth);
-          requestAnimationFrame(() => {
-            document.querySelector('.epub-view').style.transform = `translateX(\${currentOffset}px)`;
-          });
-          lastTouchX = x;
-        }
-        
         rendition.on('touchstart', event => {
-          if (event.touches.length !== 1) return; // Ignore multi-touch
-          touchStartX = event.touches[0].clientX;
-          touchStartY = event.touches[0].clientY;
-          lastTouchX = touchStartX;
+          touchStartX = event.changedTouches[0].screenX;
+          touchStartY = event.changedTouches[0].screenY;
+          touchStartTime = event.timeStamp;
           currentOffset = 0;
-          isDragging = true;
-        }, { passive: false });
         
+          document.querySelector('.epub-view').style.transition = 'none';
+        });
         
         rendition.on('touchmove', event => {
-          if (!isDragging || event.touches.length !== 1) return;
-          if (Math.abs(event.touches[0].clientY - touchStartY) > 40) return;
-          console.log(event.touches[0].clientX); 
-          updatePosition(event.touches[0].clientX);
-        }, { passive: false });
+          const currentX = event.changedTouches[0].screenX;
+          const offsetX = currentX - touchStartX;
+          currentOffset = offsetX - currentOffset;
+          console.log(currentX);
+        
+          document.querySelector('.epub-view').style.transform = `translateX(\${offsetX}px)`;
+        
+        });
         
         rendition.on('touchend', event => {
-          if (!isDragging) return;
-          let offsetX = event.changedTouches[0].clientX - touchStartX;
-          let offsetY = event.changedTouches[0].clientY - touchStartY;
-          
+          const offsetX = event.changedTouches[0].screenX - touchStartX;
+          const offsetY = event.changedTouches[0].screenY - touchStartY;
+          const time = event.timeStamp - touchStartTime;
+        
+          document.querySelector('.epub-view').style.transition = 'transform 0.3s ease';
+        
           if (Math.abs(offsetX) > Math.abs(offsetY)) {
-            if (Math.abs(currentOffset) > viewWidth * 0.3) {
-              if (currentOffset > 0) {
-                updatePosition(-viewWidth - lastTouchX);
+            if (Math.abs(offsetX) > viewWidth * 0.3) { // Turn page if moved more than 30% of width
+              if (offsetX > 0) {
                 rendition.prev();
+                document.querySelector('.epub-view').style.transform = `translateX(\${viewWidth}px)`;
               } else {
-                updatePosition(viewWidth - lastTouchX);
                 rendition.next();
+                document.querySelector('.epub-view').style.transform = `translateX(\${-viewWidth}px)`;
               }
             } else {
-              updatePosition(0);
               document.querySelector('.epub-view').style.transform = 'translateX(0)';
             }
-          } else if (Math.abs(offsetY) > 40) {
-            window.flutter_inappwebview.callHandler('showMenu');
+          } else {
+            if (time < 300 && offsetY < -40) {
+              window.flutter_inappwebview.callHandler('showMenu');
+            }
+            document.querySelector('.epub-view').style.transform = 'translateX(0)';
           }
-          // event.preventDefault();
-          isDragging = false;
-          lastTouchX = 0;
-          currentOffset = 0;
-        }, { passive: false });
+        
+        });
         
         rendition.on('relocated', () => {
-          currentOffset = 0;
           document.querySelector('.epub-view').style.transition = 'none';
           document.querySelector('.epub-view').style.transform = 'translateX(0)';
-          setTimeout(() => {
-            document.querySelector('.epub-view').style.transition = 'transform 0.1s ease';
-          }, 100);
         });
-
  
         
     // get current chapter title    
