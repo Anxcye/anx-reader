@@ -41,7 +41,15 @@ String generateIndexHtml(
           font-family: 'SourceHanSerif';
           src: url('http://localhost:${Server().port}/fonts/SourceHanSerifSC-Regular.otf');
         }
-
+  .epub-container {
+    position: relative;
+    overflow: hidden;
+    touch-action: pan-y;
+  }
+  .epub-view {
+    will-change: transform;
+    transition: transform 0.2s ease;
+  }
       </style>
     </head>
     <body>
@@ -56,7 +64,7 @@ String generateIndexHtml(
             gap: ${style.sideMargin},
         })
         var refreshProgress
-        
+    // book style    
         rendition.hooks.render.register(function(contents, view) {
           var doc = contents.document;
           doc.body.style.backgroundColor = 'transparent';
@@ -132,39 +140,104 @@ String generateIndexHtml(
         }).then(function(){
           refreshProgress();
         })
+    
+    // page animation
+
+let touchStartX = 0;
+let currentOffset = 0;
+let viewWidth = 0;
+let isDragging = false;
+let lastTouchX = 0;
+
+rendition.on('rendered', () => {
+  viewWidth = document.querySelector('.epub-container').offsetWidth;
+});
+
+function updatePosition(x) {
+  if (!isDragging) return;
+  const deltaX = x - lastTouchX;
+  currentOffset += deltaX;
+  currentOffset = Math.max(Math.min(currentOffset, viewWidth), -viewWidth);
+  requestAnimationFrame(() => {
+    document.querySelector('.epub-view').style.transform = `translateX(\${currentOffset}px)`;
+  });
+  lastTouchX = x;
+}
+
+rendition.on('touchstart', event => {
+  if (event.touches.length !== 1) return; // Ignore multi-touch
+  touchStartX = event.touches[0].clientX;
+  lastTouchX = touchStartX;
+  currentOffset = 0;
+  isDragging = true;
+  // event.preventDefault();
+}, { passive: false });
+
+rendition.on('touchmove', event => {
+  if (!isDragging || event.touches.length !== 1) return;
+  updatePosition(event.touches[0].clientX);
+  event.preventDefault();
+}, { passive: false });
+
+rendition.on('touchend', event => {
+  if (!isDragging) return;
+  isDragging = false;
+
+  if (Math.abs(currentOffset) > viewWidth * 0.3) {
+    if (currentOffset > 0) {
+      rendition.prev();
+    } else {
+      rendition.next();
+    }
+  } else {
+    document.querySelector('.epub-view').style.transform = 'translateX(0)';
+  }
+
+  // event.preventDefault();
+}, { passive: false });
+
+rendition.on('relocated', () => {
+  currentOffset = 0;
+  document.querySelector('.epub-view').style.transition = 'none';
+  document.querySelector('.epub-view').style.transform = 'translateX(0)';
+  setTimeout(() => {
+    document.querySelector('.epub-view').style.transition = 'transform 0.2s ease';
+  }, 50);
+});
+
         
-        // touch event
-        var touchStarX = 0;
-        var touchStarY = 0;
-        var touchStartTime = 0;
-        rendition.on('touchstart', event => {   //通过on方法将事件绑定到渲染上
-          // console.log(event)
-          touchStarX = event.changedTouches[0].clientX;
-          touchStarY = event.changedTouches[0].clientY;
-          touchStartTime = event.timeStamp
-        })
-        rendition.on('touchend', event => {
-          // console.log(event)
-          const offsetX = event.changedTouches[0].clientX - touchStarX
-          const offsetY = event.changedTouches[0].clientY - touchStarY
-          const time = event.timeStamp - touchStartTime
-          // console.log(offsetX, time)
-          if (Math.abs(offsetX) > Math.abs(offsetY)) {
-            if (time < 500 && offsetX > 40) {
-              rendition.prev();
-            } else if (time < 500 && offsetX < -40) {
-              rendition.next();
-            } 
-          } else {
-            if (time < 500 && offsetY > 40) {
-            } else if (time < 500 && offsetY < -40) {
-              window.flutter_inappwebview.callHandler('showMenu');
-            } 
-          }
-          event.stopPropagation();
-        })
+    // // touch event
+    //     var touchStarX = 0;
+    //     var touchStarY = 0;
+    //     var touchStartTime = 0;
+    //     rendition.on('touchstart', event => {
+    //       // console.log(event)
+    //       touchStarX = event.changedTouches[0].clientX;
+    //       touchStarY = event.changedTouches[0].clientY;
+    //       touchStartTime = event.timeStamp
+    //     })
+    //     rendition.on('touchend', event => {
+    //       // console.log(event)
+    //       const offsetX = event.changedTouches[0].clientX - touchStarX
+    //       const offsetY = event.changedTouches[0].clientY - touchStarY
+    //       const time = event.timeStamp - touchStartTime
+    //       // console.log(offsetX, time)
+    //       if (Math.abs(offsetX) > Math.abs(offsetY)) {
+    //         if (time < 500 && offsetX > 40) {
+    //           rendition.prev();
+    //         } else if (time < 500 && offsetX < -40) {
+    //           rendition.next();
+    //         } 
+    //       } else {
+    //         if (time < 500 && offsetY > 40) {
+    //         } else if (time < 500 && offsetY < -40) {
+    //           window.flutter_inappwebview.callHandler('showMenu');
+    //         } 
+    //       }
+    //       event.stopPropagation();
+    //     })
         
-        
+    // get current chapter title    
         getCurrentChapterTitle = function() {
           let toc = book.navigation.toc;
         
@@ -200,7 +273,7 @@ String generateIndexHtml(
           const chapterLabel = findChapterLabel(toc, href);
           return chapterLabel || 'Unknown Chapter';
         }
-        
+    // refresh progress    
         refreshProgress = function() {
           let progress = book.locations.percentageFromCfi(rendition.currentLocation().start.cfi);
           window.flutter_inappwebview.callHandler('getProgress', progress);
@@ -209,7 +282,8 @@ String generateIndexHtml(
           window.flutter_inappwebview.callHandler('getChapterTitle', getCurrentChapterTitle());
           window.flutter_inappwebview.callHandler('getChapterHref', rendition.currentLocation().start.href);
         }
-    
+        
+    // render book
         var renderBook = async function() {
           if ('$cfi' !== '') {
             await rendition.display('$cfi').then(() => {
@@ -231,7 +305,7 @@ String generateIndexHtml(
 
         renderBook()
         
-        // Annotation events
+    // Annotation events
         
         // selected text
         var selectedCfiRange = null;

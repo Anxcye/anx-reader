@@ -131,8 +131,6 @@ class _TocItemWidgetState extends State<TocItemWidget> {
   }
 
   bool _isSelected(TocItem tocItem) {
-    print('selected: ${widget.epubPlayerKey.currentState!.chapterHref}');
-    print('tocItem.href: ${tocItem.href}');
     if (tocItem.href == widget.epubPlayerKey.currentState!.chapterHref) {
       return true;
     }
