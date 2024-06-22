@@ -1,9 +1,8 @@
 import 'package:anx_reader/models/read_theme.dart';
 import 'package:anx_reader/utils/get_base_path.dart';
-
-import '../models/book.dart';
-import '../models/book_style.dart';
-import '../service/book_player/book_player_server.dart';
+import 'package:anx_reader/models/book.dart';
+import 'package:anx_reader/models/book_style.dart';
+import 'package:anx_reader/service/book_player/book_player_server.dart';
 
 String generateIndexHtml(
     Book book, BookStyle style, ReadTheme theme, String cfi) {
@@ -140,69 +139,92 @@ String generateIndexHtml(
         })
     
     // page animation
+  
+let touchStartX = 0;
+let touchStartY = 0;
+let touchStartTime = 0;
+let currentOffset = 0;
+let viewWidth = 0;
+let isAnimating = false;
 
-        let touchStartX = 0;
-        let touchStartY = 0;
-        let touchStartTime = 0;
-        let currentOffset = 0;
-        let viewWidth = 0;
-        
-        rendition.on('rendered', () => {
-          viewWidth = document.querySelector('.epub-container').offsetWidth;
-        });
-        
-        rendition.on('touchstart', event => {
-          touchStartX = event.changedTouches[0].screenX;
-          touchStartY = event.changedTouches[0].screenY;
-          touchStartTime = event.timeStamp;
-          currentOffset = 0;
-        
-          document.querySelector('.epub-view').style.transition = 'none';
-        });
-        
-        rendition.on('touchmove', event => {
-          const currentX = event.changedTouches[0].screenX;
-          const offsetX = currentX - touchStartX;
-          currentOffset = offsetX - currentOffset;
-          console.log(currentX);
-        
-          document.querySelector('.epub-view').style.transform = `translateX(\${offsetX}px)`;
-        
-        });
-        
-        rendition.on('touchend', event => {
-          const offsetX = event.changedTouches[0].screenX - touchStartX;
-          const offsetY = event.changedTouches[0].screenY - touchStartY;
-          const time = event.timeStamp - touchStartTime;
-        
-          document.querySelector('.epub-view').style.transition = 'transform 0.3s ease';
-        
-          if (Math.abs(offsetX) > Math.abs(offsetY)) {
-            if (Math.abs(offsetX) > viewWidth * 0.3) { // Turn page if moved more than 30% of width
-              if (offsetX > 0) {
-                rendition.prev();
-                document.querySelector('.epub-view').style.transform = `translateX(\${viewWidth}px)`;
-              } else {
-                rendition.next();
-                document.querySelector('.epub-view').style.transform = `translateX(\${-viewWidth}px)`;
-              }
-            } else {
-              document.querySelector('.epub-view').style.transform = 'translateX(0)';
-            }
-          } else {
-            if (time < 300 && offsetY < -40) {
-              window.flutter_inappwebview.callHandler('showMenu');
-            }
-            document.querySelector('.epub-view').style.transform = 'translateX(0)';
-          }
-        
-        });
-        
-        rendition.on('relocated', () => {
-          document.querySelector('.epub-view').style.transition = 'none';
-          document.querySelector('.epub-view').style.transform = 'translateX(0)';
-        });
- 
+rendition.on('rendered', () => {
+  viewWidth = document.querySelector('.epub-container').offsetWidth;
+});
+
+function transformView(offsetX, duration = 0, easing = 'linear') {
+  const view = document.querySelector('.epub-view');
+  view.style.transition = `transform \${duration}ms \${easing}`;
+  view.style.transform = `translateX(\${offsetX}px)`;
+}
+
+function animatePageTurn(direction, startOffset, callback) {
+  isAnimating = true;
+  const endOffset = direction === 'next' ? -viewWidth : viewWidth;
+  
+  transformView(startOffset, 0);
+  
+  setTimeout(() => {
+    transformView(endOffset, 300, 'ease-out');
+    setTimeout(() => {
+      callback();
+      isAnimating = false;
+    }, 350);
+  }, 50);
+}
+
+rendition.on('touchstart', event => {
+  if (isAnimating) return;
+  
+  touchStartX = event.changedTouches[0].screenX;
+  touchStartY = event.changedTouches[0].screenY;
+  touchStartTime = event.timeStamp;
+  currentOffset = 0;
+
+  transformView(0, 0);
+});
+
+rendition.on('touchmove', event => {
+  if (isAnimating) return;
+
+  const currentX = event.changedTouches[0].screenX;
+  const offsetX = currentX - touchStartX;
+  
+  transformView(offsetX);
+  
+  // event.preventDefault();
+});
+
+rendition.on('touchend', event => {
+  if (isAnimating) return;
+
+  const offsetX = event.changedTouches[0].screenX - touchStartX;
+  const offsetY = event.changedTouches[0].screenY - touchStartY;
+  const time = event.timeStamp - touchStartTime;
+
+  if (Math.abs(offsetX) > Math.abs(offsetY)) {
+    if (Math.abs(offsetX) > viewWidth * 0.3) { // Turn page if moved more than 30% of width
+      if (offsetX > 0) {
+        animatePageTurn('prev', offsetX, () => rendition.prev());
+      } else {
+        animatePageTurn('next', offsetX, () => rendition.next());
+      }
+    } else {
+      // Animate back to original position
+      transformView(0, 300, 'ease-out');
+    }
+  } else {
+    if (time < 300 && offsetY < -40) {
+      window.flutter_inappwebview.callHandler('showMenu');
+    }
+    transformView(0, 300, 'ease-out');
+  }
+
+  // event.preventDefault();
+});
+
+rendition.on('relocated', () => {
+  transformView(0, 0);
+});  
         
     // get current chapter title    
         getCurrentChapterTitle = function() {
