@@ -137,95 +137,130 @@ String generateIndexHtml(
         }).then(function(){
           refreshProgress();
         })
-    
+    // page navigation  
+        function nextPage(){
+          transformView(-viewWidth, 300);
+          rendition.next();
+        }
+      
+        function prevPage(){
+          transformView(viewWidth, 300);
+          rendition.prev();
+        }
     // page animation
-  
-let touchStartX = 0;
-let touchStartY = 0;
-let touchStartTime = 0;
-let currentOffset = 0;
-let viewWidth = 0;
-let isAnimating = false;
-
-rendition.on('rendered', () => {
-  viewWidth = document.querySelector('.epub-container').offsetWidth;
-});
-
-function transformView(offsetX, duration = 0, easing = 'linear') {
-  const view = document.querySelector('.epub-view');
-  view.style.transition = `transform \${duration}ms \${easing}`;
-  view.style.transform = `translateX(\${offsetX}px)`;
-}
-
-function animatePageTurn(direction, startOffset, callback) {
-  isAnimating = true;
-  const endOffset = direction === 'next' ? -viewWidth : viewWidth;
-  
-  transformView(startOffset, 0);
-  
-  setTimeout(() => {
-    transformView(endOffset, 300, 'ease-out');
-    setTimeout(() => {
-      callback();
-      isAnimating = false;
-    }, 350);
-  }, 50);
-}
-
-rendition.on('touchstart', event => {
-  if (isAnimating) return;
-  
-  touchStartX = event.changedTouches[0].screenX;
-  touchStartY = event.changedTouches[0].screenY;
-  touchStartTime = event.timeStamp;
-  currentOffset = 0;
-
-  transformView(0, 0);
-});
-
-rendition.on('touchmove', event => {
-  if (isAnimating) return;
-
-  const currentX = event.changedTouches[0].screenX;
-  const offsetX = currentX - touchStartX;
-  
-  transformView(offsetX);
-  
-  // event.preventDefault();
-});
-
-rendition.on('touchend', event => {
-  if (isAnimating) return;
-
-  const offsetX = event.changedTouches[0].screenX - touchStartX;
-  const offsetY = event.changedTouches[0].screenY - touchStartY;
-  const time = event.timeStamp - touchStartTime;
-
-  if (Math.abs(offsetX) > Math.abs(offsetY)) {
-    if (Math.abs(offsetX) > viewWidth * 0.3) { // Turn page if moved more than 30% of width
-      if (offsetX > 0) {
-        animatePageTurn('prev', offsetX, () => rendition.prev());
-      } else {
-        animatePageTurn('next', offsetX, () => rendition.next());
-      }
-    } else {
-      // Animate back to original position
-      transformView(0, 300, 'ease-out');
-    }
-  } else {
-    if (time < 300 && offsetY < -40) {
-      window.flutter_inappwebview.callHandler('showMenu');
-    }
-    transformView(0, 300, 'ease-out');
-  }
-
-  // event.preventDefault();
-});
-
-rendition.on('relocated', () => {
-  transformView(0, 0);
-});  
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let touchStartTime = 0;
+        let lastX = 0;
+        let viewWidth = 0;
+        let isAnimating = false;
+        let epubContainer = null;
         
+        rendition.on('rendered', () => {
+          epubContainer = document.querySelector('.epub-container');
+          viewWidth = epubContainer.offsetWidth;
+        });
+        
+        function transformView(offsetX, duration = 0) {
+          const startScrollLeft = epubContainer.scrollLeft;
+          const targetScrollLeft = startScrollLeft - offsetX;
+        
+          leftBound = epubContainer.scrollLeft + epubContainer.offsetWidth + viewWidth;
+        
+          if (leftBound <= epubContainer.scrollWidth && targetScrollLeft >= epubContainer.scrollWidth - epubContainer.offsetWidth ||
+              leftBound >= epubContainer.scrollWidth) {
+            return;
+          }
+        
+          
+          if (duration === 0) {
+            epubContainer.scrollLeft = targetScrollLeft;
+          } else {
+            let start = null;
+            function easeInOutCubic(t) {
+              return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+            }
+        
+            function step(timestamp) {
+              if (!start) start = timestamp;
+              const progress = timestamp - start;
+              let percentage = progress / duration;
+              percentage = easeInOutCubic(percentage);
+        
+              epubContainer.scrollLeft = startScrollLeft + (targetScrollLeft - startScrollLeft) * percentage;
+        
+              if (progress < duration) {
+                window.requestAnimationFrame(step);
+              }
+            }
+        
+            window.requestAnimationFrame(step);
+          }
+        }
+        
+        function animatePageTurn(direction, startOffset, callback) {
+          isAnimating = true;
+          const endOffset = direction === 'next' ? -(viewWidth - Math.abs(startOffset)) : (viewWidth - Math.abs(startOffset));
+          console.log(endOffset, startOffset);
+          
+          
+          callback();
+          transformView(endOffset, 300);
+        
+          setTimeout(() => {
+            // transformView(endOffset, 300, 'ease-out');
+            setTimeout(() => {
+              isAnimating = false;
+            }, 300);
+          }, 50);
+        }
+        
+        rendition.on('touchstart', event => {
+          if (isAnimating) return;
+          
+          touchStartX = event.changedTouches[0].screenX;
+          touchStartY = event.changedTouches[0].screenY;
+          touchStartTime = event.timeStamp;
+          lastX = touchStartX;
+        
+          // transformView(0, 0);
+        });
+        
+        rendition.on('touchmove', event => {
+          if (isAnimating) return;
+          if (Math.abs(event.changedTouches[0].screenY - touchStartY) > 
+              Math.abs(event.changedTouches[0].screenX - touchStartX)) return;
+          const currentX = event.changedTouches[0].screenX;
+          const offsetX = currentX - lastX;
+          lastX = currentX;
+          transformView(offsetX, 0);
+        });
+        
+        rendition.on('touchend', event => {
+          if (isAnimating) return;
+        
+          const offsetX = event.changedTouches[0].screenX - touchStartX;
+          const offsetY = event.changedTouches[0].screenY - touchStartY;
+          const time = event.timeStamp - touchStartTime;
+        
+          if (Math.abs(offsetX) > Math.abs(offsetY)) {
+            if (Math.abs(offsetX) > viewWidth * 0.2) { // Turn page if moved more than 30% of width
+              if (offsetX > 0) {
+                animatePageTurn('prev', offsetX, () => rendition.prev());
+              } else {
+                animatePageTurn('next', offsetX, () => rendition.next());
+              }
+            } else {
+              transformView(-offsetX, 300, 'ease-out');
+            }
+          } else {
+            if (time < 300 && offsetY < -40) {
+              window.flutter_inappwebview.callHandler('showMenu');
+            }
+            transformView(-offsetX, 300, 'ease-out');
+          }
+        });
+
     // get current chapter title    
         getCurrentChapterTitle = function() {
           let toc = book.navigation.toc;
@@ -389,7 +424,7 @@ rendition.on('relocated', () => {
         }
         
         
-        // set click event
+    // set click event
         var setClickEvent = function (annotations) {
           // get current iframe
           var win = rendition.getContents()[0].window;

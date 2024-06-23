@@ -4509,7 +4509,8 @@ class default_DefaultViewManager {
       left = this.container.scrollLeft + this.container.offsetWidth + this.layout.delta;
 
       if (left <= this.container.scrollWidth) {
-        this.scrollBy(this.layout.delta, 0, true);
+//        this.scrollBy(this.layout.delta, 0, true);
+        this.scrollBy(0, 0, true);
       } else {
         next = this.views.last().section.next();
       }
@@ -4582,7 +4583,8 @@ class default_DefaultViewManager {
       left = this.container.scrollLeft;
 
       if (left > 0) {
-        this.scrollBy(-this.layout.delta, 0, true);
+//        this.scrollBy(-this.layout.delta, 0, true);
+        this.scrollBy(0, 0, true);
       } else {
         prev = this.views.first().section.prev();
       }
