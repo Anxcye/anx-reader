@@ -477,11 +477,11 @@ class EpubPlayerState extends State<EpubPlayer> {
   }
 
   void prevPage() {
-    _webViewController.evaluateJavascript(source: 'rendition.prev()');
+    _webViewController.evaluateJavascript(source: 'prevPage(viewWidth, 300)');
   }
 
   void nextPage() {
-    _webViewController.evaluateJavascript(source: 'rendition.next()');
+    _webViewController.evaluateJavascript(source: 'nextPage(viewWidth, 300)');
   }
 
   void prevChapter() {
