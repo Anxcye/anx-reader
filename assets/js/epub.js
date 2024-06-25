@@ -4498,7 +4498,8 @@ class default_DefaultViewManager {
   // };
 
 
-  next() {
+  next(check = true) {
+
     var next;
     var left;
     let dir = this.settings.direction;
@@ -4508,9 +4509,8 @@ class default_DefaultViewManager {
       this.scrollLeft = this.container.scrollLeft;
       left = this.container.scrollLeft + this.container.offsetWidth + this.layout.delta;
 
-      if (left <= this.container.scrollWidth) {
-//        this.scrollBy(this.layout.delta, 0, true);
-        this.scrollBy(0, 0, true);
+      if (left <= this.container.scrollWidth || !check) {
+        this.scrollBy(this.layout.delta, 0, true);
       } else {
         next = this.views.last().section.next();
       }
@@ -4572,7 +4572,7 @@ class default_DefaultViewManager {
     }
   }
 
-  prev() {
+  prev(check = true) {
     var prev;
     var left;
     let dir = this.settings.direction;
@@ -4582,11 +4582,11 @@ class default_DefaultViewManager {
       this.scrollLeft = this.container.scrollLeft;
       left = this.container.scrollLeft;
 
-      if (left > 0) {
-//        this.scrollBy(-this.layout.delta, 0, true);
-        this.scrollBy(0, 0, true);
+      if (left > 0 || !check) {
+        this.scrollBy(-this.layout.delta, 0, true);
       } else {
         prev = this.views.first().section.prev();
+        console.log("prev", prev);
       }
     } else if (this.isPaginated && this.settings.axis === "horizontal" && dir === "rtl") {
       this.scrollLeft = this.container.scrollLeft;
@@ -4873,7 +4873,8 @@ class default_DefaultViewManager {
     }
 
     if (!this.settings.fullsize) {
-      if (x) this.container.scrollLeft += x * dir;
+      // if (x) this.container.scrollLeft += x * dir;
+      if (x) this.container.scrollLeft += 0;
       if (y) this.container.scrollTop += y;
     } else {
       window.scrollBy(x * dir, y * dir);
@@ -7123,7 +7124,7 @@ var Underline = exports.Underline = function (_Highlight) {
                 rect.setAttribute('y', r.top - offset.top + container.top);
                 rect.setAttribute('height', r.height);
                 rect.setAttribute('width', r.width);
-                rect.setAttribute('fill', 'transparent');
+                rect.setAttribute('fill', 'none');
                 rect.setAttribute('stroke', 'transparent');
 
                 var line = _svg2.default.createElement('line');
@@ -8752,8 +8753,9 @@ class rendition_Rendition {
    */
 
 
-  next() {
-    return this.q.enqueue(this.manager.next.bind(this.manager)).then(this.reportLocation.bind(this));
+  next(check = true) {
+    // return this.q.enqueue(this.manager.next.bind(this.manager)).then(this.reportLocation.bind(this));
+    return this.q.enqueue(() => this.manager.next(check)).then(this.reportLocation.bind(this));
   }
   /**
    * Go to the previous "page" in the rendition
@@ -8761,8 +8763,9 @@ class rendition_Rendition {
    */
 
 
-  prev() {
-    return this.q.enqueue(this.manager.prev.bind(this.manager)).then(this.reportLocation.bind(this));
+  prev(check = true) {
+    // return this.q.enqueue(this.manager.prev(check).bind(this.manager)).then(this.reportLocation.bind(this));
+    return this.q.enqueue(() => this.manager.prev(check)).then(this.reportLocation.bind(this));
   } //-- http://www.idpf.org/epub/301/spec/epub-publications.html#meta-properties-rendering
 
   /**
