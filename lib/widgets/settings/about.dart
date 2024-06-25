@@ -1,12 +1,12 @@
 import 'package:anx_reader/l10n/localization_extension.dart';
 import 'package:anx_reader/widgets/settings/link_icon.dart';
+import 'package:anx_reader/utils/check_update.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:pubspec_parse/pubspec_parse.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../utils/check_update.dart';
 
 class About extends StatefulWidget {
   const About({

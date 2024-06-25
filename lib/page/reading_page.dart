@@ -4,30 +4,22 @@ import 'dart:convert';
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/dao/reading_time.dart';
 import 'package:anx_reader/dao/theme.dart';
-import 'package:anx_reader/l10n/localization_extension.dart';
 import 'package:anx_reader/models/book.dart';
-import 'package:anx_reader/models/book_note.dart';
 import 'package:anx_reader/models/book_style.dart';
 import 'package:anx_reader/models/read_theme.dart';
 import 'package:anx_reader/page/book_player/epub_player.dart';
-import 'package:anx_reader/utils/log/common.dart';
 import 'package:anx_reader/utils/ui/status_bar.dart';
 import 'package:anx_reader/widgets/reading_page/notes_widget.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:anx_reader/models/reading_time.dart';
+import 'package:anx_reader/models/toc_item.dart';
+import 'package:anx_reader/utils/generate_index_html.dart';
+import 'package:anx_reader/widgets/reading_page/progress_widget.dart';
+import 'package:anx_reader/widgets/reading_page/style_widget.dart';
+import 'package:anx_reader/widgets/reading_page/theme_widget.dart';
+import 'package:anx_reader/widgets/reading_page/toc_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
-import '../dao/book_note.dart';
-import '../models/reading_time.dart';
-import '../models/toc_item.dart';
-import '../utils/generate_index_html.dart';
-import '../widgets/reading_page/progress_widget.dart';
-import '../widgets/reading_page/style_widget.dart';
-import '../widgets/reading_page/theme_widget.dart';
-import '../widgets/reading_page/toc_widget.dart';
-import 'book_notes_page.dart';
 
 class ReadingPage extends StatefulWidget {
   final Book book;

@@ -1,17 +1,14 @@
 import 'dart:io';
 
 import 'package:anx_reader/config/shared_preference_provider.dart';
+import 'package:anx_reader/dao/book.dart';
+import 'package:anx_reader/dao/reading_time.dart';
 import 'package:anx_reader/l10n/localization_extension.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/utils/convert_seconds.dart';
+import 'package:anx_reader/widgets/statistic/chard_card.dart';
 import 'package:anx_reader/widgets/tips/statistic_tips.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-
-import '../../dao/book.dart';
-import '../../dao/reading_time.dart';
-import '../../widgets/statistic/chard_card.dart';
 
 class StatisticPage extends StatefulWidget {
   const StatisticPage({super.key});

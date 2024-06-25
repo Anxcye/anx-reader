@@ -1,12 +1,12 @@
 import 'dart:io';
 
+import 'package:anx_reader/page/book_detail.dart';
 import 'package:anx_reader/dao/book.dart';
 import 'package:anx_reader/l10n/localization_extension.dart';
+import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/service/book.dart';
 import 'package:flutter/material.dart';
 
-import '../models/book.dart';
-import '../page/book_detail.dart';
 
 class BookItem extends StatelessWidget {
   const BookItem({
@@ -77,7 +77,7 @@ class BookItem extends StatelessWidget {
         context: context,
         builder: (BuildContext context) {
           return Container(
-            padding: EdgeInsets.all(20),
+            padding: const EdgeInsets.all(20),
             height: 100,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -103,8 +103,8 @@ class BookItem extends StatelessWidget {
                   child: Column(
                     // mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.delete),
-                      Spacer(),
+                      const Icon(Icons.delete),
+                      const Spacer(),
                       Text(context.commonDelete),
                     ],
                   ),

@@ -3,19 +3,18 @@ import 'dart:io';
 import 'package:anx_reader/dao/book.dart';
 import 'package:anx_reader/dao/reading_time.dart';
 import 'package:anx_reader/l10n/localization_extension.dart';
+import 'package:anx_reader/models/book.dart';
+import 'package:anx_reader/models/reading_time.dart';
+import 'package:anx_reader/service/book.dart';
 import 'package:anx_reader/utils/convert_seconds.dart';
+import 'package:anx_reader/utils/get_base_path.dart';
 import 'package:anx_reader/utils/log/common.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:image_picker/image_picker.dart';
 
-import '../models/book.dart';
-import '../models/reading_time.dart';
-import '../service/book.dart';
-import '../utils/get_base_path.dart';
-
 class BookDetail extends StatefulWidget {
-  BookDetail({super.key, required this.book, required this.onRefresh});
+  const BookDetail({super.key, required this.book, required this.onRefresh});
 
   final Book book;
   final Function onRefresh;
@@ -60,12 +59,12 @@ class _BookDetailState extends State<BookDetail> {
                         bookBaseDetail(context, widget.book,
                             constraints.maxWidth / 2 - 20),
                         editButton(),
-                        SizedBox(height: 5),
+                        const SizedBox(height: 5),
                         bookStatistics(context, widget.book),
                       ],
                     ),
                   ),
-                  SizedBox(width: 20),
+                  const SizedBox(width: 20),
                   Expanded(
                     flex: 1,
                     child: Padding(
@@ -81,9 +80,9 @@ class _BookDetailState extends State<BookDetail> {
                 children: [
                   bookBaseDetail(context, widget.book, constraints.maxWidth),
                   editButton(),
-                  SizedBox(height: 5),
+                  const SizedBox(height: 5),
                   bookStatistics(context, widget.book),
-                  SizedBox(height: 15),
+                  const SizedBox(height: 15),
                   moreDetail(),
                 ],
               );
@@ -134,7 +133,7 @@ class _BookDetailState extends State<BookDetail> {
     );
     double top = 60;
 
-    return Container(
+    return SizedBox(
       height: 270 + top,
       child: Stack(
         children: [
@@ -142,13 +141,13 @@ class _BookDetailState extends State<BookDetail> {
           Positioned(
             left: 0,
             top: 150 + top,
-            child: Container(
+            child: SizedBox(
                 height: 120,
                 width: width,
                 child: Card(
                   child: Row(
                     children: [
-                      Spacer(),
+                      const Spacer(),
                       // progress ring
                       Stack(
                         children: [
@@ -323,7 +322,7 @@ class _BookDetailState extends State<BookDetail> {
   Widget editButton() {
     return Row(
       children: [
-        Spacer(),
+        const Spacer(),
         isEditing
             ? ElevatedButton(
                 child: Row(
@@ -365,7 +364,7 @@ class _BookDetailState extends State<BookDetail> {
       indent: 15,
       endIndent: 15,
     );
-    return Container(
+    return SizedBox(
       height: 130,
       width: MediaQuery.of(context).size.width,
       child: Card(
@@ -499,7 +498,7 @@ class _BookDetailState extends State<BookDetail> {
       fontSize: 15,
       fontWeight: FontWeight.bold,
     );
-    return Container(
+    return SizedBox(
 
         // height: 500,
         width: MediaQuery.of(context).size.width,
@@ -518,8 +517,8 @@ class _BookDetailState extends State<BookDetail> {
                   '${context.bookDetailLastReadDate}${widget.book.updateTime.toString().substring(0, 10)}',
                   style: textStyle,
                 ),
-                Divider(),
-                Container(
+                const Divider(),
+                SizedBox(
                   height: 200,
                   child: readingDetail(),
                 ),
@@ -540,8 +539,8 @@ class _BookDetailState extends State<BookDetail> {
             itemCount: readingTimes.length,
             itemBuilder: (BuildContext context, int index) {
               int totalReadingTime = readingTimes[index].readingTime;
-              int hours = totalReadingTime ~/ 3600;
-              int minutes = totalReadingTime % 3600 ~/ 60;
+              // int hours = totalReadingTime ~/ 3600;
+              // int minutes = totalReadingTime % 3600 ~/ 60;
               return Row(
                 children: [
                   Text(

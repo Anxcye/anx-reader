@@ -1,9 +1,8 @@
-import 'package:anx_reader/l10n/localization_extension.dart';
+import 'package:anx_reader/main.dart';
 import 'package:anx_reader/utils/convert_seconds.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
-import '../../main.dart';
 
 class StatisticChart extends StatefulWidget {
   final List<int> readingTime;

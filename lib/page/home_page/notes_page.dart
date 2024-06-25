@@ -1,16 +1,15 @@
 import 'dart:io';
 
+import 'package:anx_reader/dao/book.dart';
 import 'package:anx_reader/dao/book_note.dart';
+import 'package:anx_reader/dao/reading_time.dart';
 import 'package:anx_reader/l10n/localization_extension.dart';
+import 'package:anx_reader/models/book.dart';
+import 'package:anx_reader/page/book_notes_page.dart';
 import 'package:anx_reader/utils/convert_seconds.dart';
 import 'package:anx_reader/widgets/tips/notes_tips.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
-import '../../dao/book.dart';
-import '../../dao/reading_time.dart';
-import '../../models/book.dart';
-import '../book_notes_page.dart';
 
 class NotesPage extends StatefulWidget {
   const NotesPage({super.key});

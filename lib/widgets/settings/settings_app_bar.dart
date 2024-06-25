@@ -1,4 +1,3 @@
-import 'package:anx_reader/l10n/localization_extension.dart';
 import 'package:flutter/material.dart';
 
 AppBar settingsAppBar(String title, BuildContext context) {

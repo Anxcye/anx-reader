@@ -1,8 +1,7 @@
 import 'package:anx_reader/page/settings_page/more_settings_page.dart';
+import 'package:anx_reader/widgets/settings/about.dart';
+import 'package:anx_reader/widgets/settings/theme_mode.dart';
 import 'package:flutter/material.dart';
-
-import '../../widgets/settings/about.dart';
-import '../../widgets/settings/theme_mode.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});

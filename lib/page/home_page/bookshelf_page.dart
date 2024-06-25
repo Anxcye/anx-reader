@@ -1,16 +1,15 @@
 import 'dart:io';
 
+import 'package:anx_reader/dao/book.dart';
 import 'package:anx_reader/l10n/localization_extension.dart';
+import 'package:anx_reader/models/book.dart';
+import 'package:anx_reader/service/book.dart';
 import 'package:anx_reader/utils/webdav/common.dart';
 import 'package:anx_reader/utils/webdav/show_status.dart';
 import 'package:anx_reader/widgets/book_list.dart';
+import 'package:anx_reader/widgets/tips/bookshelf_tips.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-
-import '../../dao/book.dart';
-import '../../models/book.dart';
-import '../../service/book.dart';
-import '../../widgets/tips/bookshelf_tips.dart';
 
 class BookshelfPage extends StatefulWidget {
   const BookshelfPage({super.key});

@@ -1,4 +1,5 @@
-import '../models/reading_time.dart';
+import 'package:anx_reader/models/reading_time.dart';
+
 import 'database.dart';
 
 void insertReadingTime(ReadingTime readingTime) async {

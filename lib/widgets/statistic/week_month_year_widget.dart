@@ -1,8 +1,8 @@
+import 'package:anx_reader/dao/reading_time.dart';
 import 'package:anx_reader/l10n/localization_extension.dart';
 import 'package:anx_reader/widgets/statistic/statistic_chart.dart';
 import 'package:flutter/material.dart';
 
-import '../../dao/reading_time.dart';
 
 class YearWidget extends StatelessWidget {
   const YearWidget({

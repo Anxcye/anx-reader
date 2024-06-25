@@ -8,18 +8,13 @@ import 'package:anx_reader/utils/get_base_path.dart';
 import 'package:anx_reader/utils/log/common.dart';
 import 'package:anx_reader/utils/toast/common.dart';
 import 'package:anx_reader/utils/webdav/safe_read.dart';
-import 'package:anx_reader/utils/webdav/show_status.dart';
+import 'package:anx_reader/config/shared_preference_provider.dart';
+import 'package:anx_reader/dao/book.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:webdav_client/webdav_client.dart';
-
-import 'package:flutter/services.dart';
-import 'package:flutter/painting.dart';
-
-import '../../config/shared_preference_provider.dart';
-import '../../dao/book.dart';
 
 enum SyncDirection { upload, download, both }
 

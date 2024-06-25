@@ -1,9 +1,9 @@
 import 'dart:async';
 
 import 'package:anx_reader/l10n/localization_extension.dart';
+import 'package:anx_reader/page/book_player/epub_player.dart';
 import 'package:flutter/material.dart';
 
-import '../../page/book_player/epub_player.dart';
 
 class ProgressWidget extends StatefulWidget {
   final GlobalKey<EpubPlayerState> epubPlayerKey;
@@ -70,7 +70,7 @@ class _ProgressWidgetState extends State<ProgressWidget> {
                       const Duration(milliseconds: 100),
                       () async {
                         await widget.epubPlayerKey.currentState!
-                            .goToPersentage(value);
+                            .goToPercentage(value);
                         Timer(const Duration(milliseconds: 300), () {
                           setState(() {});
                         });
