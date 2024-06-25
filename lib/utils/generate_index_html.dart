@@ -139,15 +139,13 @@ String generateIndexHtml(
         })
     // page navigation  
         function nextPage() {
-          animatePageTurn('next', 0, (check) => rendition.next(check));
+          animatePageTurn('next', 0, (check) => rendition.next(check), 1);
         }
     
         function prevPage() {
-          animatePageTurn('prev', 0, (check) => rendition.prev(check));
+          animatePageTurn('prev', 0, (check) => rendition.prev(check), 1);
         }
     // page animation
-
-
         let touchStartX = 0;
         let touchStartY = 0;
         let touchStartTime = 0;
@@ -155,68 +153,84 @@ String generateIndexHtml(
         let isAnimating = false;
         let epubContainer = null;
         let startScrollOffset = 0;
-    
+
         rendition.on('rendered', () => {
           epubContainer = document.querySelector('.epub-container');
           viewWidth = epubContainer.offsetWidth;
         });
-    
-        function transformView(offsetX, duration = 0) {
+
+        function transformView(offsetX, duration = 0, ease) {
           const startScrollLeft = epubContainer.scrollLeft;
           const targetScrollLeft = Math.round((startScrollLeft - offsetX) / viewWidth) * viewWidth;
-    
+
           if (duration === 0) {
             epubContainer.scrollLeft = targetScrollLeft;
           } else {
             let start = null;
-    
+
             function easeInOutCubic(t) {
               return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
             }
-    
+            function easeOutQuint(t) {
+              return 1 - Math.pow(1 - t, 5);
+            }
+        
             function step(timestamp) {
               if (!start) start = timestamp;
               const progress = timestamp - start;
               let percentage = progress / duration;
-              percentage = easeInOutCubic(percentage); // 应用缓动函数
-    
+
+              // percentage = easeInOutCubic(percentage); // 应用缓动函数
+              // percentage = easeOutQuint(percentage); // 应用缓动函数
+
+              percentage = ease === 2 ? easeOutQuint(percentage) : 
+                                        easeInOutCubic(percentage);
+
               epubContainer.scrollLeft = startScrollLeft + (targetScrollLeft - startScrollLeft) * percentage;
-    
+
               if (progress < duration) {
                 window.requestAnimationFrame(step);
               }
             }
-    
+
             window.requestAnimationFrame(step);
           }
-    
+
           isAnimating = false;
         }
-    
-        function animatePageTurn(direction, offset, callback) {
+
+        function animatePageTurn(direction, offset, callback, ease = 2) {
           isAnimating = true;
           const endOffset = direction === 'next' ? -(viewWidth - Math.abs(offset)) : (viewWidth - Math.abs(offset));
-    
-    
+
+
           const left = Math.round(startScrollOffset / viewWidth) * viewWidth;
-    
-    
+
+          console.log('scrollLeft: ' + epubContainer.scrollLeft)
+          console.log('endOffset: ' + endOffset)
+          console.log('left: ' + left);
+          console.log('width: ' + epubContainer.scrollWidth)
+
           if (direction === 'next' && left >= epubContainer.scrollWidth - viewWidth) {
             isAnimating = false;
             callback(true);
+            console.log('return next');
             return;
-            
+        
           } else if (direction === 'prev' && left <= 0) {
             isAnimating = false;
+            console.log('return prev');
             callback(true);
             return;
           }
-    
+
+          console.log("here");
           callback(false);
-          transformView(endOffset, 300);
+          transformView(endOffset, 300, ease);
           isAnimating = false;
-    
+
         }
+
     
         rendition.on('touchstart', event => {
           if (isAnimating) return;
