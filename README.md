@@ -10,7 +10,6 @@
   <a href="https://github.com/Anxcye/anx-reader/releases">
     <img src="https://img.shields.io/github/downloads/anxcye/anx-reader/total" alt="Downloads">
   </a>
-<a href="https://app.fossa.com/projects/git%2Bgithub.com%2FAnxcye%2Fanx-reader?ref=badge_shield" alt="FOSSA Status"><img src="https://app.fossa.com/api/projects/git%2Bgithub.com%2FAnxcye%2Fanx-reader.svg?type=shield"/></a>
   <a href="https://github.com/anxcye/anx-reader/stargazers">
     <img src="https://img.shields.io/github/stars/anxcye/anx-reader" alt="stars">
   </a>
@@ -55,4 +54,3 @@ Telegram 群组：[https://t.me/AnxReader](https://t.me/AnxReader)
 您可能遇到 Flutter 版本不兼容的问题，请参考 [Flutter 文档](https://flutter.dev/docs/get-started/install)。
 
 
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FAnxcye%2Fanx-reader.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FAnxcye%2Fanx-reader?ref=badge_large)
