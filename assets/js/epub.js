@@ -4510,7 +4510,8 @@ class default_DefaultViewManager {
       left = this.container.scrollLeft + this.container.offsetWidth + this.layout.delta;
 
       if (left <= this.container.scrollWidth || !check) {
-        this.scrollBy(this.layout.delta, 0, true);
+        // this.scrollBy(this.layout.delta, 0, true);
+        this.scrollBy(0, 0, true);
       } else {
         next = this.views.last().section.next();
       }
@@ -4583,10 +4584,10 @@ class default_DefaultViewManager {
       left = this.container.scrollLeft;
 
       if (left > 0 || !check) {
-        this.scrollBy(-this.layout.delta, 0, true);
+        // this.scrollBy(-this.layout.delta, 0, true);
+        this.scrollBy(0, 0, true);
       } else {
         prev = this.views.first().section.prev();
-        console.log("prev", prev);
       }
     } else if (this.isPaginated && this.settings.axis === "horizontal" && dir === "rtl") {
       this.scrollLeft = this.container.scrollLeft;
@@ -4873,8 +4874,7 @@ class default_DefaultViewManager {
     }
 
     if (!this.settings.fullsize) {
-      // if (x) this.container.scrollLeft += x * dir;
-      if (x) this.container.scrollLeft += 0;
+      if (x) this.container.scrollLeft += x * dir;
       if (y) this.container.scrollTop += y;
     } else {
       window.scrollBy(x * dir, y * dir);

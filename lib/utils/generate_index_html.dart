@@ -141,11 +141,17 @@ String generateIndexHtml(
         function nextPage() {
           animatePageTurn('next', 0, (check) => rendition.next(check), 1);
         }
-    
+
         function prevPage() {
           animatePageTurn('prev', 0, (check) => rendition.prev(check), 1);
+          // rendition.prev();
         }
+
     // page animation
+
+
+
+
         let touchStartX = 0;
         let touchStartY = 0;
         let touchStartTime = 0;
@@ -160,11 +166,13 @@ String generateIndexHtml(
         });
 
         function transformView(offsetX, duration = 0, ease) {
+          isAnimating = true;
+          console.log('transformView');
           const startScrollLeft = epubContainer.scrollLeft;
           const targetScrollLeft = Math.round((startScrollLeft - offsetX) / viewWidth) * viewWidth;
 
           if (duration === 0) {
-            epubContainer.scrollLeft = targetScrollLeft;
+            // epubContainer.scrollLeft = targetScrollLeft;
           } else {
             let start = null;
 
@@ -174,14 +182,11 @@ String generateIndexHtml(
             function easeOutQuint(t) {
               return 1 - Math.pow(1 - t, 5);
             }
-        
+            
             function step(timestamp) {
               if (!start) start = timestamp;
               const progress = timestamp - start;
               let percentage = progress / duration;
-
-              // percentage = easeInOutCubic(percentage); // 应用缓动函数
-              // percentage = easeOutQuint(percentage); // 应用缓动函数
 
               percentage = ease === 2 ? easeOutQuint(percentage) : 
                                         easeInOutCubic(percentage);
@@ -195,12 +200,12 @@ String generateIndexHtml(
 
             window.requestAnimationFrame(step);
           }
-
-          isAnimating = false;
+          setTimeout(() => {
+            isAnimating = false;
+          }, duration);
         }
 
         function animatePageTurn(direction, offset, callback, ease = 2) {
-          isAnimating = true;
           const endOffset = direction === 'next' ? -(viewWidth - Math.abs(offset)) : (viewWidth - Math.abs(offset));
 
 
@@ -212,13 +217,10 @@ String generateIndexHtml(
           console.log('width: ' + epubContainer.scrollWidth)
 
           if (direction === 'next' && left >= epubContainer.scrollWidth - viewWidth) {
-            isAnimating = false;
-            callback(true);
             console.log('return next');
+            callback(true);
             return;
-        
           } else if (direction === 'prev' && left <= 0) {
-            isAnimating = false;
             console.log('return prev');
             callback(true);
             return;
@@ -227,40 +229,37 @@ String generateIndexHtml(
           console.log("here");
           callback(false);
           transformView(endOffset, 300, ease);
-          isAnimating = false;
 
         }
 
-    
         rendition.on('touchstart', event => {
           if (isAnimating) return;
-    
+
           touchStartX = event.changedTouches[0].screenX;
           touchStartY = event.changedTouches[0].screenY;
           startScrollOffset = epubContainer.scrollLeft;
-    
+
           touchStartTime = event.timeStamp;
           lastX = touchStartX;
         });
-    
+
         rendition.on('touchmove', event => {
-          if (isAnimating) return;
-    
+          isAnimating = true;
           const currentX = event.changedTouches[0].screenX;
           epubContainer.scrollLeft = startScrollOffset + touchStartX - event.changedTouches[0].screenX;
+          
         });
-    
+
         rendition.on('touchend', event => {
-          if (isAnimating) return;
-    
+          isAnimating = false;
           const offsetX = event.changedTouches[0].screenX - touchStartX;
           const offsetY = event.changedTouches[0].screenY - touchStartY;
           const time = event.timeStamp - touchStartTime;
           if (Math.abs(offsetX) + Math.abs(offsetY) < 10) return;
-    
+
           const speed = Math.abs(offsetX) / time;
-    
-    
+
+
           if (Math.abs(offsetX) > Math.abs(offsetY)) {
             if (Math.abs(offsetX) > viewWidth * 0.2 || speed > 0.8) {
               if (offsetX > 0) {
@@ -277,8 +276,8 @@ String generateIndexHtml(
             }
             transformView(-offsetX, 300, 'ease-out');
           }
-    
-        }); 
+
+        });
 
     // get current chapter title    
         getCurrentChapterTitle = function() {
@@ -339,6 +338,7 @@ String generateIndexHtml(
           }
     
           rendition.on('relocated', function(locations) {
+            if (isAnimating) return;
             defaultStyle();
             refreshProgress();
             setClickEvent();

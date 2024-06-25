@@ -7,24 +7,21 @@ import 'package:anx_reader/models/book_style.dart';
 import 'package:anx_reader/models/read_theme.dart';
 import 'package:anx_reader/page/reading_page.dart';
 import 'package:anx_reader/utils/log/common.dart';
+import 'package:anx_reader/models/book_note.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
-
-import '../../models/book_note.dart';
 
 class EpubPlayer extends StatefulWidget {
   final String content;
   final int bookId;
   final Function showOrHideAppBarAndBottomBar;
 
-  EpubPlayer(
-      {Key? key,
+  const EpubPlayer(
+      {super.key,
       required this.content,
       required this.showOrHideAppBarAndBottomBar,
-      required this.bookId})
-      : super(key: key);
+      required this.bookId});
 
   @override
   State<EpubPlayer> createState() => EpubPlayerState();
@@ -40,6 +37,12 @@ class EpubPlayerState extends State<EpubPlayer> {
   late ContextMenu contextMenu;
   String selectedColor = '66ccff';
   String selectedType = 'highlight';
+
+  @override
+  void dispose() {
+    super.dispose();
+    InAppWebViewController.clearAllCache();
+  }
 
   Future<String> onReadingLocation() async {
     String currentCfi = '';
