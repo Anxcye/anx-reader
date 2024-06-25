@@ -519,13 +519,13 @@ class EpubPlayerState extends State<EpubPlayer> {
       ''');
   }
 
-  Future<void> goToPersentage(double value) async {
+  Future<void> goToPercentage(double value) async {
     await _webViewController.evaluateJavascript(source: '''
-      goToPersentage = function(value) {
+      goToPercentage = function(value) {
         let location = book.locations.cfiFromPercentage(value);
         rendition.display(location);
       }
-      goToPersentage($value);
+      goToPercentage($value);
       refreshProgress();
       
       ''');

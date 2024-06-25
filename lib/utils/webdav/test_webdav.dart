@@ -1,11 +1,11 @@
 import 'package:anx_reader/l10n/localization_extension.dart';
 import 'package:anx_reader/utils/webdav/common.dart';
+import 'package:anx_reader/config/shared_preference_provider.dart';
+import 'package:anx_reader/main.dart';
+import 'package:anx_reader/utils/toast/common.dart';
 import 'package:flutter/material.dart';
 import 'package:webdav_client/webdav_client.dart';
 
-import '../../config/shared_preference_provider.dart';
-import '../../main.dart';
-import '../toast/common.dart';
 
 Future<Map<String, dynamic>> testWebdavInfo(Map webdavInfo) async {
   var client = newClient(

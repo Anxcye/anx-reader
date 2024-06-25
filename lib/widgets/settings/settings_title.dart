@@ -1,9 +1,9 @@
 import 'package:anx_reader/widgets/settings/settings_app_bar.dart';
+import 'package:anx_reader/main.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:settings_ui/settings_ui.dart';
 
-import '../../main.dart';
 
 Widget settingsTitle(
     {required Icon icon,

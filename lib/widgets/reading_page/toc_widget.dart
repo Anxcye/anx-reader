@@ -1,11 +1,9 @@
 import 'package:anx_reader/l10n/localization_extension.dart';
 import 'package:anx_reader/widgets/reading_page/widget_title.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:anx_reader/models/toc_item.dart';
+import 'package:anx_reader/page/book_player/epub_player.dart';
 import 'package:flutter/material.dart';
 
-import '../../main.dart';
-import '../../models/toc_item.dart';
-import '../../page/book_player/epub_player.dart';
 
 class TocWidget extends StatelessWidget {
   const TocWidget({

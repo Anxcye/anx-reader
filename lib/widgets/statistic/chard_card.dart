@@ -1,7 +1,7 @@
 import 'package:anx_reader/l10n/localization_extension.dart';
+import 'package:anx_reader/widgets/statistic/week_month_year_widget.dart';
 import 'package:flutter/material.dart';
 
-import 'week_month_year_widget.dart';
 
 enum ChartMode { week, month, year }
 

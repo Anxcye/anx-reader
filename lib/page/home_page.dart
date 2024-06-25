@@ -3,12 +3,11 @@ import 'package:anx_reader/page/home_page/bookshelf_page.dart';
 import 'package:anx_reader/page/home_page/notes_page.dart';
 import 'package:anx_reader/page/home_page/settings_page.dart';
 import 'package:anx_reader/page/home_page/statistics_page.dart';
-import 'package:anx_reader/utils/check_update.dart';
 import 'package:anx_reader/utils/webdav/common.dart';
+import 'package:anx_reader/config/shared_preference_provider.dart';
+import 'package:anx_reader/utils/toast/common.dart';
 import 'package:flutter/material.dart';
 
-import '../config/shared_preference_provider.dart';
-import '../utils/toast/common.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});

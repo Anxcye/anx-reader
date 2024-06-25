@@ -1,7 +1,7 @@
+import 'package:anx_reader/models/book.dart';
+import 'package:anx_reader/widgets/book_item.dart';
 import 'package:flutter/material.dart';
 
-import '../models/book.dart';
-import 'book_item.dart';
 
 class BookList extends StatelessWidget {
   const BookList({

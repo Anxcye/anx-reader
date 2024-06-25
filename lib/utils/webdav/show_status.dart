@@ -1,8 +1,8 @@
 import 'package:anx_reader/l10n/localization_extension.dart';
 import 'package:anx_reader/utils/webdav/common.dart';
+import 'package:anx_reader/main.dart';
 import 'package:flutter/material.dart';
 
-import '../../main.dart';
 
 void showWebdavStatus() {
   final context = navigatorKey.currentContext!;
@@ -15,7 +15,7 @@ void showWebdavStatus() {
 }
 
 class SyncStatusDialog extends StatefulWidget {
-  SyncStatusDialog();
+  const SyncStatusDialog({super.key});
 
   @override
   _SyncStatusDialogState createState() => _SyncStatusDialogState();

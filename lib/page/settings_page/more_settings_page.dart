@@ -2,10 +2,10 @@ import 'package:anx_reader/l10n/localization_extension.dart';
 import 'package:anx_reader/page/settings_page/advanced.dart';
 import 'package:anx_reader/page/settings_page/appearance.dart';
 import 'package:anx_reader/page/settings_page/sync.dart';
+import 'package:anx_reader/widgets/settings/about.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import '../../widgets/settings/about.dart';
 
 class MoreSettings extends StatelessWidget {
   const MoreSettings({super.key});

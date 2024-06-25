@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/page/home_page.dart';
 import 'package:anx_reader/page/home_page/notes_page.dart';
@@ -8,13 +6,12 @@ import 'package:anx_reader/utils/check_update.dart';
 import 'package:anx_reader/utils/error/common.dart';
 import 'package:anx_reader/utils/get_base_path.dart';
 import 'package:anx_reader/utils/log/common.dart';
-import 'package:anx_reader/utils/toast/common.dart';
+import 'package:anx_reader/utils/webdav/common.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-import 'utils/webdav/common.dart';
 
 final navigatorKey = GlobalKey<NavigatorState>();
 

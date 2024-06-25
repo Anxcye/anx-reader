@@ -2,20 +2,20 @@ import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/l10n/localization_extension.dart';
 import 'package:anx_reader/widgets/reading_page/more_settings.dart';
 import 'package:anx_reader/widgets/reading_page/widget_title.dart';
+import 'package:anx_reader/dao/theme.dart';
+import 'package:anx_reader/main.dart';
+import 'package:anx_reader/models/read_theme.dart';
+import 'package:anx_reader/page/book_player/epub_player.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
-import '../../dao/theme.dart';
-import '../../main.dart';
-import '../../models/read_theme.dart';
-import '../../page/book_player/epub_player.dart';
 
 class ThemeWidget extends StatefulWidget {
   final List<ReadTheme> themes;
   final GlobalKey<EpubPlayerState> epubPlayerKey;
   final Function setCurrentPage;
 
-  ThemeWidget({
+  const ThemeWidget({
     required this.themes,
     required this.epubPlayerKey,
     required this.setCurrentPage,

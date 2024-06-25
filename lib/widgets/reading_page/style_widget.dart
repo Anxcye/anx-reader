@@ -1,11 +1,11 @@
 import 'package:anx_reader/l10n/localization_extension.dart';
 import 'package:anx_reader/widgets/reading_page/widget_title.dart';
+import 'package:anx_reader/config/shared_preference_provider.dart';
+import 'package:anx_reader/models/book_style.dart';
+import 'package:anx_reader/page/book_player/epub_player.dart';
+import 'package:anx_reader/widgets/reading_page/more_settings.dart';
 import 'package:flutter/material.dart';
 
-import '../../config/shared_preference_provider.dart';
-import '../../models/book_style.dart';
-import '../../page/book_player/epub_player.dart';
-import 'more_settings.dart';
 
 class StyleWidget extends StatefulWidget {
   const StyleWidget({super.key, required this.epubPlayerKey});

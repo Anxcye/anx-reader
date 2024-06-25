@@ -2,10 +2,10 @@ import 'package:anx_reader/l10n/localization_extension.dart';
 import 'package:anx_reader/utils/theme_mode_to_string.dart';
 import 'package:flutter/material.dart';
 
-import '../../config/shared_preference_provider.dart';
+import 'package:anx_reader/config/shared_preference_provider.dart';
 
 class ChangeThemeMode extends StatefulWidget {
-  ChangeThemeMode({Key? key}) : super(key: key);
+  const ChangeThemeMode({Key? key}) : super(key: key);
 
   @override
   _ChangeThemeModeState createState() => _ChangeThemeModeState();
