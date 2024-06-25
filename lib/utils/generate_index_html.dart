@@ -138,117 +138,121 @@ String generateIndexHtml(
           refreshProgress();
         })
     // page navigation  
-        function nextPage(){
-          transformView(-viewWidth, 300);
-          rendition.next();
+        function nextPage() {
+          animatePageTurn('next', 0, (check) => rendition.next(check));
         }
-      
-        function prevPage(){
-          transformView(viewWidth, 300);
-          rendition.prev();
+    
+        function prevPage() {
+          animatePageTurn('prev', 0, (check) => rendition.prev(check));
         }
     // page animation
+
+
         let touchStartX = 0;
         let touchStartY = 0;
         let touchStartTime = 0;
-        let lastX = 0;
         let viewWidth = 0;
         let isAnimating = false;
         let epubContainer = null;
-        
+        let startScrollOffset = 0;
+    
         rendition.on('rendered', () => {
           epubContainer = document.querySelector('.epub-container');
           viewWidth = epubContainer.offsetWidth;
         });
-        
+    
         function transformView(offsetX, duration = 0) {
           const startScrollLeft = epubContainer.scrollLeft;
-          const targetScrollLeft = startScrollLeft - offsetX;
-        
-          leftBound = epubContainer.scrollLeft + epubContainer.offsetWidth + viewWidth;
-        
-          if (leftBound <= epubContainer.scrollWidth && targetScrollLeft >= epubContainer.scrollWidth - epubContainer.offsetWidth ||
-              leftBound >= epubContainer.scrollWidth) {
-            return;
-          }
-        
-          
+          const targetScrollLeft = Math.round((startScrollLeft - offsetX) / viewWidth) * viewWidth;
+    
           if (duration === 0) {
             epubContainer.scrollLeft = targetScrollLeft;
           } else {
             let start = null;
+    
             function easeInOutCubic(t) {
               return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
             }
-        
+    
             function step(timestamp) {
               if (!start) start = timestamp;
               const progress = timestamp - start;
               let percentage = progress / duration;
-              percentage = easeInOutCubic(percentage);
-        
+              percentage = easeInOutCubic(percentage); // 应用缓动函数
+    
               epubContainer.scrollLeft = startScrollLeft + (targetScrollLeft - startScrollLeft) * percentage;
-        
+    
               if (progress < duration) {
                 window.requestAnimationFrame(step);
               }
             }
-        
+    
             window.requestAnimationFrame(step);
           }
+    
+          isAnimating = false;
         }
-        
-        function animatePageTurn(direction, startOffset, callback) {
+    
+        function animatePageTurn(direction, offset, callback) {
           isAnimating = true;
-          const endOffset = direction === 'next' ? -(viewWidth - Math.abs(startOffset)) : (viewWidth - Math.abs(startOffset));
-          console.log(endOffset, startOffset);
-          
-          
-          callback();
+          const endOffset = direction === 'next' ? -(viewWidth - Math.abs(offset)) : (viewWidth - Math.abs(offset));
+    
+    
+          const left = Math.round(startScrollOffset / viewWidth) * viewWidth;
+    
+    
+          if (direction === 'next' && left >= epubContainer.scrollWidth - viewWidth) {
+            isAnimating = false;
+            callback(true);
+            return;
+            
+          } else if (direction === 'prev' && left <= 0) {
+            isAnimating = false;
+            callback(true);
+            return;
+          }
+    
+          callback(false);
           transformView(endOffset, 300);
-        
-          setTimeout(() => {
-            // transformView(endOffset, 300, 'ease-out');
-            setTimeout(() => {
-              isAnimating = false;
-            }, 300);
-          }, 50);
+          isAnimating = false;
+    
         }
-        
+    
         rendition.on('touchstart', event => {
           if (isAnimating) return;
-          
+    
           touchStartX = event.changedTouches[0].screenX;
           touchStartY = event.changedTouches[0].screenY;
+          startScrollOffset = epubContainer.scrollLeft;
+    
           touchStartTime = event.timeStamp;
           lastX = touchStartX;
-        
-          // transformView(0, 0);
         });
-        
+    
         rendition.on('touchmove', event => {
           if (isAnimating) return;
-          if (Math.abs(event.changedTouches[0].screenY - touchStartY) > 
-              Math.abs(event.changedTouches[0].screenX - touchStartX)) return;
+    
           const currentX = event.changedTouches[0].screenX;
-          const offsetX = currentX - lastX;
-          lastX = currentX;
-          transformView(offsetX, 0);
+          epubContainer.scrollLeft = startScrollOffset + touchStartX - event.changedTouches[0].screenX;
         });
-        
+    
         rendition.on('touchend', event => {
           if (isAnimating) return;
-        
+    
           const offsetX = event.changedTouches[0].screenX - touchStartX;
           const offsetY = event.changedTouches[0].screenY - touchStartY;
           const time = event.timeStamp - touchStartTime;
-        
+          if (Math.abs(offsetX) + Math.abs(offsetY) < 10) return;
+    
+          const speed = Math.abs(offsetX) / time;
+    
+    
           if (Math.abs(offsetX) > Math.abs(offsetY)) {
-            if (Math.abs(offsetX) > viewWidth * 0.2) { // Turn page if moved more than 30% of width
+            if (Math.abs(offsetX) > viewWidth * 0.2 || speed > 0.8) {
               if (offsetX > 0) {
-                animatePageTurn('prev', offsetX, () => rendition.prev());
+                animatePageTurn('prev', offsetX, (check) => rendition.prev(check));
               } else {
-                animatePageTurn('next', offsetX, () => rendition.next());
+                animatePageTurn('next', offsetX, (check) => rendition.next(check));
               }
             } else {
               transformView(-offsetX, 300, 'ease-out');
@@ -259,7 +263,8 @@ String generateIndexHtml(
             }
             transformView(-offsetX, 300, 'ease-out');
           }
-        });
+    
+        }); 
 
     // get current chapter title    
         getCurrentChapterTitle = function() {
