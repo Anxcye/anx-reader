@@ -167,7 +167,7 @@ String generateIndexHtml(
 
         function transformView(offsetX, duration = 0, ease) {
           isAnimating = true;
-          console.log('transformView');
+          // console.log('transformView');
           const startScrollLeft = epubContainer.scrollLeft;
           const targetScrollLeft = Math.round((startScrollLeft - offsetX) / viewWidth) * viewWidth;
 
@@ -211,22 +211,22 @@ String generateIndexHtml(
 
           const left = Math.round(startScrollOffset / viewWidth) * viewWidth;
 
-          console.log('scrollLeft: ' + epubContainer.scrollLeft)
-          console.log('endOffset: ' + endOffset)
-          console.log('left: ' + left);
-          console.log('width: ' + epubContainer.scrollWidth)
+          // console.log('scrollLeft: ' + epubContainer.scrollLeft)
+          // console.log('endOffset: ' + endOffset)
+          // console.log('left: ' + left);
+          // console.log('width: ' + epubContainer.scrollWidth)
 
           if (direction === 'next' && left >= epubContainer.scrollWidth - viewWidth) {
-            console.log('return next');
+            // console.log('return next');
             callback(true);
             return;
           } else if (direction === 'prev' && left <= 0) {
-            console.log('return prev');
+            // console.log('return prev');
             callback(true);
             return;
           }
 
-          console.log("here");
+          // console.log("here");
           callback(false);
           transformView(endOffset, 300, ease);
 
@@ -258,10 +258,9 @@ String generateIndexHtml(
           if (Math.abs(offsetX) + Math.abs(offsetY) < 10) return;
 
           const speed = Math.abs(offsetX) / time;
-
-
+          
           if (Math.abs(offsetX) > Math.abs(offsetY)) {
-            if (Math.abs(offsetX) > viewWidth * 0.2 || speed > 0.8) {
+            if (Math.abs(offsetX) > viewWidth * 0.2 || speed > 0.2) {
               if (offsetX > 0) {
                 animatePageTurn('prev', offsetX, (check) => rendition.prev(check));
               } else {
