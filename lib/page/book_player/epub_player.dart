@@ -558,25 +558,18 @@ class EpubPlayerState extends State<EpubPlayer> {
   void changeStyle(BookStyle bookStyle) {
     _webViewController.evaluateJavascript(source: '''
     changeStyle = function() {
-      const body = document.querySelector('body');
-      
-      
-      rendition.themes.fontSize('${bookStyle.fontSize}%');
-      rendition.themes.font('${bookStyle.fontFamily}');
-      
-      rendition.themes.default({
-        'body': {
-          'padding-top': '${bookStyle.topMargin}px !important',
-          'padding-bottom': '${bookStyle.bottomMargin}px !important',
-          'line-height': '${bookStyle.lineHeight} !important',
-          'letter-spacing': '${bookStyle.letterSpacing}px !important',
-          // 'word-spacing': '${bookStyle.wordSpacing}px !important',
-        },
-        'p': {
-          'padding-top': '${bookStyle.paragraphSpacing}px !important',
-          'line-height': '${bookStyle.lineHeight} !important',
-        },
-      });
+      primeStyle = {
+          fontSize: ${bookStyle.fontSize},
+          fontFamily: '${bookStyle.fontFamily}',
+          lineHeight: '${bookStyle.lineHeight}',
+          letterSpacing: ${bookStyle.letterSpacing},
+          wordSpacing: ${bookStyle.wordSpacing},
+          paragraphSpacing: ${bookStyle.paragraphSpacing},
+          sideMargin: ${bookStyle.sideMargin},
+          topMargin: ${bookStyle.topMargin},
+          bottomMargin: ${bookStyle.bottomMargin},
+        }
+      defaultStyle();
     }
     changeStyle();
     setClickEvent();

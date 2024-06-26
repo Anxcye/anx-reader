@@ -61,14 +61,29 @@ String generateIndexHtml(
             gap: ${style.sideMargin},
         })
         var refreshProgress
+        
+        let primeStyle = {
+          fontSize: ${style.fontSize},
+          fontFamily: '${style.fontFamily}',
+          lineHeight: ${style.lineHeight},
+          letterSpacing: ${style.letterSpacing},
+          wordSpacing: ${style.wordSpacing},
+          paragraphSpacing: ${style.paragraphSpacing},
+          sideMargin: ${style.sideMargin},
+          topMargin: ${style.topMargin},
+          bottomMargin: ${style.bottomMargin},
+        }
+        console.log(primeStyle.topMargin)
+        
+        
     // book style    
         rendition.hooks.render.register(function(contents, view) {
           var doc = contents.document;
           doc.body.style.backgroundColor = 'transparent';
-          doc.body.style.paddingTop = '${style.topMargin}px';
-          doc.body.style.paddingBottom = '${style.bottomMargin}px';
-          doc.body.style.lineHeight = '${style.lineHeight}';
-          doc.body.style.letterSpacing = '${style.letterSpacing}px';
+          doc.body.style.paddingTop = `\${primeStyle.topMargin}px`;
+          doc.body.style.paddingBottom = `\${primeStyle.bottomMargin}px`;
+          doc.body.style.lineHeight = `\${primeStyle.lineHeight}`;
+          doc.body.style.letterSpacing = `\${primeStyle.letterSpacing}px`;
           doc.body.style.textAlign = 'justify';
           // image
           var images = doc.querySelectorAll('img');
@@ -78,8 +93,8 @@ String generateIndexHtml(
           // p
           var paragraphs = doc.querySelectorAll('p');
           paragraphs.forEach(function(p) {
-            p.style.paddingTop = '${style.paragraphSpacing}px';
-            p.style.lineHeight = '${style.lineHeight}';
+            p.style.paddingBottom = `\${primeStyle.paragraphSpacing}px`;
+            p.style.lineHeight = `\${primeStyle.lineHeight}`;
           });
           // pre
           var pres = doc.querySelectorAll('pre');
@@ -95,7 +110,7 @@ String generateIndexHtml(
         
         
         defaultStyle = function() {
-          rendition.themes.fontSize('${style.fontSize}%');
+          rendition.themes.fontSize(`\${primeStyle.fontSize}%`);
           
           rendition.themes.default({
           // '@font-face': {
@@ -107,10 +122,10 @@ String generateIndexHtml(
               'color': '#$textColor',
             },
             'body': {
-              'padding-top': '${style.topMargin}px !important',
-              'padding-bottom': '${style.bottomMargin}px !important',
-              'line-height': '${style.lineHeight} !important',
-              'letter-spacing': '${style.letterSpacing}px !important',
+              'padding-top': `\${primeStyle.topMargin}px !important`,
+              'padding-bottom': `\${primeStyle.bottomMargin}px !important`,
+              'line-height': `\${primeStyle.lineHeight} !important`,
+              'letter-spacing': `\${primeStyle.letterSpacing}px !important`,
               'text-align': 'justify !important',
             },
             '*': {
@@ -118,8 +133,8 @@ String generateIndexHtml(
               'scroll-behavior': 'smooth',
             },
             'p': {
-              'padding-top': '${style.paragraphSpacing}px !important',
-              'line-height': '${style.lineHeight} !important',
+              'padding-bottom': `\${primeStyle.paragraphSpacing}px !important`,
+              'line-height': `\${primeStyle.lineHeight} !important`,
             },
             'pre':{
               'white-space': 'pre-wrap',
