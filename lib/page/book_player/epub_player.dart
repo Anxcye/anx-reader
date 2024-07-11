@@ -100,42 +100,24 @@ class EpubPlayerState extends State<EpubPlayer> {
 
   void progressSetter() {
     _webViewController.addJavaScriptHandler(
-        handlerName: 'getProgress',
+        handlerName: 'getCurrentInfo',
         callback: (args) {
-          if (args[0] != null) {
-            progress = (args[0] as num).toDouble();
-          }
+          Map<String, dynamic> currentInfo = args[0];
+          progress = (currentInfo['progress'] as num).toDouble();
+          chapterCurrentPage = currentInfo['chapterCurrentPage'];
+          chapterTotalPage = currentInfo['chapterTotalPage'];
+          chapterTitle = currentInfo['chapterTitle'];
+          chapterHref = currentInfo['chapterHref'];
         });
 
-    _webViewController.addJavaScriptHandler(
-        handlerName: 'getChapterCurrentPage',
-        callback: (args) {
-          chapterCurrentPage = args[0];
-        });
-
-    _webViewController.addJavaScriptHandler(
-        handlerName: 'getChapterTotalPage',
-        callback: (args) {
-          chapterTotalPage = args[0];
-        });
-    _webViewController.addJavaScriptHandler(
-        handlerName: 'getChapterTitle',
-        callback: (args) {
-          chapterTitle = args[0];
-        });
-    _webViewController.addJavaScriptHandler(
-        handlerName: 'getChapterHref',
-        callback: (args) {
-          chapterHref = args[0];
-        });
-    _webViewController.addJavaScriptHandler(
-        handlerName: 'onRelocated',
-        callback: (args) {
-          BookStyle bookStyle = Prefs().bookStyle;
-          changeStyle(bookStyle);
-          ReadTheme readTheme = Prefs().readTheme;
-          changeTheme(readTheme);
-        });
+    // _webViewController.addJavaScriptHandler(
+    //     handlerName: 'onRelocated',
+    //     callback: (args) {
+    //       // BookStyle bookStyle = Prefs().bookStyle;
+    //       // changeStyle(bookStyle);
+    //       // ReadTheme readTheme = Prefs().readTheme;
+    //       // changeTheme(readTheme);
+    //     });
   }
 
   void clickHandlers() {

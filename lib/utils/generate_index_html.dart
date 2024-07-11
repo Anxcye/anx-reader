@@ -104,7 +104,7 @@ String generateIndexHtml(
           // *
           var all = doc.querySelectorAll('*');
           all.forEach(function(e) {
-            e.style.fontFamily = 'SourceHanSerif';
+            // e.style.fontFamily = 'SourceHanSerif';
           });
         });
         
@@ -130,7 +130,7 @@ String generateIndexHtml(
               'text-align': 'justify !important',
             },
             '*': {
-              'font-family': 'SourceHanSerif !important',
+              // 'font-family': 'SourceHanSerif !important',
               'scroll-behavior': 'smooth',
             },
             'p': {
@@ -165,9 +165,6 @@ String generateIndexHtml(
 
     // page animation
 
-
-
-
         let touchStartX = 0;
         let touchStartY = 0;
         let touchStartTime = 0;
@@ -188,7 +185,7 @@ String generateIndexHtml(
           const targetScrollLeft = Math.round((startScrollLeft - offsetX) / viewWidth) * viewWidth;
 
           if (duration === 0) {
-            // epubContainer.scrollLeft = targetScrollLeft;
+            epubContainer.scrollLeft = targetScrollLeft;
           } else {
             let start = null;
 
@@ -216,9 +213,9 @@ String generateIndexHtml(
 
             window.requestAnimationFrame(step);
           }
-          setTimeout(() => {
+          // setTimeout(() => {
             isAnimating = false;
-          }, duration);
+          // }, duration);
         }
 
         function animatePageTurn(direction, offset, callback, ease = 2) {
@@ -249,8 +246,7 @@ String generateIndexHtml(
         }
 
         rendition.on('touchstart', event => {
-          if (isAnimating) return;
-
+          // if (isAnimating) return;
           touchStartX = event.changedTouches[0].screenX;
           touchStartY = event.changedTouches[0].screenY;
           startScrollOffset = epubContainer.scrollLeft;
@@ -259,27 +255,12 @@ String generateIndexHtml(
           lastX = touchStartX;
         });
 
-        // rendition.on('touchmove', event => {
-        //   isAnimating = true;
-        //   const currentX = event.changedTouches[0].screenX;
-        //   epubContainer.scrollLeft = startScrollOffset + touchStartX - event.changedTouches[0].screenX;
-        //
-        // });
-        let ticking = false;
-        let lastKnownX = 0;
-    
         rendition.on('touchmove', event => {
-          lastKnownX = event.changedTouches[0].screenX;
-    
-          if (!ticking) {
-            window.requestAnimationFrame(() => {
-              epubContainer.scrollLeft = startScrollOffset + touchStartX - lastKnownX;
-              ticking = false;
-            });
-            ticking = true;
-          }
+          isAnimating = true;
+          const currentX = event.changedTouches[0].screenX;
+          epubContainer.scrollLeft = startScrollOffset + touchStartX - event.changedTouches[0].screenX;
         });
-
+        
         rendition.on('touchend', event => {
           isAnimating = false;
           const offsetX = event.changedTouches[0].screenX - touchStartX;
@@ -346,12 +327,21 @@ String generateIndexHtml(
         }
     // refresh progress    
         refreshProgress = function() {
-          let progress = book.locations.percentageFromCfi(rendition.currentLocation().start.cfi);
-          window.flutter_inappwebview.callHandler('getProgress', progress);
-          window.flutter_inappwebview.callHandler('getChapterCurrentPage', rendition.location.start.displayed.page);
-          window.flutter_inappwebview.callHandler('getChapterTotalPage', rendition.location.end.displayed.total);
-          window.flutter_inappwebview.callHandler('getChapterTitle', getCurrentChapterTitle());
-          window.flutter_inappwebview.callHandler('getChapterHref', rendition.currentLocation().start.href);
+          // let progress = book.locations.percentageFromCfi(rendition.currentLocation().start.cfi);
+          // window.flutter_inappwebview.callHandler('getProgress', progress);
+          // window.flutter_inappwebview.callHandler('getChapterCurrentPage', rendition.location.start.displayed.page);
+          // window.flutter_inappwebview.callHandler('getChapterTotalPage', rendition.location.end.displayed.total);
+          // window.flutter_inappwebview.callHandler('getChapterTitle', getCurrentChapterTitle());
+          // window.flutter_inappwebview.callHandler('getChapterHref', rendition.currentLocation().start.href);
+
+          let currentInfo = {
+            progress: book.locations.percentageFromCfi(rendition.currentLocation().start.cfi),
+            chapterCurrentPage: rendition.location.start.displayed.page,
+            chapterTotalPage: rendition.location.end.displayed.total,
+            chapterTitle: getCurrentChapterTitle(),
+            chapterHref: rendition.currentLocation().start.href,
+          };
+          window.flutter_inappwebview.callHandler('getCurrentInfo', currentInfo);
         }
         
     // render book
@@ -371,7 +361,7 @@ String generateIndexHtml(
             defaultStyle();
             refreshProgress();
             setClickEvent();
-            window.flutter_inappwebview.callHandler('onRelocated', locations.start.index);
+            // window.flutter_inappwebview.callHandler('onRelocated', locations.start.index);
           });
         }  
 
