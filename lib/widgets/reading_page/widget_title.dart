@@ -1,4 +1,4 @@
-import 'package:anx_reader/widgets/reading_page/more_settings.dart';
+import 'package:anx_reader/widgets/reading_page/more_settings/more_settings.dart';
 import 'package:flutter/material.dart';
 
 Widget widgetTitle(String title, ReadingSettings? settings) {
