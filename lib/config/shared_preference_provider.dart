@@ -158,7 +158,6 @@ class Prefs extends ChangeNotifier {
 
   DateTime get lastShowUpdate {
     String? lastShowUpdateStr = prefs.getString('lastShowUpdate');
-    // the oldest time is 1970-01-01, so
     if (lastShowUpdateStr == null) return DateTime(1970, 1, 1);
     return DateTime.parse(lastShowUpdateStr);
   }
