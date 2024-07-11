@@ -49,7 +49,7 @@ Widget pageTurningControl() {
     }
 
     return ListTile(
-      title: Text('Page Turning Control'),
+      title: Text(context.readingPagePageTurningMethod),
       subtitle: SizedBox(
         height: 120,
         child: ListView.builder(

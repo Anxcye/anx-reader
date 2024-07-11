@@ -47,6 +47,7 @@
   "reading_page_style": "样式",
   "reading_page_full_screen": "全屏",
   "reading_page_screen_timeout": "屏幕超时",
+  "reading_page_page_turning_method": "翻页方式",
 
   "bookshelf_tips_1": "书架上没有书",
   "bookshelf_tips_2": "点击添加按钮，添加一本 epub ！",
