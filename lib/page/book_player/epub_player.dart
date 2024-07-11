@@ -6,8 +6,11 @@ import 'package:anx_reader/l10n/localization_extension.dart';
 import 'package:anx_reader/models/book_style.dart';
 import 'package:anx_reader/models/read_theme.dart';
 import 'package:anx_reader/page/reading_page.dart';
+import 'package:anx_reader/utils/coordiantes_to_part.dart';
 import 'package:anx_reader/utils/log/common.dart';
 import 'package:anx_reader/models/book_note.dart';
+import 'package:anx_reader/widgets/reading_page/more_settings/page_turning/diagram.dart';
+import 'package:anx_reader/widgets/reading_page/more_settings/page_turning/types_and_icons.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
@@ -250,13 +253,22 @@ class EpubPlayerState extends State<EpubPlayer> {
   }
 
   void onViewerTap(double x, double y) {
-    if (x < 0.3) {
-      prevPage();
-    } else if (x > 0.7) {
-      nextPage();
-    } else {
-      widget.showOrHideAppBarAndBottomBar(true);
+    int part = coordinatesToPart(x, y);
+    int currentPageTurningType = Prefs().pageTurningType;
+    List<PageTurningType> pageTurningType =
+        pageTurningTypes[currentPageTurningType];
+    switch (pageTurningType[part]) {
+      case PageTurningType.prev:
+        prevPage();
+        break;
+      case PageTurningType.next:
+        nextPage();
+        break;
+      case PageTurningType.menu:
+        widget.showOrHideAppBarAndBottomBar(true);
+        break;
     }
+
     readingPageKey.currentState!.setAwakeTimer(Prefs().awakeTime);
   }
 

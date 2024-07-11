@@ -1,7 +1,8 @@
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/l10n/localization_extension.dart';
 import 'package:anx_reader/utils/ui/status_bar.dart';
-import 'package:anx_reader/widgets/reading_page/page_turning/diagram.dart';
+import 'package:anx_reader/widgets/reading_page/more_settings/page_turning/diagram.dart';
+import 'package:anx_reader/widgets/reading_page/more_settings/page_turning/types_and_icons.dart';
 import 'package:flutter/material.dart';
 
 Widget themeSettings = StatefulBuilder(
@@ -35,61 +36,6 @@ ListTile fullScreen(BuildContext context, StateSetter setState) {
 }
 
 Widget pageTurningControl() {
-  List<PageTurningType> type1 = [
-    PageTurningType.prev,
-    PageTurningType.menu,
-    PageTurningType.next,
-    PageTurningType.prev,
-    PageTurningType.menu,
-    PageTurningType.next,
-    PageTurningType.prev,
-    PageTurningType.menu,
-    PageTurningType.next
-  ];
-  List<int> icon1 = [5, 3, 4];
-
-  List<PageTurningType> type2 = [
-    PageTurningType.prev,
-    PageTurningType.prev,
-    PageTurningType.next,
-    PageTurningType.prev,
-    PageTurningType.menu,
-    PageTurningType.next,
-    PageTurningType.prev,
-    PageTurningType.next,
-    PageTurningType.next
-  ];
-  List<int> icon2 = [5, 3, 4];
-
-  List<PageTurningType> type3 = [
-    PageTurningType.prev,
-    PageTurningType.prev,
-    PageTurningType.next,
-    PageTurningType.prev,
-    PageTurningType.menu,
-    PageTurningType.next,
-    PageTurningType.next,
-    PageTurningType.next,
-    PageTurningType.next
-  ];
-  List<int> icon3 = [5, 3, 4];
-
-  List<PageTurningType> type4 = [
-    PageTurningType.prev,
-    PageTurningType.menu,
-    PageTurningType.prev,
-    PageTurningType.prev,
-    PageTurningType.menu,
-    PageTurningType.next,
-    PageTurningType.next,
-    PageTurningType.next,
-    PageTurningType.next
-  ];
-  List<int> icon4 = [5, 3, 4];
-
-  List<List<PageTurningType>> types = [type1, type2, type3, type4];
-  List<List<int>> icons = [icon1, icon2, icon3, icon4];
-
   int currentType = Prefs().pageTurningType;
 
   return StatefulBuilder(builder: (
@@ -114,7 +60,7 @@ Widget pageTurningControl() {
             return Padding(
               padding: const EdgeInsets.all(8.0),
               child: getPageTurningDiagram(
-                  context, types[index], icons[index], currentType == index,
+                  context, pageTurningTypes[index], pageTurningIcons[index], currentType == index,
                   () {
                 onTap(index);
               }),
