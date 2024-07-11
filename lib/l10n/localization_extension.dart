@@ -48,6 +48,7 @@ extension LocalizationExtension on BuildContext {
   String get readingPageStyle => AppLocalizations.of(this)?.reading_page_style ?? '';
   String get readingPageFullScreen => AppLocalizations.of(this)?.reading_page_full_screen ?? '';
   String get readingPageScreenTimeout => AppLocalizations.of(this)?.reading_page_screen_timeout ?? '';
+  String get readingPagePageTurningMethod => AppLocalizations.of(this)?.reading_page_page_turning_method ?? '';
   String get bookshelfTips1 => AppLocalizations.of(this)?.bookshelf_tips_1 ?? '';
   String get bookshelfTips2 => AppLocalizations.of(this)?.bookshelf_tips_2 ?? '';
   String get statisticsTips1 => AppLocalizations.of(this)?.statistics_tips_1 ?? '';
