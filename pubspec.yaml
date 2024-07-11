@@ -1,5 +1,5 @@
 name: anx_reader
-description: "A e-book reader."
+description: "An e-book reader."
 publish_to: 'none'
 
 version: 1.1.2+2012
@@ -25,7 +25,7 @@ dependencies:
   shared_preferences: ^2.2.2
   provider: ^6.1.2
   flutter_gen_runner: ^5.4.0
-  intl: ^0.18.1
+  intl: ^0.19.0
   settings_ui: ^2.0.2
   flutter_colorpicker: ^1.0.3
   epubx: ^4.0.0
@@ -39,7 +39,7 @@ dependencies:
   flutter_svg: ^2.0.10
   permission_handler: ^11.3.1
   webdav_client: ^1.2.1
-  fluttertoast: ^8.2.5
+  fluttertoast: ^8.2.6
   dio: ^5.4.3+1
   pubspec_parse: ^1.2.3
   logging: ^1.2.0
@@ -63,7 +63,6 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   generate: true
-  # To add assets to your application, add an assets section, like this:
   assets:
     - assets/icon/Markdown.svg
     - assets/js/epub.min.js
@@ -71,8 +70,6 @@ flutter:
     - assets/js/jszip.min.js
     - assets/fonts/SourceHanSerifSC-Regular.otf
     - pubspec.yaml
-
-
   fonts:
     - family: SourceHanSerif
       fonts:

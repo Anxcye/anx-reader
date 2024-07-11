@@ -113,10 +113,11 @@ String generateIndexHtml(
           rendition.themes.fontSize(`\${primeStyle.fontSize}%`);
           
           rendition.themes.default({
-          // '@font-face': {
-          //   'font-family': 'SourceHanSerif',
-          //   'src': 'url(http://localhost:${Server().port}/fonts/SourceHanSerifSC-Regular.otf)',
-          // },
+          '@font-face': {
+            'font-family': 'SourceHanSerif',
+            'src': 'url(http://localhost:${Server().port}/fonts/SourceHanSerifSC-Regular.otf)',
+            'font-display': 'swap',
+          },
             'html': {
               'background-color': 'transparent',
               'color': '#$textColor',
@@ -258,11 +259,25 @@ String generateIndexHtml(
           lastX = touchStartX;
         });
 
+        // rendition.on('touchmove', event => {
+        //   isAnimating = true;
+        //   const currentX = event.changedTouches[0].screenX;
+        //   epubContainer.scrollLeft = startScrollOffset + touchStartX - event.changedTouches[0].screenX;
+        //
+        // });
+        let ticking = false;
+        let lastKnownX = 0;
+    
         rendition.on('touchmove', event => {
-          isAnimating = true;
-          const currentX = event.changedTouches[0].screenX;
-          epubContainer.scrollLeft = startScrollOffset + touchStartX - event.changedTouches[0].screenX;
-          
+          lastKnownX = event.changedTouches[0].screenX;
+    
+          if (!ticking) {
+            window.requestAnimationFrame(() => {
+              epubContainer.scrollLeft = startScrollOffset + touchStartX - lastKnownX;
+              ticking = false;
+            });
+            ticking = true;
+          }
         });
 
         rendition.on('touchend', event => {
@@ -273,7 +288,7 @@ String generateIndexHtml(
           if (Math.abs(offsetX) + Math.abs(offsetY) < 10) return;
 
           const speed = Math.abs(offsetX) / time;
-          
+
           if (Math.abs(offsetX) > Math.abs(offsetY)) {
             if (Math.abs(offsetX) > viewWidth * 0.2 || speed > 0.2) {
               if (offsetX > 0) {
