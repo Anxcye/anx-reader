@@ -162,4 +162,13 @@ class Prefs extends ChangeNotifier {
     if (lastShowUpdateStr == null) return DateTime(1970, 1, 1);
     return DateTime.parse(lastShowUpdateStr);
   }
+
+  set pageTurningType(int type) {
+    prefs.setInt('pageTurningType', type);
+    notifyListeners();
+  }
+
+  int get pageTurningType {
+    return prefs.getInt('pageTurningType') ?? 0;
+  }
 }
