@@ -40,13 +40,19 @@ Future<void> checkUpdate(bool manualCheck) async {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(context.commonNewVersion),
+          title: Text(context.commonNewVersion,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+              )),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Text(context.updateNewVersion + newVersion,
+                  style: const TextStyle(
+                    fontSize: 20,
+                  )),
               Text(context.updateCurrentVersion + currentVersion),
-              Text(context.updateNewVersion + newVersion),
               const Divider(),
               Text(response.data['body'].toString()),
             ],
