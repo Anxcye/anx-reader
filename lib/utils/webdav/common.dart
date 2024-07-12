@@ -5,6 +5,7 @@ import 'package:anx_reader/l10n/localization_extension.dart';
 import 'package:anx_reader/main.dart';
 import 'package:anx_reader/page/home_page/bookshelf_page.dart';
 import 'package:anx_reader/utils/get_base_path.dart';
+import 'package:anx_reader/utils/get_path/databases_path.dart';
 import 'package:anx_reader/utils/log/common.dart';
 import 'package:anx_reader/utils/toast/common.dart';
 import 'package:anx_reader/utils/webdav/safe_read.dart';
@@ -161,7 +162,7 @@ class AnxWebdav {
   static Future<void> syncDatabase(SyncDirection direction) async {
     File? remoteDb = await safeReadProps('anx/app_database.db');
 
-    final databasePath = await getDatabasesPath();
+    final databasePath = await getAnxDataBasesPath();
     final path = join(databasePath, 'app_database.db');
 
     io.File localDb = io.File(path);
