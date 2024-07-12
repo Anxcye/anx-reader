@@ -1,4 +1,5 @@
 import 'package:anx_reader/config/shared_preference_provider.dart';
+import 'package:anx_reader/dao/database.dart';
 import 'package:anx_reader/page/home_page.dart';
 import 'package:anx_reader/page/home_page/notes_page.dart';
 import 'package:anx_reader/service/book_player/book_player_server.dart';
@@ -9,6 +10,8 @@ import 'package:anx_reader/utils/log/common.dart';
 import 'package:anx_reader/utils/webdav/common.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -22,6 +25,7 @@ Future<void> main() async {
   AnxLog.init();
   AnxError.init();
 
+  await DBHelper().initDB();
   Server().start();
   initBasePath();
   checkUpdate(false);
