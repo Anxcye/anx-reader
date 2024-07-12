@@ -6,10 +6,6 @@ enum PageTurningType {
   menu,
 }
 
-/*
-* return a picture that divided into 9 parts, each part represent a function.
-* the function is defined by PageTurningDiagramType array.
- */
 Widget getPageTurningDiagram(
   BuildContext context,
   List<PageTurningType> types,

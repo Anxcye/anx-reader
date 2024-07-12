@@ -87,7 +87,7 @@ class _TocItemWidgetState extends State<TocItemWidget> {
                   widget.epubPlayerKey.currentState!.goTo(widget.tocItem.href);
                 },
                 style: ButtonStyle(
-                  padding: MaterialStateProperty.all(EdgeInsets.zero),
+                  padding: WidgetStateProperty.all(EdgeInsets.zero),
                   alignment: Alignment.centerLeft,
                 ),
                 child: Text(

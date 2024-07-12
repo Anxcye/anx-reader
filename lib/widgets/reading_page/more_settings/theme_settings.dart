@@ -43,9 +43,10 @@ Widget pageTurningControl() {
     void Function(void Function()) setState,
   ) {
     void onTap(int index) {
-      Prefs().pageTurningType = index;
-      currentType = index;
-      setState(() {});
+      setState(() {
+        Prefs().pageTurningType = index;
+        currentType = index;
+      });
     }
 
     return ListTile(
@@ -53,15 +54,14 @@ Widget pageTurningControl() {
       subtitle: SizedBox(
         height: 120,
         child: ListView.builder(
-          itemCount: 4,
+          itemCount: pageTurningTypes.length,
           shrinkWrap: true,
           scrollDirection: Axis.horizontal,
           itemBuilder: (context, index) {
             return Padding(
               padding: const EdgeInsets.all(8.0),
-              child: getPageTurningDiagram(
-                  context, pageTurningTypes[index], pageTurningIcons[index], currentType == index,
-                  () {
+              child: getPageTurningDiagram(context, pageTurningTypes[index],
+                  pageTurningIcons[index], currentType == index, () {
                 onTap(index);
               }),
             );

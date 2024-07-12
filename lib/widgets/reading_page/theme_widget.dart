@@ -9,13 +9,13 @@ import 'package:anx_reader/page/book_player/epub_player.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
-
 class ThemeWidget extends StatefulWidget {
   final List<ReadTheme> themes;
   final GlobalKey<EpubPlayerState> epubPlayerKey;
   final Function setCurrentPage;
 
   const ThemeWidget({
+    super.key,
     required this.themes,
     required this.epubPlayerKey,
     required this.setCurrentPage,
@@ -32,7 +32,7 @@ class _ThemeWidgetState extends State<ThemeWidget> {
       children: [
         widgetTitle(context.readingPageTheme, ReadingSettings.theme),
         SizedBox(
-          height: 100, // specify the height
+          height: 100,
           child: ListView.builder(
             itemCount: widget.themes.length + 1,
             scrollDirection: Axis.horizontal,
@@ -122,14 +122,14 @@ class _ThemeWidgetState extends State<ThemeWidget> {
 }
 
 class ThemeChangeWidget extends StatefulWidget {
-  ThemeChangeWidget({
+  const ThemeChangeWidget({
     super.key,
     required this.readTheme,
     required this.setCurrentPage,
   });
 
-  ReadTheme readTheme;
-  Function setCurrentPage;
+  final ReadTheme readTheme;
+  final Function setCurrentPage;
 
   @override
   State<ThemeChangeWidget> createState() => _ThemeChangeWidgetState();
@@ -146,8 +146,7 @@ class _ThemeChangeWidgetState extends State<ThemeChangeWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-        child: Row(children: [
+    return Row(children: [
       IconButton(
         onPressed: () async {
           String? pickingColor =
@@ -190,11 +189,11 @@ class _ThemeChangeWidgetState extends State<ThemeChangeWidget> {
           size: 40,
         ),
       ),
-    ]));
+    ]);
   }
 
   Future<String?> showColorPickerDialog(String currColor) async {
-    Color pickedColor = Color(int.parse('0x' + currColor));
+    Color pickedColor = Color(int.parse('0x$currColor'));
 
     await showDialog<void>(
       context: navigatorKey.currentState!.overlay!.context,
