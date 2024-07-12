@@ -89,11 +89,11 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.anxcye" "\0"
+            VALUE "CompanyName", "com.example" "\0"
             VALUE "FileDescription", "anx_reader" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "anx_reader" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2024 com.anxcye. All rights reserved." "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2024 com.example. All rights reserved." "\0"
             VALUE "OriginalFilename", "anx_reader.exe" "\0"
             VALUE "ProductName", "anx_reader" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
