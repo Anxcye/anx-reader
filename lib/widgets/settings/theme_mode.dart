@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:anx_reader/config/shared_preference_provider.dart';
 
 class ChangeThemeMode extends StatefulWidget {
-  const ChangeThemeMode({Key? key}) : super(key: key);
+  const ChangeThemeMode({super.key});
 
   @override
   _ChangeThemeModeState createState() => _ChangeThemeModeState();
@@ -43,18 +43,18 @@ class _ChangeThemeModeState extends State<ChangeThemeMode> {
           });
         },
         style: ButtonStyle(
-          backgroundColor: MaterialStateProperty.resolveWith<Color>(
-            (Set<MaterialState> states) {
-              if (states.contains(MaterialState.pressed) ||
+          backgroundColor: WidgetStateProperty.resolveWith<Color>(
+            (Set<WidgetState> states) {
+              if (states.contains(WidgetState.pressed) ||
                   _themeMode == mode) {
                 return Theme.of(context).colorScheme.primary;
               }
               return Theme.of(context).colorScheme.surface;
             },
           ),
-          foregroundColor: MaterialStateProperty.resolveWith<Color>(
-            (Set<MaterialState> states) {
-              if (states.contains(MaterialState.pressed) ||
+          foregroundColor: WidgetStateProperty.resolveWith<Color>(
+            (Set<WidgetState> states) {
+              if (states.contains(WidgetState.pressed) ||
                   _themeMode == mode) {
                 return Theme.of(context).colorScheme.onPrimary;
               }

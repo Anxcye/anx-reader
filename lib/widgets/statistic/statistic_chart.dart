@@ -8,7 +8,7 @@ class StatisticChart extends StatefulWidget {
   final List<int> readingTime;
   final List<String> xLabels;
 
-  StatisticChart({super.key, required this.readingTime, required this.xLabels});
+  const StatisticChart({super.key, required this.readingTime, required this.xLabels});
 
   @override
   State<StatisticChart> createState() => _StatisticChartState();

@@ -10,7 +10,6 @@ import 'package:anx_reader/page/book_detail.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-
 class BookNotesPage extends StatefulWidget {
   const BookNotesPage({
     super.key,
@@ -54,8 +53,7 @@ Widget bookInfo(BuildContext context, Book book, int numberOfNotes) {
     fontWeight: FontWeight.bold,
     overflow: TextOverflow.ellipsis,
   );
-  return Container(
-      child: Card(
+  return Card(
     child: Container(
       padding: const EdgeInsets.all(10.0),
       child: LayoutBuilder(builder: (context, constraints) {
@@ -98,13 +96,13 @@ Widget bookInfo(BuildContext context, Book book, int numberOfNotes) {
                           maxLines: 2,
                         ),
                         notesStatistic(context, numberOfNotes),
-                        SizedBox(
+                        const SizedBox(
                           height: 25,
                         ),
                       ],
                     ),
                   ),
-                  SizedBox(width: 30),
+                  const SizedBox(width: 30),
                   bookCover(book),
                 ],
               ),
@@ -114,7 +112,7 @@ Widget bookInfo(BuildContext context, Book book, int numberOfNotes) {
         }
       }),
     ),
-  ));
+  );
 }
 
 ClipRRect bookCover(Book book) {

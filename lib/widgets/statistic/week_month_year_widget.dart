@@ -23,9 +23,9 @@ class YearWidget extends StatelessWidget {
           );
         } else {
           return
-            Container(
+            const SizedBox(
               width: double.infinity,
-              child: const CircularProgressIndicator(),
+              child: CircularProgressIndicator(),
             );
         }
       },

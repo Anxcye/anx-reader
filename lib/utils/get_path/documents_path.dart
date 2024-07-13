@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -13,5 +11,4 @@ Future<String> getDocumentsPath() async {
     default:
       throw Exception('Unsupported platform');
   }
-  return directory.path;
 }

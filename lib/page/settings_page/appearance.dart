@@ -48,9 +48,9 @@ class SubAppearanceSettings extends StatelessWidget {
         SettingsSection(
           title: Text(context.settingsAppearanceTheme),
           tiles: [
-            CustomSettingsTile(
+            const CustomSettingsTile(
                 child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
+              padding: EdgeInsets.fromLTRB(20, 8, 20, 8),
               child: ChangeThemeMode(),
             )),
             SettingsTile.navigation(

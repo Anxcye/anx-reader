@@ -14,7 +14,7 @@ class ChartCard extends StatefulWidget {
 
 class _ChartCardState extends State<ChartCard> {
   ChartMode _currentMode = ChartMode.week;
-  Widget currentChart = WeekWidget();
+  Widget currentChart = const WeekWidget();
 
   @override
   Widget build(BuildContext context) {
@@ -69,8 +69,8 @@ class _ChartCardState extends State<ChartCard> {
           });
         },
         style: ButtonStyle(
-          backgroundColor: MaterialStateProperty.resolveWith<Color>(
-                (Set<MaterialState> states) {
+          backgroundColor: WidgetStateProperty.resolveWith<Color>(
+                (Set<WidgetState> states) {
               if (_currentMode == mode) {
                 return Theme
                     .of(context)
@@ -83,8 +83,8 @@ class _ChartCardState extends State<ChartCard> {
                   .surface;
             },
           ),
-          foregroundColor: MaterialStateProperty.resolveWith<Color>(
-                (Set<MaterialState> states) {
+          foregroundColor: WidgetStateProperty.resolveWith<Color>(
+                (Set<WidgetState> states) {
               if (_currentMode == mode) {
                 return Theme
                     .of(context)

@@ -85,7 +85,7 @@ Future<bool> testEnableWebdav() async {
 }
 
 void chooseDirection() {
-  BuildContext context = navigatorKey.currentContext!;
+  // BuildContext context = navigatorKey.currentContext!;
   showDialog(
       context: navigatorKey.currentContext!,
       builder: (context) {
