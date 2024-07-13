@@ -14,7 +14,6 @@ import 'package:anx_reader/dao/book.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:path/path.dart';
-import 'package:sqflite/sqflite.dart';
 import 'package:webdav_client/webdav_client.dart';
 
 enum SyncDirection { upload, download, both }

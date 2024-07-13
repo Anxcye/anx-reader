@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:anx_reader/utils/get_path/documents_path.dart';
-import 'package:path_provider/path_provider.dart';
 
 Future<File> getLogFile() async {
   final logFileDir = await getDocumentsPath();

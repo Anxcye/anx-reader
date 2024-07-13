@@ -5,8 +5,6 @@ import 'package:anx_reader/utils/get_base_path.dart';
 import 'package:anx_reader/utils/get_path/databases_path.dart';
 import 'package:anx_reader/utils/log/common.dart';
 import 'package:flutter/foundation.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 

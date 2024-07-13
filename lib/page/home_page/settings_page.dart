@@ -34,8 +34,8 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
           ),
           const Divider(),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 8, 10, 8),
+          const Padding(
+            padding: EdgeInsets.fromLTRB(20, 8, 10, 8),
             child: ChangeThemeMode(),
           ),
           const Divider(),

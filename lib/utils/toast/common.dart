@@ -17,7 +17,7 @@ class AnxToast {
       padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(25.0),
-        color: Theme.of(navigatorKey.currentContext!).colorScheme.background,
+        color: Theme.of(navigatorKey.currentContext!).colorScheme.surface,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -33,7 +33,7 @@ class AnxToast {
               style: TextStyle(
                 color: Theme.of(navigatorKey.currentContext!)
                     .colorScheme
-                    .onBackground,
+                    .onSurface,
               ),
             ),
           ),

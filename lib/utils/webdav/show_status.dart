@@ -9,7 +9,7 @@ void showWebdavStatus() {
   showDialog(
     context: context,
     builder: (context) {
-      return SyncStatusDialog();
+      return const SyncStatusDialog();
     },
   );
 }

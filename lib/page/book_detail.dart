@@ -100,7 +100,7 @@ class _BookDetailState extends State<BookDetail> {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            Theme.of(context).colorScheme.background.withOpacity(0.20),
+            Theme.of(context).colorScheme.surface.withOpacity(0.20),
             Colors.transparent,
           ],
         ).createShader(
