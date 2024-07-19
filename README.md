@@ -25,7 +25,7 @@ Anx Reader is an application focused on reading, without any online promotional 
 
 ### TODO
 - [X] UI adaptation for tablets
-- [ ] Page-turning animation
+- [X] Page-turning animation
 - [ ] TTS voice reading
 - [ ] Reading fonts
 - [ ] Translation
