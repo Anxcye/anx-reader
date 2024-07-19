@@ -1,6 +1,4 @@
-<div style="text-align: right;">
 **English** | [简体中文](README_zh.md)
-</div>
 
 <br>
 
