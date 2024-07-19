@@ -1,8 +1,13 @@
+<div style="text-align: right;">
+**English** | [简体中文](README_zh.md)
+</div>
+
+<br>
+
 <p align="center">
   <img src="./docs/images/Anx-logo.jpg" alt="Anx-logo" width="100" />
 </p>
-<h1 align="center">安读 - 让阅读更专注</h1>
-
+<h1 align="center">Anx Reader</h1>
 <p align="center">
   <a href="https://github.com/Anxcye/anx-reader/blob/main/LICENSE"><img src="https://img.shields.io/github/license/anxcye/anx-reader" alt="License" ></a>
   <a href="https://github.com/Anxcye/anx-reader/releases"><img src="https://img.shields.io/github/downloads/anxcye/anx-reader/total" alt="Downloads"></a>
@@ -10,42 +15,34 @@
   <a href="https://github.com/anxcye/anx-reader/stargazers"><img src="https://img.shields.io/github/stars/anxcye/anx-reader" alt="stars"></a>
 </p>
 
-
-安读是一款专注于阅读的应用，不包含任何在线推广内容，它可以帮助你更专注于阅读，提高阅读效率。
+Anx Reader is an application focused on reading, without any online promotional content. It can help you concentrate more on reading and improve your reading efficiency.
 
 ![](./docs/images/9.jpg)
 
-
-
-- 更全面的同步功能。支持使用 WebDAV 同步阅读进度、笔记以及书籍文件。
-- 丰富且可自定义的阅读配色，让您的阅读更舒适。
-- 强大的阅读统计，记录您的每一次阅读。
-- 丰富的阅读笔记功能，让您的阅读更深入。
-- 适配手机、平板界面。
-
-
-
+- More comprehensive synchronization features. Supports using WebDAV to sync reading progress, notes, and book files.
+- Rich and customizable reading color schemes for a more comfortable reading experience.
+- Powerful reading statistics to record your every reading session.
+- Rich reading note-taking features for deeper reading.
+- Interface adapted for phones and tablets.
 
 ### TODO
-- [X] UI 适配 Tab 端
-- [ ] 翻页动画
-- [ ] TTS 语音朗读
-- [ ] 阅读字体
-- [ ] 翻译
-- [ ] 支持更多文件类型（目前仅支持导入 epub）
-- [X] 支持 WebDAV 同步
-- [ ] 支持 Windows，Linux
+- [X] UI adaptation for tablets
+- [ ] Page-turning animation
+- [ ] TTS voice reading
+- [ ] Reading fonts
+- [ ] Translation
+- [ ] Support for more file types (currently only supports importing epub)
+- [X] Support for WebDAV synchronization
+- [ ] Support for Windows, Linux
 
-Telegram 群组：[https://t.me/AnxReader](https://t.me/AnxReader)
+Telegram group: [https://t.me/AnxReader](https://t.me/AnxReader)
 
-## 构建
-希望从源码构建安读？请参考以下步骤：
-- 安装 [Flutter](https://flutter.dev)。
-- 克隆并进入项目目录。
-- 运行 `flutter pub get` 。
-- 运行 `flutter gen-l10n` 生成多语言文件。
-- 运行 `flutter run` 启动应用。
+## Building
+Want to build Anx Reader from source? Please follow these steps:
+- Install [Flutter](https://flutter.dev).
+- Clone and enter the project directory.
+- Run `flutter pub get`.
+- Run `flutter gen-l10n` to generate multi-language files.
+- Run `flutter run` to launch the application.
 
-您可能遇到 Flutter 版本不兼容的问题，请参考 [Flutter 文档](https://flutter.dev/docs/get-started/install)。
-
-
+You may encounter Flutter version incompatibility issues. Please refer to the [Flutter documentation](https://flutter.dev/docs/get-started/install).
