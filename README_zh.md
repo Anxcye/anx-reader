@@ -1,6 +1,4 @@
-<div style="text-align: right;">
 [English](README.md) | **简体中文**
-</div>
 
 <p align="center">
   <img src="./docs/images/Anx-logo.jpg" alt="Anx-logo" width="100" />
