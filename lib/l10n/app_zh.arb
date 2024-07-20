@@ -102,8 +102,6 @@
   "webdav_download": "从 WebDAV 下载",
   "webdav_upload": "上传到 WebDAV",
 
-
-
   "settings_sync": "同步",
   "settings_sync_webdav": "WebDAV",
   "settings_sync_enable_webdav": "启用 WebDAV",
@@ -122,5 +120,4 @@
   "about_check_for_updates": "检查更新",
   "update_new_version": "新版本：",
   "update_current_version": "当前版本："
-
 }

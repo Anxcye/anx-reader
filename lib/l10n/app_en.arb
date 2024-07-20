@@ -102,8 +102,6 @@
   "webdav_download": "Download from WebDAV",
   "webdav_upload": "Upload to WebDAV",
 
-
-
   "settings_sync": "Sync",
   "settings_sync_webdav": "WebDAV",
   "settings_sync_enable_webdav": "Enable WebDAV",
@@ -122,8 +120,4 @@
   "about_check_for_updates": "Check for updates",
   "update_new_version": "New version: ",
   "update_current_version": "Current version: "
-
-
-
-
 }
