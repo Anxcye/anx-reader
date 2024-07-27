@@ -33,7 +33,7 @@ String generateIndexHtml(
           column-fill: auto;
         }
         #viewer {
-          // background-color: #$backgroundColor;
+          background-color: #$backgroundColor;
           font-family: 'SourceHanSerif' !important;
         }
         @font-face {
