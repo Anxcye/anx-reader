@@ -8543,7 +8543,6 @@ class rendition_Rendition {
 
 
   _display(target) {
-  console.warn("display", target);
     if (!this.book) {
       return;
     }

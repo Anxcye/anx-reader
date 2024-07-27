@@ -436,12 +436,12 @@ String generateIndexHtml(
         
         
         // set annotations
-        const getSelections = () => rendition.getContents()
-            .map(contents => contents.window.getSelection())
+        // const getSelections = () => rendition.getContents()
+        //     .map(contents => contents.window.getSelection())
         
-        const clearSelection = () => getSelections().forEach(s => s.removeAllRanges())
+        // const clearSelection = () => getSelections().forEach(s => s.removeAllRanges())
         
-        const selectByCfi = cfi => getSelections().forEach(s => s.addRange(rendition.getRange(cfi)))
+        // const selectByCfi = cfi => getSelections().forEach(s => s.addRange(rendition.getRange(cfi)))
         
         var setAllAnnotations = function () {
           window.flutter_inappwebview.callHandler('getAllAnnotations', null);
@@ -462,7 +462,7 @@ String generateIndexHtml(
           // console.log('annotation clicked', e.target);
           x = e.target.getBoundingClientRect().left / window.innerWidth;
           y = e.target.getBoundingClientRect().top / window.innerHeight;
-          selectByCfi(bookNote.cfi);
+          // selectByCfi(bookNote.cfi);
           eventOfCurrentAnnotation = e;
           window.flutter_inappwebview.callHandler('onAnnotationClicked', { x: x, y: y, id: bookNote.id});
         }
