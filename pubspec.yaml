@@ -36,7 +36,7 @@ dependencies:
   shelf: ^1.4.1
   fl_chart: ^0.67.0
   flutter_rating_bar: ^4.0.1
-  flutter_svg: ^2.0.10
+#  flutter_svg: ^2.0.10
   permission_handler: ^11.3.1
   webdav_client: ^1.2.1
   fluttertoast: ^8.2.6
@@ -49,7 +49,8 @@ dependencies:
       url: https://github.com/Anxcye/contentsize_tabbarview.git
       ref: feat/animation
   wakelock_plus: ^1.2.5
-  icons_plus: ^5.0.0
+#  icons_plus: ^5.0.0
+  ionicons: ^0.2.2
   url_launcher: ^6.2.6
   sqflite_common_ffi: ^2.3.3
 
