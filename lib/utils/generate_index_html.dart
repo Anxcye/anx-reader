@@ -484,11 +484,11 @@ String generateIndexHtml(
           });
         };
         function handleClick(e) {
-          var selectedText = e.view.getSelection().toString().length;
           // console.log(selectedText);
           // console.log(e.target);
       
-          if (e.defaultPrevented || selectedText > 0) {
+          if (e.defaultPrevented || selectedText) {
+            rendition.getContents()[0].window.getSelection().removeAllRanges()
             return;
           }
       
