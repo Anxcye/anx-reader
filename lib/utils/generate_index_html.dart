@@ -466,8 +466,8 @@ String generateIndexHtml(
           eventOfCurrentAnnotation = e;
           window.flutter_inappwebview.callHandler('onAnnotationClicked', { x: x, y: y, id: bookNote.id});
         }
-        var removeCurrentAnnotations = function() {
-          eventOfCurrentAnnotation.target.remove();
+        var removeAnnotations = function(cfiRange, type) {
+          rendition.annotations.remove(cfiRange, type);
         }
         
         

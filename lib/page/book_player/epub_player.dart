@@ -224,7 +224,7 @@ class EpubPlayerState extends State<EpubPlayer> {
               ),
             );
             _webViewController.evaluateJavascript(
-                source: 'removeCurrentAnnotations()');
+                source: 'removeAnnotations("${oldNote.cfi}", "${oldNote.type}")');
             renderNote(BookNote(
               id: id,
               bookId: widget.bookId,
