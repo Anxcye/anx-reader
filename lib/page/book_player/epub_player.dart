@@ -15,6 +15,7 @@ import 'package:anx_reader/widgets/reading_page/more_settings/page_turning/types
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:icons_plus/icons_plus.dart';
 
 class EpubPlayer extends StatefulWidget {
   final String content;
@@ -415,7 +416,7 @@ class EpubPlayerState extends State<EpubPlayer> {
     Icon deleteIcon() {
       return deleteConfirm
           ? const Icon(
-              Icons.delete_forever,
+              EvaIcons.close_circle,
               color: Colors.red,
             )
           : const Icon(Icons.delete);
@@ -467,7 +468,7 @@ class EpubPlayerState extends State<EpubPlayer> {
         ),
         IconButton(
           icon: Icon(
-            Icons.highlight,
+            AntDesign.highlight_outline,
             color: annoType == 'highlight'
                 ? Color(int.parse('0xff$annoColor'))
                 : null,
