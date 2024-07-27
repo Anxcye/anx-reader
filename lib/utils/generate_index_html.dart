@@ -423,6 +423,7 @@ String generateIndexHtml(
           // console.log(selectedCfiRange)
           // console.log(selectedText)
           window.flutter_inappwebview.callHandler('onSelected', { left: left, right: right, top: top, bottom: bottom, cfiRange: selectedCfiRange, text: selectedText });
+          selectedText = null;
           return { left, right, top, bottom }
         }
     
@@ -489,6 +490,7 @@ String generateIndexHtml(
       
           if (e.defaultPrevented || selectedText) {
             rendition.getContents()[0].window.getSelection().removeAllRanges()
+            selectedText = null;
             return;
           }
       
