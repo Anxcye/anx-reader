@@ -59,7 +59,7 @@ String generateIndexHtml(
             height: window.innerHeight,
             allowScriptedContent: true,
             gap: ${style.sideMargin},
-        })
+        }, )
         var refreshProgress
         
         let primeStyle = {

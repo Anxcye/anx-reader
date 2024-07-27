@@ -3222,7 +3222,9 @@ function replaceLinks(contents, fn) {
 
   var base = Object(_core__WEBPACK_IMPORTED_MODULE_0__["qs"])(contents.ownerDocument, "base");
   var location = base ? base.getAttribute("href") : undefined;
-
+  if (location && location.substring(0, 4) === "null") {
+    location = "file://" + location.substring(4);
+  }
   var replaceLink = function (link) {
     var href = link.getAttribute("href");
 
@@ -8541,6 +8543,7 @@ class rendition_Rendition {
 
 
   _display(target) {
+  console.warn("display", target);
     if (!this.book) {
       return;
     }
