@@ -255,10 +255,19 @@ String generateIndexHtml(
           lastX = touchStartX;
         });
 
+        // rendition.on('touchmove', event => {
+        //   isAnimating = true;
+        //   const currentX = event.changedTouches[0].screenX;
+        //   epubContainer.scrollLeft = startScrollOffset + touchStartX - event.changedTouches[0].screenX;
+        // });
         rendition.on('touchmove', event => {
           isAnimating = true;
-          const currentX = event.changedTouches[0].screenX;
-          epubContainer.scrollLeft = startScrollOffset + touchStartX - event.changedTouches[0].screenX;
+            requestAnimationFrame(() => {
+              const currentX = event.changedTouches[0].screenX;
+              const deltaX = touchStartX - currentX;
+              epubContainer.scrollLeft = startScrollOffset + deltaX;
+              isAnimating = false;
+            });
         });
         
         rendition.on('touchend', event => {
