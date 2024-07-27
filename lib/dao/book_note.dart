@@ -74,3 +74,12 @@ Future<Map<String, int>> selectNumberOfNotesAndBooks() async {
     'numberOfBooks': maps[0]['number_of_books'],
   };
 }
+
+void deleteBookNoteById(int id) async {
+  final db = await DBHelper().database;
+  await db.delete(
+    'tb_notes',
+    where: 'id = ?',
+    whereArgs: [id],
+  );
+}

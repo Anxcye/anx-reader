@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/dao/book_note.dart';
 import 'package:anx_reader/l10n/localization_extension.dart';
+import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/models/book_style.dart';
 import 'package:anx_reader/models/read_theme.dart';
 import 'package:anx_reader/page/reading_page.dart';
@@ -158,7 +159,7 @@ class EpubPlayerState extends State<EpubPlayer> {
           Map<String, dynamic>? result =
               await showColorAndTypeSelection(context, colorMenuPosition);
           if (result != null) {
-            int id = await insertBookNote(BookNote(
+            BookNote bookNote = BookNote(
               bookId: widget.bookId,
               content: annoContent,
               cfi: annoCfi,
@@ -167,7 +168,8 @@ class EpubPlayerState extends State<EpubPlayer> {
               color: result['color'],
               createTime: DateTime.now(),
               updateTime: DateTime.now(),
-            ));
+            );
+            int id = await insertBookNote(bookNote);
             renderNote(BookNote(
               id: id,
               bookId: widget.bookId,
@@ -210,22 +212,14 @@ class EpubPlayerState extends State<EpubPlayer> {
               await showColorAndTypeSelection(context, colorMenuPosition);
           BookNote oldNote = await selectBookNoteById(id);
           if (result != null) {
-            updateBookNoteById(
-              BookNote(
-                id: id,
-                bookId: widget.bookId,
-                content: oldNote.content,
-                cfi: oldNote.cfi,
-                chapter: oldNote.chapter,
-                type: result['type'],
-                color: result['color'],
-                createTime: oldNote.createTime,
-                updateTime: DateTime.now(),
-              ),
-            );
-            _webViewController.evaluateJavascript(
-                source: 'removeAnnotations("${oldNote.cfi}", "${oldNote.type}")');
-            renderNote(BookNote(
+            if (result['isDelete']) {
+              deleteBookNoteById(id);
+              _webViewController.evaluateJavascript(
+                  source:
+                      'removeAnnotations("${oldNote.cfi}", "${oldNote.type}")');
+              return;
+            }
+            BookNote newNote = BookNote(
               id: id,
               bookId: widget.bookId,
               content: oldNote.content,
@@ -235,7 +229,12 @@ class EpubPlayerState extends State<EpubPlayer> {
               color: result['color'],
               createTime: oldNote.createTime,
               updateTime: DateTime.now(),
-            ));
+            );
+            updateBookNoteById(newNote);
+            _webViewController.evaluateJavascript(
+                source:
+                    'removeAnnotations("${oldNote.cfi}", "${oldNote.type}")');
+            renderNote(newNote);
           }
         });
     _webViewController.addJavaScriptHandler(
@@ -371,6 +370,11 @@ class EpubPlayerState extends State<EpubPlayer> {
                     colorMenuPosition: Offset(dx, dy),
                     color: selectedColor,
                     type: selectedType,
+                    onDelete: () {
+                      Navigator.pop(context, {
+                        'isDelete': true,
+                      });
+                    },
                     onColorSelected: (color) {
                       setState(() {
                         selectedColor = color;
@@ -385,6 +389,7 @@ class EpubPlayerState extends State<EpubPlayer> {
                       Navigator.pop(context, {
                         'color': selectedColor,
                         'type': selectedType,
+                        'isDelete': false,
                       });
                     }),
               ),
@@ -400,10 +405,32 @@ class EpubPlayerState extends State<EpubPlayer> {
       required Null Function() onClose,
       required String color,
       required String type,
+      required Null Function() onDelete,
       required ValueChanged<String> onColorSelected,
       required ValueChanged<String> onTypeSelected}) {
     String annoType = type;
     String annoColor = color;
+
+    bool deleteConfirm = false;
+    Icon deleteIcon() {
+      return deleteConfirm
+          ? const Icon(
+              Icons.delete_forever,
+              color: Colors.red,
+            )
+          : const Icon(Icons.delete);
+    }
+
+    void deleteHandler(StateSetter setState) {
+      if (deleteConfirm) {
+        onDelete();
+      } else {
+        setState(() {
+          deleteConfirm = true;
+        });
+      }
+    }
+
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).scaffoldBackgroundColor,
@@ -418,6 +445,15 @@ class EpubPlayerState extends State<EpubPlayer> {
         ],
       ),
       child: Row(children: [
+        StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return IconButton(
+                onPressed: () {
+                  deleteHandler(setState);
+                },
+                icon: deleteIcon());
+          },
+        ),
         IconButton(
           icon: Icon(
             Icons.format_underline,
