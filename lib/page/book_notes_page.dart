@@ -8,7 +8,7 @@ import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/models/book_note.dart';
 import 'package:anx_reader/page/book_detail.dart';
 import 'package:flutter/material.dart';
-import 'package:ionicons/ionicons.dart';
+import 'package:icons_plus/icons_plus.dart';
 
 class BookNotesPage extends StatefulWidget {
   const BookNotesPage({
@@ -147,7 +147,7 @@ Row operators(BuildContext context, Book book) {
                 operateButton(
                     context,
                     // SvgPicture.asset('assets/icon/Markdown.svg'),
-                    const Icon(Ionicons.logo_markdown),
+                    const Icon(IonIcons.logo_markdown),
                     'Markdown', () {
                   Navigator.pop(context);
                   exportNotes(book.id, ExportType.md);

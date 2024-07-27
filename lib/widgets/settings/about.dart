@@ -3,7 +3,7 @@ import 'package:anx_reader/widgets/settings/link_icon.dart';
 import 'package:anx_reader/utils/check_update.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:ionicons/ionicons.dart';
+import 'package:icons_plus/icons_plus.dart';
 import 'package:pubspec_parse/pubspec_parse.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -106,7 +106,7 @@ class _AboutState extends State<About> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     linkIcon(
-                        icon: Ionicons.logo_github,
+                        icon: IonIcons.logo_github,
                         url: 'https://github.com/Anxcye/anx-reader',
                         mode: LaunchMode.externalApplication),
                     linkIcon(
