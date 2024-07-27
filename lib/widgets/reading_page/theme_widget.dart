@@ -38,6 +38,7 @@ class _ThemeWidgetState extends State<ThemeWidget> {
             scrollDirection: Axis.horizontal,
             itemBuilder: (context, index) {
               if (index == widget.themes.length) {
+                // add a new theme
                 return Container(
                     padding: const EdgeInsets.fromLTRB(15, 20, 15, 20),
                     height: 90,
@@ -71,7 +72,7 @@ class _ThemeWidgetState extends State<ThemeWidget> {
                               color: Color(int.parse('0x${'ffcccccc'}')))),
                     ));
               }
-
+              // theme list
               return Container(
                 padding: const EdgeInsets.fromLTRB(15, 20, 15, 20),
                 height: 90,

@@ -81,8 +81,9 @@ void showLanguagePickerDialog(BuildContext context) {
   final saveToPrefs = Prefs().saveLocaleToPrefs;
   final children = [
     dialogOption('System', '', saveToPrefs),
-    dialogOption('简体中文', 'zh', saveToPrefs),
     dialogOption('English', 'en', saveToPrefs),
+    dialogOption('简体中文', 'zh', saveToPrefs),
+    dialogOption('Türkçe', 'tr', saveToPrefs)
   ];
   showSimpleDialog(title, saveToPrefs, children);
 }
