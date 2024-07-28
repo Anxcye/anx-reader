@@ -6500,6 +6500,19 @@ class Contents {
     this.document.addEventListener("selectionchange", this._onSelectionChange, {
       passive: true
     });
+    this.document.addEventListener("selectstart", (event)=>{
+      const targetNode = document.querySelector(".epub-container");
+      const sourceLeft = targetNode.scrollLeft
+      targetNode.style.overflow = "auto";
+      targetNode.addEventListener("scroll",(event2)=>{
+          // console.log("scroll",event2.target.scrollLeft)
+          targetNode.style.overflow = "hidden";
+          var selection = this.window.getSelection();
+          //var r = selection.getRangeAt(0);
+          selection.removeAllRanges();
+          targetNode.scrollLeft = sourceLeft
+      },{ capture: false, once:true })
+    }, { passive: true });
   }
   /**
    * Remove listener for text selection
@@ -6531,6 +6544,8 @@ class Contents {
     this.selectionEndTimeout = setTimeout(function () {
       var selection = this.window.getSelection();
       this.triggerSelectedEvent(selection);
+      const targetNode = document.querySelector(".epub-container");
+      targetNode.style.overflow = "hidden";
     }.bind(this), 250);
   }
   /**
