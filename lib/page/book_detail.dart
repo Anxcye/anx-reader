@@ -38,59 +38,60 @@ class _BookDetailState extends State<BookDetail> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-      ),
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+        ),
         extendBodyBehindAppBar: true,
         body: Stack(children: [
-      background(context),
-      Padding(
-        padding: const EdgeInsets.fromLTRB(20, 80, 20, 20),
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            if (constraints.maxWidth > 600) {
-              return Row(
-                children: [
-                  Expanded(
-                    flex: 1,
-                    child: ListView(
-                      padding: const EdgeInsets.all(0),
-                      children: [
-                        bookBaseDetail(context, widget.book,
-                            constraints.maxWidth / 2 - 20),
-                        editButton(),
-                        const SizedBox(height: 5),
-                        bookStatistics(context, widget.book),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 20),
-                  Expanded(
-                    flex: 1,
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 20, bottom: 20),
-                      child: moreDetail(),
-                    ),
-                  ),
-                ],
-              );
-            } else {
-              return ListView(
-                padding: const EdgeInsets.all(0),
-                children: [
-                  bookBaseDetail(context, widget.book, constraints.maxWidth),
-                  editButton(),
-                  const SizedBox(height: 5),
-                  bookStatistics(context, widget.book),
-                  const SizedBox(height: 15),
-                  moreDetail(),
-                ],
-              );
-            }
-          },
-        ),
-      ),
-    ]));
+          background(context),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 80, 20, 20),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                if (constraints.maxWidth > 600) {
+                  return Row(
+                    children: [
+                      Expanded(
+                        flex: 1,
+                        child: ListView(
+                          padding: const EdgeInsets.all(0),
+                          children: [
+                            bookBaseDetail(context, widget.book,
+                                constraints.maxWidth / 2 - 20),
+                            editButton(),
+                            const SizedBox(height: 5),
+                            bookStatistics(context, widget.book),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 20),
+                      Expanded(
+                        flex: 1,
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 20, bottom: 20),
+                          child: moreDetail(),
+                        ),
+                      ),
+                    ],
+                  );
+                } else {
+                  return ListView(
+                    padding: const EdgeInsets.all(0),
+                    children: [
+                      bookBaseDetail(
+                          context, widget.book, constraints.maxWidth),
+                      editButton(),
+                      const SizedBox(height: 5),
+                      bookStatistics(context, widget.book),
+                      const SizedBox(height: 15),
+                      moreDetail(),
+                    ],
+                  );
+                }
+              },
+            ),
+          ),
+        ]));
   }
 
   ShaderMask background(BuildContext context) {
@@ -100,7 +101,11 @@ class _BookDetailState extends State<BookDetail> {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            Theme.of(context).colorScheme.surface.withOpacity(0.20),
+            Theme
+                .of(context)
+                .colorScheme
+                .surface
+                .withOpacity(0.20),
             Colors.transparent,
           ],
         ).createShader(
@@ -109,7 +114,10 @@ class _BookDetailState extends State<BookDetail> {
       },
       blendMode: BlendMode.dstIn,
       child: Image(
-        width: MediaQuery.of(context).size.width,
+        width: MediaQuery
+            .of(context)
+            .size
+            .width,
         height: 600,
         image: coverImage.image,
         fit: BoxFit.cover,
@@ -124,12 +132,20 @@ class _BookDetailState extends State<BookDetail> {
       fontSize: 24,
       fontFamily: 'SourceHanSerif',
       fontWeight: FontWeight.bold,
-      color: Theme.of(context).textTheme.bodyLarge!.color,
+      color: Theme
+          .of(context)
+          .textTheme
+          .bodyLarge!
+          .color,
     );
     TextStyle bookAuthorStyle = TextStyle(
       fontSize: 15,
       fontFamily: 'SourceHanSerif',
-      color: Theme.of(context).textTheme.bodyLarge!.color,
+      color: Theme
+          .of(context)
+          .textTheme
+          .bodyLarge!
+          .color,
     );
     double top = 60;
 
@@ -160,13 +176,17 @@ class _BookDetailState extends State<BookDetail> {
                               strokeWidth: 6,
                               backgroundColor: Colors.grey[400],
                               valueColor: AlwaysStoppedAnimation<Color>(
-                                  Theme.of(context).colorScheme.primary),
+                                  Theme
+                                      .of(context)
+                                      .colorScheme
+                                      .primary),
                             ),
                           ),
                           Positioned.fill(
                             child: Center(
                               child: Text(
-                                "${(book.readingPercentage * 100).toStringAsFixed(0)}%",
+                                "${(book.readingPercentage * 100)
+                                    .toStringAsFixed(0)}%",
                                 style: const TextStyle(
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold,
@@ -192,20 +212,28 @@ class _BookDetailState extends State<BookDetail> {
 
                 final ImagePicker picker = ImagePicker();
                 final XFile? image =
-                    await picker.pickImage(source: ImageSource.gallery);
+                await picker.pickImage(source: ImageSource.gallery);
 
                 if (image != null) {
                   AnxLog.info('BookDetail: Image path: ${image.path}');
                   // Delete the existing cover image file
                   final File oldCoverImageFile =
-                      File(widget.book.coverFullPath);
+                  File(widget.book.coverFullPath);
                   if (await oldCoverImageFile.exists()) {
                     await oldCoverImageFile.delete();
                   }
 
                   String newPath =
-                      '${widget.book.coverPath.split('/').sublist(0, widget.book.coverPath.split('/').length - 1).join('/')}/${widget.book.title.length > 20 ? widget.book.title.substring(0, 20) : widget.book.title}-${DateTime.now().millisecond.toString()}.png'
-                          .replaceAll(' ', '_');
+                  '${widget.book.coverPath.split('/').sublist(
+                      0, widget.book.coverPath
+                      .split('/')
+                      .length - 1).join('/')}/${widget.book.title.length > 20
+                      ? widget.book.title.substring(0, 20)
+                      : widget.book.title}-${DateTime
+                      .now()
+                      .millisecond
+                      .toString()}.png'
+                      .replaceAll(' ', '_');
 
                   AnxLog.info('BookDetail: New path: $newPath');
                   String newFullPath = getBasePath(newPath);
@@ -259,7 +287,8 @@ class _BookDetailState extends State<BookDetail> {
               itemCount: 5,
               itemSize: 20,
               itemPadding: const EdgeInsets.symmetric(horizontal: 4.0),
-              itemBuilder: (context, _) => const Icon(
+              itemBuilder: (context, _) =>
+              const Icon(
                 Icons.star,
                 color: Colors.amber,
               ),
@@ -325,34 +354,34 @@ class _BookDetailState extends State<BookDetail> {
         const Spacer(),
         isEditing
             ? ElevatedButton(
-                child: Row(
-                  children: [
-                    const Icon(Icons.save),
-                    const SizedBox(width: 5),
-                    Text(context.bookDetailSave),
-                  ],
-                ),
-                onPressed: () {
-                  setState(() {
-                    isEditing = false;
-                    updateBook(widget.book);
-                    widget.onRefresh();
-                  });
-                },
-              )
+          child: Row(
+            children: [
+              const Icon(Icons.save),
+              const SizedBox(width: 5),
+              Text(context.bookDetailSave),
+            ],
+          ),
+          onPressed: () {
+            setState(() {
+              isEditing = false;
+              updateBook(widget.book);
+              widget.onRefresh();
+            });
+          },
+        )
             : ElevatedButton(
-                child: Row(
-                  children: [
-                    const Icon(Icons.edit),
-                    const SizedBox(width: 5),
-                    Text(context.bookDetailEdit),
-                  ],
-                ),
-                onPressed: () {
-                  setState(() {
-                    isEditing = true;
-                  });
-                }),
+            child: Row(
+              children: [
+                const Icon(Icons.edit),
+                const SizedBox(width: 5),
+                Text(context.bookDetailEdit),
+              ],
+            ),
+            onPressed: () {
+              setState(() {
+                isEditing = true;
+              });
+            }),
       ],
     );
   }
@@ -366,23 +395,26 @@ class _BookDetailState extends State<BookDetail> {
     );
     return SizedBox(
       height: 130,
-      width: MediaQuery.of(context).size.width,
+      width: MediaQuery
+          .of(context)
+          .size
+          .width,
       child: Card(
           child: ListView(
-        padding: const EdgeInsets.all(10),
-        scrollDirection: Axis.horizontal,
-        children: [
-          Row(
+            padding: const EdgeInsets.all(10),
+            scrollDirection: Axis.horizontal,
             children: [
-              nthBooksItem(context),
-              verticalDivider,
-              rankItem(context),
-              verticalDivider,
-              readingTimeItem(context),
+              Row(
+                children: [
+                  nthBooksItem(context),
+                  verticalDivider,
+                  rankItem(context),
+                  verticalDivider,
+                  readingTimeItem(context),
+                ],
+              ),
             ],
-          ),
-        ],
-      )),
+          )),
     );
   }
 
@@ -397,7 +429,11 @@ class _BookDetailState extends State<BookDetail> {
               style: TextStyle(
                 fontSize: 30,
                 fontWeight: FontWeight.bold,
-                color: Theme.of(context).textTheme.bodyLarge!.color,
+                color: Theme
+                    .of(context)
+                    .textTheme
+                    .bodyLarge!
+                    .color,
               ),
             ),
             TextSpan(
@@ -424,7 +460,11 @@ class _BookDetailState extends State<BookDetail> {
               style: TextStyle(
                 fontSize: 30,
                 fontWeight: FontWeight.bold,
-                color: Theme.of(context).textTheme.bodyLarge!.color,
+                color: Theme
+                    .of(context)
+                    .textTheme
+                    .bodyLarge!
+                    .color,
               ),
             ),
             const TextSpan(
@@ -445,7 +485,11 @@ class _BookDetailState extends State<BookDetail> {
     TextStyle digitStyle = TextStyle(
       fontSize: 30,
       fontWeight: FontWeight.bold,
-      color: Theme.of(context).textTheme.bodyLarge!.color,
+      color: Theme
+          .of(context)
+          .textTheme
+          .bodyLarge!
+          .color,
     );
     TextStyle textStyle = const TextStyle(
       fontSize: 15,
@@ -492,76 +536,76 @@ class _BookDetailState extends State<BookDetail> {
       },
     );
   }
-
+  // More detail section. It shows the import date,
+  // last read date, and reading time of the book.
   Widget moreDetail() {
     TextStyle textStyle = const TextStyle(
       fontSize: 15,
       fontWeight: FontWeight.bold,
     );
-    return SizedBox(
-
+    return SingleChildScrollView(
+      child: SizedBox(
         // height: 500,
-        width: MediaQuery.of(context).size.width,
-        child: Card(
-          child: Padding(
-            padding: const EdgeInsets.all(15.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '${context.bookDetailImportDate}${widget.book.createTime.toString().substring(0, 10)}',
-                  style: textStyle,
-                ),
-                const Divider(),
-                Text(
-                  '${context.bookDetailLastReadDate}${widget.book.updateTime.toString().substring(0, 10)}',
-                  style: textStyle,
-                ),
-                const Divider(),
-                SizedBox(
-                  height: 200,
-                  child: readingDetail(),
-                ),
-              ],
+          width: MediaQuery
+              .of(context)
+              .size
+              .width,
+          child: Card(
+            child: Padding(
+              padding: const EdgeInsets.all(15.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '${context.bookDetailImportDate}${widget.book.createTime
+                        .toString().substring(0, 10)}',
+                    style: textStyle,
+                  ),
+                  Text(
+                    '${context.bookDetailLastReadDate}${widget.book.updateTime
+                        .toString().substring(0, 10)}',
+                    style: textStyle,
+                  ),
+                  const Divider(),
+                  SizedBox(
+                    // height: 200,
+                    child: readingDetail(),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ));
+          )),
+    );
   }
 
   Widget readingDetail() {
     return FutureBuilder<List<ReadingTime>>(
       future: selectReadingTimeByBookId(widget.book.id),
-      builder:
-          (BuildContext context, AsyncSnapshot<List<ReadingTime>> snapshot) {
+      builder: (BuildContext context,
+          AsyncSnapshot<List<ReadingTime>> snapshot) {
         if (snapshot.hasData) {
           List<ReadingTime> readingTimes = snapshot.data!;
-          return ListView.builder(
-            itemCount: readingTimes.length,
-            itemBuilder: (BuildContext context, int index) {
+          return Column(
+            children: List.generate(readingTimes.length, (index) {
               int totalReadingTime = readingTimes[index].readingTime;
-              // int hours = totalReadingTime ~/ 3600;
-              // int minutes = totalReadingTime % 3600 ~/ 60;
               return Row(
                 children: [
                   Text(
                     readingTimes[index].date!,
                     style: const TextStyle(
                       fontSize: 15,
-                      // color: Colors.black,
                     ),
                   ),
                   const Spacer(),
                   Text(
-                    // '$hours ${context.statisticHours} $minutes ${context.statisticMinutes}',
                     convertSeconds(totalReadingTime),
                     style: const TextStyle(
                       fontSize: 15,
-                      // color: Colors.black,
                     ),
                   ),
                 ],
               );
-            },
+            }),
           );
         } else {
           return const CircularProgressIndicator();

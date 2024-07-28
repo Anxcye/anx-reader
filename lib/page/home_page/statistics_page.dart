@@ -274,7 +274,7 @@ class BookStatisticItem extends StatelessWidget {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
           return SizedBox(
-            height: 150,
+            // height: 150,
             child: Card(
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
