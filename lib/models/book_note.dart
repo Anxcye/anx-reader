@@ -9,6 +9,10 @@ class BookNote{
   DateTime? createTime;
   DateTime updateTime;
 
+  void setId(int id) {
+    this.id = id;
+  }
+
   BookNote({
     this.id,
     required this.bookId,

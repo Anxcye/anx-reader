@@ -3,6 +3,10 @@ import 'package:anx_reader/models/book_note.dart';
 import 'database.dart';
 
 Future<int> insertBookNote(BookNote bookNote) async {
+  if (bookNote.id != null) {
+    updateBookNoteById(bookNote);
+    return bookNote.id!;
+  }
   final db = await DBHelper().database;
   return db.insert('tb_notes', bookNote.toMap());
 }

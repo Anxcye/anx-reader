@@ -31,9 +31,9 @@ String generateIndexHtml(
           margin: 0;
           padding: 0; 
           column-fill: auto;
+          background-color: #$backgroundColor;
         }
         #viewer {
-          background-color: #$backgroundColor;
           font-family: 'SourceHanSerif' !important;
         }
         @font-face {
@@ -411,27 +411,57 @@ String generateIndexHtml(
         });
     
     
-        const getRect = (target, frame) => {
-          const rect = target.getBoundingClientRect()
-          const viewElementRect =
-            frame ? frame.getBoundingClientRect() : { left: 0, top: 0 }
+        // const getRect = (target, frame) => {
+        //   const rect = target.getBoundingClientRect()
+        //   const viewElementRect =
+        //     frame ? frame.getBoundingClientRect() : { left: 0, top: 0 }
+        //   const left = (rect.left + viewElementRect.left) / window.innerWidth
+        //   const right = (rect.right + viewElementRect.left) / window.innerWidth
+        //   const top = (rect.top + viewElementRect.top) / window.innerHeight
+        //   const bottom = (rect.bottom + viewElementRect.top) / window.innerHeight
+        //   // console.log({ left, right, top, bottom })
+        //   // console.log(selectedCfiRange)
+        //   // console.log(selectedText)
+        //   window.flutter_inappwebview.callHandler('onSelected', { left: left, right: right, top: top, bottom: bottom, cfiRange: selectedCfiRange, text: selectedText });
+        //   // selectedText = null;
+        //   return { left, right, top, bottom }
+        // }
+        //
+        // var excerptHandler = function () {
+        //   const frame = rendition.getContents()[0].document.defaultView.frameElement
+        //   const selection = rendition.getContents()[0].window.getSelection()
+        //   const range = selection.getRangeAt(0)
+        //   const { left, right, top, bottom } = getRect(range, frame)
+        // }
+        
+        const selectEnd = () => {
+          const contents = rendition.getContents()[0]
+          const frame = contents.document.defaultView.frameElement
+          const selection = contents.window.getSelection()
+          const range = selection.getRangeAt(0)
+          
+          selectedText = selection.toString();
+          const cfi = contents.cfiFromRange(range)
+          
+          const rect = range.getBoundingClientRect()
+          const viewElementRect = frame ? frame.getBoundingClientRect() : { left: 0, top: 0 }
+          
           const left = (rect.left + viewElementRect.left) / window.innerWidth
           const right = (rect.right + viewElementRect.left) / window.innerWidth
           const top = (rect.top + viewElementRect.top) / window.innerHeight
           const bottom = (rect.bottom + viewElementRect.top) / window.innerHeight
-          // console.log({ left, right, top, bottom })
-          // console.log(selectedCfiRange)
-          // console.log(selectedText)
-          window.flutter_inappwebview.callHandler('onSelected', { left: left, right: right, top: top, bottom: bottom, cfiRange: selectedCfiRange, text: selectedText });
-          selectedText = null;
-          return { left, right, top, bottom }
+          window.flutter_inappwebview.callHandler('onSelected', { 
+            left: left, 
+            right: right, 
+            top: top, 
+            bottom: bottom, 
+            cfiRange: cfi, 
+            text: selectedText,
+            annoId: null
+          });
         }
-    
-        var excerptHandler = function () {
-          const frame = rendition.getContents()[0].document.defaultView.frameElement
-          const selection = rendition.getContents()[0].window.getSelection()
-          const range = selection.getRangeAt(0)
-          const { left, right, top, bottom } = getRect(range, frame)
+        
+        const clearSelection = () => {
           rendition.getContents()[0].window.getSelection().removeAllRanges()
         }
         
@@ -461,11 +491,21 @@ String generateIndexHtml(
         var eventOfCurrentAnnotation = null;
         var handleAnnoClick = function(e, bookNote) {
           // console.log('annotation clicked', e.target);
-          x = e.target.getBoundingClientRect().left / window.innerWidth;
-          y = e.target.getBoundingClientRect().top / window.innerHeight;
+          leftSpace = e.target.getBoundingClientRect().left / window.innerWidth;
+          rightSpace = e.target.getBoundingClientRect().right / window.innerWidth;
+          topSpace = e.target.getBoundingClientRect().top / window.innerHeight;
+          bottomSpace = e.target.getBoundingClientRect().bottom / window.innerHeight;
           // selectByCfi(bookNote.cfi);
           eventOfCurrentAnnotation = e;
-          window.flutter_inappwebview.callHandler('onAnnotationClicked', { x: x, y: y, id: bookNote.id});
+          window.flutter_inappwebview.callHandler('onSelected', {    
+            left: leftSpace, 
+            right: rightSpace, 
+            top: topSpace, 
+            bottom: bottomSpace, 
+            cfiRange: bookNote.cfi,
+            text: bookNote.content,
+            annoId: bookNote.id
+          });
         }
         var removeAnnotations = function(cfiRange, type) {
           rendition.annotations.remove(cfiRange, type);
