@@ -170,4 +170,22 @@ class Prefs extends ChangeNotifier {
   int get pageTurningType {
     return prefs.getInt('pageTurningType') ?? 0;
   }
+
+  set annotationType(String style) {
+    prefs.setString('annotationType', style);
+    notifyListeners();
+  }
+
+  String get annotationType {
+    return prefs.getString('annotationType') ?? 'highlight';
+  }
+
+  set annotationColor(String color) {
+    prefs.setString('annotationColor', color);
+    notifyListeners();
+  }
+
+  String get annotationColor {
+    return prefs.getString('annotationColor') ?? '66CCFF';
+  }
 }

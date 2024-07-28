@@ -20,7 +20,6 @@ import 'package:anx_reader/widgets/reading_page/toc_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
-
 class ReadingPage extends StatefulWidget {
   final Book book;
 
@@ -32,6 +31,7 @@ class ReadingPage extends StatefulWidget {
 
 final GlobalKey<ReadingPageState> readingPageKey =
     GlobalKey<ReadingPageState>();
+final epubPlayerKey = GlobalKey<EpubPlayerState>();
 
 class ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
   late Book _book;
@@ -42,7 +42,6 @@ class ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
   double readProgress = 0.0;
   List<TocItem> _tocItems = [];
   Widget _currentPage = const SizedBox(height: 1);
-  final _epubPlayerKey = GlobalKey<EpubPlayerState>();
   final Stopwatch _readTimeWatch = Stopwatch();
   Timer? _awakeTimer;
 
@@ -112,13 +111,13 @@ class ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
   }
 
   Future<void> tocHandler() async {
-    String toc = await _epubPlayerKey.currentState!.getToc();
+    String toc = await epubPlayerKey.currentState!.getToc();
     setState(() {
       _tocItems =
           (json.decode(toc) as List).map((i) => TocItem.fromJson(i)).toList();
       _currentPage = TocWidget(
           tocItems: _tocItems,
-          epubPlayerKey: _epubPlayerKey,
+          epubPlayerKey: epubPlayerKey,
           hideAppBarAndBottomBar: showOrHideAppBarAndBottomBar);
     });
   }
@@ -130,10 +129,10 @@ class ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
   }
 
   void progressHandler() {
-    readProgress = _epubPlayerKey.currentState!.progress;
+    readProgress = epubPlayerKey.currentState!.progress;
     setState(() {
       _currentPage = ProgressWidget(
-        epubPlayerKey: _epubPlayerKey,
+        epubPlayerKey: epubPlayerKey,
         showOrHideAppBarAndBottomBar: showOrHideAppBarAndBottomBar,
         readProgress: readProgress,
       );
@@ -145,7 +144,7 @@ class ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
     modalSetState(() {
       _currentPage = ThemeWidget(
         themes: themes,
-        epubPlayerKey: _epubPlayerKey,
+        epubPlayerKey: epubPlayerKey,
         setCurrentPage: (Widget page) {
           modalSetState(() {
             _currentPage = page;
@@ -158,7 +157,7 @@ class ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
   Future<void> styleHandler() async {
     setState(() {
       _currentPage = StyleWidget(
-        epubPlayerKey: _epubPlayerKey,
+        epubPlayerKey: epubPlayerKey,
       );
     });
   }
@@ -236,8 +235,8 @@ class ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
         canPop: false,
         onPopInvoked: (bool didPop) async {
           if (didPop) return;
-          String cfi = await _epubPlayerKey.currentState!.onReadingLocation();
-          double readProgress = _epubPlayerKey.currentState!.progress;
+          String cfi = await epubPlayerKey.currentState!.onReadingLocation();
+          double readProgress = epubPlayerKey.currentState!.progress;
           Map<String, dynamic> result = {
             'cfi': cfi,
             'readProgress': readProgress,
@@ -248,7 +247,7 @@ class ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
           body: Stack(
             children: [
               EpubPlayer(
-                key: _epubPlayerKey,
+                key: epubPlayerKey,
                 content: _content!,
                 bookId: _book.id,
                 showOrHideAppBarAndBottomBar: showOrHideAppBarAndBottomBar,
