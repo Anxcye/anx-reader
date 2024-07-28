@@ -73,13 +73,13 @@ String generateIndexHtml(
           topMargin: ${style.topMargin},
           bottomMargin: ${style.bottomMargin},
         }
-        console.log(primeStyle.topMargin)
+        backgroundColor = '$backgroundColor';
+        textColor = '$textColor';
         
         
     // book style    
         rendition.hooks.render.register(function(contents, view) {
           var doc = contents.document;
-          doc.body.style.backgroundColor = 'transparent';
           doc.body.style.paddingTop = `\${primeStyle.topMargin}px`;
           doc.body.style.paddingBottom = `\${primeStyle.bottomMargin}px`;
           doc.body.style.lineHeight = `\${primeStyle.lineHeight}`;
@@ -108,7 +108,6 @@ String generateIndexHtml(
           });
         });
         
-        
         defaultStyle = function() {
           rendition.themes.fontSize(`\${primeStyle.fontSize}%`);
           
@@ -119,8 +118,8 @@ String generateIndexHtml(
             'font-display': 'swap',
           },
             'html': {
-              'background-color': 'transparent',
-              'color': '#$textColor',
+              'background-color': 'transparent !important',
+              'color': `#\${textColor} !important`,
             },
             'body': {
               'padding-top': `\${primeStyle.topMargin}px !important`,
