@@ -121,7 +121,7 @@ Widget excerptMenu(
     borderRadius: BorderRadius.circular(10),
     boxShadow: [
       BoxShadow(
-        color: Colors.black.withOpacity(0.5),
+        color: Colors.black.withOpacity(0.1),
         spreadRadius: 5,
         blurRadius: 7,
         offset: const Offset(0, 3),
