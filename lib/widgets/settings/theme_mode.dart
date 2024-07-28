@@ -62,7 +62,12 @@ class _ChangeThemeModeState extends State<ChangeThemeMode> {
             },
           ),
         ),
-        child: Text(text),
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(text,
+            maxLines: 1,
+          ),
+        ),
       ),
     );
   }
