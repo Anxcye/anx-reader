@@ -22,7 +22,8 @@ class Server {
         .addHandler(_handleRequests);
 
     _server = await io.serve(handler, 'localhost', 0);
-    AnxLog.info('Server: Serving at http://${_server?.address.host}:${_server?.port}');
+    AnxLog.info(
+        'Server: Serving at http://${_server?.address.host}:${_server?.port}');
   }
 
   int get port {
@@ -57,6 +58,27 @@ class Server {
         headers: {
           'Content-Type': 'font/opentype',
           'Access-Control-Allow-Origin': '*', // Add this line
+        },
+      );
+    } else if (uriPath.startsWith('/foliate-js/')) {
+      if (uriPath.endsWith('.epub')) {
+        final file = await rootBundle.load('assets/foliate-js/${uriPath.substring(12)}');
+        return shelf.Response.ok(
+          file.buffer.asUint8List(),
+          headers: {
+            'Content-Type': 'application/epub+zip',
+            'Access-Control-Allow-Origin': '*', // Add this line
+          },
+        );
+      }
+      String content =
+          await loadAsset('assets/foliate-js/${uriPath.substring(12)}');
+      String contentType =
+          uriPath.endsWith('.html') ? 'text/html' : 'application/javascript';
+      return shelf.Response.ok(
+        content,
+        headers: {
+          'Content-Type': contentType,
         },
       );
     } else {

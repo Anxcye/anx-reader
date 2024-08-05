@@ -1,11 +1,15 @@
 import 'dart:convert';
 
 import 'package:anx_reader/config/shared_preference_provider.dart';
+import 'package:anx_reader/dao/book.dart';
 import 'package:anx_reader/dao/book_note.dart';
+import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/models/book_style.dart';
 import 'package:anx_reader/models/read_theme.dart';
 import 'package:anx_reader/page/reading_page.dart';
+import 'package:anx_reader/service/book_player/book_player_server.dart';
 import 'package:anx_reader/utils/coordinates_to_part.dart';
+import 'package:anx_reader/utils/get_base_path.dart';
 import 'package:anx_reader/utils/log/common.dart';
 import 'package:anx_reader/models/book_note.dart';
 import 'package:anx_reader/widgets/context_menu.dart';
@@ -106,6 +110,32 @@ class EpubPlayerState extends State<EpubPlayer> {
           chapterTotalPage = currentInfo['chapterTotalPage'];
           chapterTitle = currentInfo['chapterTitle'];
           chapterHref = currentInfo['chapterHref'];
+        });
+
+    webViewController.addJavaScriptHandler(
+        handlerName: 'getBookUrl',
+        callback: (args) async {
+          Book book = await selectBookById(widget.bookId);
+          return 'http://localhost:${Server().port}/book/${getBasePath(book.filePath)}';
+        });
+    webViewController.addJavaScriptHandler(
+        handlerName: 'getStyle',
+        callback: (args) async {
+          final Map<String, dynamic> bookStyle = {
+            'fontSize': 1.2,
+            'spacing': '1.5',
+            'fontColor': '#66ccff',
+            'backgroundColor': '#ffffff',
+            'topMargin': 100,
+            'bottomMargin': 100,
+            'sideMargin': 5,
+            'justify': true,
+            'hyphenate': true,
+            'scroll': false,
+            'animated': true
+          };
+
+          return jsonEncode(bookStyle);
         });
   }
 
@@ -252,14 +282,37 @@ class EpubPlayerState extends State<EpubPlayer> {
       body: Stack(
         children: [
           InAppWebView(
+            initialUrlRequest: URLRequest(
+                url:
+                    WebUri("localhost:${Server().port}/foliate-js/index.html")),
+            onLoadStart: (controller, url) {
+              controller.evaluateJavascript(source: '''
+let style = {
+    fontSize: 1.2,
+    spacing: '1.5',
+    fontColor: '#66ccff',
+    backgroundColor: '#ffffff',
+    topMargin: 100,
+    bottomMargin: 100,
+    sideMargin: 5,
+    justify: true,
+    hyphenate: true,
+    scroll: false,
+    animated: true
+}
+              ''');
+            },
+
+
             initialSettings: InAppWebViewSettings(
               supportZoom: false,
               transparentBackground: true,
             ),
             contextMenu: contextMenu,
-            onWebViewCreated: (controller) {
+            onWebViewCreated: (controller) async {
               webViewController = controller;
-              _renderPage();
+
+              // _renderPage();
               progressSetter();
               clickHandlers();
             },

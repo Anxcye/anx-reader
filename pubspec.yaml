@@ -64,13 +64,12 @@ flutter:
   uses-material-design: true
   generate: true
   assets:
-    - assets/icon/Markdown.svg
-    - assets/js/epub.min.js
-    - assets/js/epub.js
-    - assets/js/jszip.min.js
     - assets/fonts/SourceHanSerifSC-Regular.otf
     - pubspec.yaml
-    - assets/foliate-js/*.js
+    - assets/foliate-js/
+    - assets/foliate-js/vendor/
+    - assets/foliate-js/vendor/pdfjs/
+
   fonts:
     - family: SourceHanSerif
       fonts:
