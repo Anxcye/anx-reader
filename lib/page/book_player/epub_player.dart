@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/dao/book.dart';
-import 'package:anx_reader/dao/book_note.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/models/book_style.dart';
 import 'package:anx_reader/models/read_theme.dart';
@@ -20,14 +19,14 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 class EpubPlayer extends StatefulWidget {
   final String content;
-  final int bookId;
+  final Book book;
   final Function showOrHideAppBarAndBottomBar;
 
   const EpubPlayer(
       {super.key,
       required this.content,
       required this.showOrHideAppBarAndBottomBar,
-      required this.bookId});
+      required this.book});
 
   @override
   State<EpubPlayer> createState() => EpubPlayerState();
@@ -113,12 +112,6 @@ class EpubPlayerState extends State<EpubPlayer> {
         });
 
     webViewController.addJavaScriptHandler(
-        handlerName: 'getBookUrl',
-        callback: (args) async {
-          Book book = await selectBookById(widget.bookId);
-          return 'http://localhost:${Server().port}/book/${getBasePath(book.filePath)}';
-        });
-    webViewController.addJavaScriptHandler(
         handlerName: 'getStyle',
         callback: (args) async {
           final Map<String, dynamic> bookStyle = {
@@ -186,21 +179,21 @@ class EpubPlayerState extends State<EpubPlayer> {
             annoId,
           );
         });
-    webViewController.addJavaScriptHandler(
-        handlerName: 'getAllAnnotations',
-        callback: (args) async {
-          List<BookNote> annotations =
-              await selectBookNotesByBookId(widget.bookId);
-
-          List<String> annotationsJson = annotations
-              .map((annotation) => jsonEncode(annotation.toMap()))
-              .toList();
-
-          for (String annotationJson in annotationsJson) {
-            webViewController.evaluateJavascript(
-                source: 'addABookNote($annotationJson);');
-          }
-        });
+    // webViewController.addJavaScriptHandler(
+    //     handlerName: 'getAllAnnotations',
+    //     callback: (args) async {
+    //       List<BookNote> annotations =
+    //           await selectBookNotesByBookId(widget.bookId);
+    //
+    //       List<String> annotationsJson = annotations
+    //           .map((annotation) => jsonEncode(annotation.toMap()))
+    //           .toList();
+    //
+    //       for (String annotationJson in annotationsJson) {
+    //         webViewController.evaluateJavascript(
+    //             source: 'addABookNote($annotationJson);');
+    //       }
+    //     });
 
     webViewController.addJavaScriptHandler(
         handlerName: 'showMenu',
@@ -236,18 +229,52 @@ class EpubPlayerState extends State<EpubPlayer> {
     readingPageKey.currentState!.setAwakeTimer(Prefs().awakeTime);
   }
 
-  Future<void> _renderPage() async {
-    await webViewController.loadData(
-      data: widget.content,
-      mimeType: "text/html",
-      encoding: "utf8",
-    );
-  }
-
   void removeOverlay() {
     if (contextMenuEntry == null || contextMenuEntry?.mounted == false) return;
     contextMenuEntry?.remove();
     contextMenuEntry = null;
+  }
+
+  //////////////// NEW CODE ////////////////
+  String cfi = '';
+  double percentage = 0.0;
+
+  void onLoadStart(InAppWebViewController controller) {
+    controller.evaluateJavascript(source: '''
+      let url = 'http://localhost:${Server().port}/book/${getBasePath(widget.book.filePath)}';
+      let cfi = '${widget.book.lastReadPosition}';
+      console.log('BookPlayer:' + cfi);
+      let style = {
+          fontSize: 1.2,
+          spacing: '1.5',
+          fontColor: '#66ccff',
+          backgroundColor: '#ffffff',
+          topMargin: 100,
+          bottomMargin: 100,
+          sideMargin: 5,
+          justify: true,
+          hyphenate: true,
+          scroll: false,
+          animated: true
+      }
+  ''');
+  }
+
+  void setHandler(InAppWebViewController controller) {
+    controller.addJavaScriptHandler(
+        handlerName: 'onRelocated',
+        callback: (args) {
+          Map<String, dynamic> location = args[0];
+          cfi = location['cfi'];
+          percentage = location['percentage'];
+        });
+  }
+
+  void onWebViewCreated(InAppWebViewController controller) {
+    webViewController = controller;
+    // progressSetter();
+    // clickHandlers();
+    setHandler(controller);
   }
 
   @override
@@ -273,8 +300,18 @@ class EpubPlayerState extends State<EpubPlayer> {
   void dispose() {
     super.dispose();
     InAppWebViewController.clearAllCache();
+    Book book = widget.book;
+    book.lastReadPosition = cfi;
+    book.readingPercentage = percentage;
+    updateBook(book);
     removeOverlay();
   }
+
+  String indexHtmlPath = "localhost:${Server().port}/foliate-js/index.html";
+  InAppWebViewSettings initialSettings = InAppWebViewSettings(
+    supportZoom: false,
+    transparentBackground: true,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -282,40 +319,11 @@ class EpubPlayerState extends State<EpubPlayer> {
       body: Stack(
         children: [
           InAppWebView(
-            initialUrlRequest: URLRequest(
-                url:
-                    WebUri("localhost:${Server().port}/foliate-js/index.html")),
-            onLoadStart: (controller, url) {
-              controller.evaluateJavascript(source: '''
-let style = {
-    fontSize: 1.2,
-    spacing: '1.5',
-    fontColor: '#66ccff',
-    backgroundColor: '#ffffff',
-    topMargin: 100,
-    bottomMargin: 100,
-    sideMargin: 5,
-    justify: true,
-    hyphenate: true,
-    scroll: false,
-    animated: true
-}
-              ''');
-            },
-
-
-            initialSettings: InAppWebViewSettings(
-              supportZoom: false,
-              transparentBackground: true,
-            ),
+            initialUrlRequest: URLRequest(url: WebUri(indexHtmlPath)),
+            onLoadStart: (controller, url) => onLoadStart(controller),
+            initialSettings: initialSettings,
             contextMenu: contextMenu,
-            onWebViewCreated: (controller) async {
-              webViewController = controller;
-
-              // _renderPage();
-              progressSetter();
-              clickHandlers();
-            },
+            onWebViewCreated: (controller) => onWebViewCreated(controller),
             onConsoleMessage: (controller, consoleMessage) {
               if (consoleMessage.messageLevel == ConsoleMessageLevel.LOG) {
                 AnxLog.info('Webview: ${consoleMessage.message}');

@@ -231,29 +231,16 @@ class ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
     if (_content == null) {
       return const Center(child: CircularProgressIndicator());
     } else {
-      return PopScope(
-        canPop: false,
-        onPopInvoked: (bool didPop) async {
-          if (didPop) return;
-          String cfi = await epubPlayerKey.currentState!.onReadingLocation();
-          double readProgress = epubPlayerKey.currentState!.progress;
-          Map<String, dynamic> result = {
-            'cfi': cfi,
-            'readProgress': readProgress,
-          };
-          Navigator.pop(context, result);
-        },
-        child: Scaffold(
-          body: Stack(
-            children: [
-              EpubPlayer(
-                key: epubPlayerKey,
-                content: _content!,
-                bookId: _book.id,
-                showOrHideAppBarAndBottomBar: showOrHideAppBarAndBottomBar,
-              ),
-            ],
-          ),
+      return Scaffold(
+        body: Stack(
+          children: [
+            EpubPlayer(
+              key: epubPlayerKey,
+              content: _content!,
+              book: _book,
+              showOrHideAppBarAndBottomBar: showOrHideAppBarAndBottomBar,
+            ),
+          ],
         ),
       );
     }
