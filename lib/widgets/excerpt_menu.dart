@@ -60,7 +60,7 @@ Widget excerptMenu(
     }
     BookNote bookNote = BookNote(
       id: id,
-      bookId: playerKey.widget.bookId,
+      bookId: playerKey.widget.book.id,
       content: annoContent,
       cfi: annoCfi,
       chapter: playerKey.chapterTitle,

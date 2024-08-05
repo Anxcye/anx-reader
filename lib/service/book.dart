@@ -12,7 +12,6 @@ import 'package:anx_reader/utils/toast/common.dart';
 import 'package:epubx/epubx.dart';
 import 'package:flutter/material.dart';
 
-
 Future<Book> importBook(File file) async {
   try {
     EpubBookRef epubBookRef = await EpubReader.openBook(file.readAsBytesSync());
@@ -80,14 +79,11 @@ void openBook(BuildContext context, Book book, Function updateBookList) {
     MaterialPageRoute(
       builder: (context) => ReadingPage(key: readingPageKey, book: book),
     ),
-  ).then((result) {
-    if (result != null) {
-      Map<String, dynamic> resultMap = result as Map<String, dynamic>;
-      book.lastReadPosition = resultMap['cfi'];
-      book.readingPercentage = resultMap['readProgress'];
-      updateBook(book);
+  ).then((value) {
+    // wait 1s to update book which is read
+    Future.delayed(const Duration(seconds: 1), () {
       updateBookList();
-    }
+    });
   });
 }
 
