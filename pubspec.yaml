@@ -70,6 +70,7 @@ flutter:
     - assets/js/jszip.min.js
     - assets/fonts/SourceHanSerifSC-Regular.otf
     - pubspec.yaml
+    - assets/foliate-js/*.js
   fonts:
     - family: SourceHanSerif
       fonts:
