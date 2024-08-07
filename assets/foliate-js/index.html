@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<meta name="color-scheme" content="light dark">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy"
+  content="default-src 'self' blob:; script-src 'self'; style-src 'self' blob: 'unsafe-inline'; img-src 'self' blob: data:; connect-src 'self' blob: data: *; frame-src blob: data:; object-src blob: data:; form-action 'none';">
+<title>E-Book Reader</title>
+<style>
+  :root {
+    --active-bg: rgba(0, 0, 0, .05);
+  }
+
+  @supports (color-scheme: light dark) {
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --active-bg: rgba(255, 255, 255, .1);
+      }
+    }
+  }
+
+  html {
+    height: 100%;
+  }
+
+  body {
+    margin: 0 auto;
+    height: 100%;
+    font: menu;
+    font-family: system-ui, sans-serif;
+  }
+
+  #footnote-dialog {
+    padding: 0;
+    width: 400px;
+    height: 200px;
+    border-radius: 30px;
+    border: 2px solid grey;
+    -webkit-user-select: none;
+  }
+
+  #footnote-dialog div {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  #footnote-dialog main {
+    min-height: 0;
+    flex: 1
+  }
+</style>
+<dialog id="footnote-dialog">
+  <div>
+    <main></main>
+  </div>
+</dialog>
+<script src="../foliate-js/vendor/pdfjs/pdf.js"></script>
+<script src="book.js" type="module"></script>
