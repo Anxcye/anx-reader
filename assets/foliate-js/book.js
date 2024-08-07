@@ -333,7 +333,7 @@ class Reader {
         if (!cfi)
             this.view.renderer.next()
 
-        const bookmarks = getAllAnnotations()
+        const bookmarks = onGetAllAnnotations()
         if (bookmarks) {
             for (const bookmark of bookmarks) {
                 const { value, type, color, note } = bookmark
@@ -442,65 +442,33 @@ const open = async (file, cfi) => {
     await reader.open(file, cfi)
 }
 
-//////// use for test //////////
-let url = '../local/shiji.epub'
-let cfi = ''
-let style = {
-    fontSize: 1.2,
-    spacing: '1.5',
-    fontColor: '#66ccff',
-    backgroundColor: '#ffffff',
-    topMargin: 100,
-    bottomMargin: 100,
-    sideMargin: 5,
-    justify: true,
-    hyphenate: true,
-    scroll: false,
-    animated: true
-}
-window.flutter_inappwebview = {}
-window.flutter_inappwebview.callHandler = (name, data) => {
-    console.log(name, data)
-}
-///////////////////////////////
+// //////// use for test //////////
+// let url = '../local/shiji.epub'
+// let cfi = ''
+// let style = {
+//     fontSize: 1.2,
+//     spacing: '1.5',
+//     fontColor: '#66ccff',
+//     backgroundColor: '#ffffff',
+//     topMargin: 100,
+//     bottomMargin: 100,
+//     sideMargin: 5,
+//     justify: true,
+//     hyphenate: true,
+//     scroll: false,
+//     animated: true
+// }
+// window.flutter_inappwebview = {}
+// window.flutter_inappwebview.callHandler = (name, data) => {
+//     console.log(name, data)
+// }
+// ///////////////////////////////
 fetch(url)
     .then(res => res.blob())
     .then(blob => open(new File([blob], new URL(url, window.location.origin).pathname), cfi))
     .catch(e => console.error(e))
 
-const onRelocated = (currentInfo) => {
-    const chapterTitle = currentInfo.tocItem?.label
-    const chapterTotalPages = 0
-    const chapterCurrentPage = 0
-    const bookTotalPages = currentInfo.location.total
-    const bookCurrentPage = currentInfo.location.current
-    const cfi = currentInfo.cfi
-    const percentage = currentInfo.fraction
-
-    window.flutter_inappwebview.callHandler('onRelocated', {
-        chapterTitle,
-        chapterTotalPages,
-        chapterCurrentPage,
-        bookTotalPages,
-        bookCurrentPage,
-        cfi,
-        percentage
-    })
-
-}
-
-const getToc = () => reader.view.book.toc
-
-const goToHref = href => reader.view.goTo(href)
-
-const goToPercent = percent => reader.view.goToFraction(percent)
-
-const next = () => reader.view.next()
-
-const prev = () => reader.view.prev()
-
-const setScroll = (scroll) => reader.view.renderer.setAttribute('flow', scroll ? 'scrolled' : 'paginated')
-
+const callFlutter = (name, data) => window.flutter_inappwebview.callHandler(name, data)
 
 const setStyle = () => {
     reader.view.renderer.setAttribute('flow', style.scroll ? 'scrolled' : 'paginated')
@@ -519,7 +487,36 @@ const setStyle = () => {
     reader.view.renderer.setStyles?.(getCSS(newStyle))
 }
 
-const getAllAnnotations = () => {
+const onRelocated = (currentInfo) => {
+    const chapterTitle = currentInfo.tocItem?.label
+    const chapterTotalPages = 0
+    const chapterCurrentPage = 0
+    const bookTotalPages = currentInfo.location.total
+    const bookCurrentPage = currentInfo.location.current
+    const cfi = currentInfo.cfi
+    const percentage = currentInfo.fraction
+
+    callFlutter('onRelocated', {
+        chapterTitle,
+        chapterTotalPages,
+        chapterCurrentPage,
+        bookTotalPages,
+        bookCurrentPage,
+        cfi,
+        percentage
+    })
+    
+}
+
+const onAnnotationClick = (annotation) => console.log(annotation)
+
+const onSelectionEnd = (selection) => console.log(selection)
+
+const onClickView = (x, y) => callFlutter('onClick', { x, y })
+
+const onExternalLink = (link) => console.log(link)
+
+const onGetAllAnnotations = () => {
     return [
         // { id: 1, type: 'highlight', value: "epubcfi(/6/8!/4/4,/1:0,/1:20)", color: 'blue', note: 'this is' },
         // { id: 2, type: 'highlight', value: "epubcfi(/6/8!/4/6,/1:0,/1:13)", color: 'yellow', note: 'this is' },
@@ -527,20 +524,26 @@ const getAllAnnotations = () => {
     ]
 }
 
-const onAnnotationClick = (annotation) => console.log(annotation)
+window.getToc = () => reader.view.book.toc
 
-const onSelectionEnd = (selection) => console.log(selection)
+window.goToHref = href => reader.view.goTo(href)
 
-const onClickView = (x, y) => console.log('click', x, y)
+window.goToPercent = percent => reader.view.goToFraction(percent)
 
-const clearSelection = () => reader.view.deselect()
+window.nextPage = () => reader.view.next()
 
-const addAnnotation = (annotation) => reader.addAnnotation(annotation)
+window.prevPage = () => reader.view.prev()
 
-const updateAnnotation = (annotation, remove) => remove ? reader.removeAnnotation(annotation) : reader.addAnnotation(annotation)
+window.setScroll = (scroll) => reader.view.renderer.setAttribute('flow', scroll ? 'scrolled' : 'paginated')
 
-const onExternalLink = (link) => console.log(link)
+window.clearSelection = () => reader.view.deselect()
 
-const prevSection = () => reader.view.renderer.prevSection()
+window.addAnnotation = (annotation) => reader.addAnnotation(annotation)
 
-const nextSection = () => reader.view.renderer.nextSection()
+window.updateAnnotation = (annotation, remove) => remove ? reader.removeAnnotation(annotation) : reader.addAnnotation(annotation)
+
+window.prevSection = () => reader.view.renderer.prevSection()
+
+window.nextSection = () => reader.view.renderer.nextSection()
+
+
