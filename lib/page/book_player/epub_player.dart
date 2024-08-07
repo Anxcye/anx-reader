@@ -236,9 +236,36 @@ class EpubPlayerState extends State<EpubPlayer> {
     contextMenuEntry = null;
   }
 
-  //////////////// NEW CODE ////////////////
+  //////////////// NEW CODE /////////////////////////////////////////////////////////////////////////
   String cfi = '';
   double percentage = 0.0;
+
+  void prevPage() {
+    webViewController.evaluateJavascript(source: 'prevPage()');
+  }
+
+  void nextPage() {
+    webViewController.evaluateJavascript(source: 'nextPage()');
+  }
+
+  void onClick(Map<String, dynamic> location) {
+    final x = location['x'];
+    final y = location['y'];
+    final part = coordinatesToPart(x, y);
+    final currentPageTurningType = Prefs().pageTurningType;
+    final pageTurningType = pageTurningTypes[currentPageTurningType];
+    switch (pageTurningType[part]) {
+      case PageTurningType.prev:
+        prevPage();
+        break;
+      case PageTurningType.next:
+        nextPage();
+        break;
+      case PageTurningType.menu:
+        widget.showOrHideAppBarAndBottomBar(true);
+        break;
+    }
+  }
 
   void onLoadStart(InAppWebViewController controller) {
     ReadTheme readTheme = Prefs().readTheme;
@@ -278,6 +305,12 @@ class EpubPlayerState extends State<EpubPlayer> {
           Map<String, dynamic> location = args[0];
           cfi = location['cfi'];
           percentage = location['percentage'];
+        });
+    controller.addJavaScriptHandler(
+        handlerName: 'onClick',
+        callback: (args) {
+          Map<String, dynamic> location = args[0];
+          onClick(location);
         });
   }
 
@@ -350,14 +383,6 @@ class EpubPlayerState extends State<EpubPlayer> {
         ],
       ),
     );
-  }
-
-  void prevPage() {
-    webViewController.evaluateJavascript(source: 'prevPage(viewWidth, 300)');
-  }
-
-  void nextPage() {
-    webViewController.evaluateJavascript(source: 'nextPage(viewWidth, 300)');
   }
 
   void prevChapter() {
