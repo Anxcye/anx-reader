@@ -9,6 +9,7 @@ import 'package:anx_reader/page/reading_page.dart';
 import 'package:anx_reader/service/book_player/book_player_server.dart';
 import 'package:anx_reader/utils/coordinates_to_part.dart';
 import 'package:anx_reader/utils/get_base_path.dart';
+import 'package:anx_reader/utils/js/convert_dart_color_to_js.dart';
 import 'package:anx_reader/utils/log/common.dart';
 import 'package:anx_reader/models/book_note.dart';
 import 'package:anx_reader/widgets/context_menu.dart';
@@ -240,6 +241,16 @@ class EpubPlayerState extends State<EpubPlayer> {
   double percentage = 0.0;
 
   void onLoadStart(InAppWebViewController controller) {
+    ReadTheme readTheme = Prefs().readTheme;
+    BookStyle bookStyle = Prefs().bookStyle;
+    String backgroundColor = convertDartColorToJs(readTheme.backgroundColor);
+    String textColor = convertDartColorToJs(readTheme.textColor);
+    print('fontsize' + bookStyle.fontSize.toString());
+    print('topMargin' + bookStyle.topMargin.toString());
+    print('sideMargin' + bookStyle.sideMargin.toString());
+    print('lineHeight' + bookStyle.lineHeight.toString());
+    print('letterSpacing' + bookStyle.letterSpacing.toString());
+
     controller.evaluateJavascript(source: '''
       let url = 'http://localhost:${Server().port}/book/${getBasePath(widget.book.filePath)}';
       let cfi = '${widget.book.lastReadPosition}';
@@ -247,8 +258,8 @@ class EpubPlayerState extends State<EpubPlayer> {
       let style = {
           fontSize: 1.2,
           spacing: '1.5',
-          fontColor: '#66ccff',
-          backgroundColor: '#ffffff',
+          fontColor: '#$textColor',
+          backgroundColor: '#$backgroundColor',
           topMargin: 100,
           bottomMargin: 100,
           sideMargin: 5,
