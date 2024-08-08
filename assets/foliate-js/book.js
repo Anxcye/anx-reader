@@ -376,7 +376,8 @@ class Reader {
 
         this.view.addEventListener('show-annotation', e => {
             const annotation = this.annotationsByValue.get(e.detail.value)
-            onAnnotationClick(annotation)
+            const pos = getPosition(e.detail.range)
+            onAnnotationClick({ annotation, pos})
         })
         this.view.addEventListener('external-link', e => {
             e.preventDefault()

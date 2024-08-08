@@ -24,11 +24,10 @@ class EpubPlayer extends StatefulWidget {
   final Book book;
   final Function showOrHideAppBarAndBottomBar;
 
-  const EpubPlayer(
-      {super.key,
-      required this.content,
-      required this.showOrHideAppBarAndBottomBar,
-      required this.book});
+  const EpubPlayer({super.key,
+    required this.content,
+    required this.showOrHideAppBarAndBottomBar,
+    required this.book});
 
   @override
   State<EpubPlayer> createState() => EpubPlayerState();
@@ -150,12 +149,15 @@ class EpubPlayerState extends State<EpubPlayer> {
     BookStyle bookStyle = Prefs().bookStyle;
     String backgroundColor = convertDartColorToJs(readTheme.backgroundColor);
     String textColor = convertDartColorToJs(readTheme.textColor);
-    List<BookNote> annotationList = await selectBookNotesByBookId(widget.book.id);
-    String allAnnotations = jsonEncode(annotationList.map((e) => e.toJson()).toList());
+    List<BookNote> annotationList = await selectBookNotesByBookId(
+        widget.book.id);
+    String allAnnotations = jsonEncode(
+        annotationList.map((e) => e.toJson()).toList());
 
     controller.evaluateJavascript(source: '''
       const allAnnotations = $allAnnotations;
-      const url = 'http://localhost:${Server().port}/book/${getBasePath(widget.book.filePath)}';
+      const url = 'http://localhost:${Server().port}/book/${getBasePath(
+        widget.book.filePath)}';
       let cfi = '${widget.book.lastReadPosition}';
       console.log('BookPlayer:' + cfi);
       let style = {
@@ -209,7 +211,32 @@ class EpubPlayerState extends State<EpubPlayer> {
           double x = location['pos']['point']['x'];
           double y = location['pos']['point']['y'];
           String dir = location['pos']['dir'];
-          showContextMenu(context, x, y, dir, text, cfi, null);
+          showContextMenu(
+              context,
+              x,
+              y,
+              dir,
+              text,
+              cfi,
+              null);
+        });
+    controller.addJavaScriptHandler(handlerName: 'onAnnotationClick',
+        callback: (args) {
+          Map<String, dynamic> annotation = args[0];
+          int id = annotation['annotation']['id'];
+          String cfi = annotation['annotation']['value'];
+          String note = annotation['annotation']['note'];
+          double x = annotation['pos']['point']['x'];
+          double y = annotation['pos']['point']['y'];
+          String dir = annotation['pos']['dir'];
+          showContextMenu(
+              context,
+              x,
+              y,
+              dir,
+              note,
+              cfi,
+              id);
         });
   }
 
