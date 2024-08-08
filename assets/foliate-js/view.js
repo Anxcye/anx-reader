@@ -88,10 +88,12 @@ export class View extends HTMLElement {
             const getFragment = book.getTOCFragment.bind(book)
             this.#tocProgress = new TOCProgress()
             await this.#tocProgress.init({
-                toc: book.toc ?? [], ids, splitHref, getFragment })
+                toc: book.toc ?? [], ids, splitHref, getFragment
+            })
             this.#pageProgress = new TOCProgress()
             await this.#pageProgress.init({
-                toc: book.pageList ?? [], ids, splitHref, getFragment })
+                toc: book.pageList ?? [], ids, splitHref, getFragment
+            })
         }
 
         this.isFixedLayout = this.book.rendition?.layout === 'pre-paginated'
@@ -177,6 +179,7 @@ export class View extends HTMLElement {
             this.history.replaceState(cfi)
         this.#emit('relocate', this.lastLocation)
     }
+    
     #onLoad({ doc, index }) {
         // set language and dir if not already set
         doc.documentElement.lang ||= this.language.canonical ?? ''
@@ -185,7 +188,7 @@ export class View extends HTMLElement {
 
         this.#handleLinks(doc, index)
         this.#handleClick(doc)
-
+        
         this.#emit('load', { doc, index })
     }
     #handleLinks(doc, index) {

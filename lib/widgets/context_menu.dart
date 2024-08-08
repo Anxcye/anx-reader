@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 
 void showContextMenu(
     BuildContext context,
-    double leftPos,
-    double topPos,
-    double bottomPos,
+    double x,
+    double y,
+    String dir,
     String annoContent,
     String annoCfi,
     int? annoId,
@@ -17,18 +17,15 @@ void showContextMenu(
   double menuHeight = 100;
   double screenWidth = MediaQuery.of(context).size.width;
   double screenHeight = MediaQuery.of(context).size.height;
-  // space is enough to show the menu in the selection
-  double widgetTop = bottomPos - topPos > menuHeight
-      ? (topPos + bottomPos - menuHeight) / 2
-  // space is not enough to show the menu above the selection
-      : topPos < menuHeight + screenHeight / 2
-      ? bottomPos + 40
-      : topPos - menuHeight - 40;
-  double widgetLeft = leftPos + menuWidth > screenWidth
+  x *= screenWidth;
+  y *= screenHeight;
+  
+  double widgetTop = dir == "up" ? y - menuHeight - 20 : y + 20;
+  double widgetLeft = x + menuWidth > screenWidth
       ? screenWidth - menuWidth - 20
-      : leftPos;
+      : x;
 
-  topPos = topPos > 80 ? topPos - 80 : topPos;
+  y = y > 80 ? y - 80 : y;
 
   playerKey.removeOverlay();
 
