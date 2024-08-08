@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/utils/get_base_path.dart';
 import 'package:anx_reader/utils/get_path/databases_path.dart';
 import 'package:anx_reader/utils/log/common.dart';
@@ -101,7 +102,7 @@ class DBHelper {
         final path = join(databasePath, 'app_database.db');
         return await openDatabase(
           path,
-          version: 3,
+          version: 4,
           onCreate: (db, version) async {
             onUpgradeDatabase(db, 0, version);
           },
@@ -198,6 +199,11 @@ class DBHelper {
             element.rename(newPath);
           }
         });
+        continue case3;
+        case3:
+        case 3:
+          // remove former book style
+        Prefs().removeBookStyle();
     }
   }
 }

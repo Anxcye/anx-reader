@@ -73,6 +73,11 @@ class Prefs extends ChangeNotifier {
     return BookStyle.fromJson(bookStyleJson);
   }
 
+  void removeBookStyle() {
+    prefs.remove('readStyle');
+    notifyListeners();
+  }
+
   void saveReadThemeToPrefs(ReadTheme readTheme) {
     prefs.setString('readTheme', readTheme.toJson());
     notifyListeners();
