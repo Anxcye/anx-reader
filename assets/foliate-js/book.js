@@ -6,101 +6,103 @@ const { configure, ZipReader, BlobReader, TextWriter, BlobWriter } =
 const { EPUB } = await import('./epub.js')
 
 // https://github.com/johnfactotum/foliate
-const setSelectionHandler = (view, doc, index) => {
-    const debounce = (f, wait, immediate) => {
-        let timeout
-        return (...args) => {
-            const later = () => {
-                timeout = null
-                if (!immediate) f(...args)
-            }
-            const callNow = immediate && !timeout
-            if (timeout) clearTimeout(timeout)
-            timeout = setTimeout(later, wait)
-            if (callNow) f(...args)
+const debounce = (f, wait, immediate) => {
+    let timeout
+    return (...args) => {
+        const later = () => {
+            timeout = null
+            if (!immediate) f(...args)
         }
+        const callNow = immediate && !timeout
+        if (timeout) clearTimeout(timeout)
+        timeout = setTimeout(later, wait)
+        if (callNow) f(...args)
     }
+}
 
-    const pointIsInView = ({ x, y }) =>
-        x > 0 && y > 0 && x < window.innerWidth && y < window.innerHeight;
+const pointIsInView = ({ x, y }) =>
+    x > 0 && y > 0 && x < window.innerWidth && y < window.innerHeight;
 
-    const frameRect = (frame, rect, sx = 1, sy = 1) => {
-        const left = sx * rect.left + frame.left;
-        const right = sx * rect.right + frame.left;
-        const top = sy * rect.top + frame.top;
-        const bottom = sy * rect.bottom + frame.top;
-        return { left, right, top, bottom };
+const frameRect = (frame, rect, sx = 1, sy = 1) => {
+    const left = sx * rect.left + frame.left;
+    const right = sx * rect.right + frame.left;
+    const top = sy * rect.top + frame.top;
+    const bottom = sy * rect.bottom + frame.top;
+    return { left, right, top, bottom };
+};
+
+const getLang = el => {
+    const lang = el.lang || el?.getAttributeNS?.('http://www.w3.org/XML/1998/namespace', 'lang');
+    if (lang) return lang;
+    if (el.parentElement) return getLang(el.parentElement);
+};
+
+const getPosition = target => {
+    const frameElement = (target.getRootNode?.() ?? target?.endContainer?.getRootNode?.())
+        ?.defaultView?.frameElement;
+
+    const transform = frameElement ? getComputedStyle(frameElement).transform : '';
+    const match = transform.match(/matrix\((.+)\)/);
+    const [sx, , , sy] = match?.[1]?.split(/\s*,\s*/)?.map(x => parseFloat(x)) ?? [];
+
+    const frame = frameElement?.getBoundingClientRect() ?? { top: 0, left: 0 };
+    const rects = Array.from(target.getClientRects());
+    const first = frameRect(frame, rects[0], sx, sy);
+    const last = frameRect(frame, rects.at(-1), sx, sy);
+    const screenWidth = window.innerWidth;
+    const screenHeight = window.innerHeight;
+    const start = {
+        point: { x: ((first.left + first.right) / 2) / screenWidth, y: first.top / screenHeight },
+        dir: 'up',
     };
-
-    const getLang = el => {
-        const lang = el.lang || el?.getAttributeNS?.('http://www.w3.org/XML/1998/namespace', 'lang');
-        if (lang) return lang;
-        if (el.parentElement) return getLang(el.parentElement);
+    const end = {
+        point: { x: ((last.left + last.right) / 2) / screenWidth, y: last.bottom / screenHeight },
+        dir: 'down',
     };
+    const startInView = pointIsInView(start.point);
+    const endInView = pointIsInView(end.point);
+    if (!startInView && !endInView) return { point: { x: 0, y: 0 } };
+    if (!startInView) return end;
+    if (!endInView) return start;
+    return start.point.y * screenHeight > window.innerHeight - end.point.y * screenHeight ? start : end;
+};
 
-    const getPosition = target => {
-        const frameElement = (target.getRootNode?.() ?? target?.endContainer?.getRootNode?.())
-            ?.defaultView?.frameElement;
+const getSelectionRange = sel => {
+    if (!sel.rangeCount) return;
+    const range = sel.getRangeAt(0);
+    if (range.collapsed) return;
+    return range;
+};
 
-        const transform = frameElement ? getComputedStyle(frameElement).transform : '';
-        const match = transform.match(/matrix\((.+)\)/);
-        const [sx, , , sy] = match?.[1]?.split(/\s*,\s*/)?.map(x => parseFloat(x)) ?? [];
+//    let isSelecting = false;
 
-        const frame = frameElement?.getBoundingClientRect() ?? { top: 0, left: 0 };
-        const rects = Array.from(target.getClientRects());
-        const first = frameRect(frame, rects[0], sx, sy);
-        const last = frameRect(frame, rects.at(-1), sx, sy);
-        const screenWidth = window.innerWidth;
-        const screenHeight = window.innerHeight;
-        const start = {
-            point: { x: ((first.left + first.right) / 2) / screenWidth, y: first.top / screenHeight },
-            dir: 'up',
-        };
-        const end = {
-            point: { x: ((last.left + last.right) / 2) / screenWidth, y: last.bottom / screenHeight },
-            dir: 'down',
-        };
-        const startInView = pointIsInView(start.point);
-        const endInView = pointIsInView(end.point);
-        if (!startInView && !endInView) return { point: { x: 0, y: 0 } };
-        if (!startInView) return end;
-        if (!endInView) return start;
-        return start.point.y > window.innerHeight - end.point.y ? start : end;
-    };
+const handleSelection = (view, doc, index) => {
+    //    isSelecting = false;
+    const sel = doc.getSelection();
+    const range = getSelectionRange(sel);
+    if (!range) return;
+    const pos = getPosition(range);
+    const cfi = view.getCFI(index, range);
+    const lang = getLang(range.commonAncestorContainer);
+    const text = sel.toString();
+    if (!text) {
+        const newSel = range.startContainer.ownerDocument.getSelection()
+        newSel.removeAllRanges()
+        newSel.addRange(range)
+        text = newSel.toString()
+    }
+    onSelectionEnd({ index, range, lang, cfi, pos, text });
+}
 
-    const getSelectionRange = sel => {
-        if (!sel.rangeCount) return;
-        const range = sel.getRangeAt(0);
-        if (range.collapsed) return;
-        return range;
-    };
-
-    let isSelecting = false;
-
-    doc.addEventListener('pointerdown', () => isSelecting = true);
-    doc.addEventListener('pointerup', () => {
-        isSelecting = false;
-        const sel = doc.getSelection();
-        const range = getSelectionRange(sel);
-        if (!range) return;
-        const pos = getPosition(range);
-        const cfi = view.getCFI(index, range);
-        const lang = getLang(range.commonAncestorContainer);
-        const text = sel.toString();
-        if (!text) {
-            const newSel = range.startContainer.ownerDocument.getSelection()
-            newSel.removeAllRanges()
-            newSel.addRange(range)
-            text = newSel.toString()
-        }
-        onSelectionEnd({ index, range, lang, cfi, pos, text });
-    });
+const setSelectionHandler = (view, doc, index) => {
+    //    doc.addEventListener('pointerdown', () => isSelecting = true);
+    //    doc.addEventListener('pointerup', () => handleSelection(view, doc, index));
 
     if (!view.isFixedLayout)
         // go to the next page when selecting to the end of a page
         // this makes it possible to select across pages
         doc.addEventListener('selectionchange', debounce(() => {
-            if (!isSelecting) return
+            //            if (!isSelecting) return
             if (view.renderer.getAttribute('flow') !== 'paginated') return
             const { lastLocation } = view
             if (!lastLocation) return
@@ -279,6 +281,8 @@ class Reader {
     annotations = new Map()
     annotationsByValue = new Map()
     #footnoteHandler = new FootnoteHandler()
+    #doc
+    #index
     constructor() {
         this.#footnoteHandler.addEventListener('before-render', e => {
             const { view } = e.detail
@@ -326,12 +330,11 @@ class Reader {
     async open(file, cfi) {
         this.view = await getView(file)
 
-        await this.view.init({ lastLocation: cfi })
-
         this.view.addEventListener('load', this.#onLoad.bind(this))
         this.view.addEventListener('relocate', this.#onRelocate.bind(this))
         this.view.addEventListener('click-view', this.#onClickView.bind(this))
 
+        await this.view.init({ lastLocation: cfi })
 
         setStyle()
         if (!cfi)
@@ -391,6 +394,11 @@ class Reader {
                 console.warn(err)
                 this.view.goTo(e.detail.href)
             }))
+
+    }
+
+    showContextMenu() {
+        handleSelection(this.view, this.#doc, this.#index)
     }
 
     addAnnotation(annotation) {
@@ -406,7 +414,8 @@ class Reader {
         this.view.addAnnotation(annotation)
     }
 
-    removeAnnotation(annotation) {
+    removeAnnotation(cfi) {
+        const annotation = this.annotationsByValue.get(cfi)
         const { value } = annotation
         const spineCode = (value.split('/')[2].split('!')[0] - 2) / 2
 
@@ -422,6 +431,8 @@ class Reader {
     }
 
     #onLoad({ detail: { doc, index } }) {
+        this.#doc = doc
+        this.#index = index
         setSelectionHandler(this.view, doc, index)
     }
 
@@ -447,29 +458,29 @@ const open = async (file, cfi) => {
     onSetToc()
 }
 
-////////// use for test //////////
-//let url = '../local/shiji.epub'
-//let cfi = ''
-//let style = {
-//    fontSize: 0.2,
-//    letterSpacing: 0,
-//    spacing: '1.5',
-//    paragraphSpacing: 5,
-//    fontColor: '#66ccff',
-//    backgroundColor: '#ffffff',
-//    topMargin: 100,
-//    bottomMargin: 100,
-//    sideMargin: 5,
-//    justify: true,
-//    hyphenate: true,
-//    scroll: false,
-//    animated: true
-//}
-//window.flutter_inappwebview = {}
-//window.flutter_inappwebview.callHandler = (name, data) => {
-//    console.log(name, data)
-//}
-/////////////////////////////////
+// //////// use for test //////////
+// let url = '../local/shiji.epub'
+// let cfi = ''
+// let style = {
+//  fontSize: 1.2,
+//  letterSpacing: 0,
+//  spacing: '1.5',
+//  paragraphSpacing: 5,
+//  fontColor: '#66ccff',
+//  backgroundColor: '#ffffff',
+//  topMargin: 100,
+//  bottomMargin: 100,
+//  sideMargin: 5,
+//  justify: true,
+//  hyphenate: true,
+//  scroll: false,
+//  animated: true
+// }
+// window.flutter_inappwebview = {}
+// window.flutter_inappwebview.callHandler = (name, data) => {
+//  console.log(name, data)
+// }
+// ///////////////////////////////
 fetch(url)
     .then(res => res.blob())
     .then(blob => open(new File([blob], new URL(url, window.location.origin).pathname), cfi))
@@ -520,7 +531,7 @@ const onRelocated = (currentInfo) => {
 
 const onAnnotationClick = (annotation) => console.log(annotation)
 
-const onSelectionEnd = (selection) => console.log(selection)
+const onSelectionEnd = (selection) => callFlutter('onSelectionEnd', selection)
 
 const onClickView = (x, y) => callFlutter('onClick', { x, y })
 
@@ -554,11 +565,13 @@ window.prevPage = () => reader.view.prev()
 
 window.setScroll = (scroll) => reader.view.renderer.setAttribute('flow', scroll ? 'scrolled' : 'paginated')
 
+window.showContextMenu = () => reader.showContextMenu()
+
 window.clearSelection = () => reader.view.deselect()
 
 window.addAnnotation = (annotation) => reader.addAnnotation(annotation)
 
-window.updateAnnotation = (annotation, remove) => remove ? reader.removeAnnotation(annotation) : reader.addAnnotation(annotation)
+window.removeAnnotation = (cfi) => reader.removeAnnotation(cfi)
 
 window.prevSection = () => reader.view.renderer.prevSection()
 

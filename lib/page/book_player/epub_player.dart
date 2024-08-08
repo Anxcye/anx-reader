@@ -41,108 +41,105 @@ class EpubPlayerState extends State<EpubPlayer> {
   // String chapterTitle = '';
   // String chapterHref = '';
   late ContextMenu contextMenu;
-  OverlayEntry? contextMenuEntry;
 
-  Future<String> onReadingLocation() async {
-    String currentCfi = '';
-    webViewController.addJavaScriptHandler(
-        handlerName: 'onReadingLocation',
-        callback: (args) {
-          currentCfi = args[0];
-        });
-    await webViewController.evaluateJavascript(source: '''
-      var currentLocation = rendition.currentLocation();
-      var currentCfi = currentLocation.start.cfi;
-      window.flutter_inappwebview.callHandler('onReadingLocation', currentCfi);
-      ''');
-    return currentCfi;
-  }
+  // Future<String> onReadingLocation() async {
+  //   String currentCfi = '';
+  //   webViewController.addJavaScriptHandler(
+  //       handlerName: 'onReadingLocation',
+  //       callback: (args) {
+  //         currentCfi = args[0];
+  //       });
+  //   await webViewController.evaluateJavascript(source: '''
+  //     var currentLocation = rendition.currentLocation();
+  //     var currentCfi = currentLocation.start.cfi;
+  //     window.flutter_inappwebview.callHandler('onReadingLocation', currentCfi);
+  //     ''');
+  //   return currentCfi;
+  // }
 
+  // Future<String> getToc() async {
+  //   String toc = '';
+  //   webViewController.addJavaScriptHandler(
+  //       handlerName: 'getToc',
+  //       callback: (args) {
+  //         toc = args[0];
+  //       });
+  //   await webViewController.evaluateJavascript(source: '''
+  //    getToc = function() {
+  //      let toc = book.navigation.toc;
+  //
+  //      function removeSuffix(obj) {
+  //        if (obj.href && obj.href.includes('#')) {
+  //          obj.href = obj.href.split('#')[0];
+  //        }
+  //        if (obj.subitems) {
+  //          obj.subitems.forEach(removeSuffix);
+  //        }
+  //      }
+  //
+  //      toc = JSON.parse(JSON.stringify(toc));
+  //
+  //      toc.forEach(removeSuffix);
+  //
+  //      toc = JSON.stringify(toc);
+  //      window.flutter_inappwebview.callHandler('getToc', toc);
+  //    }
+  //         getToc();
+  //     ''');
+  //   AnxLog.info('BookPlayer: $toc');
+  //   return toc;
+  // }
 
-
-  Future<String> getToc() async {
-    String toc = '';
-    webViewController.addJavaScriptHandler(
-        handlerName: 'getToc',
-        callback: (args) {
-          toc = args[0];
-        });
-    await webViewController.evaluateJavascript(source: '''
-     getToc = function() {
-       let toc = book.navigation.toc;
-     
-       function removeSuffix(obj) {
-         if (obj.href && obj.href.includes('#')) {
-           obj.href = obj.href.split('#')[0];
-         }
-         if (obj.subitems) {
-           obj.subitems.forEach(removeSuffix);
-         }
-       }
-     
-       toc = JSON.parse(JSON.stringify(toc));
-     
-       toc.forEach(removeSuffix);
-     
-       toc = JSON.stringify(toc);
-       window.flutter_inappwebview.callHandler('getToc', toc);
-     }
-          getToc();
-      ''');
-    AnxLog.info('BookPlayer: $toc');
-    return toc;
-  }
-
-  void progressSetter() {
-    webViewController.addJavaScriptHandler(
-        handlerName: 'getCurrentInfo',
-        callback: (args) {
-          Map<String, dynamic> currentInfo = args[0];
-          if (currentInfo['progress'] == null) {
-            return;
-          }
-          progress = (currentInfo['progress'] as num).toDouble();
-          chapterCurrentPage = currentInfo['chapterCurrentPage'];
-          chapterTotalPages = currentInfo['chapterTotalPage'];
-          chapterTitle = currentInfo['chapterTitle'];
-          chapterHref = currentInfo['chapterHref'];
-        });
-
-    webViewController.addJavaScriptHandler(
-        handlerName: 'getStyle',
-        callback: (args) async {
-          final Map<String, dynamic> bookStyle = {
-            'fontSize': 1.2,
-            'spacing': '1.5',
-            'fontColor': '#66ccff',
-            'backgroundColor': '#ffffff',
-            'topMargin': 100,
-            'bottomMargin': 100,
-            'sideMargin': 5,
-            'justify': true,
-            'hyphenate': true,
-            'scroll': false,
-            'animated': true
-          };
-
-          return jsonEncode(bookStyle);
-        });
-  }
+  // void progressSetter() {
+  //   webViewController.addJavaScriptHandler(
+  //       handlerName: 'getCurrentInfo',
+  //       callback: (args) {
+  //         Map<String, dynamic> currentInfo = args[0];
+  //         if (currentInfo['progress'] == null) {
+  //           return;
+  //         }
+  //         progress = (currentInfo['progress'] as num).toDouble();
+  //         chapterCurrentPage = currentInfo['chapterCurrentPage'];
+  //         chapterTotalPages = currentInfo['chapterTotalPage'];
+  //         chapterTitle = currentInfo['chapterTitle'];
+  //         chapterHref = currentInfo['chapterHref'];
+  //       });
+  //
+  //   webViewController.addJavaScriptHandler(
+  //       handlerName: 'getStyle',
+  //       callback: (args) async {
+  //         final Map<String, dynamic> bookStyle = {
+  //           'fontSize': 1.2,
+  //           'spacing': '1.5',
+  //           'fontColor': '#66ccff',
+  //           'backgroundColor': '#ffffff',
+  //           'topMargin': 100,
+  //           'bottomMargin': 100,
+  //           'sideMargin': 5,
+  //           'justify': true,
+  //           'hyphenate': true,
+  //           'scroll': false,
+  //           'animated': true
+  //         };
+  //
+  //         return jsonEncode(bookStyle);
+  //       });
+  // }
 
   void clickHandlers() {
     // window.flutter_inappwebview.callHandler('onTap', { x: x, y: y });
-    webViewController.addJavaScriptHandler(
-        handlerName: 'onTap',
-        callback: (args) {
-          if (contextMenuEntry != null) {
-            removeOverlay();
-            return;
-          }
-          Map<String, dynamic> coordinates = args[0];
-          double x = coordinates['x'];
-          double y = coordinates['y'];
-          onViewerTap(x, y);
-        });
+    // webViewController.addJavaScriptHandler(
+    //     handlerName: 'onTap',
+    //     callback: (args) {
+    //       if (contextMenuEntry != null) {
+    //         removeOverlay();
+    //         return;
+    //       }
+    //       Map<String, dynamic> coordinates = args[0];
+    //       double x = coordinates['x'];
+    //       double y = coordinates['y'];
+    //       onViewerTap(x, y);
+    //     });
 
     // window.flutter_inappwebview.callHandler('onSelected', { left: left, right: right, top: top, bottom: bottom, cfiRange: selectedCfiRange, text: selectedText });
     webViewController.addJavaScriptHandler(
@@ -192,45 +189,39 @@ class EpubPlayerState extends State<EpubPlayer> {
     //       }
     //     });
 
-    webViewController.addJavaScriptHandler(
-        handlerName: 'showMenu',
-        callback: (args) async {
-          removeOverlay();
-          widget.showOrHideAppBarAndBottomBar(true);
-        });
+    // webViewController.addJavaScriptHandler(
+    //     handlerName: 'showMenu',
+    //     callback: (args) async {
+    //       removeOverlay();
+    //       widget.showOrHideAppBarAndBottomBar(true);
+    //     });
   }
 
-  void renderNote(BookNote bookNote) {
-    webViewController.evaluateJavascript(source: '''
-      addABookNote(${jsonEncode(bookNote.toMap())});
-      ''');
-  }
+  // void renderNote(BookNote bookNote) {
+  //   webViewController.evaluateJavascript(source: '''
+  //     addABookNote(${jsonEncode(bookNote.toMap())});
+  //     ''');
+  // }
 
-  void onViewerTap(double x, double y) {
-    int part = coordinatesToPart(x, y);
-    int currentPageTurningType = Prefs().pageTurningType;
-    List<PageTurningType> pageTurningType =
-        pageTurningTypes[currentPageTurningType];
-    switch (pageTurningType[part]) {
-      case PageTurningType.prev:
-        prevPage();
-        break;
-      case PageTurningType.next:
-        nextPage();
-        break;
-      case PageTurningType.menu:
-        widget.showOrHideAppBarAndBottomBar(true);
-        break;
-    }
-
-    readingPageKey.currentState!.setAwakeTimer(Prefs().awakeTime);
-  }
-
-  void removeOverlay() {
-    if (contextMenuEntry == null || contextMenuEntry?.mounted == false) return;
-    contextMenuEntry?.remove();
-    contextMenuEntry = null;
-  }
+  // void onViewerTap(double x, double y) {
+  //   int part = coordinatesToPart(x, y);
+  //   int currentPageTurningType = Prefs().pageTurningType;
+  //   List<PageTurningType> pageTurningType =
+  //   pageTurningTypes[currentPageTurningType];
+  //   switch (pageTurningType[part]) {
+  //     case PageTurningType.prev:
+  //       prevPage();
+  //       break;
+  //     case PageTurningType.next:
+  //       nextPage();
+  //       break;
+  //     case PageTurningType.menu:
+  //       widget.showOrHideAppBarAndBottomBar(true);
+  //       break;
+  //   }
+  //
+  //   readingPageKey.currentState!.setAwakeTimer(Prefs().awakeTime);
+  // }
 
   //////////////// NEW CODE /////////////////////////////////////////////////////////////////////////
   String cfi = '';
@@ -240,6 +231,7 @@ class EpubPlayerState extends State<EpubPlayer> {
   int chapterCurrentPage = 0;
   int chapterTotalPages = 0;
   List<TocItem> toc = [];
+  OverlayEntry? contextMenuEntry;
 
   void prevPage() {
     webViewController.evaluateJavascript(source: 'prevPage()');
@@ -248,14 +240,80 @@ class EpubPlayerState extends State<EpubPlayer> {
   void nextPage() {
     webViewController.evaluateJavascript(source: 'nextPage()');
   }
-  
+
+  void prevChapter() {
+    webViewController.evaluateJavascript(source: '''
+      prevSection()
+      ''');
+  }
+
+  void nextChapter() {
+    webViewController.evaluateJavascript(source: '''
+      nextSection()
+      ''');
+  }
+
+  Future<void> goToPercentage(double value) async {
+    await webViewController.evaluateJavascript(source: '''
+      goToPercent($value); 
+      ''');
+  }
+
+  void changeTheme(ReadTheme readTheme) {
+    String backgroundColor = convertDartColorToJs(readTheme.backgroundColor);
+    String textColor = convertDartColorToJs(readTheme.textColor);
+
+    webViewController.evaluateJavascript(source: '''
+      changeStyle({
+        backgroundColor: '#$backgroundColor',
+        fontColor: '#$textColor',
+      })
+      ''');
+  }
+
+  void changeStyle(BookStyle bookStyle) {
+    webViewController.evaluateJavascript(source: '''
+      changeStyle({
+        fontSize: ${bookStyle.fontSize},
+        spacing: '${bookStyle.lineHeight}',
+        paragraphSpacing: ${bookStyle.paragraphSpacing},
+        topMargin: ${bookStyle.topMargin},
+        bottomMargin: ${bookStyle.bottomMargin},
+        sideMargin: ${bookStyle.sideMargin},
+        letterSpacing: ${bookStyle.letterSpacing},
+      })
+    ''');
+  }
+
   void goToHref(String href) {
     webViewController.evaluateJavascript(source: '''
       goToHref('$href');
       ''');
   }
 
+  void addAnnotation(BookNote bookNote) {
+    webViewController.evaluateJavascript(source: '''
+      addAnnotation({
+        id: ${bookNote.id},
+        type: '${bookNote.type}',
+        value: '${bookNote.cfi}',
+        color: '#${bookNote.color}',
+        note: '${bookNote.content}',
+      })
+      ''');
+  }
+
+  void removeAnnotation(String cfi) {
+    webViewController.evaluateJavascript(source: '''
+      removeAnnotation('$cfi');
+      ''');
+  }
+
   void onClick(Map<String, dynamic> location) {
+    if (contextMenuEntry != null) {
+      removeOverlay();
+      return;
+    }
     final x = location['x'];
     final y = location['y'];
     final part = coordinatesToPart(x, y);
@@ -320,11 +378,22 @@ class EpubPlayerState extends State<EpubPlayer> {
           Map<String, dynamic> location = args[0];
           onClick(location);
         });
-    controller.addJavaScriptHandler(handlerName:'onSetToc',
+    controller.addJavaScriptHandler(
+        handlerName: 'onSetToc',
         callback: (args) {
           List<dynamic> t = args[0];
-          print(t);
           toc = t.map((i) => TocItem.fromJson(i)).toList();
+        });
+    controller.addJavaScriptHandler(
+        handlerName: 'onSelectionEnd',
+        callback: (args) {
+          Map<String, dynamic> location = args[0];
+          String cfi = location['cfi'];
+          String text = location['text'];
+          double x = location['pos']['point']['x'];
+          double y = location['pos']['point']['y'];
+          String dir = location['pos']['dir'];
+          showContextMenu(context, x, y, dir, text, cfi, null);
         });
   }
 
@@ -335,16 +404,22 @@ class EpubPlayerState extends State<EpubPlayer> {
     setHandler(controller);
   }
 
+  void removeOverlay() {
+    if (contextMenuEntry == null || contextMenuEntry?.mounted == false) return;
+    contextMenuEntry?.remove();
+    contextMenuEntry = null;
+  }
+
   @override
   void initState() {
     super.initState();
     contextMenu = ContextMenu(
       settings: ContextMenuSettings(hideDefaultSystemContextMenuItems: true),
       onCreateContextMenu: (hitTestResult) async {
-        webViewController.evaluateJavascript(source: "selectEnd()");
+        webViewController.evaluateJavascript(source: "showContextMenu()");
       },
       onHideContextMenu: () {
-        removeOverlay();
+        // removeOverlay();
       },
     );
   }
@@ -397,49 +472,5 @@ class EpubPlayerState extends State<EpubPlayer> {
         ],
       ),
     );
-  }
-
-  void prevChapter() {
-    webViewController.evaluateJavascript(source: '''
-      prevSection()
-      ''');
-  }
-
-  void nextChapter() {
-    webViewController.evaluateJavascript(source: '''
-      nextSection()
-      ''');
-  }
-
-  Future<void> goToPercentage(double value) async {
-    await webViewController.evaluateJavascript(source: '''
-      goToPercent($value); 
-      ''');
-  }
-
-  void changeTheme(ReadTheme readTheme) {
-    String backgroundColor = convertDartColorToJs(readTheme.backgroundColor);
-    String textColor = convertDartColorToJs(readTheme.textColor);
-
-    webViewController.evaluateJavascript(source: '''
-      changeStyle({
-        backgroundColor: '#$backgroundColor',
-        fontColor: '#$textColor',
-      })
-      ''');
-  }
-
-  void changeStyle(BookStyle bookStyle) {
-    webViewController.evaluateJavascript(source: '''
-      changeStyle({
-        fontSize: ${bookStyle.fontSize},
-        spacing: '${bookStyle.lineHeight}',
-        paragraphSpacing: ${bookStyle.paragraphSpacing},
-        topMargin: ${bookStyle.topMargin},
-        bottomMargin: ${bookStyle.bottomMargin},
-        sideMargin: ${bookStyle.sideMargin},
-        letterSpacing: ${bookStyle.letterSpacing},
-      })
-    ''');
   }
 }

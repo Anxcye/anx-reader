@@ -38,8 +38,8 @@ Widget excerptMenu(
     if (deleteConfirm) {
       if (id != null) {
         deleteBookNoteById(id);
-        playerKey.webViewController.evaluateJavascript(
-            source: 'removeAnnotations("$annoCfi", "highlight")');
+        playerKey.removeAnnotation(annoCfi);
+
       }
       onClose();
     } else {
@@ -52,12 +52,12 @@ Widget excerptMenu(
   Future<void> onColorSelected(String color, {bool close = true}) async {
     Prefs().annotationColor = color;
     annoColor = color;
-    if (id != null) {
-      BookNote oldBookNote = await selectBookNoteById(id);
-      playerKey.webViewController.evaluateJavascript(
-          source:
-              'removeAnnotations("${oldBookNote.cfi}", "${oldBookNote.type}")');
-    }
+    // if (id != null) {
+    //   BookNote oldBookNote = await selectBookNoteById(id);
+    //   // playerKey.webViewController.evaluateJavascript(
+    //   //     source:
+    //   //         'removeAnnotations("${oldBookNote.cfi}", "${oldBookNote.type}")');
+    // }
     BookNote bookNote = BookNote(
       id: id,
       bookId: playerKey.widget.book.id,
@@ -70,7 +70,7 @@ Widget excerptMenu(
       updateTime: DateTime.now(),
     );
     bookNote.setId(await insertBookNote(bookNote));
-    playerKey.renderNote(bookNote);
+    playerKey.addAnnotation(bookNote);
     if (close) {
       onClose();
     }
