@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:anx_reader/config/shared_preference_provider.dart';
+import 'package:anx_reader/dao/book.dart';
+import 'package:anx_reader/service/book.dart';
 import 'package:anx_reader/utils/get_base_path.dart';
 import 'package:anx_reader/utils/get_path/databases_path.dart';
 import 'package:anx_reader/utils/log/common.dart';
@@ -200,10 +202,17 @@ class DBHelper {
           }
         });
         continue case3;
-        case3:
-        case 3:
-          // remove former book style
+      case3:
+      case 3:
+        // remove former book style
         Prefs().removeBookStyle();
+        selectBooks().then((books) {
+          for (var book in books) {
+            if (!File(book.coverFullPath).existsSync()) {
+              resetBookCover(book);
+            }
+          }
+        });
     }
   }
 }

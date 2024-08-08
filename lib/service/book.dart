@@ -91,3 +91,17 @@ void updateBookRating(Book book, double rating) {
   book.rating = rating;
   updateBook(book);
 }
+
+Future<void> resetBookCover(Book book) async {
+  File file = File(book.fileFullPath);
+  EpubBookRef epubBookRef = await EpubReader.openBook(file.readAsBytesSync());
+
+  final cover = await epubBookRef.readCover();
+  final relativeCoverPath = 'cover/${book.title}-${DateTime.now().millisecond.toString()}.png';
+  final coverPath = getBasePath(relativeCoverPath);
+
+  saveImageToLocal(cover, coverPath);
+
+  book.coverPath = relativeCoverPath;
+  updateBook(book);
+}
