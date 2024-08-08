@@ -164,11 +164,15 @@ export class View extends HTMLElement {
         return this.dispatchEvent(new CustomEvent(name, { detail, cancelable }))
     }
     #onRelocate({ reason, range, index, fraction, size }) {
+        const chapterLocation = {
+            current: this.renderer.page,
+            total: this.renderer.pages - 2
+        }
         const progress = this.#sectionProgress?.getProgress(index, fraction, size) ?? {}
         const tocItem = this.#tocProgress?.getProgress(index, range)
         const pageItem = this.#pageProgress?.getProgress(index, range)
         const cfi = this.getCFI(index, range)
-        this.lastLocation = { ...progress, tocItem, pageItem, cfi, range }
+        this.lastLocation = { ...progress, tocItem, pageItem, cfi, range, chapterLocation }
         if (reason === 'snap' || reason === 'page' || reason === 'scroll')
             this.history.replaceState(cfi)
         this.#emit('relocate', this.lastLocation)
@@ -203,17 +207,23 @@ export class View extends HTMLElement {
             })
     }
     #handleClick(doc) {
-      doc.addEventListener('click', e => {
-        let { x, y } = e
-        // add top margin to y, y is relative to the iframe
-        const topMargin = this.renderer.getAttribute('top-margin').match(/\d+/)[0]
-        y += parseInt(topMargin)
-        this.#emit('click-view', {x, y})
-      })
-      this.renderer.addEventListener('click', e => { 
-        const {x, y} = e
-        this.#emit('click-view', {x, y})
-      })
+        doc.addEventListener('click', e => {
+            let { clientX, clientY } = e
+            // add top margin to y, y is relative to the iframe
+            const topMargin = this.renderer.getAttribute('top-margin').match(/\d+/)[0]
+            clientY += parseInt(topMargin)
+            while (clientX > window.innerWidth) {
+                clientX -= window.innerWidth
+            }
+            this.#emit('click-view', { x: clientX, y: clientY })
+        })
+        this.renderer.addEventListener('click', e => {
+            const { clientX, clientY } = e
+            while (clientX > window.innerWidth) {
+                clientX -= window.innerWidth
+            }
+            this.#emit('click-view', { x: clientX, y: clientY })
+        })
     }
     async addAnnotation(annotation, remove) {
         const { value } = annotation
@@ -273,7 +283,7 @@ export class View extends HTMLElement {
         const resolved = await this.goTo(value)
         if (resolved) {
             const { index, anchor } = resolved
-            const { doc } =  this.#getOverlayer(index)
+            const { doc } = this.#getOverlayer(index)
             const range = anchor(doc)
             this.#emit('show-annotation', { value, index, range })
         }
@@ -313,7 +323,7 @@ export class View extends HTMLElement {
             await this.renderer.goTo(resolved)
             this.history.pushState(target)
             return resolved
-        } catch(e) {
+        } catch (e) {
             console.error(e)
             console.error(`Could not go to ${target}`)
         }
@@ -328,7 +338,7 @@ export class View extends HTMLElement {
             const obj = await this.resolveNavigation(target)
             await this.renderer.goTo({ ...obj, select: true })
             this.history.pushState(target)
-        } catch(e) {
+        } catch (e) {
             console.error(e)
             console.error(`Could not go to ${target}`)
         }
@@ -355,7 +365,7 @@ export class View extends HTMLElement {
             const range = isRange ? frag : doc.createRange()
             if (!isRange) range.selectNodeContents(frag)
             return this.#tocProgress.getProgress(index, range)
-        } catch(e) {
+        } catch (e) {
             console.error(e)
             console.error(`Could not get ${target}`)
         }
@@ -403,7 +413,7 @@ export class View extends HTMLElement {
         this.#searchResults.set(index, list)
 
         for await (const result of iter) {
-            if (result.subitems){
+            if (result.subitems) {
                 const list = result.subitems
                     .map(({ cfi }) => ({ value: SEARCH_PREFIX + cfi }))
                 this.#searchResults.set(result.index, list)

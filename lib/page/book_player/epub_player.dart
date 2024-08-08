@@ -36,9 +36,8 @@ class EpubPlayer extends StatefulWidget {
 class EpubPlayerState extends State<EpubPlayer> {
   late InAppWebViewController webViewController;
   double progress = 0.0;
-  int chapterCurrentPage = 0;
-  int chapterTotalPage = 0;
-  String chapterTitle = '';
+
+  // String chapterTitle = '';
   String chapterHref = '';
   late ContextMenu contextMenu;
   OverlayEntry? contextMenuEntry;
@@ -107,7 +106,7 @@ class EpubPlayerState extends State<EpubPlayer> {
           }
           progress = (currentInfo['progress'] as num).toDouble();
           chapterCurrentPage = currentInfo['chapterCurrentPage'];
-          chapterTotalPage = currentInfo['chapterTotalPage'];
+          chapterTotalPages = currentInfo['chapterTotalPage'];
           chapterTitle = currentInfo['chapterTitle'];
           chapterHref = currentInfo['chapterHref'];
         });
@@ -239,6 +238,9 @@ class EpubPlayerState extends State<EpubPlayer> {
   //////////////// NEW CODE /////////////////////////////////////////////////////////////////////////
   String cfi = '';
   double percentage = 0.0;
+  String chapterTitle = '';
+  int chapterCurrentPage = 0;
+  int chapterTotalPages = 0;
 
   void prevPage() {
     webViewController.evaluateJavascript(source: 'prevPage()');
@@ -251,7 +253,6 @@ class EpubPlayerState extends State<EpubPlayer> {
   void onClick(Map<String, dynamic> location) {
     final x = location['x'];
     final y = location['y'];
-    print('x: $x, y: $y');
     final part = coordinatesToPart(x, y);
     final currentPageTurningType = Prefs().pageTurningType;
     final pageTurningType = pageTurningTypes[currentPageTurningType];
@@ -273,11 +274,6 @@ class EpubPlayerState extends State<EpubPlayer> {
     BookStyle bookStyle = Prefs().bookStyle;
     String backgroundColor = convertDartColorToJs(readTheme.backgroundColor);
     String textColor = convertDartColorToJs(readTheme.textColor);
-    print('fontsize' + bookStyle.fontSize.toString());
-    print('topMargin' + bookStyle.topMargin.toString());
-    print('sideMargin' + bookStyle.sideMargin.toString());
-    print('lineHeight' + bookStyle.lineHeight.toString());
-    print('letterSpacing' + bookStyle.letterSpacing.toString());
 
     controller.evaluateJavascript(source: '''
       let url = 'http://localhost:${Server().port}/book/${getBasePath(widget.book.filePath)}';
@@ -308,6 +304,9 @@ class EpubPlayerState extends State<EpubPlayer> {
           Map<String, dynamic> location = args[0];
           cfi = location['cfi'];
           percentage = location['percentage'];
+          chapterTitle = location['chapterTitle'];
+          chapterCurrentPage = location['chapterCurrentPage'];
+          chapterTotalPages = location['chapterTotalPages'];
         });
     controller.addJavaScriptHandler(
         handlerName: 'onClick',
@@ -390,45 +389,19 @@ class EpubPlayerState extends State<EpubPlayer> {
 
   void prevChapter() {
     webViewController.evaluateJavascript(source: '''
-      prevChapter = function() {
-        let toc = book.navigation.toc;
-        let href = rendition.currentLocation().start.href;
-        let chapter = toc.filter(chapter => chapter.href === href)[0];
-        let index = toc.indexOf(chapter);
-        if (index > 0) {
-          rendition.display(toc[index - 1].href);
-        }
-      }
-      prevChapter();
-      refreshProgress();
+      prevSection()
       ''');
   }
 
   void nextChapter() {
     webViewController.evaluateJavascript(source: '''
-    nextChapter = function() {
-        let toc = book.navigation.toc;
-        let href = rendition.currentLocation().start.href;
-        let chapter = toc.filter(chapter => chapter.href === href)[0];
-        let index = toc.indexOf(chapter);
-        if (index < toc.length - 1) {
-          rendition.display(toc[index + 1].href);
-        }
-      }
-      nextChapter();
-      refreshProgress();
+      nextSection()
       ''');
   }
 
   Future<void> goToPercentage(double value) async {
     await webViewController.evaluateJavascript(source: '''
-      goToPercentage = function(value) {
-        let location = book.locations.cfiFromPercentage(value);
-        rendition.display(location);
-      }
-      goToPercentage($value);
-      refreshProgress();
-      
+      goToPercent($value); 
       ''');
   }
 

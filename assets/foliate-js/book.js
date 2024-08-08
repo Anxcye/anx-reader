@@ -426,11 +426,11 @@ class Reader {
     }
 
     #onRelocate({ detail }) {
-        const { cfi, fraction, location, tocItem, pageItem } = detail
+        const { cfi, fraction, location, tocItem, pageItem, chapterLocation } = detail
         const loc = pageItem
             ? `Page ${pageItem.label}`
             : `Loc ${location.current}`
-        onRelocated({ cfi, fraction, loc, tocItem, pageItem, location })
+        onRelocated({ cfi, fraction, loc, tocItem, pageItem, location, chapterLocation })
     }
 
     #onClickView({ detail: { x, y } }) {
@@ -450,19 +450,19 @@ const open = async (file, cfi) => {
 //let url = '../local/shiji.epub'
 //let cfi = ''
 //let style = {
-//  fontSize: 1.2,
-//          letterSpacing: 0,
-//          spacing: '1.5',
-//          paragraphSpacing: 5,
-//          fontColor: '#66ccff',
-//          backgroundColor: '#ffffff',
-//          topMargin: 100,
-//          bottomMargin: 100,
-//          sideMargin: 5,
-//          justify: true,
-//          hyphenate: true,
-//          scroll: false,
-//          animated: true
+//    fontSize: 0.2,
+//    letterSpacing: 0,
+//    spacing: '1.5',
+//    paragraphSpacing: 5,
+//    fontColor: '#66ccff',
+//    backgroundColor: '#ffffff',
+//    topMargin: 100,
+//    bottomMargin: 100,
+//    sideMargin: 5,
+//    justify: true,
+//    hyphenate: true,
+//    scroll: false,
+//    animated: true
 //}
 //window.flutter_inappwebview = {}
 //window.flutter_inappwebview.callHandler = (name, data) => {
@@ -497,8 +497,8 @@ const setStyle = () => {
 
 const onRelocated = (currentInfo) => {
     const chapterTitle = currentInfo.tocItem?.label
-    const chapterTotalPages = 0
-    const chapterCurrentPage = 0
+    const chapterTotalPages = currentInfo.chapterLocation.total
+    const chapterCurrentPage = currentInfo.chapterLocation.current
     const bookTotalPages = currentInfo.location.total
     const bookCurrentPage = currentInfo.location.current
     const cfi = currentInfo.cfi
@@ -513,7 +513,6 @@ const onRelocated = (currentInfo) => {
         cfi,
         percentage
     })
-    
 }
 
 const onAnnotationClick = (annotation) => console.log(annotation)
