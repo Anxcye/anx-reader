@@ -334,13 +334,11 @@ class Reader {
         this.view.addEventListener('relocate', this.#onRelocate.bind(this))
         this.view.addEventListener('click-view', this.#onClickView.bind(this))
 
-
         setStyle()
         if (!cfi)
             this.view.renderer.next()
 
         const bookmarks = allAnnotations ?? []
-        console.log('annotations', bookmarks[0].value)
         for (const bookmark of bookmarks) {
             const { value, type, color, note } = bookmark
             const annotation = {

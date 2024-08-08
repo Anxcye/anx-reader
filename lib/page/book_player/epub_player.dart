@@ -156,8 +156,7 @@ class EpubPlayerState extends State<EpubPlayer> {
 
     controller.evaluateJavascript(source: '''
       const allAnnotations = $allAnnotations;
-      const url = 'http://localhost:${Server().port}/book/${getBasePath(
-        widget.book.filePath)}';
+      const url = 'http://localhost:${Server().port}/book${getBasePath(widget.book.filePath)}';
       let cfi = '${widget.book.lastReadPosition}';
       console.log('BookPlayer:' + cfi);
       let style = {
@@ -184,9 +183,9 @@ class EpubPlayerState extends State<EpubPlayer> {
         callback: (args) {
           Map<String, dynamic> location = args[0];
           cfi = location['cfi'];
-          percentage = location['percentage'];
-          chapterTitle = location['chapterTitle'];
-          chapterHref = location['chapterHref'];
+          percentage = location['percentage'] ?? 0.0;
+          chapterTitle = location['chapterTitle'] ?? '';
+          chapterHref = location['chapterHref'] ?? '';
           chapterCurrentPage = location['chapterCurrentPage'];
           chapterTotalPages = location['chapterTotalPages'];
         });
