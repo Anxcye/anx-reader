@@ -444,6 +444,7 @@ const open = async (file, cfi) => {
     const reader = new Reader()
     globalThis.reader = reader
     await reader.open(file, cfi)
+    onSetToc()
 }
 
 ////////// use for test //////////
@@ -497,6 +498,7 @@ const setStyle = () => {
 
 const onRelocated = (currentInfo) => {
     const chapterTitle = currentInfo.tocItem?.label
+    const chapterHref = currentInfo.tocItem?.href
     const chapterTotalPages = currentInfo.chapterLocation.total
     const chapterCurrentPage = currentInfo.chapterLocation.current
     const bookTotalPages = currentInfo.location.total
@@ -506,6 +508,7 @@ const onRelocated = (currentInfo) => {
 
     callFlutter('onRelocated', {
         chapterTitle,
+        chapterHref,
         chapterTotalPages,
         chapterCurrentPage,
         bookTotalPages,
@@ -531,6 +534,8 @@ const onGetAllAnnotations = () => {
     ]
 }
 
+const onSetToc = () => callFlutter('onSetToc', reader.view.book.toc)
+
 window.changeStyle = (newStyle) => {
     style = {
         ...style,
@@ -538,8 +543,6 @@ window.changeStyle = (newStyle) => {
     }
     setStyle()
 }
-
-window.getToc = () => reader.view.book.toc
 
 window.goToHref = href => reader.view.goTo(href)
 

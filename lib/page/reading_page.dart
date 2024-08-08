@@ -111,12 +111,9 @@ class ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
   }
 
   Future<void> tocHandler() async {
-    String toc = await epubPlayerKey.currentState!.getToc();
     setState(() {
-      _tocItems =
-          (json.decode(toc) as List).map((i) => TocItem.fromJson(i)).toList();
       _currentPage = TocWidget(
-          tocItems: _tocItems,
+          tocItems: epubPlayerKey.currentState!.toc,
           epubPlayerKey: epubPlayerKey,
           hideAppBarAndBottomBar: showOrHideAppBarAndBottomBar);
     });
