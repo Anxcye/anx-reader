@@ -5,6 +5,7 @@ import 'package:anx_reader/dao/book.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/models/book_style.dart';
 import 'package:anx_reader/models/read_theme.dart';
+import 'package:anx_reader/models/toc_item.dart';
 import 'package:anx_reader/page/reading_page.dart';
 import 'package:anx_reader/service/book_player/book_player_server.dart';
 import 'package:anx_reader/utils/coordinates_to_part.dart';
@@ -38,7 +39,7 @@ class EpubPlayerState extends State<EpubPlayer> {
   double progress = 0.0;
 
   // String chapterTitle = '';
-  String chapterHref = '';
+  // String chapterHref = '';
   late ContextMenu contextMenu;
   OverlayEntry? contextMenuEntry;
 
@@ -57,11 +58,7 @@ class EpubPlayerState extends State<EpubPlayer> {
     return currentCfi;
   }
 
-  void goTo(String str) {
-    webViewController.evaluateJavascript(source: '''
-      rendition.display('$str');
-      ''');
-  }
+
 
   Future<String> getToc() async {
     String toc = '';
@@ -239,8 +236,10 @@ class EpubPlayerState extends State<EpubPlayer> {
   String cfi = '';
   double percentage = 0.0;
   String chapterTitle = '';
+  String chapterHref = '';
   int chapterCurrentPage = 0;
   int chapterTotalPages = 0;
+  List<TocItem> toc = [];
 
   void prevPage() {
     webViewController.evaluateJavascript(source: 'prevPage()');
@@ -248,6 +247,12 @@ class EpubPlayerState extends State<EpubPlayer> {
 
   void nextPage() {
     webViewController.evaluateJavascript(source: 'nextPage()');
+  }
+  
+  void goToHref(String href) {
+    webViewController.evaluateJavascript(source: '''
+      goToHref('$href');
+      ''');
   }
 
   void onClick(Map<String, dynamic> location) {
@@ -305,6 +310,7 @@ class EpubPlayerState extends State<EpubPlayer> {
           cfi = location['cfi'];
           percentage = location['percentage'];
           chapterTitle = location['chapterTitle'];
+          chapterHref = location['chapterHref'];
           chapterCurrentPage = location['chapterCurrentPage'];
           chapterTotalPages = location['chapterTotalPages'];
         });
@@ -313,6 +319,12 @@ class EpubPlayerState extends State<EpubPlayer> {
         callback: (args) {
           Map<String, dynamic> location = args[0];
           onClick(location);
+        });
+    controller.addJavaScriptHandler(handlerName:'onSetToc',
+        callback: (args) {
+          List<dynamic> t = args[0];
+          print(t);
+          toc = t.map((i) => TocItem.fromJson(i)).toList();
         });
   }
 

@@ -8,10 +8,10 @@ class TocItem {
 
   factory TocItem.fromJson(Map<String, dynamic> json) {
     return TocItem(
-      id: json['id'],
+      id: json['id'].toString(),
       href: json['href'],
       label: json['label'],
-      subitems: (json['subitems'] as List).map((i) => TocItem.fromJson(i)).toList(),
+      subitems: json['subitems'] == null ? [] : (json['subitems'] as List).map((i) => TocItem.fromJson(i)).toList(),
     );
   }
 }
