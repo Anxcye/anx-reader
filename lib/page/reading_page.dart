@@ -134,7 +134,6 @@ class ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
       _currentPage = ProgressWidget(
         epubPlayerKey: epubPlayerKey,
         showOrHideAppBarAndBottomBar: showOrHideAppBarAndBottomBar,
-        readProgress: readProgress,
       );
     });
   }

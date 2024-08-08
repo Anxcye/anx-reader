@@ -2,19 +2,18 @@ import 'dart:async';
 
 import 'package:anx_reader/l10n/localization_extension.dart';
 import 'package:anx_reader/page/book_player/epub_player.dart';
+import 'package:anx_reader/page/reading_page.dart';
 import 'package:flutter/material.dart';
 
 
 class ProgressWidget extends StatefulWidget {
   final GlobalKey<EpubPlayerState> epubPlayerKey;
   final Function(bool) showOrHideAppBarAndBottomBar;
-  final double readProgress;
 
   const ProgressWidget({
     super.key,
     required this.epubPlayerKey,
     required this.showOrHideAppBarAndBottomBar,
-    required this.readProgress,
   });
 
   @override
@@ -28,7 +27,7 @@ class _ProgressWidgetState extends State<ProgressWidget> {
   @override
   void initState() {
     super.initState();
-    _readProgress = widget.readProgress;
+    _readProgress = epubPlayerKey.currentState!.percentage;
   }
 
   @override
@@ -89,18 +88,18 @@ class _ProgressWidgetState extends State<ProgressWidget> {
         ),
         Row(
           children: [
-            ProgressDisplayer(
+            ProgressDisplay(
               mainText: widget.epubPlayerKey.currentState!.chapterCurrentPage
                   .toString(),
               subText: context.readingPageCurrentPage,
             ),
-            ProgressDisplayer(
-              mainText: widget.epubPlayerKey.currentState!.chapterTotalPage
+            ProgressDisplay(
+              mainText: widget.epubPlayerKey.currentState!.chapterTotalPages
                   .toString(),
               subText: context.readingPageChapterPages,
             ),
-            ProgressDisplayer(
-              mainText: (widget.epubPlayerKey.currentState!.progress * 100)
+            ProgressDisplay(
+              mainText: (widget.epubPlayerKey.currentState!.percentage * 100)
                   .toStringAsFixed(2),
               subText: '%',
             ),
@@ -112,15 +111,15 @@ class _ProgressWidgetState extends State<ProgressWidget> {
   }
 }
 
-class ProgressDisplayer extends StatelessWidget {
-  const ProgressDisplayer({
+class ProgressDisplay extends StatelessWidget {
+  const ProgressDisplay({
     super.key,
     required this.mainText,
     required this.subText,
   });
 
-  final mainText;
-  final subText;
+  final String mainText;
+  final String subText;
 
   @override
   Widget build(BuildContext context) {
