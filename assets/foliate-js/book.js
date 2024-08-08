@@ -216,7 +216,9 @@ const getView = async file => {
 }
 
 const getCSS = ({ fontSize,
+    letterSpacing,
     spacing,
+    paragraphSpacing,
     fontColor,
     backgroundColor,
     justify,
@@ -226,6 +228,7 @@ const getCSS = ({ fontSize,
         color: ${fontColor};
         background-color: ${backgroundColor};
         font-size: ${fontSize}em;
+        letter-spacing: ${letterSpacing}px;
     }
     /* https://github.com/whatwg/html/issues/5426 */
     @media (prefers-color-scheme: dark) {
@@ -235,6 +238,7 @@ const getCSS = ({ fontSize,
     }
     p, li, blockquote, dd, div{
         line-height: ${spacing};
+        padding-bottom: ${paragraphSpacing}em;
         text-align: ${justify ? 'justify' : 'start'};
         -webkit-hyphens: ${hyphenate ? 'auto' : 'manual'};
         hyphens: ${hyphenate ? 'auto' : 'manual'};
@@ -442,27 +446,29 @@ const open = async (file, cfi) => {
     await reader.open(file, cfi)
 }
 
-// //////// use for test //////////
-// let url = '../local/shiji.epub'
-// let cfi = ''
-// let style = {
-//     fontSize: 1.2,
-//     spacing: '1.5',
-//     fontColor: '#66ccff',
-//     backgroundColor: '#ffffff',
-//     topMargin: 100,
-//     bottomMargin: 100,
-//     sideMargin: 5,
-//     justify: true,
-//     hyphenate: true,
-//     scroll: false,
-//     animated: true
-// }
-// window.flutter_inappwebview = {}
-// window.flutter_inappwebview.callHandler = (name, data) => {
-//     console.log(name, data)
-// }
-// ///////////////////////////////
+////////// use for test //////////
+//let url = '../local/shiji.epub'
+//let cfi = ''
+//let style = {
+//  fontSize: 1.2,
+//          letterSpacing: 0,
+//          spacing: '1.5',
+//          paragraphSpacing: 5,
+//          fontColor: '#66ccff',
+//          backgroundColor: '#ffffff',
+//          topMargin: 100,
+//          bottomMargin: 100,
+//          sideMargin: 5,
+//          justify: true,
+//          hyphenate: true,
+//          scroll: false,
+//          animated: true
+//}
+//window.flutter_inappwebview = {}
+//window.flutter_inappwebview.callHandler = (name, data) => {
+//    console.log(name, data)
+//}
+/////////////////////////////////
 fetch(url)
     .then(res => res.blob())
     .then(blob => open(new File([blob], new URL(url, window.location.origin).pathname), cfi))
@@ -478,7 +484,9 @@ const setStyle = () => {
     reader.view.renderer.setAttribute('animated', style.animated)
     const newStyle = {
         fontSize: style.fontSize,
+        letterSpacing: style.letterSpacing,
         spacing: style.spacing,
+        paragraphSpacing: style.paragraphSpacing,
         fontColor: style.fontColor,
         backgroundColor: style.backgroundColor,
         justify: style.justify,
@@ -522,6 +530,14 @@ const onGetAllAnnotations = () => {
         // { id: 2, type: 'highlight', value: "epubcfi(/6/8!/4/6,/1:0,/1:13)", color: 'yellow', note: 'this is' },
         // { id: 3, type: 'underline', value: "epubcfi(/6/8!/4/6,/1:76,/1:84)", color: 'red', note: 'this is' },
     ]
+}
+
+window.changeStyle = (newStyle) => {
+    style = {
+        ...style,
+        ...newStyle
+    }
+    setStyle()
 }
 
 window.getToc = () => reader.view.book.toc

@@ -37,8 +37,7 @@ class _StyleWidgetState extends State<StyleWidget> {
             fontSizeSlider(),
             sideMarginSlider(),
             topBottomMarginSlider(),
-            lineHeightSlider(),
-            paragraphSpacingSlider(),
+            lineHeightAndParagraphSpacingSlider(),
             letterSpacingSlider(),
           ],
         ),
@@ -69,34 +68,10 @@ class _StyleWidgetState extends State<StyleWidget> {
     );
   }
 
-  Row paragraphSpacingSlider() {
+  Row lineHeightAndParagraphSpacingSlider() {
     return Row(
       children: [
-        const Icon(Icons.height),
-        Expanded(
-          child: Slider(
-            value: bookStyle.paragraphSpacing,
-            onChanged: (double value) {
-              setState(() {
-                bookStyle.paragraphSpacing = value;
-                widget.epubPlayerKey.currentState!.changeStyle(bookStyle);
-                Prefs().saveBookStyleToPrefs(bookStyle);
-              });
-            },
-            min: 0,
-            max: 50,
-            divisions: 10,
-            label: (bookStyle.paragraphSpacing / 50 * 10).round().toString(),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Row lineHeightSlider() {
-    return Row(
-      children: [
-        const Icon(Icons.format_line_spacing),
+        const Icon(Icons.line_weight),
         Expanded(
           child: Slider(
               value: bookStyle.lineHeight,
@@ -111,6 +86,23 @@ class _StyleWidgetState extends State<StyleWidget> {
               max: 3,
               divisions: 10,
               label: (bookStyle.lineHeight / 3 * 10).round().toString()),
+        ),
+        const Icon(Icons.height),
+        Expanded(
+          child: Slider(
+            value: bookStyle.paragraphSpacing,
+            onChanged: (double value) {
+              setState(() {
+                bookStyle.paragraphSpacing = value;
+                widget.epubPlayerKey.currentState!.changeStyle(bookStyle);
+                Prefs().saveBookStyleToPrefs(bookStyle);
+              });
+            },
+            min: 0,
+            max: 5,
+            divisions: 10,
+            label: (bookStyle.paragraphSpacing / 5 * 10).round().toString(),
+          ),
         ),
       ],
     );
@@ -131,9 +123,9 @@ class _StyleWidgetState extends State<StyleWidget> {
               });
             },
             min: 0,
-            max: 100,
+            max: 200,
             divisions: 10,
-            label: (bookStyle.topMargin).round().toString(),
+            label: (bookStyle.topMargin / 20).toStringAsFixed(0),
           ),
         ),
         const Icon(Icons.vertical_align_bottom_outlined),
@@ -148,9 +140,9 @@ class _StyleWidgetState extends State<StyleWidget> {
               });
             },
             min: 0,
-            max: 100,
+            max: 200,
             divisions: 10,
-            label: (bookStyle.bottomMargin).round().toString(),
+            label: (bookStyle.bottomMargin / 20).toStringAsFixed(0),
           ),
         ),
       ],
@@ -172,9 +164,9 @@ class _StyleWidgetState extends State<StyleWidget> {
               });
             },
             min: 0,
-            max: 200,
+            max: 20,
             divisions: 20,
-            label: (bookStyle.sideMargin / 10).round().toString(),
+            label: bookStyle.sideMargin.toStringAsFixed(1),
           ),
         ),
       ],
@@ -195,10 +187,10 @@ class _StyleWidgetState extends State<StyleWidget> {
                 Prefs().saveBookStyleToPrefs(bookStyle);
               });
             },
-            min: 10,
-            max: 300,
-            divisions: 29,
-            label: (bookStyle.fontSize / 10).round().toString(),
+            min: 0.4,
+            max: 3.0,
+            divisions: 13,
+            label: bookStyle.fontSize.toStringAsFixed(1),
           ),
         ),
       ],

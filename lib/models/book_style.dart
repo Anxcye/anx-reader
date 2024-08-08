@@ -12,15 +12,15 @@ class BookStyle {
   double bottomMargin;
 
   BookStyle({
-    this.fontSize = 120.0,
+    this.fontSize = 1.0,
     this.fontFamily = 'Arial',
     this.lineHeight = 1.8,
     this.letterSpacing = 2.0,
     this.wordSpacing = 2.0,
-    this.paragraphSpacing = 15.0,
-    this.sideMargin = 50.0,
-    this.topMargin = 70.0,
-    this.bottomMargin = 60.0,
+    this.paragraphSpacing = 1.0,
+    this.sideMargin = 6.0,
+    this.topMargin = 60.0,
+    this.bottomMargin = 20.0,
   });
 
   BookStyle copyWith({

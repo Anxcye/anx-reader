@@ -251,6 +251,7 @@ class EpubPlayerState extends State<EpubPlayer> {
   void onClick(Map<String, dynamic> location) {
     final x = location['x'];
     final y = location['y'];
+    print('x: $x, y: $y');
     final part = coordinatesToPart(x, y);
     final currentPageTurningType = Prefs().pageTurningType;
     final pageTurningType = pageTurningTypes[currentPageTurningType];
@@ -283,13 +284,15 @@ class EpubPlayerState extends State<EpubPlayer> {
       let cfi = '${widget.book.lastReadPosition}';
       console.log('BookPlayer:' + cfi);
       let style = {
-          fontSize: 1.2,
-          spacing: '1.5',
+          fontSize: ${bookStyle.fontSize},
+          letterSpacing: ${bookStyle.letterSpacing},
+          spacing: ${bookStyle.lineHeight},
+          paragraphSpacing: ${bookStyle.paragraphSpacing},
           fontColor: '#$textColor',
           backgroundColor: '#$backgroundColor',
-          topMargin: 100,
-          bottomMargin: 100,
-          sideMargin: 5,
+          topMargin: ${bookStyle.topMargin},
+          bottomMargin: ${bookStyle.bottomMargin},
+          sideMargin: ${bookStyle.sideMargin},
           justify: true,
           hyphenate: true,
           scroll: false,
@@ -451,27 +454,15 @@ class EpubPlayerState extends State<EpubPlayer> {
 
   void changeStyle(BookStyle bookStyle) {
     webViewController.evaluateJavascript(source: '''
-    changeStyle = function() {
-      primeStyle = {
-          fontSize: ${bookStyle.fontSize},
-          fontFamily: '${bookStyle.fontFamily}',
-          lineHeight: '${bookStyle.lineHeight}',
-          letterSpacing: ${bookStyle.letterSpacing},
-          wordSpacing: ${bookStyle.wordSpacing},
-          paragraphSpacing: ${bookStyle.paragraphSpacing},
-          sideMargin: ${bookStyle.sideMargin},
-          topMargin: ${bookStyle.topMargin},
-          bottomMargin: ${bookStyle.bottomMargin},
-        }
-      defaultStyle();
-    }
-    changeStyle();
-    
-    rendition.views().forEach(view => {
-      if (view.pane) view.pane.render()
-    })
-    
-    setClickEvent();
-  ''');
+      changeStyle({
+        fontSize: ${bookStyle.fontSize},
+        spacing: '${bookStyle.lineHeight}',
+        paragraphSpacing: ${bookStyle.paragraphSpacing},
+        topMargin: ${bookStyle.topMargin},
+        bottomMargin: ${bookStyle.bottomMargin},
+        sideMargin: ${bookStyle.sideMargin},
+        letterSpacing: ${bookStyle.letterSpacing},
+      })
+    ''');
   }
 }
