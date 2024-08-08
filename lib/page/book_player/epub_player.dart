@@ -433,22 +433,14 @@ class EpubPlayerState extends State<EpubPlayer> {
   }
 
   void changeTheme(ReadTheme readTheme) {
-    // convert color from AABBGGRR to RRGGBBAA
-    String backgroundColor = readTheme.backgroundColor.substring(2) +
-        readTheme.backgroundColor.substring(0, 2);
-    String textColor =
-        readTheme.textColor.substring(2) + readTheme.textColor.substring(0, 2);
+    String backgroundColor = convertDartColorToJs(readTheme.backgroundColor);
+    String textColor = convertDartColorToJs(readTheme.textColor);
 
     webViewController.evaluateJavascript(source: '''
-      changeTheme = function() {
-        const body = document.querySelector('body');
-        body.style.backgroundColor = '#$backgroundColor';
-      
-        backgroundColor = '$backgroundColor';
-        textColor = '$textColor';
-        defaultStyle();
-      }
-      changeTheme();
+      changeStyle({
+        backgroundColor: '#$backgroundColor',
+        fontColor: '#$textColor',
+      })
       ''');
   }
 
