@@ -2,11 +2,11 @@ import 'dart:convert';
 
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/dao/book.dart';
+import 'package:anx_reader/dao/book_note.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/models/book_style.dart';
 import 'package:anx_reader/models/read_theme.dart';
 import 'package:anx_reader/models/toc_item.dart';
-import 'package:anx_reader/page/reading_page.dart';
 import 'package:anx_reader/service/book_player/book_player_server.dart';
 import 'package:anx_reader/utils/coordinates_to_part.dart';
 import 'package:anx_reader/utils/get_base_path.dart';
@@ -36,194 +36,7 @@ class EpubPlayer extends StatefulWidget {
 
 class EpubPlayerState extends State<EpubPlayer> {
   late InAppWebViewController webViewController;
-  double progress = 0.0;
-
-  // String chapterTitle = '';
-  // String chapterHref = '';
   late ContextMenu contextMenu;
-
-  // Future<String> onReadingLocation() async {
-  //   String currentCfi = '';
-  //   webViewController.addJavaScriptHandler(
-  //       handlerName: 'onReadingLocation',
-  //       callback: (args) {
-  //         currentCfi = args[0];
-  //       });
-  //   await webViewController.evaluateJavascript(source: '''
-  //     var currentLocation = rendition.currentLocation();
-  //     var currentCfi = currentLocation.start.cfi;
-  //     window.flutter_inappwebview.callHandler('onReadingLocation', currentCfi);
-  //     ''');
-  //   return currentCfi;
-  // }
-
-  // Future<String> getToc() async {
-  //   String toc = '';
-  //   webViewController.addJavaScriptHandler(
-  //       handlerName: 'getToc',
-  //       callback: (args) {
-  //         toc = args[0];
-  //       });
-  //   await webViewController.evaluateJavascript(source: '''
-  //    getToc = function() {
-  //      let toc = book.navigation.toc;
-  //
-  //      function removeSuffix(obj) {
-  //        if (obj.href && obj.href.includes('#')) {
-  //          obj.href = obj.href.split('#')[0];
-  //        }
-  //        if (obj.subitems) {
-  //          obj.subitems.forEach(removeSuffix);
-  //        }
-  //      }
-  //
-  //      toc = JSON.parse(JSON.stringify(toc));
-  //
-  //      toc.forEach(removeSuffix);
-  //
-  //      toc = JSON.stringify(toc);
-  //      window.flutter_inappwebview.callHandler('getToc', toc);
-  //    }
-  //         getToc();
-  //     ''');
-  //   AnxLog.info('BookPlayer: $toc');
-  //   return toc;
-  // }
-
-  // void progressSetter() {
-  //   webViewController.addJavaScriptHandler(
-  //       handlerName: 'getCurrentInfo',
-  //       callback: (args) {
-  //         Map<String, dynamic> currentInfo = args[0];
-  //         if (currentInfo['progress'] == null) {
-  //           return;
-  //         }
-  //         progress = (currentInfo['progress'] as num).toDouble();
-  //         chapterCurrentPage = currentInfo['chapterCurrentPage'];
-  //         chapterTotalPages = currentInfo['chapterTotalPage'];
-  //         chapterTitle = currentInfo['chapterTitle'];
-  //         chapterHref = currentInfo['chapterHref'];
-  //       });
-  //
-  //   webViewController.addJavaScriptHandler(
-  //       handlerName: 'getStyle',
-  //       callback: (args) async {
-  //         final Map<String, dynamic> bookStyle = {
-  //           'fontSize': 1.2,
-  //           'spacing': '1.5',
-  //           'fontColor': '#66ccff',
-  //           'backgroundColor': '#ffffff',
-  //           'topMargin': 100,
-  //           'bottomMargin': 100,
-  //           'sideMargin': 5,
-  //           'justify': true,
-  //           'hyphenate': true,
-  //           'scroll': false,
-  //           'animated': true
-  //         };
-  //
-  //         return jsonEncode(bookStyle);
-  //       });
-  // }
-
-  void clickHandlers() {
-    // window.flutter_inappwebview.callHandler('onTap', { x: x, y: y });
-    // webViewController.addJavaScriptHandler(
-    //     handlerName: 'onTap',
-    //     callback: (args) {
-    //       if (contextMenuEntry != null) {
-    //         removeOverlay();
-    //         return;
-    //       }
-    //       Map<String, dynamic> coordinates = args[0];
-    //       double x = coordinates['x'];
-    //       double y = coordinates['y'];
-    //       onViewerTap(x, y);
-    //     });
-
-    // window.flutter_inappwebview.callHandler('onSelected', { left: left, right: right, top: top, bottom: bottom, cfiRange: selectedCfiRange, text: selectedText });
-    webViewController.addJavaScriptHandler(
-        handlerName: 'onSelected',
-        callback: (args) async {
-          Map<String, dynamic> coordinates = args[0];
-          final left = coordinates['left'];
-          // double right = coordinates['right'];
-          final top = coordinates['top'];
-          final bottom = coordinates['bottom'];
-          final annoCfi = coordinates['cfiRange'];
-          if (coordinates['text'] == '') {
-            return;
-          }
-          final annoContent = coordinates['text'];
-          int? annoId = coordinates['annoId'];
-
-          final screenSize = MediaQuery.of(context).size;
-
-          final actualLeft = left * screenSize.width;
-          final actualTop = top * screenSize.height;
-          final actualBottom = bottom * screenSize.height;
-
-          showContextMenu(
-            context,
-            actualLeft,
-            actualTop,
-            actualBottom,
-            annoContent,
-            annoCfi,
-            annoId,
-          );
-        });
-    // webViewController.addJavaScriptHandler(
-    //     handlerName: 'getAllAnnotations',
-    //     callback: (args) async {
-    //       List<BookNote> annotations =
-    //           await selectBookNotesByBookId(widget.bookId);
-    //
-    //       List<String> annotationsJson = annotations
-    //           .map((annotation) => jsonEncode(annotation.toMap()))
-    //           .toList();
-    //
-    //       for (String annotationJson in annotationsJson) {
-    //         webViewController.evaluateJavascript(
-    //             source: 'addABookNote($annotationJson);');
-    //       }
-    //     });
-
-    // webViewController.addJavaScriptHandler(
-    //     handlerName: 'showMenu',
-    //     callback: (args) async {
-    //       removeOverlay();
-    //       widget.showOrHideAppBarAndBottomBar(true);
-    //     });
-  }
-
-  // void renderNote(BookNote bookNote) {
-  //   webViewController.evaluateJavascript(source: '''
-  //     addABookNote(${jsonEncode(bookNote.toMap())});
-  //     ''');
-  // }
-
-  // void onViewerTap(double x, double y) {
-  //   int part = coordinatesToPart(x, y);
-  //   int currentPageTurningType = Prefs().pageTurningType;
-  //   List<PageTurningType> pageTurningType =
-  //   pageTurningTypes[currentPageTurningType];
-  //   switch (pageTurningType[part]) {
-  //     case PageTurningType.prev:
-  //       prevPage();
-  //       break;
-  //     case PageTurningType.next:
-  //       nextPage();
-  //       break;
-  //     case PageTurningType.menu:
-  //       widget.showOrHideAppBarAndBottomBar(true);
-  //       break;
-  //   }
-  //
-  //   readingPageKey.currentState!.setAwakeTimer(Prefs().awakeTime);
-  // }
-
-  //////////////// NEW CODE /////////////////////////////////////////////////////////////////////////
   String cfi = '';
   double percentage = 0.0;
   String chapterTitle = '';
@@ -332,14 +145,17 @@ class EpubPlayerState extends State<EpubPlayer> {
     }
   }
 
-  void onLoadStart(InAppWebViewController controller) {
+  Future<void> onLoadStart(InAppWebViewController controller) async {
     ReadTheme readTheme = Prefs().readTheme;
     BookStyle bookStyle = Prefs().bookStyle;
     String backgroundColor = convertDartColorToJs(readTheme.backgroundColor);
     String textColor = convertDartColorToJs(readTheme.textColor);
+    List<BookNote> annotationList = await selectBookNotesByBookId(widget.book.id);
+    String allAnnotations = jsonEncode(annotationList.map((e) => e.toJson()).toList());
 
     controller.evaluateJavascript(source: '''
-      let url = 'http://localhost:${Server().port}/book/${getBasePath(widget.book.filePath)}';
+      const allAnnotations = $allAnnotations;
+      const url = 'http://localhost:${Server().port}/book/${getBasePath(widget.book.filePath)}';
       let cfi = '${widget.book.lastReadPosition}';
       console.log('BookPlayer:' + cfi);
       let style = {
