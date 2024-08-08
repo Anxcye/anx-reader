@@ -9,7 +9,7 @@ import 'package:anx_reader/utils/log/common.dart';
 import 'package:anx_reader/page/reading_page.dart';
 import 'package:anx_reader/utils/import_book.dart';
 import 'package:anx_reader/utils/toast/common.dart';
-import 'package:epubx/epubx.dart';
+import 'package:epubz/epubz.dart';
 import 'package:flutter/material.dart';
 
 Future<Book> importBook(File file) async {

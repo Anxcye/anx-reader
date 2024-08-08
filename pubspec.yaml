@@ -18,7 +18,7 @@ dependencies:
   path_provider: ^2.1.2
   epub_view: ^3.2.0
   image_picker: ^1.0.7
-  image: ^3.3.0
+  image: ^3.0.8
 #  image: ^4.1.7
   sqflite: ^2.3.2
   path: ^1.9.0
@@ -28,7 +28,10 @@ dependencies:
   intl: ^0.19.0
   settings_ui: ^2.0.2
   flutter_colorpicker: ^1.0.3
-  epubx: ^4.0.0
+  #  epubx: ^4.0.0
+  epubz:
+    git:
+      url: https://github.com/Anxcye/epubz
   html: ^0.15.4
   flutter_html: ^3.0.0-beta.2
   archive: ^3.4.10
@@ -58,7 +61,7 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^3.0.0
   test: any
-  flutter_launcher_icons: ^0.11.0
+#  flutter_launcher_icons: ^0.11.0
 
 flutter:
   uses-material-design: true
