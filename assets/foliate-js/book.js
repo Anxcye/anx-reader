@@ -334,56 +334,50 @@ class Reader {
         this.view.addEventListener('relocate', this.#onRelocate.bind(this))
         this.view.addEventListener('click-view', this.#onClickView.bind(this))
 
-        await this.view.init({ lastLocation: cfi })
 
         setStyle()
         if (!cfi)
             this.view.renderer.next()
 
-        const bookmarks = onGetAllAnnotations()
-        if (bookmarks) {
-            for (const bookmark of bookmarks) {
-                const { value, type, color, note } = bookmark
-                const annotation = {
-                    id: bookmark.id,
-                    value,
-                    type,
-                    color,
-                    note
-                }
-                const spineCode = (value.split('/')[2].split('!')[0] - 2) / 2
-
-                const list = this.annotations.get(spineCode)
-                if (list) list.push(annotation)
-                else this.annotations.set(spineCode, [annotation])
-
-                this.annotationsByValue.set(value, annotation)
+        const bookmarks = allAnnotations ?? []
+        console.log('annotations', bookmarks[0].value)
+        for (const bookmark of bookmarks) {
+            const { value, type, color, note } = bookmark
+            const annotation = {
+                id: bookmark.id,
+                value,
+                type,
+                color,
+                note
             }
+            const spineCode = (value.split('/')[2].split('!')[0] - 2) / 2
 
-            this.view.addEventListener('create-overlay', e => {
+            const list = this.annotations.get(spineCode)
+            if (list) list.push(annotation)
+            else this.annotations.set(spineCode, [annotation])
 
-                const { index } = e.detail
-                const list = this.annotations.get(index)
-                if (list) for (const annotation of list)
-                    this.view.addAnnotation(annotation)
-            })
-
-            this.view.addEventListener('draw-annotation', e => {
-                const { draw, annotation } = e.detail
-                const { color, type } = annotation
-                console.log(annotation);
-
-
-                if (type === 'highlight') draw(Overlayer.highlight, { color })
-                else if (type === 'underline') draw(Overlayer.underline, { color })
-            })
-
-            this.view.addEventListener('show-annotation', e => {
-                console.log(e.detail);
-                const annotation = this.annotationsByValue.get(e.detail.value)
-                onAnnotationClick(annotation)
-            })
+            this.annotationsByValue.set(value, annotation)
         }
+
+
+        this.view.addEventListener('create-overlay', e => {
+            const { index } = e.detail
+            const list = this.annotations.get(index)
+            if (list) for (const annotation of list)
+                this.view.addAnnotation(annotation)
+        })
+
+        this.view.addEventListener('draw-annotation', e => {
+            const { draw, annotation } = e.detail
+            const { color, type } = annotation
+            if (type === 'highlight') draw(Overlayer.highlight, { color })
+            else if (type === 'underline') draw(Overlayer.underline, { color })
+        })
+
+        this.view.addEventListener('show-annotation', e => {
+            const annotation = this.annotationsByValue.get(e.detail.value)
+            onAnnotationClick(annotation)
+        })
         this.view.addEventListener('external-link', e => {
             e.preventDefault()
             onExternalLink(e.detail)
@@ -395,6 +389,7 @@ class Reader {
                 this.view.goTo(e.detail.href)
             }))
 
+        await this.view.init({ lastLocation: cfi })
     }
 
     showContextMenu() {
@@ -459,26 +454,31 @@ const open = async (file, cfi) => {
 }
 
 // //////// use for test //////////
+// const allAnnotations = [
+//     { id: 1, type: 'highlight', value: "epubcfi(/6/4!/4/4,/1:4,/1:9)", color: 'blue', note: 'this is' },
+//     { id: 2, type: 'highlight', value: "epubcfi(/6/4!/4/4,/1:222,/1:226)", color: 'yellow', note: 'this is' },
+//     { id: 3, type: 'underline', value: "epubcfi(/6/4!/4/4,/1:294,/1:301)", color: 'red', note: 'this is' },
+// ]
 // let url = '../local/shiji.epub'
 // let cfi = ''
 // let style = {
-//  fontSize: 1.2,
-//  letterSpacing: 0,
-//  spacing: '1.5',
-//  paragraphSpacing: 5,
-//  fontColor: '#66ccff',
-//  backgroundColor: '#ffffff',
-//  topMargin: 100,
-//  bottomMargin: 100,
-//  sideMargin: 5,
-//  justify: true,
-//  hyphenate: true,
-//  scroll: false,
-//  animated: true
+//     fontSize: 1.2,
+//     letterSpacing: 0,
+//     spacing: '1.5',
+//     paragraphSpacing: 5,
+//     fontColor: '#66ccff',
+//     backgroundColor: '#ffffff',
+//     topMargin: 100,
+//     bottomMargin: 100,
+//     sideMargin: 5,
+//     justify: true,
+//     hyphenate: true,
+//     scroll: false,
+//     animated: true
 // }
 // window.flutter_inappwebview = {}
 // window.flutter_inappwebview.callHandler = (name, data) => {
-//  console.log(name, data)
+//     console.log(name, data)
 // }
 // ///////////////////////////////
 fetch(url)
@@ -529,21 +529,13 @@ const onRelocated = (currentInfo) => {
     })
 }
 
-const onAnnotationClick = (annotation) => console.log(annotation)
+const onAnnotationClick = (annotation) => callFlutter('onAnnotationClick', annotation)
 
 const onSelectionEnd = (selection) => callFlutter('onSelectionEnd', selection)
 
 const onClickView = (x, y) => callFlutter('onClick', { x, y })
 
 const onExternalLink = (link) => console.log(link)
-
-const onGetAllAnnotations = () => {
-    return [
-        // { id: 1, type: 'highlight', value: "epubcfi(/6/8!/4/4,/1:0,/1:20)", color: 'blue', note: 'this is' },
-        // { id: 2, type: 'highlight', value: "epubcfi(/6/8!/4/6,/1:0,/1:13)", color: 'yellow', note: 'this is' },
-        // { id: 3, type: 'underline', value: "epubcfi(/6/8!/4/6,/1:76,/1:84)", color: 'red', note: 'this is' },
-    ]
-}
 
 const onSetToc = () => callFlutter('onSetToc', reader.view.book.toc)
 

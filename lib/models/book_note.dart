@@ -39,4 +39,14 @@ class BookNote{
     };
   }
 
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'note': content,
+      'value': cfi,
+      'type': type,
+      'color': '#$color',
+    };
+  }
+
 }
