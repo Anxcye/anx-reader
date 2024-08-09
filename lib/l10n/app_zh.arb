@@ -22,9 +22,9 @@
   "reading_contents": "目录",
 
   "statistic_to_present": "至今",
-  "statistic_books_read": "本读过",
-  "statistic_days_of_reading": "天阅读",
-  "statistic_notes": "条笔记",
+  "statistic_books_read": "{ count, plural, other{{count}本书}}",
+  "statistic_days_of_reading": "{ count, plural, other{{count}天阅读}}",
+  "statistic_notes": "{ count, plural, other{{count}条笔记}}",
   "statistic_week": "周",
   "statistic_month": "月",
   "statistic_year": "年",
@@ -61,7 +61,8 @@
 
   "book_detail_save": "保存",
   "book_detail_edit": "编辑",
-  "book_detail_nth_book": "读书次序",
+  "book_detail_nth_book": "{num, plural, other{第{num}本读的书}}",
+
   "book_detail_last_read_date": "上次阅读",
   "book_detail_import_date": "首次导入",
 

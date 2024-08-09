@@ -22,9 +22,9 @@
   "reading_contents": "İçindekiler",
 
   "statistic_to_present": "Bugüne Kadar",
-  "statistic_books_read": "okunan kitap",
-  "statistic_days_of_reading": "okunan gün",
-  "statistic_notes": "notlar",
+  "statistic_books_read": "{ count, plural, other{{count} okunan kitap}}",
+  "statistic_days_of_reading": "{ count, plural, other{{count} okunan gün}}",
+  "statistic_notes": "{ count, plural, other{{count} notlar}}",
   "statistic_week": "hafta",
   "statistic_month": "ay",
   "statistic_year": "yıl",
@@ -61,7 +61,7 @@
 
   "book_detail_save": "Kaydet",
   "book_detail_edit": "Düzenle",
-  "book_detail_nth_book": "okunan kitap",
+  "book_detail_nth_book": "{num, plural, other{{num}. kitap}}",
   "book_detail_last_read_date": "Son okuma: ",
   "book_detail_import_date": "İçe aktarma tarihi: ",
 
