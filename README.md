@@ -44,3 +44,14 @@ Want to build Anx Reader from source? Please follow these steps:
 - Run `flutter run` to launch the application.
 
 You may encounter Flutter version incompatibility issues. Please refer to the [Flutter documentation](https://flutter.dev/docs/get-started/install).
+
+# License
+Anx Reader is licensed under the [GPL-3.0 License](./LICENSE).
+
+Starting from version 1.1.4, the open source license for the Anx Reader project has been changed from the MIT License to the GNU General Public License version 3 (GPLv3).
+
+## Thanks
+[foliate-js](https://github.com/johnfactotum/foliate-js), which is MIT licensed, it used as the ebook renderer. Thanks to the author for providing such a great project.
+[foliate](https://github.com/johnfactotum/foliate), which is GPL-3.0 licensed, selection and highlight feature is inspired by this project.
+And many [other open source projects](./pubspec.yaml), thanks to all the authors for their contributions.
+
