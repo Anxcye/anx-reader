@@ -1,5 +1,5 @@
 import 'package:anx_reader/config/shared_preference_provider.dart';
-import 'package:anx_reader/l10n/localization_extension.dart';
+import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/widgets/reading_page/more_settings/more_settings.dart';
 import 'package:anx_reader/widgets/reading_page/widget_title.dart';
 import 'package:anx_reader/dao/theme.dart';
@@ -30,7 +30,7 @@ class _ThemeWidgetState extends State<ThemeWidget> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        widgetTitle(context.readingPageTheme, ReadingSettings.theme),
+        widgetTitle(L10n.of(context).reading_page_theme, ReadingSettings.theme),
         SizedBox(
           height: 100,
           child: ListView.builder(

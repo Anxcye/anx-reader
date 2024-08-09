@@ -1,10 +1,9 @@
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/dao/book_note.dart';
-import 'package:anx_reader/l10n/localization_extension.dart';
+import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/models/book_note.dart';
 import 'package:anx_reader/page/reading_page.dart';
 import 'package:anx_reader/utils/toast/common.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:icons_plus/icons_plus.dart';
@@ -157,7 +156,7 @@ Widget excerptMenu(
         icon: const Icon(EvaIcons.copy),
         onPressed: () {
           Clipboard.setData(ClipboardData(text: annoContent));
-          AnxToast.show(context.notesPageCopied);
+          AnxToast.show(L10n.of(context).notes_page_copied);
           onClose();
         },
       ),

@@ -1,4 +1,4 @@
-import 'package:anx_reader/l10n/localization_extension.dart';
+import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/utils/theme_mode_to_string.dart';
 import 'package:flutter/material.dart';
 
@@ -24,11 +24,11 @@ class _ChangeThemeModeState extends State<ChangeThemeMode> {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        _buildThemeModeButton('auto', context.settingsSystemMode),
+        _buildThemeModeButton('auto', L10n.of(context).settings_system_mode),
         const SizedBox(width: 10),
-        _buildThemeModeButton('dark', context.settingsDarkMode),
+        _buildThemeModeButton('dark', L10n.of(context).settings_dark_mode),
         const SizedBox(width: 10),
-        _buildThemeModeButton('light', context.settingsLightMode),
+        _buildThemeModeButton('light', L10n.of(context).settings_light_mode),
       ],
     );
   }

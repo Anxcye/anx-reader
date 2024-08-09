@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:anx_reader/dao/book.dart';
-import 'package:anx_reader/l10n/localization_extension.dart';
+import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/main.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/utils/get_base_path.dart';
@@ -44,7 +44,8 @@ Future<Book> importBook(File file) async {
         createTime: DateTime.now(),
         updateTime: DateTime.now());
     book.id = await insertBook(book);
-    AnxToast.show(navigatorKey.currentContext!.serviceImportSuccess);
+    BuildContext context = navigatorKey.currentContext!;
+    AnxToast.show(L10n.of(context).service_import_success);
     return book;
   } catch (e) {
     AnxToast.show(

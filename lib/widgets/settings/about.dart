@@ -1,4 +1,4 @@
-import 'package:anx_reader/l10n/localization_extension.dart';
+import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/widgets/settings/link_icon.dart';
 import 'package:anx_reader/utils/check_update.dart';
 import 'package:flutter/material.dart';
@@ -37,7 +37,7 @@ class _AboutState extends State<About> {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      title: Text(context.appAbout),
+      title: Text(L10n.of(context).app_about),
       leading: const Icon(Icons.info_outline),
       onTap: () => openAboutDialog(context),
     );
@@ -49,7 +49,7 @@ class _AboutState extends State<About> {
       builder: (BuildContext context) {
         return AlertDialog(
 
-            // title: Text(context.appName),
+            // title: Text(L10n.of(context).appName),
             content: ConstrainedBox(
           constraints: const BoxConstraints(
             maxWidth: 500,
@@ -76,14 +76,14 @@ class _AboutState extends State<About> {
                   ),
                   const Divider(),
                   ListTile(
-                    title: Text(context.appVersion),
+                    title: Text(L10n.of(context).app_version),
                     subtitle: Text(version),
                   ),
                   ListTile(
-                      title: Text(context.aboutCheckForUpdates),
+                      title: Text(L10n.of(context).about_check_for_updates),
                       onTap: () => checkUpdate(true)),
                   ListTile(
-                    title: Text(context.appLicense),
+                    title: Text(L10n.of(context).app_license),
                     onTap: () {
                       showLicensePage(
                         context: context,
@@ -93,7 +93,7 @@ class _AboutState extends State<About> {
                     },
                   ),
                   ListTile(
-                    title: Text(context.appAuthor),
+                    title: Text(L10n.of(context).app_author),
                     onTap: () {
                       launchUrl(
                         Uri.parse(

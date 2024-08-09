@@ -1,4 +1,4 @@
-import 'package:anx_reader/l10n/localization_extension.dart';
+import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:flutter/material.dart';
 
 class StatisticsTips extends StatelessWidget {
@@ -25,12 +25,12 @@ class StatisticsTips extends StatelessWidget {
                   color: Colors.grey)),
           const SizedBox(height: 50),
           Text(
-            context.statisticsTips1,
+            L10n.of(context).statistics_tips_1,
             style: textStyleBig,
           ),
           const SizedBox(height: 10),
           Text(
-            context.statisticsTips2,
+            L10n.of(context).statistics_tips_2,
             style: textStyle,
           ),
         ],

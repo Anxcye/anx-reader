@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io' as io;
 import 'package:anx_reader/dao/database.dart';
-import 'package:anx_reader/l10n/localization_extension.dart';
+import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/main.dart';
 import 'package:anx_reader/page/home_page/bookshelf_page.dart';
 import 'package:anx_reader/utils/get_base_path.dart';
@@ -74,21 +74,21 @@ class AnxWebdav {
       return;
     }
     if (!Prefs().webdavStatus) {
-      AnxToast.show(context.webdavWebdavNotEnabled);
+      AnxToast.show(L10n.of(context).webdav_webdav_not_enabled);
       return;
     }
     setSyncing(true);
-    AnxToast.show(context.webdavSyncing);
+    AnxToast.show(L10n.of(context).webdav_syncing);
     try {
       client.mkdir('anx/data').then((value) {
         syncDatabase(direction).then((value) {
-          AnxToast.show(context.webdavSyncingFiles);
+          AnxToast.show(L10n.of(context).webdav_syncing_files);
           syncFiles().then((value) {
             imageCache.clear();
             imageCache.clearLiveImages();
             // refresh book list
             const BookshelfPage().refreshBookList();
-            AnxToast.show(context.webdavSyncComplete);
+            AnxToast.show(L10n.of(context).webdav_sync_complete);
             setSyncing(false);
           });
         });

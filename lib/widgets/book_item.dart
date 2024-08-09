@@ -1,8 +1,8 @@
 import 'dart:io';
 
+import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/page/book_detail.dart';
 import 'package:anx_reader/dao/book.dart';
-import 'package:anx_reader/l10n/localization_extension.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/service/book.dart';
 import 'package:flutter/material.dart';
@@ -91,7 +91,7 @@ class BookItem extends StatelessWidget {
                     children: [
                       const Icon(Icons.details),
                       const Spacer(),
-                      Text(context.notesPageDetail),
+                      Text(L10n.of(context).notes_page_detail),
                     ],
                   ),
                 ),
@@ -105,7 +105,7 @@ class BookItem extends StatelessWidget {
                     children: [
                       const Icon(Icons.delete),
                       const Spacer(),
-                      Text(context.commonDelete),
+                      Text(L10n.of(context).common_delete),
                     ],
                   ),
                 ),

@@ -1,5 +1,5 @@
 import 'package:anx_reader/config/shared_preference_provider.dart';
-import 'package:anx_reader/l10n/localization_extension.dart';
+import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/utils/ui/status_bar.dart';
 import 'package:anx_reader/widgets/reading_page/more_settings/page_turning/diagram.dart';
 import 'package:anx_reader/widgets/reading_page/more_settings/page_turning/types_and_icons.dart';
@@ -31,7 +31,7 @@ ListTile fullScreen(BuildContext context, StateSetter setState) {
                 showStatusBar();
               }
             })),
-    title: Text(context.readingPageFullScreen),
+    title: Text(L10n.of(context).reading_page_full_screen),
   );
 }
 
@@ -50,7 +50,7 @@ Widget pageTurningControl() {
     }
 
     return ListTile(
-      title: Text(context.readingPagePageTurningMethod),
+      title: Text(L10n.of(context).reading_page_page_turning_method),
       subtitle: SizedBox(
         height: 120,
         child: ListView.builder(

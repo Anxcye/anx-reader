@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/dao/book.dart';
 import 'package:anx_reader/dao/reading_time.dart';
-import 'package:anx_reader/l10n/localization_extension.dart';
+import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/utils/convert_seconds.dart';
 import 'package:anx_reader/widgets/statistic/chard_card.dart';
@@ -83,13 +83,13 @@ class _StatisticPageState extends State<StatisticPage> {
       children: [
         Expanded(
             child: _buildStatisticCard(
-                '{} ${context.statisticBooksRead}', selectTotalNumberOfBook())),
+                '{} ${L10n.of(context).statistic_books_read}', selectTotalNumberOfBook())),
         Expanded(
-            child: _buildStatisticCard('{} ${context.statisticDaysOfReading}',
+            child: _buildStatisticCard('{} ${L10n.of(context).statistic_days_of_reading}',
                 selectTotalNumberOfDate())),
         Expanded(
             child: _buildStatisticCard(
-                '{} ${context.statisticNotes}', selectTotalNumberOfNotes())),
+                '{} ${L10n.of(context).statistic_notes}', selectTotalNumberOfNotes())),
       ],
     );
   }
@@ -133,17 +133,17 @@ Widget _totalReadTime() {
                 children: <TextSpan>[
                   TextSpan(text: '$H', style: totalReadTimeTextStyle()),
                   TextSpan(
-                      text: ' ${context.commonHours} ',
+                      text: ' ${L10n.of(context).common_hours} ',
                       style: bigTextStyle()),
                   TextSpan(text: '$M', style: totalReadTimeTextStyle()),
                   TextSpan(
-                      text: ' ${context.commonMinutes}',
+                      text: ' ${L10n.of(context).common_minutes}',
                       style: bigTextStyle()),
                 ],
               ),
             ),
             Text(
-              '${Prefs().beginDate.toString().substring(0, 10)} ${context.statisticToPresent}',
+              '${Prefs().beginDate.toString().substring(0, 10)} ${L10n.of(context).statistic_to_present}',
               style: TextStyle(
                 fontSize: 16,
                 color: Colors.grey[600],
@@ -216,7 +216,7 @@ class ThisWeekBooks extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      context.statisticThisWeek,
+                      L10n.of(context).statistic_this_week,
                       style: titleStyle,
                     ),
                   ],

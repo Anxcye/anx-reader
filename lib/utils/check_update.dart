@@ -1,5 +1,5 @@
 import 'package:anx_reader/config/shared_preference_provider.dart';
-import 'package:anx_reader/l10n/localization_extension.dart';
+import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/main.dart';
 import 'package:anx_reader/utils/app_version.dart';
 import 'package:anx_reader/utils/log/common.dart';
@@ -24,7 +24,7 @@ Future<void> checkUpdate(bool manualCheck) async {
         .get('https://api.github.com/repos/Anxcye/anx-reader/releases/latest');
   } catch (e) {
     if (manualCheck) {
-      AnxToast.show(context.commonFailed);
+      AnxToast.show(L10n.of(context).common_failed);
     }
     throw Exception('Update: Failed to check for updates $e');
   }
@@ -40,7 +40,7 @@ Future<void> checkUpdate(bool manualCheck) async {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(context.commonNewVersion,
+          title: Text(L10n.of(context).common_new_version,
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
               )),
@@ -48,11 +48,11 @@ Future<void> checkUpdate(bool manualCheck) async {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(context.updateNewVersion + newVersion,
+              Text(L10n.of(context).update_new_version + newVersion,
                   style: const TextStyle(
                     fontSize: 20,
                   )),
-              Text(context.updateCurrentVersion + currentVersion),
+              Text(L10n.of(context).update_current_version + currentVersion),
               const Divider(),
               Text(response.data['body'].toString()),
             ],
@@ -62,7 +62,7 @@ Future<void> checkUpdate(bool manualCheck) async {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text(context.commonCancel),
+              child: Text(L10n.of(context).common_cancel),
             ),
             TextButton(
               onPressed: () {
@@ -71,7 +71,7 @@ Future<void> checkUpdate(bool manualCheck) async {
                         'https://github.com/Anxcye/anx-reader/releases/latest'),
                     mode: LaunchMode.externalApplication);
               },
-              child: Text(context.commonUpdate),
+              child: Text(L10n.of(context).common_update),
             ),
           ],
         );
@@ -79,7 +79,7 @@ Future<void> checkUpdate(bool manualCheck) async {
     );
   } else {
     if (manualCheck) {
-      AnxToast.show(context.commonNoNewVersion);
+      AnxToast.show(L10n.of(context).common_no_new_version);
     }
   }
 }

@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:anx_reader/l10n/localization_extension.dart';
+import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/service/notes/export_notes.dart';
 import 'package:anx_reader/widgets/tips/notes_tips.dart';
 import 'package:anx_reader/dao/book_note.dart';
@@ -164,7 +164,7 @@ Row operators(BuildContext context, Book book) {
   }
 
   return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-    operateButton(context, const Icon(Icons.details), context.notesPageDetail,
+    operateButton(context, const Icon(Icons.details), L10n.of(context).notes_page_detail,
         () {
       Navigator.push(
         context,
@@ -174,7 +174,7 @@ Row operators(BuildContext context, Book book) {
       );
     }),
     // operateButton(context, Icons.search, 'Search', () {}),
-    operateButton(context, const Icon(Icons.ios_share), context.notesPageExport,
+    operateButton(context, const Icon(Icons.ios_share), L10n.of(context).notes_page_export,
         () {
       handleExportNotes();
     }),
@@ -219,7 +219,7 @@ Widget notesStatistic(BuildContext context, int numberOfNotes) {
             style: digitStyle,
           ),
           TextSpan(
-            text: ' ${context.notesNotes}',
+            text: ' ${L10n.of(context).notes_notes}',
             style: textStyle,
           ),
         ],

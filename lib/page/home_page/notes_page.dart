@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:anx_reader/dao/book.dart';
 import 'package:anx_reader/dao/book_note.dart';
 import 'package:anx_reader/dao/reading_time.dart';
-import 'package:anx_reader/l10n/localization_extension.dart';
+import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/page/book_notes_page.dart';
 import 'package:anx_reader/utils/convert_seconds.dart';
@@ -106,7 +106,7 @@ class _NotesPageState extends State<NotesPage> {
                             style: digitStyle,
                           ),
                           TextSpan(
-                            text: ' ${context.notesNotesAcross} ',
+                            text: ' ${L10n.of(context).notes_notes_across} ',
                             style: textStyle,
                           ),
                         ],
@@ -121,7 +121,7 @@ class _NotesPageState extends State<NotesPage> {
                             style: digitStyle,
                           ),
                           TextSpan(
-                            text: ' ${context.notesBooks}',
+                            text: ' ${L10n.of(context).notes_books}',
                             style: textStyle,
                           ),
                         ]))
@@ -216,7 +216,7 @@ class _NotesPageState extends State<NotesPage> {
                                     style: numberStyle,
                                   ),
                                   TextSpan(
-                                    text: ' ${context.notesNotes}',
+                                    text: ' ${L10n.of(context).notes_notes}',
                                     style: numberText,
                                   ),
                                 ],

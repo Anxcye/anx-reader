@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:anx_reader/dao/book.dart';
-import 'package:anx_reader/l10n/localization_extension.dart';
+import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/service/book.dart';
 import 'package:anx_reader/utils/webdav/common.dart';
@@ -103,7 +103,7 @@ class BookshelfPageState extends State<BookshelfPage>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(context.appName),
+        title: Text(L10n.of(context).appName),
         actions: [
           syncButton(),
           IconButton(
