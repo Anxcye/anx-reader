@@ -3,6 +3,7 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  battery_plus
   file_selector_windows
   permission_handler_windows
   url_launcher_windows

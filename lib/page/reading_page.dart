@@ -1,18 +1,16 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:ffi';
 
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/dao/reading_time.dart';
 import 'package:anx_reader/dao/theme.dart';
 import 'package:anx_reader/models/book.dart';
-import 'package:anx_reader/models/book_style.dart';
 import 'package:anx_reader/models/read_theme.dart';
 import 'package:anx_reader/page/book_player/epub_player.dart';
 import 'package:anx_reader/utils/ui/status_bar.dart';
 import 'package:anx_reader/widgets/reading_page/notes_widget.dart';
 import 'package:anx_reader/models/reading_time.dart';
-import 'package:anx_reader/models/toc_item.dart';
-import 'package:anx_reader/utils/generate_index_html.dart';
 import 'package:anx_reader/widgets/reading_page/progress_widget.dart';
 import 'package:anx_reader/widgets/reading_page/style_widget.dart';
 import 'package:anx_reader/widgets/reading_page/theme_widget.dart';
@@ -35,12 +33,7 @@ final epubPlayerKey = GlobalKey<EpubPlayerState>();
 
 class ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
   late Book _book;
-  String? _content;
-  late BookStyle _bookStyle;
-  late ReadTheme _readTheme;
 
-  double readProgress = 0.0;
-  List<TocItem> _tocItems = [];
   Widget _currentPage = const SizedBox(height: 1);
   final Stopwatch _readTimeWatch = Stopwatch();
   Timer? _awakeTimer;
@@ -55,9 +48,6 @@ class ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
     setAwakeTimer(Prefs().awakeTime);
 
     _book = widget.book;
-    _bookStyle = Prefs().bookStyle;
-    _readTheme = Prefs().readTheme;
-    loadContent();
     super.initState();
   }
 
@@ -91,14 +81,6 @@ class ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
       WakelockPlus.disable();
       _awakeTimer?.cancel();
       _awakeTimer = null;
-    });
-  }
-
-  void loadContent() {
-    var content = generateIndexHtml(
-        widget.book, _bookStyle, _readTheme, widget.book.lastReadPosition);
-    setState(() {
-      _content = content;
     });
   }
 
@@ -221,23 +203,19 @@ class ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
     });
   }
 
+
   @override
   Widget build(BuildContext context) {
-    if (_content == null) {
-      return const Center(child: CircularProgressIndicator());
-    } else {
       return Scaffold(
         body: Stack(
           children: [
             EpubPlayer(
               key: epubPlayerKey,
-              content: _content!,
               book: _book,
               showOrHideAppBarAndBottomBar: showOrHideAppBarAndBottomBar,
             ),
           ],
         ),
       );
-    }
   }
 }
