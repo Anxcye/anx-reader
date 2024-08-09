@@ -16,6 +16,7 @@ import 'package:anx_reader/models/book_note.dart';
 import 'package:anx_reader/widgets/context_menu.dart';
 import 'package:anx_reader/widgets/reading_page/more_settings/page_turning/diagram.dart';
 import 'package:anx_reader/widgets/reading_page/more_settings/page_turning/types_and_icons.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
@@ -24,10 +25,11 @@ class EpubPlayer extends StatefulWidget {
   final Book book;
   final Function showOrHideAppBarAndBottomBar;
 
-  const EpubPlayer({super.key,
-    required this.content,
-    required this.showOrHideAppBarAndBottomBar,
-    required this.book});
+  const EpubPlayer(
+      {super.key,
+      required this.content,
+      required this.showOrHideAppBarAndBottomBar,
+      required this.book});
 
   @override
   State<EpubPlayer> createState() => EpubPlayerState();
@@ -149,16 +151,16 @@ class EpubPlayerState extends State<EpubPlayer> {
     BookStyle bookStyle = Prefs().bookStyle;
     String backgroundColor = convertDartColorToJs(readTheme.backgroundColor);
     String textColor = convertDartColorToJs(readTheme.textColor);
-    List<BookNote> annotationList = await selectBookNotesByBookId(
-        widget.book.id);
-    String allAnnotations = jsonEncode(
-        annotationList.map((e) => e.toJson()).toList());
+    List<BookNote> annotationList =
+        await selectBookNotesByBookId(widget.book.id);
+    String allAnnotations =
+        jsonEncode(annotationList.map((e) => e.toJson()).toList());
 
-    controller.evaluateJavascript(source: '''
-      const allAnnotations = $allAnnotations;
-      const url = 'http://localhost:${Server().port}/book${getBasePath(widget.book.filePath)}';
-      let cfi = '${widget.book.lastReadPosition}';
-      console.log('BookPlayer:' + cfi);
+    await controller.evaluateJavascript(source: '''
+      console.log(navigator.userAgent)
+      const allAnnotations = $allAnnotations
+      const url = 'http://localhost:${Server().port}/book${getBasePath(widget.book.filePath)}'
+      let cfi = '${widget.book.lastReadPosition}'
       let style = {
           fontSize: ${bookStyle.fontSize},
           letterSpacing: ${bookStyle.letterSpacing},
@@ -177,7 +179,7 @@ class EpubPlayerState extends State<EpubPlayer> {
   ''');
   }
 
-  void setHandler(InAppWebViewController controller) {
+  Future<void> setHandler(InAppWebViewController controller) async {
     controller.addJavaScriptHandler(
         handlerName: 'onRelocated',
         callback: (args) {
@@ -210,16 +212,10 @@ class EpubPlayerState extends State<EpubPlayer> {
           double x = location['pos']['point']['x'];
           double y = location['pos']['point']['y'];
           String dir = location['pos']['dir'];
-          showContextMenu(
-              context,
-              x,
-              y,
-              dir,
-              text,
-              cfi,
-              null);
+          showContextMenu(context, x, y, dir, text, cfi, null);
         });
-    controller.addJavaScriptHandler(handlerName: 'onAnnotationClick',
+    controller.addJavaScriptHandler(
+        handlerName: 'onAnnotationClick',
         callback: (args) {
           Map<String, dynamic> annotation = args[0];
           int id = annotation['annotation']['id'];
@@ -228,21 +224,15 @@ class EpubPlayerState extends State<EpubPlayer> {
           double x = annotation['pos']['point']['x'];
           double y = annotation['pos']['point']['y'];
           String dir = annotation['pos']['dir'];
-          showContextMenu(
-              context,
-              x,
-              y,
-              dir,
-              note,
-              cfi,
-              id);
+          showContextMenu(context, x, y, dir, note, cfi, id);
         });
   }
 
-  void onWebViewCreated(InAppWebViewController controller) {
+  Future<void> onWebViewCreated(InAppWebViewController controller) async {
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+      await InAppWebViewController.setWebContentsDebuggingEnabled(true);
+    }
     webViewController = controller;
-    // progressSetter();
-    // clickHandlers();
     setHandler(controller);
   }
 
@@ -261,7 +251,6 @@ class EpubPlayerState extends State<EpubPlayer> {
         webViewController.evaluateJavascript(source: "showContextMenu()");
       },
       onHideContextMenu: () {
-        // removeOverlay();
       },
     );
   }
