@@ -21,7 +21,7 @@ class BookList extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
           itemCount: _books.length,
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: constraints.maxWidth ~/ 130,
+            crossAxisCount: constraints.maxWidth ~/ 110,
             childAspectRatio: 0.55,
             mainAxisSpacing: 30,
             crossAxisSpacing: 20,
