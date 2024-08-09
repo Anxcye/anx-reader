@@ -16,18 +16,19 @@ import 'package:anx_reader/models/book_note.dart';
 import 'package:anx_reader/widgets/context_menu.dart';
 import 'package:anx_reader/widgets/reading_page/more_settings/page_turning/diagram.dart';
 import 'package:anx_reader/widgets/reading_page/more_settings/page_turning/types_and_icons.dart';
+import 'package:battery_plus/battery_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:icons_plus/icons_plus.dart';
+import 'package:intl/intl.dart';
 
 class EpubPlayer extends StatefulWidget {
-  final String content;
   final Book book;
   final Function showOrHideAppBarAndBottomBar;
 
   const EpubPlayer(
       {super.key,
-      required this.content,
       required this.showOrHideAppBarAndBottomBar,
       required this.book});
 
@@ -184,12 +185,14 @@ class EpubPlayerState extends State<EpubPlayer> {
         handlerName: 'onRelocated',
         callback: (args) {
           Map<String, dynamic> location = args[0];
-          cfi = location['cfi'];
-          percentage = location['percentage'] ?? 0.0;
-          chapterTitle = location['chapterTitle'] ?? '';
-          chapterHref = location['chapterHref'] ?? '';
-          chapterCurrentPage = location['chapterCurrentPage'];
-          chapterTotalPages = location['chapterTotalPages'];
+          setState(() {
+            cfi = location['cfi'];
+            percentage = location['percentage'] ?? 0.0;
+            chapterTitle = location['chapterTitle'] ?? '';
+            chapterHref = location['chapterHref'] ?? '';
+            chapterCurrentPage = location['chapterCurrentPage'];
+            chapterTotalPages = location['chapterTotalPages'];
+          });
         });
     controller.addJavaScriptHandler(
         handlerName: 'onClick',
@@ -244,15 +247,14 @@ class EpubPlayerState extends State<EpubPlayer> {
 
   @override
   void initState() {
-    super.initState();
     contextMenu = ContextMenu(
       settings: ContextMenuSettings(hideDefaultSystemContextMenuItems: true),
       onCreateContextMenu: (hitTestResult) async {
         webViewController.evaluateJavascript(source: "showContextMenu()");
       },
-      onHideContextMenu: () {
-      },
+      onHideContextMenu: () {},
     );
+    super.initState();
   }
 
   @override
@@ -277,6 +279,78 @@ class EpubPlayerState extends State<EpubPlayer> {
     transparentBackground: true,
   );
 
+  Widget readingInfoWidget() {
+    TextStyle textStyle = TextStyle(
+        color:
+            Color(int.parse('0x${Prefs().readTheme.textColor}')).withAlpha(150),
+        fontSize: 10);
+
+    Widget time = StreamBuilder(
+        stream: Stream.periodic(const Duration(seconds: 1)),
+        builder: (context, snapshot) {
+          String currentTime = DateFormat('HH:mm').format(DateTime.now());
+          return Text(currentTime, style: textStyle);
+        });
+    Battery battery = Battery();
+
+    Widget batteryInfo = FutureBuilder(
+        future: battery.batteryLevel,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            return Stack(alignment: Alignment.center, children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(0, 2, 2, 0),
+                child: Text('${snapshot.data}',
+                    style: TextStyle(
+                      color: textStyle.color,
+                      fontSize: 9,
+                    )),
+              ),
+              Icon(
+                HeroIcons.battery_0,
+                size: 27,
+                color: textStyle.color,
+              ),
+            ]);
+          } else {
+            return const SizedBox();
+          }
+        });
+
+    Widget batteryAndTime = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        batteryInfo,
+        const SizedBox(width: 5),
+        time,
+      ],
+    );
+
+    return SafeArea(
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(chapterCurrentPage == 1 ? widget.book.title : chapterTitle,
+                style: textStyle),
+            const Spacer(),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                batteryAndTime,
+                Text('$chapterCurrentPage/$chapterTotalPages',
+                    style: textStyle),
+                Text('${(percentage * 100).toStringAsFixed(2)}%',
+                    style: textStyle),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -300,6 +374,7 @@ class EpubPlayerState extends State<EpubPlayer> {
               }
             },
           ),
+          readingInfoWidget(),
         ],
       ),
     );
