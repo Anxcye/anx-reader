@@ -1,4 +1,4 @@
-import 'package:anx_reader/l10n/localization_extension.dart';
+import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/widgets/reading_page/widget_title.dart';
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/models/book_style.dart';
@@ -23,7 +23,7 @@ class _StyleWidgetState extends State<StyleWidget> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        widgetTitle(context.readingPageStyle, ReadingSettings.style),
+        widgetTitle(L10n.of(context).reading_page_style, ReadingSettings.style),
         sliders(),
       ],
     );

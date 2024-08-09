@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:anx_reader/l10n/localization_extension.dart';
+import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/utils/get_path/log_file.dart';
 import 'package:anx_reader/utils/toast/common.dart';
 import 'package:anx_reader/utils/log/common.dart';
@@ -36,7 +36,7 @@ class _LogPageState extends State<LogPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(context.settingsAdvancedLog),
+        title: Text(L10n.of(context).settings_advanced_log),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -68,14 +68,14 @@ class _LogPageState extends State<LogPage> {
         PopupMenuItem(
           child: ListTile(
             leading: const Icon(Icons.delete),
-            title: Text(context.settingsAdvancedLogClearLog),
+            title: Text(L10n.of(context).settings_advanced_log_clear_log),
             onTap: () => clearLog(),
           ),
         ),
         PopupMenuItem(
             child: ListTile(
           leading: const Icon(Icons.file_upload_outlined),
-          title: Text(context.settingsAdvancedLogExportLog),
+          title: Text(L10n.of(context).settings_advanced_log_export_log),
           onTap: () => exportLog(),
         ))
       ],
@@ -129,7 +129,7 @@ Widget logItem(String logStr, BuildContext context) {
               onPressed: () {
                 Clipboard.setData(ClipboardData(text: logStr));
               },
-              child: Text(context.commonCopy),
+              child: Text(L10n.of(context).common_copy),
             ),
           ],
         ),

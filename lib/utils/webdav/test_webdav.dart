@@ -1,4 +1,4 @@
-import 'package:anx_reader/l10n/localization_extension.dart';
+import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/utils/webdav/common.dart';
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/main.dart';
@@ -39,7 +39,7 @@ Future<void> testWebdav(Map webdavInfo) async {
           onPressed: () {
             Navigator.pop(context);
           },
-          child: Text(context.commonOk),
+          child: Text(L10n.of(context).common_ok),
         ),
       ],
     );
@@ -52,15 +52,15 @@ Future<void> testWebdav(Map webdavInfo) async {
       context: context,
       builder: (context) {
         return buildAlertDialog(
-            context.commonSuccess, context.webdavConnectionSuccess);
+            L10n.of(context).common_success, L10n.of(context).webdav_connection_success);
       },
     );
   } else {
     showDialog(
       context: context,
       builder: (context) {
-        return buildAlertDialog(context.commonFailed,
-            '${context.webdavConnectionFailed}\n${result['error']}');
+        return buildAlertDialog(L10n.of(context).common_failed,
+            '${L10n.of(context).webdav_connection_failed}\n${result['error']}');
       },
     );
   }
@@ -76,10 +76,10 @@ Future<bool> testEnableWebdav() async {
     if (result['status']) {
       return true;
     } else {
-      AnxToast.show(context.webdavConnectionFailed);
+      AnxToast.show(L10n.of(context).webdav_connection_failed);
     }
   } else {
-    AnxToast.show(context.webdavSetInfoFirst);
+    AnxToast.show(L10n.of(context).webdav_set_info_first);
   }
   return false;
 }
@@ -90,7 +90,7 @@ void chooseDirection() {
       context: navigatorKey.currentContext!,
       builder: (context) {
         return SimpleDialog(
-          title: Text(context.webdavChooseSources),
+          title: Text(L10n.of(context).webdav_choose_Sources),
           children: [
             SimpleDialogOption(
               onPressed: () async {
@@ -99,7 +99,7 @@ void chooseDirection() {
               },
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 6),
-                child: Text(context.webdavUpload),
+                child: Text(L10n.of(context).webdav_upload),
               ),
             ),
             SimpleDialogOption(
@@ -109,7 +109,7 @@ void chooseDirection() {
               },
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 6),
-                child: Text(context.webdavDownload),
+                child: Text(L10n.of(context).webdav_download),
               ),
             ),
           ],

@@ -1,4 +1,4 @@
-import 'package:anx_reader/l10n/localization_extension.dart';
+import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/utils/webdav/common.dart';
 import 'package:anx_reader/main.dart';
 import 'package:flutter/material.dart';
@@ -45,8 +45,8 @@ class _SyncStatusDialogState extends State<SyncStatusDialog> {
   @override
   Widget build(BuildContext context) {
     String dir = direction == SyncDirection.upload
-        ? context.commonUploading
-        : context.commonDownloading;
+        ? L10n.of(context).common_uploading
+        : L10n.of(context).common_downloading;
     return AlertDialog(
       title: Text(dir),
       content: Column(
@@ -74,7 +74,7 @@ class _SyncStatusDialogState extends State<SyncStatusDialog> {
           onPressed: () {
             Navigator.pop(context);
           },
-          child: Text(context.commonOk),
+          child: Text(L10n.of(context).common_ok),
         ),
       ],
     );

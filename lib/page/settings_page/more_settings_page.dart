@@ -1,4 +1,4 @@
-import 'package:anx_reader/l10n/localization_extension.dart';
+import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/page/settings_page/advanced.dart';
 import 'package:anx_reader/page/settings_page/appearance.dart';
 import 'package:anx_reader/page/settings_page/sync.dart';
@@ -14,7 +14,7 @@ class MoreSettings extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       leading: const Icon(Icons.settings_outlined),
-      title: Text(context.settingsMoreSettings),
+      title: Text(L10n.of(context).settings_moreSettings),
       trailing: const Icon(Icons.chevron_right),
       onTap: () {
         Navigator.push(
@@ -55,7 +55,7 @@ class _SubMoreSettingsState extends State<SubMoreSettings> {
             Navigator.pop(context);
           },
         ),
-        title: Text(context.settingsMoreSettings),
+        title: Text(L10n.of(context).settings_moreSettings),
       ),
       body: LayoutBuilder(builder: (context, constraints) {
         if (constraints.maxWidth > 600) {

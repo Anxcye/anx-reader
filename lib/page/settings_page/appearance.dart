@@ -1,5 +1,5 @@
 import 'package:anx_reader/config/shared_preference_provider.dart';
-import 'package:anx_reader/l10n/localization_extension.dart';
+import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/widgets/settings/settings_title.dart';
 import 'package:anx_reader/widgets/settings/simple_dialog.dart';
 import 'package:anx_reader/widgets/settings/theme_mode.dart';
@@ -25,7 +25,7 @@ class AppearanceSetting extends StatelessWidget {
   Widget build(BuildContext context) {
     return settingsTitle(
         icon: const Icon(Icons.palette_outlined),
-        title: context.settingsAppearance,
+        title: L10n.of(context).settings_appearance,
         isMobile: isMobile,
         id: id,
         selectedIndex: selectedIndex,
@@ -42,11 +42,11 @@ class SubAppearanceSettings extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return settingsBody(
-      title: context.settingsAppearance,
+      title: L10n.of(context).settings_appearance,
       isMobile: isMobile,
       sections: [
         SettingsSection(
-          title: Text(context.settingsAppearanceTheme),
+          title: Text(L10n.of(context).settings_appearance_theme),
           tiles: [
             const CustomSettingsTile(
                 child: Padding(
@@ -54,7 +54,7 @@ class SubAppearanceSettings extends StatelessWidget {
               child: ChangeThemeMode(),
             )),
             SettingsTile.navigation(
-                title: Text(context.settingsAppearanceThemeColor),
+                title: Text(L10n.of(context).settings_appearance_themeColor),
                 leading: const Icon(Icons.color_lens),
                 onPressed: (context) async {
                   await showColorPickerDialog(context);
@@ -62,9 +62,9 @@ class SubAppearanceSettings extends StatelessWidget {
             const CustomSettingsTile(child: Divider()),
           ],
         ),
-        SettingsSection(title: Text(context.settingsAppearanceDisplay), tiles: [
+        SettingsSection(title: Text(L10n.of(context).settings_appearance_display), tiles: [
           SettingsTile.navigation(
-              title: Text(context.settingsAppearanceLanguage),
+              title: Text(L10n.of(context).settings_appearance_language),
               value: Text(Prefs().locale?.languageCode ?? 'system'),
               leading: const Icon(Icons.language),
               onPressed: (context) {
@@ -77,7 +77,7 @@ class SubAppearanceSettings extends StatelessWidget {
 }
 
 void showLanguagePickerDialog(BuildContext context) {
-  final title = context.settingsAppearanceLanguage;
+  final title = L10n.of(context).settings_appearance_language;
   final saveToPrefs = Prefs().saveLocaleToPrefs;
   final children = [
     dialogOption('System', '', saveToPrefs),
@@ -98,7 +98,7 @@ Future<void> showColorPickerDialog(BuildContext context) async {
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
-        title: Text(context.settingsAppearanceThemeColor),
+        title: Text(L10n.of(context).settings_appearance_themeColor),
         content: SingleChildScrollView(
           child: ColorPicker(
             pickerColor: pickedColor,
@@ -112,13 +112,13 @@ Future<void> showColorPickerDialog(BuildContext context) async {
         ),
         actions: <Widget>[
           TextButton(
-            child: Text(context.commonCancel),
+            child: Text(L10n.of(context).common_cancel),
             onPressed: () {
               Navigator.of(context).pop();
             },
           ),
           TextButton(
-            child: Text(context.commonOk),
+            child: Text(L10n.of(context).common_ok),
             onPressed: () {
               prefsProvider.saveThemeToPrefs(pickedColor.value);
               Navigator.of(context).pop();

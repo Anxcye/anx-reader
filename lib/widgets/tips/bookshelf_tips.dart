@@ -1,4 +1,4 @@
-import 'package:anx_reader/l10n/localization_extension.dart';
+import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:flutter/material.dart';
 
 class BookshelfTips extends StatelessWidget {
@@ -25,12 +25,12 @@ class BookshelfTips extends StatelessWidget {
                   color: Colors.grey)),
           const SizedBox(height: 50),
           Text(
-            context.bookshelfTips1,
+            L10n.of(context).bookshelf_tips_1,
             style: textStyleBig,
           ),
           const SizedBox(height: 10),
           Text(
-            context.bookshelfTips2,
+            L10n.of(context).bookshelf_tips_2,
             style: textStyle,
           ),
         ],

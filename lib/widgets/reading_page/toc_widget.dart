@@ -1,5 +1,4 @@
-import 'package:anx_reader/l10n/localization_extension.dart';
-import 'package:anx_reader/page/reading_page.dart';
+import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/widgets/reading_page/widget_title.dart';
 import 'package:anx_reader/models/toc_item.dart';
 import 'package:anx_reader/page/book_player/epub_player.dart';
@@ -24,7 +23,7 @@ class TocWidget extends StatelessWidget {
       height: 700,
       child: Column(
         children: [
-          widgetTitle(context.readingContents, null),
+          widgetTitle(L10n.of(context).reading_contents, null),
           Expanded(
             child: ListView.builder(
               itemCount: tocItems.length,

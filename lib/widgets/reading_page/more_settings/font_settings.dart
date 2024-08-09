@@ -1,5 +1,5 @@
 import 'package:anx_reader/config/shared_preference_provider.dart';
-import 'package:anx_reader/l10n/localization_extension.dart';
+import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/page/reading_page.dart';
 import 'package:flutter/material.dart';
 
@@ -20,14 +20,14 @@ Widget screenTimeout(BuildContext context, StateSetter setState) {
   return Padding(
     padding: const EdgeInsets.only(left: 10.0, right: 10.0),
     child: ListTile(
-      title: Text(context.readingPageScreenTimeout),
+      title: Text(L10n.of(context).reading_page_screen_timeout),
       leadingAndTrailingTextStyle: TextStyle(
         fontSize: 16,
         color: Theme.of(context).textTheme.bodyLarge!.color,
       ),
       subtitle: Row(
         children: [
-          Text(Prefs().awakeTime.toString() + context.commonMinutes),
+          Text(Prefs().awakeTime.toString() + L10n.of(context).common_minutes),
           Expanded(
             child: Slider(
                 min: 0,

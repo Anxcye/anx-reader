@@ -1,4 +1,4 @@
-import 'package:anx_reader/l10n/localization_extension.dart';
+import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/utils/webdav/common.dart';
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/utils/webdav/test_webdav.dart';
@@ -24,7 +24,7 @@ class SyncSetting extends StatelessWidget {
   Widget build(BuildContext context) {
     return settingsTitle(
         icon: const Icon(Icons.sync),
-        title: context.settingsSync,
+        title: L10n.of(context).settings_sync,
         isMobile: isMobile,
         id: id,
         selectedIndex: selectedIndex,
@@ -46,11 +46,11 @@ class _SubSyncSettingsState extends State<SubSyncSettings> {
   @override
   Widget build(BuildContext context) {
     return settingsBody(
-      title: context.settingsSync,
+      title: L10n.of(context).settings_sync,
       isMobile: widget.isMobile,
       sections: [
         SettingsSection(
-          title: Text(context.settingsSyncWebdav),
+          title: Text(L10n.of(context).settings_sync_webdav),
           tiles: [
             SettingsTile.switchTile(
                 leading: const Icon(Icons.cached),
@@ -71,9 +71,9 @@ class _SubSyncSettingsState extends State<SubSyncSettings> {
                     }
                   }
                 },
-                title: Text(context.settingsSyncEnableWebdav)),
+                title: Text(L10n.of(context).settings_sync_enable_webdav)),
             SettingsTile.navigation(
-                title: Text(context.settingsSyncWebdav),
+                title: Text(L10n.of(context).settings_sync_webdav),
                 leading: const Icon(Icons.cloud),
                 value: Text(Prefs().webdavInfo['url'] ?? 'Not set'),
                 // enabled: Prefs().webdavStatus,
@@ -81,7 +81,7 @@ class _SubSyncSettingsState extends State<SubSyncSettings> {
                   showWebdavDialog(context);
                 }),
             SettingsTile.navigation(
-                title: Text(context.settingsSyncWebdavSyncNow),
+                title: Text(L10n.of(context).settings_sync_webdav_sync_now),
                 leading: const Icon(Icons.sync_alt),
                 // value: Text(Prefs().syncDirection),
                 enabled: Prefs().webdavStatus,
@@ -96,7 +96,7 @@ class _SubSyncSettingsState extends State<SubSyncSettings> {
 }
 
 void showWebdavDialog(BuildContext context) {
-  final title = context.settingsSyncWebdav;
+  final title = L10n.of(context).settings_sync_webdav;
   final prefs = Prefs().saveWebdavInfo;
   final webdavInfo = Prefs().webdavInfo;
   final webdavUrlController = TextEditingController(text: webdavInfo['url']);
@@ -109,7 +109,7 @@ void showWebdavDialog(BuildContext context) {
       padding: const EdgeInsets.only(bottom: 10),
       child: TextField(
         obscureText:
-            labelText == context.settingsSyncWebdavPassword ? true : false,
+            labelText == L10n.of(context).settings_sync_webdav_password ? true : false,
         controller: controller,
         decoration: InputDecoration(
             border: const OutlineInputBorder(), labelText: labelText),
@@ -124,11 +124,11 @@ void showWebdavDialog(BuildContext context) {
         title: Text(title),
         contentPadding: const EdgeInsets.all(20),
         children: [
-          buildTextField(context.settingsSyncWebdavUrl, webdavUrlController),
+          buildTextField(L10n.of(context).settings_sync_webdav_url, webdavUrlController),
           buildTextField(
-              context.settingsSyncWebdavUsername, webdavUsernameController),
+              L10n.of(context).settings_sync_webdav_username, webdavUsernameController),
           buildTextField(
-              context.settingsSyncWebdavPassword, webdavPasswordController),
+              L10n.of(context).settings_sync_webdav_password, webdavPasswordController),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
@@ -139,7 +139,7 @@ void showWebdavDialog(BuildContext context) {
                   webdavInfo['password'] = webdavPasswordController.text;
                   testWebdav(webdavInfo);
                 },
-                child: Text(context.settingsSyncWebdavTestConnection),
+                child: Text(L10n.of(context).settings_sync_webdav_test_connection),
               ),
               TextButton(
                 onPressed: () {
@@ -149,7 +149,7 @@ void showWebdavDialog(BuildContext context) {
                   prefs(webdavInfo);
                   Navigator.pop(context);
                 },
-                child: Text(context.commonSave),
+                child: Text(L10n.of(context).common_save),
               ),
             ],
           ),

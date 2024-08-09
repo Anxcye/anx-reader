@@ -1,4 +1,4 @@
-import 'package:anx_reader/l10n/localization_extension.dart';
+import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/widgets/reading_page/widget_title.dart';
 import 'package:flutter/material.dart';
 
@@ -17,7 +17,7 @@ class ReadingNotes extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          widgetTitle(context.navBarNotes, null),
+          widgetTitle(L10n.of(context).navBar_notes, null),
           Expanded(
             child: ListView(children: [bookNotesList(book.id)]),
           ),
