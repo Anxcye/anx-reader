@@ -227,15 +227,16 @@ const getCSS = ({ fontSize,
     hyphenate }) => `
     @namespace epub "http://www.idpf.org/2007/ops";
     html {
-        color: ${fontColor};
-        background-color: ${backgroundColor};
+        color: ${fontColor} !important;
+        background: none !important;
+        background-color: ${backgroundColor} !important;
         font-size: ${fontSize}em;
         letter-spacing: ${letterSpacing}px;
     }
     /* https://github.com/whatwg/html/issues/5426 */
     @media (prefers-color-scheme: dark) {
         a:link {
-            color: lightblue;
+            color: lightblue !important;
         }
     }
     p, li, blockquote, dd, div{
@@ -306,14 +307,15 @@ class Reader {
                 fontSize: style.fontSize * 0.8,
                 spacing: style.spacing,
                 fontColor: style.fontColor,
-                backgroundColor: style.backgroundColor + '00',
+                backgroundColor: 'transparent',
                 justify: true,
                 hyphenate: true,
             }
             renderer.setStyles(getCSS(footNoteStyle))
             // set background color of dialog
-            footnoteDialog.style.backgroundColor = style.backgroundColor + 'dd'
-            // hide scorllbar of dialog
+            // if #rrggbbaa, replace aa to dd
+            footnoteDialog.style.backgroundColor = style.backgroundColor.slice(0, 7) + 'ee'
+
             footnoteDialog.style.overflow = 'hidden'
 
         })
