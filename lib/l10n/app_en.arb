@@ -22,9 +22,9 @@
   "reading_contents": "Contents",
 
   "statistic_to_present": "To Present",
-  "statistic_books_read": "books read",
-  "statistic_days_of_reading": "days read",
-  "statistic_notes": "notes",
+  "statistic_books_read": "{ count, plural, =0{No books read} =1{1 book read} other{{count} books read} }",
+  "statistic_days_of_reading": "{ count, plural, =0{No days read} =1{1 day read} other{{count} days read} }",
+  "statistic_notes": "{ count, plural, =0{No notes} =1{1 note} other{{count} notes} }",
   "statistic_week": "week",
   "statistic_month": "month",
   "statistic_year": "year",
@@ -61,7 +61,7 @@
 
   "book_detail_save": "Save",
   "book_detail_edit": "Edit",
-  "book_detail_nth_book": "th book read",
+  "book_detail_nth_book": "{num, plural, =1{1st book you've read} =2{2nd book you've read} few{3rd book you've read} other{{num}th book you've read}}",
   "book_detail_last_read_date": "Last read: ",
   "book_detail_import_date": "Import date: ",
 

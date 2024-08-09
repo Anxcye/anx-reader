@@ -6,6 +6,7 @@ import 'package:anx_reader/dao/reading_time.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/utils/convert_seconds.dart';
+import 'package:anx_reader/widgets/highlight_digit.dart';
 import 'package:anx_reader/widgets/statistic/chard_card.dart';
 import 'package:anx_reader/widgets/tips/statistic_tips.dart';
 import 'package:flutter/material.dart';
@@ -18,6 +19,27 @@ class StatisticPage extends StatefulWidget {
 }
 
 class _StatisticPageState extends State<StatisticPage> {
+  int totalNumberOfBook = 0;
+  int totalNumberOfDate = 0;
+  int totalNumberOfNotes = 0;
+
+  void setNumbers() async {
+    final numberOfBook = await selectTotalNumberOfBook();
+    final numberOfDate = await selectTotalNumberOfDate();
+    final numberOfNotes = await selectTotalNumberOfNotes();
+    setState(() {
+      totalNumberOfBook = numberOfBook;
+      totalNumberOfDate = numberOfDate;
+      totalNumberOfNotes = numberOfNotes;
+    });
+  }
+
+  @override
+  void initState() {
+    setNumbers();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -82,14 +104,28 @@ class _StatisticPageState extends State<StatisticPage> {
     return Row(
       children: [
         Expanded(
-            child: _buildStatisticCard(
-                '{} ${L10n.of(context).statistic_books_read}', selectTotalNumberOfBook())),
+            // child: _buildStatisticCard(
+            //     '{} ${L10n.of(context).statistic_books_read(0)}',
+            //     selectTotalNumberOfBook())),
+            child: highlightDigit(
+                context,
+                L10n.of(context).statistic_books_read(totalNumberOfBook),
+                smallTextStyle(),
+                bigTextStyle())),
         Expanded(
-            child: _buildStatisticCard('{} ${L10n.of(context).statistic_days_of_reading}',
-                selectTotalNumberOfDate())),
+            // child: _buildStatisticCard(
+            //     '{} ${L10n.of(context).statistic_days_of_reading}',
+            //     selectTotalNumberOfDate())),
+            child: highlightDigit(
+                context,
+                L10n.of(context).statistic_days_of_reading(totalNumberOfDate),
+                smallTextStyle(),
+                bigTextStyle())),
         Expanded(
-            child: _buildStatisticCard(
-                '{} ${L10n.of(context).statistic_notes}', selectTotalNumberOfNotes())),
+            // child: _buildStatisticCard('{} ${L10n.of(context).statistic_notes}',
+            //     selectTotalNumberOfNotes())),
+            child: highlightDigit(context, L10n.of(context).statistic_notes(totalNumberOfNotes),
+                smallTextStyle(), bigTextStyle())),
       ],
     );
   }
@@ -158,39 +194,6 @@ Widget _totalReadTime() {
   );
 }
 
-Widget _buildStatisticCard(String title, Future<int> value) {
-  return FutureBuilder<int>(
-    future: value,
-    builder: (context, snapshot) {
-      if (snapshot.connectionState == ConnectionState.done) {
-        var parts = title.split('{}');
-        return
-            // Card(
-            // child:
-            Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Center(
-            child: RichText(
-              text: TextSpan(
-                style: DefaultTextStyle.of(context).style,
-                children: <TextSpan>[
-                  TextSpan(text: parts[0], style: smallTextStyle()),
-                  TextSpan(text: '${snapshot.data}', style: bigTextStyle()),
-                  TextSpan(text: parts[1], style: smallTextStyle()),
-                ],
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-          // ),
-        );
-      } else {
-        return const CircularProgressIndicator();
-      }
-    },
-  );
-}
-
 class ThisWeekBooks extends StatelessWidget {
   const ThisWeekBooks({super.key});
 
@@ -208,7 +211,6 @@ class ThisWeekBooks extends StatelessWidget {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
           return Column(
-
             children: [
               Padding(
                 padding: const EdgeInsets.only(left: 10, top: 10, right: 10),
@@ -265,8 +267,6 @@ class BookStatisticItem extends StatelessWidget {
     fontWeight: FontWeight.bold,
   );
 
-
-
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<Book>(
@@ -302,15 +302,14 @@ class BookStatisticItem extends StatelessWidget {
                               children: [
                                 Expanded(
                                   flex: 3,
-                                  child:
-                                  Text(snapshot.data!.author,
+                                  child: Text(snapshot.data!.author,
                                       style: bookAuthorStyle),
                                 ),
-                                  Text(
-                                      // getReadingTime(context),
+                                Text(
+                                    // getReadingTime(context),
                                     convertSeconds(readingTime),
-                                      textAlign: TextAlign.end,
-                                      style: bookReadingTimeStyle),
+                                    textAlign: TextAlign.end,
+                                    style: bookReadingTimeStyle),
                               ],
                             ),
                             const SizedBox(height: 20),
