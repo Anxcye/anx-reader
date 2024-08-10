@@ -10,6 +10,7 @@ import 'package:anx_reader/page/reading_page.dart';
 import 'package:anx_reader/utils/import_book.dart';
 import 'package:anx_reader/utils/toast/common.dart';
 import 'package:epubz/epubz.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 Future<Book> importBook(File file) async {
@@ -77,7 +78,7 @@ void openBook(BuildContext context, Book book, Function updateBookList) {
 
   Navigator.push(
     context,
-    MaterialPageRoute(
+    CupertinoPageRoute(
       builder: (context) => ReadingPage(key: readingPageKey, book: book),
     ),
   ).then((value) {
