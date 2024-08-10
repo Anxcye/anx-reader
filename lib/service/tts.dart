@@ -37,6 +37,11 @@ class Tts {
     _rate = rate;
   }
 
+  static void dispose() {
+    flutterTts.stop();
+    isInit = false;
+  }
+
   static bool isCurrentLanguageInstalled = false;
 
   static String? _currentVoiceText;
@@ -63,12 +68,13 @@ class Tts {
 
   static Function getPrevVoiceText = () => '';
 
-  static void init(Function next, Function prev) {
+  static Future<void> init(Function init, Function next, Function prev) async {
+    await init();
     isInit = true;
     getNextVoiceText = next;
     getPrevVoiceText = prev;
 
-    _currentVoiceText = getNextVoiceText();
+    _currentVoiceText = await getNextVoiceText();
 
     setAwaitOptions();
 
@@ -131,9 +137,10 @@ class Tts {
       await flutterTts.setSpeechRate(rate);
       await flutterTts.setPitch(pitch);
 
+       var currentVoiceText = await getNextVoiceText();
       await flutterTts.speak(_currentVoiceText!);
+      _currentVoiceText = currentVoiceText;
       if (!isPlaying) break;
-      _currentVoiceText = getNextVoiceText();
     }
   }
 
@@ -154,13 +161,13 @@ class Tts {
 
   static Future<void> prev() async {
     await stop();
-    _currentVoiceText = getPrevVoiceText();
+    _currentVoiceText = await getPrevVoiceText();
     await speak();
   }
 
   static Future<void> next() async {
     await stop();
-    _currentVoiceText = getNextVoiceText();
+    _currentVoiceText = await getNextVoiceText();
     await speak();
   }
 

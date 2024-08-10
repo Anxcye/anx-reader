@@ -454,15 +454,15 @@ const open = async (file, cfi) => {
     onSetToc()
 }
 
-////////// use for test //////////
-//const allAnnotations = [
+// //////// use for test //////////
+// const allAnnotations = [
 //    { id: 1, type: 'highlight', value: "epubcfi(/6/4!/4/4,/1:4,/1:9)", color: 'blue', note: 'this is' },
 //    { id: 2, type: 'highlight', value: "epubcfi(/6/4!/4/4,/1:222,/1:226)", color: 'yellow', note: 'this is' },
 //    { id: 3, type: 'underline', value: "epubcfi(/6/4!/4/4,/1:294,/1:301)", color: 'red', note: 'this is' },
-//]
-//let url = '../local/shiji.epub'
-//let cfi = ''
-//let style = {
+// ]
+// let url = '../local/shiji.epub'
+// let cfi = ''
+// let style = {
 //    fontSize: 1.2,
 //    letterSpacing: 0,
 //    spacing: '1.5',
@@ -476,12 +476,12 @@ const open = async (file, cfi) => {
 //    hyphenate: true,
 //    scroll: false,
 //    animated: true
-//}
-//window.flutter_inappwebview = {}
-//window.flutter_inappwebview.callHandler = (name, data) => {
+// }
+// window.flutter_inappwebview = {}
+// window.flutter_inappwebview.callHandler = (name, data) => {
 //    console.log(name, data)
-//}
-/////////////////////////////////
+// }
+// ///////////////////////////////
 fetch(url)
     .then(res => res.blob())
     .then(blob => open(new File([blob], new URL(url, window.location.origin).pathname), cfi))
@@ -570,4 +570,8 @@ window.prevSection = () => reader.view.renderer.prevSection()
 
 window.nextSection = () => reader.view.renderer.nextSection()
 
+window.initTts = () => reader.view.initTTS()
 
+window.ttsNext = () => reader.view.tts.next()
+
+window.ttsPrev = () => reader.view.tts.prev()

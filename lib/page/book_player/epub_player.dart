@@ -127,6 +127,12 @@ class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
       ''');
   }
 
+  Future<void> initTts() async => await webViewController.evaluateJavascript(source: "initTts()");
+
+  Future<String> ttsNext() async => await webViewController.evaluateJavascript(source: "ttsNext()");
+
+  Future<String> ttsPrev() async => await webViewController.evaluateJavascript(source: "ttsPrev()");
+
   void onClick(Map<String, dynamic> location) {
     if (contextMenuEntry != null) {
       removeOverlay();
