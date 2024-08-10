@@ -72,20 +72,20 @@ Future<Book> importBook(File file) async {
 void openBook(BuildContext context, Book book, Function updateBookList) {
   book.updateTime = DateTime.now();
   updateBook(book);
-  Future.delayed(const Duration(seconds: 1), () {
+  Future.delayed(const Duration(milliseconds: 500), () {
     updateBookList();
   });
 
   Navigator.push(
       context,
       PageRouteBuilder(
-        transitionDuration: const Duration(milliseconds: 1000),
-        reverseTransitionDuration: const Duration(milliseconds: 1000),
+        transitionDuration: const Duration(milliseconds: 500),
+        reverseTransitionDuration: const Duration(milliseconds: 500),
         pageBuilder: (context, animation, secondaryAnimation) =>
             ReadingPage(key: readingPageKey, book: book),
       )).then((value) {
     // wait 1s to update book which is read
-    Future.delayed(const Duration(seconds: 1), () {
+    Future.delayed(const Duration(milliseconds: 500), () {
       updateBookList();
     });
   });

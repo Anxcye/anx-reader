@@ -258,7 +258,7 @@ class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
       onHideContextMenu: () {},
     );
     _animationController = AnimationController(
-      duration: const Duration(milliseconds: 600),
+      duration: const Duration(milliseconds: 400),
       vsync: this,
     );
     _animation =
@@ -275,15 +275,20 @@ class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
     super.didChangeDependencies();
   }
 
+  Future<void> saveReadingProgress() async {
+    if (cfi == '') return;
+    Book book = widget.book;
+    book.lastReadPosition = cfi;
+    book.readingPercentage = percentage;
+    await updateBook(book);
+  }
+
   @override
   void dispose() {
     super.dispose();
     _animationController.dispose();
     InAppWebViewController.clearAllCache();
-    Book book = widget.book;
-    book.lastReadPosition = cfi;
-    book.readingPercentage = percentage;
-    updateBook(book);
+    saveReadingProgress();
     removeOverlay();
   }
 
