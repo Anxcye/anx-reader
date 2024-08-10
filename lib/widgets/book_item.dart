@@ -62,12 +62,25 @@ class BookItem extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
-          Text(
-            book.author,
-            style: const TextStyle(
-                fontWeight: FontWeight.w300,
-                fontSize: 9,
-                overflow: TextOverflow.ellipsis),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  book.author,
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w300,
+                      fontSize: 9,
+                      overflow: TextOverflow.ellipsis),
+                ),
+              ),
+              Text(
+                '${book.readingPercentage.toStringAsFixed(0)}%',
+                style: const TextStyle(
+                    fontWeight: FontWeight.w300,
+                    fontSize: 9,
+                    overflow: TextOverflow.ellipsis),
+              ),
+            ],
           ),
         ],
       ),
