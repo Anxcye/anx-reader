@@ -120,5 +120,9 @@
 
   "about_check_for_updates": "检查更新",
   "update_new_version": "新版本：",
-  "update_current_version": "当前版本："
+  "update_current_version": "当前版本：",
+
+  "tts_volume": "音量",
+  "tts_rate": "语速",
+  "tts_pitch": "音调"
 }

@@ -119,5 +119,9 @@
 
   "about_check_for_updates": "Check for updates",
   "update_new_version": "New version: ",
-  "update_current_version": "Current version: "
+  "update_current_version": "Current version: ",
+
+  "tts_volume": "Volume",
+  "tts_rate": "Rate",
+  "tts_pitch": "Pitch"
 }
