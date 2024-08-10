@@ -1,7 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
-import 'dart:ffi';
-import 'dart:io';
 
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/dao/reading_time.dart';
@@ -13,10 +10,11 @@ import 'package:anx_reader/utils/ui/status_bar.dart';
 import 'package:anx_reader/widgets/reading_page/notes_widget.dart';
 import 'package:anx_reader/models/reading_time.dart';
 import 'package:anx_reader/widgets/reading_page/progress_widget.dart';
+import 'package:anx_reader/widgets/reading_page/tts_widget.dart';
 import 'package:anx_reader/widgets/reading_page/style_widget.dart';
-import 'package:anx_reader/widgets/reading_page/theme_widget.dart';
 import 'package:anx_reader/widgets/reading_page/toc_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:icons_plus/icons_plus.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 class ReadingPage extends StatefulWidget {
@@ -117,10 +115,10 @@ class ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
     });
   }
 
-  Future<void> themeHandler(StateSetter modalSetState) async {
+  Future<void> styleHandler(StateSetter modalSetState) async {
     List<ReadTheme> themes = await selectThemes();
     modalSetState(() {
-      _currentPage = ThemeWidget(
+      _currentPage = StyleWidget(
         themes: themes,
         epubPlayerKey: epubPlayerKey,
         setCurrentPage: (Widget page) {
@@ -132,9 +130,9 @@ class ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
     });
   }
 
-  Future<void> styleHandler() async {
+  Future<void> ttsHandler() async {
     setState(() {
-      _currentPage = StyleWidget(
+      _currentPage = TtsWidget(
         epubPlayerKey: epubPlayerKey,
       );
     });
@@ -162,7 +160,7 @@ class ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
                         },
                       ),
                       IconButton(
-                        icon: const Icon(Icons.edit_note),
+                        icon: const Icon(EvaIcons.edit),
                         onPressed: () {
                           noteHandler();
                           setState(() {});
@@ -178,14 +176,14 @@ class ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
                       IconButton(
                         icon: const Icon(Icons.color_lens),
                         onPressed: () {
-                          themeHandler(setState);
+                          styleHandler(setState);
                           setState(() {});
                         },
                       ),
                       IconButton(
-                        icon: const Icon(Icons.text_fields),
+                        icon: const Icon(EvaIcons.headphones),
                         onPressed: () {
-                          styleHandler();
+                          ttsHandler();
                           setState(() {});
                         },
                       ),

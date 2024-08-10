@@ -34,7 +34,7 @@ class _StyleWidgetState extends State<StyleWidget> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        widgetTitle(L10n.of(context).reading_page_theme, ReadingSettings.theme),
+        widgetTitle(L10n.of(context).reading_page_style, ReadingSettings.theme),
         sliders(),
         const Divider(),
         themeSelector(),
