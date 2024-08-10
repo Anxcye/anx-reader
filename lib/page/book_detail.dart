@@ -15,10 +15,10 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:image_picker/image_picker.dart';
 
 class BookDetail extends StatefulWidget {
-  const BookDetail({super.key, required this.book, required this.onRefresh});
+  const BookDetail({super.key, required this.book, this.onRefresh});
 
   final Book book;
-  final Function onRefresh;
+  final Function? onRefresh;
 
   @override
   State<BookDetail> createState() => _BookDetailState();
@@ -220,7 +220,9 @@ class _BookDetailState extends State<BookDetail> {
                   setState(() {
                     coverImage = Image.file(File(image.path));
                     updateBook(widget.book);
-                    widget.onRefresh();
+                    if (widget.onRefresh != null) {
+                      widget.onRefresh!();
+                    }
                   });
                 }
               },
@@ -237,13 +239,18 @@ class _BookDetailState extends State<BookDetail> {
                     ),
                   ],
                 ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: Image(
-                    image: coverImage.image,
-                    fit: BoxFit.cover,
-                    width: 160,
-                    height: 230,
+                child: SizedBox(
+                  width: 160,
+                  height: 230,
+                  child: Hero(
+                    tag: widget.book.coverFullPath,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: Image(
+                        image: coverImage.image,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -338,7 +345,9 @@ class _BookDetailState extends State<BookDetail> {
                   setState(() {
                     isEditing = false;
                     updateBook(widget.book);
-                    widget.onRefresh();
+                    if (widget.onRefresh != null) {
+                      widget.onRefresh!();
+                    }
                   });
                 },
               )

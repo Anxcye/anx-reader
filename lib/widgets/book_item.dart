@@ -7,7 +7,6 @@ import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/service/book.dart';
 import 'package:flutter/material.dart';
 
-
 class BookItem extends StatelessWidget {
   const BookItem({
     super.key,
@@ -31,25 +30,28 @@ class BookItem extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(7),
-                border: Border.all(
-                  width: 0.3,
-                  color: Colors.grey,
-                ),
-                image: DecorationImage(
-                  image: Image.file(File(book.coverFullPath)).image,
-                  fit: BoxFit.cover,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.2),
-                    spreadRadius: 5,
-                    blurRadius: 10,
-                    offset: const Offset(0, 2),
+            child: Hero(
+              tag: book.coverFullPath,
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(7),
+                  border: Border.all(
+                    width: 0.3,
+                    color: Colors.grey,
                   ),
-                ],
+                  image: DecorationImage(
+                    image: Image.file(File(book.coverFullPath)).image,
+                    fit: BoxFit.cover,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.2),
+                      spreadRadius: 5,
+                      blurRadius: 10,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/dao/book.dart';
@@ -36,7 +37,7 @@ class EpubPlayer extends StatefulWidget {
   State<EpubPlayer> createState() => EpubPlayerState();
 }
 
-class EpubPlayerState extends State<EpubPlayer> {
+class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
   late InAppWebViewController webViewController;
   late ContextMenu contextMenu;
   String cfi = '';
@@ -47,6 +48,8 @@ class EpubPlayerState extends State<EpubPlayer> {
   int chapterTotalPages = 0;
   List<TocItem> toc = [];
   OverlayEntry? contextMenuEntry;
+  late AnimationController _animationController;
+  late Animation<double> _animation;
 
   void prevPage() {
     webViewController.evaluateJavascript(source: 'prevPage()');
@@ -254,6 +257,16 @@ class EpubPlayerState extends State<EpubPlayer> {
       },
       onHideContextMenu: () {},
     );
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 600),
+      vsync: this,
+    );
+    _animation =
+        Tween<double>(begin: 1.0, end: 0.0).animate(_animationController);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _animationController.forward();
+    });
     super.initState();
   }
 
@@ -265,6 +278,7 @@ class EpubPlayerState extends State<EpubPlayer> {
   @override
   void dispose() {
     super.dispose();
+    _animationController.dispose();
     InAppWebViewController.clearAllCache();
     Book book = widget.book;
     book.lastReadPosition = cfi;
@@ -280,6 +294,9 @@ class EpubPlayerState extends State<EpubPlayer> {
   );
 
   Widget readingInfoWidget() {
+    if (chapterCurrentPage == 0) {
+      return const SizedBox();
+    }
     TextStyle textStyle = TextStyle(
         color:
             Color(int.parse('0x${Prefs().readTheme.textColor}')).withAlpha(150),
@@ -356,6 +373,14 @@ class EpubPlayerState extends State<EpubPlayer> {
     return Scaffold(
       body: Stack(
         children: [
+          SizedBox.expand(
+            child: FadeTransition(
+              opacity: _animation,
+              child: Image(
+                  fit: BoxFit.cover,
+                  image: FileImage(File(widget.book.coverFullPath))),
+            ),
+          ),
           InAppWebView(
             initialUrlRequest: URLRequest(url: WebUri(indexHtmlPath)),
             onLoadStart: (controller, url) => onLoadStart(controller),
