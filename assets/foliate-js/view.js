@@ -2,6 +2,7 @@ import * as CFI from './epubcfi.js'
 import { TOCProgress, SectionProgress } from './progress.js'
 import { Overlayer } from './overlayer.js'
 import { textWalker } from './text-walker.js'
+const { TTS } = await import('./tts.js')
 
 const SEARCH_PREFIX = 'foliate-search:'
 
@@ -444,10 +445,9 @@ export class View extends HTMLElement {
             for (const item of list) this.deleteAnnotation(item)
         this.#searchResults.clear()
     }
-    async initTTS() {
+    initTTS() {
         const doc = this.renderer.getContents()[0].doc
         if (this.tts && this.tts.doc === doc) return
-        const { TTS } = await import('./tts.js')
         this.tts = new TTS(doc, textWalker, range =>
             this.renderer.scrollToAnchor(range, true))
     }

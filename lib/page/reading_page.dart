@@ -61,6 +61,7 @@ class ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
     WidgetsBinding.instance.removeObserver(this);
     insertReadingTime(ReadingTime(
         bookId: _book.id, readingTime: _readTimeWatch.elapsed.inSeconds));
+    Tts.dispose();
     super.dispose();
   }
 

@@ -24,7 +24,6 @@ Future<void> main() async {
   await DBHelper().initDB();
   Server().start();
   initBasePath();
-  checkUpdate(false);
 
   runApp(const MyApp());
 }

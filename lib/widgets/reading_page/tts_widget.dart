@@ -23,18 +23,23 @@ class _TtsWidgetState extends State<TtsWidget> {
 
   @override
   void initState() {
-    int x = 66666;
-    String getText() {
-      print(x);
-      return (x++).toString();
-    }
+    //
+    // int x = 66666;
+    // String getText() {
+    //   print(x);
+    //   return (x++).toString();
+    // }
+    //
+    // String getPreviousText() {
+    //   print(x);
+    //   return (x--).toString();
+    // }
+    final initTts = widget.epubPlayerKey.currentState!.initTts;
+    final ttsNext = widget.epubPlayerKey.currentState!.ttsNext;
+    final ttsPrev = widget.epubPlayerKey.currentState!.ttsPrev;
 
-    String getPreviousText() {
-      print(x);
-      return (x--).toString();
-    }
     if (!Tts.isInit) {
-    Tts.init(getText, getPreviousText);
+    Tts.init(initTts, ttsNext, ttsPrev);
     Tts.speak();
     }
     super.initState();
