@@ -19,8 +19,8 @@ class BookStyle {
     this.wordSpacing = 2.0,
     this.paragraphSpacing = 1.0,
     this.sideMargin = 6.0,
-    this.topMargin = 60.0,
-    this.bottomMargin = 20.0,
+    this.topMargin = 80.0,
+    this.bottomMargin = 40.0,
   });
 
   BookStyle copyWith({
