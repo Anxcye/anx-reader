@@ -115,16 +115,21 @@ Widget bookInfo(BuildContext context, Book book, int numberOfNotes) {
   );
 }
 
-ClipRRect bookCover(Book book) {
-  return ClipRRect(
-    borderRadius: BorderRadius.circular(8),
-    child: Image.file(
-      File(
-        book.coverFullPath,
+Widget bookCover(Book book) {
+  return SizedBox(
+    height: 180,
+    width: 120,
+    child: Hero(
+      tag: book.coverFullPath,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: Image.file(
+          File(
+            book.coverFullPath,
+          ),
+          fit: BoxFit.cover,
+        ),
       ),
-      height: 180,
-      width: 120,
-      fit: BoxFit.cover,
     ),
   );
 }
@@ -164,7 +169,8 @@ Row operators(BuildContext context, Book book) {
   }
 
   return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-    operateButton(context, const Icon(Icons.details), L10n.of(context).notes_page_detail,
+    operateButton(
+        context, const Icon(Icons.details), L10n.of(context).notes_page_detail,
         () {
       Navigator.push(
         context,
@@ -174,8 +180,8 @@ Row operators(BuildContext context, Book book) {
       );
     }),
     // operateButton(context, Icons.search, 'Search', () {}),
-    operateButton(context, const Icon(Icons.ios_share), L10n.of(context).notes_page_export,
-        () {
+    operateButton(context, const Icon(Icons.ios_share),
+        L10n.of(context).notes_page_export, () {
       handleExportNotes();
     }),
     // operateButton(context, Icons.ios_share, 'Export', () {}),

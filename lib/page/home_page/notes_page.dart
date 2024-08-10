@@ -247,15 +247,20 @@ class _NotesPageState extends State<NotesPage> {
                         ),
                       ),
                       // Expanded(child: SizedBox()),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: Image.file(
-                          File(
-                            snapshot.data!.coverFullPath,
+                      SizedBox(
+                        height: 130,
+                        width: 90,
+                        child: Hero(
+                          tag: snapshot.data!.coverFullPath,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Image.file(
+                              File(
+                                snapshot.data!.coverFullPath,
+                              ),
+                              fit: BoxFit.cover,
+                            ),
                           ),
-                          height: 130,
-                          width: 90,
-                          fit: BoxFit.cover,
                         ),
                       ),
                     ],

@@ -5,6 +5,7 @@ import 'package:anx_reader/dao/book.dart';
 import 'package:anx_reader/dao/reading_time.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/models/book.dart';
+import 'package:anx_reader/page/book_detail.dart';
 import 'package:anx_reader/utils/convert_seconds.dart';
 import 'package:anx_reader/widgets/highlight_digit.dart';
 import 'package:anx_reader/widgets/statistic/chard_card.dart';
@@ -124,18 +125,14 @@ class _StatisticPageState extends State<StatisticPage> {
         Expanded(
             // child: _buildStatisticCard('{} ${L10n.of(context).statistic_notes}',
             //     selectTotalNumberOfNotes())),
-            child: highlightDigit(context, L10n.of(context).statistic_notes(totalNumberOfNotes),
-                smallTextStyle(), bigTextStyle())),
+            child: highlightDigit(
+                context,
+                L10n.of(context).statistic_notes(totalNumberOfNotes),
+                smallTextStyle(),
+                bigTextStyle())),
       ],
     );
   }
-}
-
-TextStyle totalReadTimeTextStyle() {
-  return const TextStyle(
-    fontSize: 30,
-    fontWeight: FontWeight.bold,
-  );
 }
 
 TextStyle bigTextStyle() {
@@ -152,6 +149,13 @@ TextStyle smallTextStyle() {
 }
 
 Widget _totalReadTime() {
+  TextStyle totalReadTimeTextStyle() {
+    return const TextStyle(
+      fontSize: 30,
+      fontWeight: FontWeight.bold,
+    );
+  }
+
   return FutureBuilder<int>(
     future: selectTotalReadingTime(),
     builder: (context, snapshot) {
@@ -273,22 +277,32 @@ class BookStatisticItem extends StatelessWidget {
       future: selectBookById(bookId),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
-          return SizedBox(
-            // height: 150,
+          return GestureDetector(
+            onTap: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => BookDetail(book: snapshot.data!)));
+            },
             child: Card(
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Row(
                   children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Image.file(
-                        File(
-                          snapshot.data!.coverFullPath,
+                    SizedBox(
+                      height: 130,
+                      width: 90,
+                      child: Hero(
+                        tag: snapshot.data!.coverFullPath,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image.file(
+                            File(
+                              snapshot.data!.coverFullPath,
+                            ),
+                            fit: BoxFit.cover,
+                          ),
                         ),
-                        height: 130,
-                        width: 90,
-                        fit: BoxFit.cover,
                       ),
                     ),
                     const SizedBox(width: 15),

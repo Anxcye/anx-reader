@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:ffi';
+import 'dart:io';
 
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/dao/reading_time.dart';
@@ -206,15 +207,18 @@ class ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-      return Scaffold(
-        body: Stack(
-          children: [
-            EpubPlayer(
-              key: epubPlayerKey,
-              book: _book,
-              showOrHideAppBarAndBottomBar: showOrHideAppBarAndBottomBar,
-            ),
-          ],
+      return Hero(
+        tag: _book.coverFullPath,
+        child: Scaffold(
+          body: Stack(
+            children: [
+              EpubPlayer(
+                key: epubPlayerKey,
+                book: _book,
+                showOrHideAppBarAndBottomBar: showOrHideAppBarAndBottomBar,
+              ),
+            ],
+          ),
         ),
       );
   }
