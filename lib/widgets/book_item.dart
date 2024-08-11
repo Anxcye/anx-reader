@@ -74,7 +74,7 @@ class BookItem extends StatelessWidget {
                 ),
               ),
               Text(
-                '${book.readingPercentage.toStringAsFixed(0)}%',
+                '${(book.readingPercentage * 100).toStringAsFixed(0)}%',
                 style: const TextStyle(
                     fontWeight: FontWeight.w300,
                     fontSize: 9,
