@@ -2,6 +2,7 @@ import * as CFI from './epubcfi.js'
 import { TOCProgress, SectionProgress } from './progress.js'
 import { Overlayer } from './overlayer.js'
 import { textWalker } from './text-walker.js'
+const { TTS } = await import('./tts.js')
 
 const SEARCH_PREFIX = 'foliate-search:'
 
@@ -67,6 +68,7 @@ export class View extends HTMLElement {
     #tocProgress
     #pageProgress
     #searchResults = new Map()
+    #index
     isFixedLayout = false
     lastLocation
     history = new History()
@@ -166,6 +168,7 @@ export class View extends HTMLElement {
         return this.dispatchEvent(new CustomEvent(name, { detail, cancelable }))
     }
     #onRelocate({ reason, range, index, fraction, size }) {
+        this.#index = index
         const chapterLocation = {
             current: this.renderer.page,
             total: this.renderer.pages - 2
@@ -179,7 +182,7 @@ export class View extends HTMLElement {
             this.history.replaceState(cfi)
         this.#emit('relocate', this.lastLocation)
     }
-    
+
     #onLoad({ doc, index }) {
         // set language and dir if not already set
         doc.documentElement.lang ||= this.language.canonical ?? ''
@@ -188,7 +191,7 @@ export class View extends HTMLElement {
 
         this.#handleLinks(doc, index)
         this.#handleClick(doc)
-        
+
         this.#emit('load', { doc, index })
     }
     #handleLinks(doc, index) {
@@ -444,12 +447,26 @@ export class View extends HTMLElement {
             for (const item of list) this.deleteAnnotation(item)
         this.#searchResults.clear()
     }
-    async initTTS() {
-        const doc = this.renderer.getContents()[0].doc
-        if (this.tts && this.tts.doc === doc) return
-        const { TTS } = await import('./tts.js')
-        this.tts = new TTS(doc, textWalker, range =>
-            this.renderer.scrollToAnchor(range, true))
+    oldValue = null
+    initTTS(stop) {
+        if (stop)
+            return this.#getOverlayer(this.#index)?.overlayer.remove(this.oldValue)
+
+        const doc = this.renderer.getContents()[0].doc;
+        if (this.tts && this.tts.doc === doc) return;
+        this.tts = new TTS(doc, textWalker, (range) => {
+            const obj = this.#getOverlayer(this.#index);
+            if (obj) {
+                const { overlayer } = obj;
+                if (this.oldValue) {
+                    overlayer.remove(this.oldValue);
+                }
+                const value = this.getCFI(this.#index, range);
+                overlayer.add(value, range, Overlayer.squiggly, { color: '#39c5bb' });
+                this.oldValue = value;
+            }
+            this.renderer.scrollToAnchor(range);
+        });
     }
     startMediaOverlay() {
         const { index } = this.renderer.getContents()[0]

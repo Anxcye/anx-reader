@@ -39,7 +39,7 @@ const getSegmenter = (lang = 'en', granularity = 'word') => {
             const endIndex = strIndex
             const endOffset = end - (sum - strs[strIndex].length)
             yield [(name++).toString(),
-                makeRange(startIndex, startOffset, endIndex, endOffset)]
+            makeRange(startIndex, startOffset, endIndex, endOffset)]
         }
     }
 }
@@ -161,6 +161,14 @@ class ListIterator {
             return this.#f(this.#arr[newIndex])
         }
     }
+    last() {
+        for (const value of this.#iter) this.#arr.push(value)
+        const newIndex = this.#arr.length - 1
+        if (this.#arr[newIndex]) {
+            this.#index = newIndex
+            return this.#f(this.#arr[newIndex])
+        }
+    }
     prev() {
         const newIndex = this.#index - 1
         if (this.#arr[newIndex]) {
@@ -235,8 +243,16 @@ export class TTS {
     }
     start() {
         this.#lastMark = null
-        const [doc] = this.#list.first() ?? []
+        const [doc, range] = this.#list.first() ?? []
         if (!doc) return this.next()
+        this.highlight(range.cloneRange())
+        return this.#speak(doc, ssml => this.#getMarkElement(ssml, this.#lastMark))
+    }
+    end() {
+        this.#lastMark = null
+        const [doc, range] = this.#list.last() ?? []
+        if (!doc) return this.next()
+        this.highlight(range.cloneRange())
         return this.#speak(doc, ssml => this.#getMarkElement(ssml, this.#lastMark))
     }
     resume() {
@@ -258,7 +274,7 @@ export class TTS {
     }
     from(range) {
         this.#lastMark = null
-        const [doc] = this.#list.find(range_ =>
+        const [doc, newRange] = this.#list.find(range_ =>
             range.compareBoundaryPoints(Range.END_TO_START, range_) <= 0)
         let mark
         for (const [name, range_] of this.#ranges.entries())
@@ -266,6 +282,7 @@ export class TTS {
                 mark = name
                 break
             }
+        if (newRange) this.highlight(newRange.cloneRange())
         return this.#speak(doc, ssml => this.#getMarkElement(ssml, mark))
     }
     setMark(mark) {

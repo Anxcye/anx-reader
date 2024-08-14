@@ -3,6 +3,7 @@ import 'package:anx_reader/page/home_page/bookshelf_page.dart';
 import 'package:anx_reader/page/home_page/notes_page.dart';
 import 'package:anx_reader/page/home_page/settings_page.dart';
 import 'package:anx_reader/page/home_page/statistics_page.dart';
+import 'package:anx_reader/utils/check_update.dart';
 import 'package:anx_reader/utils/webdav/common.dart';
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/utils/toast/common.dart';
@@ -32,6 +33,7 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> initAnx() async {
     AnxToast.init(context);
+    checkUpdate(false);
     if (Prefs().webdavStatus){
       await AnxWebdav.init();
       await AnxWebdav.syncData(SyncDirection.both);
