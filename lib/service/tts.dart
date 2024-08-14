@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io' show Platform;
 
+import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
@@ -11,35 +12,34 @@ class Tts {
   static FlutterTts flutterTts = FlutterTts();
   static String? language;
   static String? engine;
-  static double _volume = 0.5;
-  static double _pitch = 1.0;
-  static double _rate = 0.5;
+
   static bool isInit = false;
 
-  static double get volume => _volume;
+  static double get volume => Prefs().ttsVolume;
 
-  static double get pitch => _pitch;
+  static double get pitch => Prefs().ttsPitch;
 
-  static double get rate => _rate;
+  static double get rate => Prefs().ttsRate;
 
   static set volume(double volume) {
     restart();
-    _volume = volume;
+    Prefs().ttsVolume = volume;
   }
 
   static set pitch(double pitch) {
     restart();
-    _pitch = pitch;
+    Prefs().ttsPitch = pitch;
   }
 
   static set rate(double rate) {
     restart();
-    _rate = rate;
+    Prefs().ttsRate = rate;
   }
 
   static void dispose() {
-    flutterTts.stop();
+    stop();
     isInit = false;
+    _currentVoiceText = null;
   }
 
   static bool isCurrentLanguageInstalled = false;
@@ -68,13 +68,14 @@ class Tts {
 
   static Function getPrevVoiceText = () => '';
 
-  static Future<void> init(Function init, Function next, Function prev) async {
-    await init();
+  static Function getHere = () => '';
+
+  static Future<void> init(Function here, Function next, Function prev) async {
+    if (isInit) return;
+    getHere = here;
     isInit = true;
     getNextVoiceText = next;
     getPrevVoiceText = prev;
-
-    _currentVoiceText = await getNextVoiceText();
 
     setAwaitOptions();
 
@@ -88,7 +89,7 @@ class Tts {
     });
 
     flutterTts.setCompletionHandler(() {
-      ttsState = TtsState.stopped;
+      ttsState = TtsState.playing;
     });
 
     flutterTts.setCancelHandler(() {
@@ -114,8 +115,7 @@ class Tts {
 
   static Future<void> getDefaultEngine() async {
     var engine = await flutterTts.getDefaultEngine;
-    if (engine != null) {
-    }
+    if (engine != null) {}
   }
 
   static Future<void> getDefaultVoice() async {
@@ -131,16 +131,19 @@ class Tts {
     }
   }
 
-  static Future<void> speak() async {
+  static Future<void> speak({String? content}) async {
+    if (content != null) {
+      _currentVoiceText = content;
+    }
+    _currentVoiceText ??= await getHere();
     while (_currentVoiceText != null) {
       await flutterTts.setVolume(volume);
       await flutterTts.setSpeechRate(rate);
       await flutterTts.setPitch(pitch);
 
-       var currentVoiceText = await getNextVoiceText();
       await flutterTts.speak(_currentVoiceText!);
-      _currentVoiceText = currentVoiceText;
       if (!isPlaying) break;
+      _currentVoiceText = await getNextVoiceText();
     }
   }
 
@@ -162,13 +165,13 @@ class Tts {
   static Future<void> prev() async {
     await stop();
     _currentVoiceText = await getPrevVoiceText();
-    await speak();
+    speak();
   }
 
   static Future<void> next() async {
     await stop();
     _currentVoiceText = await getNextVoiceText();
-    await speak();
+    speak();
   }
 
   static Future<void> restart() async {

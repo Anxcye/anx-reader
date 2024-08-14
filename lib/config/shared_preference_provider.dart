@@ -193,4 +193,33 @@ class Prefs extends ChangeNotifier {
   String get annotationColor {
     return prefs.getString('annotationColor') ?? '66CCFF';
   }
+
+  set ttsVolume(double volume) {
+    prefs.setDouble('ttsVolume', volume);
+    notifyListeners();
+  }
+
+  double get ttsVolume {
+    return prefs.getDouble('ttsVolume') ?? 0.5;
+  }
+
+  set ttsPitch(double pitch) {
+    prefs.setDouble('ttsPitch', pitch);
+    notifyListeners();
+  }
+
+  double get ttsPitch {
+    return prefs.getDouble('ttsPitch') ?? 1.0;
+  }
+
+  set ttsRate(double rate) {
+    prefs.setDouble('ttsRate', rate);
+    notifyListeners();
+  }
+
+  double get ttsRate {
+    return prefs.getDouble('ttsRate') ?? 0.8;
+  }
+
+
 }

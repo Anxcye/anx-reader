@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ffi';
 import 'dart:io';
 
 import 'package:anx_reader/config/shared_preference_provider.dart';
@@ -28,10 +29,9 @@ class EpubPlayer extends StatefulWidget {
   final Book book;
   final Function showOrHideAppBarAndBottomBar;
 
-  const EpubPlayer(
-      {super.key,
-      required this.showOrHideAppBarAndBottomBar,
-      required this.book});
+  const EpubPlayer({super.key,
+    required this.showOrHideAppBarAndBottomBar,
+    required this.book});
 
   @override
   State<EpubPlayer> createState() => EpubPlayerState();
@@ -127,11 +127,26 @@ class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
       ''');
   }
 
-  Future<void> initTts() async => await webViewController.evaluateJavascript(source: "initTts()");
+  Future<void> initTts() async =>
+      await webViewController.evaluateJavascript(source: "ttsHere()");
 
-  Future<String> ttsNext() async => await webViewController.evaluateJavascript(source: "ttsNext()");
+  void ttsStop() => webViewController.evaluateJavascript(source: "ttsStop()");
 
-  Future<String> ttsPrev() async => await webViewController.evaluateJavascript(source: "ttsPrev()");
+  Future<String> ttsNext() async =>
+      (await webViewController.callAsyncJavaScript(
+          functionBody: "return await ttsNext()"))?.value;
+
+  Future<String> ttsPrev() async =>
+      (await webViewController.callAsyncJavaScript(
+          functionBody: "return await ttsPrev()"))?.value;
+
+  Future<String> ttsPrevSection() async =>
+      (await webViewController.callAsyncJavaScript(
+          functionBody: "return await ttsPrevSection()"))?.value;
+
+  Future<String> ttsNextSection() async =>
+      (await webViewController.callAsyncJavaScript(
+          functionBody: "return await ttsNextSection()"))?.value;
 
   void onClick(Map<String, dynamic> location) {
     if (contextMenuEntry != null) {
@@ -162,14 +177,18 @@ class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
     String backgroundColor = convertDartColorToJs(readTheme.backgroundColor);
     String textColor = convertDartColorToJs(readTheme.textColor);
     List<BookNote> annotationList =
-        await selectBookNotesByBookId(widget.book.id);
+    await selectBookNotesByBookId(widget.book.id);
     String allAnnotations =
-        jsonEncode(annotationList.map((e) => e.toJson()).toList());
+    jsonEncode(annotationList.map((e) => e.toJson()).toList());
+
+    String url =
+    'http://localhost:${Server().port}/book${getBasePath(widget.book.filePath)}'
+        .replaceAll('\'', '\\\'');
 
     await controller.evaluateJavascript(source: '''
       console.log(navigator.userAgent)
       const allAnnotations = $allAnnotations
-      const url = 'http://localhost:${Server().port}/book${getBasePath(widget.book.filePath)}'
+      const url = '$url'
       let cfi = '${widget.book.lastReadPosition}'
       let style = {
           fontSize: ${bookStyle.fontSize},
@@ -224,7 +243,14 @@ class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
           double x = location['pos']['point']['x'];
           double y = location['pos']['point']['y'];
           String dir = location['pos']['dir'];
-          showContextMenu(context, x, y, dir, text, cfi, null);
+          showContextMenu(
+              context,
+              x,
+              y,
+              dir,
+              text,
+              cfi,
+              null);
         });
     controller.addJavaScriptHandler(
         handlerName: 'onAnnotationClick',
@@ -236,7 +262,14 @@ class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
           double x = annotation['pos']['point']['x'];
           double y = annotation['pos']['point']['y'];
           String dir = annotation['pos']['dir'];
-          showContextMenu(context, x, y, dir, note, cfi, id);
+          showContextMenu(
+              context,
+              x,
+              y,
+              dir,
+              note,
+              cfi,
+              id);
         });
   }
 
@@ -310,7 +343,7 @@ class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
     }
     TextStyle textStyle = TextStyle(
         color:
-            Color(int.parse('0x${Prefs().readTheme.textColor}')).withAlpha(150),
+        Color(int.parse('0x${Prefs().readTheme.textColor}')).withAlpha(150),
         fontSize: 10);
 
     Widget time = StreamBuilder(
