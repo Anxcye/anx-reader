@@ -77,10 +77,7 @@ Future<List<String>> getCurrentBooks() async {
 }
 
 Future<List<String>> getCurrentCover() async {
-  final db = await DBHelper().database;
-  final List<Map<String, dynamic>> maps = await db.query('tb_books');
-  return List.generate(maps.length, (i) {
-    return maps[i]['cover_path'];
-  });
+  final books = await selectNotDeleteBooks();
+  return books.map((book) => book.coverPath).toList();
 
 }
