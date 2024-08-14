@@ -68,7 +68,7 @@ const getPosition = target => {
 };
 
 const getSelectionRange = sel => {
-    if (!sel.rangeCount) return;
+    if (sel && !sel.rangeCount) return;
     const range = sel.getRangeAt(0);
     if (range.collapsed) return;
     return range;
@@ -377,7 +377,7 @@ class Reader {
         this.view.addEventListener('show-annotation', e => {
             const annotation = this.annotationsByValue.get(e.detail.value)
             const pos = getPosition(e.detail.range)
-            onAnnotationClick({ annotation, pos})
+            onAnnotationClick({ annotation, pos })
         })
         this.view.addEventListener('external-link', e => {
             e.preventDefault()
@@ -456,30 +456,30 @@ const open = async (file, cfi) => {
 
 // //////// use for test //////////
 // const allAnnotations = [
-//    { id: 1, type: 'highlight', value: "epubcfi(/6/4!/4/4,/1:4,/1:9)", color: 'blue', note: 'this is' },
-//    { id: 2, type: 'highlight', value: "epubcfi(/6/4!/4/4,/1:222,/1:226)", color: 'yellow', note: 'this is' },
-//    { id: 3, type: 'underline', value: "epubcfi(/6/4!/4/4,/1:294,/1:301)", color: 'red', note: 'this is' },
+//     { id: 1, type: 'highlight', value: "epubcfi(/6/12!/4/4,/1:0,/1:73)", color: 'blue', note: 'this is' },
+//     { id: 2, type: 'highlight', value: "epubcfi(/6/4!/4/4,/1:222,/1:226)", color: 'yellow', note: 'this is' },
+//     { id: 3, type: 'underline', value: "epubcfi(/6/4!/4/4,/1:294,/1:301)", color: 'red', note: 'this is' },
 // ]
-// let url = '../local/shiji.epub'
-// let cfi = ''
+// let url = '../local/epub.epub'
+// let cfi = "epubcfi(/6/12!/4,/2[CHP3],/14/1:28)"
 // let style = {
-//    fontSize: 1.2,
-//    letterSpacing: 0,
-//    spacing: '1.5',
-//    paragraphSpacing: 5,
-//    fontColor: '#66ccff',
-//    backgroundColor: '#ffffff',
-//    topMargin: 100,
-//    bottomMargin: 100,
-//    sideMargin: 5,
-//    justify: true,
-//    hyphenate: true,
-//    scroll: false,
-//    animated: true
+//     fontSize: 1.2,
+//     letterSpacing: 0,
+//     spacing: '1.5',
+//     paragraphSpacing: 5,
+//     fontColor: '#66ccff',
+//     backgroundColor: '#ffffff',
+//     topMargin: 100,
+//     bottomMargin: 100,
+//     sideMargin: 5,
+//     justify: true,
+//     hyphenate: true,
+//     scroll: false,
+//     animated: true
 // }
 // window.flutter_inappwebview = {}
 // window.flutter_inappwebview.callHandler = (name, data) => {
-//    console.log(name, data)
+//     console.log(name, data)
 // }
 // ///////////////////////////////
 fetch(url)
@@ -572,6 +572,33 @@ window.nextSection = () => reader.view.renderer.nextSection()
 
 window.initTts = () => reader.view.initTTS()
 
-window.ttsNext = () => reader.view.tts.next()
+window.ttsStop = () => reader.view.initTTS(true)
 
-window.ttsPrev = () => reader.view.tts.prev()
+window.ttsHere = () => {
+    initTts()
+    return reader.view.tts.from(reader.view.lastLocation.range)
+}
+
+window.ttsNextSection = async () => {
+    await nextSection()
+    initTts()
+    return ttsNext()
+}
+
+window.ttsPrevSection = async (last) => {
+    await prevSection()
+    initTts()
+    return last ? reader.view.tts.end() : ttsNext()
+}
+
+window.ttsNext = async () => {
+    const result = reader.view.tts.next(true)
+    if (result) return result
+    return await ttsNextSection()
+}
+
+window.ttsPrev = () => {
+    const result = reader.view.tts.prev(true)
+    if (result) return result
+    return ttsPrevSection(true)
+}

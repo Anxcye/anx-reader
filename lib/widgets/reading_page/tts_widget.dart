@@ -1,9 +1,11 @@
 import 'package:anx_reader/l10n/generated/L10n.dart';
+import 'package:anx_reader/page/reading_page.dart';
 import 'package:anx_reader/service/tts.dart';
 import 'package:anx_reader/widgets/reading_page/widget_title.dart';
 import 'package:anx_reader/page/book_player/epub_player.dart';
 import 'package:anx_reader/widgets/reading_page/more_settings/more_settings.dart';
 import 'package:flutter/material.dart';
+import 'package:icons_plus/icons_plus.dart';
 
 class TtsWidget extends StatefulWidget {
   const TtsWidget({super.key, required this.epubPlayerKey});
@@ -19,29 +21,20 @@ class _TtsWidgetState extends State<TtsWidget> {
   double pitch = Tts.pitch;
   double rate = Tts.rate;
 
-  bool isPlaying = Tts.isPlaying;
+  late bool isPlaying;
 
   @override
   void initState() {
-    //
-    // int x = 66666;
-    // String getText() {
-    //   print(x);
-    //   return (x++).toString();
-    // }
-    //
-    // String getPreviousText() {
-    //   print(x);
-    //   return (x--).toString();
-    // }
-    final initTts = widget.epubPlayerKey.currentState!.initTts;
-    final ttsNext = widget.epubPlayerKey.currentState!.ttsNext;
-    final ttsPrev = widget.epubPlayerKey.currentState!.ttsPrev;
-
-    if (!Tts.isInit) {
-    Tts.init(initTts, ttsNext, ttsPrev);
-    Tts.speak();
+    isPlaying = Tts.isPlaying;
+    if (!isPlaying) {
+      Tts.init(
+          widget.epubPlayerKey.currentState!.initTts,
+          widget.epubPlayerKey.currentState!.ttsNext,
+          widget.epubPlayerKey.currentState!.ttsPrev);
+      Tts.speak();
+      isPlaying = true;
     }
+
     super.initState();
   }
 
@@ -131,13 +124,23 @@ class _TtsWidgetState extends State<TtsWidget> {
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
         IconButton(
+            onPressed: () async {
+              Tts.stop();
+              Tts.speak(
+                  content: await epubPlayerKey.currentState!.ttsPrevSection());
+              setState(() {
+                isPlaying = true;
+              });
+            },
+            icon: const Icon(EvaIcons.arrowhead_left)),
+        IconButton(
             onPressed: () {
               setState(() {
                 isPlaying = true;
                 Tts.prev();
               });
             },
-            icon: const Icon(Icons.skip_previous)),
+            icon: const Icon(EvaIcons.chevron_left)),
         IconButton(
             onPressed: () async {
               Tts.toggle();
@@ -146,8 +149,17 @@ class _TtsWidgetState extends State<TtsWidget> {
               });
             },
             icon: isPlaying
-                ? const Icon(Icons.pause)
-                : const Icon(Icons.play_arrow)),
+                ? const Icon(EvaIcons.pause_circle_outline)
+                : const Icon(EvaIcons.play_circle_outline)),
+        IconButton(
+            onPressed: () {
+              Tts.dispose();
+              epubPlayerKey.currentState!.ttsStop();
+              setState(() {
+                isPlaying = false;
+              });
+            },
+            icon: const Icon(EvaIcons.stop_circle_outline)),
         IconButton(
             onPressed: () {
               setState(() {
@@ -155,7 +167,17 @@ class _TtsWidgetState extends State<TtsWidget> {
                 Tts.next();
               });
             },
-            icon: const Icon(Icons.skip_next)),
+            icon: const Icon(EvaIcons.chevron_right)),
+        IconButton(
+            onPressed: () async {
+              Tts.stop();
+              Tts.speak(
+                  content: await epubPlayerKey.currentState!.ttsNextSection());
+              setState(() {
+                isPlaying = true;
+              });
+            },
+            icon: const Icon(EvaIcons.arrowhead_right)),
       ],
     );
   }
@@ -166,7 +188,7 @@ class _TtsWidgetState extends State<TtsWidget> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        widgetTitle(L10n.of(context).reading_page_style, ReadingSettings.style),
+        widgetTitle(L10n.of(context).tts_narrator, ReadingSettings.style),
         buttons(),
         const Divider(),
         sliders(),

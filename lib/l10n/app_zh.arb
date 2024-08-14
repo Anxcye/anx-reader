@@ -124,5 +124,6 @@
 
   "tts_volume": "音量",
   "tts_rate": "语速",
-  "tts_pitch": "音调"
+  "tts_pitch": "音调",
+  "tts_narrator": "朗读"
 }

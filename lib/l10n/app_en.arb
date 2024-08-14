@@ -123,5 +123,6 @@
 
   "tts_volume": "Volume",
   "tts_rate": "Rate",
-  "tts_pitch": "Pitch"
+  "tts_pitch": "Pitch",
+  "tts_narrator": "Narrator"
 }
