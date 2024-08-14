@@ -1,7 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
-import 'dart:ffi';
-import 'dart:io';
 
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/dao/reading_time.dart';
@@ -9,14 +6,17 @@ import 'package:anx_reader/dao/theme.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/models/read_theme.dart';
 import 'package:anx_reader/page/book_player/epub_player.dart';
+import 'package:anx_reader/service/tts.dart';
 import 'package:anx_reader/utils/ui/status_bar.dart';
 import 'package:anx_reader/widgets/reading_page/notes_widget.dart';
 import 'package:anx_reader/models/reading_time.dart';
 import 'package:anx_reader/widgets/reading_page/progress_widget.dart';
+import 'package:anx_reader/widgets/reading_page/tts_widget.dart';
 import 'package:anx_reader/widgets/reading_page/style_widget.dart';
-import 'package:anx_reader/widgets/reading_page/theme_widget.dart';
 import 'package:anx_reader/widgets/reading_page/toc_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_tts/flutter_tts.dart';
+import 'package:icons_plus/icons_plus.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 class ReadingPage extends StatefulWidget {
@@ -29,7 +29,7 @@ class ReadingPage extends StatefulWidget {
 }
 
 final GlobalKey<ReadingPageState> readingPageKey =
-    GlobalKey<ReadingPageState>();
+GlobalKey<ReadingPageState>();
 final epubPlayerKey = GlobalKey<EpubPlayerState>();
 
 class ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
@@ -61,6 +61,7 @@ class ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
     WidgetsBinding.instance.removeObserver(this);
     insertReadingTime(ReadingTime(
         bookId: _book.id, readingTime: _readTimeWatch.elapsed.inSeconds));
+    Tts.dispose();
     super.dispose();
   }
 
@@ -117,10 +118,10 @@ class ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
     });
   }
 
-  Future<void> themeHandler(StateSetter modalSetState) async {
+  Future<void> styleHandler(StateSetter modalSetState) async {
     List<ReadTheme> themes = await selectThemes();
     modalSetState(() {
-      _currentPage = ThemeWidget(
+      _currentPage = StyleWidget(
         themes: themes,
         epubPlayerKey: epubPlayerKey,
         setCurrentPage: (Widget page) {
@@ -132,9 +133,9 @@ class ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
     });
   }
 
-  Future<void> styleHandler() async {
+  Future<void> ttsHandler() async {
     setState(() {
-      _currentPage = StyleWidget(
+      _currentPage = TtsWidget(
         epubPlayerKey: epubPlayerKey,
       );
     });
@@ -162,7 +163,7 @@ class ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
                         },
                       ),
                       IconButton(
-                        icon: const Icon(Icons.edit_note),
+                        icon: const Icon(EvaIcons.edit),
                         onPressed: () {
                           noteHandler();
                           setState(() {});
@@ -178,14 +179,14 @@ class ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
                       IconButton(
                         icon: const Icon(Icons.color_lens),
                         onPressed: () {
-                          themeHandler(setState);
+                          styleHandler(setState);
                           setState(() {});
                         },
                       ),
                       IconButton(
-                        icon: const Icon(Icons.text_fields),
+                        icon: const Icon(EvaIcons.headphones),
                         onPressed: () {
-                          styleHandler();
+                          ttsHandler();
                           setState(() {});
                         },
                       ),
@@ -207,19 +208,19 @@ class ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-      return Hero(
-        tag: _book.coverFullPath,
-        child: Scaffold(
-          body: Stack(
-            children: [
-              EpubPlayer(
-                key: epubPlayerKey,
-                book: _book,
-                showOrHideAppBarAndBottomBar: showOrHideAppBarAndBottomBar,
-              ),
-            ],
-          ),
+    return Hero(
+      tag: _book.coverFullPath,
+      child: Scaffold(
+        body: Stack(
+          children: [
+            EpubPlayer(
+              key: epubPlayerKey,
+              book: _book,
+              showOrHideAppBarAndBottomBar: showOrHideAppBarAndBottomBar,
+            ),
+          ],
         ),
-      );
+      ),
+    );
   }
 }
