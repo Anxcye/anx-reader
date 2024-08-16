@@ -9,6 +9,18 @@ import 'package:flutter/services.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+List<String> notesColors = ['66CCFF', 'FF0000', '00FF00', 'EB3BFF', 'FFD700'];
+List<Map<String, dynamic>> notesType = [
+  {
+    'type': 'highlight',
+    'icon': AntDesign.highlight_outline,
+  },
+  {
+    'type': 'underline',
+    'icon': Icons.format_underline,
+  },
+];
+
 Widget excerptMenu(
   BuildContext context,
   String annoCfi,
@@ -26,8 +38,6 @@ Widget excerptMenu(
         : const Icon(Icons.delete);
   }
 
-  List<String> colors = ['66ccff', 'FF0000', '00FF00', 'EB3BFF', 'FFD700'];
-
   String annoType = Prefs().annotationType;
   String annoColor = Prefs().annotationColor;
 
@@ -38,7 +48,6 @@ Widget excerptMenu(
       if (id != null) {
         deleteBookNoteById(id);
         playerKey.removeAnnotation(annoCfi);
-
       }
       onClose();
     } else {
@@ -51,12 +60,6 @@ Widget excerptMenu(
   Future<void> onColorSelected(String color, {bool close = true}) async {
     Prefs().annotationColor = color;
     annoColor = color;
-    // if (id != null) {
-    //   BookNote oldBookNote = await selectBookNoteById(id);
-    //   // playerKey.webViewController.evaluateJavascript(
-    //   //     source:
-    //   //         'removeAnnotations("${oldBookNote.cfi}", "${oldBookNote.type}")');
-    // }
     BookNote bookNote = BookNote(
       id: id,
       bookId: playerKey.widget.book.id,
@@ -141,9 +144,9 @@ Widget excerptMenu(
               icon: deleteIcon());
         },
       ),
-      typeButton('underline', Icons.format_underline),
-      typeButton('highlight', AntDesign.highlight_outline),
-      for (String color in colors) colorButton(color),
+      for (Map<String, dynamic> type in notesType)
+        typeButton(type['type'], type['icon']),
+      for (String color in notesColors) colorButton(color),
     ]),
   );
 
