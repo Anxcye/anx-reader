@@ -15,7 +15,6 @@ import 'package:anx_reader/widgets/reading_page/tts_widget.dart';
 import 'package:anx_reader/widgets/reading_page/style_widget.dart';
 import 'package:anx_reader/widgets/reading_page/toc_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_tts/flutter_tts.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
@@ -29,7 +28,7 @@ class ReadingPage extends StatefulWidget {
 }
 
 final GlobalKey<ReadingPageState> readingPageKey =
-GlobalKey<ReadingPageState>();
+    GlobalKey<ReadingPageState>();
 final epubPlayerKey = GlobalKey<EpubPlayerState>();
 
 class ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
@@ -204,7 +203,6 @@ class ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
       });
     });
   }
-
 
   @override
   Widget build(BuildContext context) {

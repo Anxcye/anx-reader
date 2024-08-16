@@ -331,7 +331,7 @@ class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
     removeOverlay();
   }
 
-  String indexHtmlPath = "localhost:${Server().port}/foliate-js/index.html";
+  String indexHtmlPath = "http://localhost:${Server().port}/foliate-js/index.html";
   InAppWebViewSettings initialSettings = InAppWebViewSettings(
     supportZoom: false,
     transparentBackground: true,
