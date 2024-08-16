@@ -463,27 +463,21 @@ class _BookDetailState extends State<BookDetail> {
           int minutes = totalReadingTime % 3600 ~/ 60;
           return Padding(
             padding: const EdgeInsets.only(left: 20, right: 20),
-            child: RichText(
-              text: TextSpan(
-                children: [
-                  TextSpan(
-                    text: '$hours',
-                    style: digitStyle,
-                  ),
-                  TextSpan(
-                    text: ' ${L10n.of(context).common_hours} ',
-                    style: textStyle,
-                  ),
-                  TextSpan(
-                    text: '$minutes',
-                    style: digitStyle,
-                  ),
-                  TextSpan(
-                    text: ' ${L10n.of(context).common_minutes}',
-                    style: textStyle,
-                  ),
-                ],
-              ),
+            child: Row(
+              children: [
+                highlightDigit(
+                  context,
+                  L10n.of(context).common_hours(hours),
+                  textStyle,
+                  digitStyle,
+                ),
+                highlightDigit(
+                  context,
+                  L10n.of(context).common_minutes(minutes),
+                  textStyle,
+                  digitStyle,
+                ),
+              ],
             ),
           );
         } else {

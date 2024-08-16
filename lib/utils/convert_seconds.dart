@@ -9,10 +9,10 @@ String convertSeconds(int seconds) {
   final int minutes = (seconds % 3600) ~/ 60;
   final int second = seconds % 60;
   if (hours > 0) {
-    return '${hours.toString()} ${L10n.of(context).common_hours} ${minutes.toString()} ${L10n.of(context).common_minutes}';
+    return '${L10n.of(context).common_hours(hours)} ${L10n.of(context).common_minutes(minutes)}';
   } else if (minutes > 0) {
-    return '${minutes.toString()} ${L10n.of(context).common_minutes_full}';
+    return L10n.of(context).common_minutes_full(minutes);
   } else {
-    return '${second.toString()} ${L10n.of(context).common_seconds_full}';
+    return L10n.of(context).common_seconds_full(second);
   }
 }

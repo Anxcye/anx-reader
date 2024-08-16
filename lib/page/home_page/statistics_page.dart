@@ -102,59 +102,49 @@ class _StatisticPageState extends State<StatisticPage> {
   }
 
   Row baseStatistic(BuildContext context) {
+    TextStyle digitStyle = const TextStyle(
+      fontSize: 24,
+      fontWeight: FontWeight.bold,
+    );
+
+    TextStyle textStyle = const TextStyle(
+      fontSize: 16,
+    );
     return Row(
       children: [
         Expanded(
-            // child: _buildStatisticCard(
-            //     '{} ${L10n.of(context).statistic_books_read(0)}',
-            //     selectTotalNumberOfBook())),
             child: highlightDigit(
                 context,
                 L10n.of(context).statistic_books_read(totalNumberOfBook),
-                smallTextStyle(),
-                bigTextStyle())),
+                textStyle,
+                digitStyle)),
         Expanded(
-            // child: _buildStatisticCard(
-            //     '{} ${L10n.of(context).statistic_days_of_reading}',
-            //     selectTotalNumberOfDate())),
             child: highlightDigit(
                 context,
                 L10n.of(context).statistic_days_of_reading(totalNumberOfDate),
-                smallTextStyle(),
-                bigTextStyle())),
+                textStyle,
+                digitStyle)),
         Expanded(
-            // child: _buildStatisticCard('{} ${L10n.of(context).statistic_notes}',
-            //     selectTotalNumberOfNotes())),
             child: highlightDigit(
                 context,
                 L10n.of(context).statistic_notes(totalNumberOfNotes),
-                smallTextStyle(),
-                bigTextStyle())),
+                textStyle,
+                digitStyle)),
       ],
     );
   }
 }
 
-TextStyle bigTextStyle() {
-  return const TextStyle(
+Widget _totalReadTime() {
+  TextStyle textStyle = const TextStyle(
+    fontSize: 30,
+    fontWeight: FontWeight.bold,
+  );
+
+  TextStyle digitStyle = const TextStyle(
     fontSize: 24,
     fontWeight: FontWeight.bold,
   );
-}
-
-TextStyle smallTextStyle() {
-  return const TextStyle(
-    fontSize: 16,
-  );
-}
-
-Widget _totalReadTime() {
-  TextStyle totalReadTimeTextStyle() {
-    return const TextStyle(
-      fontSize: 30,
-      fontWeight: FontWeight.bold,
-    );
-  }
 
   return FutureBuilder<int>(
     future: selectTotalReadingTime(),
@@ -166,21 +156,21 @@ Widget _totalReadTime() {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            RichText(
-              textAlign: TextAlign.start,
-              text: TextSpan(
-                style: DefaultTextStyle.of(context).style,
-                children: <TextSpan>[
-                  TextSpan(text: '$H', style: totalReadTimeTextStyle()),
-                  TextSpan(
-                      text: ' ${L10n.of(context).common_hours} ',
-                      style: bigTextStyle()),
-                  TextSpan(text: '$M', style: totalReadTimeTextStyle()),
-                  TextSpan(
-                      text: ' ${L10n.of(context).common_minutes}',
-                      style: bigTextStyle()),
-                ],
-              ),
+            Row(
+              children: [
+                highlightDigit(
+                  context,
+                  L10n.of(context).common_hours(H),
+                  digitStyle,
+                  textStyle,
+                ),
+                highlightDigit(
+                  context,
+                  L10n.of(context).common_minutes(M),
+                  digitStyle,
+                  textStyle,
+                ),
+              ],
             ),
             Text(
               '${Prefs().beginDate.toString().substring(0, 10)} ${L10n.of(context).statistic_to_present}',

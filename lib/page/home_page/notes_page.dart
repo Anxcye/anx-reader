@@ -7,6 +7,7 @@ import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/page/book_notes_page.dart';
 import 'package:anx_reader/utils/convert_seconds.dart';
+import 'package:anx_reader/widgets/highlight_digit.dart';
 import 'package:anx_reader/widgets/tips/notes_tips.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -97,34 +98,20 @@ class _NotesPageState extends State<NotesPage> {
               child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    RichText(
-                      text: TextSpan(
-                        style: DefaultTextStyle.of(context).style,
-                        children: <TextSpan>[
-                          TextSpan(
-                            text: '${snapshot.data!['numberOfNotes']}',
-                            style: digitStyle,
-                          ),
-                          TextSpan(
-                            text: ' ${L10n.of(context).notes_notes_across} ',
-                            style: textStyle,
-                          ),
-                        ],
-                      ),
+                    highlightDigit(
+                      context,
+                      L10n.of(context)
+                          .notes_notes_across(snapshot.data!['numberOfNotes']!),
+                      textStyle,
+                      digitStyle,
                     ),
-                    RichText(
-                        text: TextSpan(
-                            style: DefaultTextStyle.of(context).style,
-                            children: [
-                          TextSpan(
-                            text: '${snapshot.data!['numberOfBooks']}',
-                            style: digitStyle,
-                          ),
-                          TextSpan(
-                            text: ' ${L10n.of(context).notes_books}',
-                            style: textStyle,
-                          ),
-                        ]))
+                    highlightDigit(
+                      context,
+                      L10n.of(context)
+                          .notes_books(snapshot.data!['numberOfBooks']!),
+                      textStyle,
+                      digitStyle,
+                    ),
                   ]),
             );
           } else {
@@ -159,11 +146,11 @@ class _NotesPageState extends State<NotesPage> {
 
   Widget bookNotes(
       BuildContext context, int bookId, int numberOfNotes, bool isMobile) {
-    TextStyle numberStyle = const TextStyle(
+    TextStyle digitStyle = const TextStyle(
       fontSize: 28,
       fontWeight: FontWeight.bold,
     );
-    TextStyle numberText = const TextStyle(
+    TextStyle textStyle = const TextStyle(
       fontSize: 20,
     );
     TextStyle titleStyle = const TextStyle(
@@ -207,20 +194,11 @@ class _NotesPageState extends State<NotesPage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            RichText(
-                              text: TextSpan(
-                                style: DefaultTextStyle.of(context).style,
-                                children: [
-                                  TextSpan(
-                                    text: '$numberOfNotes',
-                                    style: numberStyle,
-                                  ),
-                                  TextSpan(
-                                    text: ' ${L10n.of(context).notes_notes}',
-                                    style: numberText,
-                                  ),
-                                ],
-                              ),
+                            highlightDigit(
+                              context,
+                              L10n.of(context).notes_notes(numberOfNotes),
+                              textStyle,
+                              digitStyle,
                             ),
                             const SizedBox(height: 8),
                             Text(snapshot.data!.title, style: titleStyle),

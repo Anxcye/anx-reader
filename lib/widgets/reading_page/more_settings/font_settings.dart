@@ -27,7 +27,7 @@ Widget screenTimeout(BuildContext context, StateSetter setState) {
       ),
       subtitle: Row(
         children: [
-          Text(Prefs().awakeTime.toString() + L10n.of(context).common_minutes),
+          Text(L10n.of(context).common_minutes(Prefs().awakeTime)),
           Expanded(
             child: Slider(
                 min: 0,

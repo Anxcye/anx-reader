@@ -2,11 +2,10 @@ import 'dart:io';
 
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/service/notes/export_notes.dart';
-import 'package:anx_reader/widgets/tips/notes_tips.dart';
-import 'package:anx_reader/dao/book_note.dart';
+import 'package:anx_reader/widgets/book_notes/book_notes_list.dart';
 import 'package:anx_reader/models/book.dart';
-import 'package:anx_reader/models/book_note.dart';
 import 'package:anx_reader/page/book_detail.dart';
+import 'package:anx_reader/widgets/highlight_digit.dart';
 import 'package:flutter/material.dart';
 import 'package:icons_plus/icons_plus.dart';
 
@@ -39,7 +38,7 @@ class _BookNotesPageState extends State<BookNotesPage> {
           children: [
             bookInfo(context, widget.book, widget.numberOfNotes),
             const SizedBox(height: 170),
-            bookNotesList(widget.book.id),
+            BookNotesList(book: widget.book, reading: false),
           ],
         ),
       ),
@@ -69,7 +68,7 @@ Widget bookInfo(BuildContext context, Book book, int numberOfNotes) {
                       style: titleStyle,
                       maxLines: 1,
                     ),
-                    notesStatistic(context, numberOfNotes),
+                    notesStatistic(context, numberOfNotes, book),
                     const SizedBox(
                       height: 25,
                     ),
@@ -95,7 +94,7 @@ Widget bookInfo(BuildContext context, Book book, int numberOfNotes) {
                           style: titleStyle,
                           maxLines: 2,
                         ),
-                        notesStatistic(context, numberOfNotes),
+                        notesStatistic(context, numberOfNotes, book),
                         const SizedBox(
                           height: 25,
                         ),
@@ -206,7 +205,7 @@ Widget operateButton(
   );
 }
 
-Widget notesStatistic(BuildContext context, int numberOfNotes) {
+Widget notesStatistic(BuildContext context, int numberOfNotes, Book book) {
   TextStyle digitStyle = TextStyle(
     fontSize: 28,
     fontWeight: FontWeight.bold,
@@ -216,86 +215,19 @@ Widget notesStatistic(BuildContext context, int numberOfNotes) {
       fontSize: 18,
       color: Theme.of(context).textTheme.bodyLarge!.color,
       fontFamily: 'SourceHanSerif');
-  return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-    RichText(
-      text: TextSpan(
-        children: <TextSpan>[
-          TextSpan(
-            text: '$numberOfNotes',
-            style: digitStyle,
-          ),
-          TextSpan(
-            text: ' ${L10n.of(context).notes_notes}',
-            style: textStyle,
-          ),
-        ],
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      highlightDigit(
+        context,
+        L10n.of(context).notes_notes(numberOfNotes),
+        textStyle,
+        digitStyle,
       ),
-    ),
-  ]);
-}
-
-Widget bookNotesList(int bookId) {
-  return FutureBuilder<List<BookNote>>(
-    future: selectBookNotesByBookId(bookId),
-    builder: (context, snapshot) {
-      if (snapshot.connectionState == ConnectionState.done) {
-        if (snapshot.data!.isEmpty) {
-          return const Center(child: NotesTips());
-        }
-        return Column(
-          children: snapshot.data!.map((bookNote) {
-            return bookNoteItem(context, bookNote);
-          }).toList(),
-        );
-      } else {
-        return const CircularProgressIndicator();
-      }
-    },
-  );
-}
-
-Widget bookNoteItem(BuildContext context, BookNote bookNote) {
-  Color iconColor = Color(int.parse('0x88${bookNote.color}'));
-  return Card(
-    child: Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-              padding: const EdgeInsets.only(left: 10, right: 10, top: 10),
-              child: bookNote.type == 'highlight'
-                  ? Icon(Icons.highlight, color: iconColor)
-                  : Icon(Icons.format_underline, color: iconColor)),
-          Expanded(
-            // flex: 7,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  bookNote.content,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'SourceHanSerif',
-                  ),
-                ),
-                Divider(
-                  indent: 4,
-                  height: 3,
-                  color: Colors.grey.shade300,
-                ),
-                Text(
-                  bookNote.chapter,
-                  style: const TextStyle(
-                    fontSize: 14,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+      Text(
+        L10n.of(context).notes_read_percentage(
+            '${(book.readingPercentage * 100).toStringAsFixed(2)}%'),
       ),
-    ),
+    ],
   );
 }
