@@ -230,7 +230,7 @@ const getCSS = ({ fontSize,
         color: ${fontColor} !important;
         background: none !important;
         background-color: ${backgroundColor} !important;
-        font-size: ${fontSize}em;
+        font-size: ${fontSize}em !important;
         letter-spacing: ${letterSpacing}px;
     }
     /* https://github.com/whatwg/html/issues/5426 */
@@ -240,8 +240,9 @@ const getCSS = ({ fontSize,
         }
     }
     p, li, blockquote, dd, div{
-        line-height: ${spacing};
-        padding-bottom: ${paragraphSpacing}em;
+        color: ${fontColor} !important;
+        line-height: ${spacing} !important;
+        padding-bottom: ${paragraphSpacing}em !important;
         text-align: ${justify ? 'justify' : 'start'};
         -webkit-hyphens: ${hyphenate ? 'auto' : 'manual'};
         hyphens: ${hyphenate ? 'auto' : 'manual'};
