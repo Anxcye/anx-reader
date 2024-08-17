@@ -19,7 +19,7 @@ class TocWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 700,
+      height: 600,
       child: Column(
         children: [
           widgetTitle(L10n.of(context).reading_contents, null),

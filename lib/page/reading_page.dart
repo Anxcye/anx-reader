@@ -5,6 +5,7 @@ import 'package:anx_reader/dao/reading_time.dart';
 import 'package:anx_reader/dao/theme.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/models/read_theme.dart';
+import 'package:anx_reader/page/book_detail.dart';
 import 'package:anx_reader/page/book_player/epub_player.dart';
 import 'package:anx_reader/service/tts.dart';
 import 'package:anx_reader/utils/ui/status_bar.dart';
@@ -14,6 +15,7 @@ import 'package:anx_reader/widgets/reading_page/progress_widget.dart';
 import 'package:anx_reader/widgets/reading_page/tts_widget.dart';
 import 'package:anx_reader/widgets/reading_page/style_widget.dart';
 import 'package:anx_reader/widgets/reading_page/toc_widget.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
@@ -142,60 +144,104 @@ class ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
   }
 
   void showBottomBar(BuildContext context) {
-    showModalBottomSheet(
+    showGeneralDialog(
       context: context,
-      builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return IntrinsicHeight(
-              child: Column(
-                children: [
-                  const SizedBox(height: 10),
-                  Expanded(child: _currentPage),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.toc),
-                        onPressed: () {
-                          tocHandler();
-                          setState(() {});
-                        },
-                      ),
-                      IconButton(
-                        icon: const Icon(EvaIcons.edit),
-                        onPressed: () {
-                          noteHandler();
-                          setState(() {});
-                        },
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.data_usage),
-                        onPressed: () {
-                          progressHandler();
-                          setState(() {});
-                        },
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.color_lens),
-                        onPressed: () {
-                          styleHandler(setState);
-                          setState(() {});
-                        },
-                      ),
-                      IconButton(
-                        icon: const Icon(EvaIcons.headphones),
-                        onPressed: () {
-                          ttsHandler();
-                          setState(() {});
-                        },
-                      ),
-                    ],
-                  ),
-                ],
+      barrierDismissible: true,
+      transitionDuration: const Duration(milliseconds: 200),
+      barrierLabel: MaterialLocalizations.of(context).dialogLabel,
+      barrierColor: Colors.black.withOpacity(0.1),
+      pageBuilder: (context, _, __) {
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: <Widget>[
+            AppBar(
+              title: Text(_book.title, overflow: TextOverflow.ellipsis),
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () {
+                  // close bottom bar
+                  Navigator.pop(context);
+                  // close reading page
+                  Navigator.pop(context);
+                },
               ),
-            );
-          },
+              actions: [
+                IconButton(
+                  icon: const Icon(EvaIcons.more_vertical),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      CupertinoPageRoute(
+                        builder: (context) => BookDetail(book: widget.book),
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+            const Spacer(),
+            ClipRRect(
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
+              ),
+              child: Material(
+                child: StatefulBuilder(
+                  builder: (BuildContext context, StateSetter setState) {
+                    return IntrinsicHeight(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const SizedBox(height: 10),
+                          Expanded(child: _currentPage),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.toc),
+                                onPressed: () {
+                                  tocHandler();
+                                  setState(() {});
+                                },
+                              ),
+                              IconButton(
+                                icon: const Icon(EvaIcons.edit),
+                                onPressed: () {
+                                  noteHandler();
+                                  setState(() {});
+                                },
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.data_usage),
+                                onPressed: () {
+                                  progressHandler();
+                                  setState(() {});
+                                },
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.color_lens),
+                                onPressed: () {
+                                  styleHandler(setState);
+                                  setState(() {});
+                                },
+                              ),
+                              IconButton(
+                                icon: const Icon(EvaIcons.headphones),
+                                onPressed: () {
+                                  ttsHandler();
+                                  setState(() {});
+                                },
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ],
         );
       },
     ).then((value) {
