@@ -550,6 +550,8 @@ window.changeStyle = (newStyle) => {
 
 window.goToHref = href => reader.view.goTo(href)
 
+window.goToCfi = cfi => reader.view.goTo(cfi)
+
 window.goToPercent = percent => reader.view.goToFraction(percent)
 
 window.nextPage = () => reader.view.next()
