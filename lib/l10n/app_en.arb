@@ -92,6 +92,7 @@
   "common_new_version": "New version!",
   "common_update": "Update",
   "common_no_new_version": "No new version",
+  "common_confirm": "Confirm",
 
   "service_import_success": "Import success",
 

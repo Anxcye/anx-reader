@@ -93,6 +93,7 @@
   "common_new_version": "新版本!",
   "common_update": "更新",
   "common_no_new_version": "没有新版本",
+  "common_confirm": "确认",
 
   "service_import_success":"导入成功",
 

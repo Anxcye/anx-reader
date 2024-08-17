@@ -8,8 +8,8 @@ class DeleteConfirm extends StatefulWidget {
       required this.confirmIcon});
 
   final Function delete;
-  final Icon deleteIcon;
-  final Icon confirmIcon;
+  final Widget deleteIcon;
+  final Widget confirmIcon;
 
   @override
   State<DeleteConfirm> createState() => _DeleteConfirmState();

@@ -71,6 +71,7 @@ class ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
     if (state == AppLifecycleState.paused) {
+      epubPlayerKey.currentState!.saveReadingProgress();
       _readTimeWatch.stop();
     } else if (state == AppLifecycleState.resumed) {
       _readTimeWatch.start();
