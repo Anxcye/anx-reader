@@ -4,7 +4,6 @@ import 'package:anx_reader/models/toc_item.dart';
 import 'package:anx_reader/page/book_player/epub_player.dart';
 import 'package:flutter/material.dart';
 
-
 class TocWidget extends StatelessWidget {
   const TocWidget({
     super.key,
@@ -65,7 +64,7 @@ class _TocItemWidgetState extends State<TocItemWidget> {
       );
 
   TextStyle tocStyleSelected(context) => TextStyle(
-        fontSize: 20,
+        fontSize: 16,
         color: Theme.of(context).colorScheme.primary,
         fontWeight: FontWeight.bold,
       );
@@ -74,41 +73,38 @@ class _TocItemWidgetState extends State<TocItemWidget> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        SizedBox(
-          height: 50,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // SizedBox(width: 1),
-              TextButton(
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Expanded(
+              child: TextButton(
                 onPressed: () {
                   widget.hideAppBarAndBottomBar(false);
-                  widget.epubPlayerKey.currentState!.goToHref(widget.tocItem.href);
+                  widget.epubPlayerKey.currentState!
+                      .goToHref(widget.tocItem.href);
                 },
-                style: ButtonStyle(
-                  padding: WidgetStateProperty.all(EdgeInsets.zero),
+                style: const ButtonStyle(
                   alignment: Alignment.centerLeft,
                 ),
                 child: Text(
-                  '     ${widget.tocItem.label.trim()}',
+                  widget.tocItem.label.trim(),
                   style: _isSelected(widget.tocItem)
                       ? tocStyleSelected(context)
                       : tocStyle(context),
                 ),
               ),
-              if (widget.tocItem.subitems.isNotEmpty)
-                IconButton(
-                  icon:
-                      Icon(_isExpanded ? Icons.expand_less : Icons.expand_more),
-                  onPressed: () {
-                    setState(() {
-                      _isExpanded = !_isExpanded;
-                    });
-                  },
-                ),
-            ],
-          ),
+            ),
+            if (widget.tocItem.subitems.isNotEmpty)
+              IconButton(
+                icon: Icon(_isExpanded ? Icons.expand_less : Icons.expand_more),
+                onPressed: () {
+                  setState(() {
+                    _isExpanded = !_isExpanded;
+                  });
+                },
+              ),
+          ],
         ),
         if (_isExpanded)
           for (var subItem in widget.tocItem.subitems)
@@ -120,7 +116,7 @@ class _TocItemWidgetState extends State<TocItemWidget> {
                   epubPlayerKey: widget.epubPlayerKey),
             ),
         Divider(
-            indent: 20,
+            indent: 10,
             endIndent: 20,
             thickness: 1,
             color: Colors.grey.shade400),
