@@ -1,3 +1,4 @@
+
 import 'package:anx_reader/models/book_note.dart';
 
 import 'database.dart';
@@ -7,8 +8,34 @@ Future<int> insertBookNote(BookNote bookNote) async {
     updateBookNoteById(bookNote);
     return bookNote.id!;
   }
+
+  List<BookNote> bookNotes = await selectBookNoteByCfiAndBookId(bookNote.cfi, bookNote.bookId);
+  if (bookNotes.isNotEmpty) {
+    bookNote.id = bookNotes.last.id;
+    updateBookNoteById(bookNote);
+    return bookNote.id!;
+  }
+
   final db = await DBHelper().database;
   return db.insert('tb_notes', bookNote.toMap());
+}
+
+Future<List<BookNote>> selectBookNoteByCfiAndBookId(String cfi, int bookId) async {
+  final db = await DBHelper().database;
+  final List<Map<String, dynamic>> maps = await db.query('tb_notes', where: 'cfi = ? AND book_id = ?', whereArgs: [cfi, bookId]);
+  return List.generate(maps.length, (i) {
+    return BookNote(
+      id: maps[i]['id'],
+      bookId: maps[i]['book_id'],
+      content: maps[i]['content'],
+      cfi: maps[i]['cfi'],
+      chapter: maps[i]['chapter'],
+      type: maps[i]['type'],
+      color: maps[i]['color'],
+      createTime: DateTime.parse(maps[i]['create_time']),
+      updateTime: DateTime.parse(maps[i]['update_time']),
+    );
+  });
 }
 
 Future<List<BookNote>> selectBookNotesByBookId(int bookId) async {
