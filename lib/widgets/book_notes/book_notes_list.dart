@@ -2,20 +2,25 @@ import 'package:anx_reader/dao/book_note.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/models/book_note.dart';
+import 'package:anx_reader/widgets/delete_confirm.dart';
 import 'package:anx_reader/widgets/excerpt_menu.dart';
 import 'package:anx_reader/widgets/tips/notes_tips.dart';
 import 'package:flutter/material.dart';
 import 'package:icons_plus/icons_plus.dart';
+import 'package:sticky_headers/sticky_headers.dart';
 
 class BookNotesList extends StatefulWidget {
   const BookNotesList({
     super.key,
     required this.book,
     required this.reading,
+    this.exportNotes,
   });
 
   final Book book;
   final bool reading;
+  final Function(BuildContext context, Book book, {List<BookNote>? notes})?
+      exportNotes;
 
   @override
   State<BookNotesList> createState() => _BookNotesListState();
@@ -24,10 +29,9 @@ class BookNotesList extends StatefulWidget {
 class _BookNotesListState extends State<BookNotesList> {
   List<BookNote> bookNotes = [];
   List<BookNote> showNotes = [];
+  List<BookNote> selectedNotes = [];
   String sortType = 'cfi';
   bool asc = true;
-
-  // notesType * notesColors
   List<bool> typeColorSelected =
       List.filled(notesType.length * notesColors.length, true);
 
@@ -47,44 +51,84 @@ class _BookNotesListState extends State<BookNotesList> {
 
   Widget bookNoteItem(BuildContext context, BookNote bookNote, bool selected) {
     Color iconColor = Color(int.parse('0xaa${bookNote.color}'));
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-                padding: const EdgeInsets.only(left: 10, right: 10, top: 10),
-                child: Icon(
-                  notesType.firstWhere(
-                      (element) => element['type'] == bookNote.type)['icon'],
-                  color: iconColor,
-                )),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    bookNote.content,
-                    style: const TextStyle(
-                      fontSize: 16,
+    return GestureDetector(
+      onTap: () {
+        if (selectedNotes.isNotEmpty) {
+          setState(() {
+            if (selectedNotes.contains(bookNote)) {
+              selectedNotes.remove(bookNote);
+            } else {
+              selectedNotes.add(bookNote);
+            }
+          });
+        } else {}
+      },
+      onLongPress: () {
+        setState(() {
+          if (selectedNotes.contains(bookNote)) {
+            selectedNotes.remove(bookNote);
+          } else {
+            selectedNotes.add(bookNote);
+          }
+        });
+      },
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                  padding: const EdgeInsets.only(left: 10, right: 10, top: 10),
+                  child: Icon(
+                    notesType.firstWhere(
+                        (element) => element['type'] == bookNote.type)['icon'],
+                    color: iconColor,
+                  )),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      bookNote.content,
+                      style: const TextStyle(
+                        fontSize: 16,
+                      ),
                     ),
-                  ),
-                  Divider(
-                    indent: 4,
-                    height: 3,
-                    color: Colors.grey.shade300,
-                  ),
-                  Text(
-                    bookNote.chapter,
-                    style: const TextStyle(
-                      fontSize: 14,
+                    Divider(
+                      indent: 4,
+                      height: 3,
+                      color: Colors.grey.shade300,
                     ),
-                  ),
-                ],
+                    Text(
+                      bookNote.chapter,
+                      style: const TextStyle(
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+              if (selectedNotes.isNotEmpty)
+                IconButton(
+                  onPressed: () {
+                    setState(() {
+                      if (selectedNotes.contains(bookNote)) {
+                        selectedNotes.remove(bookNote);
+                      } else {
+                        selectedNotes.add(bookNote);
+                      }
+                    });
+                  },
+                  icon: Icon(
+                    selectedNotes.contains(bookNote)
+                        ? EvaIcons.checkmark_circle
+                        : Icons.circle_outlined,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );
@@ -131,10 +175,12 @@ class _BookNotesListState extends State<BookNotesList> {
       List<BookNote> filterNotes = [];
 
       for (int i = 0; i < bookNotes.length; i++) {
-        int index = notesType.indexOf(notesType.firstWhere(
-                    (element) => element['type'] == bookNotes[i].type)) *
-                notesColors.length +
-            notesColors.indexOf(bookNotes[i].color);
+        Map<String, dynamic> typeMap = notesType
+            .firstWhere((element) => element['type'] == bookNotes[i].type);
+        String color = bookNotes[i].color.toUpperCase();
+        int index = notesType.indexOf(typeMap) * notesColors.length +
+            notesColors.indexOf(color);
+
         if (typeColorSelected[index]) {
           filterNotes.add(bookNotes[i]);
         }
@@ -327,29 +373,89 @@ class _BookNotesListState extends State<BookNotesList> {
             : const Icon(EvaIcons.funnel));
   }
 
+  Widget header(BuildContext context) {
+    Color buttonColor = Theme.of(context).colorScheme.primary;
+    List<Widget> filter = [
+      const Spacer(),
+      filterButton(context),
+    ];
+    List<Widget> selected = [
+      IconButton(
+        onPressed: () {
+          setState(() {
+            if (selectedNotes.length == showNotes.length) {
+              selectedNotes.clear();
+            } else {
+              selectedNotes = List.from(showNotes);
+            }
+          });
+        },
+        icon: Icon(
+          selectedNotes.length == showNotes.length
+              ? EvaIcons.checkmark_circle
+              : Icons.circle_outlined,
+          color: Theme.of(context).colorScheme.primary,
+        ),
+      ),
+      const Spacer(),
+      DeleteConfirm(
+        delete: () {
+          for (int i = 0; i < selectedNotes.length; i++) {
+            deleteBookNoteById(selectedNotes[i].id!);
+          }
+          setState(() {
+            selectedNotes.clear();
+            _loadBookNotes();
+          });
+        },
+        deleteIcon: Icon(
+          EvaIcons.trash_2,
+          color: buttonColor,
+        ),
+        confirmIcon: const Icon(
+          EvaIcons.close_circle,
+          color: Colors.red,
+        ),
+      ),
+      if (!widget.reading)
+        IconButton(
+            onPressed: () {
+              widget.exportNotes!(context, widget.book, notes: selectedNotes);
+            },
+            icon: Icon(
+              Icons.ios_share,
+              color: buttonColor,
+            )),
+    ];
+
+    return Container(
+      // color: Theme.of(context).colorScheme.surface,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: selectedNotes.isNotEmpty ? selected : filter,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Spacer(),
-            filterButton(context),
-          ],
+        StickyHeader(
+          header: header(context),
+          content: showNotes.isEmpty
+              ? const Column(
+                  children: [
+                    Divider(),
+                    NotesTips(),
+                  ],
+                )
+              : Column(
+                  children: showNotes.map((bookNote) {
+                    return bookNoteItem(context, bookNote, false);
+                  }).toList(),
+                ),
         ),
-        showNotes.isEmpty
-            ? const Column(
-                children: [
-                  Divider(),
-                  NotesTips(),
-                ],
-              )
-            : Column(
-                children: showNotes.map((bookNote) {
-                  return bookNoteItem(context, bookNote, false);
-                }).toList(),
-              ),
       ],
     );
   }
