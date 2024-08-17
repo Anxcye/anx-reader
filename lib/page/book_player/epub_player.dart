@@ -27,11 +27,14 @@ import 'package:intl/intl.dart';
 
 class EpubPlayer extends StatefulWidget {
   final Book book;
+  final String? cfi;
   final Function showOrHideAppBarAndBottomBar;
 
-  const EpubPlayer({super.key,
-    required this.showOrHideAppBarAndBottomBar,
-    required this.book});
+  const EpubPlayer(
+      {super.key,
+      required this.showOrHideAppBarAndBottomBar,
+      required this.book,
+      this.cfi});
 
   @override
   State<EpubPlayer> createState() => EpubPlayerState();
@@ -104,9 +107,11 @@ class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
   }
 
   void goToHref(String href) {
-    webViewController.evaluateJavascript(source: '''
-      goToHref('$href');
-      ''');
+    webViewController.evaluateJavascript(source: "goToHref('$href')");
+  }
+
+  void goToCfi(String cfi) {
+    webViewController.evaluateJavascript(source: "goToCfi('$cfi')");
   }
 
   void addAnnotation(BookNote bookNote) {
@@ -132,21 +137,21 @@ class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
 
   void ttsStop() => webViewController.evaluateJavascript(source: "ttsStop()");
 
-  Future<String> ttsNext() async =>
-      (await webViewController.callAsyncJavaScript(
-          functionBody: "return await ttsNext()"))?.value;
+  Future<String> ttsNext() async => (await webViewController
+          .callAsyncJavaScript(functionBody: "return await ttsNext()"))
+      ?.value;
 
-  Future<String> ttsPrev() async =>
-      (await webViewController.callAsyncJavaScript(
-          functionBody: "return await ttsPrev()"))?.value;
+  Future<String> ttsPrev() async => (await webViewController
+          .callAsyncJavaScript(functionBody: "return await ttsPrev()"))
+      ?.value;
 
-  Future<String> ttsPrevSection() async =>
-      (await webViewController.callAsyncJavaScript(
-          functionBody: "return await ttsPrevSection()"))?.value;
+  Future<String> ttsPrevSection() async => (await webViewController
+          .callAsyncJavaScript(functionBody: "return await ttsPrevSection()"))
+      ?.value;
 
-  Future<String> ttsNextSection() async =>
-      (await webViewController.callAsyncJavaScript(
-          functionBody: "return await ttsNextSection()"))?.value;
+  Future<String> ttsNextSection() async => (await webViewController
+          .callAsyncJavaScript(functionBody: "return await ttsNextSection()"))
+      ?.value;
 
   void onClick(Map<String, dynamic> location) {
     if (contextMenuEntry != null) {
@@ -177,19 +182,22 @@ class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
     String backgroundColor = convertDartColorToJs(readTheme.backgroundColor);
     String textColor = convertDartColorToJs(readTheme.textColor);
     List<BookNote> annotationList =
-    await selectBookNotesByBookId(widget.book.id);
+        await selectBookNotesByBookId(widget.book.id);
     String allAnnotations =
-    jsonEncode(annotationList.map((e) => e.toJson()).toList());
+        jsonEncode(annotationList.map((e) => e.toJson()).toList())
+            .replaceAll('\'', '\\\'');
 
     String url =
-    'http://localhost:${Server().port}/book${getBasePath(widget.book.filePath)}'
-        .replaceAll('\'', '\\\'');
+        'http://localhost:${Server().port}/book${getBasePath(widget.book.filePath)}'
+            .replaceAll('\'', '\\\'');
+
+    String cfi = widget.cfi ?? widget.book.lastReadPosition;
 
     await controller.evaluateJavascript(source: '''
       console.log(navigator.userAgent)
       const allAnnotations = $allAnnotations
       const url = '$url'
-      let cfi = '${widget.book.lastReadPosition}'
+      let cfi = '$cfi'
       let style = {
           fontSize: ${bookStyle.fontSize},
           letterSpacing: ${bookStyle.letterSpacing},
@@ -243,14 +251,7 @@ class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
           double x = location['pos']['point']['x'];
           double y = location['pos']['point']['y'];
           String dir = location['pos']['dir'];
-          showContextMenu(
-              context,
-              x,
-              y,
-              dir,
-              text,
-              cfi,
-              null);
+          showContextMenu(context, x, y, dir, text, cfi, null);
         });
     controller.addJavaScriptHandler(
         handlerName: 'onAnnotationClick',
@@ -262,14 +263,7 @@ class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
           double x = annotation['pos']['point']['x'];
           double y = annotation['pos']['point']['y'];
           String dir = annotation['pos']['dir'];
-          showContextMenu(
-              context,
-              x,
-              y,
-              dir,
-              note,
-              cfi,
-              id);
+          showContextMenu(context, x, y, dir, note, cfi, id);
         });
   }
 
@@ -331,7 +325,8 @@ class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
     removeOverlay();
   }
 
-  String indexHtmlPath = "http://localhost:${Server().port}/foliate-js/index.html";
+  String indexHtmlPath =
+      "http://localhost:${Server().port}/foliate-js/index.html";
   InAppWebViewSettings initialSettings = InAppWebViewSettings(
     supportZoom: false,
     transparentBackground: true,
@@ -343,7 +338,7 @@ class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
     }
     TextStyle textStyle = TextStyle(
         color:
-        Color(int.parse('0x${Prefs().readTheme.textColor}')).withAlpha(150),
+            Color(int.parse('0x${Prefs().readTheme.textColor}')).withAlpha(150),
         fontSize: 10);
 
     Widget time = StreamBuilder(

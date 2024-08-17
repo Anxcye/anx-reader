@@ -19,9 +19,10 @@ import 'package:icons_plus/icons_plus.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 class ReadingPage extends StatefulWidget {
-  final Book book;
+  const ReadingPage({super.key, required this.book, this.cfi});
 
-  const ReadingPage({super.key, required this.book});
+  final Book book;
+  final String? cfi;
 
   @override
   State<ReadingPage> createState() => ReadingPageState();
@@ -214,6 +215,7 @@ class ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
             EpubPlayer(
               key: epubPlayerKey,
               book: _book,
+              cfi: widget.cfi,
               showOrHideAppBarAndBottomBar: showOrHideAppBarAndBottomBar,
             ),
           ],
