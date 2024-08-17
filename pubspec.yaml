@@ -2,7 +2,7 @@ name: anx_reader
 description: "An e-book reader."
 publish_to: 'none'
 
-version: 1.1.6+2022
+version: 1.1.6+2023
 
 environment:
   sdk: '>=3.3.2 <4.0.0'
@@ -56,7 +56,7 @@ dependencies:
   sqflite_common_ffi: ^2.3.3
   battery_plus: ^6.0.2
   flutter_tts: ^4.0.2
-
+  sticky_headers: ^0.3.0+2
 
 dev_dependencies:
   flutter_test:

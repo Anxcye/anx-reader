@@ -4,6 +4,8 @@ import 'package:anx_reader/dao/book.dart';
 import 'package:anx_reader/dao/book_note.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/main.dart';
+import 'package:anx_reader/models/book.dart';
+import 'package:anx_reader/models/book_note.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 
@@ -12,10 +14,8 @@ import '../../utils/toast/common.dart';
 
 enum ExportType { copy, md, txt }
 
-Future<void> exportNotes(int bookId, ExportType exportType) async {
+Future<void> exportNotes(Book book, List<BookNote> notesList, ExportType exportType) async {
   BuildContext context = navigatorKey.currentContext!;
-  var notesList = await selectBookNotesByBookId(bookId);
-  var book = await selectBookById(bookId);
   if (notesList.isEmpty) {
     return;
   }
