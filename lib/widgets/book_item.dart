@@ -1,3 +1,4 @@
+import 'dart:ffi';
 import 'dart:io';
 
 import 'package:anx_reader/l10n/generated/L10n.dart';
@@ -5,7 +6,10 @@ import 'package:anx_reader/page/book_detail.dart';
 import 'package:anx_reader/dao/book.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/service/book.dart';
+import 'package:anx_reader/widgets/delete_confirm.dart';
+import 'package:anx_reader/widgets/icon_and_text.dart';
 import 'package:flutter/material.dart';
+import 'package:icons_plus/icons_plus.dart';
 
 class BookItem extends StatelessWidget {
   const BookItem({
@@ -96,34 +100,32 @@ class BookItem extends StatelessWidget {
             height: 100,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                GestureDetector(
+                iconAndText(
+                  icon: const Icon(EvaIcons.more_vertical),
+                  text: L10n.of(context).notes_page_detail,
                   onTap: () {
                     handleDetail(context);
                   },
-                  child: Column(
-                    // mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.details),
-                      const Spacer(),
-                      Text(L10n.of(context).notes_page_detail),
-                    ],
-                  ),
                 ),
-                const SizedBox(width: 20),
-                GestureDetector(
-                  onTap: () {
+                const Spacer(),
+                DeleteConfirm(
+                  delete: () {
                     handleDelete(context);
                   },
-                  child: Column(
-                    // mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.delete),
-                      const Spacer(),
-                      Text(L10n.of(context).common_delete),
-                    ],
+                  deleteIcon: iconAndText(
+                    icon: const Icon(EvaIcons.trash),
+                    text: L10n.of(context).common_delete,
                   ),
-                ),
+                  confirmIcon: iconAndText(
+                    icon: const Icon(
+                      EvaIcons.checkmark_circle_2,
+                      color: Colors.red,
+                    ),
+                    text: L10n.of(context).common_confirm,
+                  ),
+                )
               ],
             ),
           );
