@@ -218,9 +218,11 @@ export class View extends HTMLElement {
             // add top margin to y, y is relative to the iframe
             const topMargin = this.renderer.getAttribute('top-margin').match(/\d+/)[0]
             clientY += parseInt(topMargin)
-            while (clientX > window.innerWidth) {
-                clientX -= window.innerWidth
-            }
+            
+            this.renderer.scrollProp == 'scrollLeft'
+                ? clientX -= (this.renderer.start - this.renderer.size) 
+                : clientY -= (this.renderer.start)
+                
             this.#emit('click-view', { x: clientX, y: clientY })
         })
         this.renderer.addEventListener('click', e => {
