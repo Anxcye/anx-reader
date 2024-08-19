@@ -96,6 +96,7 @@
   "common_confirm": "确认",
 
   "service_import_success":"导入成功",
+  "service_import_n_books": "{count, plural, other{正在导入 {count} 本书}}",
 
   "webdav_webdav_not_enabled": "WebDav 未启用",
   "webdav_syncing": "同步中",

@@ -95,6 +95,7 @@
   "common_confirm": "Confirm",
 
   "service_import_success": "Import success",
+  "service_import_n_books": "{count, plural, =1{importing 1 book} other{importing {count} books}}",
 
   "webdav_webdav_not_enabled": "WebDAV is not enabled",
   "webdav_syncing": "Syncing",

@@ -35,17 +35,33 @@ class Server {
     AnxLog.info('Server: Server stopped');
   }
 
-  Future<String> loadAsset(String path) async {
+  Future<String> _loadAsset(String path) async {
     return await rootBundle.loadString(path);
+  }
+
+  File? _tempFile;
+
+  set tempFile(File file) {
+    _tempFile = file;
   }
 
   Future<shelf.Response> _handleRequests(shelf.Request request) async {
     final uriPath = request.requestedUri.path;
+    AnxLog.info('Server: Request for $uriPath');
+    if (Uri.decodeComponent(uriPath) == _tempFile?.path) {
+      return shelf.Response.ok(
+        _tempFile?.openRead(),
+        headers: {
+          'Content-Type': 'application/epub+zip',
+          'Access-Control-Allow-Origin': '*',
+        },
+      );
+    }
 
     if (uriPath.startsWith('/book/')) {
       return _handleBookRequest(request);
     } else if (uriPath.startsWith('/js/')) {
-      String content = await loadAsset('assets/js/${path.basename(uriPath)}');
+      String content = await _loadAsset('assets/js/${path.basename(uriPath)}');
       return shelf.Response.ok(
         content,
         headers: {'Content-Type': 'application/javascript'},
@@ -62,7 +78,8 @@ class Server {
       );
     } else if (uriPath.startsWith('/foliate-js/')) {
       if (uriPath.endsWith('.epub')) {
-        final file = await rootBundle.load('assets/foliate-js/${uriPath.substring(12)}');
+        final file =
+            await rootBundle.load('assets/foliate-js/${uriPath.substring(12)}');
         return shelf.Response.ok(
           file.buffer.asUint8List(),
           headers: {
@@ -72,7 +89,7 @@ class Server {
         );
       }
       String content =
-          await loadAsset('assets/foliate-js/${uriPath.substring(12)}');
+          await _loadAsset('assets/foliate-js/${uriPath.substring(12)}');
       String contentType =
           uriPath.endsWith('.html') ? 'text/html' : 'application/javascript';
       return shelf.Response.ok(

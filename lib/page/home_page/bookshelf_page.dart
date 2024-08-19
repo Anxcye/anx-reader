@@ -53,9 +53,11 @@ class BookshelfPageState extends State<BookshelfPage>
   }
 
   Future<void> _importBook() async {
-    final allowBookExtensions = ['epub'];
+    // final allowBookExtensions = ["epub", "mobi", "azw3", "fb2"];
     final selectedBook = (await FilePicker.platform.pickFiles(
-            type: FileType.custom, allowedExtensions: allowBookExtensions))
+      type: FileType.any,
+      // allowedExtensions: allowBookExtensions,
+    ))
         ?.files;
 
     if (selectedBook?.isEmpty ?? true) {
@@ -65,9 +67,7 @@ class BookshelfPageState extends State<BookshelfPage>
     final bookPath = selectedBook!.single.path!;
     File file = File(bookPath);
 
-    await importBook(file);
-
-    refreshBookList();
+    await importBook(file, refreshBookList);
   }
 
   Widget syncButton() {
