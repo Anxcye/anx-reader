@@ -9,6 +9,7 @@ import 'package:anx_reader/service/book.dart';
 import 'package:anx_reader/utils/convert_seconds.dart';
 import 'package:anx_reader/utils/get_base_path.dart';
 import 'package:anx_reader/utils/log/common.dart';
+import 'package:anx_reader/widgets/book_cover.dart';
 import 'package:anx_reader/widgets/highlight_digit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
@@ -27,13 +28,13 @@ class BookDetail extends StatefulWidget {
 class _BookDetailState extends State<BookDetail> {
   late double rating;
   bool isEditing = false;
-  late Image coverImage;
+  late Book _book;
 
   @override
   void initState() {
     super.initState();
     rating = widget.book.rating;
-    coverImage = Image.file(File(widget.book.coverFullPath));
+    _book = widget.book;
   }
 
   @override
@@ -110,13 +111,11 @@ class _BookDetailState extends State<BookDetail> {
         );
       },
       blendMode: BlendMode.dstIn,
-      child: Image(
-        width: MediaQuery.of(context).size.width,
+      child: bookCover(
+        context,
+        _book,
         height: 600,
-        image: coverImage.image,
-        fit: BoxFit.cover,
-        filterQuality: FilterQuality.high,
-        alignment: Alignment.topCenter,
+        width: MediaQuery.of(context).size.width,
       ),
     );
   }
@@ -218,8 +217,9 @@ class _BookDetailState extends State<BookDetail> {
                   widget.book.coverPath = newPath;
 
                   setState(() {
-                    coverImage = Image.file(File(image.path));
+                    book.coverPath = newPath;
                     updateBook(widget.book);
+
                     if (widget.onRefresh != null) {
                       widget.onRefresh!();
                     }
@@ -239,19 +239,10 @@ class _BookDetailState extends State<BookDetail> {
                     ),
                   ],
                 ),
-                child: SizedBox(
-                  width: 160,
-                  height: 230,
-                  child: Hero(
-                    tag: widget.book.coverFullPath,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
-                      child: Image(
-                        image: coverImage.image,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ),
+                child: Hero(
+                  tag: widget.book.coverFullPath,
+                  child:
+                      bookCover(context, widget.book, height: 230, width: 160),
                 ),
               ),
             ),

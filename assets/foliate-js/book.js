@@ -333,6 +333,9 @@ class Reader {
     async open(file, cfi) {
         this.view = await getView(file)
 
+        if (importing) return
+        console.log('importing', importing)
+
         this.view.addEventListener('load', this.#onLoad.bind(this))
         this.view.addEventListener('relocate', this.#onRelocate.bind(this))
         this.view.addEventListener('click-view', this.#onClickView.bind(this))
@@ -452,37 +455,40 @@ const open = async (file, cfi) => {
     const reader = new Reader()
     globalThis.reader = reader
     await reader.open(file, cfi)
-    onSetToc()
+    if (!importing) { onSetToc() }
+    else { getMetadata() }
 }
 
-//////// use for test //////////
-const allAnnotations = [
-    { id: 1, type: 'highlight', value: "epubcfi(/6/12!/4/4,/1:0,/1:73)", color: 'blue', note: 'this is' },
-    { id: 2, type: 'highlight', value: "epubcfi(/6/4!/4/4,/1:222,/1:226)", color: 'yellow', note: 'this is' },
-    { id: 3, type: 'underline', value: "epubcfi(/6/4!/4/4,/1:294,/1:301)", color: 'red', note: 'this is' },
-]
-let url = '../local/epub.epub'
-let cfi = "epubcfi(/6/12!/4,/2[CHP3],/14/1:28)"
-let style = {
-    fontSize: 1.2,
-    letterSpacing: 0,
-    spacing: '1.5',
-    paragraphSpacing: 5,
-    fontColor: '#66ccff',
-    backgroundColor: '#ffffff',
-    topMargin: 100,
-    bottomMargin: 100,
-    sideMargin: 5,
-    justify: true,
-    hyphenate: true,
-    scroll: false,
-    animated: false
-}
-window.flutter_inappwebview = {}
-window.flutter_inappwebview.callHandler = (name, data) => {
-    console.log(name, data)
-}
-///////////////////////////////
+// //////// use for test //////////
+// const importing = false
+// const allAnnotations = [
+//     { id: 1, type: 'highlight', value: "epubcfi(/6/12!/4/4,/1:0,/1:73)", color: 'blue', note: 'this is' },
+//     { id: 2, type: 'highlight', value: "epubcfi(/6/4!/4/4,/1:222,/1:226)", color: 'yellow', note: 'this is' },
+//     { id: 3, type: 'underline', value: "epubcfi(/6/4!/4/4,/1:294,/1:301)", color: 'red', note: 'this is' },
+// ]
+// let url = '../local/a.epub'
+// // let cfi = "epubcfi(/6/12!/4,/2[CHP3],/14/1:28)"
+// let cfi = null
+// let style = {
+//     fontSize: 1.2,
+//     letterSpacing: 0,
+//     spacing: '1.5',
+//     paragraphSpacing: 5,
+//     fontColor: '#66ccff',
+//     backgroundColor: '#ffffff',
+//     topMargin: 100,
+//     bottomMargin: 100,
+//     sideMargin: 5,
+//     justify: true,
+//     hyphenate: true,
+//     scroll: false,
+//     animated: true
+// }
+// window.flutter_inappwebview = {}
+// window.flutter_inappwebview.callHandler = (name, data) => {
+//     console.log(name, data)
+// }
+// ///////////////////////////////
 fetch(url)
     .then(res => res.blob())
     .then(blob => open(new File([blob], new URL(url, window.location.origin).pathname), cfi))
@@ -542,6 +548,27 @@ const onClickView = (x, y) => callFlutter('onClick', { x, y })
 const onExternalLink = (link) => console.log(link)
 
 const onSetToc = () => callFlutter('onSetToc', reader.view.book.toc)
+
+const getMetadata = async () => {
+    const cover = await reader.view.book.getCover()
+    if (cover) {
+        // cover is a blob, so we need to convert it to base64
+        const fileReader = new FileReader()
+        fileReader.readAsDataURL(cover)
+        fileReader.onloadend = () => {
+            callFlutter('onMetadata', {
+                ...reader.view.book.metadata,
+                cover: fileReader.result
+            })
+        }
+    } else {
+        callFlutter('onMetadata', {
+            ...reader.view.book.metadata,
+            cover: null
+        })
+    }
+}
+
 
 window.changeStyle = (newStyle) => {
     style = {

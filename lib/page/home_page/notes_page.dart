@@ -7,6 +7,7 @@ import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/page/book_notes_page.dart';
 import 'package:anx_reader/utils/convert_seconds.dart';
+import 'package:anx_reader/widgets/book_cover.dart';
 import 'package:anx_reader/widgets/highlight_digit.dart';
 import 'package:anx_reader/widgets/tips/notes_tips.dart';
 import 'package:flutter/material.dart';
@@ -225,20 +226,13 @@ class _NotesPageState extends State<NotesPage> {
                         ),
                       ),
                       // Expanded(child: SizedBox()),
-                      SizedBox(
-                        height: 130,
-                        width: 90,
-                        child: Hero(
-                          tag: snapshot.data!.coverFullPath,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: Image.file(
-                              File(
-                                snapshot.data!.coverFullPath,
-                              ),
-                              fit: BoxFit.cover,
-                            ),
-                          ),
+                      Hero(
+                        tag: snapshot.data!.coverFullPath,
+                        child: bookCover(
+                          context,
+                          snapshot.data!,
+                          height: 130,
+                          width: 90,
                         ),
                       ),
                     ],

@@ -1,4 +1,3 @@
-import 'dart:ffi';
 import 'dart:io';
 
 import 'package:anx_reader/l10n/generated/L10n.dart';
@@ -6,6 +5,7 @@ import 'package:anx_reader/page/book_detail.dart';
 import 'package:anx_reader/dao/book.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/service/book.dart';
+import 'package:anx_reader/widgets/book_cover.dart';
 import 'package:anx_reader/widgets/delete_confirm.dart';
 import 'package:anx_reader/widgets/icon_and_text.dart';
 import 'package:flutter/material.dart';
@@ -38,15 +38,6 @@ class BookItem extends StatelessWidget {
               tag: book.coverFullPath,
               child: Container(
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(7),
-                  border: Border.all(
-                    width: 0.3,
-                    color: Colors.grey,
-                  ),
-                  image: DecorationImage(
-                    image: Image.file(File(book.coverFullPath)).image,
-                    fit: BoxFit.cover,
-                  ),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.grey.withOpacity(0.2),
@@ -56,6 +47,7 @@ class BookItem extends StatelessWidget {
                     ),
                   ],
                 ),
+                child: bookCover(context, book),
               ),
             ),
           ),

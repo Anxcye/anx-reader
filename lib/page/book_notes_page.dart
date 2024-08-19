@@ -4,11 +4,13 @@ import 'package:anx_reader/dao/book_note.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/models/book_note.dart';
 import 'package:anx_reader/service/notes/export_notes.dart';
+import 'package:anx_reader/widgets/book_cover.dart';
 import 'package:anx_reader/widgets/book_notes/book_notes_list.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/page/book_detail.dart';
 import 'package:anx_reader/widgets/highlight_digit.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_html/flutter_html.dart';
 import 'package:icons_plus/icons_plus.dart';
 
 class BookNotesPage extends StatefulWidget {
@@ -57,7 +59,14 @@ class _BookNotesPageState extends State<BookNotesPage> {
                   ),
                 ),
                 const SizedBox(width: 30),
-                bookCover(book),
+                Hero(
+                    tag: book.coverFullPath,
+                    child: bookCover(
+                      context,
+                      book,
+                      height: 180,
+                      width: 120,
+                    )),
               ],
             );
           } else {
@@ -82,7 +91,14 @@ class _BookNotesPageState extends State<BookNotesPage> {
                       ),
                     ),
                     const SizedBox(width: 30),
-                    bookCover(book),
+                    Hero(
+                        tag: book.coverFullPath,
+                        child: bookCover(
+                          context,
+                          book,
+                          height: 180,
+                          width: 120,
+                        )),
                   ],
                 ),
                 operators(context, book),
@@ -94,26 +110,8 @@ class _BookNotesPageState extends State<BookNotesPage> {
     );
   }
 
-  Widget bookCover(Book book) {
-    return SizedBox(
-      height: 180,
-      width: 120,
-      child: Hero(
-        tag: book.coverFullPath,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: Image.file(
-            File(
-              book.coverFullPath,
-            ),
-            fit: BoxFit.cover,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Future<void> handleExportNotes(BuildContext context, Book book, {List<BookNote>? notes}) async {
+  Future<void> handleExportNotes(BuildContext context, Book book,
+      {List<BookNote>? notes}) async {
     notes ??= await selectBookNotesByBookId(book.id);
 
     showModalBottomSheet(
@@ -227,7 +225,10 @@ class _BookNotesPageState extends State<BookNotesPage> {
           children: [
             bookInfo(context, widget.book, widget.numberOfNotes),
             const SizedBox(height: 170),
-            BookNotesList(book: widget.book, reading: false, exportNotes: handleExportNotes),
+            BookNotesList(
+                book: widget.book,
+                reading: false,
+                exportNotes: handleExportNotes),
           ],
         ),
       ),

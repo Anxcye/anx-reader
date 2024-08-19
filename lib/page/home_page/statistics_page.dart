@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/dao/book.dart';
 import 'package:anx_reader/dao/reading_time.dart';
@@ -7,6 +5,7 @@ import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/page/book_detail.dart';
 import 'package:anx_reader/utils/convert_seconds.dart';
+import 'package:anx_reader/widgets/book_cover.dart';
 import 'package:anx_reader/widgets/highlight_digit.dart';
 import 'package:anx_reader/widgets/statistic/chard_card.dart';
 import 'package:anx_reader/widgets/tips/statistic_tips.dart';
@@ -279,22 +278,14 @@ class BookStatisticItem extends StatelessWidget {
                 padding: const EdgeInsets.all(8.0),
                 child: Row(
                   children: [
-                    SizedBox(
-                      height: 130,
-                      width: 90,
-                      child: Hero(
+                    Hero(
                         tag: snapshot.data!.coverFullPath,
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: Image.file(
-                            File(
-                              snapshot.data!.coverFullPath,
-                            ),
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      ),
-                    ),
+                        child: bookCover(
+                          context,
+                          snapshot.data!,
+                          height: 130,
+                          width: 90,
+                        )),
                     const SizedBox(width: 15),
                     Flexible(
                       child: Column(

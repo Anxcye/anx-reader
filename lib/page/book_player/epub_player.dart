@@ -15,6 +15,9 @@ import 'package:anx_reader/utils/get_base_path.dart';
 import 'package:anx_reader/utils/js/convert_dart_color_to_js.dart';
 import 'package:anx_reader/utils/log/common.dart';
 import 'package:anx_reader/models/book_note.dart';
+import 'package:anx_reader/utils/webView/webview_console_message.dart';
+import 'package:anx_reader/utils/webView/webview_initial_variable.dart';
+import 'package:anx_reader/widgets/book_cover.dart';
 import 'package:anx_reader/widgets/context_menu.dart';
 import 'package:anx_reader/widgets/reading_page/more_settings/page_turning/diagram.dart';
 import 'package:anx_reader/widgets/reading_page/more_settings/page_turning/types_and_icons.dart';
@@ -193,27 +196,15 @@ class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
 
     String cfi = widget.cfi ?? widget.book.lastReadPosition;
 
-    await controller.evaluateJavascript(source: '''
-      console.log(navigator.userAgent)
-      const allAnnotations = $allAnnotations
-      const url = '$url'
-      let cfi = '$cfi'
-      let style = {
-          fontSize: ${bookStyle.fontSize},
-          letterSpacing: ${bookStyle.letterSpacing},
-          spacing: ${bookStyle.lineHeight},
-          paragraphSpacing: ${bookStyle.paragraphSpacing},
-          fontColor: '#$textColor',
-          backgroundColor: '#$backgroundColor',
-          topMargin: ${bookStyle.topMargin},
-          bottomMargin: ${bookStyle.bottomMargin},
-          sideMargin: ${bookStyle.sideMargin},
-          justify: true,
-          hyphenate: true,
-          scroll: false,
-          animated: true
-      }
-  ''');
+    await controller.evaluateJavascript(
+        source: webviewInitialVariable(
+      allAnnotations,
+      url,
+      cfi,
+      bookStyle,
+      textColor,
+      backgroundColor,
+    ));
   }
 
   Future<void> setHandler(InAppWebViewController controller) async {
@@ -414,11 +405,7 @@ class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
         children: [
           SizedBox.expand(
             child: FadeTransition(
-              opacity: _animation,
-              child: Image(
-                  fit: BoxFit.cover,
-                  image: FileImage(File(widget.book.coverFullPath))),
-            ),
+                opacity: _animation, child: bookCover(context, widget.book)),
           ),
           InAppWebView(
             initialUrlRequest: URLRequest(url: WebUri(indexHtmlPath)),
@@ -427,15 +414,7 @@ class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
             contextMenu: contextMenu,
             onWebViewCreated: (controller) => onWebViewCreated(controller),
             onConsoleMessage: (controller, consoleMessage) {
-              if (consoleMessage.messageLevel == ConsoleMessageLevel.LOG) {
-                AnxLog.info('Webview: ${consoleMessage.message}');
-              } else if (consoleMessage.messageLevel ==
-                  ConsoleMessageLevel.WARNING) {
-                AnxLog.warning('Webview: ${consoleMessage.message}');
-              } else if (consoleMessage.messageLevel ==
-                  ConsoleMessageLevel.ERROR) {
-                AnxLog.severe('Webview: ${consoleMessage.message}');
-              }
+              webviewConsoleMessage(controller, consoleMessage);
             },
           ),
           readingInfoWidget(),
