@@ -133,15 +133,16 @@ class BookItem extends StatelessWidget {
       filePath: book.filePath,
       lastReadPosition: book.lastReadPosition,
       readingPercentage: book.readingPercentage,
-      author: '',
+      author: book.author,
       isDeleted: true,
       description: book.description,
-      rating: 0.0,
+      rating: book.rating,
       createTime: book.createTime,
       updateTime: DateTime.now(),
     ));
     onRefresh();
     File(book.fileFullPath).delete();
+    File(book.coverFullPath).delete();
   }
 
   void handleDetail(BuildContext context) {

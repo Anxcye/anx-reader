@@ -21,9 +21,7 @@ import 'book_player/book_player_server.dart';
 HeadlessInAppWebView? headlessInAppWebView;
 
 Future<void> importBook(File file, Function updateBookList) async {
-  AnxToast.show(
-      L10n.of(navigatorKey.currentContext!).service_import_n_books(1));
-  getBookMetadata(file, updateBookList: updateBookList);
+  await getBookMetadata(file, updateBookList: updateBookList);
 }
 
 void openBook(BuildContext context, Book book, Function updateBookList) {
@@ -64,7 +62,7 @@ Future<void> saveBook(
   Book? provideBook,
 }) async {
   final newBookName =
-      '${title.length > 20 ? title.substring(0, 20) : title}-${DateTime.now().millisecond.toString()}'
+      '${title.length > 20 ? title.substring(0, 20) : title}-${DateTime.now().millisecondsSinceEpoch}'
           .replaceAll(' ', '_');
 
   final extension = file.path.split('.').last;
@@ -75,11 +73,14 @@ Future<void> saveBook(
   // final coverPath = getBasePath(relativeCoverPath);
 
   await file.copy(filePath);
+  // remove cached file
+  file.delete();
+
   relativeCoverPath = await saveImageToLocal(cover, relativeCoverPath);
   Book book = Book(
       id: provideBook != null ? provideBook.id : -1,
       title: title,
-      coverPath: relativeCoverPath ?? '',
+      coverPath: relativeCoverPath,
       filePath: relativeFilePath,
       lastReadPosition: '',
       readingPercentage: 0,
@@ -93,6 +94,7 @@ Future<void> saveBook(
   BuildContext context = navigatorKey.currentContext!;
   AnxToast.show(L10n.of(context).service_import_success);
   headlessInAppWebView?.dispose();
+  headlessInAppWebView = null;
   return;
 }
 
@@ -146,10 +148,13 @@ Future<void> getBookMetadata(
             String description = metadata['description'] ?? '';
             await saveBook(file, title, author, description, cover);
             updateBookList?.call();
+            return;
           });
     },
     onConsoleMessage: (controller, consoleMessage) {
       if (consoleMessage.messageLevel == ConsoleMessageLevel.ERROR) {
+        headlessInAppWebView?.dispose();
+        headlessInAppWebView = null;
         throw Exception('Webview: ${consoleMessage.message}');
       }
       webviewConsoleMessage(controller, consoleMessage);
@@ -159,4 +164,16 @@ Future<void> getBookMetadata(
   await webview.dispose();
   await webview.run();
   headlessInAppWebView = webview;
+  // max 30s
+  int count = 0;
+  while (count < 300) {
+    if (headlessInAppWebView == null) {
+      return;
+    }
+    await Future.delayed(const Duration(milliseconds: 100));
+    count++;
+  }
+  headlessInAppWebView?.dispose();
+  headlessInAppWebView = null;
+  throw Exception('Import: Get book metadata timeout');
 }
