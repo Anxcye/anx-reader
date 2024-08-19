@@ -49,6 +49,11 @@
   "reading_page_screen_timeout": "Screen Timeout",
   "reading_page_page_turning_method": "Page Turning Method",
 
+  "import_n_books_selected": "{count, plural, =1{1 book selected} other{{count} books selected}}",
+  "import_support_types": "Support types: {types}",
+  "import_n_books_not_support": "{count, plural, =1{1 book not support yet} other{{count} books not support yet}}",
+  "import_import_n_books": "{count, plural, =1{Import 1 book} other{Import {count} books}}",
+
   "bookshelf_tips_1": "There are no books.",
   "bookshelf_tips_2": "Click the add button to add a book!",
   "statistics_tips_1": "This week you have read",

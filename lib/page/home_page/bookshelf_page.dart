@@ -4,6 +4,7 @@ import 'package:anx_reader/dao/book.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/service/book.dart';
+import 'package:anx_reader/utils/toast/common.dart';
 import 'package:anx_reader/utils/webdav/common.dart';
 import 'package:anx_reader/utils/webdav/show_status.dart';
 import 'package:anx_reader/widgets/book_list.dart';
@@ -53,21 +54,108 @@ class BookshelfPageState extends State<BookshelfPage>
   }
 
   Future<void> _importBook() async {
-    // final allowBookExtensions = ["epub", "mobi", "azw3", "fb2"];
-    final selectedBook = (await FilePicker.platform.pickFiles(
+    final allowBookExtensions = ["epub", "mobi", "azw3", "fb2"];
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.any,
-      // allowedExtensions: allowBookExtensions,
-    ))
-        ?.files;
+      allowMultiple: true,
+    );
 
-    if (selectedBook?.isEmpty ?? true) {
+    if (result == null) {
       return;
     }
 
-    final bookPath = selectedBook!.single.path!;
-    File file = File(bookPath);
+    // List<File> files = result.paths.map((path) => File(path!)).toList();
+    // List<File> supportedFiles = files.where((file) {
+    //   final extension = file.path.split('.').last;
+    //   return allowBookExtensions.contains(extension);
+    // }).toList();
+    //
+    // List<String> unsupportedFiles = files
+    //     .where((file) {
+    //       final extension = file.path.split('.').last;
+    //       return !allowBookExtensions.contains(extension);
+    //     })
+    //     .map((file) => file.path.split('/').last)
+    //     .toList();
+    List<PlatformFile> files = result.files;
+    List<PlatformFile> supportedFiles = files.where((file) {
+      return allowBookExtensions.contains(file.extension);
+    }).toList();
+    List<PlatformFile> unsupportedFiles = files.where((file) {
+      return !allowBookExtensions.contains(file.extension);
+    }).toList();
 
-    await importBook(file, refreshBookList);
+    // delete unsupported files
+    for (var file in unsupportedFiles) {
+      File(file.path!).deleteSync();
+    }
+
+    Widget bookItem(String name, Icon icon) {
+      return Row(
+        children: [
+          icon,
+          Expanded(
+            child: Text(
+              name,
+              style: const TextStyle(
+                  fontWeight: FontWeight.w300,
+                  // fontSize: ,
+                  overflow: TextOverflow.ellipsis),
+            ),
+          ),
+        ],
+      );
+    }
+
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text(L10n.of(context).import_n_books_selected(files.length)),
+            content: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(L10n.of(context)
+                      .import_support_types(allowBookExtensions.join(' / '))),
+                  const SizedBox(height: 10),
+                  if (unsupportedFiles.isNotEmpty)
+                    Text(L10n.of(context)
+                        .import_n_books_not_support(unsupportedFiles.length)),
+                  const SizedBox(height: 20),
+                  for (var file in unsupportedFiles)
+                    bookItem(file.name, const Icon(Icons.error)),
+                  for (var file in supportedFiles)
+                    bookItem(file.name, const Icon(Icons.done)),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  for (var file in supportedFiles) {
+                    File(file.path!).deleteSync();
+                  }
+                },
+                child: Text(L10n.of(context).common_cancel),
+              ),
+              if (supportedFiles.isNotEmpty)
+                TextButton(
+                    onPressed: () async {
+                      for (var file in supportedFiles) {
+                        AnxToast.show(file.name);
+                        await importBook(File(file.path!), refreshBookList);
+                      }
+                      Navigator.of(context).pop('dialog');
+                    },
+                    child: Text(L10n.of(context)
+                        .import_import_n_books(supportedFiles.length))),
+            ],
+          );
+        });
+
+
   }
 
   Widget syncButton() {

@@ -5,9 +5,9 @@ import 'dart:typed_data';
 import 'package:anx_reader/utils/get_base_path.dart';
 import 'package:anx_reader/utils/log/common.dart';
 
-Future<String?> saveImageToLocal(String? imageFile, String name) async {
+Future<String> saveImageToLocal(String? imageFile, String name) async {
   if (imageFile == null) {
-    return null;
+    return name;
   }
   try {
     // image is base64 encoded
@@ -26,6 +26,6 @@ Future<String?> saveImageToLocal(String? imageFile, String name) async {
     return name;
   } catch (e) {
     AnxLog.severe('Error saving image\n$e');
-    return null;
+    return name;
   }
 }
