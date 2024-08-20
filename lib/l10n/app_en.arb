@@ -45,6 +45,8 @@
   "reading_page_excerpt": "Excerpt",
   "reading_page_theme": "Theme",
   "reading_page_style": "Style",
+  "reading_page_other": "Other",
+
   "reading_page_full_screen": "Full Screen",
   "reading_page_screen_timeout": "Screen Timeout",
   "reading_page_page_turning_method": "Page Turning Method",
