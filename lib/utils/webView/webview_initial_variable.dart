@@ -1,3 +1,4 @@
+import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/models/book_style.dart';
 
 String webviewInitialVariable(String allAnnotations, String url, String cfi,
@@ -22,8 +23,7 @@ String webviewInitialVariable(String allAnnotations, String url, String cfi,
          sideMargin: ${bookStyle.sideMargin},
          justify: true,
          hyphenate: true,
-         scroll: false,
-         animated: true
+         pageTurnStyle: '${Prefs().pageTurnStyle.name}',
      }
   ''';
 }

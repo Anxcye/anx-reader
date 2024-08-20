@@ -481,14 +481,16 @@ const open = async (file, cfi) => {
 //     sideMargin: 5,
 //     justify: true,
 //     hyphenate: true,
-//     scroll: false,
-//     animated: true
+//     // scroll: false,
+//     // animated: true,
+//     pageTurnStyle: 'scroll'
 // }
 // window.flutter_inappwebview = {}
 // window.flutter_inappwebview.callHandler = (name, data) => {
 //     console.log(name, data)
 // }
 // ///////////////////////////////
+
 fetch(url)
     .then(res => res.blob())
     .then(blob => open(new File([blob], new URL(url, window.location.origin).pathname), cfi))
@@ -497,11 +499,31 @@ fetch(url)
 const callFlutter = (name, data) => window.flutter_inappwebview.callHandler(name, data)
 
 const setStyle = () => {
-    reader.view.renderer.setAttribute('flow', style.scroll ? 'scrolled' : 'paginated')
+    const turn = {
+        scroll: false,
+        animated: true
+    }
+
+    switch (style.pageTurnStyle) {
+        case 'slide':
+            turn.scroll = false
+            turn.animated = true
+            break
+        case 'scroll':
+            turn.scroll = true
+            turn.animated = true
+            break
+        case "noAnimation":
+            turn.scroll = false
+            turn.animated = false
+            break
+    }
+
+    reader.view.renderer.setAttribute('flow', turn.scroll ? 'scrolled' : 'paginated')
     reader.view.renderer.setAttribute('top-margin', `${style.topMargin}px`)
     reader.view.renderer.setAttribute('bottom-margin', `${style.bottomMargin}px`)
     reader.view.renderer.setAttribute('gap', `${style.sideMargin}%`)
-    style.animated ? reader.view.renderer.setAttribute('animated', 'true')
+    turn.animated ? reader.view.renderer.setAttribute('animated', 'true')
         : reader.view.renderer.removeAttribute('animated')
 
     const newStyle = {

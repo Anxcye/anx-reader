@@ -18,6 +18,7 @@ import 'package:anx_reader/widgets/book_cover.dart';
 import 'package:anx_reader/widgets/context_menu.dart';
 import 'package:anx_reader/widgets/reading_page/more_settings/page_turning/diagram.dart';
 import 'package:anx_reader/widgets/reading_page/more_settings/page_turning/types_and_icons.dart';
+import 'package:anx_reader/widgets/reading_page/style_widget.dart';
 import 'package:battery_plus/battery_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -102,6 +103,14 @@ class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
         bottomMargin: ${bookStyle.bottomMargin},
         sideMargin: ${bookStyle.sideMargin},
         letterSpacing: ${bookStyle.letterSpacing},
+      })
+    ''');
+  }
+
+  void changePageTurnStyle(PageTurn pageTurnStyle) {
+    webViewController.evaluateJavascript(source: '''
+      changeStyle({
+        pageTurnStyle: '${pageTurnStyle.name}',
       })
     ''');
   }
@@ -419,4 +428,5 @@ class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
       ),
     );
   }
+
 }

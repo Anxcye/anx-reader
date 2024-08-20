@@ -3,6 +3,7 @@ import 'dart:core';
 
 import 'package:anx_reader/models/book_style.dart';
 import 'package:anx_reader/models/read_theme.dart';
+import 'package:anx_reader/widgets/reading_page/style_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -220,6 +221,18 @@ class Prefs extends ChangeNotifier {
   double get ttsRate {
     return prefs.getDouble('ttsRate') ?? 0.8;
   }
+
+  set pageTurnStyle(PageTurn style) {
+    prefs.setString('pageTurnStyle', style.name);
+    notifyListeners();
+  }
+
+  PageTurn get pageTurnStyle {
+    String? style = prefs.getString('pageTurnStyle');
+    if (style == null) return PageTurn.slide;
+    return PageTurn.values.firstWhere((element) => element.name == style);
+  }
+
 
 
 }
