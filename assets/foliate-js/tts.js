@@ -16,130 +16,46 @@ const getLang = el => {
     return x ? x : el.parentElement ? getLang(el.parentElement) : null
 }
 
-const getAlphabet = el => {
-    const x = el?.getAttributeNS?.(NS.XML, 'lang')
-    return x ? x : el.parentElement ? getAlphabet(el.parentElement) : null
+function rangeIsEmpty(range) {
+    return range.collapsed || range.toString().trim() === ''
 }
 
-const getSegmenter = (lang = 'en', granularity = 'word') => {
-    const segmenter = new Intl.Segmenter(lang, { granularity })
-    const granularityIsWord = granularity === 'word'
-    return function* (strs, makeRange) {
-        const str = strs.join('')
-        let name = 0
-        let strIndex = -1
-        let sum = 0
-        for (const { index, segment, isWordLike } of segmenter.segment(str)) {
-            if (granularityIsWord && !isWordLike) continue
-            while (sum <= index) sum += strs[++strIndex].length
-            const startIndex = strIndex
-            const startOffset = index - (sum - strs[strIndex].length)
-            const end = index + segment.length
-            if (end < str.length) while (sum <= end) sum += strs[++strIndex].length
-            const endIndex = strIndex
-            const endOffset = end - (sum - strs[strIndex].length)
-            yield [(name++).toString(),
-            makeRange(startIndex, startOffset, endIndex, endOffset)]
-        }
+const sentenseEndRegex = (lang) => {
+    switch (lang) {
+        case 'zh':
+            return /[!?。！？]["'“”‘’]?/g
+        case 'en':
+            return /[.!?]["']?/g
+        default:
+            return /[.!?]["']?/g
     }
 }
-
-const fragmentToSSML = (fragment, inherited) => {
-    const ssml = document.implementation.createDocument(NS.SSML, 'speak')
-    const { lang } = inherited
-    if (lang) ssml.documentElement.setAttributeNS(NS.XML, 'lang', lang)
-
-    const convert = (node, parent, inheritedAlphabet) => {
-        if (!node) return
-        if (node.nodeType === 3) return ssml.createTextNode(node.textContent)
-        if (node.nodeType === 4) return ssml.createCDATASection(node.textContent)
-        if (node.nodeType !== 1) return
-
-        let el
-        const nodeName = node.nodeName.toLowerCase()
-        if (nodeName === 'foliate-mark') {
-            el = ssml.createElementNS(NS.SSML, 'mark')
-            el.setAttribute('name', node.dataset.name)
-        }
-        else if (nodeName === 'br')
-            el = ssml.createElementNS(NS.SSML, 'break')
-        else if (nodeName === 'em' || nodeName === 'strong')
-            el = ssml.createElementNS(NS.SSML, 'emphasis')
-
-        const lang = node.lang || node.getAttributeNS(NS.XML, 'lang')
-        if (lang) {
-            if (!el) el = ssml.createElementNS(NS.SSML, 'lang')
-            el.setAttributeNS(NS.XML, 'lang', lang)
-        }
-
-        const alphabet = node.getAttributeNS(NS.SSML, 'alphabet') || inheritedAlphabet
-        if (!el) {
-            const ph = node.getAttributeNS(NS.SSML, 'ph')
-            if (ph) {
-                el = ssml.createElementNS(NS.SSML, 'phoneme')
-                if (alphabet) el.setAttribute('alphabet', alphabet)
-                el.setAttribute('ph', ph)
-            }
-        }
-
-        if (!el) el = parent
-
-        let child = node.firstChild
-        while (child) {
-            const childEl = convert(child, el, alphabet)
-            if (childEl && el !== childEl) el.append(childEl)
-            child = child.nextSibling
-        }
-        return el
-    }
-    convert(fragment.firstChild, ssml.documentElement, inherited.alphabet)
-    return ssml
-}
-
-const getFragmentWithMarks = (range, textWalker, granularity) => {
-    const lang = getLang(range.commonAncestorContainer)
-    const alphabet = getAlphabet(range.commonAncestorContainer)
-
-    const segmenter = getSegmenter(lang, granularity)
-    const fragment = range.cloneContents()
-
-    // we need ranges on both the original document (for highlighting)
-    // and the document fragment (for inserting marks)
-    // so unfortunately need to do it twice, as you can't copy the ranges
-    const entries = [...textWalker(range, segmenter)]
-    const fragmentEntries = [...textWalker(fragment, segmenter)]
-
-    for (const [name, range] of fragmentEntries) {
-        const mark = document.createElement('foliate-mark')
-        mark.dataset.name = name
-        range.insertNode(mark)
-    }
-    const ssml = fragmentToSSML(fragment, { lang, alphabet })
-    return { entries, ssml }
-}
-
-const rangeIsEmpty = range => !range.toString().trim()
 
 function* getBlocks(doc) {
-    let last
-    const walker = doc.createTreeWalker(doc.body, NodeFilter.SHOW_ELEMENT)
+    const walker = doc.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT)
+    let lastRange = null
+
     for (let node = walker.nextNode(); node; node = walker.nextNode()) {
-        const name = node.tagName.toLowerCase()
-        if (blockTags.has(name)) {
-            if (last) {
-                last.setEndBefore(node)
-                if (!rangeIsEmpty(last)) yield last
+        let match
+        const regex = sentenseEndRegex(getLang(node.parentElement))
+        while ((match = regex.exec(node.textContent)) !== null) {
+            const range = doc.createRange()
+            if (lastRange) {
+                lastRange.setEnd(node, match.index + match[0].length)
+                if (!rangeIsEmpty(lastRange)) yield lastRange
             }
-            last = doc.createRange()
-            last.setStart(node, 0)
+            lastRange = doc.createRange()
+            lastRange.setStart(node, match.index + match[0].length)
         }
+
+        // 在每个 node 结尾时创建一个新的 Range 对象
+        if (lastRange) {
+            lastRange.setEnd(node, node.textContent.length)
+            if (!rangeIsEmpty(lastRange)) yield lastRange
+        }
+        lastRange = doc.createRange()
+        lastRange.setStart(node, node.textContent.length)
     }
-    if (!last) {
-        last = doc.createRange()
-        last.setStart(doc.body.firstChild ?? doc.body, 0)
-    }
-    last.setEndAfter(doc.body.lastChild ?? doc.body)
-    if (!rangeIsEmpty(last)) yield last
 }
 
 class ListIterator {
@@ -212,84 +128,70 @@ class ListIterator {
 
 export class TTS {
     #list
-    #ranges
     #lastMark
-    #serializer = new XMLSerializer()
     constructor(doc, textWalker, highlight) {
         this.doc = doc
         this.highlight = highlight
         this.#list = new ListIterator(getBlocks(doc), range => {
-            const { entries, ssml } = getFragmentWithMarks(range, textWalker)
-            this.#ranges = new Map(entries)
-            return [ssml, range]
+            return [range.toString(), range]
         })
     }
-    #getMarkElement(doc, mark) {
-        if (!mark) return null
-        return doc.querySelector(`mark[name="${CSS.escape(mark)}"`)
-    }
-    #speak(doc, getNode) {
-        if (!doc) return
-        if (!getNode) return this.#serializer.serializeToString(doc)
-        const ssml = document.implementation.createDocument(NS.SSML, 'speak')
-        ssml.documentElement.replaceWith(ssml.importNode(doc.documentElement, true))
-        let node = getNode(ssml)?.previousSibling
+
+    #getText(text, getNode) {
+        if (!text) return ''
+        if (!getNode) return text
+        const tempElement = document.createElement('div')
+        tempElement.innerHTML = text
+        let node = getNode(tempElement)?.previousSibling
         while (node) {
             const next = node.previousSibling ?? node.parentNode?.previousSibling
             node.parentNode.removeChild(node)
             node = next
         }
-        return this.#serializer.serializeToString(ssml)
+        return tempElement.textContent
     }
+
     start() {
         this.#lastMark = null
-        const [doc, range] = this.#list.first() ?? []
-        if (!doc) return this.next()
+        const [text, range] = this.#list.first() ?? []
+        if (!text) return this.next()
         this.highlight(range.cloneRange())
-        return this.#speak(doc, ssml => this.#getMarkElement(ssml, this.#lastMark))
+        return this.#getText(text)
     }
+
     end() {
         this.#lastMark = null
-        const [doc, range] = this.#list.last() ?? []
-        if (!doc) return this.next()
+        const [text, range] = this.#list.last() ?? []
+        if (!text) return this.next()
         this.highlight(range.cloneRange())
-        return this.#speak(doc, ssml => this.#getMarkElement(ssml, this.#lastMark))
+        return this.#getText(text)
     }
+
     resume() {
-        const [doc] = this.#list.current() ?? []
-        if (!doc) return this.next()
-        return this.#speak(doc, ssml => this.#getMarkElement(ssml, this.#lastMark))
+        const [text] = this.#list.current() ?? []
+        if (!text) return this.next()
+        return this.#getText(text)
     }
+
     prev(paused) {
         this.#lastMark = null
-        const [doc, range] = this.#list.prev() ?? []
+        const [text, range] = this.#list.prev() ?? []
         if (paused && range) this.highlight(range.cloneRange())
-        return this.#speak(doc)
+        return this.#getText(text)
     }
+
     next(paused) {
         this.#lastMark = null
-        const [doc, range] = this.#list.next() ?? []
+        const [text, range] = this.#list.next() ?? []
         if (paused && range) this.highlight(range.cloneRange())
-        return this.#speak(doc)
+        return this.#getText(text)
     }
+
     from(range) {
         this.#lastMark = null
-        const [doc, newRange] = this.#list.find(range_ =>
+        const [text, newRange] = this.#list.find(range_ =>
             range.compareBoundaryPoints(Range.END_TO_START, range_) <= 0)
-        let mark
-        for (const [name, range_] of this.#ranges.entries())
-            if (range.compareBoundaryPoints(Range.START_TO_START, range_) <= 0) {
-                mark = name
-                break
-            }
         if (newRange) this.highlight(newRange.cloneRange())
-        return this.#speak(doc, ssml => this.#getMarkElement(ssml, mark))
-    }
-    setMark(mark) {
-        const range = this.#ranges.get(mark)
-        if (range) {
-            this.#lastMark = mark
-            this.highlight(range.cloneRange())
-        }
+        return this.#getText(text)
     }
 }
