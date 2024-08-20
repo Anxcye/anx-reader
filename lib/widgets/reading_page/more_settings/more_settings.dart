@@ -1,7 +1,7 @@
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/main.dart';
-import 'package:anx_reader/widgets/reading_page/more_settings/font_settings.dart';
-import 'package:anx_reader/widgets/reading_page/more_settings/theme_settings.dart';
+import 'package:anx_reader/widgets/reading_page/more_settings/other_settings.dart';
+import 'package:anx_reader/widgets/reading_page/more_settings/style_settings.dart';
 import 'package:contentsize_tabbarview/contentsize_tabbarview.dart';
 import 'package:flutter/material.dart';
 
@@ -26,8 +26,8 @@ void showMoreSettings(ReadingSettings settings) {
             TabBar(
               controller: tabController,
               tabs: [
-                Tab(text: L10n.of(context).reading_page_theme),
                 Tab(text: L10n.of(context).reading_page_style),
+                Tab(text: L10n.of(context).reading_page_other),
               ],
             ),
             const Divider(height: 0),
@@ -40,8 +40,8 @@ void showMoreSettings(ReadingSettings settings) {
                 animationDuration: const Duration(milliseconds: 600),
                 controller: tabController,
                 children: [
-                  themeSettings,
-                  fontSettings,
+                  styleSettings,
+                  otherSettings,
                 ],
               ),
             ),

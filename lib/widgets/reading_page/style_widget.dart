@@ -48,36 +48,12 @@ class _StyleWidgetState extends State<StyleWidget> {
       child: Column(
         children: [
           fontSizeSlider(),
-          sideMarginSlider(),
-          topBottomMarginSlider(),
+          // sideMarginSlider(),
+          // topBottomMarginSlider(),
           lineHeightAndParagraphSpacingSlider(),
-          letterSpacingSlider(),
+          // letterSpacingSlider(),
         ],
       ),
-    );
-  }
-
-  Row letterSpacingSlider() {
-    return Row(
-      children: [
-        const Icon(Icons.compare_arrows),
-        Expanded(
-          child: Slider(
-            value: bookStyle.letterSpacing,
-            onChanged: (double value) {
-              setState(() {
-                bookStyle.letterSpacing = value;
-                widget.epubPlayerKey.currentState!.changeStyle(bookStyle);
-                Prefs().saveBookStyleToPrefs(bookStyle);
-              });
-            },
-            min: -3,
-            max: 7,
-            divisions: 10,
-            label: (bookStyle.letterSpacing).toString(),
-          ),
-        ),
-      ],
     );
   }
 
@@ -115,71 +91,6 @@ class _StyleWidgetState extends State<StyleWidget> {
             max: 5,
             divisions: 10,
             label: (bookStyle.paragraphSpacing / 5 * 10).round().toString(),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Row topBottomMarginSlider() {
-    return Row(
-      children: [
-        const Icon(Icons.vertical_align_top_outlined),
-        Expanded(
-          child: Slider(
-            value: bookStyle.topMargin,
-            onChanged: (double value) {
-              setState(() {
-                bookStyle.topMargin = value;
-                widget.epubPlayerKey.currentState!.changeStyle(bookStyle);
-                Prefs().saveBookStyleToPrefs(bookStyle);
-              });
-            },
-            min: 0,
-            max: 200,
-            divisions: 10,
-            label: (bookStyle.topMargin / 20).toStringAsFixed(0),
-          ),
-        ),
-        const Icon(Icons.vertical_align_bottom_outlined),
-        Expanded(
-          child: Slider(
-            value: bookStyle.bottomMargin,
-            onChanged: (double value) {
-              setState(() {
-                bookStyle.bottomMargin = value;
-                widget.epubPlayerKey.currentState!.changeStyle(bookStyle);
-                Prefs().saveBookStyleToPrefs(bookStyle);
-              });
-            },
-            min: 0,
-            max: 200,
-            divisions: 10,
-            label: (bookStyle.bottomMargin / 20).toStringAsFixed(0),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Row sideMarginSlider() {
-    return Row(
-      children: [
-        const Icon(Icons.format_indent_increase),
-        Expanded(
-          child: Slider(
-            value: bookStyle.sideMargin,
-            onChanged: (double value) {
-              setState(() {
-                bookStyle.sideMargin = value;
-                widget.epubPlayerKey.currentState!.changeStyle(bookStyle);
-                Prefs().saveBookStyleToPrefs(bookStyle);
-              });
-            },
-            min: 0,
-            max: 20,
-            divisions: 20,
-            label: bookStyle.sideMargin.toStringAsFixed(1),
           ),
         ),
       ],
