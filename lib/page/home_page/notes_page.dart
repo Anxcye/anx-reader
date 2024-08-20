@@ -1,4 +1,3 @@
-import 'dart:io';
 
 import 'package:anx_reader/dao/book.dart';
 import 'package:anx_reader/dao/book_note.dart';

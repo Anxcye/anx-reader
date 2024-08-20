@@ -4,7 +4,6 @@ import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/page/home_page.dart';
 import 'package:anx_reader/page/home_page/notes_page.dart';
 import 'package:anx_reader/service/book_player/book_player_server.dart';
-import 'package:anx_reader/utils/check_update.dart';
 import 'package:anx_reader/utils/error/common.dart';
 import 'package:anx_reader/utils/get_base_path.dart';
 import 'package:anx_reader/utils/log/common.dart';

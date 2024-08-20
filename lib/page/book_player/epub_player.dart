@@ -1,6 +1,4 @@
 import 'dart:convert';
-import 'dart:ffi';
-import 'dart:io';
 
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/dao/book.dart';
@@ -13,7 +11,6 @@ import 'package:anx_reader/service/book_player/book_player_server.dart';
 import 'package:anx_reader/utils/coordinates_to_part.dart';
 import 'package:anx_reader/utils/get_base_path.dart';
 import 'package:anx_reader/utils/js/convert_dart_color_to_js.dart';
-import 'package:anx_reader/utils/log/common.dart';
 import 'package:anx_reader/models/book_note.dart';
 import 'package:anx_reader/utils/webView/webview_console_message.dart';
 import 'package:anx_reader/utils/webView/webview_initial_variable.dart';

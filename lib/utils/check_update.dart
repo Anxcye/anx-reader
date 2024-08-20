@@ -44,18 +44,20 @@ Future<void> checkUpdate(bool manualCheck) async {
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
               )),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(L10n.of(context).update_new_version + newVersion,
-                  style: const TextStyle(
-                    fontSize: 20,
-                  )),
-              Text(L10n.of(context).update_current_version + currentVersion),
-              const Divider(),
-              Text(response.data['body'].toString()),
-            ],
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(L10n.of(context).update_new_version + newVersion,
+                    style: const TextStyle(
+                      fontSize: 20,
+                    )),
+                Text(L10n.of(context).update_current_version + currentVersion),
+                const Divider(),
+                Text(response.data['body'].toString()),
+              ],
+            ),
           ),
           actions: <Widget>[
             TextButton(
