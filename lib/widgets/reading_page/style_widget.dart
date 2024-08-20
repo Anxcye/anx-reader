@@ -1,6 +1,8 @@
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/models/book_style.dart';
+import 'package:anx_reader/page/reading_page.dart';
+import 'package:anx_reader/utils/convert_seconds.dart';
 import 'package:anx_reader/widgets/reading_page/more_settings/more_settings.dart';
 import 'package:anx_reader/widgets/reading_page/widget_title.dart';
 import 'package:anx_reader/dao/theme.dart';
@@ -10,17 +12,34 @@ import 'package:anx_reader/page/book_player/epub_player.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
-class StyleWidget extends StatefulWidget {
-  final List<ReadTheme> themes;
-  final GlobalKey<EpubPlayerState> epubPlayerKey;
-  final Function setCurrentPage;
+enum PageTurn {
+  noAnimation,
+  slide,
+  scroll;
 
+  String getLabel(BuildContext context) {
+    switch (this) {
+      case PageTurn.noAnimation:
+        return L10n.of(context).no_animation;
+      case PageTurn.slide:
+        return L10n.of(context).slide;
+      case PageTurn.scroll:
+        return L10n.of(context).scroll;
+    }
+  }
+}
+
+class StyleWidget extends StatefulWidget {
   const StyleWidget({
     super.key,
     required this.themes,
     required this.epubPlayerKey,
     required this.setCurrentPage,
   });
+
+  final List<ReadTheme> themes;
+  final GlobalKey<EpubPlayerState> epubPlayerKey;
+  final Function setCurrentPage;
 
   @override
   _StyleWidgetState createState() => _StyleWidgetState();
@@ -36,10 +55,61 @@ class _StyleWidgetState extends State<StyleWidget> {
       children: [
         widgetTitle(L10n.of(context).reading_page_style, ReadingSettings.theme),
         sliders(),
+        fontAndPageTurn(),
         const Divider(),
         themeSelector(),
       ],
     );
+  }
+
+  Widget fontAndPageTurn() {
+    return Row(children: [
+      Expanded(
+        child: DropdownMenu<PageTurn>(
+          label: Text(L10n.of(context).reading_page_page_turning_method),
+          initialSelection: Prefs().pageTurnStyle,
+          expandedInsets: const EdgeInsets.all(10),
+          inputDecorationTheme: InputDecorationTheme(
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(50),
+            ),
+          ),
+          onSelected: (PageTurn? value) {
+            if (value != null) {
+              Prefs().pageTurnStyle = value;
+              epubPlayerKey.currentState!.changePageTurnStyle(value);
+            }
+          },
+          dropdownMenuEntries: PageTurn.values
+              .map((e) => DropdownMenuEntry(
+                    value: e,
+                    label: e.getLabel(context),
+                  ))
+              .toList(),
+        ),
+      ),
+      // Expanded(
+      //   child: DropdownMenu<PageTurn>(
+      //     label: Text(L10n.of(context).reading_page_page_turning_method),
+      //     expandedInsets: const EdgeInsets.all(10),
+      //     initialSelection: Prefs().pageTurnStyle,
+      //     inputDecorationTheme: InputDecorationTheme(
+      //       border: OutlineInputBorder(
+      //         borderRadius: BorderRadius.circular(50),
+      //       ),
+      //     ),
+      //     onSelected: (PageTurn? value) {
+      //
+      //     },
+      //     dropdownMenuEntries: PageTurn.values
+      //         .map((e) => DropdownMenuEntry(
+      //               value: e,
+      //               label: e.label,
+      //             ))
+      //         .toList(),
+      //   ),
+      // ),
+    ]);
   }
 
   Padding sliders() {
@@ -48,10 +118,7 @@ class _StyleWidgetState extends State<StyleWidget> {
       child: Column(
         children: [
           fontSizeSlider(),
-          // sideMarginSlider(),
-          // topBottomMarginSlider(),
           lineHeightAndParagraphSpacingSlider(),
-          // letterSpacingSlider(),
         ],
       ),
     );

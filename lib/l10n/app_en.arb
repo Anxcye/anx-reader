@@ -51,6 +51,11 @@
   "reading_page_screen_timeout": "Screen Timeout",
   "reading_page_page_turning_method": "Page Turning Method",
 
+  "page_turning_style": "Page Turning Style",
+  "no_animation": "No Animation",
+  "slide": "Slide",
+  "scroll": "Scroll",
+
   "book_deleted": "Book deleted",
 
   "import_n_books_selected": "{count, plural, =1{1 book selected} other{{count} books selected}}",
