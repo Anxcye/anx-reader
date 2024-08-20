@@ -1,4 +1,3 @@
-import 'dart:io';
 
 import 'package:anx_reader/dao/book_note.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
@@ -10,7 +9,6 @@ import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/page/book_detail.dart';
 import 'package:anx_reader/widgets/highlight_digit.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_html/flutter_html.dart';
 import 'package:icons_plus/icons_plus.dart';
 
 class BookNotesPage extends StatefulWidget {

@@ -49,6 +49,8 @@
   "reading_page_screen_timeout": "屏幕超时",
   "reading_page_page_turning_method": "翻页方式",
 
+  "book_deleted": "书籍已删除",
+
   "import_n_books_selected": "{count, plural, other{选择了 {count} 本书}}",
   "import_support_types": "支持 {types}",
   "import_n_books_not_support": "{count, plural, other{{count} 本书暂不支持}}",

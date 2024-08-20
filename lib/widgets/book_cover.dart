@@ -18,7 +18,8 @@ Widget bookCover(
           fit: BoxFit.cover,
         )
       : Container(
-          color: Theme.of(context).cardColor,
+          color: Colors.primaries[book.title.hashCode % Colors.primaries.length]
+              .shade200,
           child: Center(
             child: Icon(
               Icons.book,

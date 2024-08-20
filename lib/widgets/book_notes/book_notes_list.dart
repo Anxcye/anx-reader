@@ -3,10 +3,10 @@ import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/models/book_note.dart';
 import 'package:anx_reader/page/reading_page.dart';
+import 'package:anx_reader/service/book.dart';
 import 'package:anx_reader/widgets/delete_confirm.dart';
 import 'package:anx_reader/widgets/excerpt_menu.dart';
 import 'package:anx_reader/widgets/tips/notes_tips.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:sticky_headers/sticky_headers.dart';
@@ -67,15 +67,7 @@ class _BookNotesListState extends State<BookNotesList> {
           if (widget.reading) {
             epubPlayerKey.currentState!.goToCfi(bookNote.cfi);
           } else {
-            Navigator.push(
-                context,
-                CupertinoPageRoute(
-                  builder: (context) => ReadingPage(
-                    key: readingPageKey,
-                    book: widget.book,
-                    cfi: bookNote.cfi,
-                  ),
-                ));
+            pushToReadingPage(context, widget.book, cfi: bookNote.cfi);
           }
         }
       },

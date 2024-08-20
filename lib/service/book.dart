@@ -24,6 +24,26 @@ Future<void> importBook(File file, Function updateBookList) async {
   await getBookMetadata(file, updateBookList: updateBookList);
 }
 
+Future<void> pushToReadingPage(
+  BuildContext context,
+  Book book, {
+  String? cfi,
+}) async {
+  if (book.isDeleted) {
+    AnxToast.show(L10n.of(context).book_deleted);
+    return;
+  }
+  await Navigator.push(
+      context,
+      CupertinoPageRoute(
+        builder: (context) => ReadingPage(
+          key: readingPageKey,
+          book: book,
+          cfi: cfi,
+        ),
+      ));
+}
+
 void openBook(BuildContext context, Book book, Function updateBookList) {
   book.updateTime = DateTime.now();
   updateBook(book);
@@ -31,11 +51,7 @@ void openBook(BuildContext context, Book book, Function updateBookList) {
     updateBookList();
   });
 
-  Navigator.push(
-      context,
-      CupertinoPageRoute(
-        builder: (context) => ReadingPage(key: readingPageKey, book: book),
-      )).then((value) {
+  pushToReadingPage(context, book).then((value) {
     // wait 1s to update book which is read
     Future.delayed(const Duration(milliseconds: 500), () {
       updateBookList();

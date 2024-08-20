@@ -3,11 +3,13 @@ import 'dart:async';
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/dao/reading_time.dart';
 import 'package:anx_reader/dao/theme.dart';
+import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/models/read_theme.dart';
 import 'package:anx_reader/page/book_detail.dart';
 import 'package:anx_reader/page/book_player/epub_player.dart';
 import 'package:anx_reader/service/tts.dart';
+import 'package:anx_reader/utils/toast/common.dart';
 import 'package:anx_reader/utils/ui/status_bar.dart';
 import 'package:anx_reader/widgets/reading_page/notes_widget.dart';
 import 'package:anx_reader/models/reading_time.dart';
@@ -43,6 +45,11 @@ class ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
 
   @override
   void initState() {
+    if (widget.book.isDeleted){
+      Navigator.pop(context);
+      AnxToast.show(L10n.of(context).book_deleted);
+      return;
+    }
     if (Prefs().hideStatusBar) {
       hideStatusBar();
     }
