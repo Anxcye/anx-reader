@@ -7,7 +7,7 @@ import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/models/reading_time.dart';
 import 'package:anx_reader/service/book.dart';
 import 'package:anx_reader/utils/convert_seconds.dart';
-import 'package:anx_reader/utils/get_base_path.dart';
+import 'package:anx_reader/utils/get_path/get_base_path.dart';
 import 'package:anx_reader/utils/log/common.dart';
 import 'package:anx_reader/widgets/book_cover.dart';
 import 'package:anx_reader/widgets/highlight_digit.dart';

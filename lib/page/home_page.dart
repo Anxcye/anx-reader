@@ -4,6 +4,7 @@ import 'package:anx_reader/page/home_page/notes_page.dart';
 import 'package:anx_reader/page/home_page/settings_page.dart';
 import 'package:anx_reader/page/home_page/statistics_page.dart';
 import 'package:anx_reader/utils/check_update.dart';
+import 'package:anx_reader/utils/load_default_font.dart';
 import 'package:anx_reader/utils/webdav/common.dart';
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/utils/toast/common.dart';
@@ -38,6 +39,7 @@ class _HomePageState extends State<HomePage> {
       await AnxWebdav.init();
       await AnxWebdav.syncData(SyncDirection.both);
     }
+    loadDefaultFont();
   }
 
   @override

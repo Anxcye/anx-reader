@@ -1,8 +1,12 @@
 import 'dart:convert';
 import 'dart:core';
 
+import 'package:anx_reader/l10n/generated/L10n.dart';
+import 'package:anx_reader/main.dart';
 import 'package:anx_reader/models/book_style.dart';
+import 'package:anx_reader/models/font_model.dart';
 import 'package:anx_reader/models/read_theme.dart';
+import 'package:anx_reader/utils/convert_seconds.dart';
 import 'package:anx_reader/widgets/reading_page/style_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -233,6 +237,18 @@ class Prefs extends ChangeNotifier {
     return PageTurn.values.firstWhere((element) => element.name == style);
   }
 
+  set font(FontModel font) {
+    prefs.setString('font', font.toJson());
+    notifyListeners();
+  }
 
-
+  FontModel get font {
+    String? fontJson = prefs.getString('font');
+    BuildContext context = navigatorKey.currentContext!;
+    if (fontJson == null) {
+      return FontModel(
+          label: L10n.of(context).follow_book, name: 'book', path: '');
+    }
+    return FontModel.fromJson(fontJson);
+  }
 }

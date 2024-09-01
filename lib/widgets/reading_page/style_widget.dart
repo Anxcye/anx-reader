@@ -1,8 +1,14 @@
+import 'dart:io';
+
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/models/book_style.dart';
+import 'package:anx_reader/models/font_model.dart';
 import 'package:anx_reader/page/reading_page.dart';
-import 'package:anx_reader/utils/convert_seconds.dart';
+import 'package:anx_reader/service/book_player/book_player_server.dart';
+import 'package:anx_reader/service/font.dart';
+import 'package:anx_reader/utils/font_parser.dart';
+import 'package:anx_reader/utils/get_path/get_base_path.dart';
 import 'package:anx_reader/widgets/reading_page/more_settings/more_settings.dart';
 import 'package:anx_reader/widgets/reading_page/widget_title.dart';
 import 'package:anx_reader/dao/theme.dart';
@@ -62,6 +68,38 @@ class _StyleWidgetState extends State<StyleWidget> {
     );
   }
 
+  List<FontModel> fonts() {
+    Directory fontDir = getFontDir();
+    List<FontModel> fontList = [
+      FontModel(
+        label: L10n.of(context).add_new_font,
+        name: 'newFont',
+        path: '',
+      ),
+      FontModel(
+        label: L10n.of(context).follow_book,
+        name: 'book',
+        path: '',
+      ),
+      FontModel(
+        label: L10n.of(context).system_font,
+        name: 'system',
+        path: 'system',
+      ),
+    ];
+    fontDir.listSync().forEach((element) {
+      if (element is File) {
+        fontList.add(FontModel(
+          label: getFontNameFromFile(element),
+          name: element.path.split('/').last.split('.').first,
+          path:
+              'http://localhost:${Server().port}/fonts/${element.path.split('/').last}',
+        ));
+      }
+    });
+    return fontList;
+  }
+
   Widget fontAndPageTurn() {
     return Row(children: [
       Expanded(
@@ -88,27 +126,36 @@ class _StyleWidgetState extends State<StyleWidget> {
               .toList(),
         ),
       ),
-      // Expanded(
-      //   child: DropdownMenu<PageTurn>(
-      //     label: Text(L10n.of(context).reading_page_page_turning_method),
-      //     expandedInsets: const EdgeInsets.all(10),
-      //     initialSelection: Prefs().pageTurnStyle,
-      //     inputDecorationTheme: InputDecorationTheme(
-      //       border: OutlineInputBorder(
-      //         borderRadius: BorderRadius.circular(50),
-      //       ),
-      //     ),
-      //     onSelected: (PageTurn? value) {
-      //
-      //     },
-      //     dropdownMenuEntries: PageTurn.values
-      //         .map((e) => DropdownMenuEntry(
-      //               value: e,
-      //               label: e.label,
-      //             ))
-      //         .toList(),
-      //   ),
-      // ),
+      Expanded(
+        child: DropdownMenu<FontModel>(
+          label: Text(L10n.of(context).font),
+          expandedInsets: const EdgeInsets.all(10),
+          initialSelection: Prefs().font,
+          inputDecorationTheme: InputDecorationTheme(
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(50),
+            ),
+          ),
+          onSelected: (FontModel? font) async {
+            if (font == null) return;
+            if (font.name == 'newFont') {
+              await importFont();
+              setState(() {});
+              return;
+            }
+            epubPlayerKey.currentState!.changeFont(font);
+            Prefs().font = font;
+          },
+          dropdownMenuEntries: fonts()
+              .map((font) => DropdownMenuEntry(
+                    value: font,
+                    label: font.label,
+                    leadingIcon:
+                        font.name == 'newFont' ? const Icon(Icons.add) : null,
+                  ))
+              .toList(),
+        ),
+      ),
     ]);
   }
 
