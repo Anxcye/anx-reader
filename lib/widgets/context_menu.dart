@@ -14,7 +14,7 @@ void showContextMenu(
 
   final playerKey = epubPlayerKey.currentState!;
   double menuWidth = 350;
-  double menuHeight = 100;
+  double menuHeight = 50;
   double screenWidth = MediaQuery.of(context).size.width;
   double screenHeight = MediaQuery.of(context).size.height;
   x *= screenWidth;
