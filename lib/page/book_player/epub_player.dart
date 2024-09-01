@@ -5,11 +5,12 @@ import 'package:anx_reader/dao/book.dart';
 import 'package:anx_reader/dao/book_note.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/models/book_style.dart';
+import 'package:anx_reader/models/font_model.dart';
 import 'package:anx_reader/models/read_theme.dart';
 import 'package:anx_reader/models/toc_item.dart';
 import 'package:anx_reader/service/book_player/book_player_server.dart';
 import 'package:anx_reader/utils/coordinates_to_part.dart';
-import 'package:anx_reader/utils/get_base_path.dart';
+import 'package:anx_reader/utils/get_path/get_base_path.dart';
 import 'package:anx_reader/utils/js/convert_dart_color_to_js.dart';
 import 'package:anx_reader/models/book_note.dart';
 import 'package:anx_reader/utils/webView/webview_console_message.dart';
@@ -103,6 +104,15 @@ class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
         bottomMargin: ${bookStyle.bottomMargin},
         sideMargin: ${bookStyle.sideMargin},
         letterSpacing: ${bookStyle.letterSpacing},
+      })
+    ''');
+  }
+
+  void changeFont(FontModel font) {
+    webViewController.evaluateJavascript(source: '''
+      changeStyle({
+        fontName: '${font.name}',
+        fontPath: '${font.path}',
       })
     ''');
   }
@@ -428,5 +438,4 @@ class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
       ),
     );
   }
-
 }

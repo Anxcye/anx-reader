@@ -64,19 +64,6 @@ class BookshelfPageState extends State<BookshelfPage>
       return;
     }
 
-    // List<File> files = result.paths.map((path) => File(path!)).toList();
-    // List<File> supportedFiles = files.where((file) {
-    //   final extension = file.path.split('.').last;
-    //   return allowBookExtensions.contains(extension);
-    // }).toList();
-    //
-    // List<String> unsupportedFiles = files
-    //     .where((file) {
-    //       final extension = file.path.split('.').last;
-    //       return !allowBookExtensions.contains(extension);
-    //     })
-    //     .map((file) => file.path.split('/').last)
-    //     .toList();
     List<PlatformFile> files = result.files;
     List<PlatformFile> supportedFiles = files.where((file) {
       return allowBookExtensions.contains(file.extension);

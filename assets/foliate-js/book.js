@@ -68,8 +68,8 @@ const getPosition = target => {
 };
 
 const getSelectionRange = sel => {
-    if (sel && !sel.rangeCount) return;
-    const range = sel.getRangeAt(0);
+    if (!sel || !sel.rangeCount) return;
+    const range = sel?.getRangeAt(0);
     if (range.collapsed) return;
     return range;
 };
@@ -218,14 +218,26 @@ const getView = async file => {
 }
 
 const getCSS = ({ fontSize,
+    fontName,
+    fontPath,
     letterSpacing,
     spacing,
+    textIndent,
     paragraphSpacing,
     fontColor,
     backgroundColor,
     justify,
-    hyphenate }) => `
+    hyphenate }) => {
+
+    fontName = (fontName === 'system' ? 'system-ui' : 'AnxCustomFont')
+
+    return `
     @namespace epub "http://www.idpf.org/2007/ops";
+    @font-face {
+      font-family: 'AnxCustomFont';
+      src: url('${fontPath}');
+      font-display: swap;
+    }
     html {
         color: ${fontColor} !important;
         background: none !important;
@@ -239,6 +251,10 @@ const getCSS = ({ fontSize,
             color: lightblue !important;
         }
     }
+    * {
+        color: ${fontColor} !important;
+        font-family: ${fontName} !important;
+    }
     p, li, blockquote, dd, div{
         color: ${fontColor} !important;
         line-height: ${spacing} !important;
@@ -251,6 +267,7 @@ const getCSS = ({ fontSize,
         -webkit-hyphenate-limit-lines: 2;
         hanging-punctuation: allow-end last;
         widows: 2;
+        text-indent: ${textIndent}em !important;
     }
     /* prevent the above from overriding the align attribute */
     [align="left"] { text-align: left; }
@@ -267,7 +284,7 @@ const getCSS = ({ fontSize,
     aside[epub|type~="rearnote"] {
         display: none;
     }
-`
+`}
 
 const footnoteDialog = document.getElementById('footnote-dialog')
 footnoteDialog.addEventListener('close', () => {
@@ -305,7 +322,7 @@ class Reader {
             renderer.setAttribute('flow', 'scrolled')
             renderer.setAttribute('gap', '5%')
             const footNoteStyle = {
-                fontSize: style.fontSize * 0.8,
+                fontSize: style.fontSize,
                 spacing: style.spacing,
                 fontColor: style.fontColor,
                 backgroundColor: 'transparent',
@@ -334,7 +351,6 @@ class Reader {
         this.view = await getView(file)
 
         if (importing) return
-        console.log('importing', importing)
 
         this.view.addEventListener('load', this.#onLoad.bind(this))
         this.view.addEventListener('relocate', this.#onRelocate.bind(this))
@@ -462,32 +478,33 @@ const open = async (file, cfi) => {
 // //////// use for test //////////
 // const importing = false
 // const allAnnotations = [
-//     { id: 1, type: 'highlight', value: "epubcfi(/6/12!/4/4,/1:0,/1:73)", color: 'blue', note: 'this is' },
-//     { id: 2, type: 'highlight', value: "epubcfi(/6/4!/4/4,/1:222,/1:226)", color: 'yellow', note: 'this is' },
-//     { id: 3, type: 'underline', value: "epubcfi(/6/4!/4/4,/1:294,/1:301)", color: 'red', note: 'this is' },
+//    { id: 1, type: 'highlight', value: "epubcfi(/6/12!/4/4,/1:0,/1:73)", color: 'blue', note: 'this is' },
+//    { id: 2, type: 'highlight', value: "epubcfi(/6/4!/4/4,/1:222,/1:226)", color: 'yellow', note: 'this is' },
+//    { id: 3, type: 'underline', value: "epubcfi(/6/4!/4/4,/1:294,/1:301)", color: 'red', note: 'this is' },
 // ]
-// let url = '../local/a.fb2'
-// // let cfi = "epubcfi(/6/12!/4,/2[CHP3],/14/1:28)"
-// let cfi = null
+// let url = '../local/a.epub'
+// let cfi = "epubcfi(/6/8!/4,/2[CHP1],/10/1:177)"
+// // let cfi = null
 // let style = {
-//     fontSize: 1.2,
-//     letterSpacing: 0,
-//     spacing: '1.5',
-//     paragraphSpacing: 5,
-//     fontColor: '#66ccff',
-//     backgroundColor: '#ffffff',
-//     topMargin: 100,
-//     bottomMargin: 100,
-//     sideMargin: 5,
-//     justify: true,
-//     hyphenate: true,
-//     // scroll: false,
-//     // animated: true,
-//     pageTurnStyle: 'scroll'
+//    fontSize: 1.2,
+//    letterSpacing: 0,
+//    spacing: '1.5',
+//    paragraphSpacing: 5,
+//    textIndent: 0,
+//    fontColor: '#66ccff',
+//    backgroundColor: '#ffffff',
+//    topMargin: 100,
+//    bottomMargin: 100,
+//    sideMargin: 5,
+//    justify: true,
+//    hyphenate: true,
+//    // scroll: false,
+//    // animated: true,
+//    pageTurnStyle: 'slide'
 // }
 // window.flutter_inappwebview = {}
 // window.flutter_inappwebview.callHandler = (name, data) => {
-//     console.log(name, data)
+//    console.log(name, data)
 // }
 // ///////////////////////////////
 
@@ -528,9 +545,12 @@ const setStyle = () => {
 
     const newStyle = {
         fontSize: style.fontSize,
+        fontName: style.fontName,
+        fontPath: style.fontPath,
         letterSpacing: style.letterSpacing,
         spacing: style.spacing,
         paragraphSpacing: style.paragraphSpacing,
+        textIndent: style.textIndent,
         fontColor: style.fontColor,
         backgroundColor: style.backgroundColor,
         justify: style.justify,
@@ -597,6 +617,7 @@ window.changeStyle = (newStyle) => {
         ...style,
         ...newStyle
     }
+    console.log('changeStyle', JSON.stringify(style))
     setStyle()
 }
 

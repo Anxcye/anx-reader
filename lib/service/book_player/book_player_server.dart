@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:anx_reader/utils/get_path/get_base_path.dart';
 import 'package:anx_reader/utils/log/common.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart' as path;
@@ -48,6 +49,7 @@ class Server {
   Future<shelf.Response> _handleRequests(shelf.Request request) async {
     final uriPath = request.requestedUri.path;
     AnxLog.info('Server: Request for $uriPath');
+
     if (Uri.decodeComponent(uriPath) == _tempFile?.path) {
       return shelf.Response.ok(
         _tempFile?.openRead(),
@@ -67,15 +69,19 @@ class Server {
         headers: {'Content-Type': 'application/javascript'},
       );
     } else if (uriPath.startsWith('/fonts/')) {
-      final file =
-          await rootBundle.load('assets/fonts/${path.basename(uriPath)}');
+      Directory fontDir = getFontDir();
+      final file = File('${fontDir.path}/${path.basename(uriPath)}');
+      if (!file.existsSync()) {
+        return shelf.Response.notFound('Font not found');
+      }
       return shelf.Response.ok(
-        file.buffer.asUint8List(),
+        file.openRead(),
         headers: {
           'Content-Type': 'font/opentype',
-          'Access-Control-Allow-Origin': '*', // Add this line
+          'Access-Control-Allow-Origin': '*',
         },
       );
+
     } else if (uriPath.startsWith('/foliate-js/')) {
       if (uriPath.endsWith('.epub')) {
         final file =

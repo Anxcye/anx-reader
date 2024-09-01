@@ -50,6 +50,10 @@
   "reading_page_full_screen": "Full Screen",
   "reading_page_screen_timeout": "Screen Timeout",
   "reading_page_page_turning_method": "Page Turning Method",
+  "font": "Font",
+  "add_new_font": "Add New Font",
+  "follow_book": "Follow Book",
+  "system_font": "System Font",
 
   "page_turning_style": "Page Turning Style",
   "no_animation": "No Animation",
