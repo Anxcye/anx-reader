@@ -1,9 +1,11 @@
 import 'dart:convert';
 
+import 'package:anx_reader/service/book_player/book_player_server.dart';
+
 class FontModel {
   final String label;
   final String name;
-  final String path;
+  String path;
 
   FontModel({
     required this.label,
@@ -26,7 +28,7 @@ class FontModel {
     return FontModel(
       label: json['label'],
       name: json['name'],
-      path: json['path'],
+      path: 'http://localhost:${Server().port}/fonts/${json['path']}',
     );
   }
 
@@ -35,8 +37,7 @@ class FontModel {
       identical(this, other) ||
       other is FontModel &&
           runtimeType == other.runtimeType &&
-          name == other.name &&
-          path == other.path;
+          name == other.name;
 
   @override
   int get hashCode => name.hashCode ^ path.hashCode;

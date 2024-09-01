@@ -19,8 +19,7 @@ String getFontNameFromFile(File file) {
 
   int count = _readUint16(fontData, nameTableOffset + 2);
   int stringOffset = _readUint16(fontData, nameTableOffset + 4);
-
-  String languageCode = Prefs().locale!.languageCode;
+  String languageCode = Prefs().locale?.languageCode ?? Platform.localeName.split('_').first;
   int specifiedLanguageId = fontCache[languageCode] ?? fontCache['en']!;
 
   for (int i = 0; i < count; i++) {
