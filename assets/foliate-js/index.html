@@ -1,23 +1,10 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
-<meta name="color-scheme" content="light dark">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Content-Security-Policy"
   content="default-src 'self' blob:; script-src 'self'; style-src 'self' blob: 'unsafe-inline'; img-src 'self' blob: data:; connect-src 'self' blob: data: *; frame-src blob: data:; object-src blob: data:; form-action 'none';">
 <title>E-Book Reader</title>
 <style>
-  :root {
-    --active-bg: rgba(0, 0, 0, .05);
-  }
-
-  @supports (color-scheme: light dark) {
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --active-bg: rgba(255, 255, 255, .1);
-      }
-    }
-  }
-
   html {
     height: 100%;
   }
