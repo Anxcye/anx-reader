@@ -231,7 +231,7 @@ const getCSS = ({ fontSize,
 
     const fontFamily = fontName === 'book' ? '' :
         fontName === 'system' ? 'font-family: system-ui !important;' :
-        'font-family: ${fontName} !important;'
+            'font-family: ${fontName} !important;'
 
     return `
     @namespace epub "http://www.idpf.org/2007/ops";
@@ -243,15 +243,17 @@ const getCSS = ({ fontSize,
     html {
         color: ${fontColor} !important;
         background: none !important;
-        background-color: ${backgroundColor} !important;
+        // background-color: ${backgroundColor} !important;
+        background-color: transparent !important;
         font-size: ${fontSize}em !important;
         letter-spacing: ${letterSpacing}px;
     }
-    /* https://github.com/whatwg/html/issues/5426 */
-    @media (prefers-color-scheme: dark) {
-        a:link {
-            color: lightblue !important;
-        }
+    body {
+        background: none !important;
+        background-color: transparent;
+    }
+    a:link {
+        color: #66ccff !important;
     }
     * {
         ${fontFamily}
@@ -486,7 +488,7 @@ const open = async (file, cfi) => {
 //     { id: 2, type: 'highlight', value: "epubcfi(/6/4!/4/4,/1:222,/1:226)", color: 'yellow', note: 'this is' },
 //     { id: 3, type: 'underline', value: "epubcfi(/6/4!/4/4,/1:294,/1:301)", color: 'red', note: 'this is' },
 // ]
-// let url = '../local/b.epub'
+// let url = '../local/c.epub'
 // let cfi = "epubcfi(/6/8!/4,/2[CHP1],/10/1:177)"
 // // let cfi = null
 // let style = {
@@ -497,7 +499,7 @@ const open = async (file, cfi) => {
 //     paragraphSpacing: 5,
 //     textIndent: 0,
 //     fontColor: '#66ccff',
-//     backgroundColor: '#ffffff',
+//     backgroundColor: '#33445566',
 //     topMargin: 100,
 //     bottomMargin: 100,
 //     sideMargin: 5,
@@ -545,6 +547,8 @@ const setStyle = () => {
     reader.view.renderer.setAttribute('top-margin', `${style.topMargin}px`)
     reader.view.renderer.setAttribute('bottom-margin', `${style.bottomMargin}px`)
     reader.view.renderer.setAttribute('gap', `${style.sideMargin}%`)
+    reader.view.renderer.setAttribute('background-color', style.backgroundColor)
+
     turn.animated ? reader.view.renderer.setAttribute('animated', 'true')
         : reader.view.renderer.removeAttribute('animated')
 
