@@ -176,97 +176,107 @@ class ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
             ),
             Offstage(
               offstage: bottomBarOffstage,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
+              child: Stack(
                 children: [
-                  AppBar(
-                    title: Text(_book.title, overflow: TextOverflow.ellipsis),
-                    leading: IconButton(
-                      icon: const Icon(Icons.arrow_back),
-                      onPressed: () {
-                        // close bottom bar
-                        Navigator.pop(context);
-                        // close reading page
-                        Navigator.pop(context);
-                      },
-                    ),
-                    actions: [
-                      IconButton(
-                        icon: const Icon(EvaIcons.more_vertical),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            CupertinoPageRoute(
-                              builder: (context) =>
-                                  BookDetail(book: widget.book),
-                            ),
-                          );
+                  Positioned.fill(
+                    child: GestureDetector(
+                        onTap: () {
+                          showOrHideAppBarAndBottomBar(false);
                         },
+                        child: Container(
+                          color: Colors.black.withOpacity(0.1),
+                        )),
+                  ),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      AppBar(
+                        title:
+                            Text(_book.title, overflow: TextOverflow.ellipsis),
+                        leading: IconButton(
+                          icon: const Icon(Icons.arrow_back),
+                          onPressed: () {
+                            // close bottom bar
+                            Navigator.pop(context);
+                            // close reading page
+                            Navigator.pop(context);
+                          },
+                        ),
+                        actions: [
+                          IconButton(
+                            icon: const Icon(EvaIcons.more_vertical),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                CupertinoPageRoute(
+                                  builder: (context) =>
+                                      BookDetail(book: widget.book),
+                                ),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                      const Spacer(),
+                      ClipRRect(
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(20),
+                          topRight: Radius.circular(20),
+                        ),
+                        child: Container(
+                          constraints: const BoxConstraints(maxWidth: 600),
+                          child: Material(
+                            child: StatefulBuilder(
+                              builder:
+                                  (BuildContext context, StateSetter setState) {
+                                return IntrinsicHeight(
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Expanded(child: _currentPage),
+                                      Offstage(
+                                        offstage: tocOffstage ||
+                                            _currentPage is! SizedBox,
+                                        child: _tocWidget,
+                                      ),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceAround,
+                                        children: [
+                                          IconButton(
+                                            icon: const Icon(Icons.toc),
+                                            onPressed: tocHandler,
+                                          ),
+                                          IconButton(
+                                            icon: const Icon(EvaIcons.edit),
+                                            onPressed: noteHandler,
+                                          ),
+                                          IconButton(
+                                            icon: const Icon(Icons.data_usage),
+                                            onPressed: progressHandler,
+                                          ),
+                                          IconButton(
+                                            icon: const Icon(Icons.color_lens),
+                                            onPressed: () {
+                                              styleHandler(setState);
+                                            },
+                                          ),
+                                          IconButton(
+                                            icon:
+                                                const Icon(EvaIcons.headphones),
+                                            onPressed: ttsHandler,
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ),
                       ),
                     ],
-                  ),
-                  Expanded(
-                    child: GestureDetector(
-                      child: Container(
-                        color: Colors.transparent,
-                      ),
-                      onTap: () {
-                        showOrHideAppBarAndBottomBar(false);
-                      },
-                    ),
-                  ),
-                  ClipRRect(
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(20),
-                      topRight: Radius.circular(20),
-                    ),
-                    child: Material(
-                      child: StatefulBuilder(
-                        builder: (BuildContext context, StateSetter setState) {
-                          return IntrinsicHeight(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Expanded(child: _currentPage),
-                                Offstage(
-                                  offstage:
-                                      tocOffstage || _currentPage is! SizedBox,
-                                  child: _tocWidget,
-                                ),
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceAround,
-                                  children: [
-                                    IconButton(
-                                      icon: const Icon(Icons.toc),
-                                      onPressed: tocHandler,
-                                    ),
-                                    IconButton(
-                                      icon: const Icon(EvaIcons.edit),
-                                      onPressed: noteHandler,
-                                    ),
-                                    IconButton(
-                                      icon: const Icon(Icons.data_usage),
-                                      onPressed: progressHandler,
-                                    ),
-                                    IconButton(
-                                      icon: const Icon(Icons.color_lens),
-                                      onPressed: () {
-                                        styleHandler(setState);
-                                      },
-                                    ),
-                                    IconButton(
-                                      icon: const Icon(EvaIcons.headphones),
-                                      onPressed: ttsHandler,
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-                    ),
                   ),
                 ],
               ),
