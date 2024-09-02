@@ -165,6 +165,7 @@ class ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
     return Hero(
       tag: _book.coverFullPath,
       child: Scaffold(
+        resizeToAvoidBottomInset: false,
         body: Stack(
           children: [
             EpubPlayer(
