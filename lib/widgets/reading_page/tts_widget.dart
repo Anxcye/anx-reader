@@ -186,13 +186,16 @@ class _TtsWidgetState extends State<TtsWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        widgetTitle(L10n.of(context).tts_narrator, ReadingSettings.style),
-        buttons(),
-        const Divider(),
-        sliders(),
-      ],
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: Column(
+        children: [
+          widgetTitle(L10n.of(context).tts_narrator, ReadingSettings.style),
+          buttons(),
+          const Divider(),
+          sliders(),
+        ],
+      ),
     );
   }
 }

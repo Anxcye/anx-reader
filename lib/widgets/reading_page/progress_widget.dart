@@ -5,7 +5,6 @@ import 'package:anx_reader/page/book_player/epub_player.dart';
 import 'package:anx_reader/page/reading_page.dart';
 import 'package:flutter/material.dart';
 
-
 class ProgressWidget extends StatefulWidget {
   final GlobalKey<EpubPlayerState> epubPlayerKey;
   final Function(bool) showOrHideAppBarAndBottomBar;
@@ -32,81 +31,84 @@ class _ProgressWidgetState extends State<ProgressWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        const SizedBox(height: 10),
-        Text(
-          widget.epubPlayerKey.currentState!.chapterTitle,
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            fontSize: 20,
-            fontFamily: 'SourceHanSerif',
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const Divider(),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            IconButton(
-              icon: const Icon(Icons.arrow_back),
-              onPressed: () {
-                widget.epubPlayerKey.currentState!.prevChapter();
-                widget.showOrHideAppBarAndBottomBar(false);
-              },
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: Column(
+        children: [
+          const SizedBox(height: 10),
+          Text(
+            widget.epubPlayerKey.currentState!.chapterTitle,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 20,
+              fontFamily: 'SourceHanSerif',
+              fontWeight: FontWeight.bold,
             ),
-            Expanded(
-              child: Slider(
-                inactiveColor: Colors.grey.shade300,
-                value: _readProgress,
-                onChanged: (value) {
-                  setState(() {
-                    _readProgress = value;
-                  });
-                  _sliderTimer?.cancel();
-                  _sliderTimer = Timer(
-                    const Duration(milliseconds: 100),
-                    () async {
-                      await widget.epubPlayerKey.currentState!
-                          .goToPercentage(value);
-                      Timer(const Duration(milliseconds: 300), () {
-                        setState(() {});
-                      });
-                    },
-                  );
+          ),
+          const Divider(),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () {
+                  widget.epubPlayerKey.currentState!.prevChapter();
+                  widget.showOrHideAppBarAndBottomBar(false);
                 },
               ),
-            ),
-            IconButton(
-              icon: const Icon(Icons.arrow_forward),
-              onPressed: () {
-                widget.epubPlayerKey.currentState!.nextChapter();
-                widget.showOrHideAppBarAndBottomBar(false);
-              },
-            ),
-          ],
-        ),
-        Row(
-          children: [
-            ProgressDisplay(
-              mainText: widget.epubPlayerKey.currentState!.chapterCurrentPage
-                  .toString(),
-              subText: L10n.of(context).reading_page_current_page,
-            ),
-            ProgressDisplay(
-              mainText: widget.epubPlayerKey.currentState!.chapterTotalPages
-                  .toString(),
-              subText: L10n.of(context).reading_page_chapter_pages,
-            ),
-            ProgressDisplay(
-              mainText: (widget.epubPlayerKey.currentState!.percentage * 100)
-                  .toStringAsFixed(2),
-              subText: '%',
-            ),
-          ],
-        ),
-        const SizedBox(height: 10),
-      ],
+              Expanded(
+                child: Slider(
+                  inactiveColor: Colors.grey.shade300,
+                  value: _readProgress,
+                  onChanged: (value) {
+                    setState(() {
+                      _readProgress = value;
+                    });
+                    _sliderTimer?.cancel();
+                    _sliderTimer = Timer(
+                      const Duration(milliseconds: 100),
+                      () async {
+                        await widget.epubPlayerKey.currentState!
+                            .goToPercentage(value);
+                        Timer(const Duration(milliseconds: 300), () {
+                          setState(() {});
+                        });
+                      },
+                    );
+                  },
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.arrow_forward),
+                onPressed: () {
+                  widget.epubPlayerKey.currentState!.nextChapter();
+                  widget.showOrHideAppBarAndBottomBar(false);
+                },
+              ),
+            ],
+          ),
+          Row(
+            children: [
+              ProgressDisplay(
+                mainText: widget.epubPlayerKey.currentState!.chapterCurrentPage
+                    .toString(),
+                subText: L10n.of(context).reading_page_current_page,
+              ),
+              ProgressDisplay(
+                mainText: widget.epubPlayerKey.currentState!.chapterTotalPages
+                    .toString(),
+                subText: L10n.of(context).reading_page_chapter_pages,
+              ),
+              ProgressDisplay(
+                mainText: (widget.epubPlayerKey.currentState!.percentage * 100)
+                    .toStringAsFixed(2),
+                subText: '%',
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+        ],
+      ),
     );
   }
 }
