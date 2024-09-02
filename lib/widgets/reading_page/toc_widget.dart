@@ -149,11 +149,11 @@ Widget searchResultWidget({
             },
             child: Row(
               children: [
-                Text(searchResult.label),
+                Flexible(child: Text(searchResult.label, overflow: TextOverflow.ellipsis)),
                 isExpanded
                     ? const Icon(Icons.expand_less)
                     : const Icon(Icons.expand_more),
-                const Spacer(),
+                // const Spacer(),
                 Text(
                   searchResult.subitems.length.toString(),
                   style: const TextStyle(color: Colors.grey),
