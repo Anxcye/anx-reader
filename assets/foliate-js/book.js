@@ -229,7 +229,9 @@ const getCSS = ({ fontSize,
     justify,
     hyphenate }) => {
 
-    fontName = (fontName === 'system' ? 'system-ui' : 'AnxCustomFont')
+    const fontFamily = fontName === 'book' ? '' :
+        fontName === 'system' ? 'font-family: system-ui !important;' :
+        'font-family: ${fontName} !important;'
 
     return `
     @namespace epub "http://www.idpf.org/2007/ops";
@@ -252,10 +254,9 @@ const getCSS = ({ fontSize,
         }
     }
     * {
-        color: ${fontColor} !important;
-        font-family: ${fontName} !important;
+        ${fontFamily}
     }
-    p, li, blockquote, dd, div{
+    p, li, blockquote, dd, div, font {
         color: ${fontColor} !important;
         line-height: ${spacing} !important;
         padding-bottom: ${paragraphSpacing}em !important;
@@ -485,11 +486,12 @@ const open = async (file, cfi) => {
 //     { id: 2, type: 'highlight', value: "epubcfi(/6/4!/4/4,/1:222,/1:226)", color: 'yellow', note: 'this is' },
 //     { id: 3, type: 'underline', value: "epubcfi(/6/4!/4/4,/1:294,/1:301)", color: 'red', note: 'this is' },
 // ]
-// let url = '../local/a.epub'
+// let url = '../local/b.epub'
 // let cfi = "epubcfi(/6/8!/4,/2[CHP1],/10/1:177)"
 // // let cfi = null
 // let style = {
 //     fontSize: 1.2,
+//     fontName: 'book',
 //     letterSpacing: 0,
 //     spacing: '1.5',
 //     paragraphSpacing: 5,
