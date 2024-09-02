@@ -1,0 +1,64 @@
+name: Build & Release
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: '3.x'
+
+      - name: Get Flutter version
+        run: flutter --version
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build APKs
+        run: |
+          flutter build apk --release
+          flutter build apk --split-per-abi
+
+      - name: Get version from tag
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+
+      - name: Rename APKs
+        run: |
+          cd app/build/app/outputs/flutter-apk
+          mv app-armeabi-v7a-release.apk Anx-Reader-${{ env.VERSION }}-armeabi-v7a.apk
+          mv app-arm64-v8a-release.apk Anx-Reader-${{ env.VERSION }}-arm64-v8a.apk
+          mv app-x86_64-release.apk Anx-Reader-${{ env.VERSION }}-x86_64.apk
+          mv app-release.apk Anx-Reader-${{ env.VERSION }}-universal.apk
+
+      - name: Extract release notes
+        id: extract_release_notes
+        run: |
+          VERSION=${{ env.VERSION }}
+          CHANGELOG_CONTENT=$(sed -n "/## $VERSION/,/## /p" CHANGELOG.md | sed '$d')
+          echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
+          echo "$CHANGELOG_CONTENT" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            app/build/app/outputs/flutter-apk/Anx-Reader-${{ env.VERSION }}-armeabi-v7a.apk
+            app/build/app/outputs/flutter-apk/Anx-Reader-${{ env.VERSION }}-arm64-v8a.apk
+            app/build/app/outputs/flutter-apk/Anx-Reader-${{ env.VERSION }}-x86_64.apk
+            app/build/app/outputs/flutter-apk/Anx-Reader-${{ env.VERSION }}-universal.apk
+          body: ${{ env.RELEASE_NOTES }}
+          generate_release_notes: false
