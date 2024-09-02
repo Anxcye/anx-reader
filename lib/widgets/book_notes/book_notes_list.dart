@@ -43,6 +43,14 @@ class _BookNotesListState extends State<BookNotesList> {
     _loadBookNotes();
   }
 
+  @override
+  void didUpdateWidget(covariant BookNotesList oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.book.id != widget.book.id) {
+      _loadBookNotes();
+    }
+  }
+
   Future<void> _loadBookNotes() async {
     List<BookNote> notes = await selectBookNotesByBookId(widget.book.id);
     setState(() {

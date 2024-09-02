@@ -1,4 +1,3 @@
-
 import 'package:anx_reader/dao/book_note.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/models/book_note.dart';
@@ -16,10 +15,12 @@ class BookNotesPage extends StatefulWidget {
     super.key,
     required this.book,
     required this.numberOfNotes,
+    required this.isMobile,
   });
 
   final Book book;
   final int numberOfNotes;
+  final bool isMobile;
 
   @override
   State<BookNotesPage> createState() => _BookNotesPageState();
@@ -209,20 +210,23 @@ class _BookNotesPageState extends State<BookNotesPage> {
     );
   }
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.book.title),
-      ),
+      appBar: widget.isMobile
+          ? AppBar(
+              title: Text(widget.book.title),
+            )
+          : null,
       extendBodyBehindAppBar: true,
       body: SafeArea(
-        // top: false,
         child: ListView(
           padding: const EdgeInsets.all(20),
           children: [
             bookInfo(context, widget.book, widget.numberOfNotes),
             const SizedBox(height: 170),
+            Text(widget.book.title),
             BookNotesList(
                 book: widget.book,
                 reading: false,
