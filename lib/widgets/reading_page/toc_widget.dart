@@ -1,4 +1,7 @@
 import 'package:anx_reader/l10n/generated/L10n.dart';
+import 'package:anx_reader/main.dart';
+import 'package:anx_reader/models/search_result_model.dart';
+import 'package:anx_reader/page/reading_page.dart';
 import 'package:anx_reader/widgets/reading_page/widget_title.dart';
 import 'package:anx_reader/models/toc_item.dart';
 import 'package:anx_reader/page/book_player/epub_player.dart';
@@ -22,6 +25,7 @@ class TocWidget extends StatefulWidget {
 
 class _TocWidgetState extends State<TocWidget> {
   String? _searchValue;
+  TextEditingController searchBarController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -31,21 +35,77 @@ class _TocWidgetState extends State<TocWidget> {
       child: Column(
         children: [
           widgetTitle(L10n.of(context).reading_contents, null),
-          // search bar
           SearchBar(
-            shadowColor: const WidgetStatePropertyAll<Color>(Colors.transparent),
+            controller: searchBarController,
+            shadowColor:
+                const WidgetStatePropertyAll<Color>(Colors.transparent),
             padding: const WidgetStatePropertyAll<EdgeInsets>(
                 EdgeInsets.symmetric(horizontal: 16.0)),
             leading: const Icon(Icons.search),
+            trailing: [
+              _searchValue != null
+                  ? IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () {
+                        setState(() {
+                          _searchValue = null;
+                          searchBarController.clear();
+                          epubPlayerKey.currentState!.clearSearch();
+                        });
+                      },
+                    )
+                  : const SizedBox(),
+            ],
             onSubmitted: (value) {
               setState(() {
-                _searchValue = value;
+                if (value.isEmpty) {
+                  _searchValue = null;
+                } else {
+                  _searchValue = value;
+                  epubPlayerKey.currentState!.search(value);
+                }
               });
-              print(value);
             },
           ),
           _searchValue != null
-              ? Text('Search value: $_searchValue')
+              ? Expanded(
+                  child: Column(
+                  children: [
+                    const SizedBox(height: 6.0),
+                    StreamBuilder<double>(
+                      stream: epubPlayerKey.currentState!.searchProgressStream,
+                      builder: (context, snapshot) {
+                        return snapshot.data == 1.0
+                            ? const SizedBox()
+                            : LinearProgressIndicator(
+                                value: snapshot.data ?? 0.0,
+                              );
+                      },
+                    ),
+                    StreamBuilder(
+                        stream: epubPlayerKey.currentState!.searchResultStream,
+                        builder: (context, snapshot) {
+                          if (snapshot.data == null) {
+                            return const SizedBox();
+                          }
+                          List<SearchResultModel> searchResults =
+                              snapshot.data!;
+                          return Expanded(
+                            child: ListView.builder(
+                              itemCount: searchResults.length,
+                              itemBuilder: (context, index) {
+                                return searchResultWidget(
+                                  searchResult: searchResults[index],
+                                  hideAppBarAndBottomBar:
+                                      widget.hideAppBarAndBottomBar,
+                                  epubPlayerKey: widget.epubPlayerKey,
+                                );
+                              },
+                            ),
+                          );
+                        }),
+                  ],
+                ))
               : Expanded(
                   child: ListView.builder(
                     itemCount: widget.tocItems.length,
@@ -63,6 +123,67 @@ class _TocWidgetState extends State<TocWidget> {
   }
 }
 
+Widget searchResultWidget({
+  required SearchResultModel searchResult,
+  required Function hideAppBarAndBottomBar,
+  required GlobalKey<EpubPlayerState> epubPlayerKey,
+}) {
+  bool isExpanded = true;
+  TextStyle matchStyle = TextStyle(
+    color: Theme.of(navigatorKey.currentContext!).colorScheme.primary,
+    fontWeight: FontWeight.bold,
+  );
+  TextStyle prePostStyle = const TextStyle(
+    color: Colors.grey,
+  );
+  return StatefulBuilder(
+    builder: (context, setState) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TextButton(
+            onPressed: () {
+              setState(() {
+                isExpanded = !isExpanded;
+              });
+            },
+            child: Row(
+              children: [
+                Text(searchResult.label),
+                isExpanded
+                    ? const Icon(Icons.expand_less)
+                    : const Icon(Icons.expand_more),
+                const Spacer(),
+                Text(
+                  searchResult.subitems.length.toString(),
+                  style: const TextStyle(color: Colors.grey),
+                ),
+              ],
+            ),
+          ),
+          if (isExpanded)
+            for (var subItem in searchResult.subitems)
+              TextButton(
+                onPressed: () {
+                  hideAppBarAndBottomBar(false);
+                  epubPlayerKey.currentState!.goToCfi(subItem.cfi);
+                },
+                child: RichText(
+                  text: TextSpan(
+                    children: [
+                      TextSpan(text: subItem.pre, style: prePostStyle),
+                      TextSpan(text: subItem.match, style: matchStyle),
+                      TextSpan(text: subItem.post, style: prePostStyle),
+                    ],
+                  ),
+                ),
+              ),
+        ],
+      );
+    },
+  );
+}
+
 class TocItemWidget extends StatefulWidget {
   final TocItem tocItem;
   final Function hideAppBarAndBottomBar;
@@ -75,10 +196,10 @@ class TocItemWidget extends StatefulWidget {
       required this.epubPlayerKey});
 
   @override
-  _TocItemWidgetState createState() => _TocItemWidgetState();
+  TocItemWidgetState createState() => TocItemWidgetState();
 }
 
-class _TocItemWidgetState extends State<TocItemWidget> {
+class TocItemWidgetState extends State<TocItemWidget> {
   bool _isExpanded = false;
 
   TextStyle tocStyle(content) => TextStyle(
