@@ -263,7 +263,7 @@ class TocItemWidgetState extends State<TocItemWidget> {
             indent: 10,
             endIndent: 20,
             thickness: 1,
-            color: Colors.grey.shade400),
+            color: Colors.grey.withAlpha(110)),
       ],
     );
   }
