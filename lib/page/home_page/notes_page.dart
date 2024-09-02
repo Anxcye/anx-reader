@@ -1,4 +1,3 @@
-
 import 'package:anx_reader/dao/book.dart';
 import 'package:anx_reader/dao/book_note.dart';
 import 'package:anx_reader/dao/reading_time.dart';
@@ -38,11 +37,7 @@ class _NotesPageState extends State<NotesPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        // appBar: AppBar(
-        //   title: Text(context.navBarNotes),
-        // ),
-        body: SafeArea(
+    return Scaffold(body: SafeArea(
       child: LayoutBuilder(
         builder: (context, constraints) {
           if (constraints.maxWidth > 600) {
@@ -174,8 +169,10 @@ class _NotesPageState extends State<NotesPage> {
                     context,
                     MaterialPageRoute(
                         builder: (context) => BookNotesPage(
-                            book: snapshot.data!,
-                            numberOfNotes: numberOfNotes)),
+                              book: snapshot.data!,
+                              numberOfNotes: numberOfNotes,
+                              isMobile: true,
+                            )),
                   );
                 } else {
                   Provider.of<NotesDetailModel>(context, listen: false)
@@ -267,7 +264,9 @@ class NotesDetailModel with ChangeNotifier {
     return currentBook == null
         ? const Center(child: NotesTips())
         : BookNotesPage(
-            book: currentBook!, numberOfNotes: currentNumberOfNotes);
+            isMobile: false,
+            book: currentBook!,
+            numberOfNotes: currentNumberOfNotes);
   }
 
   void updateCurrentBook(Book book, int numberOfNotes) {
