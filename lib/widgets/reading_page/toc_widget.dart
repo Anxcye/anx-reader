@@ -149,7 +149,9 @@ Widget searchResultWidget({
             },
             child: Row(
               children: [
-                Flexible(child: Text(searchResult.label, overflow: TextOverflow.ellipsis)),
+                Flexible(
+                    child: Text(searchResult.label,
+                        overflow: TextOverflow.ellipsis)),
                 isExpanded
                     ? const Icon(Icons.expand_less)
                     : const Icon(Icons.expand_more),

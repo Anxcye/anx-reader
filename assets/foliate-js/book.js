@@ -231,7 +231,7 @@ const getCSS = ({ fontSize,
 
     const fontFamily = fontName === 'book' ? '' :
         fontName === 'system' ? 'font-family: system-ui !important;' :
-            'font-family: ${fontName} !important;'
+            'font-family: AnxCustomFont, serif !important;'
 
     return `
     @namespace epub "http://www.idpf.org/2007/ops";
