@@ -478,38 +478,38 @@ const open = async (file, cfi) => {
     else { getMetadata() }
 }
 
-//////// use for test //////////
-const importing = false
-const allAnnotations = [
-    { id: 1, type: 'highlight', value: "epubcfi(/6/12!/4/4,/1:0,/1:73)", color: 'blue', note: 'this is' },
-    { id: 2, type: 'highlight', value: "epubcfi(/6/4!/4/4,/1:222,/1:226)", color: 'yellow', note: 'this is' },
-    { id: 3, type: 'underline', value: "epubcfi(/6/4!/4/4,/1:294,/1:301)", color: 'red', note: 'this is' },
-]
-let url = '../local/a.epub'
-let cfi = "epubcfi(/6/8!/4,/2[CHP1],/10/1:177)"
-// let cfi = null
-let style = {
-    fontSize: 1.2,
-    letterSpacing: 0,
-    spacing: '1.5',
-    paragraphSpacing: 5,
-    textIndent: 0,
-    fontColor: '#66ccff',
-    backgroundColor: '#ffffff',
-    topMargin: 100,
-    bottomMargin: 100,
-    sideMargin: 5,
-    justify: true,
-    hyphenate: true,
-    // scroll: false,
-    // animated: true,
-    pageTurnStyle: 'slide'
-}
-window.flutter_inappwebview = {}
-window.flutter_inappwebview.callHandler = (name, data) => {
-    console.log(name, data)
-}
-///////////////////////////////
+// //////// use for test //////////
+// const importing = false
+// const allAnnotations = [
+//     { id: 1, type: 'highlight', value: "epubcfi(/6/12!/4/4,/1:0,/1:73)", color: 'blue', note: 'this is' },
+//     { id: 2, type: 'highlight', value: "epubcfi(/6/4!/4/4,/1:222,/1:226)", color: 'yellow', note: 'this is' },
+//     { id: 3, type: 'underline', value: "epubcfi(/6/4!/4/4,/1:294,/1:301)", color: 'red', note: 'this is' },
+// ]
+// let url = '../local/a.epub'
+// let cfi = "epubcfi(/6/8!/4,/2[CHP1],/10/1:177)"
+// // let cfi = null
+// let style = {
+//     fontSize: 1.2,
+//     letterSpacing: 0,
+//     spacing: '1.5',
+//     paragraphSpacing: 5,
+//     textIndent: 0,
+//     fontColor: '#66ccff',
+//     backgroundColor: '#ffffff',
+//     topMargin: 100,
+//     bottomMargin: 100,
+//     sideMargin: 5,
+//     justify: true,
+//     hyphenate: true,
+//     // scroll: false,
+//     // animated: true,
+//     pageTurnStyle: 'slide'
+// }
+// window.flutter_inappwebview = {}
+// window.flutter_inappwebview.callHandler = (name, data) => {
+//     console.log(name, data)
+// }
+// ///////////////////////////////
 
 fetch(url)
     .then(res => res.blob())
@@ -700,9 +700,12 @@ window.ttsPrev = () => {
 window.clearSearch = () => reader.view.clearSearch()
 
 window.search = async (text, opts) => {
-    // opts == null && (opts = {
-
-    // })
+    opts == null && (opts = {
+        'scope': 'book',
+        'matchCase': false,
+        'matchDiacritics': false,
+        'matchWholeWords': false,
+    })
     const query = text.trim()
     if (!query) return
 
