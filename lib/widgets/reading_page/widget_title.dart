@@ -15,22 +15,19 @@ Widget widgetTitle(String title, ReadingSettings? settings) {
 
   return Column(
     children: [
-      Padding(
-        padding: const EdgeInsets.only(left: 20, top: 5, right: 20),
-        child: Row(
-          children: [
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 28,
-                fontFamily: 'SourceHanSerif',
-                fontWeight: FontWeight.bold,
-              ),
+      Row(
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 28,
+              fontFamily: 'SourceHanSerif',
+              fontWeight: FontWeight.bold,
             ),
-            const Spacer(),
-            settingsButton,
-          ],
-        ),
+          ),
+          const Spacer(),
+          settingsButton,
+        ],
       ),
       const Divider(),
     ],

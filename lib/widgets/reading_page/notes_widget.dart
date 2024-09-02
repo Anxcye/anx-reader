@@ -12,7 +12,8 @@ class ReadingNotes extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
       height: 550,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

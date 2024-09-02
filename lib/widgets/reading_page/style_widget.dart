@@ -57,14 +57,18 @@ class _StyleWidgetState extends State<StyleWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        widgetTitle(L10n.of(context).reading_page_style, ReadingSettings.theme),
-        sliders(),
-        fontAndPageTurn(),
-        const Divider(),
-        themeSelector(),
-      ],
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: Column(
+        children: [
+          widgetTitle(
+              L10n.of(context).reading_page_style, ReadingSettings.theme),
+          sliders(),
+          fontAndPageTurn(),
+          const Divider(),
+          themeSelector(),
+        ],
+      ),
     );
   }
 
@@ -106,7 +110,7 @@ class _StyleWidgetState extends State<StyleWidget> {
         child: DropdownMenu<PageTurn>(
           label: Text(L10n.of(context).reading_page_page_turning_method),
           initialSelection: Prefs().pageTurnStyle,
-          expandedInsets: const EdgeInsets.all(10),
+          expandedInsets: const EdgeInsets.only(right: 5),
           inputDecorationTheme: InputDecorationTheme(
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(50),
@@ -129,7 +133,7 @@ class _StyleWidgetState extends State<StyleWidget> {
       Expanded(
         child: DropdownMenu<FontModel>(
           label: Text(L10n.of(context).font),
-          expandedInsets: const EdgeInsets.all(10),
+          expandedInsets: const EdgeInsets.only(left: 5),
           initialSelection: Prefs().font,
           inputDecorationTheme: InputDecorationTheme(
             border: OutlineInputBorder(

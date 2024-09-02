@@ -38,14 +38,16 @@ final epubPlayerKey = GlobalKey<EpubPlayerState>();
 
 class ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
   late Book _book;
-
   Widget _currentPage = const SizedBox(height: 1);
   final Stopwatch _readTimeWatch = Stopwatch();
   Timer? _awakeTimer;
+  bool bottomBarOffstage = true;
+  bool tocOffstage = true;
+  Widget? _tocWidget;
 
   @override
   void initState() {
-    if (widget.book.isDeleted){
+    if (widget.book.isDeleted) {
       Navigator.pop(context);
       AnxToast.show(L10n.of(context).book_deleted);
       return;
@@ -97,19 +99,26 @@ class ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
   }
 
   void showOrHideAppBarAndBottomBar(bool show) {
-    if (show) {
-      showBottomBar(context);
-    } else {
-      Navigator.pop(context);
-    }
+    setState(() {
+      if (show) {
+        bottomBarOffstage = false;
+      } else {
+        bottomBarOffstage = true;
+        tocOffstage = true;
+        _currentPage = const SizedBox(height: 1);
+      }
+    });
   }
 
   Future<void> tocHandler() async {
     setState(() {
-      _currentPage = TocWidget(
-          tocItems: epubPlayerKey.currentState!.toc,
-          epubPlayerKey: epubPlayerKey,
-          hideAppBarAndBottomBar: showOrHideAppBarAndBottomBar);
+      _tocWidget = TocWidget(
+        tocItems: epubPlayerKey.currentState!.toc,
+        epubPlayerKey: epubPlayerKey,
+        hideAppBarAndBottomBar: showOrHideAppBarAndBottomBar,
+      );
+      _currentPage = const SizedBox(height: 1);
+      tocOffstage = false;
     });
   }
 
@@ -130,7 +139,7 @@ class ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
 
   Future<void> styleHandler(StateSetter modalSetState) async {
     List<ReadTheme> themes = await selectThemes();
-    modalSetState(() {
+    setState(() {
       _currentPage = StyleWidget(
         themes: themes,
         epubPlayerKey: epubPlayerKey,
@@ -151,114 +160,6 @@ class ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
     });
   }
 
-  void showBottomBar(BuildContext context) {
-    showGeneralDialog(
-      context: context,
-      barrierDismissible: true,
-      transitionDuration: const Duration(milliseconds: 200),
-      barrierLabel: MaterialLocalizations.of(context).dialogLabel,
-      barrierColor: Colors.black.withOpacity(0.1),
-      pageBuilder: (context, _, __) {
-        return Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            AppBar(
-              title: Text(_book.title, overflow: TextOverflow.ellipsis),
-              leading: IconButton(
-                icon: const Icon(Icons.arrow_back),
-                onPressed: () {
-                  // close bottom bar
-                  Navigator.pop(context);
-                  // close reading page
-                  Navigator.pop(context);
-                },
-              ),
-              actions: [
-                IconButton(
-                  icon: const Icon(EvaIcons.more_vertical),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      CupertinoPageRoute(
-                        builder: (context) => BookDetail(book: widget.book),
-                      ),
-                    );
-                  },
-                ),
-              ],
-            ),
-            const Spacer(),
-            ClipRRect(
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(20),
-                topRight: Radius.circular(20),
-              ),
-              child: Material(
-                child: StatefulBuilder(
-                  builder: (BuildContext context, StateSetter setState) {
-                    return IntrinsicHeight(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const SizedBox(height: 10),
-                          Expanded(child: _currentPage),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.toc),
-                                onPressed: () {
-                                  tocHandler();
-                                  setState(() {});
-                                },
-                              ),
-                              IconButton(
-                                icon: const Icon(EvaIcons.edit),
-                                onPressed: () {
-                                  noteHandler();
-                                  setState(() {});
-                                },
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.data_usage),
-                                onPressed: () {
-                                  progressHandler();
-                                  setState(() {});
-                                },
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.color_lens),
-                                onPressed: () {
-                                  styleHandler(setState);
-                                  setState(() {});
-                                },
-                              ),
-                              IconButton(
-                                icon: const Icon(EvaIcons.headphones),
-                                onPressed: () {
-                                  ttsHandler();
-                                  setState(() {});
-                                },
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ),
-          ],
-        );
-      },
-    ).then((value) {
-      setState(() {
-        _currentPage = const SizedBox(height: 1);
-      });
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Hero(
@@ -271,6 +172,103 @@ class ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
               book: _book,
               cfi: widget.cfi,
               showOrHideAppBarAndBottomBar: showOrHideAppBarAndBottomBar,
+            ),
+            Offstage(
+              offstage: bottomBarOffstage,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  AppBar(
+                    title: Text(_book.title, overflow: TextOverflow.ellipsis),
+                    leading: IconButton(
+                      icon: const Icon(Icons.arrow_back),
+                      onPressed: () {
+                        // close bottom bar
+                        Navigator.pop(context);
+                        // close reading page
+                        Navigator.pop(context);
+                      },
+                    ),
+                    actions: [
+                      IconButton(
+                        icon: const Icon(EvaIcons.more_vertical),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            CupertinoPageRoute(
+                              builder: (context) =>
+                                  BookDetail(book: widget.book),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                  Expanded(
+                    child: GestureDetector(
+                      child: Container(
+                        color: Colors.transparent,
+                      ),
+                      onTap: () {
+                        showOrHideAppBarAndBottomBar(false);
+                      },
+                    ),
+                  ),
+                  ClipRRect(
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(20),
+                      topRight: Radius.circular(20),
+                    ),
+                    child: Material(
+                      child: StatefulBuilder(
+                        builder: (BuildContext context, StateSetter setState) {
+                          return IntrinsicHeight(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Expanded(child: _currentPage),
+                                Offstage(
+                                  offstage:
+                                      tocOffstage || _currentPage is! SizedBox,
+                                  child: _tocWidget,
+                                ),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceAround,
+                                  children: [
+                                    IconButton(
+                                      icon: const Icon(Icons.toc),
+                                      onPressed: tocHandler,
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(EvaIcons.edit),
+                                      onPressed: noteHandler,
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(Icons.data_usage),
+                                      onPressed: progressHandler,
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(Icons.color_lens),
+                                      onPressed: () {
+                                        styleHandler(setState);
+                                      },
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(EvaIcons.headphones),
+                                      onPressed: ttsHandler,
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),

@@ -410,6 +410,7 @@ export class View extends HTMLElement {
         }
     }
     async * search(opts) {
+        console.log('search', opts)
         this.clearSearch()
         const { searchMatcher } = await import('./search.js')
         const { query, index } = opts

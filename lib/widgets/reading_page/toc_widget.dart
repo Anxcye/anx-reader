@@ -4,7 +4,7 @@ import 'package:anx_reader/models/toc_item.dart';
 import 'package:anx_reader/page/book_player/epub_player.dart';
 import 'package:flutter/material.dart';
 
-class TocWidget extends StatelessWidget {
+class TocWidget extends StatefulWidget {
   const TocWidget({
     super.key,
     required this.tocItems,
@@ -17,23 +17,46 @@ class TocWidget extends StatelessWidget {
   final Function hideAppBarAndBottomBar;
 
   @override
+  State<TocWidget> createState() => _TocWidgetState();
+}
+
+class _TocWidgetState extends State<TocWidget> {
+  String? _searchValue;
+
+  @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 600,
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      height: 0.8 * MediaQuery.of(context).size.height,
       child: Column(
         children: [
           widgetTitle(L10n.of(context).reading_contents, null),
-          Expanded(
-            child: ListView.builder(
-              itemCount: tocItems.length,
-              itemBuilder: (context, index) {
-                return TocItemWidget(
-                    tocItem: tocItems[index],
-                    hideAppBarAndBottomBar: hideAppBarAndBottomBar,
-                    epubPlayerKey: epubPlayerKey);
-              },
-            ),
+          // search bar
+          SearchBar(
+            shadowColor: const WidgetStatePropertyAll<Color>(Colors.transparent),
+            padding: const WidgetStatePropertyAll<EdgeInsets>(
+                EdgeInsets.symmetric(horizontal: 16.0)),
+            leading: const Icon(Icons.search),
+            onSubmitted: (value) {
+              setState(() {
+                _searchValue = value;
+              });
+              print(value);
+            },
           ),
+          _searchValue != null
+              ? Text('Search value: $_searchValue')
+              : Expanded(
+                  child: ListView.builder(
+                    itemCount: widget.tocItems.length,
+                    itemBuilder: (context, index) {
+                      return TocItemWidget(
+                          tocItem: widget.tocItems[index],
+                          hideAppBarAndBottomBar: widget.hideAppBarAndBottomBar,
+                          epubPlayerKey: widget.epubPlayerKey);
+                    },
+                  ),
+                ),
         ],
       ),
     );
