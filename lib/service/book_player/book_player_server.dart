@@ -79,6 +79,7 @@ class Server {
         headers: {
           'Content-Type': 'font/opentype',
           'Access-Control-Allow-Origin': '*',
+          'cache-control': 'public, max-age=31536000',
         },
       );
 
