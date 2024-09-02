@@ -23,7 +23,7 @@ function rangeIsEmpty(range) {
 const sentenseEndRegex = (lang) => {
     switch (lang) {
         case 'zh':
-            return /[!?。！？]["'“”‘’]?/g
+            return 
         case 'en':
             return /[.!?]["']?/g
         default:
@@ -37,7 +37,10 @@ function* getBlocks(doc) {
 
     for (let node = walker.nextNode(); node; node = walker.nextNode()) {
         let match
-        const regex = sentenseEndRegex(getLang(node.parentElement))
+        // it some times cannot get the lang of the parent element
+        // const regex = sentenseEndRegex(getLang(node.parentElement))
+
+        const regex = /[.!?。！？]["'“”‘’]?/g
         while ((match = regex.exec(node.textContent)) !== null) {
             const range = doc.createRange()
             if (lastRange) {
@@ -48,7 +51,6 @@ function* getBlocks(doc) {
             lastRange.setStart(node, match.index + match[0].length)
         }
 
-        // 在每个 node 结尾时创建一个新的 Range 对象
         if (lastRange) {
             lastRange.setEnd(node, node.textContent.length)
             if (!rangeIsEmpty(lastRange)) yield lastRange
