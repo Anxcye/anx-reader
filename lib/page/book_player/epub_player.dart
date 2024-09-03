@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:collection';
 import 'dart:convert';
 
 import 'package:anx_reader/config/shared_preference_provider.dart';
@@ -223,37 +224,29 @@ class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
     }
   }
 
-  Future<void> onLoadStart(InAppWebViewController controller) async {
-    ReadTheme readTheme = Prefs().readTheme;
-    BookStyle bookStyle = Prefs().bookStyle;
-    String backgroundColor = convertDartColorToJs(readTheme.backgroundColor);
-    String textColor = convertDartColorToJs(readTheme.textColor);
+  Future<void> renderAnnotations(InAppWebViewController controller) async {
     List<BookNote> annotationList =
         await selectBookNotesByBookId(widget.book.id);
     String allAnnotations =
         jsonEncode(annotationList.map((e) => e.toJson()).toList())
             .replaceAll('\'', '\\\'');
+    controller.evaluateJavascript(source: '''
+     const allAnnotations = $allAnnotations
+     renderAnnotations()
+    ''');
+  }
 
+  String userScript() {
     String url =
         'http://localhost:${Server().port}/book${getBasePath(widget.book.filePath)}'
             .replaceAll('\'', '\\\'');
 
     String cfi = widget.cfi ?? widget.book.lastReadPosition;
 
-    String fontName = Prefs().font.name;
-    String fontPath = Prefs().font.path;
-
-    await controller.evaluateJavascript(
-        source: webviewInitialVariable(
-      allAnnotations,
+    return webviewInitialVariable(
       url,
       cfi,
-      bookStyle,
-      textColor,
-      fontName,
-      fontPath,
-      backgroundColor,
-    ));
+    );
   }
 
   Future<void> setHandler(InAppWebViewController controller) async {
@@ -318,6 +311,12 @@ class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
             _searchResultController.add(searchResult);
           }
         });
+      },
+    );
+    controller.addJavaScriptHandler(
+      handlerName: 'renderAnnotations',
+      callback: (args) {
+        renderAnnotations(controller);
       },
     );
   }
@@ -474,7 +473,12 @@ class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
           ),
           InAppWebView(
             initialUrlRequest: URLRequest(url: WebUri(indexHtmlPath)),
-            onLoadStart: (controller, url) => onLoadStart(controller),
+            // onLoadStop: (controller, url) => onLoadStop(controller),
+            initialUserScripts: UnmodifiableListView<UserScript>([
+              UserScript(
+                  source: userScript(),
+                  injectionTime: UserScriptInjectionTime.AT_DOCUMENT_START),
+            ]),
             initialSettings: initialSettings,
             contextMenu: contextMenu,
             onWebViewCreated: (controller) => onWebViewCreated(controller),

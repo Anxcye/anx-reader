@@ -363,26 +363,6 @@ class Reader {
         if (!cfi)
             this.view.renderer.next()
 
-        const bookmarks = allAnnotations ?? []
-        for (const bookmark of bookmarks) {
-            const { value, type, color, note } = bookmark
-            const annotation = {
-                id: bookmark.id,
-                value,
-                type,
-                color,
-                note
-            }
-            const spineCode = (value.split('/')[2].split('!')[0] - 2) / 2
-
-            const list = this.annotations.get(spineCode)
-            if (list) list.push(annotation)
-            else this.annotations.set(spineCode, [annotation])
-
-            this.annotationsByValue.set(value, annotation)
-        }
-
-
         this.view.addEventListener('create-overlay', e => {
             const { index } = e.detail
             const list = this.annotations.get(index)
@@ -414,6 +394,23 @@ class Reader {
             }))
 
         await this.view.init({ lastLocation: cfi })
+    }
+
+    renderAnnotation() {
+        const bookmarks = allAnnotations ?? []
+        for (const bookmark of bookmarks) {
+            const { value, type, color, note } = bookmark
+            const annotation = {
+                id: bookmark.id,
+                value,
+                type,
+                color,
+                note
+            }
+
+        this.addAnnotation(annotation)
+        }
+
     }
 
     showContextMenu() {
@@ -477,48 +474,47 @@ const open = async (file, cfi) => {
     const reader = new Reader()
     globalThis.reader = reader
     await reader.open(file, cfi)
-    if (!importing) { onSetToc() }
+    if (!importing) {
+        onSetToc()
+        callFlutter('renderAnnotations')
+    }
     else { getMetadata() }
 }
 
-// //////// use for test //////////
-// const importing = false
-// const allAnnotations = [
-//     { id: 1, type: 'highlight', value: "epubcfi(/6/12!/4/4,/1:0,/1:73)", color: 'blue', note: 'this is' },
-//     { id: 2, type: 'highlight', value: "epubcfi(/6/4!/4/4,/1:222,/1:226)", color: 'yellow', note: 'this is' },
-//     { id: 3, type: 'underline', value: "epubcfi(/6/4!/4/4,/1:294,/1:301)", color: 'red', note: 'this is' },
-// ]
-// let url = '../local/c.epub'
-// let cfi = "epubcfi(/6/8!/4,/2[CHP1],/10/1:177)"
-// // let cfi = null
-// let style = {
-//     fontSize: 1.2,
-//     fontName: 'book',
-//     letterSpacing: 0,
-//     spacing: '1.5',
-//     paragraphSpacing: 5,
-//     textIndent: 0,
-//     fontColor: '#66ccff',
-//     backgroundColor: '#33445566',
-//     topMargin: 100,
-//     bottomMargin: 100,
-//     sideMargin: 5,
-//     justify: true,
-//     hyphenate: true,
-//     // scroll: false,
-//     // animated: true,
-//     pageTurnStyle: 'slide'
-// }
-// window.flutter_inappwebview = {}
-// window.flutter_inappwebview.callHandler = (name, data) => {
-//     console.log(name, data)
-// }
-// ///////////////////////////////
 
-fetch(url)
-    .then(res => res.blob())
-    .then(blob => open(new File([blob], new URL(url, window.location.origin).pathname), cfi))
-    .catch(e => console.error(e))
+////////// use for test //////////
+//const importing = false
+//const allAnnotations = [
+//    { id: 1, type: 'highlight', value: "epubcfi(/6/12!/4/4,/1:0,/1:73)", color: 'blue', note: 'this is' },
+//    { id: 2, type: 'highlight', value: "epubcfi(/6/4!/4/4,/1:222,/1:226)", color: 'yellow', note: 'this is' },
+//    { id: 3, type: 'underline', value: "epubcfi(/6/4!/4/4,/1:294,/1:301)", color: 'red', note: 'this is' },
+//]
+//let url = '../local/d.epub'
+//let cfi = "epubcfi(/6/8!/4,/2[CHP1],/10/1:177)"
+//// let cfi = null
+//let style = {
+//    fontSize: 1.2,
+//    fontName: 'book',
+//    letterSpacing: 0,
+//    spacing: '1.5',
+//    paragraphSpacing: 5,
+//    textIndent: 0,
+//    fontColor: '#000000',
+//    backgroundColor: '#11223344',
+//    topMargin: 100,
+//    bottomMargin: 100,
+//    sideMargin: 5,
+//    justify: true,
+//    hyphenate: true,
+//    // scroll: false,
+//    // animated: true,
+//    pageTurnStyle: 'slide'
+//}
+//window.flutter_inappwebview = {}
+//window.flutter_inappwebview.callHandler = (name, data) => {
+//    console.log(name, data)
+//}
+/////////////////////////////////
 
 const callFlutter = (name, data) => window.flutter_inappwebview.callHandler(name, data)
 
@@ -619,7 +615,6 @@ const getMetadata = async () => {
         })
     }
 }
-
 
 window.changeStyle = (newStyle) => {
     style = {
@@ -728,3 +723,10 @@ window.search = async (text, opts) => {
         }
     }
 }
+
+window.renderAnnotations = () => reader.renderAnnotation()
+
+fetch(url)
+    .then(res => res.blob())
+    .then(blob => open(new File([blob], new URL(url, window.location.origin).pathname), cfi))
+    .catch(e => console.error(e))
