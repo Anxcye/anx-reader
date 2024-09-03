@@ -1,24 +1,31 @@
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/models/book_style.dart';
+import 'package:anx_reader/models/read_theme.dart';
+import 'package:anx_reader/utils/js/convert_dart_color_to_js.dart';
 
 String webviewInitialVariable(
-  String allAnnotations,
   String url,
-  String cfi,
-  BookStyle bookStyle,
-  String textColor,
-  String fontName,
-  String fontPath,
-  String backgroundColor, {
+  String cfi,{
+  BookStyle? bookStyle,
+  String? textColor,
+  String? fontName,
+  String? fontPath,
+  String? backgroundColor,
   bool? importing,
 }) {
-  importing ?? false;
+
+  ReadTheme readTheme = Prefs().readTheme;
+  bookStyle ??= Prefs().bookStyle;
+  textColor ??= convertDartColorToJs(readTheme.textColor);
+  fontName ??= Prefs().font.name;
+  fontPath ??= Prefs().font.path;
+  backgroundColor ??= convertDartColorToJs(readTheme.backgroundColor);
+  importing ??= false;
 
 
   return '''
      console.log(navigator.userAgent)
      const importing = $importing
-     const allAnnotations = $allAnnotations
      const url = '$url'
      let cfi = '$cfi'
      let style = {

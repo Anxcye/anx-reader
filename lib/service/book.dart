@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:io';
 
 import 'package:anx_reader/config/shared_preference_provider.dart';
@@ -122,11 +123,6 @@ Future<void> getBookMetadata(
   String filePath = file.path;
   Server().tempFile = file;
 
-  ReadTheme readTheme = Prefs().readTheme;
-  String backgroundColor = convertDartColorToJs(readTheme.backgroundColor);
-  String textColor = convertDartColorToJs(readTheme.textColor);
-
-  String allAnnotations = 'null';
   String cfi = '';
 
   String indexHtmlPath =
@@ -135,18 +131,6 @@ Future<void> getBookMetadata(
   HeadlessInAppWebView webview = HeadlessInAppWebView(
     initialUrlRequest: URLRequest(url: WebUri(indexHtmlPath)),
     onLoadStart: (controller, url) async {
-      controller.evaluateJavascript(
-          source: webviewInitialVariable(
-        allAnnotations,
-        filePath,
-        cfi,
-        Prefs().bookStyle,
-        textColor,
-        Prefs().font.name,
-        Prefs().font.path,
-        backgroundColor,
-        importing: true,
-      ));
       controller.addJavaScriptHandler(
           handlerName: 'onMetadata',
           callback: (args) async {
@@ -169,6 +153,15 @@ Future<void> getBookMetadata(
             return;
           });
     },
+    initialUserScripts: UnmodifiableListView<UserScript>([
+      UserScript(
+          source: webviewInitialVariable(
+            filePath,
+            cfi,
+            importing: true,
+          ),
+          injectionTime: UserScriptInjectionTime.AT_DOCUMENT_START),
+    ]),
     onConsoleMessage: (controller, consoleMessage) {
       if (consoleMessage.messageLevel == ConsoleMessageLevel.ERROR) {
         headlessInAppWebView?.dispose();
