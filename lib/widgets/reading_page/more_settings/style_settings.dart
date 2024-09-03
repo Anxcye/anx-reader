@@ -21,6 +21,7 @@ Widget sliders() {
   return StatefulBuilder(
     builder: (BuildContext context, StateSetter setState) => Column(
       children: [
+        textIndent(bookStyle, setState),
         sideMarginSlider(bookStyle, setState),
         topBottomMarginSlider(bookStyle, setState),
         letterSpacingSlider(bookStyle, setState),
@@ -29,9 +30,29 @@ Widget sliders() {
   );
 }
 
-Widget sideMarginSlider(BookStyle bookStyle, StateSetter setState) {
+Widget textIndent(BookStyle bookStyle, StateSetter setState) {
   return ListTile(
     leading: const Icon(Icons.format_indent_increase),
+    title: Slider(
+      value: bookStyle.indent ?? 0.0,
+      onChanged: (double value) {
+        setState(() {
+          bookStyle.indent = value;
+          epubPlayerKey.currentState!.changeStyle(bookStyle);
+          Prefs().saveBookStyleToPrefs(bookStyle);
+        });
+      },
+      min: 0,
+      max: 8,
+      divisions: 16,
+      label: bookStyle.indent?.toStringAsFixed(1),
+    ),
+  );
+}
+
+Widget sideMarginSlider(BookStyle bookStyle, StateSetter setState) {
+  return ListTile(
+    leading: const Icon(Icons.margin_rounded),
     title: Slider(
       value: bookStyle.sideMargin,
       onChanged: (double value) {

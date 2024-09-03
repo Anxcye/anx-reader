@@ -10,6 +10,7 @@ class BookStyle {
   double sideMargin;
   double topMargin;
   double bottomMargin;
+  double indent;
 
   BookStyle({
     this.fontSize = 1.0,
@@ -21,6 +22,7 @@ class BookStyle {
     this.sideMargin = 6.0,
     this.topMargin = 80.0,
     this.bottomMargin = 40.0,
+    this.indent = 0,
   });
 
   BookStyle copyWith({
@@ -33,6 +35,7 @@ class BookStyle {
     double? sideMargin,
     double? topMargin,
     double? bottomMargin,
+    double? indent,
   }) {
     return BookStyle(
       fontSize: fontSize ?? this.fontSize,
@@ -44,6 +47,7 @@ class BookStyle {
       sideMargin: sideMargin ?? this.sideMargin,
       topMargin: topMargin ?? this.topMargin,
       bottomMargin: bottomMargin ?? this.bottomMargin,
+      indent: indent ?? this.indent,
     );
   }
 
@@ -58,6 +62,7 @@ class BookStyle {
       'sideMargin': sideMargin,
       'topMargin': topMargin,
       'bottomMargin': bottomMargin,
+      'indent': indent,
     };
   }
 
@@ -72,7 +77,8 @@ class BookStyle {
       "paragraphSpacing": $paragraphSpacing,
       "sideMargin": $sideMargin,
       "topMargin": $topMargin,
-      "bottomMargin": $bottomMargin
+      "bottomMargin": $bottomMargin,
+      "indent": $indent
     }
     ''';
   }
@@ -105,6 +111,11 @@ class BookStyle {
       bottomMargin: data['bottomMargin'] is String
           ? double.parse(data['bottomMargin'])
           : data['bottomMargin'],
+      indent: data['indent'] == null
+          ? 0
+          : data['indent'] is String
+              ? double.parse(data['indent'])
+              : data['indent'],
     );
   }
 }
