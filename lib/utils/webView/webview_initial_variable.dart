@@ -7,12 +7,13 @@ String webviewInitialVariable(
   String cfi,
   BookStyle bookStyle,
   String textColor,
+  String fontName,
+  String fontPath,
   String backgroundColor, {
   bool? importing,
 }) {
   importing ?? false;
-  String fontName = Prefs().font.name;
-  String fontPath = Prefs().font.path;
+
 
   return '''
      console.log(navigator.userAgent)

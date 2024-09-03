@@ -226,7 +226,6 @@ class _BookNotesPageState extends State<BookNotesPage> {
           children: [
             bookInfo(context, widget.book, widget.numberOfNotes),
             const SizedBox(height: 170),
-            Text(widget.book.title),
             BookNotesList(
                 book: widget.book,
                 reading: false,

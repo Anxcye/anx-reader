@@ -196,8 +196,6 @@ class ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
                         leading: IconButton(
                           icon: const Icon(Icons.arrow_back),
                           onPressed: () {
-                            // close bottom bar
-                            Navigator.pop(context);
                             // close reading page
                             Navigator.pop(context);
                           },
