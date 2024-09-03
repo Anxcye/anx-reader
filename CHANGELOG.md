@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.1.6 2024-09-02
+## 1.1.6 2024-09-03
 This release includes a number of new features and improvements, as well as bug fixes.
 Feature: Added support for importing books in mobi, azw3, and fb2 formats
 Feature: Added TTS (Text-to-Speech) voice reading functionality

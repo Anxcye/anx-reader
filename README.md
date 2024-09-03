@@ -15,6 +15,8 @@
 
 Anx Reader is an application focused on reading, without any online promotional content. It can help you concentrate more on reading and improve your reading efficiency.
 
+Support **epub / mobi / azw3 / fb2**
+
 ![](./docs/images/9.jpg)
 
 - More comprehensive synchronization features. Supports using WebDAV to sync reading progress, notes, and book files.
@@ -26,10 +28,10 @@ Anx Reader is an application focused on reading, without any online promotional 
 ### TODO
 - [X] UI adaptation for tablets
 - [X] Page-turning animation
-- [ ] TTS voice reading
-- [ ] Reading fonts
+- [X] TTS voice reading
+- [X] Reading fonts
 - [ ] Translation
-- [ ] Support for more file types (currently only supports importing epub)
+- [ ] Support for more file types (txt, pdf)
 - [X] Support for WebDAV synchronization
 - [ ] Support for Windows, Linux
 
