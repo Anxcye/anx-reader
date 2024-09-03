@@ -142,6 +142,8 @@ Future<void> getBookMetadata(
         cfi,
         Prefs().bookStyle,
         textColor,
+        Prefs().font.name,
+        Prefs().font.path,
         backgroundColor,
         importing: true,
       ));

@@ -240,6 +240,9 @@ class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
 
     String cfi = widget.cfi ?? widget.book.lastReadPosition;
 
+    String fontName = Prefs().font.name;
+    String fontPath = Prefs().font.path;
+
     await controller.evaluateJavascript(
         source: webviewInitialVariable(
       allAnnotations,
@@ -247,6 +250,8 @@ class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
       cfi,
       bookStyle,
       textColor,
+      fontName,
+      fontPath,
       backgroundColor,
     ));
   }
