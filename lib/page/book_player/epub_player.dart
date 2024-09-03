@@ -120,6 +120,7 @@ class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
         bottomMargin: ${bookStyle.bottomMargin},
         sideMargin: ${bookStyle.sideMargin},
         letterSpacing: ${bookStyle.letterSpacing},
+        textIndent: ${bookStyle.indent},
       })
     ''');
   }

@@ -7,6 +7,7 @@ String webviewInitialVariable(
   String url,
   String cfi,{
   BookStyle? bookStyle,
+  int? textIndent,
   String? textColor,
   String? fontName,
   String? fontPath,
@@ -35,7 +36,7 @@ String webviewInitialVariable(
          letterSpacing: ${bookStyle.letterSpacing},
          spacing: ${bookStyle.lineHeight},
          paragraphSpacing: ${bookStyle.paragraphSpacing},
-         textIndent: 0,
+         textIndent: ${bookStyle.indent},
          fontColor: '#$textColor',
          backgroundColor: '#$backgroundColor',
          topMargin: ${bookStyle.topMargin},
