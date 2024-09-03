@@ -45,7 +45,7 @@ jobs:
 
       - name: Rename APKs
         run: |
-          cd app/build/app/outputs/flutter-apk
+          cd build/app/outputs/flutter-apk
           mv app-armeabi-v7a-release.apk Anx-Reader-${{ env.VERSION }}-armeabi-v7a.apk
           mv app-arm64-v8a-release.apk Anx-Reader-${{ env.VERSION }}-arm64-v8a.apk
           mv app-x86_64-release.apk Anx-Reader-${{ env.VERSION }}-x86_64.apk
