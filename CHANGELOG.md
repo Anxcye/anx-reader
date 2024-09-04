@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+feat: text indent setting
+fix: blank page sometimes when opening a book
+
 ## 1.1.6 2024-09-03
 This release includes a number of new features and improvements, as well as bug fixes.
 Feature: Added support for importing books in mobi, azw3, and fb2 formats
