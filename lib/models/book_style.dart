@@ -85,10 +85,16 @@ class BookStyle {
 
   factory BookStyle.fromJson(String json) {
     Map<String, dynamic> data = jsonDecode(json);
+    double fontsSize = data['fontSize'] is String
+        ? double.parse(data['fontSize'])
+        : data['fontSize'];
+
+    if (fontsSize > 2 || fontsSize < 0.5) {
+      fontsSize = 1.0;
+    }
+
     return BookStyle(
-      fontSize: data['fontSize'] is String
-          ? double.parse(data['fontSize'])
-          : data['fontSize'],
+      fontSize: fontsSize,
       fontFamily: data['fontFamily'],
       lineHeight: data['lineHeight'] is String
           ? double.parse(data['lineHeight'])

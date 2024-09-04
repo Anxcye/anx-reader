@@ -229,10 +229,10 @@ class _StyleWidgetState extends State<StyleWidget> {
                 Prefs().saveBookStyleToPrefs(bookStyle);
               });
             },
-            min: 0.4,
-            max: 3.0,
-            divisions: 13,
-            label: bookStyle.fontSize.toStringAsFixed(1),
+            min: 0.5,
+            max: 2.0,
+            divisions: 30,
+            label: bookStyle.fontSize.toStringAsFixed(2),
           ),
         ),
       ],
