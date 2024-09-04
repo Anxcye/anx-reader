@@ -34,7 +34,7 @@ Widget textIndent(BookStyle bookStyle, StateSetter setState) {
   return ListTile(
     leading: const Icon(Icons.format_indent_increase),
     title: Slider(
-      value: bookStyle.indent ?? 0.0,
+      value: bookStyle.indent,
       onChanged: (double value) {
         setState(() {
           bookStyle.indent = value;
@@ -45,7 +45,7 @@ Widget textIndent(BookStyle bookStyle, StateSetter setState) {
       min: 0,
       max: 8,
       divisions: 16,
-      label: bookStyle.indent?.toStringAsFixed(1),
+      label: bookStyle.indent.toStringAsFixed(1),
     ),
   );
 }
