@@ -95,7 +95,7 @@ class _StyleWidgetState extends State<StyleWidget> {
       if (element is File) {
         fontList.add(FontModel(
           label: getFontNameFromFile(element),
-          name: element.path.split('/').last.split('.').first,
+          name: 'customFont',
           path:
               'http://localhost:${Server().port}/fonts/${element.path.split('/').last}',
         ));
