@@ -35,7 +35,10 @@ Support **epub / mobi / azw3 / fb2**
 - [X] Support for WebDAV synchronization
 - [ ] Support for Windows, Linux
 
-Telegram group: [https://t.me/AnxReader](https://t.me/AnxReader)
+### I Encountered a Problem, What Should I Do?
+Check [Troubleshooting](./docs/troubleshooting.md#English)
+Submit an [issue](https://github.com/Anxcye/anx-reader/issues/new/choose), and we will respond as soon as possible.
+Telegram Group: [https://t.me/AnxReader](https://t.me/AnxReader)
 
 ## Building
 Want to build Anx Reader from source? Please follow these steps:

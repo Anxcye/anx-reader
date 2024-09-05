@@ -29,7 +29,6 @@
 
 
 
-
 ### TODO
 - [X] UI 适配 Tab 端
 - [X] 翻页动画
@@ -40,6 +39,10 @@
 - [X] 支持 WebDAV 同步
 - [ ] 支持 Windows，Linux
 
+
+### 我遇到了问题，怎么办？
+查看[故障排除](./docs/troubleshooting.md#简体中文)
+提出一个[issue](https://github.com/Anxcye/anx-reader/issues/new/choose)，将会尽快回复。
 Telegram 群组：[https://t.me/AnxReader](https://t.me/AnxReader)
 
 ## 构建
