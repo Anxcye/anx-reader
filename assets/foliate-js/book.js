@@ -245,7 +245,6 @@ const getCSS = ({ fontSize,
         background: none !important;
         // background-color: ${backgroundColor} !important;
         background-color: transparent !important;
-        font-size: ${fontSize}em !important;
         letter-spacing: ${letterSpacing}px;
     }
     body {
@@ -256,6 +255,7 @@ const getCSS = ({ fontSize,
         color: #66ccff !important;
     }
     * {
+        font-size: ${fontSize}em !important;
         ${fontFamily}
     }
     p, li, blockquote, dd, div, font {
@@ -482,17 +482,17 @@ const open = async (file, cfi) => {
 }
 
 
-////////// use for test //////////
-//const importing = false
-//const allAnnotations = [
+// //////// use for test //////////
+// const importing = false
+// const allAnnotations = [
 //    { id: 1, type: 'highlight', value: "epubcfi(/6/12!/4/4,/1:0,/1:73)", color: 'blue', note: 'this is' },
 //    { id: 2, type: 'highlight', value: "epubcfi(/6/4!/4/4,/1:222,/1:226)", color: 'yellow', note: 'this is' },
 //    { id: 3, type: 'underline', value: "epubcfi(/6/4!/4/4,/1:294,/1:301)", color: 'red', note: 'this is' },
-//]
-//let url = '../local/d.epub'
-//let cfi = "epubcfi(/6/8!/4,/2[CHP1],/10/1:177)"
-//// let cfi = null
-//let style = {
+// ]
+// let url = '../local/dyx.epub'
+// let cfi = "epubcfi(/6/8!/4,/2[CHP1],/10/1:177)"
+// // let cfi = null
+// let style = {
 //    fontSize: 1.2,
 //    fontName: 'book',
 //    letterSpacing: 0,
@@ -509,12 +509,12 @@ const open = async (file, cfi) => {
 //    // scroll: false,
 //    // animated: true,
 //    pageTurnStyle: 'slide'
-//}
-//window.flutter_inappwebview = {}
-//window.flutter_inappwebview.callHandler = (name, data) => {
+// }
+// window.flutter_inappwebview = {}
+// window.flutter_inappwebview.callHandler = (name, data) => {
 //    console.log(name, data)
-//}
-/////////////////////////////////
+// }
+// ///////////////////////////////
 
 const callFlutter = (name, data) => window.flutter_inappwebview.callHandler(name, data)
 
