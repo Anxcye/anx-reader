@@ -37,7 +37,9 @@ Support **epub / mobi / azw3 / fb2**
 
 ### I Encountered a Problem, What Should I Do?
 Check [Troubleshooting](./docs/troubleshooting.md#English)
+
 Submit an [issue](https://github.com/Anxcye/anx-reader/issues/new/choose), and we will respond as soon as possible.
+
 Telegram Group: [https://t.me/AnxReader](https://t.me/AnxReader)
 
 ## Building
@@ -57,6 +59,8 @@ Starting from version 1.1.4, the open source license for the Anx Reader project 
 
 ## Thanks
 [foliate-js](https://github.com/johnfactotum/foliate-js), which is MIT licensed, it used as the ebook renderer. Thanks to the author for providing such a great project.
+
 [foliate](https://github.com/johnfactotum/foliate), which is GPL-3.0 licensed, selection and highlight feature is inspired by this project.
+
 And many [other open source projects](./pubspec.yaml), thanks to all the authors for their contributions.
 
