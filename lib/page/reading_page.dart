@@ -98,6 +98,10 @@ class ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
     });
   }
 
+  void resetAwakeTimer() {
+    setAwakeTimer(Prefs().awakeTime);
+  }
+
   void showOrHideAppBarAndBottomBar(bool show) {
     setState(() {
       if (show) {
