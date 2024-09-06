@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io' show Platform;
 
 import 'package:anx_reader/config/shared_preference_provider.dart';
+import 'package:anx_reader/page/reading_page.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
@@ -84,12 +85,23 @@ class Tts {
       getDefaultVoice();
     }
 
-    flutterTts.setStartHandler(() {
+    flutterTts.setStartHandler(() async {
       ttsState = TtsState.playing;
+      _currentVoiceText = await epubPlayerKey.currentState!.ttsPrepare();
+
+      if (_currentVoiceText?.isNotEmpty ?? false) {
+        flutterTts.speak(_currentVoiceText!);
+      }
     });
 
-    flutterTts.setCompletionHandler(() {
+    flutterTts.setCompletionHandler(() async {
       ttsState = TtsState.playing;
+      if (_currentVoiceText?.isEmpty ?? true) {
+        _currentVoiceText = await getNextVoiceText();
+        speak();
+      } else {
+        getNextVoiceText();
+      }
     });
 
     flutterTts.setCancelHandler(() {
@@ -125,7 +137,7 @@ class Tts {
 
   static void toggle() {
     if (isPlaying) {
-      stop();
+      pause();
     } else {
       speak();
     }
@@ -136,20 +148,23 @@ class Tts {
       _currentVoiceText = content;
     }
     _currentVoiceText ??= await getHere();
-    while (_currentVoiceText != null) {
-      await flutterTts.setVolume(volume);
-      await flutterTts.setSpeechRate(rate);
-      await flutterTts.setPitch(pitch);
+    await flutterTts.setVolume(volume);
+    await flutterTts.setSpeechRate(rate);
+    await flutterTts.setPitch(pitch);
 
-      await flutterTts.speak(_currentVoiceText!);
-      if (!isPlaying) break;
-      _currentVoiceText = await getNextVoiceText();
-    }
+
+    // at speak begin, ttsStartHandler will be called,
+    // a new voice text will be set there and begin synthesize
+
+    // at speak complete, ttsCompletionHandler will be called,
+    // a new voice text will be set there and begin synthesize
+    await flutterTts.speak(_currentVoiceText!);
   }
 
   static Future<void> setAwaitOptions() async {
     await flutterTts.awaitSpeakCompletion(true);
     await flutterTts.awaitSynthCompletion(true);
+    await flutterTts.setQueueMode(1);
   }
 
   static Future<void> stop() async {
