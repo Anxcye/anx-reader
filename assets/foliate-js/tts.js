@@ -110,6 +110,16 @@ class ListIterator {
             }
         }
     }
+    prepare() {
+        const newIndex = this.#index + 1
+        if (this.#arr[newIndex]) return this.#f(this.#arr[newIndex])
+        while (true) {
+            const { done, value } = this.#iter.next()
+            if (done) break
+            this.#arr.push(value)
+            if (this.#arr[newIndex]) return this.#f(this.#arr[newIndex])
+        }
+    }
     find(f) {
         const index = this.#arr.findIndex(x => f(x))
         if (index > -1) {
@@ -186,6 +196,12 @@ export class TTS {
         this.#lastMark = null
         const [text, range] = this.#list.next() ?? []
         if (paused && range) this.highlight(range.cloneRange())
+        return this.#getText(text)
+    }
+
+    // get next text without moving the iterator
+    prepare() {
+        const [text] = this.#list.prepare() ?? []
         return this.#getText(text)
     }
 

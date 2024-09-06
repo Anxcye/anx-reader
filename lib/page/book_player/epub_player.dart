@@ -203,7 +203,11 @@ class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
           .callAsyncJavaScript(functionBody: "return await ttsNextSection()"))
       ?.value;
 
+  Future<String> ttsPrepare() async =>
+      (await webViewController.evaluateJavascript(source: "ttsPrepare()"));
+
   void onClick(Map<String, dynamic> location) {
+    readingPageKey.currentState?.resetAwakeTimer();
     if (contextMenuEntry != null) {
       removeOverlay();
       return;
@@ -264,7 +268,6 @@ class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
             chapterCurrentPage = location['chapterCurrentPage'];
             chapterTotalPages = location['chapterTotalPages'];
           });
-          readingPageKey.currentState?.resetAwakeTimer();
         });
     controller.addJavaScriptHandler(
         handlerName: 'onClick',
