@@ -91,16 +91,27 @@ class _StyleWidgetState extends State<StyleWidget> {
         path: 'system',
       ),
     ];
-    fontDir.listSync().forEach((element) {
-      if (element is File) {
-        fontList.add(FontModel(
-          label: getFontNameFromFile(element),
-          name: 'customFont',
-          path:
-              'http://localhost:${Server().port}/fonts/${element.path.split('/').last}',
-        ));
-      }
-    });
+    // fontDir.listSync().forEach((element) {
+    //   if (element is File) {
+    //     fontList.add(FontModel(
+    //       label: getFontNameFromFile(element),
+    //       name: 'customFont' + ,
+    //       path:
+    //           'http://localhost:${Server().port}/fonts/${element.path.split('/').last}',
+    //     ));
+    //   }
+    // });
+    // name = 'customFont' + index
+    for (int i = 0; i < fontDir.listSync().length; i++) {
+      File element = fontDir.listSync()[i] as File;
+      fontList.add(FontModel(
+        label: getFontNameFromFile(element),
+        name: 'customFont$i',
+        path:
+            'http://localhost:${Server().port}/fonts/${element.path.split('/').last}',
+      ));
+    }
+
     return fontList;
   }
 
