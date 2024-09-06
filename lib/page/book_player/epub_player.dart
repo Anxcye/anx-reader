@@ -11,6 +11,7 @@ import 'package:anx_reader/models/font_model.dart';
 import 'package:anx_reader/models/read_theme.dart';
 import 'package:anx_reader/models/search_result_model.dart';
 import 'package:anx_reader/models/toc_item.dart';
+import 'package:anx_reader/page/reading_page.dart';
 import 'package:anx_reader/service/book_player/book_player_server.dart';
 import 'package:anx_reader/utils/coordinates_to_part.dart';
 import 'package:anx_reader/utils/get_path/get_base_path.dart';
@@ -263,6 +264,7 @@ class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
             chapterCurrentPage = location['chapterCurrentPage'];
             chapterTotalPages = location['chapterTotalPages'];
           });
+          readingPageKey.currentState?.resetAwakeTimer();
         });
     controller.addJavaScriptHandler(
         handlerName: 'onClick',
