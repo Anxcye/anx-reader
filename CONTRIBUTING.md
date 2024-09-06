@@ -23,6 +23,26 @@ flutter run # or click the run button in your IDE
 5. Push to the branch (`git push origin feature/AmazingFeature`)
 6. Submit a Pull Request
 
+### Building
+You will need a signing key to generate an APK. You can generate one or use the debug signing option:
+
+If you want to generate a signing key, please refer to [here](https://developer.android.com/studio/publish/app-signing).
+
+Using the debug signing option, you can modify the following in the `android/app/build.gradle` file:
+
+```gradle
+android {
+    // ...
+    buildTypes {
+      release {
+        signingConfig signingConfigs.debug // using debug signing
+      }
+    }
+    // ...
+}
+```
+
+
 ### Translation
 If you'd like Anx Reader to support your language, let's work together on the translation!
 
@@ -81,6 +101,24 @@ flutter run # 或点击IDE运行按钮
 5. 推送到分支 (`git push origin feature/AmazingFeature`)
 6. 提交一个 Pull Request
 
+### 编译
+您将需要签名密钥来生成 APK。您可以生成一个或使用调试签名选项：
+
+如果您想要生成一个签名密钥，请参考 [这里](https://developer.android.com/studio/publish/app-signing)。
+
+使用调试签名选项，您可以在 `android/app/build.gradle` 文件中修改这些内容：
+
+```gradle
+android {
+    // ...
+    buildTypes {
+      release {
+        signingConfig signingConfigs.debug // using debug signing
+      }
+    }
+    // ...
+}
+```
 
 ### 翻译
 想要让安读支持您的语言，让我们一起来翻译吧！
