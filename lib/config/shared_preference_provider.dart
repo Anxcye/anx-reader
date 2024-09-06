@@ -238,7 +238,6 @@ class Prefs extends ChangeNotifier {
   }
 
   set font(FontModel font) {
-    font.path = font.path.split('/').last;
     prefs.setString('font', font.toJson());
     notifyListeners();
   }
