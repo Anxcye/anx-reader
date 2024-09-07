@@ -1,6 +1,9 @@
-import 'package:anx_reader/utils/get_path/documents_path.dart';
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
+
+import 'get_base_path.dart';
 
 Future<String> getAnxDataBasesPath() async {
   switch (defaultTargetPlatform) {
@@ -8,9 +11,13 @@ Future<String> getAnxDataBasesPath() async {
       final path = await getDatabasesPath();
       return path;
     case TargetPlatform.windows:
-      final documentsPath = await getDocumentsPath();
+      final documentsPath = await getAnxDocumentsPath();
       return '$documentsPath\\databases';
     default:
       throw Exception('Unsupported platform');
   }
+}
+
+Future<Directory> getAnxDataBasesDir() async {
+  return Directory(await getAnxDataBasesPath());
 }
