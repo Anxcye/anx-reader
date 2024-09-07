@@ -1,11 +1,22 @@
+import 'dart:io';
+
 import 'package:anx_reader/l10n/generated/L10n.dart';
+import 'package:anx_reader/utils/get_path/cache_path.dart';
+import 'package:anx_reader/utils/get_path/databases_path.dart';
+import 'package:anx_reader/utils/get_path/get_base_path.dart';
+import 'package:anx_reader/utils/get_path/shared_prefs_path.dart';
+import 'package:anx_reader/utils/log/common.dart';
+import 'package:anx_reader/utils/toast/common.dart';
 import 'package:anx_reader/utils/webdav/common.dart';
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/utils/webdav/test_webdav.dart';
 import 'package:anx_reader/widgets/settings/settings_title.dart';
+import 'package:archive/archive_io.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_file_dialog/flutter_file_dialog.dart';
 import 'package:settings_ui/settings_ui.dart';
-
 
 class SyncSetting extends StatelessWidget {
   const SyncSetting(
@@ -90,9 +101,96 @@ class _SubSyncSettingsState extends State<SubSyncSettings> {
                 })
           ],
         ),
+        SettingsSection(
+          title: Text("Export/Import"),
+          tiles: [
+            SettingsTile.navigation(
+                title: Text("Export"),
+                leading: const Icon(Icons.cloud_upload),
+                onPressed: (context) {
+                  exportData(context);
+                }),
+            SettingsTile.navigation(
+                title: Text("Import"),
+                leading: const Icon(Icons.cloud_download),
+                onPressed: (context) {
+                  importData();
+                }),
+          ],
+        ),
       ],
     );
   }
+
+  void _showDataDialog(BuildContext context, String title) {
+    showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (context) => SimpleDialog(
+              title: Center(child: Text(title)),
+              children: const [
+                Center(
+                  child: CircularProgressIndicator(),
+                ),
+              ],
+            ));
+  }
+
+  Future<void> exportData(BuildContext context) async {
+    AnxLog.info('exportData: start');
+    if (!mounted) return;
+
+    Future.microtask(() {
+      _showDataDialog(context, "Exporting");
+    });
+
+    RootIsolateToken token = RootIsolateToken.instance!;
+    final zipPath = await compute(createZipFile, token);
+
+    final file = File(zipPath);
+    Navigator.of(context).pop('dialog');
+    if (await file.exists()) {
+      SaveFileDialogParams params = SaveFileDialogParams(
+        sourceFilePath: file.path,
+        mimeTypesFilter: ['application/zip'],
+      );
+      final filePath = await FlutterFileDialog.saveFile(params: params);
+      if (filePath != null) {
+        AnxLog.info('exportData: Saved to: $filePath');
+        AnxToast.show("saved to: $filePath");
+      } else {
+        AnxLog.info('exportData: Cancelled');
+        AnxToast.show("Cancelled");
+      }
+    }
+  }
+
+  void importData() {}
+}
+
+Future<String> createZipFile(RootIsolateToken token) async {
+  BackgroundIsolateBinaryMessenger.ensureInitialized(token);
+  final date =
+      '${DateTime.now().year}-${DateTime.now().month}-${DateTime.now().day}';
+  final zipPath = '${(await getAnxCacheDir()).path}/AnxReader-Backup-$date.zip';
+  final docPath = await getAnxDocumentsPath();
+  final directoryList = [
+    getFileDir(path: docPath),
+    getCoverDir(path: docPath),
+    getFontDir(path: docPath),
+    await getAnxDataBasesDir(),
+    await getAnxSharedPrefsDir(),
+  ];
+
+  AnxLog.info('exportData: directoryList: $directoryList');
+
+  final encoder = ZipFileEncoder();
+  encoder.create(zipPath);
+  for (final dir in directoryList) {
+    await encoder.addDirectory(dir);
+  }
+  encoder.close();
+  return zipPath;
 }
 
 void showWebdavDialog(BuildContext context) {
@@ -108,8 +206,9 @@ void showWebdavDialog(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: TextField(
-        obscureText:
-            labelText == L10n.of(context).settings_sync_webdav_password ? true : false,
+        obscureText: labelText == L10n.of(context).settings_sync_webdav_password
+            ? true
+            : false,
         controller: controller,
         decoration: InputDecoration(
             border: const OutlineInputBorder(), labelText: labelText),
@@ -124,11 +223,12 @@ void showWebdavDialog(BuildContext context) {
         title: Text(title),
         contentPadding: const EdgeInsets.all(20),
         children: [
-          buildTextField(L10n.of(context).settings_sync_webdav_url, webdavUrlController),
           buildTextField(
-              L10n.of(context).settings_sync_webdav_username, webdavUsernameController),
-          buildTextField(
-              L10n.of(context).settings_sync_webdav_password, webdavPasswordController),
+              L10n.of(context).settings_sync_webdav_url, webdavUrlController),
+          buildTextField(L10n.of(context).settings_sync_webdav_username,
+              webdavUsernameController),
+          buildTextField(L10n.of(context).settings_sync_webdav_password,
+              webdavPasswordController),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
@@ -139,7 +239,8 @@ void showWebdavDialog(BuildContext context) {
                   webdavInfo['password'] = webdavPasswordController.text;
                   testWebdav(webdavInfo);
                 },
-                child: Text(L10n.of(context).settings_sync_webdav_test_connection),
+                child:
+                    Text(L10n.of(context).settings_sync_webdav_test_connection),
               ),
               TextButton(
                 onPressed: () {

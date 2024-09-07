@@ -24,7 +24,7 @@ flutter run # or click the run button in your IDE
 6. Submit a Pull Request
 
 ### Building
-You will need a signing key to generate an APK. You can generate one or use the debug signing option:
+You will need a signing key to generate an APK. You can generate one or use the debug signing option
 
 If you want to generate a signing key, please refer to [here](https://developer.android.com/studio/publish/app-signing).
 
@@ -102,7 +102,7 @@ flutter run # 或点击IDE运行按钮
 6. 提交一个 Pull Request
 
 ### 编译
-您将需要签名密钥来生成 APK。您可以生成一个或使用调试签名选项：
+您将需要签名密钥来生成 APK。您可以生成一个或使用调试签名选项
 
 如果您想要生成一个签名密钥，请参考 [这里](https://developer.android.com/studio/publish/app-signing)。
 
