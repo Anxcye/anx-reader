@@ -111,6 +111,7 @@
   "common_update": "Update",
   "common_no_new_version": "No new version",
   "common_confirm": "Confirm",
+  "common_canceled": "Canceled",
 
   "service_import_success": "Import success",
   "service_import_n_books": "{count, plural, =1{importing 1 book} other{importing {count} books}}",
@@ -134,6 +135,16 @@
   "settings_sync_webdav_password": "Password",
   "settings_sync_webdav_test_connection": "Test Connection",
   "settings_sync_webdav_sync_now": "Sync Now",
+  "export_and_import": "Export/Import",
+  "export_and_import_export": "Export",
+  "export_and_import_import": "Import",
+  "exporting": "Exporting",
+  "importing": "Importing",
+  "export_to": "Export to {path}",
+  "import_cannot_get_file_path": "Cannot get file path",
+  "import_success_restart_app": "Import success, please restart the app",
+  "import_failed": "Import failed: {error}",
+
 
   "settings_advanced": "Advanced",
   "settings_advanced_log": "Log",
