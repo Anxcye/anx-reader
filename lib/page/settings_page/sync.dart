@@ -12,10 +12,12 @@ import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/utils/webdav/test_webdav.dart';
 import 'package:anx_reader/widgets/settings/settings_title.dart';
 import 'package:archive/archive_io.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_file_dialog/flutter_file_dialog.dart';
+import 'package:path/path.dart' as path;
 import 'package:settings_ui/settings_ui.dart';
 
 class SyncSetting extends StatelessWidget {
@@ -123,26 +125,26 @@ class _SubSyncSettingsState extends State<SubSyncSettings> {
   }
 
   void _showDataDialog(BuildContext context, String title) {
-    showDialog(
-        barrierDismissible: false,
-        context: context,
-        builder: (context) => SimpleDialog(
-              title: Center(child: Text(title)),
-              children: const [
-                Center(
-                  child: CircularProgressIndicator(),
-                ),
-              ],
-            ));
+    Future.microtask(() {
+      showDialog(
+          barrierDismissible: false,
+          context: context,
+          builder: (context) => SimpleDialog(
+                title: Center(child: Text(title)),
+                children: const [
+                  Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                ],
+              ));
+    });
   }
 
   Future<void> exportData(BuildContext context) async {
     AnxLog.info('exportData: start');
     if (!mounted) return;
 
-    Future.microtask(() {
-      _showDataDialog(context, "Exporting");
-    });
+    _showDataDialog(context, "Exporting");
 
     RootIsolateToken token = RootIsolateToken.instance!;
     final zipPath = await compute(createZipFile, token);
@@ -155,6 +157,9 @@ class _SubSyncSettingsState extends State<SubSyncSettings> {
         mimeTypesFilter: ['application/zip'],
       );
       final filePath = await FlutterFileDialog.saveFile(params: params);
+
+      await file.delete();
+
       if (filePath != null) {
         AnxLog.info('exportData: Saved to: $filePath');
         AnxToast.show("saved to: $filePath");
@@ -165,7 +170,81 @@ class _SubSyncSettingsState extends State<SubSyncSettings> {
     }
   }
 
-  void importData() {}
+  Future<void> importData() async {
+    AnxLog.info('importData: start');
+    if (!mounted) return;
+
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['zip'],
+    );
+
+    if (result == null) {
+      return;
+    }
+
+    String? filePath = result.files.single.path;
+    if (filePath == null) {
+      AnxToast.show("无法获取文件路径");
+      return;
+    }
+
+    File zipFile = File(filePath);
+    if (!await zipFile.exists()) {
+      AnxToast.show("文件不存在");
+      return;
+    }
+    _showDataDialog(context, "Importing");
+
+    Directory tempDir = await getAnxCacheDir();
+    String tempPath = tempDir.path;
+    String extractPath = '$tempPath/anx_reader_import';
+
+    try {
+      await Directory(extractPath).create(recursive: true);
+
+      await compute(extractZipFile, {
+        'zipFilePath': zipFile.path,
+        'destinationPath': extractPath,
+      });
+
+      String docPath = await getAnxDocumentsPath();
+      _copyDirectorySync(
+          Directory('$extractPath/file'), getFileDir(path: docPath));
+      _copyDirectorySync(
+          Directory('$extractPath/cover'), getCoverDir(path: docPath));
+      _copyDirectorySync(
+          Directory('$extractPath/font'), getFontDir(path: docPath));
+      _copyDirectorySync(
+          Directory('$extractPath/databases'), await getAnxDataBasesDir());
+      _copyDirectorySync(
+          Directory('$extractPath/shared_prefs'), await getAnxSharedPrefsDir());
+
+      AnxToast.show("导入成功，请重启应用");
+    } catch (e) {
+      AnxLog.info('importData: 解压或复制文件时出错: $e');
+      AnxToast.show("导入失败：$e");
+    } finally {
+      Navigator.of(context).pop('dialog');
+      await Directory(extractPath).delete(recursive: true);
+    }
+  }
+
+  void _copyDirectorySync(Directory source, Directory destination) {
+    if (!destination.existsSync()) {
+      destination.createSync(recursive: true);
+    }
+    source.listSync(recursive: false).forEach((entity) {
+      final newPath = destination.path +
+          Platform.pathSeparator +
+          path.basename(entity.path);
+      if (entity is File) {
+        entity.copySync(newPath);
+      } else if (entity is Directory) {
+        _copyDirectorySync(entity, Directory(newPath));
+      }
+    });
+  }
 }
 
 Future<String> createZipFile(RootIsolateToken token) async {
@@ -191,6 +270,26 @@ Future<String> createZipFile(RootIsolateToken token) async {
   }
   encoder.close();
   return zipPath;
+}
+
+Future<void> extractZipFile(Map<String, String> params) async {
+  final zipFilePath = params['zipFilePath']!;
+  final destinationPath = params['destinationPath']!;
+
+  final bytes = File(zipFilePath).readAsBytesSync();
+  final archive = ZipDecoder().decodeBytes(bytes);
+
+  for (final file in archive) {
+    final filename = file.name;
+    if (file.isFile) {
+      final data = file.content as List<int>;
+      File('$destinationPath/$filename')
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(data);
+    } else {
+      Directory('$destinationPath/$filename').createSync(recursive: true);
+    }
+  }
 }
 
 void showWebdavDialog(BuildContext context) {
