@@ -104,16 +104,16 @@ class _SubSyncSettingsState extends State<SubSyncSettings> {
           ],
         ),
         SettingsSection(
-          title: Text("Export/Import"),
+          title: Text(L10n.of(context).export_and_import),
           tiles: [
             SettingsTile.navigation(
-                title: Text("Export"),
+                title: Text(L10n.of(context).export_and_import_export),
                 leading: const Icon(Icons.cloud_upload),
                 onPressed: (context) {
                   exportData(context);
                 }),
             SettingsTile.navigation(
-                title: Text("Import"),
+                title: Text(L10n.of(context).export_and_import_import),
                 leading: const Icon(Icons.cloud_download),
                 onPressed: (context) {
                   importData();
@@ -144,7 +144,7 @@ class _SubSyncSettingsState extends State<SubSyncSettings> {
     AnxLog.info('exportData: start');
     if (!mounted) return;
 
-    _showDataDialog(context, "Exporting");
+    _showDataDialog(context, L10n.of(context).exporting);
 
     RootIsolateToken token = RootIsolateToken.instance!;
     final zipPath = await compute(createZipFile, token);
@@ -162,10 +162,10 @@ class _SubSyncSettingsState extends State<SubSyncSettings> {
 
       if (filePath != null) {
         AnxLog.info('exportData: Saved to: $filePath');
-        AnxToast.show("saved to: $filePath");
+        AnxToast.show(L10n.of(context).export_to(filePath));
       } else {
         AnxLog.info('exportData: Cancelled');
-        AnxToast.show("Cancelled");
+        AnxToast.show(L10n.of(context).common_canceled);
       }
     }
   }
@@ -185,16 +185,18 @@ class _SubSyncSettingsState extends State<SubSyncSettings> {
 
     String? filePath = result.files.single.path;
     if (filePath == null) {
-      AnxToast.show("无法获取文件路径");
+      AnxLog.info('importData: cannot get file path');
+      AnxToast.show(L10n.of(context).import_cannot_get_file_path);
       return;
     }
 
     File zipFile = File(filePath);
     if (!await zipFile.exists()) {
-      AnxToast.show("文件不存在");
+      AnxLog.info('importData: zip file not found');
+      AnxToast.show(L10n.of(context).import_cannot_get_file_path);
       return;
     }
-    _showDataDialog(context, "Importing");
+    _showDataDialog(context, L10n.of(context).importing);
 
     Directory tempDir = await getAnxCacheDir();
     String tempPath = tempDir.path;
@@ -220,10 +222,11 @@ class _SubSyncSettingsState extends State<SubSyncSettings> {
       _copyDirectorySync(
           Directory('$extractPath/shared_prefs'), await getAnxSharedPrefsDir());
 
-      AnxToast.show("导入成功，请重启应用");
+      AnxLog.info('importData: import success');
+      AnxToast.show(L10n.of(context).import_success_restart_app);
     } catch (e) {
-      AnxLog.info('importData: 解压或复制文件时出错: $e');
-      AnxToast.show("导入失败：$e");
+      AnxLog.info('importData: error while unzipping or copying files: $e');
+      AnxToast.show(L10n.of(context).import_failed(e.toString()));
     } finally {
       Navigator.of(context).pop('dialog');
       await Directory(extractPath).delete(recursive: true);
