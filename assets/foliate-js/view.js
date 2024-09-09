@@ -15,6 +15,7 @@ class History extends EventTarget {
         this.#arr[++this.#index] = x
         this.#arr.length = this.#index + 1
         this.dispatchEvent(new Event('index-change'))
+        this.dispatchEvent(new CustomEvent('pushstate', { detail: x }))
     }
     replaceState(x) {
         const index = this.#index

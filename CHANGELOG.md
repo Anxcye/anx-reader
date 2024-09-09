@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+feat: add back and forward button in book player
 feat: pop note in another pop note
 feat: text indent setting
 feat: select text in pop note
