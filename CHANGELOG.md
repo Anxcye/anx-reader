@@ -6,6 +6,7 @@ feat: add back and forward button in book player
 feat: pop note in another pop note
 feat: text indent setting
 feat: select text in pop note
+fix: status bar not show
 fix: blank page sometimes when opening a book
 fix: font can't change with Chinese characters
 fix: TTS interval too long with TTS-server
