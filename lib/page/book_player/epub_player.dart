@@ -288,10 +288,11 @@ class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
           Map<String, dynamic> location = args[0];
           String cfi = location['cfi'];
           String text = location['text'];
+          bool footnote = location['footnote'];
           double x = location['pos']['point']['x'];
           double y = location['pos']['point']['y'];
           String dir = location['pos']['dir'];
-          showContextMenu(context, x, y, dir, text, cfi, null);
+          showContextMenu(context, x, y, dir, text, cfi, null, footnote);
         });
     controller.addJavaScriptHandler(
         handlerName: 'onAnnotationClick',
@@ -303,7 +304,7 @@ class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
           double x = annotation['pos']['point']['x'];
           double y = annotation['pos']['point']['y'];
           String dir = annotation['pos']['dir'];
-          showContextMenu(context, x, y, dir, note, cfi, id);
+          showContextMenu(context, x, y, dir, note, cfi, id, false);
         });
     controller.addJavaScriptHandler(
       handlerName: 'onSearch',

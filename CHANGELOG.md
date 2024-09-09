@@ -1,10 +1,13 @@
 # Changelog
 
 ## Unreleased
+feat: pop note in another pop note
 feat: text indent setting
+feat: select text in pop note
 fix: blank page sometimes when opening a book
 fix: font can't change with Chinese characters
 fix: TTS interval too long with TTS-server
+
 
 ## 1.1.6 2024-09-03
 This release includes a number of new features and improvements, as well as bug fixes.

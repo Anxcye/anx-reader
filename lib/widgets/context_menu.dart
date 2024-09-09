@@ -3,23 +3,24 @@ import 'package:anx_reader/widgets/excerpt_menu.dart';
 import 'package:flutter/material.dart';
 
 void showContextMenu(
-    BuildContext context,
-    double x,
-    double y,
-    String dir,
-    String annoContent,
-    String annoCfi,
-    int? annoId,
-    ) {
-
+  BuildContext context,
+  double x,
+  double y,
+  String dir,
+  String annoContent,
+  String annoCfi,
+  int? annoId,
+  bool footnote,
+) {
   final playerKey = epubPlayerKey.currentState!;
-  double menuWidth = 350;
-  double menuHeight = 50;
   double screenWidth = MediaQuery.of(context).size.width;
   double screenHeight = MediaQuery.of(context).size.height;
+
+  double menuWidth = 350 > screenWidth ? screenWidth - 20 : 350;
+  double menuHeight = 50;
   x *= screenWidth;
   y *= screenHeight;
-  
+
   double widgetTop = dir == "up" ? y - menuHeight - 20 : y + 20;
   double widgetLeft = x + menuWidth > screenWidth
       ? screenWidth - menuWidth - 20
@@ -50,6 +51,7 @@ void showContextMenu(
               annoContent,
               annoId,
               onClose,
+              footnote,
             ),
           ],
         ),
