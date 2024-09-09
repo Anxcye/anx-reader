@@ -27,6 +27,7 @@ Widget excerptMenu(
   String annoContent,
   int? id,
   Function() onClose,
+  bool footnote,
 ) {
   bool deleteConfirm = false;
   Icon deleteIcon() {
@@ -177,10 +178,10 @@ Widget excerptMenu(
   );
 
   return Row(
-    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    mainAxisAlignment: MainAxisAlignment.spaceAround,
     children: [
       operatorMenu,
-      annotationMenu,
+      if (!footnote) annotationMenu,
     ],
   );
 }

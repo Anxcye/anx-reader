@@ -1,36 +1,39 @@
-//////// use for test //////////
-const importing = false
-const allAnnotations = [
-    { id: 1, type: 'highlight', value: "epubcfi(/6/12!/4/4,/1:0,/1:73)", color: 'blue', note: 'this is' },
-    { id: 2, type: 'highlight', value: "epubcfi(/6/4!/4/4,/1:222,/1:226)", color: 'yellow', note: 'this is' },
-    { id: 3, type: 'underline', value: "epubcfi(/6/4!/4/4,/1:294,/1:301)", color: 'red', note: 'this is' },
-]
-let url = '../local/shj.epub'
-let cfi = "epubcfi(/6/10!/4,/2[CHP2],/6/1:16)"
-// let cfi = null
-let style = {
-    fontSize: 1.2,
-    fontName: 'book',
-    letterSpacing: 0,
-    spacing: '1.5',
-    paragraphSpacing: 5,
-    textIndent: 0,
-    fontColor: '#000000',
-    backgroundColor: '#11223344',
-    topMargin: 100,
-    bottomMargin: 100,
-    sideMargin: 5,
-    justify: true,
-    hyphenate: true,
-    // scroll: false,
-    // animated: true,
-    pageTurnStyle: 'slide'
-}
-window.flutter_inappwebview = {}
-window.flutter_inappwebview.callHandler = (name, data) => {
-    console.log(name, data)
-}
-///////////////////////////////
+// //////// use for test //////////
+// const importing = false
+// const allAnnotations = [
+//     // { id: 1, type: 'highlight', value: "epubcfi(/6/6!/4/2,/1:3,/1:4)", color: 'blue', note: 'this is' },
+//     { id: 2, type: 'highlight', value: "epubcfi(/6/6!/4/576,/1:2,/1:3)", color: 'yellow', note: 'this is' },
+//     // { id: 3, type: 'underline', value: "epubcfi(/6/4!/4/4,/1:294,/1:301)", color: 'red', note: 'this is' },
+// ]
+// let url = '../local/shj.epub'
+// let cfi = "epubcfi(/6/6!/4,/574,/602/8/1:3)"
+// // let cfi = null
+// let style = {
+//     fontSize: 1.2,
+//     fontName: 'book',
+//     letterSpacing: 0,
+//     spacing: '1.5',
+//     paragraphSpacing: 5,
+//     textIndent: 0,
+//     fontColor: '#000000',
+//     backgroundColor: '#ffffff',
+//     topMargin: 100,
+//     bottomMargin: 100,
+//     sideMargin: 5,
+//     justify: true,
+//     hyphenate: true,
+//     // scroll: false,
+//     // animated: true,
+//     pageTurnStyle: 'slide'
+// }
+// window.flutter_inappwebview = {}
+// window.flutter_inappwebview.callHandler = (name, data) => {
+//     console.log(name, data)
+// }
+// setTimeout(() => {
+//     reader.renderAnnotation()
+// }, 1000)
+// ///////////////////////////////
 
 import './view.js'
 import { FootnoteHandler } from './footnotes.js'
@@ -125,7 +128,8 @@ const handleSelection = (view, doc, index) => {
         newSel.addRange(range)
         text = newSel.toString()
     }
-    onSelectionEnd({ index, range, lang, cfi, pos, text });
+    // onSelectionEnd({ index, range, lang, cfi, pos, text });
+    return { index, range, lang, cfi, pos, text }
 }
 
 const setSelectionHandler = (view, doc, index) => {
@@ -325,11 +329,53 @@ const getCSS = ({ fontSize,
 
 const footnoteDialog = document.getElementById('footnote-dialog')
 footnoteDialog.addEventListener('close', () => {
-    // emit({ type: 'dialog-close' })
-    const view = footnoteDialog.querySelector('foliate-view')
-    view.close()
-    view.remove()
+    console.log('close')
 })
+const replaceFootnote = (view) => {
+    clearSelection()
+    footnoteDialog.querySelector('main').replaceChildren(view)
+
+    view.addEventListener('load', (e) => {
+        const { doc, index } = e.detail
+        globalThis.footnoteSelection = () => handleSelection(view, doc, index)
+        setTimeout(() => {
+            const dialog = document.getElementById('footnote-dialog')
+            const content = document.querySelector("#footnote-dialog > div > main > foliate-view")
+                .shadowRoot.querySelector("foliate-paginator")
+                .shadowRoot.querySelector("#container > div > iframe")
+
+
+            dialog.style.width = 'auto'
+            dialog.style.height = 'auto'
+
+            const contentWidth = content.scrollWidth
+            const contentHeight = content.scrollHeight
+
+            dialog.style.width = `${Math.min(Math.max(contentWidth, 200), window.innerWidth * 0.8)}px`
+            dialog.style.height = `${Math.min(Math.max(contentHeight, 100), window.innerHeight * 0.8)}px`
+        }, 0)
+    })
+
+    const { renderer } = view
+    renderer.setAttribute('flow', 'scrolled')
+    renderer.setAttribute('gap', '5%')
+    const footNoteStyle = {
+        fontSize: style.fontSize,
+        fontName: style.fontName,
+        fontPath: style.fontPath,
+        letterSpacing: style.letterSpacing,
+        spacing: style.spacing,
+        textIndent: style.textIndent,
+        fontColor: style.fontColor,
+        backgroundColor: 'transparent',
+        justify: true,
+        hyphenate: true,
+    }
+    renderer.setStyles(getCSS(footNoteStyle))
+    // set background color of dialog
+    // if #rrggbbaa, replace aa to ee
+    footnoteDialog.style.backgroundColor = style.backgroundColor.slice(0, 7) + 'ee'
+}
 footnoteDialog.addEventListener('click', e =>
     e.target === footnoteDialog ? footnoteDialog.close() : null)
 
@@ -342,66 +388,13 @@ class Reader {
     constructor() {
         this.#footnoteHandler.addEventListener('before-render', e => {
             const { view } = e.detail
+            this.setView(view)
 
-            view.addEventListener('link', e => {
-                e.preventDefault()
-                const { href } = e.detail
-                this.view.goTo(href)
-            })
-            view.addEventListener('external-link', e => {
-                e.preventDefault()
-                // emit({ type: 'external-link', ...e.detail })
-            })
-
-            footnoteDialog.querySelector('main').replaceChildren(view)
-
-            view.addEventListener('load', () => {
-                setTimeout(() => {
-                    const dialog = document.getElementById('footnote-dialog')
-                    const content = document.querySelector("#footnote-dialog > div > main > foliate-view")
-                        .shadowRoot.querySelector("foliate-paginator")
-                        .shadowRoot.querySelector("#container > div > iframe")
-
-
-                    dialog.style.width = 'auto'
-                    dialog.style.height = 'auto'
-
-                    const contentWidth = content.scrollWidth
-                    const contentHeight = content.scrollHeight
-                    console.log(contentWidth, contentHeight)
-
-                    dialog.style.width = `${Math.min(Math.max(contentWidth, 200), window.innerWidth * 0.8)}px`
-                    dialog.style.height = `${Math.min(Math.max(contentHeight, 100), window.innerHeight * 0.8)}px`
-                }, 0)
-            })
-
-            const { renderer } = view
-            renderer.setAttribute('flow', 'scrolled')
-            renderer.setAttribute('gap', '5%')
-            const footNoteStyle = {
-                fontSize: style.fontSize,
-                fontName: style.fontName,
-                fontPath: style.fontPath,
-                letterSpacing: style.letterSpacing,
-                spacing: style.spacing,
-                textIndent: style.textIndent,
-                fontColor: style.fontColor,
-                backgroundColor: 'transparent',
-                justify: true,
-                hyphenate: true,
-            }
-            renderer.setStyles(getCSS(footNoteStyle))
-            // set background color of dialog
-            // if #rrggbbaa, replace aa to ee
-            footnoteDialog.style.backgroundColor = style.backgroundColor.slice(0, 7) + 'ee'
+            replaceFootnote(view)
 
         })
         this.#footnoteHandler.addEventListener('render', e => {
-            console.log(e.detail)
-            // const { href, hidden, type } = e.detail
             const { view } = e.detail
-            console.log(view)
-
 
             footnoteDialog.showModal()
         })
@@ -418,38 +411,40 @@ class Reader {
         setStyle()
         if (!cfi)
             this.view.renderer.next()
+        this.setView(this.view)
+        await this.view.init({ lastLocation: cfi })
+    }
 
-        this.view.addEventListener('create-overlay', e => {
+    setView(view) {
+        view.addEventListener('create-overlay', e => {
             const { index } = e.detail
             const list = this.annotations.get(index)
             if (list) for (const annotation of list)
                 this.view.addAnnotation(annotation)
         })
 
-        this.view.addEventListener('draw-annotation', e => {
+        view.addEventListener('draw-annotation', e => {
             const { draw, annotation } = e.detail
             const { color, type } = annotation
             if (type === 'highlight') draw(Overlayer.highlight, { color })
             else if (type === 'underline') draw(Overlayer.underline, { color })
         })
 
-        this.view.addEventListener('show-annotation', e => {
+        view.addEventListener('show-annotation', e => {
             const annotation = this.annotationsByValue.get(e.detail.value)
             const pos = getPosition(e.detail.range)
             onAnnotationClick({ annotation, pos })
         })
-        this.view.addEventListener('external-link', e => {
+        view.addEventListener('external-link', e => {
             e.preventDefault()
             onExternalLink(e.detail)
         })
 
-        this.view.addEventListener('link', e =>
+        view.addEventListener('link', e =>
             this.#footnoteHandler.handle(this.view.book, e)?.catch(err => {
                 console.warn(err)
                 this.view.goTo(e.detail.href)
             }))
-
-        await this.view.init({ lastLocation: cfi })
     }
 
     renderAnnotation() {
@@ -470,7 +465,7 @@ class Reader {
     }
 
     showContextMenu() {
-        handleSelection(this.view, this.#doc, this.#index)
+        return handleSelection(this.view, this.#doc, this.#index)
     }
 
     addAnnotation(annotation) {
@@ -675,7 +670,13 @@ window.setNoAnimation = () => {
     setStyle()
 }
 
-window.showContextMenu = () => reader.showContextMenu()
+window.showContextMenu = () => {
+    if (footnoteDialog.open) {
+        callFlutter('onSelectionEnd', { ...footnoteSelection(), footnote: true })
+    } else {
+        callFlutter('onSelectionEnd', { ...reader.showContextMenu(), footnote: false })
+    }
+}
 
 window.clearSelection = () => reader.view.deselect()
 
