@@ -61,6 +61,9 @@ class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
   late Animation<double> _animation;
   double searchProcess = 0.0;
   List<SearchResultModel> searchResult = [];
+  bool showHistory = false;
+  bool canGoBack = false;
+  bool canGoForward = false;
 
   final StreamController<double> _searchProgressController =
       StreamController<double>.broadcast();
@@ -206,6 +209,14 @@ class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
   Future<String> ttsPrepare() async =>
       (await webViewController.evaluateJavascript(source: "ttsPrepare()"));
 
+  void backHistory() {
+    webViewController.evaluateJavascript(source: "back()");
+  }
+
+  void forwardHistory() {
+    webViewController.evaluateJavascript(source: "forward()");
+  }
+
   void onClick(Map<String, dynamic> location) {
     readingPageKey.currentState?.resetAwakeTimer();
     if (contextMenuEntry != null) {
@@ -325,6 +336,22 @@ class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
       handlerName: 'renderAnnotations',
       callback: (args) {
         renderAnnotations(controller);
+      },
+    );
+    controller.addJavaScriptHandler(
+      handlerName: 'onPushState',
+      callback: (args) {
+        Map<String, dynamic> state = args[0];
+        canGoBack = state['canGoBack'];
+        canGoForward = state['canGoForward'];
+        setState(() {
+          showHistory = true;
+        });
+        Future.delayed(const Duration(seconds: 20), () {
+          setState(() {
+            showHistory = false;
+          });
+        });
       },
     );
   }
@@ -495,6 +522,34 @@ class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
             },
           ),
           readingInfoWidget(),
+          if (showHistory)
+            Positioned(
+              bottom: 30,
+              left: 0,
+              child: Container(
+                width: MediaQuery.of(context).size.width,
+                padding: const EdgeInsets.all(10),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    if (canGoBack)
+                      IconButton(
+                        onPressed: () {
+                          backHistory();
+                        },
+                        icon: const Icon(Icons.arrow_back_ios),
+                      ),
+                    if (canGoForward)
+                      IconButton(
+                        onPressed: () {
+                          forwardHistory();
+                        },
+                        icon: const Icon(Icons.arrow_forward_ios),
+                      ),
+                  ],
+                ),
+              ),
+            ),
         ],
       ),
     );

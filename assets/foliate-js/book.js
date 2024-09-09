@@ -445,6 +445,13 @@ class Reader {
                 console.warn(err)
                 this.view.goTo(e.detail.href)
             }))
+
+        view.history.addEventListener('pushstate', e => {
+            callFlutter('onPushState', {
+                canGoBack: view.history.canGoBack,
+                canGoForward: view.history.canGoForward
+            })
+        })
     }
 
     renderAnnotation() {
@@ -748,6 +755,10 @@ window.search = async (text, opts) => {
         }
     }
 }
+
+window.back = () => reader.view.history.back()
+
+window.forward = () => reader.view.history.forward()
 
 window.renderAnnotations = () => reader.renderAnnotation()
 
