@@ -70,7 +70,7 @@ class Server {
       );
     } else if (uriPath.startsWith('/fonts/')) {
       Directory fontDir = getFontDir();
-      final file = File('${fontDir.path}/${path.basename(uriPath)}');
+      final file = File('${fontDir.path}/${path.basename(Uri.decodeComponent(uriPath))}');
       if (!file.existsSync()) {
         return shelf.Response.notFound('Font not found');
       }
@@ -82,7 +82,6 @@ class Server {
           'cache-control': 'public, max-age=31536000',
         },
       );
-
     } else if (uriPath.startsWith('/foliate-js/')) {
       if (uriPath.endsWith('.epub')) {
         final file =
@@ -108,7 +107,9 @@ class Server {
     } else {
       return shelf.Response.ok(
         'Request for "${request.url}"',
-        headers: {'Access-Control-Allow-Origin': '*'},
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+        },
       );
     }
   }
