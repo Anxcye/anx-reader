@@ -268,6 +268,7 @@ class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
             chapterCurrentPage = location['chapterCurrentPage'];
             chapterTotalPages = location['chapterTotalPages'];
           });
+          readingPageKey.currentState?.resetAwakeTimer();
         });
     controller.addJavaScriptHandler(
         handlerName: 'onClick',

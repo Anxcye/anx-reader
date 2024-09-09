@@ -1,36 +1,36 @@
-//  //////// use for test //////////
-//  const importing = false
-//  const allAnnotations = [
-//     { id: 1, type: 'highlight', value: "epubcfi(/6/12!/4/4,/1:0,/1:73)", color: 'blue', note: 'this is' },
-//     { id: 2, type: 'highlight', value: "epubcfi(/6/4!/4/4,/1:222,/1:226)", color: 'yellow', note: 'this is' },
-//     { id: 3, type: 'underline', value: "epubcfi(/6/4!/4/4,/1:294,/1:301)", color: 'red', note: 'this is' },
-//  ]
-//  let url = '../local/a.epub'
-//  let cfi = "epubcfi(/6/10!/4,/2[CHP2],/6/1:16)"
-//  // let cfi = null
-//  let style = {
-//     fontSize: 1.2,
-//     fontName: 'book',
-//     letterSpacing: 0,
-//     spacing: '1.5',
-//     paragraphSpacing: 5,
-//     textIndent: 0,
-//     fontColor: '#000000',
-//     backgroundColor: '#11223344',
-//     topMargin: 100,
-//     bottomMargin: 100,
-//     sideMargin: 5,
-//     justify: true,
-//     hyphenate: true,
-//     // scroll: false,
-//     // animated: true,
-//     pageTurnStyle: 'slide'
-//  }
-//  window.flutter_inappwebview = {}
-//  window.flutter_inappwebview.callHandler = (name, data) => {
-//     console.log(name, data)
-//  }
-//  ///////////////////////////////
+//////// use for test //////////
+const importing = false
+const allAnnotations = [
+    { id: 1, type: 'highlight', value: "epubcfi(/6/12!/4/4,/1:0,/1:73)", color: 'blue', note: 'this is' },
+    { id: 2, type: 'highlight', value: "epubcfi(/6/4!/4/4,/1:222,/1:226)", color: 'yellow', note: 'this is' },
+    { id: 3, type: 'underline', value: "epubcfi(/6/4!/4/4,/1:294,/1:301)", color: 'red', note: 'this is' },
+]
+let url = '../local/shj.epub'
+let cfi = "epubcfi(/6/10!/4,/2[CHP2],/6/1:16)"
+// let cfi = null
+let style = {
+    fontSize: 1.2,
+    fontName: 'book',
+    letterSpacing: 0,
+    spacing: '1.5',
+    paragraphSpacing: 5,
+    textIndent: 0,
+    fontColor: '#000000',
+    backgroundColor: '#11223344',
+    topMargin: 100,
+    bottomMargin: 100,
+    sideMargin: 5,
+    justify: true,
+    hyphenate: true,
+    // scroll: false,
+    // animated: true,
+    pageTurnStyle: 'slide'
+}
+window.flutter_inappwebview = {}
+window.flutter_inappwebview.callHandler = (name, data) => {
+    console.log(name, data)
+}
+///////////////////////////////
 
 import './view.js'
 import { FootnoteHandler } from './footnotes.js'
@@ -355,12 +355,36 @@ class Reader {
 
             footnoteDialog.querySelector('main').replaceChildren(view)
 
+            view.addEventListener('load', () => {
+                setTimeout(() => {
+                    const dialog = document.getElementById('footnote-dialog')
+                    const content = document.querySelector("#footnote-dialog > div > main > foliate-view")
+                        .shadowRoot.querySelector("foliate-paginator")
+                        .shadowRoot.querySelector("#container > div > iframe")
+
+
+                    dialog.style.width = 'auto'
+                    dialog.style.height = 'auto'
+
+                    const contentWidth = content.scrollWidth
+                    const contentHeight = content.scrollHeight
+                    console.log(contentWidth, contentHeight)
+
+                    dialog.style.width = `${Math.min(Math.max(contentWidth, 200), window.innerWidth * 0.8)}px`
+                    dialog.style.height = `${Math.min(Math.max(contentHeight, 100), window.innerHeight * 0.8)}px`
+                }, 0)
+            })
+
             const { renderer } = view
             renderer.setAttribute('flow', 'scrolled')
             renderer.setAttribute('gap', '5%')
             const footNoteStyle = {
                 fontSize: style.fontSize,
+                fontName: style.fontName,
+                fontPath: style.fontPath,
+                letterSpacing: style.letterSpacing,
                 spacing: style.spacing,
+                textIndent: style.textIndent,
                 fontColor: style.fontColor,
                 backgroundColor: 'transparent',
                 justify: true,
@@ -368,10 +392,8 @@ class Reader {
             }
             renderer.setStyles(getCSS(footNoteStyle))
             // set background color of dialog
-            // if #rrggbbaa, replace aa to dd
+            // if #rrggbbaa, replace aa to ee
             footnoteDialog.style.backgroundColor = style.backgroundColor.slice(0, 7) + 'ee'
-
-            footnoteDialog.style.overflow = 'hidden'
 
         })
         this.#footnoteHandler.addEventListener('render', e => {
@@ -385,7 +407,7 @@ class Reader {
         })
     }
     async open(file, cfi) {
-        this.view = await getView(file)
+        this.view = await getView(file, cfi)
 
         if (importing) return
 
@@ -442,7 +464,7 @@ class Reader {
                 note
             }
 
-        this.addAnnotation(annotation)
+            this.addAnnotation(annotation)
         }
 
     }
