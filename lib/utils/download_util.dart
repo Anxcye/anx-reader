@@ -4,6 +4,8 @@ import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/main.dart';
 import 'package:anx_reader/utils/log/common.dart';
 import 'package:anx_reader/utils/toast/common.dart';
+import 'package:device_info_plus/device_info_plus.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -75,9 +77,24 @@ class DownloadUtil {
     String name,
   ) async {
     try {
-      if (!await requestStoragePer()) {
-        return false;
+      if (defaultTargetPlatform != TargetPlatform.android) return true;
+      final deviceInfoPlugin = DeviceInfoPlugin();
+      final deviceInfo = await deviceInfoPlugin.androidInfo;
+      final sdkInt = deviceInfo.version.sdkInt;
+      AnxLog.info('sdkInt: $sdkInt');
+
+      if (sdkInt > 33) {
+        if (!await requestPhotoPer()) {
+          return false;
+        }
+      } else {
+        if (!await requestStoragePer()) {
+          return false;
+        }
       }
+      // if (!await requestPhotoPer()) {
+      //   return false;
+      // }
       SmartDialog.showLoading(
           msg: L10n.of(navigatorKey.currentContext!).common_saving);
 

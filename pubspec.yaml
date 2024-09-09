@@ -61,6 +61,7 @@ dependencies:
   flutter_smart_dialog: ^4.9.8+1
   saver_gallery: ^3.0.6
   share_plus: ^10.0.2
+  device_info_plus: ^10.1.2
 
 dev_dependencies:
   flutter_test:
