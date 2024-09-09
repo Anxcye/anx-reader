@@ -2,11 +2,11 @@
 // const importing = false
 // const allAnnotations = [
 //     // { id: 1, type: 'highlight', value: "epubcfi(/6/6!/4/2,/1:3,/1:4)", color: 'blue', note: 'this is' },
-//     { id: 2, type: 'highlight', value: "epubcfi(/6/6!/4/576,/1:2,/1:3)", color: 'yellow', note: 'this is' },
+//     // { id: 2, type: 'highlight', value: "epubcfi(/6/6!/4/576,/1:2,/1:3)", color: 'yellow', note: 'this is' },
 //     // { id: 3, type: 'underline', value: "epubcfi(/6/4!/4/4,/1:294,/1:301)", color: 'red', note: 'this is' },
 // ]
-// let url = '../local/shj.epub'
-// let cfi = "epubcfi(/6/6!/4,/574,/602/8/1:3)"
+// let url = '../local/a.epub'
+// let cfi = "epubcfi(/6/12!/4,/2[CHP3],/8/1:29)"
 // // let cfi = null
 // let style = {
 //     fontSize: 1.2,
@@ -451,6 +451,18 @@ class Reader {
                 canGoBack: view.history.canGoBack,
                 canGoForward: view.history.canGoForward
             })
+        })
+        view.addEventListener('click-image', async e => {
+            console.log('click-image', e.detail.img.src)
+            const blobUrl = e.detail.img.src
+            const blob = await fetch(blobUrl).then(r => r.blob())
+            const base64 = await new Promise((resolve, reject) => {
+                const reader = new FileReader()
+                reader.onloadend = () => resolve(reader.result)
+                reader.onerror = reject
+                reader.readAsDataURL(blob)
+            })
+            callFlutter('onImageClick', base64 )
         })
     }
 

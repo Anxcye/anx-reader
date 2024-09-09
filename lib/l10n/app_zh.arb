@@ -112,6 +112,9 @@
   "common_no_new_version": "没有新版本",
   "common_confirm": "确认",
   "common_canceled": "已取消",
+  "common_attention": "注意",
+  "common_saving": "保存中",
+  "common_saved": "已保存",
 
   "service_import_success":"导入成功",
   "service_import_n_books": "{count, plural, other{正在导入 {count} 本书}}",
@@ -150,6 +153,10 @@
   "settings_advanced_log_clear_log": "清空日志",
   "settings_advanced_log_export_log": "导出日志",
   "settings_advanced_clear_log_when_start": "启动时清空日志",
+
+  "storage_permission_denied": "存储权限未授权",
+  "gallery_permission_denied": "相册权限未授权",
+  "goto_authorize": "去授权",
 
   "about_check_for_updates": "检查更新",
   "update_new_version": "新版本：",
