@@ -112,6 +112,9 @@
   "common_no_new_version": "No new version",
   "common_confirm": "Confirm",
   "common_canceled": "Canceled",
+  "common_attention": "Attention",
+  "common_saving": "Saving",
+  "common_saved": "Saved",
 
   "service_import_success": "Import success",
   "service_import_n_books": "{count, plural, =1{importing 1 book} other{importing {count} books}}",
@@ -144,6 +147,10 @@
   "import_cannot_get_file_path": "Cannot get file path",
   "import_success_restart_app": "Import success, please restart the app",
   "import_failed": "Import failed: {error}",
+
+  "storage_permission_denied": "Storage permission denied",
+  "gallery_permission_denied": "Gallery permission denied",
+  "goto_authorize": "Go to authorize",
 
 
   "settings_advanced": "Advanced",

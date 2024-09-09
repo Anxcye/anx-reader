@@ -9,6 +9,7 @@ import 'package:anx_reader/utils/get_path/get_base_path.dart';
 import 'package:anx_reader/utils/log/common.dart';
 import 'package:anx_reader/utils/webdav/common.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:provider/provider.dart';
 
 final navigatorKey = GlobalKey<NavigatorState>();
@@ -71,6 +72,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       child: Consumer<Prefs>(
         builder: (context, prefsNotifier, child) {
           return MaterialApp(
+            navigatorObservers: [FlutterSmartDialog.observer],
+            builder: FlutterSmartDialog.init(),
             navigatorKey: navigatorKey,
             locale: prefsNotifier.locale,
             localizationsDelegates: L10n.localizationsDelegates,

@@ -11,6 +11,7 @@ import 'package:anx_reader/models/font_model.dart';
 import 'package:anx_reader/models/read_theme.dart';
 import 'package:anx_reader/models/search_result_model.dart';
 import 'package:anx_reader/models/toc_item.dart';
+import 'package:anx_reader/page/book_player/image_viewer.dart';
 import 'package:anx_reader/page/reading_page.dart';
 import 'package:anx_reader/service/book_player/book_player_server.dart';
 import 'package:anx_reader/utils/coordinates_to_part.dart';
@@ -352,6 +353,19 @@ class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
             showHistory = false;
           });
         });
+      },
+    );
+    controller.addJavaScriptHandler(
+      handlerName: 'onImageClick',
+      callback: (args) {
+        String image = args[0];
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => ImageViewer(
+                      image: image,
+                      bookName: widget.book.title,
+                    )));
       },
     );
   }

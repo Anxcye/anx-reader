@@ -192,7 +192,7 @@ export class View extends HTMLElement {
 
         this.#handleLinks(doc, index)
         this.#handleClick(doc)
-
+        this.#handleImage(doc)
         this.#emit('load', { doc, index })
     }
     #handleLinks(doc, index) {
@@ -213,6 +213,17 @@ export class View extends HTMLElement {
                     .catch(e => console.error(e))
             })
     }
+
+    #handleImage(doc) {
+       for (const img of doc.querySelectorAll('img')) {
+            img.addEventListener('click', e => {
+                e.preventDefault()
+                e.stopPropagation()
+                this.#emit('click-image', { img })
+            })
+       }
+    }
+
     #handleClick(doc) {
         doc.addEventListener('click', e => {
             let { clientX, clientY } = e

@@ -1,0 +1,107 @@
+import 'dart:typed_data';
+
+import 'package:anx_reader/l10n/generated/L10n.dart';
+import 'package:anx_reader/main.dart';
+import 'package:anx_reader/utils/log/common.dart';
+import 'package:anx_reader/utils/toast/common.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:saver_gallery/saver_gallery.dart';
+
+/// From https://github.com/guozhigq/pilipala which is GPL-3.0 Licensed
+class DownloadUtil {
+  static Future<bool> requestStoragePer() async {
+    await Permission.storage.request();
+    PermissionStatus status = await Permission.storage.status;
+    if (status == PermissionStatus.denied ||
+        status == PermissionStatus.permanentlyDenied) {
+      SmartDialog.show(
+        useSystem: true,
+        animationType: SmartAnimationType.centerFade_otherSlide,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text(L10n.of(context).storage_permission_denied),
+            content: Text(L10n.of(context).storage_permission_denied),
+            actions: [
+              TextButton(
+                onPressed: () async {
+                  openAppSettings();
+                },
+                child: Text(L10n.of(context).goto_authorize),
+              )
+            ],
+          );
+        },
+      );
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  static Future<bool> requestPhotoPer() async {
+    await Permission.photos.request();
+    PermissionStatus status = await Permission.photos.status;
+    if (status == PermissionStatus.denied ||
+        status == PermissionStatus.permanentlyDenied) {
+      SmartDialog.show(
+        useSystem: true,
+        animationType: SmartAnimationType.centerFade_otherSlide,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text(L10n.of(context).common_attention),
+            content: Text(L10n.of(context).gallery_permission_denied),
+            actions: [
+              TextButton(
+                onPressed: () async {
+                  openAppSettings();
+                },
+                child: Text(L10n.of(context).goto_authorize),
+              )
+            ],
+          );
+        },
+      );
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  static Future<bool> downloadImg(
+    Uint8List img,
+    String extension,
+    String name,
+  ) async {
+    try {
+      if (!await requestStoragePer()) {
+        return false;
+      }
+      SmartDialog.showLoading(
+          msg: L10n.of(navigatorKey.currentContext!).common_saving);
+
+      String picName =
+          "AnxReader_${name}_${DateTime.now().toString().replaceAll(RegExp(r'[- :]'), '').split('.').first}";
+
+      final SaveResult result = await SaverGallery.saveImage(
+        img,
+        name: '$picName.$extension',
+        androidRelativePath: "Pictures/AnxReader",
+        androidExistNotSave: false,
+      );
+
+      SmartDialog.dismiss();
+      if (result.isSuccess) {
+        await SmartDialog.showToast(
+            '「${'$picName.$extension'}」${L10n.of(navigatorKey.currentContext!).common_saved}');
+      }
+      return true;
+    } catch (err) {
+      SmartDialog.dismiss();
+      AnxToast.show(L10n.of(navigatorKey.currentContext!).common_failed);
+      AnxLog.severe("saveImage: saveImage error: $err");
+      return true;
+    }
+  }
+}
