@@ -11,9 +11,9 @@ import 'package:anx_reader/utils/get_path/get_base_path.dart';
 import 'package:anx_reader/utils/log/common.dart';
 import 'package:anx_reader/widgets/book_cover.dart';
 import 'package:anx_reader/widgets/highlight_digit.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
-import 'package:image_picker/image_picker.dart';
 
 class BookDetail extends StatefulWidget {
   const BookDetail({super.key, required this.book, this.onRefresh});
@@ -191,40 +191,47 @@ class _BookDetailState extends State<BookDetail> {
                   return;
                 }
 
-                final ImagePicker picker = ImagePicker();
-                final XFile? image =
-                    await picker.pickImage(source: ImageSource.gallery);
+                // final ImagePicker picker = ImagePicker();
+                // final XFile? image =
+                //     await picker.pickImage(source: ImageSource.gallery);
 
-                if (image != null) {
-                  AnxLog.info('BookDetail: Image path: ${image.path}');
-                  // Delete the existing cover image file
-                  final File oldCoverImageFile =
-                      File(widget.book.coverFullPath);
-                  if (await oldCoverImageFile.exists()) {
-                    await oldCoverImageFile.delete();
-                  }
+                FilePickerResult? result = await FilePicker.platform.pickFiles(
+                  type: FileType.image,
+                  allowMultiple: false,
+                );
 
-                  String newPath =
-                      '${widget.book.coverPath.split('/').sublist(0, widget.book.coverPath.split('/').length - 1).join('/')}/${widget.book.title.length > 20 ? widget.book.title.substring(0, 20) : widget.book.title}-${DateTime.now().millisecond.toString()}.png'
-                          .replaceAll(' ', '_');
-
-                  AnxLog.info('BookDetail: New path: $newPath');
-                  String newFullPath = getBasePath(newPath);
-
-                  final File newCoverImageFile = File(newFullPath);
-                  await newCoverImageFile
-                      .writeAsBytes(await image.readAsBytes());
-                  widget.book.coverPath = newPath;
-
-                  setState(() {
-                    book.coverPath = newPath;
-                    updateBook(widget.book);
-
-                    if (widget.onRefresh != null) {
-                      widget.onRefresh!();
-                    }
-                  });
+                if (result == null) {
+                  return;
                 }
+
+                File image = File(result.files.single.path!);
+
+                AnxLog.info('BookDetail: Image path: ${image.path}');
+                // Delete the existing cover image file
+                final File oldCoverImageFile = File(widget.book.coverFullPath);
+                if (await oldCoverImageFile.exists()) {
+                  await oldCoverImageFile.delete();
+                }
+
+                String newPath =
+                    '${widget.book.coverPath.split('/').sublist(0, widget.book.coverPath.split('/').length - 1).join('/')}/${widget.book.title.length > 20 ? widget.book.title.substring(0, 20) : widget.book.title}-${DateTime.now().millisecond.toString()}.png'
+                        .replaceAll(' ', '_');
+
+                AnxLog.info('BookDetail: New path: $newPath');
+                String newFullPath = getBasePath(newPath);
+
+                final File newCoverImageFile = File(newFullPath);
+                await newCoverImageFile.writeAsBytes(await image.readAsBytes());
+                widget.book.coverPath = newPath;
+
+                setState(() {
+                  book.coverPath = newPath;
+                  updateBook(widget.book);
+
+                  if (widget.onRefresh != null) {
+                    widget.onRefresh!();
+                  }
+                });
               },
               child: Container(
                 decoration: BoxDecoration(
