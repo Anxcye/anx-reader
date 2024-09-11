@@ -1,15 +1,29 @@
 # Changelog
 
-## Unreleased
-feat: add image viewer in book player
-feat: add back and forward button in book player
-feat: pop note in another pop note
-feat: text indent setting
-feat: select text in pop note
-fix: status bar not show
-fix: blank page sometimes when opening a book
-fix: font can't change with Chinese characters
-fix: TTS interval too long with TTS-server
+## 1.1.7 2024-09-11
+* Backup: Export/import all data
+* Ability to click and view large images
+* Convenient back arrow after navigation
+* Multiple pop-up annotations within a pop-up annotation
+* Customizable text indentation size
+* Text selection within pop-up annotations
+* Optimization of status bar and navigation key areas to avoid obstruction by navigation keys
+* Fixed white screen issue when opening files
+* Fixed issue with importing font files with Chinese filenames
+* Shortened TTS reading intervals, especially when using TTS-Server
+
+* 备份：导出/导入全部数据
+* 能够点击查看大图了
+* 跳转后能够有方便地返回箭头
+* 弹注中多次弹注
+* 弹注字体跟随设置
+* 自定义文本缩进大小
+* 弹注中选择文字
+* 状态栏和导航键区域优化，避免了被导航键遮盖
+* 修复打开文件白屏
+* 修复字体文件中中文文件名无法导入
+*  缩短了TTS朗读间隔，尤其是使用TTS-Server时
+* 根据弹注内容调整弹注框大小
 
 
 ## 1.1.6 2024-09-03
