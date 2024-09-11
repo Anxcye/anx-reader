@@ -62,6 +62,7 @@ dependencies:
   saver_gallery: ^3.0.6
   share_plus: ^10.0.2
   device_info_plus: ^10.1.2
+  drag_and_drop_lists: ^0.4.1
 
 dev_dependencies:
   flutter_test:
