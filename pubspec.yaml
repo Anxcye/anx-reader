@@ -5,7 +5,7 @@ publish_to: 'none'
 version: 1.1.7+2026
 
 environment:
-  sdk: '>=3.3.2 <4.0.0'
+  sdk: '>=3.5.2 <4.0.0'
 
 dependencies:
   flutter:
@@ -17,7 +17,7 @@ dependencies:
   file_picker: ^8.1.2
   path_provider: ^2.1.2
 #  epub_view: ^3.2.0
-  image_picker: ^1.0.7
+#  image_picker: ^1.0.7
   image: ^3.0.8
 #  image: ^4.1.7
   sqflite: ^2.3.2
@@ -62,12 +62,18 @@ dependencies:
   saver_gallery: ^3.0.6
   share_plus: ^10.0.2
   device_info_plus: ^10.1.2
+  flutter_riverpod: ^2.5.1
+  riverpod_annotation: ^2.3.5
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.0
   test: any
+  build_runner: ^2.4.12
+  custom_lint: ^0.6.7
+  riverpod_generator: ^2.4.3
+  riverpod_lint: ^2.3.13
 #  flutter_launcher_icons: ^0.11.0
 
 flutter:
