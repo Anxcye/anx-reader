@@ -16,10 +16,7 @@ dependencies:
   cupertino_icons: ^1.0.6
   file_picker: ^8.1.2
   path_provider: ^2.1.2
-#  epub_view: ^3.2.0
-#  image_picker: ^1.0.7
   image: ^3.0.8
-#  image: ^4.1.7
   sqflite: ^2.3.2
   path: ^1.9.0
   shared_preferences: ^2.2.2
@@ -28,10 +25,6 @@ dependencies:
   intl: ^0.19.0
   settings_ui: ^2.0.2
   flutter_colorpicker: ^1.0.3
-  #  epubx: ^4.0.0
-#  epubz:
-#    git:
-#      url: https://github.com/Anxcye/epubz
   html: ^0.15.4
   flutter_html: ^3.0.0-beta.2
   archive: ^3.4.10

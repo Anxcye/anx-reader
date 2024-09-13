@@ -116,6 +116,8 @@ class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
   }
 
   void changeStyle(BookStyle bookStyle) {
+    initialSettings.textZoom = (bookStyle.fontSize * 100).toInt();
+    webViewController.setSettings(settings: initialSettings);
     webViewController.evaluateJavascript(source: '''
       changeStyle({
         fontSize: ${bookStyle.fontSize},
@@ -430,9 +432,11 @@ class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
 
   String indexHtmlPath =
       "http://localhost:${Server().port}/foliate-js/index.html";
+
   InAppWebViewSettings initialSettings = InAppWebViewSettings(
     supportZoom: false,
     transparentBackground: true,
+    textZoom: (Prefs().bookStyle.fontSize * 100).toInt(),
   );
 
   Widget readingInfoWidget() {

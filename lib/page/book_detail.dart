@@ -191,10 +191,6 @@ class _BookDetailState extends State<BookDetail> {
                   return;
                 }
 
-                // final ImagePicker picker = ImagePicker();
-                // final XFile? image =
-                //     await picker.pickImage(source: ImageSource.gallery);
-
                 FilePickerResult? result = await FilePicker.platform.pickFiles(
                   type: FileType.image,
                   allowMultiple: false,
