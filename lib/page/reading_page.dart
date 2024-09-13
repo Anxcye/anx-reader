@@ -102,16 +102,28 @@ class ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
     setAwakeTimer(Prefs().awakeTime);
   }
 
-  void showOrHideAppBarAndBottomBar(bool show) {
+  void showBottomBar() {
     setState(() {
-      if (show) {
-        bottomBarOffstage = false;
-      } else {
-        bottomBarOffstage = true;
-        tocOffstage = true;
-        _currentPage = const SizedBox(height: 1);
-      }
+      showStatusBar();
+      bottomBarOffstage = false;
     });
+  }
+
+  void hideBottomBar() {
+    setState(() {
+      tocOffstage = true;
+      _currentPage = const SizedBox(height: 1);
+      bottomBarOffstage = true;
+      hideStatusBar();
+    });
+  }
+
+  void showOrHideAppBarAndBottomBar(bool show) {
+    if (show) {
+      showBottomBar();
+    } else {
+      hideBottomBar();
+    }
   }
 
   Future<void> tocHandler() async {
