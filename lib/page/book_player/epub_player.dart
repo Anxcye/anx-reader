@@ -256,20 +256,15 @@ class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
     ''');
   }
 
-  String userScript() {
+  Future<void> setHandler(InAppWebViewController controller) async {
     String url =
         'http://localhost:${Server().port}/book${getBasePath(widget.book.filePath)}'
             .replaceAll('\'', '\\\'');
 
     String cfi = widget.cfi ?? widget.book.lastReadPosition;
 
-    return webviewInitialVariable(
-      url,
-      cfi,
-    );
-  }
+    webviewInitialVariable(controller, url, cfi);
 
-  Future<void> setHandler(InAppWebViewController controller) async {
     controller.addJavaScriptHandler(
         handlerName: 'onRelocated',
         callback: (args) {
@@ -526,12 +521,6 @@ class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
           ),
           InAppWebView(
             initialUrlRequest: URLRequest(url: WebUri(indexHtmlPath)),
-            // onLoadStop: (controller, url) => onLoadStop(controller),
-            initialUserScripts: UnmodifiableListView<UserScript>([
-              UserScript(
-                  source: userScript(),
-                  injectionTime: UserScriptInjectionTime.AT_DOCUMENT_START),
-            ]),
             initialSettings: initialSettings,
             contextMenu: contextMenu,
             onWebViewCreated: (controller) => onWebViewCreated(controller),

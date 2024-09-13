@@ -128,6 +128,7 @@ Future<void> getBookMetadata(
   HeadlessInAppWebView webview = HeadlessInAppWebView(
     initialUrlRequest: URLRequest(url: WebUri(indexHtmlPath)),
     onLoadStart: (controller, url) async {
+      webviewInitialVariable(controller, filePath, cfi, importing: true);
       controller.addJavaScriptHandler(
           handlerName: 'onMetadata',
           callback: (args) async {
@@ -150,15 +151,6 @@ Future<void> getBookMetadata(
             return;
           });
     },
-    initialUserScripts: UnmodifiableListView<UserScript>([
-      UserScript(
-          source: webviewInitialVariable(
-            filePath,
-            cfi,
-            importing: true,
-          ),
-          injectionTime: UserScriptInjectionTime.AT_DOCUMENT_START),
-    ]),
     onConsoleMessage: (controller, consoleMessage) {
       if (consoleMessage.messageLevel == ConsoleMessageLevel.ERROR) {
         headlessInAppWebView?.dispose();

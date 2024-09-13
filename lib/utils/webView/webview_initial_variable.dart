@@ -2,10 +2,12 @@ import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/models/book_style.dart';
 import 'package:anx_reader/models/read_theme.dart';
 import 'package:anx_reader/utils/js/convert_dart_color_to_js.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
-String webviewInitialVariable(
+void webviewInitialVariable(
+  InAppWebViewController controller,
   String url,
-  String cfi,{
+  String cfi, {
   BookStyle? bookStyle,
   int? textIndent,
   String? textColor,
@@ -14,7 +16,6 @@ String webviewInitialVariable(
   String? backgroundColor,
   bool? importing,
 }) {
-
   ReadTheme readTheme = Prefs().readTheme;
   bookStyle ??= Prefs().bookStyle;
   textColor ??= convertDartColorToJs(readTheme.textColor);
@@ -23,8 +24,7 @@ String webviewInitialVariable(
   backgroundColor ??= convertDartColorToJs(readTheme.backgroundColor);
   importing ??= false;
 
-
-  return '''
+  final script = '''
      console.log(navigator.userAgent)
      const importing = $importing
      const url = '$url'
@@ -47,4 +47,10 @@ String webviewInitialVariable(
          pageTurnStyle: '${Prefs().pageTurnStyle.name}',
      }
   ''';
+  controller.addJavaScriptHandler(
+      handlerName: 'webviewInitialVariable',
+      callback: (args) async {
+        await controller.evaluateJavascript(source: script);
+        return null;
+      });
 }
