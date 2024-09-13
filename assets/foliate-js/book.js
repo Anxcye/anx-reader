@@ -1,39 +1,39 @@
- //////// use for test //////////
- const importing = false
- const allAnnotations = [
-     // { id: 1, type: 'highlight', value: "epubcfi(/6/6!/4/2,/1:3,/1:4)", color: 'blue', note: 'this is' },
-     // { id: 2, type: 'highlight', value: "epubcfi(/6/6!/4/576,/1:2,/1:3)", color: 'yellow', note: 'this is' },
-     // { id: 3, type: 'underline', value: "epubcfi(/6/4!/4/4,/1:294,/1:301)", color: 'red', note: 'this is' },
- ]
- let url = '../local/dyx.epub'
- let cfi = "epubcfi(/6/12!/4,/2[CHP3],/8/1:29)"
-//  let cfi = null
- let style = {
-     fontSize: 2.2,
-     fontName: 'book',
-     letterSpacing: 0,
-     spacing: '1.5',
-     paragraphSpacing: 5,
-     textIndent: 5,
-     fontColor: '#0000ff',
-     backgroundColor: '#ffffff',
-     topMargin: 100,
-     bottomMargin: 100,
-     sideMargin: 5,
-     justify: true,
-     hyphenate: true,
-     // scroll: false,
-     // animated: true,
-     pageTurnStyle: 'slide'
- }
- window.flutter_inappwebview = {}
- window.flutter_inappwebview.callHandler = (name, data) => {
-     console.log(name, data)
- }
- setTimeout(() => {
-     reader.renderAnnotation()
- }, 1000)
- ///////////////////////////////
+//  //////// use for test //////////
+//  const importing = false
+//  const allAnnotations = [
+//      // { id: 1, type: 'highlight', value: "epubcfi(/6/6!/4/2,/1:3,/1:4)", color: 'blue', note: 'this is' },
+//      // { id: 2, type: 'highlight', value: "epubcfi(/6/6!/4/576,/1:2,/1:3)", color: 'yellow', note: 'this is' },
+//      // { id: 3, type: 'underline', value: "epubcfi(/6/4!/4/4,/1:294,/1:301)", color: 'red', note: 'this is' },
+//  ]
+//  let url = '../local/a.epub'
+//  let cfi = "epubcfi(/6/12!/4,/2[CHP3],/8/1:29)"
+// //  let cfi = null
+//  let style = {
+//      fontSize: 2.2,
+//      fontName: 'book',
+//      letterSpacing: 0,
+//      spacing: '1.5',
+//      paragraphSpacing: 5,
+//      textIndent: 5,
+//      fontColor: '#0000ff',
+//      backgroundColor: '#ffffff',
+//      topMargin: 100,
+//      bottomMargin: 100,
+//      sideMargin: 5,
+//      justify: true,
+//      hyphenate: true,
+//      // scroll: false,
+//      // animated: true,
+//      pageTurnStyle: 'slide'
+//  }
+//  window.flutter_inappwebview = {}
+//  window.flutter_inappwebview.callHandler = (name, data) => {
+//      console.log(name, data)
+//  }
+//  setTimeout(() => {
+//      reader.renderAnnotation()
+//  }, 1000)
+//  ///////////////////////////////
 
 import './view.js'
 import { FootnoteHandler } from './footnotes.js'
@@ -279,7 +279,6 @@ const getCSS = ({ fontSize,
       font-display: swap;
     }
     html {
-        font-size: ${fontSize}em !important;
         color: ${fontColor} !important;
         background: none !important;
         // background-color: ${backgroundColor} !important;
@@ -294,7 +293,6 @@ const getCSS = ({ fontSize,
         color: #66ccff !important;
     }
     * {
-//        font-size: ${fontSize}rem !important;
         ${fontFamily}
     }
     p, li, blockquote, dd, div, font {
