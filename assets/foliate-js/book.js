@@ -35,6 +35,8 @@
 //  }, 1000)
 //  ///////////////////////////////
 
+console.log('book.js')
+
 import './view.js'
 import { FootnoteHandler } from './footnotes.js'
 import { Overlayer } from './overlayer.js'
@@ -772,6 +774,8 @@ window.back = () => reader.view.history.back()
 window.forward = () => reader.view.history.forward()
 
 window.renderAnnotations = () => reader.renderAnnotation()
+
+await callFlutter('webviewInitialVariable')
 
 fetch(url)
     .then(res => res.blob())

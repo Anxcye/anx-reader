@@ -43,4 +43,4 @@ app.*.map.json
 /android/app/release
 
 # riverpod generated files
-# lib/gen/
+lib/gen/
