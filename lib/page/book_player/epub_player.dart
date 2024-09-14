@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:collection';
 import 'dart:convert';
 
 import 'package:anx_reader/config/shared_preference_provider.dart';
@@ -116,8 +115,6 @@ class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
   }
 
   void changeStyle(BookStyle bookStyle) {
-    initialSettings.textZoom = (bookStyle.fontSize * 100).toInt();
-    webViewController.setSettings(settings: initialSettings);
     webViewController.evaluateJavascript(source: '''
       changeStyle({
         fontSize: ${bookStyle.fontSize},
@@ -256,14 +253,14 @@ class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
     ''');
   }
 
-  Future<void> setHandler(InAppWebViewController controller) async {
+  void setHandler(InAppWebViewController controller) {
     String url =
         'http://localhost:${Server().port}/book${getBasePath(widget.book.filePath)}'
             .replaceAll('\'', '\\\'');
 
-    String cfi = widget.cfi ?? widget.book.lastReadPosition;
+    String initialCfi = widget.cfi ?? widget.book.lastReadPosition;
 
-    webviewInitialVariable(controller, url, cfi);
+    webviewInitialVariable(controller, url, initialCfi);
 
     controller.addJavaScriptHandler(
         handlerName: 'onRelocated',
@@ -431,7 +428,6 @@ class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
   InAppWebViewSettings initialSettings = InAppWebViewSettings(
     supportZoom: false,
     transparentBackground: true,
-    textZoom: (Prefs().bookStyle.fontSize * 100).toInt(),
   );
 
   Widget readingInfoWidget() {
