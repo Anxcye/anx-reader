@@ -104,7 +104,7 @@ class ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
 
   void showBottomBar() {
     setState(() {
-      showStatusBar();
+      onlyStatusBar();
       bottomBarOffstage = false;
     });
   }
@@ -114,7 +114,9 @@ class ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
       tocOffstage = true;
       _currentPage = const SizedBox(height: 1);
       bottomBarOffstage = true;
-      hideStatusBar();
+      if (Prefs().hideStatusBar) {
+        hideStatusBar();
+      }
     });
   }
 

@@ -5,15 +5,15 @@
 //      // { id: 2, type: 'highlight', value: "epubcfi(/6/6!/4/576,/1:2,/1:3)", color: 'yellow', note: 'this is' },
 //      // { id: 3, type: 'underline', value: "epubcfi(/6/4!/4/4,/1:294,/1:301)", color: 'red', note: 'this is' },
 //  ]
-//  let url = '../local/a.epub'
-//  let cfi = "epubcfi(/6/12!/4,/2[CHP3],/8/1:29)"
-// //  let cfi = null
+//  let url = '../local/b.epub'
+//  let initialCfi = "epubcfi(/6/12!/4,/2[CHP3],/8/1:29)"
+// //  let initialCfi = null
 //  let style = {
-//      fontSize: 2.2,
+//      fontSize: 1.2,
 //      fontName: 'book',
 //      letterSpacing: 0,
-//      spacing: '1.5',
-//      paragraphSpacing: 5,
+//      spacing: 1.7,
+//      paragraphSpacing: 1,
 //      textIndent: 5,
 //      fontColor: '#0000ff',
 //      backgroundColor: '#ffffff',
@@ -286,7 +286,9 @@ const getCSS = ({ fontSize,
         // background-color: ${backgroundColor} !important;
         background-color: transparent !important;
         letter-spacing: ${letterSpacing}px;
+        // font-size: ${fontSize}em;
     }
+
     body {
         background: none !important;
         background-color: transparent;
@@ -295,11 +297,13 @@ const getCSS = ({ fontSize,
         color: #66ccff !important;
     }
     * {
+        font-size-adjust: ${fontSize} !important;
+        line-height: ${(spacing + fontSize) * fontSize} !important;
         ${fontFamily}
     }
     p, li, blockquote, dd, div, font {
         color: ${fontColor} !important;
-        line-height: ${spacing} !important;
+        // line-height: ${spacing} !important;
         padding-bottom: ${paragraphSpacing}em !important;
         text-align: ${justify ? 'justify' : 'start'};
         -webkit-hyphens: ${hyphenate ? 'auto' : 'manual'};
@@ -779,5 +783,5 @@ await callFlutter('webviewInitialVariable')
 
 fetch(url)
     .then(res => res.blob())
-    .then(blob => open(new File([blob], new URL(url, window.location.origin).pathname), cfi))
+    .then(blob => open(new File([blob], new URL(url, window.location.origin).pathname), initialCfi))
     .catch(e => console.error(e))

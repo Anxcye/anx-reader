@@ -28,7 +28,7 @@ void webviewInitialVariable(
      console.log(navigator.userAgent)
      const importing = $importing
      const url = '$url'
-     let cfi = '$cfi'
+     let initialCfi = '$cfi'
      let style = {
          fontSize: ${bookStyle.fontSize},
          fontName: '$fontName',
