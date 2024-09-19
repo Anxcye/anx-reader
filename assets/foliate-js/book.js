@@ -273,6 +273,8 @@ const getCSS = ({ fontSize,
         fontName === 'system' ? 'font-family: system-ui !important;' :
             `font-family: ${fontName} !important;`
 
+    const lineHeight = (spacing + fontSize) * spacing
+
     return `
     @namespace epub "http://www.idpf.org/2007/ops";
     @font-face {
@@ -298,7 +300,7 @@ const getCSS = ({ fontSize,
     }
     * {
         font-size-adjust: ${fontSize} !important;
-        line-height: ${(spacing + fontSize) * spacing} !important;
+        line-height: ${lineHeight} !important;
         ${fontFamily}
     }
     p, li, blockquote, dd, div, font {

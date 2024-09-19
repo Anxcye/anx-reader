@@ -88,9 +88,15 @@ class BookStyle {
     double fontsSize = data['fontSize'] is String
         ? double.parse(data['fontSize'])
         : data['fontSize'];
+    double paragraphSpacing = data['paragraphSpacing'] is String
+        ? double.parse(data['paragraphSpacing'])
+        : data['paragraphSpacing'];
 
-    if (fontsSize > 2 || fontsSize < 0.5) {
-      fontsSize = 1.0;
+    if (fontsSize > 1.3 || fontsSize < 0.3) {
+      fontsSize = 0.7;
+    }
+    if (paragraphSpacing > 2 || paragraphSpacing < 1) {
+      paragraphSpacing = 1.5;
     }
 
     return BookStyle(
@@ -105,9 +111,7 @@ class BookStyle {
       wordSpacing: data['wordSpacing'] is String
           ? double.parse(data['wordSpacing'])
           : data['wordSpacing'],
-      paragraphSpacing: data['paragraphSpacing'] is String
-          ? double.parse(data['paragraphSpacing'])
-          : data['paragraphSpacing'],
+      paragraphSpacing: paragraphSpacing,
       sideMargin: data['sideMargin'] is String
           ? double.parse(data['sideMargin'])
           : data['sideMargin'],
