@@ -5,7 +5,7 @@
 //      // { id: 2, type: 'highlight', value: "epubcfi(/6/6!/4/576,/1:2,/1:3)", color: 'yellow', note: 'this is' },
 //      // { id: 3, type: 'underline', value: "epubcfi(/6/4!/4/4,/1:294,/1:301)", color: 'red', note: 'this is' },
 //  ]
-//  let url = '../local/b.epub'
+//  let url = '../local/a.epub'
 //  let initialCfi = "epubcfi(/6/12!/4,/2[CHP3],/8/1:29)"
 // //  let initialCfi = null
 //  let style = {
@@ -298,7 +298,7 @@ const getCSS = ({ fontSize,
     }
     * {
         font-size-adjust: ${fontSize} !important;
-        line-height: ${(spacing + fontSize) * fontSize} !important;
+        line-height: ${(spacing + fontSize) * spacing} !important;
         ${fontFamily}
     }
     p, li, blockquote, dd, div, font {
