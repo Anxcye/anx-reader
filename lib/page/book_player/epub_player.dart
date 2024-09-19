@@ -118,7 +118,7 @@ class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
     webViewController.evaluateJavascript(source: '''
       changeStyle({
         fontSize: ${bookStyle.fontSize},
-        spacing: '${bookStyle.lineHeight}',
+        spacing: ${bookStyle.lineHeight},
         paragraphSpacing: ${bookStyle.paragraphSpacing},
         topMargin: ${bookStyle.topMargin},
         bottomMargin: ${bookStyle.bottomMargin},
