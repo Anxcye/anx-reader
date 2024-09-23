@@ -5,7 +5,7 @@
 //      // { id: 2, type: 'highlight', value: "epubcfi(/6/6!/4/576,/1:2,/1:3)", color: 'yellow', note: 'this is' },
 //      // { id: 3, type: 'underline', value: "epubcfi(/6/4!/4/4,/1:294,/1:301)", color: 'red', note: 'this is' },
 //  ]
-//  let url = '../local/a.epub'
+//  let url = '../local/dyx.epub'
 //  let initialCfi = "epubcfi(/6/12!/4,/2[CHP3],/8/1:29)"
 // //  let initialCfi = null
 //  let style = {
@@ -273,7 +273,6 @@ const getCSS = ({ fontSize,
         fontName === 'system' ? 'font-family: system-ui !important;' :
             `font-family: ${fontName} !important;`
 
-    const lineHeight = (spacing + fontSize) * spacing
 
     return `
     @namespace epub "http://www.idpf.org/2007/ops";
@@ -288,7 +287,7 @@ const getCSS = ({ fontSize,
         // background-color: ${backgroundColor} !important;
         background-color: transparent !important;
         letter-spacing: ${letterSpacing}px;
-        // font-size: ${fontSize}em;
+        font-size: ${fontSize}em;
     }
 
     body {
@@ -299,8 +298,7 @@ const getCSS = ({ fontSize,
         color: #66ccff !important;
     }
     * {
-        font-size-adjust: ${fontSize} !important;
-        line-height: ${lineHeight} !important;
+        line-height: ${spacing}em !important;
         ${fontFamily}
     }
     p, li, blockquote, dd, div, font {
