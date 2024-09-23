@@ -92,10 +92,10 @@ class BookStyle {
         ? double.parse(data['paragraphSpacing'])
         : data['paragraphSpacing'];
 
-    if (fontsSize > 1.3 || fontsSize < 0.3) {
-      fontsSize = 0.7;
+    if (fontsSize > 2 || fontsSize < 0.5) {
+      fontsSize = 1;
     }
-    if (paragraphSpacing > 2 || paragraphSpacing < 1) {
+    if (paragraphSpacing > 3 || paragraphSpacing < 0) {
       paragraphSpacing = 1.5;
     }
 

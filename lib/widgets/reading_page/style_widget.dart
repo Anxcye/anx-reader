@@ -200,10 +200,10 @@ class _StyleWidgetState extends State<StyleWidget> {
                   Prefs().saveBookStyleToPrefs(bookStyle);
                 });
               },
-              min: 1,
-              max: 2,
+              min: 0,
+              max: 3,
               divisions: 10,
-              label: ((bookStyle.lineHeight - 1 ) * 10).round().toString()),
+              label: (bookStyle.lineHeight / 3 * 10).round().toString()),
         ),
         const Icon(Icons.height),
         Expanded(
@@ -240,9 +240,9 @@ class _StyleWidgetState extends State<StyleWidget> {
                 Prefs().saveBookStyleToPrefs(bookStyle);
               });
             },
-            min: 0.3,
-            max: 1.3,
-            divisions: 20,
+            min: 0.5,
+            max: 2.0,
+            divisions: 30,
             label: bookStyle.fontSize.toStringAsFixed(2),
           ),
         ),

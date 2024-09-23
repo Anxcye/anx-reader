@@ -67,7 +67,7 @@ const resolveURL = (url, relativeTo) => {
         const obj = new URL(url, root + relativeTo)
         obj.search = ''
         return decodeURI(obj.href.replace(root, ''))
-    } catch(e) {
+    } catch (e) {
         console.warn(e)
         return url
     }
@@ -281,8 +281,8 @@ const parseClock = str => {
     const n = parseFloat(x)
     const f = unit === 'h' ? 60 * 60
         : unit === 'min' ? 60
-        : unit === 'ms' ? .001
-        : 1
+            : unit === 'ms' ? .001
+                : 1
     return n * f
 }
 
@@ -674,7 +674,7 @@ class Loader {
             let doc = new DOMParser().parseFromString(str, mediaType)
             // change to HTML if it's not valid XHTML
             if (mediaType === MIME.XHTML && (doc.querySelector('parsererror')
-            || !doc.documentElement?.namespaceURI)) {
+                || !doc.documentElement?.namespaceURI)) {
                 console.warn(doc.querySelector('parsererror')?.innerText ?? 'Invalid XHTML')
                 item.mediaType = MIME.HTML
                 doc = new DOMParser().parseFromString(str, item.mediaType)
@@ -746,6 +746,9 @@ class Loader {
                 `-webkit-column-break-${x}:`)
             .replace(/break-(after|before|inside)\s*:\s*(avoid-)?page/gi, (_, x, y) =>
                 `break-${x}: ${y ?? ''}column`)
+            // If px is used as the unit of font-size, it should be converted to em and the 
+            // number should be divided by 16
+            .replace(/(\d*\.?\d+)px/gi, (_, d) => `${parseFloat(d) / 16}em`)
     }
     // find & replace all possible relative paths for all assets without parsing
     replaceString(str, href, parents = []) {
@@ -872,7 +875,7 @@ ${doc.querySelector('parsererror').innerText}`)
             this.toc = nav.toc
             this.pageList = nav.pageList
             this.landmarks = nav.landmarks
-        } catch(e) {
+        } catch (e) {
             console.warn(e)
         }
         if (!this.toc && ncxPath) try {
@@ -880,7 +883,7 @@ ${doc.querySelector('parsererror').innerText}`)
             const ncx = parseNCX(await this.#loadXML(ncxPath), resolve)
             this.toc = ncx.toc
             this.pageList = ncx.pageList
-        } catch(e) {
+        } catch (e) {
             console.warn(e)
         }
         this.landmarks ??= this.resources.guide
@@ -897,7 +900,7 @@ ${doc.querySelector('parsererror').innerText}`)
                 this.rendition.layout ??= 'pre-paginated'
             if (displayOptions.openToSpread === 'false') this.sections
                 .find(section => section.linear !== 'no').pageSpread ??=
-                    this.dir === 'rtl' ? 'left' : 'right'
+                this.dir === 'rtl' ? 'left' : 'right'
         }
 
         this.parsedMetadata = metadata // for debugging or advanced use cases
