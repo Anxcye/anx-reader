@@ -40,23 +40,24 @@ void initBasePath() async {
 }
 
 String getBasePath(String path) {
-  return '$documentPath/$path';
+  path.replaceAll("/", Platform.pathSeparator);
+  return '$documentPath${Platform.pathSeparator}$path';
 }
 
 
 Directory getFontDir({String? path}){
   path ??= documentPath;
-  return Directory('$path/font');
+  return Directory('$path${Platform.pathSeparator}font');
 }
 
 
 Directory getCoverDir({String? path}){
   path ??= documentPath;
-  return Directory('$path/cover');
+  return Directory('$path${Platform.pathSeparator}cover');
 }
 
 Directory getFileDir({String? path}){
   path ??= documentPath;
-  return Directory('$path/file');
+  return Directory('$path${Platform.pathSeparator}file');
 }
 

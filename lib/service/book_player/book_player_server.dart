@@ -41,16 +41,19 @@ class Server {
   }
 
   File? _tempFile;
+  String? _tempFileName;
 
-  set tempFile(File file) {
+  String setTempFile(File file) {
     _tempFile = file;
+    _tempFileName = DateTime.timestamp().hashCode.toString();
+    return _tempFileName!;
   }
 
   Future<shelf.Response> _handleRequests(shelf.Request request) async {
     final uriPath = request.requestedUri.path;
     AnxLog.info('Server: Request for $uriPath');
 
-    if (Uri.decodeComponent(uriPath) == _tempFile?.path) {
+    if (_tempFileName != null && uriPath == "/${_tempFileName!}") {
       return shelf.Response.ok(
         _tempFile?.openRead(),
         headers: {
