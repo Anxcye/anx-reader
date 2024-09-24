@@ -226,6 +226,9 @@ export class View extends HTMLElement {
 
     #handleClick(doc) {
         doc.addEventListener('click', e => {
+            if (doc.getSelection().type !== "Caret")
+                return
+
             let { clientX, clientY } = e
             // add top margin to y, y is relative to the iframe
             const topMargin = this.renderer.getAttribute('top-margin').match(/\d+/)[0]

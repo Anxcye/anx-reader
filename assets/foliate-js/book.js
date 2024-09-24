@@ -1,39 +1,39 @@
-//  //////// use for test //////////
-//  const importing = false
-//  const allAnnotations = [
-//      // { id: 1, type: 'highlight', value: "epubcfi(/6/6!/4/2,/1:3,/1:4)", color: 'blue', note: 'this is' },
-//      // { id: 2, type: 'highlight', value: "epubcfi(/6/6!/4/576,/1:2,/1:3)", color: 'yellow', note: 'this is' },
-//      // { id: 3, type: 'underline', value: "epubcfi(/6/4!/4/4,/1:294,/1:301)", color: 'red', note: 'this is' },
-//  ]
-//  let url = '../local/dyx.epub'
-//  let initialCfi = "epubcfi(/6/12!/4,/2[CHP3],/8/1:29)"
+// //////// use for test //////////
+// const importing = false
+// const allAnnotations = [
+//     // { id: 1, type: 'highlight', value: "epubcfi(/6/6!/4/2,/1:3,/1:4)", color: 'blue', note: 'this is' },
+//     // { id: 2, type: 'highlight', value: "epubcfi(/6/6!/4/576,/1:2,/1:3)", color: 'yellow', note: 'this is' },
+//     // { id: 3, type: 'underline', value: "epubcfi(/6/4!/4/4,/1:294,/1:301)", color: 'red', note: 'this is' },
+// ]
+// let url = '../local/shj.epub'
+// let initialCfi = "epubcfi(/6/12!/4,/2[CHP3],/8/1:29)"
 // //  let initialCfi = null
-//  let style = {
-//      fontSize: 1.2,
-//      fontName: 'book',
-//      letterSpacing: 0,
-//      spacing: 1.7,
-//      paragraphSpacing: 1,
-//      textIndent: 5,
-//      fontColor: '#0000ff',
-//      backgroundColor: '#ffffff',
-//      topMargin: 100,
-//      bottomMargin: 100,
-//      sideMargin: 5,
-//      justify: true,
-//      hyphenate: true,
-//      // scroll: false,
-//      // animated: true,
-//      pageTurnStyle: 'slide'
-//  }
-//  window.flutter_inappwebview = {}
-//  window.flutter_inappwebview.callHandler = (name, data) => {
-//      console.log(name, data)
-//  }
-//  setTimeout(() => {
-//      reader.renderAnnotation()
-//  }, 1000)
-//  ///////////////////////////////
+// let style = {
+//     fontSize: 1.2,
+//     fontName: 'book',
+//     letterSpacing: 0,
+//     spacing: 1.7,
+//     paragraphSpacing: 1,
+//     textIndent: 5,
+//     fontColor: '#0000ff',
+//     backgroundColor: '#ffffff',
+//     topMargin: 100,
+//     bottomMargin: 100,
+//     sideMargin: 5,
+//     justify: true,
+//     hyphenate: true,
+//     // scroll: false,
+//     // animated: true,
+//     pageTurnStyle: 'slide'
+// }
+// window.flutter_inappwebview = {}
+// window.flutter_inappwebview.callHandler = (name, data) => {
+//     console.log(name, data)
+// }
+// setTimeout(() => {
+//     reader.renderAnnotation()
+// }, 1000)
+// ///////////////////////////////
 
 console.log('book.js')
 
@@ -131,12 +131,13 @@ const handleSelection = (view, doc, index) => {
         text = newSel.toString()
     }
     // onSelectionEnd({ index, range, lang, cfi, pos, text });
-    return { index, range, lang, cfi, pos, text }
+    // return 
+    onSelectionEnd({ index, range, lang, cfi, pos, text })
 }
 
 const setSelectionHandler = (view, doc, index) => {
     //    doc.addEventListener('pointerdown', () => isSelecting = true);
-    //    doc.addEventListener('pointerup', () => handleSelection(view, doc, index));
+    doc.addEventListener('pointerup', () => handleSelection(view, doc, index));
 
     if (!view.isFixedLayout)
         // go to the next page when selecting to the end of a page
@@ -334,7 +335,7 @@ const getCSS = ({ fontSize,
 
 const footnoteDialog = document.getElementById('footnote-dialog')
 footnoteDialog.addEventListener('close', () => {
-    console.log('close')
+    callFlutter("onFootnoteClose")
 })
 const replaceFootnote = (view) => {
     clearSelection()
@@ -343,6 +344,7 @@ const replaceFootnote = (view) => {
     view.addEventListener('load', (e) => {
         const { doc, index } = e.detail
         globalThis.footnoteSelection = () => handleSelection(view, doc, index)
+        setSelectionHandler(view, doc, index)
         setTimeout(() => {
             const dialog = document.getElementById('footnote-dialog')
             const content = document.querySelector("#footnote-dialog > div > main > foliate-view")
@@ -467,7 +469,7 @@ class Reader {
                 reader.onerror = reject
                 reader.readAsDataURL(blob)
             })
-            callFlutter('onImageClick', base64 )
+            callFlutter('onImageClick', base64)
         })
     }
 
@@ -629,8 +631,6 @@ const onRelocated = (currentInfo) => {
 
 const onAnnotationClick = (annotation) => callFlutter('onAnnotationClick', annotation)
 
-const onSelectionEnd = (selection) => callFlutter('onSelectionEnd', selection)
-
 const onClickView = (x, y) => callFlutter('onClick', { x, y })
 
 const onExternalLink = (link) => console.log(link)
@@ -694,11 +694,19 @@ window.setNoAnimation = () => {
     setStyle()
 }
 
+const onSelectionEnd = (selection) => {
+    if (footnoteDialog.open) {
+        callFlutter('onSelectionEnd', { ...selection, footnote: true })
+    } else {
+        callFlutter('onSelectionEnd', { ...selection, footnote: false })
+    }
+}
+
 window.showContextMenu = () => {
     if (footnoteDialog.open) {
-        callFlutter('onSelectionEnd', { ...footnoteSelection(), footnote: true })
+        footnoteSelection()
     } else {
-        callFlutter('onSelectionEnd', { ...reader.showContextMenu(), footnote: false })
+        reader.showContextMenu()
     }
 }
 
