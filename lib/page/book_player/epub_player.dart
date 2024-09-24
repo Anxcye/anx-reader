@@ -14,7 +14,6 @@ import 'package:anx_reader/page/book_player/image_viewer.dart';
 import 'package:anx_reader/page/reading_page.dart';
 import 'package:anx_reader/service/book_player/book_player_server.dart';
 import 'package:anx_reader/utils/coordinates_to_part.dart';
-import 'package:anx_reader/utils/get_path/get_base_path.dart';
 import 'package:anx_reader/utils/js/convert_dart_color_to_js.dart';
 import 'package:anx_reader/models/book_note.dart';
 import 'package:anx_reader/utils/webView/webview_console_message.dart';
@@ -358,6 +357,12 @@ class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
                       image: image,
                       bookName: widget.book.title,
                     )));
+      },
+    );
+    controller.addJavaScriptHandler(
+      handlerName: 'onFootnoteClose',
+      callback: (args) {
+        removeOverlay();
       },
     );
   }
