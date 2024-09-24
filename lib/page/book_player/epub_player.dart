@@ -415,7 +415,11 @@ class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
   void dispose() {
     super.dispose();
     _animationController.dispose();
-    InAppWebViewController.clearAllCache();
+    if (defaultTargetPlatform == TargetPlatform.android ||
+        defaultTargetPlatform == TargetPlatform.iOS ||
+        defaultTargetPlatform == TargetPlatform.macOS) {
+      InAppWebViewController.clearAllCache();
+    }
     saveReadingProgress();
     removeOverlay();
   }

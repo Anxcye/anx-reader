@@ -108,7 +108,7 @@ class _StyleWidgetState extends State<StyleWidget> {
         label: getFontNameFromFile(element),
         name: 'customFont$i',
         path:
-            'http://localhost:${Server().port}/fonts/${element.path.split('/').last}',
+            'http://localhost:${Server().port}/fonts/${element.path.split(Platform.pathSeparator).last}',
       ));
     }
 
