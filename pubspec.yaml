@@ -57,6 +57,7 @@ dependencies:
   device_info_plus: ^10.1.2
   flutter_riverpod: ^2.5.1
   riverpod_annotation: ^2.3.5
+  chinese_font_library: ^1.2.0
 
 dev_dependencies:
   flutter_test:

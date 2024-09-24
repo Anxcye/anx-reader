@@ -781,7 +781,6 @@ window.renderAnnotations = () => reader.renderAnnotation()
 
 await callFlutter('webviewInitialVariable')
 
-console.log(url)
 fetch(url)
     .then(res => res.blob())
     .then(blob => open(new File([blob], new URL(url, window.location.origin).pathname), initialCfi))

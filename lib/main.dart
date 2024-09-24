@@ -8,6 +8,7 @@ import 'package:anx_reader/utils/error/common.dart';
 import 'package:anx_reader/utils/get_path/get_base_path.dart';
 import 'package:anx_reader/utils/log/common.dart';
 import 'package:anx_reader/utils/webdav/common.dart';
+import 'package:chinese_font_library/chinese_font_library.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:provider/provider.dart';
@@ -86,14 +87,14 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                 seedColor: prefsNotifier.themeColor,
                 brightness: Brightness.light,
               ),
-            ),
+            ).useSystemChineseFont(Brightness.light),
             darkTheme: ThemeData(
               brightness: Brightness.dark,
               colorScheme: ColorScheme.fromSeed(
                 seedColor: prefsNotifier.themeColor,
                 brightness: Brightness.dark,
               ),
-            ),
+          ).useSystemChineseFont(Brightness.dark),
             home: const HomePage(),
           );
         },
