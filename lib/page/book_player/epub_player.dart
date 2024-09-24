@@ -254,10 +254,8 @@ class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
   }
 
   void setHandler(InAppWebViewController controller) {
-    String url =
-        'http://localhost:${Server().port}/book${getBasePath(widget.book.filePath)}'
-            .replaceAll('\'', '\\\'');
-
+    String uri = Uri.encodeComponent(widget.book.fileFullPath);
+    String url = 'http://localhost:${Server().port}/book/$uri';
     String initialCfi = widget.cfi ?? widget.book.lastReadPosition;
 
     webviewInitialVariable(controller, url, initialCfi);

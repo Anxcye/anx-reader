@@ -80,21 +80,22 @@ Future<void> saveBook(
 
   final extension = file.path.split('.').last;
 
-  final relativeFilePath = 'file/$newBookName.$extension';
-  final filePath = getBasePath(relativeFilePath);
-  String? relativeCoverPath = 'cover/$newBookName';
-  // final coverPath = getBasePath(relativeCoverPath);
+  final dbFilePath = 'file/$newBookName.$extension';
+  final filePath = getBasePath(dbFilePath);
+  String? dbCoverPath = 'cover/$newBookName';
+  // final coverPath = getBasePath(dbCoverPath);
 
   await file.copy(filePath);
   // remove cached file
   file.delete();
 
-  relativeCoverPath = await saveImageToLocal(cover, relativeCoverPath);
+  dbCoverPath = await saveImageToLocal(cover, dbCoverPath);
+
   Book book = Book(
       id: provideBook != null ? provideBook.id : -1,
       title: title,
-      coverPath: relativeCoverPath,
-      filePath: relativeFilePath,
+      coverPath: dbCoverPath,
+      filePath: dbFilePath,
       lastReadPosition: '',
       readingPercentage: 0,
       author: author,
@@ -116,18 +117,19 @@ Future<void> getBookMetadata(
   Book? book,
   Function? updateBookList,
 }) async {
-  String filePath = file.path;
-  Server().tempFile = file;
+  String serverFileName = Server().setTempFile(file);
 
   String cfi = '';
 
   String indexHtmlPath =
       "http://localhost:${Server().port}/foliate-js/index.html";
 
+  String bookUrl = "http://localhost:${Server().port}/$serverFileName";
+
   HeadlessInAppWebView webview = HeadlessInAppWebView(
     initialUrlRequest: URLRequest(url: WebUri(indexHtmlPath)),
     onLoadStart: (controller, url) async {
-      webviewInitialVariable(controller, filePath, cfi, importing: true);
+      webviewInitialVariable(controller, bookUrl, cfi, importing: true);
       controller.addJavaScriptHandler(
           handlerName: 'onMetadata',
           callback: (args) async {
