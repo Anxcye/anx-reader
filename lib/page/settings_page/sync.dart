@@ -1,6 +1,8 @@
 import 'dart:io';
 
+import 'package:anx_reader/dao/database.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
+import 'package:anx_reader/utils/file_saver.dart';
 import 'package:anx_reader/utils/get_path/cache_path.dart';
 import 'package:anx_reader/utils/get_path/databases_path.dart';
 import 'package:anx_reader/utils/get_path/get_base_path.dart';
@@ -16,7 +18,6 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_file_dialog/flutter_file_dialog.dart';
 import 'package:path/path.dart' as path;
 import 'package:settings_ui/settings_ui.dart';
 
@@ -152,11 +153,17 @@ class _SubSyncSettingsState extends State<SubSyncSettings> {
     final file = File(zipPath);
     Navigator.of(context).pop('dialog');
     if (await file.exists()) {
-      SaveFileDialogParams params = SaveFileDialogParams(
-        sourceFilePath: file.path,
-        mimeTypesFilter: ['application/zip'],
-      );
-      final filePath = await FlutterFileDialog.saveFile(params: params);
+      // SaveFileDialogParams params = SaveFileDialogParams(
+      //   sourceFilePath: file.path,
+      //   mimeTypesFilter: ['application/zip'],
+      // );
+      // final filePath = await FlutterFileDialog.saveFile(params: params);
+      String fileName =
+          'AnxReader-Backup-${DateTime.now().year}-${DateTime.now().month}-${DateTime.now().day}-v2.zip';
+      String? filePath = await fileSaver(
+          bytes: await file.readAsBytes(),
+          fileName: fileName,
+          mimeType: 'application/zip');
 
       await file.delete();
 
@@ -198,9 +205,11 @@ class _SubSyncSettingsState extends State<SubSyncSettings> {
     }
     _showDataDialog(context, L10n.of(context).importing);
 
-    Directory tempDir = await getAnxCacheDir();
-    String tempPath = tempDir.path;
-    String extractPath = '$tempPath/anx_reader_import';
+    String pathSeparator = Platform.pathSeparator;
+
+    Directory cacheDir = await getAnxCacheDir();
+    String cachePath = cacheDir.path;
+    String extractPath = '$cachePath${pathSeparator}anx_reader_import';
 
     try {
       await Directory(extractPath).create(recursive: true);
@@ -211,16 +220,20 @@ class _SubSyncSettingsState extends State<SubSyncSettings> {
       });
 
       String docPath = await getAnxDocumentsPath();
-      _copyDirectorySync(
-          Directory('$extractPath/file'), getFileDir(path: docPath));
-      _copyDirectorySync(
-          Directory('$extractPath/cover'), getCoverDir(path: docPath));
-      _copyDirectorySync(
-          Directory('$extractPath/font'), getFontDir(path: docPath));
-      _copyDirectorySync(
-          Directory('$extractPath/databases'), await getAnxDataBasesDir());
-      _copyDirectorySync(
-          Directory('$extractPath/shared_prefs'), await getAnxSharedPrefsDir());
+      _copyDirectorySync(Directory('$extractPath${pathSeparator}file'),
+          getFileDir(path: docPath));
+      _copyDirectorySync(Directory('$extractPath${pathSeparator}cover'),
+          getCoverDir(path: docPath));
+      _copyDirectorySync(Directory('$extractPath${pathSeparator}font'),
+          getFontDir(path: docPath));
+
+      DBHelper.close();
+      _copyDirectorySync(Directory('$extractPath${pathSeparator}databases'),
+          await getAnxDataBasesDir());
+      DBHelper().initDB();
+
+      _copyFileSync(File('$extractPath/${getSharedPrefsFileName()}'),
+          await getAnxShredPrefsFile());
 
       AnxLog.info('importData: import success');
       AnxToast.show(L10n.of(context).import_success_restart_app);
@@ -233,10 +246,20 @@ class _SubSyncSettingsState extends State<SubSyncSettings> {
     }
   }
 
-  void _copyDirectorySync(Directory source, Directory destination) {
+  void _copyFileSync(File source, File destination) {
     if (!destination.existsSync()) {
       destination.createSync(recursive: true);
+    } else {
+      destination.delete();
     }
+    source.copySync(destination.path);
+  }
+
+  void _copyDirectorySync(Directory source, Directory destination) {
+    if (destination.existsSync()) {
+      destination.deleteSync(recursive: true);
+    }
+    destination.createSync(recursive: true);
     source.listSync(recursive: false).forEach((entity) {
       final newPath = destination.path +
           Platform.pathSeparator +
@@ -261,7 +284,8 @@ Future<String> createZipFile(RootIsolateToken token) async {
     getCoverDir(path: docPath),
     getFontDir(path: docPath),
     await getAnxDataBasesDir(),
-    await getAnxSharedPrefsDir(),
+    // await getAnxSharedPrefsDir(),
+    await getAnxShredPrefsFile(),
   ];
 
   AnxLog.info('exportData: directoryList: $directoryList');
@@ -269,7 +293,11 @@ Future<String> createZipFile(RootIsolateToken token) async {
   final encoder = ZipFileEncoder();
   encoder.create(zipPath);
   for (final dir in directoryList) {
-    await encoder.addDirectory(dir);
+    if (dir is Directory) {
+      await encoder.addDirectory(dir);
+    } else if (dir is File) {
+      await encoder.addFile(dir);
+    }
   }
   encoder.close();
   return zipPath;

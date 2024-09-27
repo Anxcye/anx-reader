@@ -9,7 +9,7 @@ Future<Directory> getAnxCacheDir() async {
       return await getApplicationCacheDirectory();
     case TargetPlatform.windows:
       // TODO: implement windows cache path
-      return Directory('${Directory.current.path}\\cache');
+      return await getApplicationCacheDirectory();
     default:
       throw Exception('Unsupported platform');
   }

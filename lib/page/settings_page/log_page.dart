@@ -1,13 +1,12 @@
 import 'dart:io';
 
 import 'package:anx_reader/l10n/generated/L10n.dart';
+import 'package:anx_reader/utils/file_saver.dart';
 import 'package:anx_reader/utils/get_path/log_file.dart';
 import 'package:anx_reader/utils/toast/common.dart';
 import 'package:anx_reader/utils/log/common.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_file_dialog/flutter_file_dialog.dart';
-
 
 class LogPage extends StatefulWidget {
   const LogPage({super.key});
@@ -91,11 +90,18 @@ class _LogPageState extends State<LogPage> {
   Future<void> exportLog() async {
     Navigator.pop(context);
     File logFile = await getLogFile();
-    SaveFileDialogParams params = SaveFileDialogParams(
-      sourceFilePath: logFile.path,
-    );
-    await FlutterFileDialog.saveFile(params: params);
-    AnxToast.show("saved");
+    // SaveFileDialogParams params = SaveFileDialogParams(
+    //   sourceFilePath: logFile.path,
+    // );
+    // await FlutterFileDialog.saveFile(params: params);
+    String fileName =
+        'AnxReader-Log-${DateTime.now().year}-${DateTime.now().month}-${DateTime.now().day}.txt';
+    String? filePath = await fileSaver(
+        bytes: await logFile.readAsBytes(),
+        fileName: fileName,
+        mimeType: 'text/plain');
+
+    AnxToast.show("saved $filePath");
   }
 }
 
