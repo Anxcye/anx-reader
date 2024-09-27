@@ -226,7 +226,7 @@ export class View extends HTMLElement {
 
     #handleClick(doc) {
         doc.addEventListener('click', e => {
-            if (doc.getSelection().type !== "Caret")
+            if (doc.getSelection().type === "Range")
                 return
 
             let { clientX, clientY } = e

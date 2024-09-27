@@ -1,7 +1,6 @@
-import 'dart:typed_data';
-
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/main.dart';
+import 'package:anx_reader/utils/file_saver.dart';
 import 'package:anx_reader/utils/log/common.dart';
 import 'package:anx_reader/utils/toast/common.dart';
 import 'package:device_info_plus/device_info_plus.dart';
@@ -71,11 +70,8 @@ class DownloadUtil {
     }
   }
 
-  static Future<bool> downloadImg(
-    Uint8List img,
-    String extension,
-    String name,
-  ) async {
+  static Future<bool> androidImgSaver(
+      Uint8List img, String extension, String name) async {
     try {
       if (defaultTargetPlatform != TargetPlatform.android) return true;
       final deviceInfoPlugin = DeviceInfoPlugin();
@@ -92,18 +88,13 @@ class DownloadUtil {
           return false;
         }
       }
-      // if (!await requestPhotoPer()) {
-      //   return false;
-      // }
       SmartDialog.showLoading(
           msg: L10n.of(navigatorKey.currentContext!).common_saving);
 
-      String picName =
-          "AnxReader_${name}_${DateTime.now().toString().replaceAll(RegExp(r'[- :]'), '').split('.').first}";
 
       final SaveResult result = await SaverGallery.saveImage(
         img,
-        name: '$picName.$extension',
+        name: '$name.$extension',
         androidRelativePath: "Pictures/AnxReader",
         androidExistNotSave: false,
       );
@@ -111,7 +102,7 @@ class DownloadUtil {
       SmartDialog.dismiss();
       if (result.isSuccess) {
         await SmartDialog.showToast(
-            '「${'$picName.$extension'}」${L10n.of(navigatorKey.currentContext!).common_saved}');
+            '「${'$name.$extension'}」${L10n.of(navigatorKey.currentContext!).common_saved}');
       }
       return true;
     } catch (err) {
@@ -119,6 +110,39 @@ class DownloadUtil {
       AnxToast.show(L10n.of(navigatorKey.currentContext!).common_failed);
       AnxLog.severe("saveImage: saveImage error: $err");
       return true;
+    }
+  }
+
+  // windows just save the image to the download path
+  static Future<bool> windowsImgSaver(
+      Uint8List img, String extension, String name) async {
+    String? path = await fileSaver(
+      bytes: img,
+      fileName: '$name.$extension',
+      mimeType: 'image/$extension',
+    );
+    if (path == null) {
+      return false;
+    }
+    AnxToast.show(
+        '「$name.$extension」${L10n.of(navigatorKey.currentContext!).common_saved}');
+    return true;
+  }
+
+  static Future<bool> downloadImg(
+    Uint8List img,
+    String extension,
+    String name,
+  ) async {
+    String picName =
+        "AnxReader_${name}_${DateTime.now().toString().replaceAll(RegExp(r'[- :]'), '').split('.').first}";
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+        return await androidImgSaver(img, extension, picName);
+      case TargetPlatform.windows:
+        return await windowsImgSaver(img, extension, picName);
+      default:
+        return true;
     }
   }
 }

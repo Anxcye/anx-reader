@@ -11,7 +11,8 @@ Future<String> getAnxDocumentsPath() async {
     case TargetPlatform.android:
       return directory.path;
     case TargetPlatform.windows:
-      return '${directory.path}\\AnxReader';
+      // return '${directory.path}\\AnxReader';
+      return (await getApplicationSupportDirectory()).path;
     default:
       throw Exception('Unsupported platform');
   }
@@ -40,6 +41,7 @@ void initBasePath() async {
 }
 
 String getBasePath(String path) {
+  // the path that in database using "/"
   path.replaceAll("/", Platform.pathSeparator);
   return '$documentPath${Platform.pathSeparator}$path';
 }
