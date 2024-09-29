@@ -17,6 +17,7 @@ Future<String?> fileSaver(
         // sourceFilePath: file.path,
         data: bytes,
         mimeTypesFilter: [mimeType ?? 'application/zip'],
+        fileName: fileName,
       );
       final filePath = await FlutterFileDialog.saveFile(params: params);
       return filePath;

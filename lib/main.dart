@@ -94,7 +94,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                 seedColor: prefsNotifier.themeColor,
                 brightness: Brightness.dark,
               ),
-          ).useSystemChineseFont(Brightness.dark),
+            ).useSystemChineseFont(Brightness.dark),
             home: const HomePage(),
           );
         },
