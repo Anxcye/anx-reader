@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.1.8 2024-10-23
+
+* Added: Modify import/export file structure
+* Fixed: Book font size cannot maintain relative relationship
+* Fixed: Can be used in lower webview versions (about 92.0.0.0 and above)
+
+* 修改：修改了导入导出的文件结构
+* 修复：书籍字体大小不能保持相对关系
+* 修复：能够在较低的 webview 版本中使用(约92.0.0.0及以上)
+
+Windows version is coming soon!
+Windows端即将发布，敬请期待！
+
 ## 1.1.7 2024-09-11
 * Backup: Export/import all data
 * Ability to click and view large images
