@@ -34,16 +34,21 @@ class AppearanceSetting extends StatelessWidget {
   }
 }
 
-class SubAppearanceSettings extends StatelessWidget {
+class SubAppearanceSettings extends StatefulWidget {
   const SubAppearanceSettings({super.key, required this.isMobile});
 
   final bool isMobile;
 
   @override
+  State<SubAppearanceSettings> createState() => _SubAppearanceSettingsState();
+}
+
+class _SubAppearanceSettingsState extends State<SubAppearanceSettings> {
+  @override
   Widget build(BuildContext context) {
     return settingsBody(
       title: L10n.of(context).settings_appearance,
-      isMobile: isMobile,
+      isMobile: widget.isMobile,
       sections: [
         SettingsSection(
           title: Text(L10n.of(context).settings_appearance_theme),
@@ -59,18 +64,31 @@ class SubAppearanceSettings extends StatelessWidget {
                 onPressed: (context) async {
                   await showColorPickerDialog(context);
                 }),
+            SettingsTile.switchTile(
+              title: Text("OLED Dark Mode"),
+              leading: const Icon(Icons.brightness_2),
+              initialValue: Prefs().trueDarkMode,
+              onToggle: (bool value) {
+                setState(() {
+
+                Prefs().trueDarkMode = value;
+                });
+              },
+            ),
             const CustomSettingsTile(child: Divider()),
           ],
         ),
-        SettingsSection(title: Text(L10n.of(context).settings_appearance_display), tiles: [
-          SettingsTile.navigation(
-              title: Text(L10n.of(context).settings_appearance_language),
-              value: Text(Prefs().locale?.languageCode ?? 'system'),
-              leading: const Icon(Icons.language),
-              onPressed: (context) {
-                showLanguagePickerDialog(context);
-              })
-        ])
+        SettingsSection(
+            title: Text(L10n.of(context).settings_appearance_display),
+            tiles: [
+              SettingsTile.navigation(
+                  title: Text(L10n.of(context).settings_appearance_language),
+                  value: Text(Prefs().locale?.languageCode ?? 'system'),
+                  leading: const Icon(Icons.language),
+                  onPressed: (context) {
+                    showLanguagePickerDialog(context);
+                  })
+            ])
       ],
     );
   }

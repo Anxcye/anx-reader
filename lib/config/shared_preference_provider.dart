@@ -250,4 +250,13 @@ class Prefs extends ChangeNotifier {
     }
     return FontModel.fromJson(fontJson);
   }
+
+  set trueDarkMode(bool status) {
+    prefs.setBool('trueDarkMode', status);
+    notifyListeners();
+  }
+
+  bool get trueDarkMode {
+    return prefs.getBool('trueDarkMode') ?? false;
+  }
 }

@@ -9,6 +9,7 @@ import 'package:anx_reader/utils/get_path/get_base_path.dart';
 import 'package:anx_reader/utils/log/common.dart';
 import 'package:anx_reader/utils/webdav/common.dart';
 import 'package:chinese_font_library/chinese_font_library.dart';
+import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:provider/provider.dart';
@@ -81,15 +82,25 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             supportedLocales: L10n.supportedLocales,
             title: 'Anx',
             themeMode: prefsNotifier.themeMode,
-            theme: ThemeData(
-              brightness: Brightness.light,
+            // theme: ThemeData(
+            //   brightness: Brightness.light,
+            //   colorScheme: ColorScheme.fromSeed(
+            //     seedColor: prefsNotifier.themeColor,
+            //     brightness: Brightness.light,
+            //   ),
+            // ).useSystemChineseFont(Brightness.light),
+            theme: FlexThemeData.light(
+              useMaterial3: true,
+              swapLegacyOnMaterial3: true,
               colorScheme: ColorScheme.fromSeed(
                 seedColor: prefsNotifier.themeColor,
-                brightness: Brightness.light,
+                // brightness: Brightness.light,
               ),
             ).useSystemChineseFont(Brightness.light),
-            darkTheme: ThemeData(
-              brightness: Brightness.dark,
+            darkTheme: FlexThemeData.dark(
+              useMaterial3: true,
+              swapLegacyOnMaterial3: true,
+              darkIsTrueBlack: prefsNotifier.trueDarkMode,
               colorScheme: ColorScheme.fromSeed(
                 seedColor: prefsNotifier.themeColor,
                 brightness: Brightness.dark,
