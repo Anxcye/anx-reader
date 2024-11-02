@@ -58,6 +58,7 @@ dependencies:
   flutter_riverpod: ^2.5.1
   riverpod_annotation: ^2.3.5
   chinese_font_library: ^1.2.0
+  flex_color_scheme: ^7.3.1
 
 dev_dependencies:
   flutter_test:
