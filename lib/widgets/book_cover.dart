@@ -13,9 +13,13 @@ Widget bookCover(
   radius ??= 8;
   File file = File(book.coverFullPath);
   Widget child = file.existsSync()
-      ? Image.file(
-          file,
-          fit: BoxFit.cover,
+      ? Container(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: FileImage(file),
+              fit: BoxFit.cover,
+            ),
+          ),
         )
       : Container(
           color: Colors.primaries[book.title.hashCode % Colors.primaries.length]
