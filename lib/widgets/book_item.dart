@@ -47,7 +47,11 @@ class BookItem extends StatelessWidget {
                     ),
                   ],
                 ),
-                child: bookCover(context, book),
+                child: Row(
+                  children: [
+                    Expanded(child: bookCover(context, book)),
+                  ],
+                ),
               ),
             ),
           ),
