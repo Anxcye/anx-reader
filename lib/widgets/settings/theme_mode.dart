@@ -22,53 +22,32 @@ class _ChangeThemeModeState extends State<ChangeThemeMode> {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        _buildThemeModeButton('auto', L10n.of(context).settings_system_mode),
-        const SizedBox(width: 10),
-        _buildThemeModeButton('dark', L10n.of(context).settings_dark_mode),
-        const SizedBox(width: 10),
-        _buildThemeModeButton('light', L10n.of(context).settings_light_mode),
+    return SegmentedButton<String>(
+      segments: <ButtonSegment<String>>[
+        ButtonSegment<String>(
+          value: 'auto',
+          label: Text(L10n.of(context).settings_system_mode),
+          icon: const Icon(Icons.brightness_auto),
+        ),
+        ButtonSegment<String>(
+          value: 'dark',
+          label: Text(L10n.of(context).settings_dark_mode),
+          icon: const Icon(Icons.brightness_2),
+        ),
+        ButtonSegment<String>(
+          value: 'light',
+          label: Text(L10n.of(context).settings_light_mode),
+          icon: const Icon(Icons.brightness_5),
+        ),
       ],
-    );
-  }
-
-  Widget _buildThemeModeButton(String mode, String text) {
-    return Expanded(
-      child: ElevatedButton(
-        onPressed: () {
-          Prefs().saveThemeModeToPrefs(mode);
-          setState(() {
-            _themeMode = mode;
-          });
-        },
-        style: ButtonStyle(
-          backgroundColor: WidgetStateProperty.resolveWith<Color>(
-            (Set<WidgetState> states) {
-              if (states.contains(WidgetState.pressed) ||
-                  _themeMode == mode) {
-                return Theme.of(context).colorScheme.primary;
-              }
-              return Theme.of(context).colorScheme.surface;
-            },
-          ),
-          foregroundColor: WidgetStateProperty.resolveWith<Color>(
-            (Set<WidgetState> states) {
-              if (states.contains(WidgetState.pressed) ||
-                  _themeMode == mode) {
-                return Theme.of(context).colorScheme.onPrimary;
-              }
-              return Theme.of(context).colorScheme.onSurface;
-            },
-          ),
-        ),
-        child: FittedBox(
-          fit: BoxFit.scaleDown,
-          child: Text(text,
-            maxLines: 1,
-          ),
-        ),
-      ),
+      selected: {_themeMode},
+      onSelectionChanged: (Set<String> newSelection) {
+        final String mode = newSelection.first;
+        Prefs().saveThemeModeToPrefs(mode);
+        setState(() {
+          _themeMode = mode;
+        });
+      },
     );
   }
 }

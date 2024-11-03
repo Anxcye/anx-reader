@@ -4,6 +4,7 @@ import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/models/book_note.dart';
 import 'package:anx_reader/page/reading_page.dart';
 import 'package:anx_reader/service/book.dart';
+import 'package:anx_reader/utils/time_to_human.dart';
 import 'package:anx_reader/widgets/delete_confirm.dart';
 import 'package:anx_reader/widgets/excerpt_menu.dart';
 import 'package:anx_reader/widgets/tips/notes_tips.dart';
@@ -61,6 +62,10 @@ class _BookNotesListState extends State<BookNotesList> {
 
   Widget bookNoteItem(BuildContext context, BookNote bookNote, bool selected) {
     Color iconColor = Color(int.parse('0xaa${bookNote.color}'));
+    TextStyle infoStyle = const TextStyle(
+      fontSize: 14,
+      color: Colors.grey,
+    );
     return GestureDetector(
       onTap: () {
         if (selectedNotes.isNotEmpty) {
@@ -89,6 +94,7 @@ class _BookNotesListState extends State<BookNotesList> {
         });
       },
       child: Card(
+        shadowColor: Colors.transparent,
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Row(
@@ -116,11 +122,21 @@ class _BookNotesListState extends State<BookNotesList> {
                       height: 3,
                       color: Colors.grey.shade300,
                     ),
-                    Text(
-                      bookNote.chapter,
-                      style: const TextStyle(
-                        fontSize: 14,
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            bookNote.chapter,
+                            style: infoStyle,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        Text(
+                          timeToHuman(bookNote.createTime, context),
+                          style:infoStyle,
+                        )
+                      ],
                     ),
                   ],
                 ),
