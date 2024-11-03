@@ -165,5 +165,13 @@
   "tts_volume": "音量",
   "tts_rate": "语速",
   "tts_pitch": "音调",
-  "tts_narrator": "朗读"
+  "tts_narrator": "朗读",
+
+  "statistic_just_now": "刚刚",
+  "statistic_minutes_ago": "{count, plural, =1{1分钟前} other{{count}分钟前}}",
+  "statistic_hours_ago": "{count, plural, =1{1小时前} other{{count}小时前}}",
+  "statistic_yesterday": "{count, plural, =1{昨天} other{{count}天前}}",
+  "statistic_days_ago": "{count, plural, =1{1天前} other{{count}天前}}",
+  "statistic_months_ago": "{count, plural, =1{1个月前} other{{count}个月前}}",
+  "statistic_years_ago": "{count, plural, =1{1年前} other{{count}年前}}"
 }
