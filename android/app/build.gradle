@@ -29,7 +29,7 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    namespace "com.example.anx_reader"
+    namespace "com.anxcye.anx_reader"
     compileSdk flutter.compileSdkVersion
     ndkVersion flutter.ndkVersion
 
