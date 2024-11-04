@@ -76,7 +76,9 @@
 
   "reading_page_chapter_pages": "Chapter Pages",
   "reading_page_current_page": "Current Page",
-
+  "reading_page_auto_translate_selection": "Auto Translate Selection",
+  "translate_error": "Translate Error",
+  
   "book_detail_save": "Save",
   "book_detail_edit": "Edit",
   "book_detail_nth_book": "{count, plural, =1{1st book you've read} =2{2nd book you've read} few{3rd book you've read} other{{count}th book you've read}}",

@@ -78,7 +78,7 @@ LangList getLang(String code) {
       .firstWhere((e) => e.code == code, orElse: () => LangList.english);
 }
 
-Future<String> translateText(String text, TranslateService? service) async {
+Future<String> translateText(String text, {TranslateService? service}) async {
   service ??= Prefs().translateService;
   LangList from = Prefs().translateFrom;
   LangList to = Prefs().translateTo;

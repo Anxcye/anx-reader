@@ -6,7 +6,7 @@ import 'package:anx_reader/page/reading_page.dart';
 import 'package:anx_reader/service/book.dart';
 import 'package:anx_reader/utils/time_to_human.dart';
 import 'package:anx_reader/widgets/delete_confirm.dart';
-import 'package:anx_reader/widgets/excerpt_menu.dart';
+import 'package:anx_reader/widgets/context_menu/excerpt_menu.dart';
 import 'package:anx_reader/widgets/tips/notes_tips.dart';
 import 'package:flutter/material.dart';
 import 'package:icons_plus/icons_plus.dart';

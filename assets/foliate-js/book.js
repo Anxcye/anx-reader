@@ -282,6 +282,7 @@ const getCSS = ({ fontSize,
       src: url('${fontPath}');
       font-display: swap;
     }
+
     html {
         color: ${fontColor} !important;
         background: none !important;
@@ -295,13 +296,16 @@ const getCSS = ({ fontSize,
         background: none !important;
         background-color: transparent;
     }
+
     a:link {
         color: #66ccff !important;
     }
+
     * {
         line-height: ${spacing}em !important;
         ${fontFamily}
     }
+
     p, li, blockquote, dd, div, font {
         color: ${fontColor} !important;
         // line-height: ${spacing} !important;
@@ -316,6 +320,7 @@ const getCSS = ({ fontSize,
         widows: 2;
         text-indent: ${textIndent}em !important;
     }
+        
     /* prevent the above from overriding the align attribute */
     [align="left"] { text-align: left; }
     [align="right"] { text-align: right; }
