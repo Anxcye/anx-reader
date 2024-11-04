@@ -2,6 +2,7 @@ import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/page/settings_page/advanced.dart';
 import 'package:anx_reader/page/settings_page/appearance.dart';
 import 'package:anx_reader/page/settings_page/sync.dart';
+import 'package:anx_reader/page/settings_page/translate.dart';
 import 'package:anx_reader/widgets/settings/about.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -101,9 +102,15 @@ class _SubMoreSettingsState extends State<SubMoreSettings> {
           selectedIndex: selectedIndex,
           setDetail: setDetail,
         ),
+        TranslateSetting(
+          isMobile: isMobile,
+          id: 2,
+          selectedIndex: selectedIndex,
+          setDetail: setDetail,
+        ),
         AdvancedSetting(
             isMobile: isMobile,
-            id: 2,
+            id: 3,
             selectedIndex: selectedIndex,
             setDetail: setDetail),
         const About()

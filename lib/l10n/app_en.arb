@@ -115,6 +115,7 @@
   "common_attention": "Attention",
   "common_saving": "Saving",
   "common_saved": "Saved",
+  "common_test": "Test",
 
   "service_import_success": "Import success",
   "service_import_n_books": "{count, plural, =1{importing 1 book} other{importing {count} books}}",
@@ -147,6 +148,12 @@
   "import_cannot_get_file_path": "Cannot get file path",
   "import_success_restart_app": "Import success, please restart the app",
   "import_failed": "Import failed: {error}",
+
+  "settings_translate": "Translate",
+  "settings_translate_current_service": "Current Service",
+  "settings_translate_auto": "Auto",
+  "settings_translate_from": "From",
+  "settings_translate_to": "To",
 
   "storage_permission_denied": "Storage permission denied",
   "gallery_permission_denied": "Gallery permission denied",
