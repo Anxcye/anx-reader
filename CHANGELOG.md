@@ -1,10 +1,12 @@
 # Changelog
 
 ## Unreleased
-* Added: Note add time
+* Feat: Translate selected content
+* Feat: Note add time
 * UI: Optimized the statistic card
 
-* 新增：笔记添加时间
+* 新增：翻译选中内容
+* 新增：显示笔记添加时间
 * UI：优化了统计卡片
 
 ## 1.1.8 2024-10-23

@@ -52,6 +52,7 @@ class _TranslationMenuState extends State<TranslationMenu> {
     // Currently blocked by https://github.com/flutter/flutter/issues/116504
         maxHeight: 200,
       ),
+      color: Theme.of(context).colorScheme.secondaryContainer,
       itemBuilder: (context) => [
         for (var lang in LangList.values)
           PopupMenuItem(
