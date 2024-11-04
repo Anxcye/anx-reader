@@ -137,8 +137,11 @@ const handleSelection = (view, doc, index) => {
 
 const setSelectionHandler = (view, doc, index) => {
     //    doc.addEventListener('pointerdown', () => isSelecting = true);
-    // doc.addEventListener('pointerup', () => handleSelection(view, doc, index));
-    doc.addEventListener('selectionchange', () => handleSelection(view, doc, index));
+    // if windows
+    if (navigator.platform.includes('Win')) {
+        doc.addEventListener('pointerup', () => handleSelection(view, doc, index));
+    }
+    // doc.addEventListener('selectionchange', () => handleSelection(view, doc, index));
 
     if (!view.isFixedLayout)
         // go to the next page when selecting to the end of a page
