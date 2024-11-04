@@ -47,7 +47,6 @@ class EpubPlayer extends StatefulWidget {
 
 class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
   late InAppWebViewController webViewController;
-  late ContextMenu contextMenu;
   String cfi = '';
   double percentage = 0.0;
   String chapterTitle = '';
@@ -288,6 +287,7 @@ class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
     controller.addJavaScriptHandler(
         handlerName: 'onSelectionEnd',
         callback: (args) {
+          removeOverlay();
           Map<String, dynamic> location = args[0];
           String cfi = location['cfi'];
           String text = location['text'];
@@ -383,15 +383,6 @@ class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
 
   @override
   void initState() {
-    contextMenu = ContextMenu(
-      settings: ContextMenuSettings(hideDefaultSystemContextMenuItems: true),
-      onCreateContextMenu: (hitTestResult) async {
-        webViewController.evaluateJavascript(source: "showContextMenu()");
-      },
-      onHideContextMenu: () {
-        removeOverlay();
-      },
-    );
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 400),
       vsync: this,
@@ -437,6 +428,7 @@ class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
   InAppWebViewSettings initialSettings = InAppWebViewSettings(
     supportZoom: false,
     transparentBackground: true,
+    disableContextMenu: true,
   );
 
   Widget readingInfoWidget() {
@@ -527,7 +519,6 @@ class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
           InAppWebView(
             initialUrlRequest: URLRequest(url: WebUri(indexHtmlPath)),
             initialSettings: initialSettings,
-            contextMenu: contextMenu,
             onWebViewCreated: (controller) => onWebViewCreated(controller),
             onConsoleMessage: (controller, consoleMessage) {
               webviewConsoleMessage(controller, consoleMessage);

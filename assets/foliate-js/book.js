@@ -5,7 +5,7 @@
 //     // { id: 2, type: 'highlight', value: "epubcfi(/6/6!/4/576,/1:2,/1:3)", color: 'yellow', note: 'this is' },
 //     // { id: 3, type: 'underline', value: "epubcfi(/6/4!/4/4,/1:294,/1:301)", color: 'red', note: 'this is' },
 // ]
-// let url = '../local/shj.epub'
+// let url = '../local/a.epub'
 // let initialCfi = "epubcfi(/6/12!/4,/2[CHP3],/8/1:29)"
 // //  let initialCfi = null
 // let style = {
@@ -137,7 +137,8 @@ const handleSelection = (view, doc, index) => {
 
 const setSelectionHandler = (view, doc, index) => {
     //    doc.addEventListener('pointerdown', () => isSelecting = true);
-    doc.addEventListener('pointerup', () => handleSelection(view, doc, index));
+    // doc.addEventListener('pointerup', () => handleSelection(view, doc, index));
+    doc.addEventListener('selectionchange', () => handleSelection(view, doc, index));
 
     if (!view.isFixedLayout)
         // go to the next page when selecting to the end of a page
@@ -545,6 +546,7 @@ class Reader {
     #onClickView({ detail: { x, y } }) {
         const coordinatesX = x / window.innerWidth
         const coordinatesY = y / window.innerHeight
+        console.log('@@@@ #onClickView', coordinatesX, coordinatesY)
         onClickView(coordinatesX, coordinatesY)
     }
     get index() {
