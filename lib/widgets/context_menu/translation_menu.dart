@@ -19,21 +19,32 @@ class TranslationMenu extends StatefulWidget {
 class _TranslationMenuState extends State<TranslationMenu> {
   String? translatedText;
   bool isLoading = true;
+  bool _mounted = true;
 
   @override
   void initState() {
     super.initState();
-    _translate();
+    if (_mounted) {
+      _translate();
+    }
+  }
+
+  @override
+  void dispose() {
+    _mounted = false;
+    super.dispose();
   }
 
   Future<void> _translate() async {
     try {
       final result = await translateText(widget.content);
+      if (!_mounted) return;
       setState(() {
         translatedText = result;
         isLoading = false;
       });
     } catch (e) {
+      if (!_mounted) return;
       setState(() {
         translatedText = L10n.of(context).translate_error;
         isLoading = false;
@@ -49,7 +60,7 @@ class _TranslationMenuState extends State<TranslationMenu> {
       constraints: const BoxConstraints(
         minWidth: 120,
         maxWidth: 240,
-    // Currently blocked by https://github.com/flutter/flutter/issues/116504
+        // Currently blocked by https://github.com/flutter/flutter/issues/116504
         maxHeight: 200,
       ),
       color: Theme.of(context).colorScheme.secondaryContainer,
@@ -125,7 +136,8 @@ class _TranslationMenuState extends State<TranslationMenu> {
                                 onPressed: () {
                                   Clipboard.setData(
                                       ClipboardData(text: widget.content));
-                                  AnxToast.show(L10n.of(context).notes_page_copied);
+                                  AnxToast.show(
+                                      L10n.of(context).notes_page_copied);
                                 },
                                 icon: const Icon(EvaIcons.copy),
                               ),
