@@ -75,6 +75,8 @@
 
   "reading_page_chapter_pages": "本章页数",
   "reading_page_current_page": "当前页",
+  "reading_page_auto_translate_selection": "自动翻译选中的内容",
+  "translate_error": "翻译错误",
 
   "book_detail_save": "保存",
   "book_detail_edit": "编辑",

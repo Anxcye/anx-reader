@@ -19,7 +19,7 @@ import 'package:anx_reader/models/book_note.dart';
 import 'package:anx_reader/utils/webView/webview_console_message.dart';
 import 'package:anx_reader/utils/webView/webview_initial_variable.dart';
 import 'package:anx_reader/widgets/book_cover.dart';
-import 'package:anx_reader/widgets/context_menu.dart';
+import 'package:anx_reader/widgets/context_menu/context_menu.dart';
 import 'package:anx_reader/widgets/reading_page/more_settings/page_turning/diagram.dart';
 import 'package:anx_reader/widgets/reading_page/more_settings/page_turning/types_and_icons.dart';
 import 'package:anx_reader/widgets/reading_page/style_widget.dart';
@@ -388,7 +388,9 @@ class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
       onCreateContextMenu: (hitTestResult) async {
         webViewController.evaluateJavascript(source: "showContextMenu()");
       },
-      onHideContextMenu: () {},
+      onHideContextMenu: () {
+        removeOverlay();
+      },
     );
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 400),

@@ -14,6 +14,7 @@ Widget otherSettings = StatefulBuilder(
       child: Column(
         children: [
           fullScreen(context, setState),
+          autoTranslateSelection(context, setState),
           screenTimeout(context, setState),
           pageTurningControl(),
         ],
@@ -54,7 +55,7 @@ Widget screenTimeout(BuildContext context, StateSetter setState) {
 }
 ListTile fullScreen(BuildContext context, StateSetter setState) {
   return ListTile(
-    leading: Checkbox(
+    trailing: Switch(
         value: Prefs().hideStatusBar,
         onChanged: (bool? value) => setState(() {
           Prefs().saveHideStatusBar(value!);
@@ -103,4 +104,15 @@ Widget pageTurningControl() {
       ),
     );
   });
+}
+Widget autoTranslateSelection(BuildContext context, StateSetter setState) {
+  return ListTile(
+    trailing: Switch(
+      value: Prefs().autoTranslateSelection,
+      onChanged: (bool value) => setState(() {
+        Prefs().autoTranslateSelection = value;
+      }),
+    ),
+    title: Text(L10n.of(context).reading_page_auto_translate_selection),
+  );
 }

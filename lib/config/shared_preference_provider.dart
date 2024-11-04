@@ -267,7 +267,8 @@ class Prefs extends ChangeNotifier {
   }
 
   TranslateService get translateService {
-    return getTranslateService(prefs.getString('translateService') ?? 'microsoft');
+    return getTranslateService(
+        prefs.getString('translateService') ?? 'microsoft');
   }
 
   set translateFrom(LangList from) {
@@ -286,5 +287,14 @@ class Prefs extends ChangeNotifier {
 
   LangList get translateTo {
     return getLang(prefs.getString('translateTo') ?? 'en');
+  }
+
+  set autoTranslateSelection(bool status) {
+    prefs.setBool('autoTranslateSelection', status);
+    notifyListeners();
+  }
+
+  bool get autoTranslateSelection {
+    return prefs.getBool('autoTranslateSelection') ?? true;
   }
 }

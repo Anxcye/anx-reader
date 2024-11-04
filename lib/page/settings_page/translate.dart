@@ -245,7 +245,7 @@ class _TranslateSettingItemState extends State<TranslateSettingItem> {
                           onPressed: () {
                             translateText(
                               testText,
-                              widget.service,
+                              service: widget.service,
                             ).then((value) {
                               SmartDialog.show(
                                 useSystem: true,

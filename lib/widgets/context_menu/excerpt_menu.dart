@@ -28,6 +28,8 @@ Widget excerptMenu(
   int? id,
   Function() onClose,
   bool footnote,
+  BoxDecoration decoration,
+  Function() toggleTranslationMenu,
 ) {
   bool deleteConfirm = false;
   Icon deleteIcon() {
@@ -119,18 +121,6 @@ Widget excerptMenu(
     );
   }
 
-  BoxDecoration decoration = BoxDecoration(
-    color: Theme.of(context).scaffoldBackgroundColor,
-    borderRadius: BorderRadius.circular(10),
-    boxShadow: [
-      BoxShadow(
-        color: Colors.black.withOpacity(0.1),
-        spreadRadius: 5,
-        blurRadius: 7,
-        offset: const Offset(0, 3),
-      ),
-    ],
-  );
 
   Widget annotationMenu = Container(
     height: 48,
@@ -174,14 +164,23 @@ Widget excerptMenu(
               mode: LaunchMode.externalApplication);
         },
       ),
+      // toggle translation menu
+      iconButton(
+        icon: const Icon(Icons.translate),
+        onPressed: () {
+          toggleTranslationMenu();
+        },
+      ),
     ]),
   );
 
-  return Row(
-    mainAxisAlignment: MainAxisAlignment.spaceAround,
-    children: [
-      operatorMenu,
-      if (!footnote) annotationMenu,
-    ],
+  return Expanded(
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        operatorMenu,
+        if (!footnote) annotationMenu,
+      ],
+    ),
   );
 }
