@@ -115,6 +115,7 @@
   "common_attention": "注意",
   "common_saving": "保存中",
   "common_saved": "已保存",
+  "common_test": "测试",
 
   "service_import_success":"导入成功",
   "service_import_n_books": "{count, plural, other{正在导入 {count} 本书}}",
@@ -147,6 +148,12 @@
   "import_cannot_get_file_path": "无法获取文件路径",
   "import_success_restart_app": "导入成功，请重启应用",
   "import_failed": "导入失败: {error}",
+
+  "settings_translate": "翻译",
+  "settings_translate_current_service": "当前服务",
+  "settings_translate_auto": "自动",
+  "settings_translate_from": "原文",
+  "settings_translate_to": "译文",
 
   "settings_advanced": "高级",
   "settings_advanced_log": "日志",

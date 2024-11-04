@@ -6,6 +6,7 @@ import 'package:anx_reader/main.dart';
 import 'package:anx_reader/models/book_style.dart';
 import 'package:anx_reader/models/font_model.dart';
 import 'package:anx_reader/models/read_theme.dart';
+import 'package:anx_reader/service/translate/index.dart';
 import 'package:anx_reader/widgets/reading_page/style_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -258,5 +259,32 @@ class Prefs extends ChangeNotifier {
 
   bool get trueDarkMode {
     return prefs.getBool('trueDarkMode') ?? false;
+  }
+
+  set translateService(TranslateService service) {
+    prefs.setString('translateService', service.name);
+    notifyListeners();
+  }
+
+  TranslateService get translateService {
+    return getTranslateService(prefs.getString('translateService') ?? 'microsoft');
+  }
+
+  set translateFrom(LangList from) {
+    prefs.setString('translateFrom', from.code);
+    notifyListeners();
+  }
+
+  LangList get translateFrom {
+    return getLang(prefs.getString('translateFrom') ?? 'auto');
+  }
+
+  set translateTo(LangList to) {
+    prefs.setString('translateTo', to.code);
+    notifyListeners();
+  }
+
+  LangList get translateTo {
+    return getLang(prefs.getString('translateTo') ?? 'en');
   }
 }
