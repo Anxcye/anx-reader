@@ -182,5 +182,10 @@
   "statistic_yesterday": "{count, plural, =1{昨天} other{{count}天前}}",
   "statistic_days_ago": "{count, plural, =1{1天前} other{{count}天前}}",
   "statistic_months_ago": "{count, plural, =1{1个月前} other{{count}个月前}}",
-  "statistic_years_ago": "{count, plural, =1{1年前} other{{count}年前}}"
+  "statistic_years_ago": "{count, plural, =1{1年前} other{{count}年前}}",
+
+  "webview_unsupported_version": "不支持的 Webview 版本",
+  "webview_unsupported_message": "Webview 版本可能不支持。当前版本为 {version}, 所需的最低版本是 {minVersion}，请更新您的 Webview",
+  "webview_update": "如何更新",
+  "webview_cancel": "我知道了"
 }
