@@ -183,6 +183,11 @@
   "statistic_yesterday": "{count, plural, =1{1 yesterday} other{{count} yesterday}}",
   "statistic_days_ago": "{count, plural, =1{1 day ago} other{{count} days ago}}",
   "statistic_months_ago": "{count, plural, =1{1 month ago} other{{count} months ago}}",
-  "statistic_years_ago": "{count, plural, =1{1 year ago} other{{count} years ago}}"
+  "statistic_years_ago": "{count, plural, =1{1 year ago} other{{count} years ago}}",
+
+  "webview_unsupported_version": "Unsupported Webview Version",
+  "webview_unsupported_message": "Your Webview version may be not supported. Current version is {version}, required minimum version is {minVersion}, please update your Webview",
+  "webview_update": "How to update",
+  "webview_cancel": "I know"
 
 }
