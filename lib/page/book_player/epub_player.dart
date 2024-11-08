@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/dao/book.dart';
 import 'package:anx_reader/dao/book_note.dart';
+import 'package:anx_reader/enums/convert_chinese_mode.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/models/book_style.dart';
 import 'package:anx_reader/models/font_model.dart';
@@ -125,6 +126,12 @@ class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
         letterSpacing: ${bookStyle.letterSpacing},
         textIndent: ${bookStyle.indent},
       })
+    ''');
+  }
+
+  void changeConvertChinese(ConvertChineseMode convertChineseMode) {
+    webViewController.evaluateJavascript(source: '''
+      convertChinese('${convertChineseMode.name}')
     ''');
   }
 

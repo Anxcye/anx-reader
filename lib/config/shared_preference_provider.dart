@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:core';
 
+import 'package:anx_reader/enums/convert_chinese_mode.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/main.dart';
 import 'package:anx_reader/models/book_style.dart';
@@ -296,5 +297,15 @@ class Prefs extends ChangeNotifier {
 
   bool get autoTranslateSelection {
     return prefs.getBool('autoTranslateSelection') ?? true;
+  }
+
+  set convertChineseMode(ConvertChineseMode mode) {
+    prefs.setString('convertChineseMode', mode.name);
+    notifyListeners();
+  }
+
+  ConvertChineseMode get convertChineseMode {
+    return getConvertChineseMode(
+        prefs.getString('convertChineseMode') ?? 'none');
   }
 }
