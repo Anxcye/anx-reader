@@ -56,6 +56,7 @@ void webviewInitialVariable(
          hyphenate: true,
          pageTurnStyle: '${Prefs().pageTurnStyle.name}',
      }
+     let convertChineseMode = '${Prefs().convertChineseMode.name}'
   ''';
   controller.addJavaScriptHandler(
       handlerName: 'webviewInitialVariable',

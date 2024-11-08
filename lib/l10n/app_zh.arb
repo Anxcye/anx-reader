@@ -46,6 +46,13 @@
   "reading_page_theme": "主题",
   "reading_page_style": "样式",
   "reading_page_other": "其他",
+  "reading_page_reading": "阅读",
+  "reading_page_convert_chinese": "简繁转换",
+  "reading_page_original": "原文",
+  "reading_page_simplified": "简体",
+  "reading_page_traditional": "繁体",
+  "reading_page_convert_chinese_tips": "简繁转换可能不准确，请谨慎使用",
+
   "reading_page_full_screen": "全屏",
   "reading_page_screen_timeout": "屏幕超时",
   "reading_page_page_turning_method": "翻页方式",
