@@ -2,19 +2,20 @@
 
 ## Todo
 - 选择时移动
-- 简繁转换
 - 自动背景色
 
 ## Unreleased
 - Feat: Translate selected content
 - Feat: Note add time
 - Feat: Webview version check
+- Feat: convert chinese mode
 - UI: Optimized the statistic card
 - Fix: Context menu cannot be closed once
 
 - 新增：翻译选中内容
 - 新增：显示笔记添加时间
 - 新增：Webview版本检查
+- 新增：简繁转换
 - UI：优化了统计卡片
 - 修复：上下文菜单不能一次关闭
 
