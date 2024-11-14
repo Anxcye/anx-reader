@@ -602,10 +602,10 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_tts
-      sha256: aed2a00c48c43af043ed81145fd8503ddd793dafa7088ab137dbef81a703e53d
+      sha256: "02c65a10d3423dcd73e0236fb381dbd459d4a13ecfce40b9be41bd0bc4180733"
       url: "https://pub.dev"
     source: hosted
-    version: "4.0.2"
+    version: "4.1.0"
   flutter_web_plugins:
     dependency: transitive
     description: flutter
