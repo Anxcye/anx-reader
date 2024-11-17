@@ -5,6 +5,12 @@
 - 自动背景色
 
 ## Unreleased
+
+## 1.2.0 2024-11-17
+
+🚀You can now use Anx-Reader on Windows!
+🚀现在可以在 Windows 上使用安读了！
+
 - Feat: Translate selected content
 - Feat: Note add time
 - Feat: Webview version check
