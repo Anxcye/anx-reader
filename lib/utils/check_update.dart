@@ -32,7 +32,18 @@ Future<void> checkUpdate(bool manualCheck) async {
   String currentVersion =
       (await getAppVersion()).substring(0, newVersion.length);
   AnxLog.info('Update: new version $newVersion');
-  if (newVersion != currentVersion) {
+
+  List<String> newVersionList = newVersion.split('.');
+  List<String> currentVersionList = currentVersion.split('.');
+  bool needUpdate = false;
+  for (int i = 0; i < newVersionList.length; i++) {
+    if (int.parse(newVersionList[i]) > int.parse(currentVersionList[i])) {
+      needUpdate = true;
+      break;
+    }
+  }
+
+  if (needUpdate) {
     if (manualCheck) {
       Navigator.of(context).pop();
     }
