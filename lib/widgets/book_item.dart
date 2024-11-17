@@ -30,6 +30,10 @@ class BookItem extends StatelessWidget {
       onLongPress: () {
         handleLongPress(context);
       },
+      onSecondaryTap: () {
+        handleLongPress(context);
+      },
+      
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
