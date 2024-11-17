@@ -11,13 +11,15 @@
 - Feat: convert chinese mode
 - UI: Optimized the statistic card
 - Fix: Context menu cannot be closed once
+- Fix: Cannot correctly judge the version when checking for updates
 
 - 新增：翻译选中内容
-- 新增：显示笔记添加时间
-- 新增：Webview版本检查
 - 新增：简繁转换
+- 新增：Webview版本检查
+- 新增：显示笔记添加时间
 - UI：优化了统计卡片
 - 修复：上下文菜单不能一次关闭
+- 修复: 检查更新时不能正确判断版本
 
 ## 1.1.8 2024-10-23
 
