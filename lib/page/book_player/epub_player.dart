@@ -26,7 +26,9 @@ import 'package:anx_reader/widgets/reading_page/more_settings/page_turning/types
 import 'package:anx_reader/widgets/reading_page/style_widget.dart';
 import 'package:battery_plus/battery_plus.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:intl/intl.dart';
@@ -75,6 +77,8 @@ class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
 
   Stream<List<SearchResultModel>> get searchResultStream =>
       _searchResultController.stream;
+
+  FocusNode focusNode = FocusNode();
 
   void prevPage() {
     webViewController.evaluateJavascript(source: 'prevPage()');
@@ -389,8 +393,48 @@ class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
     contextMenuEntry = null;
   }
 
+  void _handleKeyAndMouseEvents(KeyEvent event) {
+    final nextPageEvent = [
+      LogicalKeyboardKey.arrowRight,
+      LogicalKeyboardKey.arrowDown,
+      LogicalKeyboardKey.pageDown,
+      LogicalKeyboardKey.space,
+    ];
+
+    final prevPageEvent = [
+      LogicalKeyboardKey.arrowLeft,
+      LogicalKeyboardKey.arrowUp,
+      LogicalKeyboardKey.pageUp,
+    ];
+
+    final appBarEvent = [
+      LogicalKeyboardKey.enter,
+    ];
+
+    if (event is KeyDownEvent) {
+      if (nextPageEvent.contains(event.logicalKey)) {
+        nextPage();
+      } else if (prevPageEvent.contains(event.logicalKey)) {
+        prevPage();
+      } else if (appBarEvent.contains(event.logicalKey)) {
+        widget.showOrHideAppBarAndBottomBar(true);
+      }
+    }
+  }
+
+  void _handlePointerEvents(PointerEvent event) {
+    if (event is PointerScrollEvent) {
+      if (event.scrollDelta.dy > 0) {
+        nextPage();
+      } else {
+        prevPage();
+      }
+    }
+  }
+
   @override
   void initState() {
+    focusNode.requestFocus();
     contextMenu = ContextMenu(
       settings: ContextMenuSettings(hideDefaultSystemContextMenuItems: true),
       onCreateContextMenu: (hitTestResult) async {
@@ -524,53 +568,63 @@ class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      body: Stack(
-        children: [
-          SizedBox.expand(
-            child: FadeTransition(
-                opacity: _animation, child: bookCover(context, widget.book)),
-          ),
-          InAppWebView(
-            initialUrlRequest: URLRequest(url: WebUri(indexHtmlPath)),
-            initialSettings: initialSettings,
-            contextMenu: contextMenu,
-            onWebViewCreated: (controller) => onWebViewCreated(controller),
-            onConsoleMessage: (controller, consoleMessage) {
-              webviewConsoleMessage(controller, consoleMessage);
-            },
-          ),
-          readingInfoWidget(),
-          if (showHistory)
-            Positioned(
-              bottom: 30,
-              left: 0,
-              child: Container(
-                width: MediaQuery.of(context).size.width,
-                padding: const EdgeInsets.all(10),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    if (canGoBack)
-                      IconButton(
-                        onPressed: () {
-                          backHistory();
-                        },
-                        icon: const Icon(Icons.arrow_back_ios),
-                      ),
-                    if (canGoForward)
-                      IconButton(
-                        onPressed: () {
-                          forwardHistory();
-                        },
-                        icon: const Icon(Icons.arrow_forward_ios),
-                      ),
-                  ],
-                ),
+    return KeyboardListener(
+      focusNode: focusNode,
+      onKeyEvent: _handleKeyAndMouseEvents,
+      child: Listener(
+        onPointerSignal: (event) {
+          _handlePointerEvents(event);
+        },
+        child: Scaffold(
+          resizeToAvoidBottomInset: false,
+          body: Stack(
+            children: [
+              SizedBox.expand(
+                child: FadeTransition(
+                    opacity: _animation,
+                    child: bookCover(context, widget.book)),
               ),
-            ),
-        ],
+              InAppWebView(
+                initialUrlRequest: URLRequest(url: WebUri(indexHtmlPath)),
+                initialSettings: initialSettings,
+                contextMenu: contextMenu,
+                onWebViewCreated: (controller) => onWebViewCreated(controller),
+                onConsoleMessage: (controller, consoleMessage) {
+                  webviewConsoleMessage(controller, consoleMessage);
+                },
+              ),
+              readingInfoWidget(),
+              if (showHistory)
+                Positioned(
+                  bottom: 30,
+                  left: 0,
+                  child: Container(
+                    width: MediaQuery.of(context).size.width,
+                    padding: const EdgeInsets.all(10),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        if (canGoBack)
+                          IconButton(
+                            onPressed: () {
+                              backHistory();
+                            },
+                            icon: const Icon(Icons.arrow_back_ios),
+                          ),
+                        if (canGoForward)
+                          IconButton(
+                            onPressed: () {
+                              forwardHistory();
+                            },
+                            icon: const Icon(Icons.arrow_forward_ios),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
       ),
     );
   }
