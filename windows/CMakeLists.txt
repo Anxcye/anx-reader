@@ -1,5 +1,6 @@
 # Project-level configuration.
 cmake_minimum_required(VERSION 3.14)
+set(CMAKE_SYSTEM_VERSION "10.0.22621.0")
 project(anx_reader LANGUAGES CXX)
 
 # The name of the executable created for the application. Change this to change
