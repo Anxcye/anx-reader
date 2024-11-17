@@ -9,10 +9,38 @@ permissions:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - platform: android
+            os: ubuntu-latest
+          - platform: windows
+            os: windows-latest
+            
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          ref: 'main'
+
+      - name: Get version from pubspec.yaml
+        id: get_version
+        shell: bash
+        run: echo "VERSION=$( grep '^version:' pubspec.yaml | cut -d ' ' -f 2 | cut -d '+' -f 1 )" >> $GITHUB_ENV
+        
+      - name: Setup for Windows
+        if: matrix.platform == 'windows'
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: mingw64
+          install: mingw-w64-x86_64-gcc
+          update: true
+
+      - name: Set Mingw64 Env
+        if: matrix.platform == 'windows'
+        run: |
+          echo "${{ runner.temp }}\msys64\mingw64\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -24,6 +52,7 @@ jobs:
         run: flutter --version
 
       - name: Setup Java
+        if: matrix.platform == 'android'
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
@@ -34,22 +63,53 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Build APKs
+      - name: Setup Android signing
+        if: matrix.platform == 'android'
         run: |
-          flutter build apk --release
-          flutter build apk --split-per-abi
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/keystore.jks        
+          echo "storePassword=${{ secrets.KEYSTORE_PASSWORD }}" > android/key.properties    
+          echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> android/key.properties    
+          echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> android/key.properties    
+          echo "storeFile=keystore.jks" >> android/key.properties
 
-      - name: Get version from tag
-        id: get_version
-        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
-
-      - name: Rename APKs
+      - name: Prepare for platform
+        if: matrix.platform == 'windows'
+        shell: bash
         run: |
-          cd build/app/outputs/flutter-apk
-          mv app-armeabi-v7a-release.apk Anx-Reader-${{ env.VERSION }}-armeabi-v7a.apk
-          mv app-arm64-v8a-release.apk Anx-Reader-${{ env.VERSION }}-arm64-v8a.apk
-          mv app-x86_64-release.apk Anx-Reader-${{ env.VERSION }}-x86_64.apk
-          mv app-release.apk Anx-Reader-${{ env.VERSION }}-universal.apk
+          flutter config --enable-windows-desktop
+          sed -i "1i #define MyAppVersion \"${{ env.VERSION }}\"" scripts/compile_windows_setup-inno.iss
+
+      - name: Build for Android
+        if: matrix.platform == 'android'
+        run: |
+            flutter gen-l10n
+            flutter build apk --release
+            flutter build apk --split-per-abi
+        shell: bash
+
+      - name: Install winget
+        if: matrix.platform == 'windows'
+        uses: Cyberboss/install-winget@v1
+
+      - name: Build for Windows
+        if: matrix.platform == 'windows'
+        shell: pwsh
+        run: ./scripts/build_windows.ps1
+
+      - name: Rename builds
+        run: |
+          cd build
+          if [ "${{ matrix.platform }}" == "android" ]; then
+            cd app/outputs/flutter-apk
+            mv app-armeabi-v7a-release.apk Anx-Reader-${{ matrix.platform }}-${{ env.VERSION }}-armeabi-v7a.apk
+            mv app-arm64-v8a-release.apk Anx-Reader-${{ matrix.platform }}-${{ env.VERSION }}-arm64-v8a.apk
+            mv app-x86_64-release.apk Anx-Reader-${{ matrix.platform }}-${{ env.VERSION }}-x86_64.apk
+            mv app-release.apk Anx-Reader-${{ matrix.platform }}-${{ env.VERSION }}-universal.apk
+          elif [ "${{ matrix.platform }}" == "windows" ]; then
+            mv windows/app.zip windows/Anx-Reader-${{ matrix.platform }}-${{ env.VERSION }}.zip
+            mv windows/app.exe windows/Anx-Reader-${{ matrix.platform }}-${{ env.VERSION }}.exe
+          fi
+        shell: bash
 
       - name: Extract release notes
         id: extract_release_notes
@@ -59,14 +119,25 @@ jobs:
           echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
           echo "$CHANGELOG_CONTENT" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
-
-      - name: Create Release
-        uses: softprops/action-gh-release@v2
+        shell: bash
+      
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
         with:
-          files: |
-            build/app/outputs/flutter-apk/Anx-Reader-${{ env.VERSION }}-armeabi-v7a.apk
-            build/app/outputs/flutter-apk/Anx-Reader-${{ env.VERSION }}-arm64-v8a.apk
-            build/app/outputs/flutter-apk/Anx-Reader-${{ env.VERSION }}-x86_64.apk
-            build/app/outputs/flutter-apk/Anx-Reader-${{ env.VERSION }}-universal.apk
-          body: ${{ env.RELEASE_NOTES }}
-          generate_release_notes: false
+          name: ${{ matrix.platform }}-artifacts
+          path: |
+            build/app/outputs/flutter-apk/*.apk
+            build/windows/*.zip
+            build/windows/*.exe
+          if-no-files-found: warn
+
+
+      # - name: Create Release
+      #   uses: softprops/action-gh-release@v2
+      #   with:
+      #     files: |
+      #       build/app/outputs/flutter-apk/*.apk
+      #       build/windows/*.zip
+      #       build/windows/*.exe
+      #     body: ${{ env.RELEASE_NOTES }}
+      #     generate_release_notes: false
