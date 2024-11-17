@@ -7,6 +7,8 @@
 ## Unreleased
 
 ## 1.2.0 2024-11-17
+❗Anx-Reader has changed the Android version signature, please back up and reinstall Anx-Reader❗
+❗安读更换了Android版本的签名, 请做好备份重新安装安读❗
 
 🚀You can now use Anx-Reader on Windows!
 🚀现在可以在 Windows 上使用安读了！
