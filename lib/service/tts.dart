@@ -87,6 +87,9 @@ class Tts {
 
     flutterTts.setStartHandler(() async {
       ttsState = TtsState.playing;
+      if (isWindows) {
+        return;
+      }
       _currentVoiceText = await epubPlayerKey.currentState!.ttsPrepare();
 
       if (_currentVoiceText?.isNotEmpty ?? false) {
@@ -96,6 +99,9 @@ class Tts {
 
     flutterTts.setCompletionHandler(() async {
       ttsState = TtsState.playing;
+      if (isWindows) {
+        return;
+      }
       if (_currentVoiceText?.isEmpty ?? true) {
         _currentVoiceText = await getNextVoiceText();
         speak();
@@ -137,13 +143,15 @@ class Tts {
 
   static void toggle() {
     if (isPlaying) {
-      pause();
+      // pause();
+      stop();
     } else {
       speak();
     }
   }
 
   static Future<void> speak({String? content}) async {
+    await setAwaitOptions();
     if (content != null) {
       _currentVoiceText = content;
     }
@@ -152,19 +160,24 @@ class Tts {
     await flutterTts.setSpeechRate(rate);
     await flutterTts.setPitch(pitch);
 
-
     // at speak begin, ttsStartHandler will be called,
     // a new voice text will be set there and begin synthesize
 
     // at speak complete, ttsCompletionHandler will be called,
     // a new voice text will be set there and begin synthesize
     await flutterTts.speak(_currentVoiceText!);
+    if (isWindows && ttsState == TtsState.playing) {
+      _currentVoiceText = await getNextVoiceText();
+      speak();
+    }
   }
 
   static Future<void> setAwaitOptions() async {
     await flutterTts.awaitSpeakCompletion(true);
-    await flutterTts.awaitSynthCompletion(true);
-    await flutterTts.setQueueMode(1);
+    if (isAndroid) {
+      await flutterTts.awaitSynthCompletion(true);
+      await flutterTts.setQueueMode(1);
+    }
   }
 
   static Future<void> stop() async {
