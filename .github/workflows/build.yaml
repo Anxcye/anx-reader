@@ -29,27 +29,16 @@ jobs:
         shell: bash
         run: echo "VERSION=$( grep '^version:' pubspec.yaml | cut -d ' ' -f 2 | cut -d '+' -f 1 )" >> $GITHUB_ENV
         
-      - name: Setup for Windows
-        if: matrix.platform == 'windows'
-        uses: msys2/setup-msys2@v2
-        with:
-          msystem: mingw64
-          install: mingw-w64-x86_64-gcc
-          update: true
-
-      - name: Set Mingw64 Env
-        if: matrix.platform == 'windows'
-        run: |
-          echo "${{ runner.temp }}\msys64\mingw64\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version: '3.x'
+          flutter-version: '3.24.3'
 
-      - name: Get Flutter version
-        run: flutter --version
+      - name: Get Dependencies
+        run: |
+          flutter --version
+          flutter pub get
 
       - name: Setup Java
         if: matrix.platform == 'android'
@@ -60,8 +49,21 @@ jobs:
           cache: 'gradle'
           check-latest: true
 
-      - name: Install dependencies
-        run: flutter pub get
+      # - name: Setup for Windows
+      #   if: matrix.platform == 'windows'
+      #   uses: msys2/setup-msys2@v2
+      #   with:
+      #     msystem: mingw64
+      #     install: mingw-w64-x86_64-gcc
+      #     update: true
+
+      # - name: Set Mingw64 Env
+      #   if: matrix.platform == 'windows'
+      #   shell: bash
+      #   run: |
+      #     echo "${{ runner.temp }}\msys64\mingw64\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      #     gcc -v
+
 
       - name: Setup Android signing
         if: matrix.platform == 'android'
@@ -121,23 +123,23 @@ jobs:
           echo "EOF" >> $GITHUB_ENV
         shell: bash
       
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+    #   - name: Upload artifacts
+    #     uses: actions/upload-artifact@v4
+    #     with:
+    #       name: ${{ matrix.platform }}-artifacts
+    #       path: |
+    #         build/app/outputs/flutter-apk/*.apk
+    #         build/windows/*.zip
+    #         build/windows/*.exe
+    #       if-no-files-found: warn
+
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
         with:
-          name: ${{ matrix.platform }}-artifacts
-          path: |
+          files: |
             build/app/outputs/flutter-apk/*.apk
             build/windows/*.zip
             build/windows/*.exe
-          if-no-files-found: warn
-
-
-      # - name: Create Release
-      #   uses: softprops/action-gh-release@v2
-      #   with:
-      #     files: |
-      #       build/app/outputs/flutter-apk/*.apk
-      #       build/windows/*.zip
-      #       build/windows/*.exe
-      #     body: ${{ env.RELEASE_NOTES }}
-      #     generate_release_notes: false
+          body: ${{ env.RELEASE_NOTES }}
+          generate_release_notes: false
