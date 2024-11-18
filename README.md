@@ -16,6 +16,7 @@
 Anx Reader is an application focused on reading, without any online promotional content. It can help you concentrate more on reading and improve your reading efficiency.
 
 Support **epub / mobi / azw3 / fb2**
+Available on Android and Windows.
 
 ![](./docs/images/9.jpg)
 
@@ -30,10 +31,11 @@ Support **epub / mobi / azw3 / fb2**
 - [X] Page-turning animation
 - [X] TTS voice reading
 - [X] Reading fonts
-- [ ] Translation
+- [X] Translation
+- [ ] Full-text translation
 - [ ] Support for more file types (txt, pdf)
 - [X] Support for WebDAV synchronization
-- [ ] Support for Windows, Linux
+- [ ] Support for Linux, MacOS
 
 ### I Encountered a Problem, What Should I Do?
 Check [Troubleshooting](./docs/troubleshooting.md#English)
@@ -41,6 +43,17 @@ Check [Troubleshooting](./docs/troubleshooting.md#English)
 Submit an [issue](https://github.com/Anxcye/anx-reader/issues/new/choose), and we will respond as soon as possible.
 
 Telegram Group: [https://t.me/AnxReader](https://t.me/AnxReader)
+
+### Screenshots
+| ![](./docs/images/windows_main.png)**windows** | ![](./docs/images/2wen.png) **Android Tablet**|
+|:--:|:-:|
+| ![](./docs/images/1wen.png) | ![](./docs/images/3wen.png) |
+
+| ![](./docs/images/5men.jpg) | ![](./docs/images/1men.jpg) |![](./docs/images/7men.jpg)|
+|:--:|:--:|:--:|
+| ![](./docs/images/10men.jpg) | ![](./docs/images/9men.jpg) | ![](./docs/images/8men.jpg)|
+
+
 
 ## Building
 Want to build Anx Reader from source? Please follow these steps:
