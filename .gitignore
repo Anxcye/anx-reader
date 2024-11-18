@@ -44,3 +44,4 @@ app.*.map.json
 
 # riverpod generated files
 lib/gen/
+release.sh
