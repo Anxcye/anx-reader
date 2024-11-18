@@ -16,6 +16,7 @@
 安读是一款专注于阅读的应用，不包含任何在线推广内容，它可以帮助你更专注于阅读，提高阅读效率。
 
 支持 **epub / mobi / azw3 / fb2**
+现已支持 Android 和 Windows。
 
 ![](./docs/images/9_zh.jpg)
 
@@ -34,10 +35,12 @@
 - [X] 翻页动画
 - [X] TTS 语音朗读
 - [X] 阅读字体
-- [ ] 翻译
+- [X] 翻译
+- [ ] 全文翻译
 - [ ] 支持更多文件类型（txt, pdf）
 - [X] 支持 WebDAV 同步
-- [ ] 支持 Windows，Linux
+- [ ] 支持 Linux, MacOS
+
 
 
 ### 我遇到了问题，怎么办？
@@ -46,6 +49,18 @@
 提出一个[issue](https://github.com/Anxcye/anx-reader/issues/new/choose)，将会尽快回复。
 
 Telegram 群组：[https://t.me/AnxReader](https://t.me/AnxReader)
+
+### 截图
+| ![](./docs/images/windows_main.png)**windows** | ![](./docs/images/2wen.png) **Android Tablet**|
+|:--:|:-:|
+| ![](./docs/images/1wen.png) | ![](./docs/images/3wen.png) |
+
+| ![](./docs/images/5men.jpg) | ![](./docs/images/1men.jpg) |![](./docs/images/7men.jpg)|
+|:--:|:--:|:--:|
+| ![](./docs/images/10men.jpg) | ![](./docs/images/9men.jpg) | ![](./docs/images/8men.jpg)|
+
+
+
 
 ## 构建
 希望从源码构建安读？请参考以下步骤：
