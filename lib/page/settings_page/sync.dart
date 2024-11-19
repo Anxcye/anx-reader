@@ -18,10 +18,11 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as path;
 import 'package:settings_ui/settings_ui.dart';
 
-class SyncSetting extends StatelessWidget {
+class SyncSetting extends ConsumerWidget {
   const SyncSetting(
       {super.key,
       required this.isMobile,
@@ -35,7 +36,7 @@ class SyncSetting extends StatelessWidget {
   final void Function(Widget detail, int id) setDetail;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return settingsTitle(
         icon: const Icon(Icons.sync),
         title: L10n.of(context).settings_sync,
@@ -47,16 +48,17 @@ class SyncSetting extends StatelessWidget {
   }
 }
 
-class SubSyncSettings extends StatefulWidget {
+class SubSyncSettings extends ConsumerStatefulWidget {
   const SubSyncSettings({super.key, required this.isMobile});
 
   final bool isMobile;
 
   @override
-  State<SubSyncSettings> createState() => _SubSyncSettingsState();
+  ConsumerState<ConsumerStatefulWidget> createState() =>
+      _SubSyncSettingsState();
 }
 
-class _SubSyncSettingsState extends State<SubSyncSettings> {
+class _SubSyncSettingsState extends ConsumerState<SubSyncSettings> {
   @override
   Widget build(BuildContext context) {
     return settingsBody(
@@ -81,7 +83,7 @@ class _SubSyncSettingsState extends State<SubSyncSettings> {
                       });
                     } else {
                       AnxWebdav.init();
-                      chooseDirection();
+                      chooseDirection(ref);
                     }
                   }
                 },
@@ -100,7 +102,7 @@ class _SubSyncSettingsState extends State<SubSyncSettings> {
                 // value: Text(Prefs().syncDirection),
                 enabled: Prefs().webdavStatus,
                 onPressed: (context) {
-                  chooseDirection();
+                  chooseDirection(ref);
                 })
           ],
         ),

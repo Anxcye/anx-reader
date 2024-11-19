@@ -9,15 +9,16 @@ import 'package:anx_reader/utils/webdav/common.dart';
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/utils/toast/common.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class HomePage extends StatefulWidget {
+class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  ConsumerState<ConsumerStatefulWidget> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends ConsumerState<HomePage> {
   int _currentIndex = 0;
   final List<Widget> _pages = [
     const BookshelfPage(),
@@ -37,7 +38,7 @@ class _HomePageState extends State<HomePage> {
     checkUpdate(false);
     if (Prefs().webdavStatus){
       await AnxWebdav.init();
-      await AnxWebdav.syncData(SyncDirection.both);
+      await AnxWebdav.syncData(SyncDirection.both, ref);
     }
     loadDefaultFont();
   }

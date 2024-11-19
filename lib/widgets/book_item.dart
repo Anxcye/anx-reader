@@ -4,28 +4,102 @@ import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/page/book_detail.dart';
 import 'package:anx_reader/dao/book.dart';
 import 'package:anx_reader/models/book.dart';
+import 'package:anx_reader/providers/book_list.dart';
 import 'package:anx_reader/service/book.dart';
 import 'package:anx_reader/widgets/book_cover.dart';
 import 'package:anx_reader/widgets/delete_confirm.dart';
 import 'package:anx_reader/widgets/icon_and_text.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:icons_plus/icons_plus.dart';
 
-class BookItem extends StatelessWidget {
+class BookItem extends ConsumerWidget {
   const BookItem({
     super.key,
     required this.book,
-    required this.onRefresh,
+    // required this.onRefresh,
   });
 
   final Book book;
-  final Future<void> Function() onRefresh;
+  // final Future<void> Function() onRefresh;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    Future<dynamic> handleLongPress(BuildContext context) {
+      Future<void> handleDelete(BuildContext context) async {
+        Navigator.pop(context);
+        await updateBook(Book(
+          id: book.id,
+          title: book.title,
+          coverPath: book.coverPath,
+          filePath: book.filePath,
+          lastReadPosition: book.lastReadPosition,
+          readingPercentage: book.readingPercentage,
+          author: book.author,
+          isDeleted: true,
+          description: book.description,
+          rating: book.rating,
+          createTime: book.createTime,
+          updateTime: DateTime.now(),
+        ));
+        ref.read(bookListProvider.notifier).refresh();
+        File(book.fileFullPath).delete();
+        File(book.coverFullPath).delete();
+      }
+
+      void handleDetail(BuildContext context) {
+        Navigator.pop(context);
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => BookDetail(book: book),
+          ),
+        );
+      }
+
+      return showModalBottomSheet(
+          context: context,
+          builder: (BuildContext context) {
+            return Container(
+              padding: const EdgeInsets.all(20),
+              height: 100,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  iconAndText(
+                    icon: const Icon(EvaIcons.more_vertical),
+                    text: L10n.of(context).notes_page_detail,
+                    onTap: () {
+                      handleDetail(context);
+                    },
+                  ),
+                  const Spacer(),
+                  DeleteConfirm(
+                    delete: () {
+                      handleDelete(context);
+                    },
+                    deleteIcon: iconAndText(
+                      icon: const Icon(EvaIcons.trash),
+                      text: L10n.of(context).common_delete,
+                    ),
+                    confirmIcon: iconAndText(
+                      icon: const Icon(
+                        EvaIcons.checkmark_circle_2,
+                        color: Colors.red,
+                      ),
+                      text: L10n.of(context).common_confirm,
+                    ),
+                  )
+                ],
+              ),
+            );
+          });
+    }
+
     return GestureDetector(
       onTap: () {
-        openBook(context, book, onRefresh);
+        openBook(context, book, ref);
       },
       onLongPress: () {
         handleLongPress(context);
@@ -33,7 +107,6 @@ class BookItem extends StatelessWidget {
       onSecondaryTap: () {
         handleLongPress(context);
       },
-      
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -87,78 +160,6 @@ class BookItem extends StatelessWidget {
             ],
           ),
         ],
-      ),
-    );
-  }
-
-  Future<dynamic> handleLongPress(BuildContext context) {
-    return showModalBottomSheet(
-        context: context,
-        builder: (BuildContext context) {
-          return Container(
-            padding: const EdgeInsets.all(20),
-            height: 100,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                iconAndText(
-                  icon: const Icon(EvaIcons.more_vertical),
-                  text: L10n.of(context).notes_page_detail,
-                  onTap: () {
-                    handleDetail(context);
-                  },
-                ),
-                const Spacer(),
-                DeleteConfirm(
-                  delete: () {
-                    handleDelete(context);
-                  },
-                  deleteIcon: iconAndText(
-                    icon: const Icon(EvaIcons.trash),
-                    text: L10n.of(context).common_delete,
-                  ),
-                  confirmIcon: iconAndText(
-                    icon: const Icon(
-                      EvaIcons.checkmark_circle_2,
-                      color: Colors.red,
-                    ),
-                    text: L10n.of(context).common_confirm,
-                  ),
-                )
-              ],
-            ),
-          );
-        });
-  }
-
-  void handleDelete(BuildContext context) {
-    Navigator.pop(context);
-    updateBook(Book(
-      id: book.id,
-      title: book.title,
-      coverPath: book.coverPath,
-      filePath: book.filePath,
-      lastReadPosition: book.lastReadPosition,
-      readingPercentage: book.readingPercentage,
-      author: book.author,
-      isDeleted: true,
-      description: book.description,
-      rating: book.rating,
-      createTime: book.createTime,
-      updateTime: DateTime.now(),
-    ));
-    onRefresh();
-    File(book.fileFullPath).delete();
-    File(book.coverFullPath).delete();
-  }
-
-  void handleDetail(BuildContext context) {
-    Navigator.pop(context);
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => BookDetail(book: book, onRefresh: onRefresh),
       ),
     );
   }

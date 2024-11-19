@@ -1,31 +1,29 @@
 import 'dart:io';
 
-import 'package:anx_reader/dao/book.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/models/book.dart';
+import 'package:anx_reader/providers/book_list.dart';
 import 'package:anx_reader/service/book.dart';
+import 'package:anx_reader/utils/get_path/cache_path.dart';
+import 'package:anx_reader/utils/log/common.dart';
 import 'package:anx_reader/utils/toast/common.dart';
 import 'package:anx_reader/utils/webdav/common.dart';
 import 'package:anx_reader/utils/webdav/show_status.dart';
-import 'package:anx_reader/widgets/book_list.dart';
+import 'package:anx_reader/widgets/book_item.dart';
 import 'package:anx_reader/widgets/tips/bookshelf_tips.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class BookshelfPage extends StatefulWidget {
+class BookshelfPage extends ConsumerStatefulWidget {
   const BookshelfPage({super.key});
 
   @override
-  State<BookshelfPage> createState() => BookshelfPageState();
-
-  void refreshBookList() {
-    BookshelfPageState().refreshBookList();
-  }
+  ConsumerState<BookshelfPage> createState() => BookshelfPageState();
 }
 
-class BookshelfPageState extends State<BookshelfPage>
+class BookshelfPageState extends ConsumerState<BookshelfPage>
     with SingleTickerProviderStateMixin {
-  List<Book> _books = [];
   AnimationController? _syncAnimationController;
 
   @override
@@ -41,16 +39,6 @@ class BookshelfPageState extends State<BookshelfPage>
       vsync: this,
       duration: const Duration(seconds: 1),
     )..repeat();
-    refreshBookList();
-  }
-
-  Future<void> refreshBookList() async {
-    final books = await selectNotDeleteBooks();
-    if (mounted) {
-      setState(() {
-        _books = books;
-      });
-    }
   }
 
   Future<void> _importBook() async {
@@ -65,25 +53,40 @@ class BookshelfPageState extends State<BookshelfPage>
     }
 
     List<PlatformFile> files = result.files;
-    List<PlatformFile> supportedFiles = files.where((file) {
-      return allowBookExtensions.contains(file.extension);
+    AnxLog.info('importBook files: ${files.toString()}');
+    // FilePicker on Windows will return files with original path,
+    // but on Android it will return files with temporary path.
+    // So we need to save the files to the temp directory.
+    List<File> fileList = [];
+    if (Platform.isWindows) {
+      fileList = await Future.wait(files.map((file) async {
+        Directory tempDir = await getAnxCacheDir();
+        File tempFile = File('${tempDir.path}/${file.name}');
+        await File(file.path!).copy(tempFile.path);
+        return tempFile;
+      }).toList());
+    }
+    AnxLog.info('importBook fileList: ${fileList.toString()}');
+
+    List<File> supportedFiles = fileList.where((file) {
+      return allowBookExtensions.contains(file.path.split('.').last);
     }).toList();
-    List<PlatformFile> unsupportedFiles = files.where((file) {
-      return !allowBookExtensions.contains(file.extension);
+    List<File> unsupportedFiles = fileList.where((file) {
+      return !allowBookExtensions.contains(file.path.split('.').last);
     }).toList();
 
     // delete unsupported files
     for (var file in unsupportedFiles) {
-      File(file.path!).deleteSync();
+      file.deleteSync();
     }
 
-    Widget bookItem(String name, Icon icon) {
+    Widget bookItem(String path, Icon icon) {
       return Row(
         children: [
           icon,
           Expanded(
             child: Text(
-              name,
+              path.split('/').last,
               style: const TextStyle(
                   fontWeight: FontWeight.w300,
                   // fontSize: ,
@@ -111,9 +114,9 @@ class BookshelfPageState extends State<BookshelfPage>
                         .import_n_books_not_support(unsupportedFiles.length)),
                   const SizedBox(height: 20),
                   for (var file in unsupportedFiles)
-                    bookItem(file.name, const Icon(Icons.error)),
+                    bookItem(file.path, const Icon(Icons.error)),
                   for (var file in supportedFiles)
-                    bookItem(file.name, const Icon(Icons.done)),
+                    bookItem(file.path, const Icon(Icons.done)),
                 ],
               ),
             ),
@@ -122,7 +125,7 @@ class BookshelfPageState extends State<BookshelfPage>
                 onPressed: () {
                   Navigator.pop(context);
                   for (var file in supportedFiles) {
-                    File(file.path!).deleteSync();
+                    file.deleteSync();
                   }
                 },
                 child: Text(L10n.of(context).common_cancel),
@@ -131,8 +134,8 @@ class BookshelfPageState extends State<BookshelfPage>
                 TextButton(
                     onPressed: () async {
                       for (var file in supportedFiles) {
-                        AnxToast.show(file.name);
-                        await importBook(File(file.path!), refreshBookList);
+                        AnxToast.show(file.path.split('/').last);
+                        await importBook(file, ref);
                       }
                       Navigator.of(context).pop('dialog');
                     },
@@ -141,8 +144,6 @@ class BookshelfPageState extends State<BookshelfPage>
             ],
           );
         });
-
-
   }
 
   Widget syncButton() {
@@ -166,7 +167,7 @@ class BookshelfPageState extends State<BookshelfPage>
           return IconButton(
             icon: const Icon(Icons.sync),
             onPressed: () {
-              AnxWebdav.syncData(SyncDirection.both);
+              AnxWebdav.syncData(SyncDirection.both, ref);
             },
           );
         }
@@ -177,19 +178,46 @@ class BookshelfPageState extends State<BookshelfPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(L10n.of(context).appName),
-        actions: [
-          syncButton(),
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: _importBook,
-          ),
-        ],
-      ),
-      body: _books.isEmpty
-          ? const BookshelfTips()
-          : BookList(books: _books, onRefresh: refreshBookList),
-    );
+        appBar: AppBar(
+          title: Text(L10n.of(context).appName),
+          actions: [
+            syncButton(),
+            IconButton(
+              icon: const Icon(Icons.add),
+              onPressed: _importBook,
+            ),
+          ],
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            ref.read(bookListProvider.notifier).refresh();
+          },
+          child: const Icon(Icons.add),
+        ),
+        body: ref.watch(bookListProvider).when(
+              data: (books) => LayoutBuilder(
+                builder: (context, constraints) {
+                  return books.isEmpty
+                      ? const Center(child: BookshelfTips())
+                      : GridView.builder(
+                          padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
+                          itemCount: books.length,
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: constraints.maxWidth ~/ 110,
+                            childAspectRatio: 0.55,
+                            mainAxisSpacing: 30,
+                            crossAxisSpacing: 20,
+                          ),
+                          itemBuilder: (BuildContext context, int index) {
+                            Book book = books[index];
+                            return BookItem(book: book);
+                          },
+                        );
+                },
+              ),
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (error, stack) => Center(child: Text(error.toString())),
+            ));
   }
 }
