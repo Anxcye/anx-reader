@@ -152,7 +152,7 @@ class _BookNotesPageState extends State<BookNotesPage> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => BookDetail(book: book, onRefresh: () {}),
+            builder: (context) => BookDetail(book: book),
           ),
         );
       }),
@@ -209,7 +209,6 @@ class _BookNotesPageState extends State<BookNotesPage> {
       ],
     );
   }
-
 
   @override
   Widget build(BuildContext context) {

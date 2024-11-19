@@ -3,7 +3,7 @@ import 'dart:io' as io;
 import 'package:anx_reader/dao/database.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/main.dart';
-import 'package:anx_reader/page/home_page/bookshelf_page.dart';
+import 'package:anx_reader/providers/book_list.dart';
 import 'package:anx_reader/utils/get_path/get_base_path.dart';
 import 'package:anx_reader/utils/get_path/databases_path.dart';
 import 'package:anx_reader/utils/log/common.dart';
@@ -13,6 +13,7 @@ import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/dao/book.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart';
 import 'package:webdav_client/webdav_client.dart';
 
@@ -67,7 +68,7 @@ class AnxWebdav {
     _syncingController.add(value);
   }
 
-  static Future<void> syncData(SyncDirection direction) async {
+  static Future<void> syncData(SyncDirection direction, WidgetRef ref) async {
     BuildContext context = navigatorKey.currentContext!;
     // if is  syncing
     if (isSyncing) {
@@ -87,7 +88,8 @@ class AnxWebdav {
             imageCache.clear();
             imageCache.clearLiveImages();
             // refresh book list
-            const BookshelfPage().refreshBookList();
+            // const BookshelfPage().refreshBookList();
+            ref.read(bookListProvider.notifier).refresh();
             AnxToast.show(L10n.of(context).webdav_sync_complete);
             setSyncing(false);
           });

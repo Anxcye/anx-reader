@@ -4,6 +4,7 @@ import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/main.dart';
 import 'package:anx_reader/utils/toast/common.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:webdav_client/webdav_client.dart';
 
 
@@ -84,7 +85,7 @@ Future<bool> testEnableWebdav() async {
   return false;
 }
 
-void chooseDirection() {
+void chooseDirection(WidgetRef ref) {
   // BuildContext context = navigatorKey.currentContext!;
   showDialog(
       context: navigatorKey.currentContext!,
@@ -95,7 +96,7 @@ void chooseDirection() {
             SimpleDialogOption(
               onPressed: () async {
                 Navigator.pop(context);
-                await AnxWebdav.syncData(SyncDirection.upload);
+                await AnxWebdav.syncData(SyncDirection.upload, ref);
               },
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 6),
@@ -105,7 +106,7 @@ void chooseDirection() {
             SimpleDialogOption(
               onPressed: () async {
                 Navigator.pop(context);
-                await AnxWebdav.syncData(SyncDirection.download);
+                await AnxWebdav.syncData(SyncDirection.download, ref);
               },
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 6),

@@ -11,8 +11,9 @@ import 'package:anx_reader/utils/webdav/common.dart';
 import 'package:chinese_font_library/chinese_font_library.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
-import 'package:provider/provider.dart';
+import 'package:provider/provider.dart' as provider;
 
 final navigatorKey = GlobalKey<NavigatorState>();
 
@@ -27,17 +28,21 @@ Future<void> main() async {
   Server().start();
   initBasePath();
 
-  runApp(const MyApp());
+  runApp(
+    const ProviderScope(
+      child: MyApp(),
+    ),
+  );
 }
 
-class MyApp extends StatefulWidget {
+class MyApp extends ConsumerStatefulWidget {
   const MyApp({super.key});
 
   @override
-  State<MyApp> createState() => _MyAppState();
+  ConsumerState<ConsumerStatefulWidget> createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
+class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
@@ -55,23 +60,23 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.inactive) {
       if (Prefs().webdavStatus) {
-        await AnxWebdav.syncData(SyncDirection.upload);
+        await AnxWebdav.syncData(SyncDirection.upload, ref);
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
+    return provider.MultiProvider(
       providers: [
-        ChangeNotifierProvider(
+        provider.ChangeNotifierProvider(
           create: (_) => Prefs(),
         ),
-        ChangeNotifierProvider(
+        provider.ChangeNotifierProvider(
           create: (_) => NotesDetailModel(),
         )
       ],
-      child: Consumer<Prefs>(
+      child: provider.Consumer<Prefs>(
         builder: (context, prefsNotifier, child) {
           return MaterialApp(
             navigatorObservers: [FlutterSmartDialog.observer],

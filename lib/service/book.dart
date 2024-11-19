@@ -4,6 +4,7 @@ import 'package:anx_reader/dao/book.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/main.dart';
 import 'package:anx_reader/models/book.dart';
+import 'package:anx_reader/providers/book_list.dart';
 import 'package:anx_reader/utils/get_path/get_base_path.dart';
 import 'package:anx_reader/page/reading_page.dart';
 import 'package:anx_reader/utils/import_book.dart';
@@ -12,13 +13,15 @@ import 'package:anx_reader/utils/webView/webview_console_message.dart';
 import 'package:anx_reader/utils/webView/webview_initial_variable.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'book_player/book_player_server.dart';
 
 HeadlessInAppWebView? headlessInAppWebView;
 
-Future<void> importBook(File file, Function updateBookList) async {
-  await getBookMetadata(file, updateBookList: updateBookList);
+Future<void> importBook(File file, WidgetRef ref) async {
+  await getBookMetadata(file, ref: ref);
+  ref.read(bookListProvider.notifier).refresh();
 }
 
 Future<void> pushToReadingPage(
@@ -41,17 +44,17 @@ Future<void> pushToReadingPage(
       ));
 }
 
-void openBook(BuildContext context, Book book, Function updateBookList) {
+void openBook(BuildContext context, Book book, WidgetRef ref) {
   book.updateTime = DateTime.now();
   updateBook(book);
   Future.delayed(const Duration(milliseconds: 500), () {
-    updateBookList();
+    ref.read(bookListProvider.notifier).refresh();
   });
 
   pushToReadingPage(context, book).then((value) {
     // wait 1s to update book which is read
     Future.delayed(const Duration(milliseconds: 500), () {
-      updateBookList();
+      ref.read(bookListProvider.notifier).refresh();
     });
   });
 }
@@ -115,7 +118,7 @@ Future<void> saveBook(
 Future<void> getBookMetadata(
   File file, {
   Book? book,
-  Function? updateBookList,
+  WidgetRef? ref,
 }) async {
   String serverFileName = Server().setTempFile(file);
 
@@ -147,9 +150,9 @@ Future<void> getBookMetadata(
             // base64 cover
             String cover = metadata['cover'] ?? '';
             String description = metadata['description'] ?? '';
-            await saveBook(file, title, author, description, cover);
-            updateBookList?.call();
-            return;
+            saveBook(file, title, author, description, cover);
+            ref?.read(bookListProvider.notifier).refresh();
+            // return;
           });
     },
     onConsoleMessage: (controller, consoleMessage) {
