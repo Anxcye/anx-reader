@@ -12,6 +12,8 @@ Let's get started!
 Execute the following commands:
 ```bash
 flutter pub get
+flutter gen-l10n
+dart run build_runner watch
 flutter run # or click the run button in your IDE
 ```
 
@@ -89,6 +91,8 @@ Please submit a Pull Request after re-commenting the code in `book.js`.
 执行以下命令：
 ```bash
 flutter pub get
+flutter gen-l10n
+dart run build_runner watch
 flutter run # 或点击IDE运行按钮
 ```
 
