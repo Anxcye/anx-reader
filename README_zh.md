@@ -68,6 +68,7 @@ Telegram 群组：[https://t.me/AnxReader](https://t.me/AnxReader)
 - 克隆并进入项目目录。
 - 运行 `flutter pub get` 。
 - 运行 `flutter gen-l10n` 生成多语言文件。
+- 运行 `dart run build_runner build --delete-conflicting-outputs` 生成 Riverpod 代码。
 - 运行 `flutter run` 启动应用。
 
 您可能遇到 Flutter 版本不兼容的问题，请参考 [Flutter 文档](https://flutter.dev/docs/get-started/install)。

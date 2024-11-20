@@ -85,6 +85,7 @@ jobs:
         if: matrix.platform == 'android'
         run: |
             flutter gen-l10n
+            dart run build_runner build --delete-conflicting-outputs
             flutter build apk --release
             flutter build apk --split-per-abi
         shell: bash

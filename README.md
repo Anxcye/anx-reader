@@ -61,6 +61,7 @@ Want to build Anx Reader from source? Please follow these steps:
 - Clone and enter the project directory.
 - Run `flutter pub get`.
 - Run `flutter gen-l10n` to generate multi-language files.
+- Run `dart run build_runner build --delete-conflicting-outputs` to generate the Riverpod code.
 - Run `flutter run` to launch the application.
 
 You may encounter Flutter version incompatibility issues. Please refer to the [Flutter documentation](https://flutter.dev/docs/get-started/install).
