@@ -31,7 +31,7 @@ class _TocWidgetState extends State<TocWidget> {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      height: 0.8 * MediaQuery.of(context).size.height,
+      height: 0.6 * MediaQuery.of(context).size.height,
       child: Column(
         children: [
           widgetTitle(L10n.of(context).reading_contents, null),

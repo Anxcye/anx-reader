@@ -541,27 +541,25 @@ class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
       ],
     );
 
-    return SafeArea(
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(chapterCurrentPage == 1 ? widget.book.title : chapterTitle,
-                style: textStyle),
-            const Spacer(),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                batteryAndTime,
-                Text('$chapterCurrentPage/$chapterTotalPages',
-                    style: textStyle),
-                Text('${(percentage * 100).toStringAsFixed(2)}%',
-                    style: textStyle),
-              ],
-            ),
-          ],
-        ),
+    return Container(
+      padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(chapterCurrentPage == 1 ? widget.book.title : chapterTitle,
+              style: textStyle),
+          const Spacer(),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              batteryAndTime,
+              Text('$chapterCurrentPage/$chapterTotalPages',
+                  style: textStyle),
+              Text('${(percentage * 100).toStringAsFixed(2)}%',
+                  style: textStyle),
+            ],
+          ),
+        ],
       ),
     );
   }
