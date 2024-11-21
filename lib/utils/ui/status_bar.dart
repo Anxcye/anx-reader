@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 void hideStatusBar() {
@@ -11,6 +12,12 @@ void showStatusBar() {
   SystemChrome.setEnabledSystemUIMode(
     SystemUiMode.manual,
     overlays: SystemUiOverlay.values,
+  );
+}
+
+void showStatusBarWithoutResize() {
+  SystemChrome.setEnabledSystemUIMode(
+    SystemUiMode.edgeToEdge,
   );
 }
 
