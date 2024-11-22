@@ -121,7 +121,7 @@ class DBHelper {
         return await databaseFactory.openDatabase(
           path,
           options: OpenDatabaseOptions(
-            version: 3,
+            version: 4,
             onCreate: (db, version) async {
               onUpgradeDatabase(db, 0, version);
             },
@@ -213,6 +213,12 @@ class DBHelper {
             }
           }
         });
+        continue case4;
+      case4:
+      case 4:
+        // add a column (group_id) to tb_books, and set all group_id to 0 default
+        await db.execute('ALTER TABLE tb_books ADD COLUMN group_id INTEGER');
+        await db.execute('UPDATE tb_books SET group_id = 0');
     }
   }
 }

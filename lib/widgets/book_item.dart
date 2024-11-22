@@ -25,7 +25,7 @@ class BookItem extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    Future<dynamic> handleLongPress(BuildContext context) {
+    Future<void> handleLongPress(BuildContext context) async {
       Future<void> handleDelete(BuildContext context) async {
         Navigator.pop(context);
         await updateBook(Book(
@@ -57,7 +57,9 @@ class BookItem extends ConsumerWidget {
         );
       }
 
-      return showModalBottomSheet(
+      showBottomSheet(
+          enableDrag: true,
+          showDragHandle: true,
           context: context,
           builder: (BuildContext context) {
             return Container(

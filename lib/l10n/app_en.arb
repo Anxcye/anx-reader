@@ -124,6 +124,8 @@
   "common_saving": "Saving",
   "common_saved": "Saved",
   "common_test": "Test",
+  "common_dissolve": "Dissolve",
+  "common_edit": "Edit",
 
   "service_import_success": "Import success",
   "service_import_n_books": "{count, plural, =1{importing 1 book} other{importing {count} books}}",

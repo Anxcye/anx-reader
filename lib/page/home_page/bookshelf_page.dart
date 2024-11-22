@@ -9,7 +9,7 @@ import 'package:anx_reader/utils/log/common.dart';
 import 'package:anx_reader/utils/toast/common.dart';
 import 'package:anx_reader/utils/webdav/common.dart';
 import 'package:anx_reader/utils/webdav/show_status.dart';
-import 'package:anx_reader/widgets/book_item.dart';
+import 'package:anx_reader/widgets/book_folder.dart';
 import 'package:anx_reader/widgets/tips/bookshelf_tips.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -188,12 +188,6 @@ class BookshelfPageState extends ConsumerState<BookshelfPage>
             ),
           ],
         ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            ref.read(bookListProvider.notifier).refresh();
-          },
-          child: const Icon(Icons.add),
-        ),
         body: ref.watch(bookListProvider).when(
               data: (books) => LayoutBuilder(
                 builder: (context, constraints) {
@@ -210,8 +204,9 @@ class BookshelfPageState extends ConsumerState<BookshelfPage>
                             crossAxisSpacing: 20,
                           ),
                           itemBuilder: (BuildContext context, int index) {
-                            Book book = books[index];
-                            return BookItem(book: book);
+                            List<Book> groupBooks = books[index];
+                            // return BookItem(book: book);
+                            return BookFolder(books: groupBooks);
                           },
                         );
                 },
