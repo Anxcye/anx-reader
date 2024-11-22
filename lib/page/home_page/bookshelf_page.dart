@@ -54,18 +54,21 @@ class BookshelfPageState extends ConsumerState<BookshelfPage>
 
     List<PlatformFile> files = result.files;
     AnxLog.info('importBook files: ${files.toString()}');
+    List<File> fileList = [];
     // FilePicker on Windows will return files with original path,
     // but on Android it will return files with temporary path.
     // So we need to save the files to the temp directory.
-    List<File> fileList = [];
-    if (Platform.isWindows) {
+    if (!Platform.isAndroid) {
       fileList = await Future.wait(files.map((file) async {
         Directory tempDir = await getAnxCacheDir();
         File tempFile = File('${tempDir.path}/${file.name}');
         await File(file.path!).copy(tempFile.path);
         return tempFile;
       }).toList());
+    } else {
+      fileList = files.map((file) => File(file.path!)).toList();
     }
+
     AnxLog.info('importBook fileList: ${fileList.toString()}');
 
     List<File> supportedFiles = fileList.where((file) {
