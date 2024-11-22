@@ -5,6 +5,11 @@
 - 自动背景色
 
 ## Unreleased
+- Feat: Drag to group books
+- Fix: Bottom navigation bar covers menu bar
+
+- 新增：拖拽实现书籍分组
+- 修复：底部导航栏覆盖菜单栏
 
 ## 1.2.0 2024-11-17
 ❗Anx-Reader has changed the Android version signature, please back up and reinstall Anx-Reader❗
