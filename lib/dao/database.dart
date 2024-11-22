@@ -98,13 +98,14 @@ class DBHelper {
   }
 
   Future<Database> initDB() async {
+    int dbVersion = 5;
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
         final databasePath = await getAnxDataBasesPath();
         final path = join(databasePath, 'app_database.db');
         return await openDatabase(
           path,
-          version: 4,
+          version: dbVersion,
           onCreate: (db, version) async {
             onUpgradeDatabase(db, 0, version);
           },
@@ -121,7 +122,7 @@ class DBHelper {
         return await databaseFactory.openDatabase(
           path,
           options: OpenDatabaseOptions(
-            version: 4,
+            version: dbVersion,
             onCreate: (db, version) async {
               onUpgradeDatabase(db, 0, version);
             },
