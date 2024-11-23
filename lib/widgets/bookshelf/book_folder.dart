@@ -68,25 +68,14 @@ class _BookFolderState extends ConsumerState<BookFolder> {
     }
 
     return widget.books.length == 1
-        ? 
-        // Draggable<Book>(
-            // data: widget.books[0],
-            // feedback: SizedBox(
-            //   height: 190,
-            //   width: 100,
-            //   child: BookItem(book: widget.books[0]),
-            // ),
-            // childWhenDragging: Container(color: Colors.transparent),
-            // child: 
-            DragTarget<Book>(
-              onAcceptWithDetails: (book) => onAcceptBook(book),
-              onWillAcceptWithDetails: (data) => onWillAcceptBook(data),
-              onLeave: (data) => onLeaveBook(data),
-              builder: (context, candidateData, rejectedData) {
-                return scaleTransition(BookItem(book: widget.books[0]));
-              },
-            )
-          // ,)
+        ? DragTarget<Book>(
+            onAcceptWithDetails: (book) => onAcceptBook(book),
+            onWillAcceptWithDetails: (data) => onWillAcceptBook(data),
+            onLeave: (data) => onLeaveBook(data),
+            builder: (context, candidateData, rejectedData) {
+              return scaleTransition(BookItem(book: widget.books[0]));
+            },
+          )
         : DragTarget<Book>(
             onAcceptWithDetails: (book) => onAcceptBook(book),
             onWillAcceptWithDetails: (data) => onWillAcceptBook(data),
