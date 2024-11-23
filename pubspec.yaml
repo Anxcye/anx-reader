@@ -60,7 +60,7 @@ dependencies:
   chinese_font_library: ^1.2.0
   flex_color_scheme: ^7.3.1
   sqlite3_flutter_libs: ^0.5.26
-
+  flutter_reorderable_grid_view: ^5.4.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

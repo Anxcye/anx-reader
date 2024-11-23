@@ -60,4 +60,8 @@ class BookList extends _$BookList {
     updateBook(book.copyWith(groupId: 0));
     refresh();
   }
+
+  void reorder(List<List<Book>> books) {
+    state = AsyncData(books);
+  }
 }

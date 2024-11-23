@@ -9,10 +9,12 @@ import 'package:anx_reader/utils/log/common.dart';
 import 'package:anx_reader/utils/toast/common.dart';
 import 'package:anx_reader/utils/webdav/common.dart';
 import 'package:anx_reader/utils/webdav/show_status.dart';
-import 'package:anx_reader/widgets/book_folder.dart';
+import 'package:anx_reader/widgets/bookshelf/book_bottom_sheet.dart';
+import 'package:anx_reader/widgets/bookshelf/book_folder.dart';
 import 'package:anx_reader/widgets/tips/bookshelf_tips.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_reorderable_grid_view/widgets/reorderable_builder.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class BookshelfPage extends ConsumerStatefulWidget {
@@ -25,6 +27,7 @@ class BookshelfPage extends ConsumerStatefulWidget {
 class BookshelfPageState extends ConsumerState<BookshelfPage>
     with SingleTickerProviderStateMixin {
   AnimationController? _syncAnimationController;
+  final _scrollController = ScrollController();
 
   @override
   void dispose() {
@@ -180,6 +183,11 @@ class BookshelfPageState extends ConsumerState<BookshelfPage>
 
   @override
   Widget build(BuildContext context) {
+    void handleBottomSheet(BuildContext context, Book book) {
+      showBottomSheet(
+          context: context,
+          builder: (context) => BookBottomSheet(book: book));
+    }
     return Scaffold(
         appBar: AppBar(
           title: Text(L10n.of(context).appName),
@@ -192,28 +200,46 @@ class BookshelfPageState extends ConsumerState<BookshelfPage>
           ],
         ),
         body: ref.watch(bookListProvider).when(
-              data: (books) => LayoutBuilder(
-                builder: (context, constraints) {
-                  return books.isEmpty
-                      ? const Center(child: BookshelfTips())
-                      : GridView.builder(
+              data: (books) => books.isEmpty
+                  ? const Center(child: BookshelfTips())
+                  : ReorderableBuilder(
+                      enableDraggable: true,
+                      longPressDelay: const Duration(milliseconds: 100),
+                      onDragStarted: (index) {
+                        if (books[index].length == 1) {
+                          handleBottomSheet(context, books[index].first);
+                        }
+                      },
+                      onReorder: (ReorderedListFunction reorderedListFunction) {
+                        Navigator.pop(context);
+                        ref.read(bookListProvider.notifier).reorder(
+                            reorderedListFunction(books) as List<List<Book>>);
+                      },
+                      scrollController: _scrollController,
+                      children: [
+                        ...books.map(
+                          (book) => BookFolder(
+                            key: Key(book.first.id.toString()),
+                            books: book,
+                          ),
+                        ),
+                      ],
+                      builder: (children) {
+                        return GridView(
+                          key: GlobalKey(),
+                          controller: _scrollController,
                           padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
-                          itemCount: books.length,
                           gridDelegate:
                               SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: constraints.maxWidth ~/ 110,
+                            crossAxisCount:
+                                MediaQuery.of(context).size.width ~/ 110,
                             childAspectRatio: 0.55,
                             mainAxisSpacing: 30,
                             crossAxisSpacing: 20,
                           ),
-                          itemBuilder: (BuildContext context, int index) {
-                            List<Book> groupBooks = books[index];
-                            // return BookItem(book: book);
-                            return BookFolder(books: groupBooks);
-                          },
+                          children: children,
                         );
-                },
-              ),
+                      }),
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (error, stack) => Center(child: Text(error.toString())),
             ));
