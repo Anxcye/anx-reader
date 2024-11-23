@@ -1,8 +1,8 @@
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/providers/book_list.dart';
-import 'package:anx_reader/widgets/book_cover.dart';
-import 'package:anx_reader/widgets/book_item.dart';
-import 'package:anx_reader/widgets/book_opened_folder.dart';
+import 'package:anx_reader/widgets/bookshelf/book_cover.dart';
+import 'package:anx_reader/widgets/bookshelf/book_item.dart';
+import 'package:anx_reader/widgets/bookshelf/book_opened_folder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -68,62 +68,67 @@ class _BookFolderState extends ConsumerState<BookFolder> {
     }
 
     return widget.books.length == 1
-        ? Draggable<Book>(
-            data: widget.books[0],
-            feedback: SizedBox(
-              height: 190,
-              width: 100,
-              child: BookItem(book: widget.books[0]),
-            ),
-            childWhenDragging: Container(color: Colors.transparent),
-            child: DragTarget<Book>(
+        ? 
+        // Draggable<Book>(
+            // data: widget.books[0],
+            // feedback: SizedBox(
+            //   height: 190,
+            //   width: 100,
+            //   child: BookItem(book: widget.books[0]),
+            // ),
+            // childWhenDragging: Container(color: Colors.transparent),
+            // child: 
+            DragTarget<Book>(
               onAcceptWithDetails: (book) => onAcceptBook(book),
               onWillAcceptWithDetails: (data) => onWillAcceptBook(data),
               onLeave: (data) => onLeaveBook(data),
               builder: (context, candidateData, rejectedData) {
                 return scaleTransition(BookItem(book: widget.books[0]));
               },
-            ),
-          )
+            )
+          // ,)
         : DragTarget<Book>(
             onAcceptWithDetails: (book) => onAcceptBook(book),
             onWillAcceptWithDetails: (data) => onWillAcceptBook(data),
+            onLeave: (data) => onLeaveBook(data),
             builder: (context, candidateData, rejectedData) {
               double topPosition = -10;
-              return InkWell(
-                onTap: openFolder,
-                child: Column(
-                  children: [
-                    Expanded(
-                      child: Stack(
-                        children: [
-                          ...(widget.books.length >= 4
-                                  ? widget.books.sublist(0, 4)
-                                  : widget.books)
-                              .reversed
-                              .map((book) {
-                            topPosition += 10;
-                            return Positioned.fill(
-                              right: 0,
-                              top: topPosition,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .outlineVariant,
-                                    width: 1,
+              return scaleTransition(
+                InkWell(
+                  onTap: openFolder,
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: Stack(
+                          children: [
+                            ...(widget.books.length >= 4
+                                    ? widget.books.sublist(0, 4)
+                                    : widget.books)
+                                .reversed
+                                .map((book) {
+                              topPosition += 10;
+                              return Positioned.fill(
+                                right: 0,
+                                top: topPosition,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .outlineVariant,
+                                      width: 1,
+                                    ),
                                   ),
+                                  child: bookCover(context, book),
                                 ),
-                                child: bookCover(context, book),
-                              ),
-                            );
-                          }),
-                        ],
+                              );
+                            }),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               );
             },
