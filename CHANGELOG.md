@@ -7,9 +7,13 @@
 ## Unreleased
 - Feat: Drag to group books
 - Fix: Bottom navigation bar covers menu bar
+- Fix: Windows no longer deletes original files when importing
+- Fix: Books with single quotes cannot be opened
 
 - 新增：拖拽实现书籍分组
 - 修复：底部导航栏覆盖菜单栏
+- 修复: Windows 端导入时删除原文件的问题
+- 修复: 包含单引号的书籍无法打开
 
 ## 1.2.0 2024-11-17
 ❗Anx-Reader has changed the Android version signature, please back up and reinstall Anx-Reader❗
