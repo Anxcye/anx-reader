@@ -29,6 +29,10 @@ void webviewInitialVariable(
 
   const minWebviewVersion = 92;
 
+  String replaceSingleQuote(String value) {
+    return value.replaceAll("'", "\\'");
+  }
+
   final script = '''
      console.log(navigator.userAgent)
      const webviewVersion = navigator.userAgent.match(/Chrome\\/(\\d+)/)?.[1]
@@ -37,12 +41,12 @@ void webviewInitialVariable(
        window.flutter_inappwebview.callHandler('webviewVersion', webviewVersion)
      }
      const importing = $importing
-     const url = '$url'
-     let initialCfi = '$cfi'
+     const url = '${replaceSingleQuote(url)}'
+     let initialCfi = '${replaceSingleQuote(cfi)}'
      let style = {
          fontSize: ${bookStyle.fontSize},
-         fontName: '$fontName',
-         fontPath: '$fontPath',
+         fontName: '${replaceSingleQuote(fontName)}',
+         fontPath: '${replaceSingleQuote(fontPath)}',
          letterSpacing: ${bookStyle.letterSpacing},
          spacing: ${bookStyle.lineHeight},
          paragraphSpacing: ${bookStyle.paragraphSpacing},
