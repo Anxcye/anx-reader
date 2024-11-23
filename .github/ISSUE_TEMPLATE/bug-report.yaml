@@ -4,7 +4,7 @@ title: "[Bug]: "
 labels: ["bug"]
 
 body:
-  - type: checkbox
+  - type: checkboxes
     id: bug_report_is_crash
     attributes:
       label: Checked the troubleshooting guide|我已经查看过故障排除指南
