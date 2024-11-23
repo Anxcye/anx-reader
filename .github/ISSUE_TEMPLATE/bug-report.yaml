@@ -1,0 +1,73 @@
+name: Bug report
+description: Report a bug!|我遇到了问题！
+title: "[Bug]: "
+labels: ["bug"]
+
+body:
+  - type: checkbox
+    id: bug_report_is_crash
+    attributes:
+      label: Checked the troubleshooting guide|我已经查看过故障排除指南
+      description: |
+        I have checked the [troubleshooting guide](https://github.com/Anxcye/anx-reader/blob/develop/docs/troubleshooting.md)
+        我已经查看过[故障排除指南](https://github.com/Anxcye/anx-reader/blob/develop/docs/troubleshooting.md)
+    validations:
+      required: true
+
+  - type: textarea
+    id: bug_report_description
+    attributes:
+      label: Describe the bug|描述问题
+      description: |
+        A clear and concise description of what the bug is
+        一个清晰且简洁的描述问题
+    validations:
+      required: true
+  - type: textarea
+    id: bug_report_reproduce
+    attributes:
+      label: To reproduce|重现步骤
+      description: |
+        Steps to reproduce the behavior
+        如何重现问题
+      value: |
+        1. Go to '...' | 前往...
+        2. Click on '...' | 点击...
+        3. Scroll down to '...' | 向下滚动到...
+        4. See error | 看到错误
+    validations:
+      required: true
+  - type: textarea
+    id: bug_report_expected_behavior
+    attributes:
+      label: Expected behavior|预期行为
+      description: |
+        A clear and concise description of what you expected to happen
+        一个清晰且简洁的描述你期望发生的事情
+    validations:
+      required: true
+  - type: textarea
+    id: bug_report_screenshots
+    attributes:
+      label: Screenshots|截图
+      description: |
+        If applicable, add screenshots to help explain your problem
+        Tip: You can attach images by clicking this area to highlight it and then dragging files in.
+        如果可以，添加截图以帮助解释问题
+        提示：你可以通过点击此区域来高亮它，然后拖动文件来添加图片。
+  - type: textarea
+    id: bug_report_desktop
+    attributes:
+      label: Platform (please complete the following information)|平台（请填写以下信息）
+      placeholder: |
+        - Platform: [e.g. Android] | 平台：[e.g. Android]
+        - OS: [e.g. Android13(MIUI14)] | 操作系统：[e.g. Android13(MIUI14)]
+        - AnxReader Version: [e.g. 1.2.0+2033] | 安读版本：[e.g. 1.2.0+2033]
+        - Device: [e.g. Xiaomi 13] | 设备：[e.g. Xiaomi 13]
+  - type: textarea
+    id: bug_report_additional_context
+    attributes:
+      label: Additional context|其他信息
+      description: |
+        Add any other context about the problem here, e.g. logs
+        添加任何其他关于问题的信息，如日志等
