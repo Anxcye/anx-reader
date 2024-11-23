@@ -14,6 +14,7 @@ import 'package:anx_reader/widgets/bookshelf/book_folder.dart';
 import 'package:anx_reader/widgets/tips/bookshelf_tips.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_reorderable_grid_view/widgets/custom_draggable.dart';
 import 'package:flutter_reorderable_grid_view/widgets/reorderable_builder.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -185,9 +186,13 @@ class BookshelfPageState extends ConsumerState<BookshelfPage>
   Widget build(BuildContext context) {
     void handleBottomSheet(BuildContext context, Book book) {
       showBottomSheet(
-          context: context,
-          builder: (context) => BookBottomSheet(book: book));
+        context: context,
+        builder: (context) => BookBottomSheet(book: book),
+      );
     }
+
+    List<int> _lockedIndices = [];
+
     return Scaffold(
         appBar: AppBar(
           title: Text(L10n.of(context).appName),
@@ -200,46 +205,76 @@ class BookshelfPageState extends ConsumerState<BookshelfPage>
           ],
         ),
         body: ref.watch(bookListProvider).when(
-              data: (books) => books.isEmpty
-                  ? const Center(child: BookshelfTips())
-                  : ReorderableBuilder(
-                      enableDraggable: true,
-                      longPressDelay: const Duration(milliseconds: 100),
-                      onDragStarted: (index) {
-                        if (books[index].length == 1) {
-                          handleBottomSheet(context, books[index].first);
-                        }
-                      },
-                      onReorder: (ReorderedListFunction reorderedListFunction) {
-                        Navigator.pop(context);
-                        ref.read(bookListProvider.notifier).reorder(
-                            reorderedListFunction(books) as List<List<Book>>);
-                      },
-                      scrollController: _scrollController,
-                      children: [
-                        ...books.map(
-                          (book) => BookFolder(
-                            key: Key(book.first.id.toString()),
-                            books: book,
+              data: (books) {
+                for (int i = 0; i < books.length; i++) {
+                  // folder can't be dragged
+                  if (books[i].length != 1) {
+                    _lockedIndices.add(i);
+                  }
+                }
+                return books.isEmpty
+                    ? const Center(child: BookshelfTips())
+                    : ReorderableBuilder(
+                        // lock all index of books
+                        lockedIndices: _lockedIndices,
+                        enableDraggable: true,
+                        longPressDelay: const Duration(milliseconds: 300),
+                        onDragStarted: (index) {
+                          if (books[index].length == 1) {
+                            handleBottomSheet(context, books[index].first);
+                            // add other books to lockedIndices
+                            for (int i = 0; i < books.length; i++) {
+                              if (i != index) {
+                                _lockedIndices.add(i);
+                              }
+                            }
+                          }
+                        },
+                        onDragEnd: (index) {
+                          // remove all books from lockedIndices
+                          _lockedIndices = [];
+                          for (int i = 0; i < books.length; i++) {
+                            if (books[i].length != 1) {
+                              _lockedIndices.add(i);
+                            }
+                          }
+                          setState(() {});
+                        },
+                        onReorder:
+                            (ReorderedListFunction reorderedListFunction) {},
+                        scrollController: _scrollController,
+                        children: [
+                          ...books.map(
+                            (book) {
+                              return book.length == 1
+                                  ? CustomDraggable(
+                                      key: Key(book.first.id.toString()),
+                                      data: book.first,
+                                      child: BookFolder(books: book))
+                                  : BookFolder(
+                                      key: Key(book.first.id.toString()),
+                                      books: book,
+                                    );
+                            },
                           ),
-                        ),
-                      ],
-                      builder: (children) {
-                        return GridView(
-                          key: GlobalKey(),
-                          controller: _scrollController,
-                          padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
-                          gridDelegate:
-                              SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount:
-                                MediaQuery.of(context).size.width ~/ 110,
-                            childAspectRatio: 0.55,
-                            mainAxisSpacing: 30,
-                            crossAxisSpacing: 20,
-                          ),
-                          children: children,
-                        );
-                      }),
+                        ],
+                        builder: (children) {
+                          return GridView(
+                            key: GlobalKey(),
+                            controller: _scrollController,
+                            padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount:
+                                  MediaQuery.of(context).size.width ~/ 110,
+                              childAspectRatio: 0.55,
+                              mainAxisSpacing: 30,
+                              crossAxisSpacing: 20,
+                            ),
+                            children: children,
+                          );
+                        });
+              },
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (error, stack) => Center(child: Text(error.toString())),
             ));
