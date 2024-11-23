@@ -4,7 +4,7 @@
 - 选择时移动
 - 自动背景色
 
-## Unreleased
+## 1.2.1 2024-11-23
 - Feat: Drag to group books
 - Fix: Bottom navigation bar covers menu bar
 - Fix: Windows no longer deletes original files when importing
