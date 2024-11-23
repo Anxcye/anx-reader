@@ -7,13 +7,12 @@ body:
   - type: checkboxes
     id: bug_report_is_crash
     attributes:
-      label: Checked the troubleshooting guide|我已经查看过故障排除指南
-      description: |
-        I have checked the [troubleshooting guide](https://github.com/Anxcye/anx-reader/blob/develop/docs/troubleshooting.md)
-        我已经查看过[故障排除指南](https://github.com/Anxcye/anx-reader/blob/develop/docs/troubleshooting.md)
-    validations:
-      required: true
-
+      label: Prerequisites|前提条件
+      options:
+        - label: I have checked the [troubleshooting](https://github.com/Anxcye/anx-reader/blob/develop/docs/troubleshooting.md)|我已经查看过[故障排除](https://github.com/Anxcye/anx-reader/blob/develop/docs/troubleshooting.md)
+          required: true
+        - label: I have searched for similar issues and did not find any|我已经搜索过没有相同的问题
+          required: true
   - type: textarea
     id: bug_report_description
     attributes:
@@ -59,11 +58,17 @@ body:
     id: bug_report_desktop
     attributes:
       label: Platform (please complete the following information)|平台（请填写以下信息）
-      placeholder: |
-        - Platform: [e.g. Android] | 平台：[e.g. Android]
-        - OS: [e.g. Android13(MIUI14)] | 操作系统：[e.g. Android13(MIUI14)]
-        - AnxReader Version: [e.g. 1.2.0+2033] | 安读版本：[e.g. 1.2.0+2033]
-        - Device: [e.g. Xiaomi 13] | 设备：[e.g. Xiaomi 13]
+      value: |
+        - Platform: | 平台：
+          [e.g. Android]
+        - OS: | 操作系统：
+          [e.g. Android13(MIUI14)]
+        - AnxReader Version: | 安读版本：
+          [e.g. 1.2.0+2033]
+        - Device: | 设备：
+          [e.g. Xiaomi 13]
+    validations:
+      required: true
   - type: textarea
     id: bug_report_additional_context
     attributes:
