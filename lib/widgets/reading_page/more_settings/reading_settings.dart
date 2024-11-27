@@ -11,6 +11,7 @@ Widget readingSettings = StatefulBuilder(
       child: Column(
         children: [
           convertChinese(),
+          columnCount(),
         ],
       ),
     ),
@@ -70,5 +71,35 @@ Widget convertChinese() {
         ],
       );
     },
+  );
+}
+
+Widget columnCount() {
+  return StatefulBuilder(
+    builder: (context, setState) => SegmentedButton(
+      segments: [
+        ButtonSegment<int>(
+          label: Text("auto"),
+          value: 0,
+        ),
+        ButtonSegment<int>(
+          label: Text("single"),
+          value: 1,
+        ),
+        ButtonSegment<int>(
+          label: Text("double"),
+          value: 2,
+        ),
+      ],
+      selected: {Prefs().bookStyle.maxColumnCount},
+      onSelectionChanged: (value) {
+        setState(() {
+          Prefs().saveBookStyleToPrefs(
+              Prefs().bookStyle.copyWith(maxColumnCount: value.first));
+          epubPlayerKey.currentState!
+              .changeStyle(Prefs().bookStyle.copyWith(maxColumnCount: value.first));
+        });
+      },
+    ),
   );
 }

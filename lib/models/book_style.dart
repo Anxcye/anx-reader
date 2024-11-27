@@ -11,6 +11,7 @@ class BookStyle {
   double topMargin;
   double bottomMargin;
   double indent;
+  int maxColumnCount;
 
   BookStyle({
     this.fontSize = 1.0,
@@ -23,6 +24,7 @@ class BookStyle {
     this.topMargin = 80.0,
     this.bottomMargin = 40.0,
     this.indent = 0,
+    this.maxColumnCount = 0,
   });
 
   BookStyle copyWith({
@@ -36,6 +38,7 @@ class BookStyle {
     double? topMargin,
     double? bottomMargin,
     double? indent,
+    int? maxColumnCount,
   }) {
     return BookStyle(
       fontSize: fontSize ?? this.fontSize,
@@ -48,6 +51,7 @@ class BookStyle {
       topMargin: topMargin ?? this.topMargin,
       bottomMargin: bottomMargin ?? this.bottomMargin,
       indent: indent ?? this.indent,
+      maxColumnCount: maxColumnCount ?? this.maxColumnCount,
     );
   }
 
@@ -63,6 +67,7 @@ class BookStyle {
       'topMargin': topMargin,
       'bottomMargin': bottomMargin,
       'indent': indent,
+      'maxColumnCount': maxColumnCount,
     };
   }
 
@@ -78,7 +83,8 @@ class BookStyle {
       "sideMargin": $sideMargin,
       "topMargin": $topMargin,
       "bottomMargin": $bottomMargin,
-      "indent": $indent
+      "indent": $indent,
+      "maxColumnCount": $maxColumnCount
     }
     ''';
   }
@@ -126,6 +132,11 @@ class BookStyle {
           : data['indent'] is String
               ? double.parse(data['indent'])
               : data['indent'],
+      maxColumnCount: data['maxColumnCount'] == null
+          ? 0
+          : data['maxColumnCount'] is String
+              ? int.parse(data['maxColumnCount'])
+              : data['maxColumnCount'],
     );
   }
 }

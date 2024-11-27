@@ -5,7 +5,7 @@
 //   // { id: 2, type: 'highlight', value: "epubcfi(/6/6!/4/576,/1:2,/1:3)", color: 'yellow', note: 'this is' },
 //   // { id: 3, type: 'underline', value: "epubcfi(/6/4!/4/4,/1:294,/1:301)", color: 'red', note: 'this is' },
 // ]
-// let url = '../local/lab.pdf'
+// let url = '../local/a.epub'
 // let initialCfi = "epubcfi(/6/12!/4,/2[CHP3],/8/1:29)"
 // //  let initialCfi = null
 // let style = {
@@ -24,7 +24,8 @@
 //   hyphenate: true,
 //   // scroll: false,
 //   // animated: true,
-//   pageTurnStyle: 'slide'
+//   pageTurnStyle: 'slide',
+//   maxColumnCount: 2
 // }
 // window.flutter_inappwebview = {}
 // window.flutter_inappwebview.callHandler = (name, data) => {
@@ -662,6 +663,7 @@ const setStyle = () => {
   reader.view.renderer.setAttribute('bottom-margin', `${style.bottomMargin}px`)
   reader.view.renderer.setAttribute('gap', `${style.sideMargin}%`)
   reader.view.renderer.setAttribute('background-color', style.backgroundColor)
+  reader.view.renderer.setAttribute('max-column-count', style.maxColumnCount)
 
   turn.animated ? reader.view.renderer.setAttribute('animated', 'true')
     : reader.view.renderer.removeAttribute('animated')

@@ -59,6 +59,7 @@ void webviewInitialVariable(
          justify: true,
          hyphenate: true,
          pageTurnStyle: '${Prefs().pageTurnStyle.name}',
+         maxColumnCount: ${bookStyle.maxColumnCount},
      }
      let convertChineseMode = '${Prefs().convertChineseMode.name}'
   ''';
