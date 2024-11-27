@@ -4,6 +4,13 @@
 - 选择时移动
 - 自动背景色
 
+## Unreleased
+- Feat: Setting column count
+- Fix: Windows import book error
+
+- 新增：设置列数
+- 修复：Windows端部分设备无法导入书籍
+
 ## 1.2.1 2024-11-23
 - Feat: Drag to group books
 - Fix: Bottom navigation bar covers menu bar

@@ -36,26 +36,29 @@ void showMoreSettings(ReadingSettings settings) {
     context: context,
     builder: (context) {
       return Dialog(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TabBar(
-              controller: tabController,
-              tabs: tabs,
-            ),
-            const Divider(height: 0),
-            ConstrainedBox(
-              constraints: BoxConstraints(
-                maxHeight: MediaQuery.of(context).size.height * 0.5,
-                maxWidth: MediaQuery.of(context).size.width * 0.8,
-              ),
-              child: ContentSizeTabBarView(
-                animationDuration: const Duration(milliseconds: 600),
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 600),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TabBar(
                 controller: tabController,
-                children: childrens,
+                tabs: tabs,
               ),
-            ),
-          ],
+              const Divider(height: 0),
+              ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxHeight: MediaQuery.of(context).size.height * 0.5,
+                  maxWidth: MediaQuery.of(context).size.width * 0.8,
+                ),
+                child: ContentSizeTabBarView(
+                  animationDuration: const Duration(milliseconds: 600),
+                  controller: tabController,
+                  children: childrens,
+                ),
+              ),
+            ],
+          ),
         ),
       );
     },
