@@ -19,6 +19,12 @@ New-Item -ItemType Directory -Force -Path "D:\inno-result"
 
 7z a -tzip "D:\inno-result\app.zip" "D:\inno\*"
 
+# copy dll
+Copy-Item "scripts\windows\x64\msvcp140.dll" "build\windows\x64\runner\Release\"
+Copy-Item "scripts\windows\x64\vcruntime140.dll" "build\windows\x64\runner\Release\"
+Copy-Item "scripts\windows\x64\vcruntime140_1.dll" "build\windows\x64\runner\Release\"
+
+# copy language file
 Copy-Item "scripts\ChineseSimplified.isl" "$innoSetupDir\Languages\"
 Copy-Item "scripts\ChineseTraditional.isl" "$innoSetupDir\Languages\"
 & "$innoSetupDir\ISCC.exe" ".\scripts\compile_windows_setup-inno.iss"
