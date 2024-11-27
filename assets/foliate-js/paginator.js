@@ -534,11 +534,11 @@ export class Paginator extends HTMLElement {
             case 'top-margin':
             case 'max-block-size':
             case 'background-color':
-            case 'max-column-count':
-                this.#top.style.setProperty('--_' + name, value)
-                break
+              this.#top.style.setProperty('--_' + name, value)
+              break
             case 'bottom-margin':
             case 'gap':
+            case 'max-column-count':
             case 'max-inline-size':
                 // needs explicit `render()` as it doesn't necessarily resize
                 this.#top.style.setProperty('--_' + name, value)
@@ -576,7 +576,7 @@ export class Paginator extends HTMLElement {
 
         const style = getComputedStyle(this.#top)
         const maxInlineSize = parseFloat(style.getPropertyValue('--_max-inline-size'))
-        const maxColumnCount = parseInt(style.getPropertyValue('--_max-column-count-spread'))
+        const maxColumnCount = parseInt(style.getPropertyValue('--_max-column-count'))
         const margin = parseFloat(style.getPropertyValue('--_top-margin'))
         this.#margin = margin
 
@@ -615,7 +615,10 @@ export class Paginator extends HTMLElement {
             return { flow, margin, gap, columnWidth }
         }
 
-        const divisor = Math.min(maxColumnCount, Math.ceil(size / maxInlineSize))
+      const divisor = maxColumnCount == 0
+        ? Math.min(2, Math.ceil(size / maxInlineSize))
+        : maxColumnCount
+      
         const columnWidth = (size / divisor) - gap
         this.setAttribute('dir', rtl ? 'rtl' : 'ltr')
 
