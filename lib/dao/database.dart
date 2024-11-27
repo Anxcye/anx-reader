@@ -159,25 +159,25 @@ class DBHelper {
         await db.execute('ALTER TABLE tb_books ADD COLUMN rating REAL');
         // remove '/data/user/0/com.anxcye.anx_reader/app_flutter/' from file_path & cover_path
         await db.execute(
-            'UPDATE tb_books SET file_path = REPLACE(file_path, "/data/user/0/com.anxcye.anx_reader/app_flutter/", "")');
+            "UPDATE tb_books SET file_path = REPLACE(file_path, '/data/user/0/com.anxcye.anx_reader/app_flutter/', '')");
         await db.execute(
-            'UPDATE tb_books SET cover_path = REPLACE(cover_path, "/data/user/0/com.anxcye.anx_reader/app_flutter/", "")');
+            "UPDATE tb_books SET cover_path = REPLACE(cover_path, '/data/user/0/com.anxcye.anx_reader/app_flutter/', '')");
         continue case2;
       case2:
       case 2:
         // replave ' ' with '_' in db and cut file name to 25
         await db.execute(
-            'UPDATE tb_books SET file_path = REPLACE(file_path, " ", "_")');
+            "UPDATE tb_books SET file_path = REPLACE(file_path, ' ', '_')");
         await db.execute(
-            'UPDATE tb_books SET cover_path = REPLACE(cover_path, " ", "_")');
+            "UPDATE tb_books SET cover_path = REPLACE(cover_path, ' ', '_')");
         await db.execute(
-            'UPDATE tb_books SET file_path = SUBSTR(file_path, 0, 25)');
+            "UPDATE tb_books SET file_path = SUBSTR(file_path, 0, 25)");
         await db.execute(
-            'UPDATE tb_books SET cover_path = SUBSTR(cover_path, 0, 25)');
+            "UPDATE tb_books SET cover_path = SUBSTR(cover_path, 0, 25)");
         await db
-            .execute('UPDATE tb_books SET file_path = file_path || ".epub"');
+            .execute("UPDATE tb_books SET file_path = file_path || '.epub'");
         await db
-            .execute('UPDATE tb_books SET cover_path = cover_path || ".png"');
+            .execute("UPDATE tb_books SET cover_path = cover_path || '.png'");
 
         final basePath = getBasePath('');
         final fileDir = Directory('$basePath/file');
@@ -218,8 +218,8 @@ class DBHelper {
       case4:
       case 4:
         // add a column (group_id) to tb_books, and set all group_id to 0 default
-        await db.execute('ALTER TABLE tb_books ADD COLUMN group_id INTEGER');
-        await db.execute('UPDATE tb_books SET group_id = 0');
+        await db.execute("ALTER TABLE tb_books ADD COLUMN group_id INTEGER");
+        await db.execute("UPDATE tb_books SET group_id = 0");
     }
   }
 }
