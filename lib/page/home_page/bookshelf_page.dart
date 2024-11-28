@@ -259,20 +259,22 @@ class BookshelfPageState extends ConsumerState<BookshelfPage>
                           ),
                         ],
                         builder: (children) {
-                          return GridView(
-                            key: GlobalKey(),
-                            controller: _scrollController,
-                            padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
-                            gridDelegate:
-                                SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount:
-                                  MediaQuery.of(context).size.width ~/ 110,
-                              childAspectRatio: 0.55,
-                              mainAxisSpacing: 30,
-                              crossAxisSpacing: 20,
-                            ),
-                            children: children,
-                          );
+                          return LayoutBuilder(builder: (context, constraints) {
+                            return GridView(
+                              key: GlobalKey(),
+                              controller: _scrollController,
+                              padding:
+                                  const EdgeInsets.fromLTRB(20, 20, 20, 10),
+                              gridDelegate:
+                                  SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: constraints.maxWidth ~/ 110,
+                                childAspectRatio: 0.55,
+                                mainAxisSpacing: 30,
+                                crossAxisSpacing: 20,
+                              ),
+                              children: children,
+                            );
+                          });
                         });
               },
               loading: () => const Center(child: CircularProgressIndicator()),
