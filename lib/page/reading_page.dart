@@ -20,24 +20,26 @@ import 'package:anx_reader/widgets/reading_page/toc_widget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
-class ReadingPage extends StatefulWidget {
+class ReadingPage extends ConsumerStatefulWidget {
   const ReadingPage({super.key, required this.book, this.cfi});
 
   final Book book;
   final String? cfi;
 
   @override
-  State<ReadingPage> createState() => ReadingPageState();
+  ConsumerState<ReadingPage> createState() => ReadingPageState();
 }
 
 final GlobalKey<ReadingPageState> readingPageKey =
     GlobalKey<ReadingPageState>();
 final epubPlayerKey = GlobalKey<EpubPlayerState>();
 
-class ReadingPageState extends State<ReadingPage> with WidgetsBindingObserver {
+class ReadingPageState extends ConsumerState<ReadingPage>
+    with WidgetsBindingObserver {
   late Book _book;
   Widget _currentPage = const SizedBox(height: 1);
   final Stopwatch _readTimeWatch = Stopwatch();

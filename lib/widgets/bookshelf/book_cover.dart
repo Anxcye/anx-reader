@@ -27,7 +27,7 @@ Widget bookCover(
           child: Center(
             child: Icon(
               Icons.book,
-              size: MediaQuery.of(context).size.width / 5,
+              size: 40,
               color: Theme.of(context).hintColor,
             ),
           ),

@@ -13,6 +13,7 @@ import 'package:anx_reader/models/search_result_model.dart';
 import 'package:anx_reader/models/toc_item.dart';
 import 'package:anx_reader/page/book_player/image_viewer.dart';
 import 'package:anx_reader/page/reading_page.dart';
+import 'package:anx_reader/providers/book_list.dart';
 import 'package:anx_reader/service/book_player/book_player_server.dart';
 import 'package:anx_reader/utils/coordinates_to_part.dart';
 import 'package:anx_reader/utils/js/convert_dart_color_to_js.dart';
@@ -30,10 +31,11 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:intl/intl.dart';
 
-class EpubPlayer extends StatefulWidget {
+class EpubPlayer extends ConsumerStatefulWidget {
   final Book book;
   final String? cfi;
   final Function showOrHideAppBarAndBottomBar;
@@ -45,10 +47,11 @@ class EpubPlayer extends StatefulWidget {
       this.cfi});
 
   @override
-  State<EpubPlayer> createState() => EpubPlayerState();
+  ConsumerState<EpubPlayer> createState() => EpubPlayerState();
 }
 
-class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
+class EpubPlayerState extends ConsumerState<EpubPlayer>
+    with TickerProviderStateMixin {
   late InAppWebViewController webViewController;
   late ContextMenu contextMenu;
   String cfi = '';
@@ -275,6 +278,7 @@ class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
         handlerName: 'onRelocated',
         callback: (args) {
           Map<String, dynamic> location = args[0];
+          if (cfi == location['cfi']) return;
           setState(() {
             cfi = location['cfi'];
             percentage = location['percentage'] ?? 0.0;
@@ -283,6 +287,7 @@ class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
             chapterCurrentPage = location['chapterCurrentPage'];
             chapterTotalPages = location['chapterTotalPages'];
           });
+          saveReadingProgress();
           readingPageKey.currentState?.resetAwakeTimer();
         });
     controller.addJavaScriptHandler(
@@ -349,10 +354,12 @@ class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
         Map<String, dynamic> state = args[0];
         canGoBack = state['canGoBack'];
         canGoForward = state['canGoForward'];
+        if (!mounted) return;
         setState(() {
           showHistory = true;
         });
         Future.delayed(const Duration(seconds: 20), () {
+          if (!mounted) return;
           setState(() {
             showHistory = false;
           });
@@ -469,6 +476,9 @@ class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
     book.lastReadPosition = cfi;
     book.readingPercentage = percentage;
     await updateBook(book);
+    if (mounted) {
+      ref.read(bookListProvider.notifier).refresh();
+    }
   }
 
   @override
@@ -554,8 +564,7 @@ class EpubPlayerState extends State<EpubPlayer> with TickerProviderStateMixin {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               batteryAndTime,
-              Text('$chapterCurrentPage/$chapterTotalPages',
-                  style: textStyle),
+              Text('$chapterCurrentPage/$chapterTotalPages', style: textStyle),
               Text('${(percentage * 100).toStringAsFixed(2)}%',
                   style: textStyle),
             ],
