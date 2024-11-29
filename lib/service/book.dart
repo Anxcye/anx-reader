@@ -5,13 +5,16 @@ import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/main.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/providers/book_list.dart';
+import 'package:anx_reader/service/convert_to_epub/txt/convert_from_txt.dart';
 import 'package:anx_reader/utils/get_path/get_base_path.dart';
 import 'package:anx_reader/page/reading_page.dart';
 import 'package:anx_reader/utils/import_book.dart';
+import 'package:anx_reader/utils/log/common.dart';
 import 'package:anx_reader/utils/toast/common.dart';
 import 'package:anx_reader/utils/webView/webview_console_message.dart';
 import 'package:anx_reader/utils/webView/webview_initial_variable.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -19,7 +22,99 @@ import 'book_player/book_player_server.dart';
 
 HeadlessInAppWebView? headlessInAppWebView;
 
+/// import book list and **delete file**
+void importBookList(List<File> fileList, WidgetRef ref) {
+  final allowBookExtensions = ["epub", "mobi", "azw3", "fb2", "txt"];
+
+  AnxLog.info('importBook fileList: ${fileList.toString()}');
+
+  List<File> supportedFiles = fileList.where((file) {
+    return allowBookExtensions.contains(file.path.split('.').last);
+  }).toList();
+
+  List<File> unsupportedFiles = fileList.where((file) {
+    return !allowBookExtensions.contains(file.path.split('.').last);
+  }).toList();
+
+  // delete unsupported files
+  for (var file in unsupportedFiles) {
+    file.deleteSync();
+  }
+
+  Widget bookItem(String path, Icon icon) {
+    return Row(
+      children: [
+        icon,
+        Expanded(
+          child: Text(
+            path.split('/').last,
+            style: const TextStyle(
+                fontWeight: FontWeight.w300,
+                // fontSize: ,
+                overflow: TextOverflow.ellipsis),
+          ),
+        ),
+      ],
+    );
+  }
+
+  showDialog(
+      context: navigatorKey.currentContext!,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title:
+              Text(L10n.of(context).import_n_books_selected(fileList.length)),
+          content: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(L10n.of(context)
+                    .import_support_types(allowBookExtensions.join(' / '))),
+                const SizedBox(height: 10),
+                if (unsupportedFiles.isNotEmpty)
+                  Text(L10n.of(context)
+                      .import_n_books_not_support(unsupportedFiles.length)),
+                const SizedBox(height: 20),
+                for (var file in unsupportedFiles)
+                  bookItem(file.path, const Icon(Icons.error)),
+                for (var file in supportedFiles)
+                  bookItem(file.path, const Icon(Icons.done)),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                for (var file in supportedFiles) {
+                  file.deleteSync();
+                }
+              },
+              child: Text(L10n.of(context).common_cancel),
+            ),
+            if (supportedFiles.isNotEmpty)
+              TextButton(
+                  onPressed: () async {
+                    for (var file in supportedFiles) {
+                      AnxToast.show(file.path.split('/').last);
+                      await importBook(file, ref);
+                    }
+                    Navigator.of(context).pop('dialog');
+                  },
+                  child: Text(L10n.of(context)
+                      .import_import_n_books(supportedFiles.length))),
+          ],
+        );
+      });
+}
+
 Future<void> importBook(File file, WidgetRef ref) async {
+  if (file.path.split('.').last == 'txt') {
+    final tempFile = await convertFromTxt(file);
+    file.deleteSync();
+    file = tempFile;
+  }
+
   await getBookMetadata(file, ref: ref);
   ref.read(bookListProvider.notifier).refresh();
 }
