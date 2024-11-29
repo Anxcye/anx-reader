@@ -5,11 +5,15 @@
 - 自动背景色
 
 ## Unreleased
-- Feat: Setting column count
+- Feat: Setting reading column count
+- Feat: Import txt format books
+- Fix: Book progress record is not timely
 - Fix: Windows import book error
 
-- 新增：设置列数
-- 修复：Windows端部分设备无法导入书籍
+- 新增：设置阅读栏数
+- 新增：导入 txt 格式书籍
+- 修复：书籍进度记录不及时
+- 修复：Windows 端部分设备无法导入书籍
 
 ## 1.2.1 2024-11-23
 - Feat: Drag to group books

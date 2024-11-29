@@ -139,19 +139,9 @@ Future<void> pushToReadingPage(
       ));
 }
 
-void openBook(BuildContext context, Book book, WidgetRef ref) {
-  book.updateTime = DateTime.now();
-  updateBook(book);
-  Future.delayed(const Duration(milliseconds: 500), () {
-    ref.read(bookListProvider.notifier).refresh();
-  });
-
-  pushToReadingPage(context, book).then((value) {
-    // wait 1s to update book which is read
-    Future.delayed(const Duration(milliseconds: 500), () {
-      ref.read(bookListProvider.notifier).refresh();
-    });
-  });
+Future<void> openBook(BuildContext context, Book book, WidgetRef ref) async {
+  ref.read(bookListProvider.notifier).moveBookToTop(book.id);
+  await pushToReadingPage(context, book);
 }
 
 void updateBookRating(Book book, double rating) {

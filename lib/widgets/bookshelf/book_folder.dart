@@ -101,7 +101,7 @@ class _BookFolderState extends ConsumerState<BookFolder> {
                                 top: topPosition,
                                 child: Container(
                                   decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(8),
+                                    borderRadius: BorderRadius.circular(10),
                                     border: Border.all(
                                       color: Theme.of(context)
                                           .colorScheme

@@ -4,12 +4,6 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'book_list.g.dart';
 
-// @riverpod
-// Future<List<Book>> bookList(Ref ref) async {
-//   final books = await selectBooks();
-//   return books;
-// }
-
 @riverpod
 class BookList extends _$BookList {
   @override
@@ -63,5 +57,22 @@ class BookList extends _$BookList {
 
   void reorder(List<List<Book>> books) {
     state = AsyncData(books);
+  }
+
+  void moveBookToTop(int bookId) {
+    var groups = state.value!.map((group) {
+      if (group.any((book) => book.id == bookId)) {
+        return [
+          group.firstWhere((book) => book.id == bookId),
+          ...group.where((b) => b.id != bookId)
+        ];
+      }
+      return group;
+    }).toList();
+
+    state = AsyncData([
+      groups.firstWhere((group) => group.any((book) => book.id == bookId)),
+      ...groups.where((group) => group.every((book) => book.id != bookId))
+    ]);
   }
 }
