@@ -6,7 +6,6 @@ import 'package:anx_reader/providers/book_list.dart';
 import 'package:anx_reader/service/book.dart';
 import 'package:anx_reader/utils/get_path/cache_path.dart';
 import 'package:anx_reader/utils/log/common.dart';
-import 'package:anx_reader/utils/toast/common.dart';
 import 'package:anx_reader/utils/webdav/common.dart';
 import 'package:anx_reader/utils/webdav/show_status.dart';
 import 'package:anx_reader/widgets/bookshelf/book_bottom_sheet.dart';
@@ -46,7 +45,6 @@ class BookshelfPageState extends ConsumerState<BookshelfPage>
   }
 
   Future<void> _importBook() async {
-    final allowBookExtensions = ["epub", "mobi", "azw3", "fb2"];
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.any,
       allowMultiple: true,
@@ -73,84 +71,7 @@ class BookshelfPageState extends ConsumerState<BookshelfPage>
       fileList = files.map((file) => File(file.path!)).toList();
     }
 
-    AnxLog.info('importBook fileList: ${fileList.toString()}');
-
-    List<File> supportedFiles = fileList.where((file) {
-      return allowBookExtensions.contains(file.path.split('.').last);
-    }).toList();
-    List<File> unsupportedFiles = fileList.where((file) {
-      return !allowBookExtensions.contains(file.path.split('.').last);
-    }).toList();
-
-    // delete unsupported files
-    for (var file in unsupportedFiles) {
-      file.deleteSync();
-    }
-
-    Widget bookItem(String path, Icon icon) {
-      return Row(
-        children: [
-          icon,
-          Expanded(
-            child: Text(
-              path.split('/').last,
-              style: const TextStyle(
-                  fontWeight: FontWeight.w300,
-                  // fontSize: ,
-                  overflow: TextOverflow.ellipsis),
-            ),
-          ),
-        ],
-      );
-    }
-
-    showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text(L10n.of(context).import_n_books_selected(files.length)),
-            content: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(L10n.of(context)
-                      .import_support_types(allowBookExtensions.join(' / '))),
-                  const SizedBox(height: 10),
-                  if (unsupportedFiles.isNotEmpty)
-                    Text(L10n.of(context)
-                        .import_n_books_not_support(unsupportedFiles.length)),
-                  const SizedBox(height: 20),
-                  for (var file in unsupportedFiles)
-                    bookItem(file.path, const Icon(Icons.error)),
-                  for (var file in supportedFiles)
-                    bookItem(file.path, const Icon(Icons.done)),
-                ],
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  for (var file in supportedFiles) {
-                    file.deleteSync();
-                  }
-                },
-                child: Text(L10n.of(context).common_cancel),
-              ),
-              if (supportedFiles.isNotEmpty)
-                TextButton(
-                    onPressed: () async {
-                      for (var file in supportedFiles) {
-                        AnxToast.show(file.path.split('/').last);
-                        await importBook(file, ref);
-                      }
-                      Navigator.of(context).pop('dialog');
-                    },
-                    child: Text(L10n.of(context)
-                        .import_import_n_books(supportedFiles.length))),
-            ],
-          );
-        });
+    importBookList(fileList, ref);
   }
 
   Widget syncButton() {

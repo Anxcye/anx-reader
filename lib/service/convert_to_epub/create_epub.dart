@@ -120,5 +120,7 @@ Future<File> createEpub(
   encoder.addFile(mimetypeFile);
   encoder.close();
 
+  epubDir.deleteSync(recursive: true);
+
   return zipFile;
 }
