@@ -4,7 +4,10 @@
 - 选择时移动
 - 自动背景色
 
-## Unreleased
+## 1.2.2 2024-12-02
+🚀 Support txt files now!
+🚀 支持了 txt 文件导入
+
 - Feat: Setting reading column count
 - Feat: Import txt format books
 - Fix: Book progress record is not timely
