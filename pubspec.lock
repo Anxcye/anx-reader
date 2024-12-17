@@ -452,6 +452,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.2"
+  flutter_gbk2utf8:
+    dependency: "direct main"
+    description:
+      name: flutter_gbk2utf8
+      sha256: c17323808d6ae7cfaf7676669e0130c33df6be322eb807cdd32face5824c1134
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.1"
   flutter_gen_core:
     dependency: transitive
     description:

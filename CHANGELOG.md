@@ -4,6 +4,12 @@
 - 选择时移动
 - 自动背景色
 
+## Unreleased
+
+- Fix: Fixed garbled text when importing txt files
+
+- 修复：txt 文件导入时乱码问题(添加了 GBK 解码)
+
 ## 1.2.2 2024-12-02
 🚀 Support txt files now!
 🚀 支持了 txt 文件导入

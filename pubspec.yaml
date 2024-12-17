@@ -62,6 +62,7 @@ dependencies:
   sqlite3_flutter_libs: ^0.5.26
   flutter_reorderable_grid_view: ^5.4.0
   uuid: ^4.5.1
+  flutter_gbk2utf8: ^1.0.1
 
 dev_dependencies:
   flutter_test:
