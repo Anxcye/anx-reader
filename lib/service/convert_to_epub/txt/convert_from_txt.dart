@@ -62,20 +62,13 @@ Future<File> convertFromTxt(File file) async {
   var orientation = false;
 
   final prologuePattern = RegExp(r'^\s*(楔子|序章|序言|序|引子).*');
-  final volumePattern1 = RegExp(r'^\s*[第][0123456789ⅠI一二三四五六七八九十零序〇百千两]*[卷].*');
-  final volumePattern2 = RegExp(r'^\s*[卷][0123456789ⅠI一二三四五六七八九十零序〇百千两]*[ ].*');
-  final volumePattern3 =
-      RegExp(r'^\s*(Vol(?:ume)?\.?|Book)\s*[0123456789ⅠI]*\s*[ ].*');
+  final volumePattern = RegExp(
+      r'^\s*(?:[第][0123456789ⅠI一二三四五六七八九十零序〇百千两]*[卷]|[卷][0123456789ⅠI一二三四五六七八九十零序〇百千两]*[ ]|(Vol(?:ume)?\.?|Book)\s*[0123456789ⅠI]*\s*[ ]).*');
 
-  final chapterPattern1 =
-      RegExp(r'^\s*[第][0123456789ⅠI一二三四五六七八九十零序〇百千两]*[章].*');
-  final chapterPattern2 =
-      RegExp(r'^\s*(Chapter|Ch\.?)\s*[0123456789ⅠI]*\s*[ ].*');
+  final chapterPattern = RegExp(
+      r'^\s*(?:[第][0123456789ⅠI一二三四五六七八九十零序〇百千两]*[章]|(Chapter|Ch\.?)\s*[0123456789ⅠI]*\s*[ ]).*');
 
-  int lineIndex = 0;
   for (var line in lines) {
-    lineIndex++;
-    print('lineIndex: $lineIndex / ${lines.length}');
     line = line.trim();
     if (line.isEmpty) continue;
 
@@ -91,16 +84,15 @@ Future<File> convertFromTxt(File file) async {
       }
     }
 
-    if (volumePattern1.hasMatch(line) ||
-        volumePattern2.hasMatch(line) ||
-        volumePattern3.hasMatch(line)) {
+
+    if (volumePattern.hasMatch(line)) {
       orientation = true;
       level = 1;
       chapters.add('# $line \n');
       continue;
     }
 
-    if (chapterPattern1.hasMatch(line) || chapterPattern2.hasMatch(line)) {
+    if (chapterPattern.hasMatch(line)) {
       orientation = true;
       chapters.add(level == 1 ? '## $line \n' : '# $line \n');
       continue;
