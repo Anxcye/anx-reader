@@ -1,7 +1,47 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:anx_reader/service/convert_to_epub/create_epub.dart';
 import 'package:anx_reader/utils/log/common.dart';
+
+import 'package:flutter_gbk2utf8/flutter_gbk2utf8.dart';
+
+List<String> readFileWithEncoding(File file) {
+  bool checkGarbled(List<String> lines) {
+    final garbledPattern = RegExp(r'[¡-ÿ]{2,}|[²-º]|Õ|Ê|Ç|³|¾|Ð|Ó|Î|Á|É');
+
+    final sampleLines = lines.take(10);
+    return sampleLines.any((line) => garbledPattern.hasMatch(line));
+  }
+
+  final List<Encoding> encodings = [
+    utf8,
+    latin1,
+  ];
+
+  for (final encoding in encodings) {
+    try {
+      AnxLog.info('Convert: Reading file with encoding: ${encoding.name}');
+      final lines = file.readAsLinesSync(encoding: encoding);
+
+      if (!checkGarbled(lines)) {
+        return lines;
+      }
+      AnxLog.info('Convert: Detected garbled text, trying next encoding');
+    } catch (e) {
+      continue;
+    }
+  }
+
+  try {
+    AnxLog.info('Convert: Reading file with encoding: gbk');
+    final content = gbk.decode(file.readAsBytesSync());
+    return content.split('\n');
+  } catch (e) {
+    AnxLog.severe('Convert: Failed to read file with encoding');
+    return [];
+  }
+}
 
 Future<File> convertFromTxt(File file) async {
   var filename = file.path.split('/').last;
@@ -14,23 +54,28 @@ Future<File> convertFromTxt(File file) async {
 
   AnxLog.info('convert from txt. title: $titleString, author: $authorString');
 
-  // TODO: detect encoding and convert to utf-8
-
   // parse content
-  final lines = file.readAsLinesSync();
+  final lines = readFileWithEncoding(file);
   final chapters = <String>[];
+
   var level = 0;
   var orientation = false;
 
   final prologuePattern = RegExp(r'^\s*(楔子|序章|序言|序|引子).*');
   final volumePattern1 = RegExp(r'^\s*[第][0123456789ⅠI一二三四五六七八九十零序〇百千两]*[卷].*');
   final volumePattern2 = RegExp(r'^\s*[卷][0123456789ⅠI一二三四五六七八九十零序〇百千两]*[ ].*');
-  final volumePattern3 = RegExp(r'^\s*(Vol(?:ume)?\.?|Book)\s*[0123456789ⅠI]*\s*[ ].*');
+  final volumePattern3 =
+      RegExp(r'^\s*(Vol(?:ume)?\.?|Book)\s*[0123456789ⅠI]*\s*[ ].*');
 
-  final chapterPattern1 = RegExp(r'^\s*[第][0123456789ⅠI一二三四五六七八九十零序〇百千两]*[章].*');
-  final chapterPattern2 = RegExp(r'^\s*(Chapter|Ch\.?)\s*[0123456789ⅠI]*\s*[ ].*');
+  final chapterPattern1 =
+      RegExp(r'^\s*[第][0123456789ⅠI一二三四五六七八九十零序〇百千两]*[章].*');
+  final chapterPattern2 =
+      RegExp(r'^\s*(Chapter|Ch\.?)\s*[0123456789ⅠI]*\s*[ ].*');
 
+  int lineIndex = 0;
   for (var line in lines) {
+    lineIndex++;
+    print('lineIndex: $lineIndex / ${lines.length}');
     line = line.trim();
     if (line.isEmpty) continue;
 
