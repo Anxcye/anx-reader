@@ -96,6 +96,8 @@
   "book_detail_last_read_date": "上次阅读",
   "book_detail_import_date": "首次导入",
 
+  "bookshelf_dragging": "松开以导入",
+
   "notes_page_detail": "详情",
   "notes_page_export": "导出",
   "notes_page_copied": "已复制",

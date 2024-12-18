@@ -5,14 +5,15 @@
 - 自动背景色
 
 ## Unreleased
+* Feat(Android): Import books through system sharing
+* Feat(Windows): Drag to import books
+* Fix: Fixed garbled text when importing txt files
+* Fix: Optimized import efficiency
 
-- Feat(Android): Import books through system sharing
-- Fix: Fixed garbled text when importing txt files
-- Fix: Optimized import efficiency
-
-- 新增（Android）：通过系统分享导入书籍
-- 修复：txt 文件导入时乱码问题(添加了 GBK 解码)
-- 修复：大幅优化导入效率
+* 新增（Android）：通过系统分享导入书籍
+* 新增（Windows）：拖拽导入书籍
+* 修复：txt 文件导入时乱码问题(添加了 GBK 解码)
+* 修复：大幅优化导入效率
 
 ## 1.2.2 2024-12-02
 🚀 Support txt files now!
