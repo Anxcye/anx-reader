@@ -95,6 +95,8 @@
   "book_detail_last_read_date": "Last read: ",
   "book_detail_import_date": "Import date: ",
 
+  "bookshelf_dragging": "Release to import",
+
   "notes_page_detail": "Detail",
   "notes_page_export": "Export",
   "notes_page_copied": "Copied",

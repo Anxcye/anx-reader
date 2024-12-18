@@ -47,36 +47,38 @@ class _HomePageState extends ConsumerState<HomePage> {
     }
     loadDefaultFont();
 
-    // receive sharing intent
-    Future<void> handleShare(List<SharedMediaFile> value) async {
-      List<File> files = [];
-      for (var item in value) {
-        final sourceFile = File(item.path);
-        files.add(sourceFile);
+    if (Platform.isAndroid || Platform.isIOS) {
+      // receive sharing intent
+      Future<void> handleShare(List<SharedMediaFile> value) async {
+        List<File> files = [];
+        for (var item in value) {
+          final sourceFile = File(item.path);
+          files.add(sourceFile);
+        }
+        importBookList(files, context, ref);
+        ReceiveSharingIntent.instance.reset();
       }
-      importBookList(files, context, ref);
-      ReceiveSharingIntent.instance.reset();
+
+      ReceiveSharingIntent.instance.getMediaStream().listen((value) {
+        AnxLog.info(
+            'share: Receive share intent: ${value.map((e) => e.toMap())}');
+        if (value.isNotEmpty) {
+          handleShare(value);
+        }
+      }, onError: (err) {
+        AnxLog.severe('share: Receive share intent');
+      });
+
+      ReceiveSharingIntent.instance.getInitialMedia().then((value) {
+        AnxLog.info(
+            'share: Receive share intent: ${value.map((e) => e.toMap())}');
+        if (value.isNotEmpty) {
+          handleShare(value);
+        }
+      }, onError: (err) {
+        AnxLog.severe('share: Receive share intent');
+      });
     }
-
-    ReceiveSharingIntent.instance.getMediaStream().listen((value) {
-      AnxLog.info(
-          'share: Receive share intent: ${value.map((e) => e.toMap())}');
-      if (value.isNotEmpty) {
-        handleShare(value);
-      }
-    }, onError: (err) {
-      AnxLog.severe('share: Receive share intent');
-    });
-
-    ReceiveSharingIntent.instance.getInitialMedia().then((value) {
-      AnxLog.info(
-          'share: Receive share intent: ${value.map((e) => e.toMap())}');
-      if (value.isNotEmpty) {
-        handleShare(value);
-      }
-    }, onError: (err) {
-      AnxLog.severe('share: Receive share intent');
-    });
   }
 
   @override
