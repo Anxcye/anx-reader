@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:anx_reader/service/convert_to_epub/create_epub.dart';
 import 'package:anx_reader/utils/log/common.dart';
@@ -43,32 +44,20 @@ List<String> readFileWithEncoding(File file) {
   }
 }
 
-Future<File> convertFromTxt(File file) async {
-  var filename = file.path.split('/').last;
-
-  filename = filename.split('.').first;
-  final titleString =
-      RegExp(r'(?<=《)[^》]+').firstMatch(filename)?.group(0) ?? filename;
-  final authorString =
-      RegExp(r'(?<=作者：).*').firstMatch(filename)?.group(0) ?? 'Unknown';
-
-  AnxLog.info('convert from txt. title: $titleString, author: $authorString');
-
-  // parse content
-  final lines = readFileWithEncoding(file);
+Future<List<String>> processChunkInIsolate(Map<String, dynamic> params) async {
+  final List<String> lines = params['lines'];
   final chapters = <String>[];
-
-  var level = 0;
-  var orientation = false;
+  var level = params['level'];
+  var orientation = params['orientation'];
 
   final prologuePattern = RegExp(r'^\s*(楔子|序章|序言|序|引子).*');
   final volumePattern = RegExp(
       r'^\s*(?:[第][0123456789ⅠI一二三四五六七八九十零序〇百千两]*[卷]|[卷][0123456789ⅠI一二三四五六七八九十零序〇百千两]*[ ]|(Vol(?:ume)?\.?|Book)\s*[0123456789ⅠI]*\s*[ ]).*');
-
   final chapterPattern = RegExp(
       r'^\s*(?:[第][0123456789ⅠI一二三四五六七八九十零序〇百千两]*[章]|(Chapter|Ch\.?)\s*[0123456789ⅠI]*\s*[ ]).*');
 
   for (var line in lines) {
+
     line = line.trim();
     if (line.isEmpty) continue;
 
@@ -83,7 +72,6 @@ Future<File> convertFromTxt(File file) async {
         continue;
       }
     }
-
 
     if (volumePattern.hasMatch(line)) {
       orientation = true;
@@ -101,7 +89,45 @@ Future<File> convertFromTxt(File file) async {
     chapters.isNotEmpty ? chapters.last += '$line \n' : chapters.add('$line\n');
   }
 
-  final epubFile = await createEpub(titleString, authorString, chapters);
+  return chapters;
+}
 
+Future<File> convertFromTxt(File file) async {
+  var filename = file.path.split('/').last;
+
+  filename = filename.split('.').first;
+  final titleString =
+      RegExp(r'(?<=《)[^》]+').firstMatch(filename)?.group(0) ?? filename;
+  final authorString =
+      RegExp(r'(?<=作者：).*').firstMatch(filename)?.group(0) ?? 'Unknown';
+
+  AnxLog.info('convert from txt. title: $titleString, author: $authorString');
+
+  // read file
+  final lines = readFileWithEncoding(file);
+
+  // split file to chunks
+  final int chunkSize = (lines.length / Platform.numberOfProcessors).ceil();
+  final chunks = <List<String>>[];
+
+  for (var i = 0; i < lines.length; i += chunkSize) {
+    chunks.add(lines.sublist(
+        i, i + chunkSize > lines.length ? lines.length : i + chunkSize));
+  }
+
+  // process each chunk in parallel
+  final futures = chunks.map((chunk) {
+    return Isolate.run(() => processChunkInIsolate({
+          'lines': chunk,
+          'level': 0,
+          'orientation': false,
+        }));
+  }).toList();
+
+  final results = await Future.wait(futures);
+  List chapters = results.expand((x) => x).toList();
+
+  final epubFile =
+      await createEpub(titleString, authorString, List<String>.from(chapters));
   return epubFile;
 }
