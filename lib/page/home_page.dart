@@ -1,15 +1,20 @@
+import 'dart:io';
+
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/page/home_page/bookshelf_page.dart';
 import 'package:anx_reader/page/home_page/notes_page.dart';
 import 'package:anx_reader/page/home_page/settings_page.dart';
 import 'package:anx_reader/page/home_page/statistics_page.dart';
+import 'package:anx_reader/service/book.dart';
 import 'package:anx_reader/utils/check_update.dart';
 import 'package:anx_reader/utils/load_default_font.dart';
+import 'package:anx_reader/utils/log/common.dart';
 import 'package:anx_reader/utils/webdav/common.dart';
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/utils/toast/common.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -36,11 +41,42 @@ class _HomePageState extends ConsumerState<HomePage> {
   Future<void> initAnx() async {
     AnxToast.init(context);
     checkUpdate(false);
-    if (Prefs().webdavStatus){
+    if (Prefs().webdavStatus) {
       await AnxWebdav.init();
       await AnxWebdav.syncData(SyncDirection.both, ref);
     }
     loadDefaultFont();
+
+    // receive sharing intent
+    Future<void> handleShare(List<SharedMediaFile> value) async {
+      List<File> files = [];
+      for (var item in value) {
+        final sourceFile = File(item.path);
+        files.add(sourceFile);
+      }
+      importBookList(files, context, ref);
+      ReceiveSharingIntent.instance.reset();
+    }
+
+    ReceiveSharingIntent.instance.getMediaStream().listen((value) {
+      AnxLog.info(
+          'share: Receive share intent: ${value.map((e) => e.toMap())}');
+      if (value.isNotEmpty) {
+        handleShare(value);
+      }
+    }, onError: (err) {
+      AnxLog.severe('share: Receive share intent');
+    });
+
+    ReceiveSharingIntent.instance.getInitialMedia().then((value) {
+      AnxLog.info(
+          'share: Receive share intent: ${value.map((e) => e.toMap())}');
+      if (value.isNotEmpty) {
+        handleShare(value);
+      }
+    }, onError: (err) {
+      AnxLog.severe('share: Receive share intent');
+    });
   }
 
   @override
