@@ -11,8 +11,18 @@ String generateNestedToc(List<String> chapters) {
     tocItems.add(_TocItem(i, level, cleanTitle));
   }
 
+  // 调整level, 如果所有level都大于1, 则所有level减1
+  while (tocItems.every((item) => item.level > 1)) {
+    for (int i = 0; i < tocItems.length; i++) {
+      tocItems[i].level -= 1;
+    }
+  }
+
   String buildNavPoints(
-      List<_TocItem> items, int currentLevel, int startIndex) {
+    List<_TocItem> items,
+    int currentLevel,
+    int startIndex,
+  ) {
     StringBuffer result = StringBuffer();
 
     for (int i = startIndex; i < items.length; i++) {
@@ -52,7 +62,7 @@ String generateNestedToc(List<String> chapters) {
 
 class _TocItem {
   final int index;
-  final int level;
+  int level;
   final String title;
 
   _TocItem(this.index, this.level, this.title);

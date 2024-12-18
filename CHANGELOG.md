@@ -7,8 +7,10 @@
 ## Unreleased
 
 - Fix: Fixed garbled text when importing txt files
+- Fix: Optimized import efficiency
 
 - 修复：txt 文件导入时乱码问题(添加了 GBK 解码)
+- 修复：大幅优化导入效率
 
 ## 1.2.2 2024-12-02
 🚀 Support txt files now!
