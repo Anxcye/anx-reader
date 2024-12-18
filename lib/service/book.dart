@@ -23,7 +23,7 @@ import 'book_player/book_player_server.dart';
 HeadlessInAppWebView? headlessInAppWebView;
 
 /// import book list and **delete file**
-void importBookList(List<File> fileList, WidgetRef ref) {
+void importBookList(List<File> fileList, BuildContext context, WidgetRef ref) {
   final allowBookExtensions = ["epub", "mobi", "azw3", "fb2", "txt"];
 
   AnxLog.info('importBook fileList: ${fileList.toString()}');
@@ -59,7 +59,7 @@ void importBookList(List<File> fileList, WidgetRef ref) {
   }
 
   showDialog(
-      context: navigatorKey.currentContext!,
+      context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title:

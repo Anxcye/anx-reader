@@ -319,6 +319,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.7.10"
+  desktop_drop:
+    dependency: "direct main"
+    description:
+      name: desktop_drop
+      sha256: "03abf1c0443afdd1d65cf8fa589a2f01c67a11da56bbb06f6ea1de79d5628e94"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.5.0"
   device_info_plus:
     dependency: "direct main"
     description:
@@ -1075,6 +1083,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.3.0"
+  receive_sharing_intent:
+    dependency: "direct main"
+    description:
+      name: receive_sharing_intent
+      sha256: ec76056e4d258ad708e76d85591d933678625318e411564dcb9059048ca3a593
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.8.1"
   riverpod:
     dependency: transitive
     description:

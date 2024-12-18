@@ -71,7 +71,7 @@ class BookshelfPageState extends ConsumerState<BookshelfPage>
       fileList = files.map((file) => File(file.path!)).toList();
     }
 
-    importBookList(fileList, ref);
+    importBookList(fileList, context, ref);
   }
 
   Widget syncButton() {
