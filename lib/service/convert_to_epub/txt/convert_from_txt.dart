@@ -49,6 +49,7 @@ Future<List<String>> processChunkInIsolate(Map<String, dynamic> params) async {
   final chapters = <String>[];
   var level = params['level'];
   var orientation = params['orientation'];
+  var currentChapter = StringBuffer();
 
   final prologuePattern = RegExp(r'^\s*(楔子|序章|序言|序|引子).*');
   final volumePattern = RegExp(
@@ -56,19 +57,27 @@ Future<List<String>> processChunkInIsolate(Map<String, dynamic> params) async {
   final chapterPattern = RegExp(
       r'^\s*(?:[第][0123456789ⅠI一二三四五六七八九十零序〇百千两]*[章]|(Chapter|Ch\.?)\s*[0123456789ⅠI]*\s*[ ]).*');
 
-  for (var line in lines) {
+  void addChapter() {
+    if (currentChapter.isNotEmpty) {
+      chapters.add(currentChapter.toString());
+      currentChapter.clear();
+    }
+  }
 
+  for (var line in lines) {
     line = line.trim();
     if (line.isEmpty) continue;
 
     if (!orientation) {
       if (line.startsWith('简介') || line.startsWith('内容简介')) {
-        chapters.add('$line \n');
+        addChapter();
+        currentChapter.writeln(line);
         continue;
       }
 
       if (prologuePattern.hasMatch(line)) {
-        chapters.add('$line \n');
+        addChapter();
+        currentChapter.writeln(line);
         continue;
       }
     }
@@ -76,19 +85,22 @@ Future<List<String>> processChunkInIsolate(Map<String, dynamic> params) async {
     if (volumePattern.hasMatch(line)) {
       orientation = true;
       level = 1;
-      chapters.add('# $line \n');
+      addChapter();
+      currentChapter.writeln('# $line');
       continue;
     }
 
     if (chapterPattern.hasMatch(line)) {
       orientation = true;
-      chapters.add(level == 1 ? '## $line \n' : '# $line \n');
+      addChapter();
+      currentChapter.writeln(level == 1 ? '## $line' : '# $line');
       continue;
     }
 
-    chapters.isNotEmpty ? chapters.last += '$line \n' : chapters.add('$line\n');
+    currentChapter.writeln(line);
   }
 
+  addChapter();
   return chapters;
 }
 
