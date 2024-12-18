@@ -47,7 +47,6 @@ List<String> readFileWithEncoding(File file) {
 Future<List<String>> processChunkInIsolate(Map<String, dynamic> params) async {
   final List<String> lines = params['lines'];
   final chapters = <String>[];
-  var level = params['level'];
   var orientation = params['orientation'];
   var currentChapter = StringBuffer();
 
@@ -71,20 +70,19 @@ Future<List<String>> processChunkInIsolate(Map<String, dynamic> params) async {
     if (!orientation) {
       if (line.startsWith('简介') || line.startsWith('内容简介')) {
         addChapter();
-        currentChapter.writeln(line);
+        currentChapter.writeln('## $line');
         continue;
       }
 
       if (prologuePattern.hasMatch(line)) {
         addChapter();
-        currentChapter.writeln(line);
+        currentChapter.writeln('## $line');
         continue;
       }
     }
 
     if (volumePattern.hasMatch(line)) {
       orientation = true;
-      level = 1;
       addChapter();
       currentChapter.writeln('# $line');
       continue;
@@ -93,7 +91,7 @@ Future<List<String>> processChunkInIsolate(Map<String, dynamic> params) async {
     if (chapterPattern.hasMatch(line)) {
       orientation = true;
       addChapter();
-      currentChapter.writeln(level == 1 ? '## $line' : '# $line');
+      currentChapter.writeln('## $line');
       continue;
     }
 
@@ -131,15 +129,26 @@ Future<File> convertFromTxt(File file) async {
   final futures = chunks.map((chunk) {
     return Isolate.run(() => processChunkInIsolate({
           'lines': chunk,
-          'level': 0,
           'orientation': false,
         }));
   }).toList();
 
   final results = await Future.wait(futures);
   List chapters = results.expand((x) => x).toList();
+  List<String> chaptersAfterRearrange = [];
+
+  // if some String not begin with '#' or '##',  concat them after previous one
+  for (var chapter in chapters) {
+    if (chapter.startsWith('#') || chapter.startsWith('##')) {
+      chaptersAfterRearrange.add(chapter);
+    } else {
+      chaptersAfterRearrange.isNotEmpty
+          ? chaptersAfterRearrange.last +=chapter
+          : chaptersAfterRearrange.add(chapter);
+    }
+  }
 
   final epubFile =
-      await createEpub(titleString, authorString, List<String>.from(chapters));
+      await createEpub(titleString, authorString, chaptersAfterRearrange);
   return epubFile;
 }
