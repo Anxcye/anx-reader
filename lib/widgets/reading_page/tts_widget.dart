@@ -125,7 +125,7 @@ class _TtsWidgetState extends State<TtsWidget> {
       children: [
         IconButton(
             onPressed: () async {
-              Tts.stop();
+              Tts.stopStatic();
               Tts.speak(
                   content: await epubPlayerKey.currentState!.ttsPrevSection());
               setState(() {
@@ -170,7 +170,7 @@ class _TtsWidgetState extends State<TtsWidget> {
             icon: const Icon(EvaIcons.chevron_right)),
         IconButton(
             onPressed: () async {
-              Tts.stop();
+              Tts.stopStatic();
               Tts.speak(
                   content: await epubPlayerKey.currentState!.ttsNextSection());
               setState(() {

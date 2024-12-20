@@ -4,10 +4,12 @@ import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/page/home_page.dart';
 import 'package:anx_reader/page/home_page/notes_page.dart';
 import 'package:anx_reader/service/book_player/book_player_server.dart';
+import 'package:anx_reader/service/tts.dart';
 import 'package:anx_reader/utils/error/common.dart';
 import 'package:anx_reader/utils/get_path/get_base_path.dart';
 import 'package:anx_reader/utils/log/common.dart';
 import 'package:anx_reader/utils/webdav/common.dart';
+import 'package:audio_service/audio_service.dart';
 import 'package:chinese_font_library/chinese_font_library.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
@@ -16,6 +18,7 @@ import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:provider/provider.dart' as provider;
 
 final navigatorKey = GlobalKey<NavigatorState>();
+late AudioHandler _audioHandler;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,6 +30,14 @@ Future<void> main() async {
   await DBHelper().initDB();
   Server().start();
   initBasePath();
+
+  _audioHandler = await AudioService.init(
+    builder: () => Tts(),
+    config: const AudioServiceConfig(
+      androidNotificationChannelId: 'com.anx.anx_reader.channel.audio',
+      androidNotificationChannelName: 'TTS playback',
+    ),
+  );
 
   runApp(
     const ProviderScope(
