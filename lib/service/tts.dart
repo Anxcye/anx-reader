@@ -3,13 +3,14 @@ import 'dart:io' show Platform;
 
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/page/reading_page.dart';
+import 'package:audio_service/audio_service.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
 enum TtsState { playing, stopped, paused, continued }
 
-class Tts {
+class Tts extends BaseAudioHandler with QueueHandler, SeekHandler {
   static FlutterTts flutterTts = FlutterTts();
   static String? language;
   static String? engine;
@@ -38,7 +39,7 @@ class Tts {
   }
 
   static void dispose() {
-    stop();
+    stopStatic();
     isInit = false;
     _currentVoiceText = null;
   }
@@ -144,7 +145,7 @@ class Tts {
   static void toggle() {
     if (isPlaying) {
       // pause();
-      stop();
+      stopStatic();
     } else {
       speak();
     }
@@ -180,30 +181,40 @@ class Tts {
     }
   }
 
-  static Future<void> stop() async {
+  @override
+  Future<void> stop() async {
+    await stopStatic();
+  }
+
+  @override
+  Future<void> pause() async {
+    await pauseStatic();
+  }
+
+  static Future<void> stopStatic() async {
     var result = await flutterTts.stop();
     if (result == 1) ttsState = TtsState.stopped;
   }
 
-  static Future<void> pause() async {
+  static Future<void> pauseStatic() async {
     var result = await flutterTts.pause();
     if (result == 1) ttsState = TtsState.paused;
   }
 
   static Future<void> prev() async {
-    await stop();
+    await stopStatic();
     _currentVoiceText = await getPrevVoiceText();
     speak();
   }
 
   static Future<void> next() async {
-    await stop();
+    await stopStatic();
     _currentVoiceText = await getNextVoiceText();
     speak();
   }
 
   static Future<void> restart() async {
-    await stop();
+    await stopStatic();
     await speak();
   }
 

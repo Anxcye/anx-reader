@@ -47,7 +47,7 @@ dependencies:
   icons_plus: ^5.0.0
   url_launcher: ^6.2.6
   sqflite_common_ffi: ^2.3.3
-  battery_plus: ^6.0.2
+  battery_plus: ^6.2.1
   flutter_tts: ^4.1.0
   sticky_headers: ^0.3.0+2
   photo_view: ^0.15.0
@@ -65,6 +65,7 @@ dependencies:
   flutter_gbk2utf8: ^1.0.1
   receive_sharing_intent: ^1.8.1
   desktop_drop: ^0.5.0
+  audio_service: ^0.18.16
 
 dev_dependencies:
   flutter_test:
