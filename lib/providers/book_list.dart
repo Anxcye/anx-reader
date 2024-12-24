@@ -6,26 +6,30 @@ part 'book_list.g.dart';
 
 @riverpod
 class BookList extends _$BookList {
-  @override
-  Future<List<List<Book>>> build() async {
-    final books = await bookDao.selectNotDeleteBooks();
-    var groupBooks = <List<Book>>[];
+  List<List<Book>> groupBooks(List<Book> books) {
+    var groupedBooks = <List<Book>>[];
     for (var book in books) {
       if (book.groupId == 0) {
-        groupBooks.add([book]);
+        groupedBooks.add([book]);
       } else {
-        var existingGroup = groupBooks.firstWhere(
+        var existingGroup = groupedBooks.firstWhere(
           (group) => group.first.groupId == book.groupId,
           orElse: () => [],
         );
         if (existingGroup.isEmpty) {
-          groupBooks.add([book]);
+          groupedBooks.add([book]);
         } else {
           existingGroup.add(book);
         }
       }
     }
-    return groupBooks;
+    return groupedBooks;
+  }
+
+  @override
+  Future<List<List<Book>>> build() async {
+    final books = await bookDao.selectNotDeleteBooks();
+    return groupBooks(books);
   }
 
   Future<void> refresh() async {
@@ -74,5 +78,21 @@ class BookList extends _$BookList {
       groups.firstWhere((group) => group.any((book) => book.id == bookId)),
       ...groups.where((group) => group.every((book) => book.id != bookId))
     ]);
+  }
+
+  Future<void> search(String? value) async {
+    if (value == null || value.isEmpty) {
+      state = AsyncData(await build());
+      return;
+    }
+
+    final books = await bookDao.selectNotDeleteBooks();
+
+    final filteredBooks = books.where((book) {
+      return book.title.contains(value) || book.author.contains(value);
+    }).toList();
+
+    final groupedBooks = groupBooks(filteredBooks);
+    state = AsyncData(groupedBooks);
   }
 }
