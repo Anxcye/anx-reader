@@ -31,6 +31,8 @@ class BookshelfPageState extends ConsumerState<BookshelfPage>
   AnimationController? _syncAnimationController;
   final _scrollController = ScrollController();
   bool _dragging = false;
+  String? _searchValue;
+  TextEditingController searchBarController = TextEditingController();
 
   @override
   void dispose() {
@@ -194,7 +196,44 @@ class BookshelfPageState extends ConsumerState<BookshelfPage>
 
     return Scaffold(
         appBar: AppBar(
-          title: Text(L10n.of(context).appName),
+          // title: Text(L10n.of(context).appName),
+          title: Container(
+            height: 48,
+            constraints: const BoxConstraints(maxWidth: 400),
+            child: SearchBar(
+              controller: searchBarController,
+              hintText: L10n.of(context).appName,
+              shadowColor:
+                  const WidgetStatePropertyAll<Color>(Colors.transparent),
+              padding: const WidgetStatePropertyAll<EdgeInsets>(
+                  EdgeInsets.symmetric(horizontal: 16.0)),
+              leading: const Icon(Icons.search),
+              trailing: [
+                _searchValue != null
+                    ? IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () {
+                          setState(() {
+                            _searchValue = null;
+                            searchBarController.clear();
+                            ref.read(bookListProvider.notifier).search(null);
+                          });
+                        },
+                      )
+                    : const SizedBox(),
+              ],
+              onSubmitted: (value) {
+                setState(() {
+                  if (value.isEmpty) {
+                    _searchValue = null;
+                  } else {
+                    _searchValue = value;
+                    ref.read(bookListProvider.notifier).search(value);
+                  }
+                });
+              },
+            ),
+          ),
           actions: [
             syncButton(),
             IconButton(

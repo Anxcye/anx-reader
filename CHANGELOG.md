@@ -5,12 +5,14 @@
 - 自动背景色
 
 ## Unreleased
+* Feat: Search books
 - Feat(Android): Display TTS control buttons in the notification screen
 * Feat(Android): Import books through system sharing
 * Feat(Windows): Drag to import books
 * Fix: Fixed garbled text when importing txt files
 * Fix: Optimized import efficiency
 
+* 新增：书籍搜索
 * 新增（Android）：在通知栏中显示 TTS 控制按钮
 * 新增（Android）：通过系统分享导入书籍
 * 新增（Windows）：拖拽导入书籍
