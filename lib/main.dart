@@ -34,8 +34,9 @@ Future<void> main() async {
   audioHandler = await AudioService.init(
     builder: () => Tts(),
     config: const AudioServiceConfig(
-      androidNotificationChannelId: 'com.anx.anx_reader.channel.audio',
+      androidNotificationChannelId: 'com.anxcye.anx_reader.channel.audio',
       androidNotificationChannelName: 'TTS playback',
+      androidNotificationOngoing: true,
     ),
   );
 

@@ -66,6 +66,7 @@ dependencies:
   receive_sharing_intent: ^1.8.1
   desktop_drop: ^0.5.0
   audio_service: ^0.18.16
+  audio_session: ^0.1.23
 
 dev_dependencies:
   flutter_test:
