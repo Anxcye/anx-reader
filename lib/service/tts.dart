@@ -7,6 +7,7 @@ import 'package:audio_service/audio_service.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:audio_session/audio_session.dart';
 
 enum TtsStateEnum { playing, stopped, paused, continued }
 
@@ -152,30 +153,6 @@ class Tts extends BaseAudioHandler with QueueHandler, SeekHandler {
     }
   }
 
-  @override
-  Future<void> stop() async {
-    stopStatic();
-    isInit = false;
-    _currentVoiceText = null;
-    epubPlayerKey.currentState!.ttsStop();
-    updateTtsState(TtsStateEnum.stopped);
-  }
-
-  @override
-  Future<void> pause() async {
-    await stopStatic();
-    updateTtsState(TtsStateEnum.paused);
-  }
-
-  @override
-  Future<void> play() async {
-    if (isAndroid && ttsStateNotifier.value == TtsStateEnum.paused) {
-      _currentVoiceText = _prevVoiceText;
-    }
-    await speak();
-    updateTtsState(TtsStateEnum.playing);
-  }
-
   static Future<int> stopStatic() async {
     return await flutterTts.stop();
   }
@@ -238,5 +215,92 @@ class Tts extends BaseAudioHandler with QueueHandler, SeekHandler {
           .isLanguageInstalled(language!)
           .then((value) => isCurrentLanguageInstalled = (value as bool));
     }
+  }
+
+  @override
+  Future<void> stop() async {
+    playbackState.add(playbackState.value.copyWith(
+      controls: [],
+      processingState: AudioProcessingState.idle,
+      playing: false,
+    ));
+    stopStatic();
+    isInit = false;
+    _currentVoiceText = null;
+    epubPlayerKey.currentState!.ttsStop();
+    updateTtsState(TtsStateEnum.stopped);
+  }
+
+  @override
+  Future<void> pause() async {
+    playbackState.add(playbackState.value.copyWith(
+      controls: [MediaControl.play, MediaControl.stop],
+      processingState: AudioProcessingState.ready,
+      playing: false,
+    ));
+
+    await stopStatic();
+    updateTtsState(TtsStateEnum.paused);
+  }
+
+  @override
+  Future<void> play() async {
+    final session = await AudioSession.instance;
+    // flutter_tts doesn't activate the session, so we do it here. This
+    // allows the app to stop other apps from playing audio while we are
+    // playing audio.
+    if (await session.setActive(true)) {
+      // If we successfully activated the session, set the state to playing
+      // and resume playback.
+      playbackState.add(playbackState.value.copyWith(
+        controls: [MediaControl.pause, MediaControl.stop],
+        processingState: AudioProcessingState.ready,
+        playing: true,
+      ));
+    }
+
+    mediaItem.add(MediaItem(
+      id: epubPlayerKey.currentState!.chapterTitle,
+      title: epubPlayerKey.currentState!.chapterTitle,
+      album: epubPlayerKey.currentState!.book.title,
+      artist: epubPlayerKey.currentState!.book.author,
+      artUri: Uri.tryParse(
+          'file://${epubPlayerKey.currentState!.book.coverFullPath}'),
+    ));
+
+    if (isAndroid && ttsStateNotifier.value == TtsStateEnum.paused) {
+      _currentVoiceText = _prevVoiceText;
+    }
+    await speak();
+    updateTtsState(TtsStateEnum.playing);
+  }
+
+  Tts() {
+    _initTts();
+  }
+
+  Future<void> _initTts() async {
+    final session = await AudioSession.instance;
+    session.interruptionEventStream.listen((event) {
+      if (event.begin) {
+        if (isPlaying) {
+          pause();
+        }
+      } else {
+        switch (event.type) {
+          case AudioInterruptionType.pause:
+          case AudioInterruptionType.duck:
+            if (!isPlaying) {
+              play();
+            }
+            break;
+          case AudioInterruptionType.unknown:
+            break;
+        }
+      }
+    });
+    session.becomingNoisyEventStream.listen((_) {
+      if (isPlaying) pause();
+    });
   }
 }

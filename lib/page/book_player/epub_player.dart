@@ -69,6 +69,7 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
   bool showHistory = false;
   bool canGoBack = false;
   bool canGoForward = false;
+  late Book book;
 
   final StreamController<double> _searchProgressController =
       StreamController<double>.broadcast();
@@ -442,6 +443,7 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
 
   @override
   void initState() {
+    book = widget.book;
     focusNode.requestFocus();
     contextMenu = ContextMenu(
       settings: ContextMenuSettings(hideDefaultSystemContextMenuItems: true),
