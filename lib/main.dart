@@ -18,7 +18,7 @@ import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:provider/provider.dart' as provider;
 
 final navigatorKey = GlobalKey<NavigatorState>();
-late AudioHandler _audioHandler;
+late AudioHandler audioHandler;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,7 +31,7 @@ Future<void> main() async {
   Server().start();
   initBasePath();
 
-  _audioHandler = await AudioService.init(
+  audioHandler = await AudioService.init(
     builder: () => Tts(),
     config: const AudioServiceConfig(
       androidNotificationChannelId: 'com.anx.anx_reader.channel.audio',
