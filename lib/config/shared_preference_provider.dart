@@ -7,6 +7,7 @@ import 'package:anx_reader/main.dart';
 import 'package:anx_reader/models/book_style.dart';
 import 'package:anx_reader/models/font_model.dart';
 import 'package:anx_reader/models/read_theme.dart';
+import 'package:anx_reader/models/reading_rules.dart';
 import 'package:anx_reader/service/translate/index.dart';
 import 'package:anx_reader/widgets/reading_page/style_widget.dart';
 import 'package:flutter/material.dart';
@@ -299,13 +300,29 @@ class Prefs extends ChangeNotifier {
     return prefs.getBool('autoTranslateSelection') ?? true;
   }
 
-  set convertChineseMode(ConvertChineseMode mode) {
-    prefs.setString('convertChineseMode', mode.name);
+  // set convertChineseMode(ConvertChineseMode mode) {
+  //   prefs.setString('convertChineseMode', mode.name);
+  //   notifyListeners();
+  // }
+
+  // ConvertChineseMode get convertChineseMode {
+  //   return getConvertChineseMode(
+  //       prefs.getString('convertChineseMode') ?? 'none');
+  // }
+
+  set readingRules(ReadingRules rules) {
+    prefs.setString('readingRules', rules.toJson().toString());
     notifyListeners();
   }
 
-  ConvertChineseMode get convertChineseMode {
-    return getConvertChineseMode(
-        prefs.getString('convertChineseMode') ?? 'none');
+  ReadingRules get readingRules {
+    String? rulesJson = prefs.getString('readingRules');
+    if (rulesJson == null) {
+      return ReadingRules(
+        convertChineseMode: ConvertChineseMode.none,
+        bionicReading: false,
+      );
+    }
+    return ReadingRules.fromJson(rulesJson);
   }
 }

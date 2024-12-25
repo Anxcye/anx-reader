@@ -32,6 +32,7 @@ Widget sliders() {
 
 Widget textIndent(BookStyle bookStyle, StateSetter setState) {
   return ListTile(
+    contentPadding: EdgeInsets.zero,
     leading: const Icon(Icons.format_indent_increase),
     title: Slider(
       value: bookStyle.indent,
@@ -52,6 +53,7 @@ Widget textIndent(BookStyle bookStyle, StateSetter setState) {
 
 Widget sideMarginSlider(BookStyle bookStyle, StateSetter setState) {
   return ListTile(
+    contentPadding: EdgeInsets.zero,
     leading: const Icon(Icons.margin_rounded),
     title: Slider(
       value: bookStyle.sideMargin,
@@ -72,6 +74,7 @@ Widget sideMarginSlider(BookStyle bookStyle, StateSetter setState) {
 
 Widget letterSpacingSlider(BookStyle bookStyle, StateSetter setState) {
   return ListTile(
+    contentPadding: EdgeInsets.zero,
     leading: const Icon(Icons.compare_arrows),
     title: Slider(
       value: bookStyle.letterSpacing,
@@ -92,6 +95,7 @@ Widget letterSpacingSlider(BookStyle bookStyle, StateSetter setState) {
 
 ListTile topBottomMarginSlider(BookStyle bookStyle, StateSetter setState) {
   return ListTile(
+    contentPadding: EdgeInsets.zero,
     title: Row(
       children: [
         const Icon(Icons.vertical_align_top_outlined),

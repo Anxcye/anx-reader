@@ -4,6 +4,7 @@ import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/page/reading_page.dart';
 import 'package:flutter/material.dart';
 import 'package:icons_plus/icons_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 Widget readingSettings = StatefulBuilder(
   builder: (context, setState) => SingleChildScrollView(
@@ -12,8 +13,10 @@ Widget readingSettings = StatefulBuilder(
       child: Column(
         children: [
           columnCount(),
-          const Divider(height: 18),
+          const Divider(height: 8),
           convertChinese(),
+          const Divider(height: 8),
+          bionicReading(),
         ],
       ),
     ),
@@ -33,31 +36,34 @@ Widget convertChinese() {
           Row(
             children: [
               Expanded(
-                child: SegmentedButton(
+                child: SegmentedButton<ConvertChineseMode>(
                   segments: [
-                    ButtonSegment<String>(
+                    ButtonSegment<ConvertChineseMode>(
                       label: Text(L10n.of(context).reading_page_original),
-                      value: "none",
+                      value: ConvertChineseMode.none,
                       icon: const Text("原", style: iconStyle),
                     ),
-                    ButtonSegment<String>(
+                    ButtonSegment<ConvertChineseMode>(
                       label: Text(L10n.of(context).reading_page_simplified),
-                      value: "t2s",
+                      value: ConvertChineseMode.t2s,
                       icon: const Text("简", style: iconStyle),
                     ),
-                    ButtonSegment<String>(
+                    ButtonSegment<ConvertChineseMode>(
                       label: Text(L10n.of(context).reading_page_traditional),
-                      value: "s2t",
+                      value: ConvertChineseMode.s2t,
                       icon: const Text("繁", style: iconStyle),
                     ),
                   ],
-                  selected: {Prefs().convertChineseMode.name},
+                  selected: {Prefs().readingRules.convertChineseMode},
                   onSelectionChanged: (value) {
                     setState(() {
-                      Prefs().convertChineseMode =
-                          ConvertChineseMode.values.byName(value.first);
+                      // Prefs().readingRules.convertChineseMode =
+                      //     ConvertChineseMode.values.byName(value.first);
+                      Prefs().readingRules = Prefs()
+                          .readingRules
+                          .copyWith(convertChineseMode: value.first);
                       epubPlayerKey.currentState!
-                          .changeConvertChinese(Prefs().convertChineseMode);
+                          .changeReadingRules(Prefs().readingRules);
                     });
                   },
                 ),
@@ -67,12 +73,56 @@ Widget convertChinese() {
           Row(
             children: [
               const Icon(Icons.error_outline),
-              Text(L10n.of(context).reading_page_convert_chinese_tips),
+              Expanded(
+                child: Text(
+                  L10n.of(context).reading_page_convert_chinese_tips,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
             ],
           ),
         ],
       );
     },
+  );
+}
+
+Widget bionicReading() {
+  return StatefulBuilder(
+    builder: (context, setState) => ListTile(
+      contentPadding: EdgeInsets.zero,
+      title: Text(L10n.of(context).reading_page_bionic_reading,
+          style: Theme.of(context).textTheme.titleMedium),
+      subtitle: GestureDetector(
+        child: Text(
+          textAlign: TextAlign.start,
+          L10n.of(context).reading_page_bionic_reading_tips,
+          style: const TextStyle(
+            fontSize: 12,
+            color: Color(0xFF666666),
+            decoration: TextDecoration.underline,
+          ),
+        ),
+        onTap: () {
+          launchUrl(
+            Uri.parse('https://github.com/Anxcye/anx-reader/issues/49'),
+            mode: LaunchMode.externalApplication,
+          );
+        },
+      ),
+      trailing: Switch(
+        value: Prefs().readingRules.bionicReading,
+        onChanged: (value) {
+          setState(() {
+            Prefs().readingRules =
+                Prefs().readingRules.copyWith(bionicReading: value);
+            epubPlayerKey.currentState!
+                .changeReadingRules(Prefs().readingRules);
+          });
+        },
+      ),
+    ),
   );
 }
 

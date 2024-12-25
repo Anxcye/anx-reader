@@ -56,6 +56,8 @@
   "reading_page_auto": "Auto",
   "reading_page_single": "Single",
   "reading_page_double": "Double",
+  "reading_page_bionic_reading": "Bionic Reading",
+  "reading_page_bionic_reading_tips": "What is Bionic Reading?",
   
   "reading_page_full_screen": "Full Screen",
   "reading_page_screen_timeout": "Screen Timeout",
