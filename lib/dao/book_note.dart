@@ -32,6 +32,7 @@ Future<List<BookNote>> selectBookNoteByCfiAndBookId(String cfi, int bookId) asyn
       chapter: maps[i]['chapter'],
       type: maps[i]['type'],
       color: maps[i]['color'],
+      readerNote: maps[i]['reader_note'],
       createTime: DateTime.parse(maps[i]['create_time']),
       updateTime: DateTime.parse(maps[i]['update_time']),
     );
@@ -51,6 +52,7 @@ Future<List<BookNote>> selectBookNotesByBookId(int bookId) async {
       chapter: maps[i]['chapter'],
       type: maps[i]['type'],
       color: maps[i]['color'],
+      readerNote: maps[i]['reader_note'],
       createTime: DateTime.parse(maps[i]['create_time']),
       updateTime: DateTime.parse(maps[i]['update_time']),
     );
@@ -79,6 +81,7 @@ Future<BookNote> selectBookNoteById(int id) async {
     chapter: maps[0]['chapter'],
     type: maps[0]['type'],
     color: maps[0]['color'],
+    readerNote: maps[0]['reader_note'],
     createTime: DateTime.parse(maps[0]['create_time']),
     updateTime: DateTime.parse(maps[0]['update_time']),
   );

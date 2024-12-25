@@ -1,44 +1,44 @@
 // //////// use for test //////////
 // const importing = false
 // const allAnnotations = [
-//   // { id: 1, type: 'highlight', value: "epubcfi(/6/6!/4/2,/1:3,/1:4)", color: 'blue', note: 'this is' },
-//   // { id: 2, type: 'highlight', value: "epubcfi(/6/6!/4/576,/1:2,/1:3)", color: 'yellow', note: 'this is' },
-//   // { id: 3, type: 'underline', value: "epubcfi(/6/4!/4/4,/1:294,/1:301)", color: 'red', note: 'this is' },
+//  // { id: 1, type: 'highlight', value: "epubcfi(/6/6!/4/2,/1:3,/1:4)", color: 'blue', note: 'this is' },
+//  // { id: 2, type: 'highlight', value: "epubcfi(/6/6!/4/576,/1:2,/1:3)", color: 'yellow', note: 'this is' },
+//  // { id: 3, type: 'underline', value: "epubcfi(/6/4!/4/4,/1:294,/1:301)", color: 'red', note: 'this is' },
 // ]
-// let url = '../local/xwz.epub'
+// let url = '../local/alice.epub'
 // let initialCfi = "epubcfi(/6/12!/4,/2[CHP3],/8/1:29)"
 // //  let initialCfi = null
 // let style = {
-//   fontSize: 1.2,
-//   fontName: 'book',
-//   letterSpacing: 0,
-//   spacing: 1.7,
-//   paragraphSpacing: 1,
-//   textIndent: 5,
-//   fontColor: '#0000ff',
-//   backgroundColor: '#ffffff',
-//   topMargin: 100,
-//   bottomMargin: 100,
-//   sideMargin: 5,
-//   justify: true,
-//   hyphenate: true,
-//   // scroll: false,
-//   // animated: true,
-//   pageTurnStyle: 'slide',
-//   maxColumnCount: 2,
+//  fontSize: 1.2,
+//  fontName: 'book',
+//  letterSpacing: 0,
+//  spacing: 1.7,
+//  paragraphSpacing: 1,
+//  textIndent: 5,
+//  fontColor: '#0000ff',
+//  backgroundColor: '#ffffff',
+//  topMargin: 100,
+//  bottomMargin: 100,
+//  sideMargin: 5,
+//  justify: true,
+//  hyphenate: true,
+//  // scroll: false,
+//  // animated: true,
+//  pageTurnStyle: 'slide',
+//  maxColumnCount: 2,
 // }
 // window.flutter_inappwebview = {}
 // window.flutter_inappwebview.callHandler = (name, data) => {
-//   console.log(name, data)
+//  console.log(name, data)
 // }
 // setTimeout(() => {
-//   reader.renderAnnotation()
+//  reader.renderAnnotation()
 // }, 1000)
 
 // let readingRules = {
-//   // 'none', 's2t', 't2s'
-//   convertChineseMode: 's2t',
-//   bionicReadingMode: true,
+//  // 'none', 's2t', 't2s'
+//  convertChineseMode: 's2t',
+//  bionicReadingMode: true,
 // }
 
 
@@ -382,6 +382,9 @@ const convertChineseHandler = (mode, doc) => {
 }
 
 const bionicReadingHandler = (doc) => {
+
+  return;
+
   const walker = document.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT, {
     acceptNode: (node) => {
       if (node.parentNode.nodeName === 'SCRIPT' ||
@@ -425,12 +428,13 @@ const bionicReadingHandler = (doc) => {
   });
 };
 
+
 const readingFeaturesDocHandler = (doc) => {
-  if (readingRules.bionicReadingMode) {
-    bionicReadingHandler(doc)
-  }
   if (readingRules.convertChineseMode !== 'none') {
     convertChineseHandler(readingRules.convertChineseMode, doc)
+  }
+  if (readingRules.bionicReadingMode) {
+    bionicReadingHandler(doc)
   }
 }
 

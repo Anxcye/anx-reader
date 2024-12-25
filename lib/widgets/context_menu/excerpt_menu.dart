@@ -4,6 +4,7 @@ import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/models/book_note.dart';
 import 'package:anx_reader/page/reading_page.dart';
 import 'package:anx_reader/utils/toast/common.dart';
+import 'package:anx_reader/widgets/context_menu/reader_note_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:icons_plus/icons_plus.dart';
@@ -21,17 +22,43 @@ List<Map<String, dynamic>> notesType = [
   },
 ];
 
-Widget excerptMenu(
-  BuildContext context,
-  String annoCfi,
-  String annoContent,
-  int? id,
-  Function() onClose,
-  bool footnote,
-  BoxDecoration decoration,
-  Function() toggleTranslationMenu,
-) {
+class ExcerptMenu extends StatefulWidget {
+  final String annoCfi;
+  final String annoContent;
+  final int? id;
+  final Function() onClose;
+  final bool footnote;
+  final BoxDecoration decoration;
+  final Function() toggleTranslationMenu;
+
+  const ExcerptMenu({
+    Key? key,
+    required this.annoCfi,
+    required this.annoContent,
+    this.id,
+    required this.onClose,
+    required this.footnote,
+    required this.decoration,
+    required this.toggleTranslationMenu,
+  }) : super(key: key);
+
+  @override
+  ExcerptMenuState createState() => ExcerptMenuState();
+}
+
+class ExcerptMenuState extends State<ExcerptMenu> {
   bool deleteConfirm = false;
+  late final GlobalKey<ReaderNoteMenuState> readerNoteMenuKey;
+
+  @override
+  initState() {
+    super.initState();
+    readerNoteMenuKey = GlobalKey<ReaderNoteMenuState>();
+  }
+
+  String annoType = Prefs().annotationType;
+  String annoColor = Prefs().annotationColor;
+
   Icon deleteIcon() {
     return deleteConfirm
         ? const Icon(
@@ -41,18 +68,13 @@ Widget excerptMenu(
         : const Icon(Icons.delete);
   }
 
-  String annoType = Prefs().annotationType;
-  String annoColor = Prefs().annotationColor;
-
-  final playerKey = epubPlayerKey.currentState!;
-
-  void deleteHandler(StateSetter setState) {
+  void deleteHandler() {
     if (deleteConfirm) {
-      if (id != null) {
-        deleteBookNoteById(id);
-        playerKey.removeAnnotation(annoCfi);
+      if (widget.id != null) {
+        deleteBookNoteById(widget.id!);
+        epubPlayerKey.currentState!.removeAnnotation(widget.annoCfi);
       }
-      onClose();
+      widget.onClose();
     } else {
       setState(() {
         deleteConfirm = true;
@@ -64,20 +86,20 @@ Widget excerptMenu(
     Prefs().annotationColor = color;
     annoColor = color;
     BookNote bookNote = BookNote(
-      id: id,
-      bookId: playerKey.widget.book.id,
-      content: annoContent,
-      cfi: annoCfi,
-      chapter: playerKey.chapterTitle,
+      id: widget.id,
+      bookId: epubPlayerKey.currentState!.widget.book.id,
+      content: widget.annoContent,
+      cfi: widget.annoCfi,
+      chapter: epubPlayerKey.currentState!.chapterTitle,
       type: annoType,
       color: annoColor,
       createTime: DateTime.now(),
       updateTime: DateTime.now(),
     );
     bookNote.setId(await insertBookNote(bookNote));
-    playerKey.addAnnotation(bookNote);
+    epubPlayerKey.currentState!.addAnnotation(bookNote);
     if (close) {
-      onClose();
+      widget.onClose();
     }
   }
 
@@ -121,66 +143,82 @@ Widget excerptMenu(
     );
   }
 
+  @override
+  Widget build(BuildContext context) {
+    Widget annotationMenu = Container(
+      height: 48,
+      decoration: widget.decoration,
+      child: Row(children: [
+        iconButton(
+          onPressed: deleteHandler,
+          icon: deleteIcon(),
+        ),
+        for (Map<String, dynamic> type in notesType)
+          typeButton(type['type'], type['icon']),
+        for (String color in notesColors) colorButton(color),
+      ]),
+    );
 
-  Widget annotationMenu = Container(
-    height: 48,
-    decoration: decoration,
-    child: Row(children: [
-      StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
-          return iconButton(
-              onPressed: () {
-                deleteHandler(setState);
-              },
-              icon: deleteIcon());
-        },
-      ),
-      for (Map<String, dynamic> type in notesType)
-        typeButton(type['type'], type['icon']),
-      for (String color in notesColors) colorButton(color),
-    ]),
-  );
+    Widget operatorMenu = Container(
+      height: 48,
+      decoration: widget.decoration,
+      child: Row(children: [
+        // copy
+        iconButton(
+          icon: const Icon(EvaIcons.copy),
+          onPressed: () {
+            Clipboard.setData(ClipboardData(text: widget.annoContent));
+            AnxToast.show(L10n.of(context).notes_page_copied);
+            widget.onClose();
+          },
+        ),
+        // Web search
+        iconButton(
+          icon: const Icon(EvaIcons.globe),
+          onPressed: () {
+            widget.onClose();
+            launchUrl(
+              Uri.parse('https://www.bing.com/search?q=${widget.annoContent}'),
+              mode: LaunchMode.externalApplication,
+            );
+          },
+        ),
+        // toggle translation menu
+        iconButton(
+          icon: const Icon(Icons.translate),
+          onPressed: widget.toggleTranslationMenu,
+        ),
+        iconButton(
+          icon: const Icon(EvaIcons.edit_2_outline),
+          onPressed: () {
+            readerNoteMenuKey.currentState!.showNoteDialog();
+          },
+        ),
+      ]),
+    );
 
-  Widget operatorMenu = Container(
-    height: 48,
-    decoration: decoration,
-    child: Row(children: [
-      // copy
-      iconButton(
-        icon: const Icon(EvaIcons.copy),
-        onPressed: () {
-          Clipboard.setData(ClipboardData(text: annoContent));
-          AnxToast.show(L10n.of(context).notes_page_copied);
-          onClose();
-        },
+    return Expanded(
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              operatorMenu,
+              if (!widget.footnote) annotationMenu,
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              ReaderNoteMenu(
+                key: readerNoteMenuKey,
+                noteId: widget.id!,
+                decoration: widget.decoration,
+              ),
+            ],
+          ),
+        ],
       ),
-      // Web search
-      iconButton(
-        icon: const Icon(EvaIcons.globe),
-        onPressed: () {
-          onClose();
-          // open browser
-          launchUrl(Uri.parse('https://www.bing.com/search?q=$annoContent'),
-              mode: LaunchMode.externalApplication);
-        },
-      ),
-      // toggle translation menu
-      iconButton(
-        icon: const Icon(Icons.translate),
-        onPressed: () {
-          toggleTranslationMenu();
-        },
-      ),
-    ]),
-  );
-
-  return Expanded(
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        operatorMenu,
-        if (!footnote) annotationMenu,
-      ],
-    ),
-  );
+    );
+  }
 }

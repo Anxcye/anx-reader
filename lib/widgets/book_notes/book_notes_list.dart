@@ -117,6 +117,33 @@ class _BookNotesListState extends State<BookNotesList> {
                         fontSize: 16,
                       ),
                     ),
+                    if (bookNote.readerNote != null &&
+                        bookNote.readerNote!.isNotEmpty)
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const SizedBox(height: 4),
+                          IntrinsicHeight(
+                            child: Row(
+                              children: [
+                                const VerticalDivider(
+                                  thickness: 3,
+                                ),
+                                Expanded(
+                                  child: Text(
+                                    bookNote.readerNote!,
+                                    style: infoStyle.copyWith(
+                                      color: Colors.grey.shade600,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                        ],
+                      ),
                     Divider(
                       indent: 4,
                       height: 3,
@@ -134,7 +161,7 @@ class _BookNotesListState extends State<BookNotesList> {
                         ),
                         Text(
                           timeToHuman(bookNote.createTime, context),
-                          style:infoStyle,
+                          style: infoStyle,
                         )
                       ],
                     ),

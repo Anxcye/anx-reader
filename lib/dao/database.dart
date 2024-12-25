@@ -98,7 +98,7 @@ class DBHelper {
   }
 
   Future<Database> initDB() async {
-    int dbVersion = 5;
+    int dbVersion = 6;
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
         final databasePath = await getAnxDataBasesPath();
@@ -220,6 +220,12 @@ class DBHelper {
         // add a column (group_id) to tb_books, and set all group_id to 0 default
         await db.execute("ALTER TABLE tb_books ADD COLUMN group_id INTEGER");
         await db.execute("UPDATE tb_books SET group_id = 0");
+        continue case5;
+      case5:
+      case 5:
+        // add a column (reader_note) to tb_notes, null default
+        await db.execute("ALTER TABLE tb_notes ADD COLUMN reader_note TEXT");
+      
     }
   }
 }
