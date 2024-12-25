@@ -1,4 +1,3 @@
-
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/main.dart';
 import 'package:anx_reader/models/book.dart';
@@ -21,9 +20,21 @@ Future<void> exportNotes(
   switch (exportType) {
     case ExportType.copy:
       var notes = '${book.title}\n\t${book.author}\n\n';
+
       notes += notesList.map((note) {
-        return '${note.chapter}\n\t${note.content}';
-      }).join('\n');
+        String exportContent = '${note.chapter}\n';
+
+        if (note.content.isNotEmpty) {
+          exportContent += '\t${note.content}\n';
+        }
+
+        if (note.readerNote != null && note.readerNote!.isNotEmpty) {
+          exportContent += '\t\t${note.readerNote}\n';
+        }
+
+        return exportContent;
+      }).join('\n\n');
+
       await Clipboard.setData(ClipboardData(text: notes));
       AnxToast.show(L10n.of(context).notes_page_copied);
       break;
@@ -31,7 +42,16 @@ Future<void> exportNotes(
     case ExportType.md:
       var notes = '# ${book.title}\n\n *${book.author}*\n\n';
       notes += notesList.map((note) {
-        return '## ${note.chapter}\n\n${note.content}\n\n';
+        String exportContent = '## ${note.chapter}\n\n';
+        if (note.content.isNotEmpty) {
+          exportContent += '> ${note.content}\n\n';
+        }
+
+        if (note.readerNote != null && note.readerNote!.isNotEmpty) {
+          exportContent += '${note.readerNote}\n\n';
+        }
+
+        return exportContent;
       }).join('');
 
       String? filePath = await fileSaver(
@@ -43,8 +63,17 @@ Future<void> exportNotes(
 
     case ExportType.txt:
       var notes = notesList.map((note) {
-        return '${note.chapter}\n\n${note.content}\n\n';
-      }).join('');
+        String exportContent = '${note.chapter}\n';
+
+        if (note.content.isNotEmpty) {
+          exportContent += '\t${note.content}\n';
+        }
+
+        if (note.readerNote != null && note.readerNote!.isNotEmpty) {
+          exportContent += '\t\t${note.readerNote}\n';
+        }
+        return exportContent;
+      }).join('\n\n');
       String? filePath = await fileSaver(
           bytes: convertStringToUint8List(notes),
           fileName: '${book.title}.txt',

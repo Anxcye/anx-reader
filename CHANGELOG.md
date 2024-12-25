@@ -3,9 +3,11 @@
 ## Todo
 - 选择时移动
 - 自动背景色
+* Feat: Add bionic reading mode(#49)
+* 新增：仿生阅读(#49)
 
 ## Unreleased
-* Feat: Add bionic reading mode(#49)
+* Feat: Reader could add notes
 * Feat: Search books
 * Feat(Android): Display TTS control buttons in the notification screen
 * Feat(Android): Import books through system sharing
@@ -13,7 +15,7 @@
 * Fix: Fixed garbled text when importing txt files
 * Fix: Optimized import efficiency
 
-* 新增：仿生阅读(#49)
+* 新增：读者添加批注
 * 新增：书籍搜索
 * 新增（Android）：在通知栏中显示 TTS 控制按钮
 * 新增（Android）：通过系统分享导入书籍

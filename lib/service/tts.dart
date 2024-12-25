@@ -227,7 +227,7 @@ class Tts extends BaseAudioHandler with QueueHandler, SeekHandler {
     stopStatic();
     isInit = false;
     _currentVoiceText = null;
-    epubPlayerKey.currentState!.ttsStop();
+    epubPlayerKey.currentState?.ttsStop();
     updateTtsState(TtsStateEnum.stopped);
   }
 

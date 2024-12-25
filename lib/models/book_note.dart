@@ -6,6 +6,7 @@ class BookNote{
   String chapter;
   String type;
   String color;
+  String? readerNote;
   DateTime? createTime;
   DateTime updateTime;
 
@@ -21,6 +22,7 @@ class BookNote{
     required this.chapter,
     required this.type,
     required this.color,
+    this.readerNote,
     this.createTime,
     required this.updateTime,
   });
@@ -34,6 +36,7 @@ class BookNote{
       'chapter': chapter,
       'type': type,
       'color': color,
+      'reader_note': readerNote,
       'create_time': createTime?.toIso8601String(),
       'update_time': updateTime.toIso8601String(),
     };
