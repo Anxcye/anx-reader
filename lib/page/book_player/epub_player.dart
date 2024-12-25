@@ -4,11 +4,11 @@ import 'dart:convert';
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/dao/book.dart';
 import 'package:anx_reader/dao/book_note.dart';
-import 'package:anx_reader/enums/convert_chinese_mode.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/models/book_style.dart';
 import 'package:anx_reader/models/font_model.dart';
 import 'package:anx_reader/models/read_theme.dart';
+import 'package:anx_reader/models/reading_rules.dart';
 import 'package:anx_reader/models/search_result_model.dart';
 import 'package:anx_reader/models/toc_item.dart';
 import 'package:anx_reader/page/book_player/image_viewer.dart';
@@ -138,9 +138,12 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
     ''');
   }
 
-  void changeConvertChinese(ConvertChineseMode convertChineseMode) {
+  void changeReadingRules(ReadingRules readingRules) {
     webViewController.evaluateJavascript(source: '''
-      convertChinese('${convertChineseMode.name}')
+      readingFeatures({
+        convertChineseMode: '${readingRules.convertChineseMode.name}',
+        bionicReadingMode: ${readingRules.bionicReading},
+      })
     ''');
   }
 

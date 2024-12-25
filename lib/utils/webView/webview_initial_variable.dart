@@ -61,7 +61,11 @@ void webviewInitialVariable(
          pageTurnStyle: '${Prefs().pageTurnStyle.name}',
          maxColumnCount: ${bookStyle.maxColumnCount},
      }
-     let convertChineseMode = '${Prefs().convertChineseMode.name}'
+        let readingRules = {
+          convertChineseMode: '${Prefs().readingRules.convertChineseMode.name}',
+          bionicReadingMode: ${Prefs().readingRules.bionicReading},
+        }
+
   ''';
   controller.addJavaScriptHandler(
       handlerName: 'webviewInitialVariable',

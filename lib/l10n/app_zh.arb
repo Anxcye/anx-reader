@@ -56,6 +56,9 @@
   "reading_page_auto": "自动",
   "reading_page_single": "单列",
   "reading_page_double": "双列",
+  "reading_page_bionic_reading": "仿生阅读",
+  "reading_page_bionic_reading_tips": "什么是仿生阅读？",
+
 
   "reading_page_full_screen": "全屏",
   "reading_page_screen_timeout": "屏幕超时",
