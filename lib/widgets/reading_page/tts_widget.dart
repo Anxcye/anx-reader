@@ -5,7 +5,6 @@ import 'package:anx_reader/service/tts.dart';
 import 'package:anx_reader/widgets/reading_page/widget_title.dart';
 import 'package:anx_reader/page/book_player/epub_player.dart';
 import 'package:anx_reader/widgets/reading_page/more_settings/more_settings.dart';
-import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:icons_plus/icons_plus.dart';
 
