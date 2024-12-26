@@ -206,6 +206,8 @@
   "webview_unsupported_version": "Unsupported Webview Version",
   "webview_unsupported_message": "Your Webview version may be not supported. Current version is {version}, required minimum version is {minVersion}, please update your Webview",
   "webview_update": "How to update",
-  "webview_cancel": "I know"
+  "webview_cancel": "I know",
+  "webview2_not_installed": "Failed to find an installed WebView2 Runtime or non-stable Microsoft Edge installation.",
+  "webview2_install": "Go to download"
 
 }

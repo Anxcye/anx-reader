@@ -12,16 +12,20 @@
 * Feat(Android): Display TTS control buttons in the notification screen
 * Feat(Android): Import books through system sharing
 * Feat(Windows): Drag to import books
+* Feat(Windows): Webview2 check and prompt
 * Fix: Fixed garbled text when importing txt files
 * Fix: Optimized import efficiency
+* Fix(Windows)：Fixed crash issue when opening books on some Windows devices
 
 * 新增：读者添加批注
 * 新增：书籍搜索
 * 新增（Android）：在通知栏中显示 TTS 控制按钮
 * 新增（Android）：通过系统分享导入书籍
 * 新增（Windows）：拖拽导入书籍
+* 新增(Windows)：Webview2 检查和提示
 * 修复：txt 文件导入时乱码问题(添加了 GBK 解码)
 * 修复：大幅优化导入效率
+* 修复（Windows）：部分Windows 端打开书时闪退问题
 
 ## 1.2.2 2024-12-02
 🚀 Support txt files now!

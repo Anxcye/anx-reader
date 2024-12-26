@@ -206,5 +206,8 @@
   "webview_unsupported_version": "不支持的 Webview 版本",
   "webview_unsupported_message": "Webview 版本可能不支持。当前版本为 {version}, 所需的最低版本是 {minVersion}，请更新您的 Webview",
   "webview_update": "如何更新",
-  "webview_cancel": "我知道了"
+  "webview_cancel": "我知道了",
+
+  "webview2_not_installed": "未能找到已安装的WebView2运行时或非稳定版的Microsoft Edge安装。",
+  "webview2_install": "去安装"
 }
