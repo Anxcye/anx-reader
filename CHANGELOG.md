@@ -6,7 +6,7 @@
 * Feat: Add bionic reading mode(#49)
 * 新增：仿生阅读(#49)
 
-## Unreleased
+## 1.2.3 2024-12-26
 * Feat: Reader could add notes
 * Feat: Search books
 * Feat(Android): Display TTS control buttons in the notification screen
