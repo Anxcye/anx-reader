@@ -37,6 +37,8 @@ WizardStyle=modern
 ; SignTool=MySignTool
 ArchitecturesInstallIn64BitMode=x64compatible
 ArchitecturesAllowed=x64compatible
+PrivilegesRequired=admin
+
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"

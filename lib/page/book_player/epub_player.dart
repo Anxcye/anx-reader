@@ -12,6 +12,7 @@ import 'package:anx_reader/models/reading_rules.dart';
 import 'package:anx_reader/models/search_result_model.dart';
 import 'package:anx_reader/models/toc_item.dart';
 import 'package:anx_reader/page/book_player/image_viewer.dart';
+import 'package:anx_reader/page/home_page.dart';
 import 'package:anx_reader/page/reading_page.dart';
 import 'package:anx_reader/providers/book_list.dart';
 import 'package:anx_reader/service/book_player/book_player_server.dart';
@@ -599,6 +600,7 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
               ),
               SizedBox.expand(
                 child: InAppWebView(
+                  webViewEnvironment: webViewEnvironment,
                   initialUrlRequest: URLRequest(url: WebUri(indexHtmlPath)),
                   initialSettings: initialSettings,
                   contextMenu: contextMenu,

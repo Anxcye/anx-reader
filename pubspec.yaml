@@ -28,7 +28,7 @@ dependencies:
   html: ^0.15.4
   flutter_html: ^3.0.0-beta.2
   archive: ^3.4.10
-  flutter_inappwebview: ^6.1.0+1
+  flutter_inappwebview: ^6.1.5
   shelf: ^1.4.1
   fl_chart: ^0.67.0
   flutter_rating_bar: ^4.0.1
