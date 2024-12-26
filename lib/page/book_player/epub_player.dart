@@ -597,14 +597,17 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
                     opacity: _animation,
                     child: bookCover(context, widget.book)),
               ),
-              InAppWebView(
-                initialUrlRequest: URLRequest(url: WebUri(indexHtmlPath)),
-                initialSettings: initialSettings,
-                contextMenu: contextMenu,
-                onWebViewCreated: (controller) => onWebViewCreated(controller),
-                onConsoleMessage: (controller, consoleMessage) {
-                  webviewConsoleMessage(controller, consoleMessage);
-                },
+              SizedBox.expand(
+                child: InAppWebView(
+                  initialUrlRequest: URLRequest(url: WebUri(indexHtmlPath)),
+                  initialSettings: initialSettings,
+                  contextMenu: contextMenu,
+                  onWebViewCreated: (controller) =>
+                      onWebViewCreated(controller),
+                  onConsoleMessage: (controller, consoleMessage) {
+                    webviewConsoleMessage(controller, consoleMessage);
+                  },
+                ),
               ),
               readingInfoWidget(),
               if (showHistory)
