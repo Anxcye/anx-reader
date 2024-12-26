@@ -5,10 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:icons_plus/icons_plus.dart';
 
 class ReaderNoteMenu extends StatefulWidget {
-  const ReaderNoteMenu(
-      {super.key, required this.noteId, required this.decoration});
+  const ReaderNoteMenu({super.key, this.noteId, required this.decoration});
 
-  final int noteId;
+  final int? noteId;
   final BoxDecoration decoration;
 
   @override
@@ -21,12 +20,13 @@ class ReaderNoteMenuState extends State<ReaderNoteMenu> {
   bool _showNoteDialog = false;
   final textFieldController = TextEditingController();
   bool showSaveButton = false;
+  int? noteId;
 
   @override
   void initState() {
     super.initState();
     if (mounted) {
-      getNoteDetail();
+      getNoteDetail(widget.noteId);
     }
   }
 
@@ -35,15 +35,18 @@ class ReaderNoteMenuState extends State<ReaderNoteMenu> {
     super.dispose();
   }
 
-  Future<void> getNoteDetail() async {
+  Future<void> getNoteDetail(int? id) async {
+    if (id == null) return;
     try {
-      note = await selectBookNoteById(widget.noteId);
+      note = await selectBookNoteById(id);
 
       if (note != null &&
           note!.readerNote != null &&
           note!.readerNote!.isNotEmpty) {
         textFieldController.text = note!.readerNote!;
-        _showNoteDialog = true;
+        setState(() {
+          _showNoteDialog = true;
+        });
       }
     } finally {
       isLoading = false;
@@ -52,10 +55,17 @@ class ReaderNoteMenuState extends State<ReaderNoteMenu> {
     }
   }
 
-  void showNoteDialog() {
+  Future<void> showNoteDialog(int noteId) async {
+    await getNoteDetail(noteId);
     setState(() {
       _showNoteDialog = true;
     });
+  }
+
+  void saveNote() {
+    textFieldController.text = textFieldController.text.trim();
+    note!.readerNote = textFieldController.text;
+    updateBookNoteById(note!);
   }
 
   @override
@@ -80,16 +90,15 @@ class ReaderNoteMenuState extends State<ReaderNoteMenu> {
                           controller: textFieldController,
                           decoration: InputDecoration(
                             border: InputBorder.none,
-                            hintText: L10n.of(context).context_menu_add_note_tips,
+                            hintText:
+                                L10n.of(context).context_menu_add_note_tips,
                             suffixIcon: !showSaveButton
                                 ? null
                                 : IconButton(
                                     icon: const Icon(
                                         EvaIcons.checkmark_circle_2_outline),
                                     onPressed: () {
-                                      note!.readerNote =
-                                          textFieldController.text;
-                                      updateBookNoteById(note!);
+                                      saveNote();
                                       // remove focus
                                       FocusScope.of(context).unfocus();
                                       setState(() {
@@ -101,8 +110,7 @@ class ReaderNoteMenuState extends State<ReaderNoteMenu> {
                           maxLines: 5,
                           minLines: 1,
                           onSubmitted: (String value) {
-                            note!.readerNote = value;
-                            updateBookNoteById(note!);
+                            saveNote();
                           },
                           onChanged: (String value) {
                             setState(() {

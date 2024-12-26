@@ -1,7 +1,6 @@
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/page/reading_page.dart';
 import 'package:anx_reader/widgets/context_menu/excerpt_menu.dart';
-import 'package:anx_reader/widgets/context_menu/reader_note_menu.dart';
 import 'package:anx_reader/widgets/context_menu/translation_menu.dart';
 import 'package:flutter/material.dart';
 

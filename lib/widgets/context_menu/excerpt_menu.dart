@@ -49,6 +49,7 @@ class ExcerptMenu extends StatefulWidget {
 class ExcerptMenuState extends State<ExcerptMenu> {
   bool deleteConfirm = false;
   late final GlobalKey<ReaderNoteMenuState> readerNoteMenuKey;
+  int? noteId;
 
   @override
   initState() {
@@ -96,7 +97,8 @@ class ExcerptMenuState extends State<ExcerptMenu> {
       createTime: DateTime.now(),
       updateTime: DateTime.now(),
     );
-    bookNote.setId(await insertBookNote(bookNote));
+    noteId = await insertBookNote(bookNote);
+    bookNote.setId(noteId!);
     epubPlayerKey.currentState!.addAnnotation(bookNote);
     if (close) {
       widget.onClose();
@@ -188,10 +190,14 @@ class ExcerptMenuState extends State<ExcerptMenu> {
           icon: const Icon(Icons.translate),
           onPressed: widget.toggleTranslationMenu,
         ),
+        // edit note
         iconButton(
           icon: const Icon(EvaIcons.edit_2_outline),
-          onPressed: () {
-            readerNoteMenuKey.currentState!.showNoteDialog();
+          onPressed: () async {
+            await onColorSelected(annoColor, close: false);
+            // update that noteId is not null
+            setState(() {});
+            await readerNoteMenuKey.currentState!.showNoteDialog(noteId!);
           },
         ),
       ]),
@@ -212,7 +218,7 @@ class ExcerptMenuState extends State<ExcerptMenu> {
             children: [
               ReaderNoteMenu(
                 key: readerNoteMenuKey,
-                noteId: widget.id!,
+                noteId: widget.id,
                 decoration: widget.decoration,
               ),
             ],
