@@ -60,6 +60,11 @@ Telegram 群组：[https://t.me/AnxReader](https://t.me/AnxReader)
 | ![](./docs/images/10men.jpg) | ![](./docs/images/9men.jpg) | ![](./docs/images/8men.jpg)|
 
 
+## 捐赠
+如果你喜欢安读，请考虑捐赠支持项目。您的支持将帮助我优化功能、修复问题，并为您带来更好的阅读体验！感谢您的慷慨支持！
+
+❤️ [捐赠](https://anxcye.com/home/7)
+
 
 
 ## 构建
