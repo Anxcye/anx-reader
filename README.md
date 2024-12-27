@@ -53,7 +53,10 @@ Telegram Group: [https://t.me/AnxReader](https://t.me/AnxReader)
 |:--:|:--:|:--:|
 | ![](./docs/images/10men.jpg) | ![](./docs/images/9men.jpg) | ![](./docs/images/8men.jpg)|
 
+## Donations
+If you like Anx Reader, please consider supporting the project by donating. Your donation will help me maintain and improve the project.
 
+❤️ [Donate](https://anxcye.com/home/7)
 
 ## Building
 Want to build Anx Reader from source? Please follow these steps:
