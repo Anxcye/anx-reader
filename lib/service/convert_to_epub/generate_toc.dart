@@ -11,10 +11,9 @@ String generateNestedToc(List<String> chapters) {
     tocItems.add(_TocItem(i, level, cleanTitle));
   }
 
-  // 调整level, 如果所有level都大于1, 则所有level减1
-  while (tocItems.every((item) => item.level > 1)) {
+  while (tocItems.every((item) => item.level > 1 || item.level == 0)) {
     for (int i = 0; i < tocItems.length; i++) {
-      tocItems[i].level -= 1;
+      tocItems[i].level = tocItems[i].level == 0 ? 0 : tocItems[i].level - 1;
     }
   }
 
