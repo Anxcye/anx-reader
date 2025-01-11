@@ -7,7 +7,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 
-
 class AnxLog {
   static final log = Logger('AnxReader');
   static late File? logFile;
@@ -25,11 +24,15 @@ class AnxLog {
           : Colors.grey;
 
   static AnxLog parse(String log) {
-    final logParts = log.split('^*^');
-    final level = stringToLevel(logParts[0]);
-    final time = DateTime.parse(logParts[1].trim());
-    final message = logParts[2];
-    return AnxLog(level, time, message);
+    try {
+      final logParts = log.split('^*^');
+      final level = stringToLevel(logParts[0]);
+      final time = DateTime.parse(logParts[1].trim());
+      final message = logParts[2];
+      return AnxLog(level, time, message);
+    } catch (e) {
+      return AnxLog(Level.SEVERE, DateTime.now(), 'Parse log error: $e');
+    }
   }
 
   static init() async {
@@ -51,8 +54,7 @@ class AnxLog {
         print('${record.error} \x1B[0m');
       }
       logFile!.writeAsStringSync(
-          '${'${record.level.name}^*^ ${record.time}^*^ [${record.message}]:${record.error}'
-                  .replaceAll('\n', ' ')}\n',
+          '${'${record.level.name}^*^ ${record.time}^*^ [${record.message}]:${record.error}'.replaceAll('\n', ' ')}\n',
           mode: FileMode.append);
     });
     if (Prefs().clearLogWhenStart) {
