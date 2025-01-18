@@ -1,18 +1,21 @@
 import 'package:anx_reader/dao/book_note.dart';
+import 'package:anx_reader/enums/sync_direction.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/models/book_note.dart';
 import 'package:anx_reader/page/reading_page.dart';
+import 'package:anx_reader/providers/anx_webdav.dart';
 import 'package:anx_reader/service/book.dart';
 import 'package:anx_reader/utils/time_to_human.dart';
 import 'package:anx_reader/widgets/delete_confirm.dart';
 import 'package:anx_reader/widgets/context_menu/excerpt_menu.dart';
 import 'package:anx_reader/widgets/tips/notes_tips.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:sticky_headers/sticky_headers.dart';
 
-class BookNotesList extends StatefulWidget {
+class BookNotesList extends ConsumerStatefulWidget {
   const BookNotesList({
     super.key,
     required this.book,
@@ -26,10 +29,10 @@ class BookNotesList extends StatefulWidget {
       exportNotes;
 
   @override
-  State<BookNotesList> createState() => _BookNotesListState();
+  ConsumerState<BookNotesList> createState() => _BookNotesListState();
 }
 
-class _BookNotesListState extends State<BookNotesList> {
+class _BookNotesListState extends ConsumerState<BookNotesList> {
   List<BookNote> bookNotes = [];
   List<BookNote> showNotes = [];
   List<BookNote> selectedNotes = [];
@@ -462,6 +465,7 @@ class _BookNotesListState extends State<BookNotesList> {
           for (int i = 0; i < selectedNotes.length; i++) {
             deleteBookNoteById(selectedNotes[i].id!);
           }
+          AnxWebdav().syncData(SyncDirection.upload, ref);
           setState(() {
             selectedNotes.clear();
             _loadBookNotes();
