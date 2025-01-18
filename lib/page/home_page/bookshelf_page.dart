@@ -151,7 +151,7 @@ class BookshelfPageState extends ConsumerState<BookshelfPage> {
         appBar: AppBar(
           // title: Text(L10n.of(context).appName),
           title: Container(
-            height: 48,
+            height: 34,
             constraints: const BoxConstraints(maxWidth: 400),
             child: SearchBar(
               controller: searchBarController,
