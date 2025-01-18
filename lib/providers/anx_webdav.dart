@@ -83,14 +83,24 @@ class AnxWebdav extends _$AnxWebdav {
 
   Future<void> syncData(SyncDirection direction, WidgetRef ref) async {
     BuildContext context = navigatorKey.currentContext!;
+    if (!Prefs().webdavStatus) {
+      return;
+    }
     // if is  syncing
     if (state.isSyncing) {
       return;
     }
-    if (!Prefs().webdavStatus) {
-      AnxToast.show(L10n.of(context).webdav_webdav_not_enabled);
+
+    File? remoteDb = await safeReadProps('anx/app_database.db', _client);
+    final databasePath = await getAnxDataBasesPath();
+    final path = join(databasePath, 'app_database.db');
+    io.File localDb = io.File(path);
+    // less than 5s return
+    if (remoteDb != null &&
+        localDb.lastModifiedSync().difference(remoteDb.mTime!).inSeconds < 5) {
       return;
     }
+
     changeState(state.copyWith(isSyncing: true));
     AnxToast.show(L10n.of(context).webdav_syncing);
     try {
@@ -205,7 +215,7 @@ class AnxWebdav extends _$AnxWebdav {
             DBHelper.close();
             await uploadFile(path, 'anx/app_database.db');
             DBHelper().initDB();
-          } else {
+          } else if (remoteDb.mTime!.isAfter(localDb.lastModifiedSync())) {
             DBHelper.close();
             await downloadFile('anx/app_database.db', path);
             DBHelper().initDB();

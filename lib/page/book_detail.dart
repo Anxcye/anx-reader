@@ -2,9 +2,11 @@ import 'dart:io';
 
 import 'package:anx_reader/dao/book.dart';
 import 'package:anx_reader/dao/reading_time.dart';
+import 'package:anx_reader/enums/sync_direction.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/models/reading_time.dart';
+import 'package:anx_reader/providers/anx_webdav.dart';
 import 'package:anx_reader/providers/book_list.dart';
 import 'package:anx_reader/service/book.dart';
 import 'package:anx_reader/utils/convert_seconds.dart';
@@ -170,6 +172,7 @@ class _BookDetailState extends ConsumerState<BookDetail> {
                   setState(() {
                     widget.book.coverPath = newPath;
                     updateBook(widget.book);
+                    AnxWebdav().syncData(SyncDirection.upload, ref);
                     ref.read(bookListProvider.notifier).refresh();
                   });
                 },
@@ -283,6 +286,7 @@ class _BookDetailState extends ConsumerState<BookDetail> {
                     setState(() {
                       isEditing = false;
                       updateBook(widget.book);
+                      AnxWebdav().syncData(SyncDirection.upload, ref);
                       ref.read(bookListProvider.notifier).refresh();
                     });
                   },
