@@ -1,5 +1,6 @@
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/dao/database.dart';
+import 'package:anx_reader/enums/sync_direction.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/page/home_page.dart';
 import 'package:anx_reader/page/home_page/notes_page.dart';
@@ -8,7 +9,7 @@ import 'package:anx_reader/service/tts.dart';
 import 'package:anx_reader/utils/error/common.dart';
 import 'package:anx_reader/utils/get_path/get_base_path.dart';
 import 'package:anx_reader/utils/log/common.dart';
-import 'package:anx_reader/utils/webdav/common.dart';
+import 'package:anx_reader/providers/anx_webdav.dart';
 import 'package:audio_service/audio_service.dart';
 import 'package:chinese_font_library/chinese_font_library.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
@@ -72,7 +73,9 @@ class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
     if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.inactive) {
       if (Prefs().webdavStatus) {
-        await AnxWebdav.syncData(SyncDirection.upload, ref);
+        ref
+            .read(anxWebdavProvider.notifier)
+            .syncData(SyncDirection.upload, ref);
       }
     }
   }

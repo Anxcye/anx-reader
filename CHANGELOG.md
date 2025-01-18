@@ -6,6 +6,11 @@
 * Feat: Add bionic reading mode(#49)
 * 新增：仿生阅读(#49)
 
+## Unreleased
+* Fix: enhance Webdav sync stability
+
+* 修复：增强 Webdav 同步稳定性
+
 ## 1.2.3 2024-12-26
 * Feat: Reader could add notes
 * Feat: Search books
