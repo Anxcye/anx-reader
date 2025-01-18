@@ -4,6 +4,7 @@ import 'package:anx_reader/dao/book.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/main.dart';
 import 'package:anx_reader/models/book.dart';
+import 'package:anx_reader/page/home_page.dart';
 import 'package:anx_reader/providers/book_list.dart';
 import 'package:anx_reader/service/convert_to_epub/txt/convert_from_txt.dart';
 import 'package:anx_reader/utils/get_path/get_base_path.dart';
@@ -215,6 +216,7 @@ Future<void> getBookMetadata(
   String bookUrl = "http://localhost:${Server().port}/$serverFileName";
 
   HeadlessInAppWebView webview = HeadlessInAppWebView(
+    webViewEnvironment: webViewEnvironment,
     initialUrlRequest: URLRequest(url: WebUri(indexHtmlPath)),
     onLoadStart: (controller, url) async {
       webviewInitialVariable(controller, bookUrl, cfi, importing: true);

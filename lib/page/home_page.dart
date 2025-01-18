@@ -19,6 +19,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
+import 'package:icons_plus/icons_plus.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -170,10 +171,10 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   List<Map<String, dynamic>> _navBarItems() {
     return [
-      {'icon': Icons.book, 'label': L10n.of(context).navBar_bookshelf},
+      {'icon': EvaIcons.book_open, 'label': L10n.of(context).navBar_bookshelf},
       {'icon': Icons.show_chart, 'label': L10n.of(context).navBar_statistics},
       {'icon': Icons.note, 'label': L10n.of(context).navBar_notes},
-      {'icon': Icons.settings, 'label': L10n.of(context).navBar_settings},
+      {'icon': EvaIcons.settings_2, 'label': L10n.of(context).navBar_settings},
     ];
   }
 

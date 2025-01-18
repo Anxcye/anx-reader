@@ -7,8 +7,10 @@
 * 新增：仿生阅读(#49)
 
 ## Unreleased
+* Fix: some Windows systems cannot import books
 * Fix: enhance Webdav sync stability
 
+* 修复：部分Windows系统下无法导入图书
 * 修复：增强 Webdav 同步稳定性
 
 ## 1.2.3 2024-12-26
