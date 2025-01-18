@@ -1,5 +1,6 @@
+import 'package:anx_reader/enums/sync_direction.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
-import 'package:anx_reader/utils/webdav/common.dart';
+import 'package:anx_reader/providers/anx_webdav.dart';
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/main.dart';
 import 'package:anx_reader/utils/toast/common.dart';
@@ -52,8 +53,8 @@ Future<void> testWebdav(Map webdavInfo) async {
     showDialog(
       context: context,
       builder: (context) {
-        return buildAlertDialog(
-            L10n.of(context).common_success, L10n.of(context).webdav_connection_success);
+        return buildAlertDialog(L10n.of(context).common_success,
+            L10n.of(context).webdav_connection_success);
       },
     );
   } else {
@@ -96,7 +97,7 @@ void chooseDirection(WidgetRef ref) {
             SimpleDialogOption(
               onPressed: () async {
                 Navigator.pop(context);
-                await AnxWebdav.syncData(SyncDirection.upload, ref);
+                await AnxWebdav().syncData(SyncDirection.upload, ref);
               },
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 6),
@@ -106,7 +107,7 @@ void chooseDirection(WidgetRef ref) {
             SimpleDialogOption(
               onPressed: () async {
                 Navigator.pop(context);
-                await AnxWebdav.syncData(SyncDirection.download, ref);
+                await AnxWebdav().syncData(SyncDirection.download, ref);
               },
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 6),

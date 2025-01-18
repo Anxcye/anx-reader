@@ -67,16 +67,20 @@ dependencies:
   desktop_drop: ^0.5.0
   audio_service: ^0.18.16
   audio_session: ^0.1.23
+  freezed_annotation: ^2.4.4
+  json_annotation: ^4.9.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.0
   test: any
-  build_runner: ^2.4.12
+  build_runner: ^2.4.13
   custom_lint: ^0.6.7
   riverpod_generator: ^2.4.3
   riverpod_lint: ^2.3.13
+  freezed: ^2.5.7
+  json_serializable: ^6.9.0
 #  flutter_launcher_icons: ^0.11.0
 
 flutter:

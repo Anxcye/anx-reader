@@ -6,10 +6,9 @@ import 'package:anx_reader/providers/book_list.dart';
 import 'package:anx_reader/service/book.dart';
 import 'package:anx_reader/utils/get_path/cache_path.dart';
 import 'package:anx_reader/utils/log/common.dart';
-import 'package:anx_reader/utils/webdav/common.dart';
-import 'package:anx_reader/utils/webdav/show_status.dart';
 import 'package:anx_reader/widgets/bookshelf/book_bottom_sheet.dart';
 import 'package:anx_reader/widgets/bookshelf/book_folder.dart';
+import 'package:anx_reader/widgets/bookshelf/sync_button.dart';
 import 'package:anx_reader/widgets/tips/bookshelf_tips.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:file_picker/file_picker.dart';
@@ -26,28 +25,11 @@ class BookshelfPage extends ConsumerStatefulWidget {
   ConsumerState<BookshelfPage> createState() => BookshelfPageState();
 }
 
-class BookshelfPageState extends ConsumerState<BookshelfPage>
-    with SingleTickerProviderStateMixin {
-  AnimationController? _syncAnimationController;
+class BookshelfPageState extends ConsumerState<BookshelfPage> {
   final _scrollController = ScrollController();
   bool _dragging = false;
   String? _searchValue;
   TextEditingController searchBarController = TextEditingController();
-
-  @override
-  void dispose() {
-    _syncAnimationController?.dispose();
-    super.dispose();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _syncAnimationController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 1),
-    )..repeat();
-  }
 
   Future<void> _importBook() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -77,35 +59,6 @@ class BookshelfPageState extends ConsumerState<BookshelfPage>
     }
 
     importBookList(fileList, context, ref);
-  }
-
-  Widget syncButton() {
-    return StreamBuilder<bool>(
-      stream: AnxWebdav.syncing,
-      builder: (context, snapshot) {
-        if (snapshot.hasData && snapshot.data == true) {
-          _syncAnimationController?.repeat();
-          return IconButton(
-            icon: RotationTransition(
-              turns: Tween(begin: 1.0, end: 0.0)
-                  .animate(_syncAnimationController!),
-              child: const Icon(Icons.sync),
-            ),
-            onPressed: () {
-              // AnxWebdav.syncData(SyncDirection.both);
-              showWebdavStatus();
-            },
-          );
-        } else {
-          return IconButton(
-            icon: const Icon(Icons.sync),
-            onPressed: () {
-              AnxWebdav.syncData(SyncDirection.both, ref);
-            },
-          );
-        }
-      },
-    );
   }
 
   @override
@@ -235,7 +188,7 @@ class BookshelfPageState extends ConsumerState<BookshelfPage>
             ),
           ),
           actions: [
-            syncButton(),
+            const SyncButton(),
             IconButton(
               icon: const Icon(Icons.add),
               onPressed: _importBook,

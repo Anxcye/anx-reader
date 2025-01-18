@@ -1,11 +1,12 @@
 import 'package:anx_reader/l10n/generated/L10n.dart';
-import 'package:anx_reader/utils/webdav/common.dart';
-import 'package:anx_reader/main.dart';
+import 'package:anx_reader/providers/anx_webdav.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../enums/sync_direction.dart';
 
 
-void showWebdavStatus() {
-  final context = navigatorKey.currentContext!;
+void showWebdavStatus(BuildContext context) {
   showDialog(
     context: context,
     builder: (context) {
@@ -14,39 +15,27 @@ void showWebdavStatus() {
   );
 }
 
-class SyncStatusDialog extends StatefulWidget {
+
+class SyncStatusDialog extends ConsumerStatefulWidget {
   const SyncStatusDialog({super.key});
 
   @override
-  _SyncStatusDialogState createState() => _SyncStatusDialogState();
+  SyncStatusDialogState createState() => SyncStatusDialogState();
 }
 
-class _SyncStatusDialogState extends State<SyncStatusDialog> {
-  late int count;
-  late int total;
-  late String fileName;
-  late SyncDirection direction;
-
-  @override
-  void initState() {
-    super.initState();
-    AnxWebdav.syncing.listen((syncing) {
-      if (syncing) {
-        setState(() {
-          fileName = AnxWebdav.fileName;
-          direction = AnxWebdav.direction;
-          count = AnxWebdav.count;
-          total = AnxWebdav.total;
-        });
-      }
-    });
-  }
+class SyncStatusDialogState extends ConsumerState<SyncStatusDialog> {
 
   @override
   Widget build(BuildContext context) {
-    String dir = direction == SyncDirection.upload
-        ? L10n.of(context).common_uploading
-        : L10n.of(context).common_downloading;
+    final syncState = ref.watch(anxWebdavProvider);
+
+    String dir = syncState.direction == SyncDirection.upload
+        ? L10n
+        .of(context)
+        .common_uploading
+        : L10n
+        .of(context)
+        .common_downloading;
     return AlertDialog(
       title: Text(dir),
       content: Column(
@@ -58,15 +47,16 @@ class _SyncStatusDialogState extends State<SyncStatusDialog> {
               Padding(
                 padding: const EdgeInsets.only(bottom: 10),
                 child: Text(
-                  fileName,
+                  syncState.fileName,
                 ),
               ),
             ],
           ),
           LinearProgressIndicator(
-            value: count / total,
+            value: syncState.count / syncState.total,
           ),
-          Text('${byteToHuman(count)} / ${byteToHuman(total)}'),
+          Text('${byteToHuman(syncState.count)} / ${byteToHuman(
+              syncState.total)}'),
         ],
       ),
       actions: [
@@ -74,7 +64,9 @@ class _SyncStatusDialogState extends State<SyncStatusDialog> {
           onPressed: () {
             Navigator.pop(context);
           },
-          child: Text(L10n.of(context).common_ok),
+          child: Text(L10n
+              .of(context)
+              .common_ok),
         ),
       ],
     );

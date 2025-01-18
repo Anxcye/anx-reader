@@ -9,7 +9,7 @@ import 'package:anx_reader/utils/get_path/get_base_path.dart';
 import 'package:anx_reader/utils/get_path/shared_prefs_path.dart';
 import 'package:anx_reader/utils/log/common.dart';
 import 'package:anx_reader/utils/toast/common.dart';
-import 'package:anx_reader/utils/webdav/common.dart';
+import 'package:anx_reader/providers/anx_webdav.dart';
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/utils/webdav/test_webdav.dart';
 import 'package:anx_reader/widgets/settings/settings_title.dart';
@@ -82,7 +82,7 @@ class _SubSyncSettingsState extends ConsumerState<SubSyncSettings> {
                         Prefs().saveWebdavStatus(!value);
                       });
                     } else {
-                      AnxWebdav.init();
+                      AnxWebdav().init();
                       chooseDirection(ref);
                     }
                   }

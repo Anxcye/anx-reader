@@ -1,9 +1,12 @@
 import 'dart:async';
 import 'dart:io' as io;
 import 'package:anx_reader/dao/database.dart';
+import 'package:anx_reader/enums/sync_direction.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/main.dart';
+import 'package:anx_reader/models/sync_state_model.dart';
 import 'package:anx_reader/providers/book_list.dart';
+import 'package:anx_reader/utils/get_path/cache_path.dart';
 import 'package:anx_reader/utils/get_path/get_base_path.dart';
 import 'package:anx_reader/utils/get_path/databases_path.dart';
 import 'package:anx_reader/utils/log/common.dart';
@@ -15,83 +18,92 @@ import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:webdav_client/webdav_client.dart';
 
-enum SyncDirection { upload, download, both }
+part 'anx_webdav.g.dart';
 
-class AnxWebdav {
-  static late Client client;
-  static final StreamController<bool> _syncingController =
-      StreamController<bool>.broadcast();
+@Riverpod(keepAlive: true)
+class AnxWebdav extends _$AnxWebdav {
+  static final AnxWebdav _instance = AnxWebdav._internal();
 
-  static Stream<bool> get syncing => _syncingController.stream;
-  static bool isSyncing = false;
+  factory AnxWebdav() {
+    return _instance;
+  }
 
-  static SyncDirection direction = SyncDirection.both;
-  static int count = 0;
-  static int total = 0;
-  static String fileName = '';
+  AnxWebdav._internal();
 
-  static Future<void> init() async {
-    client = newClient(
+  @override
+  SyncStateModel build() {
+    return const SyncStateModel(
+      direction: SyncDirection.both,
+      isSyncing: false,
+      total: 0,
+      count: 0,
+      fileName: '',
+    );
+  }
+
+  void changeState(SyncStateModel s) {
+    state = s;
+  }
+
+  static late Client _client;
+
+  Future<void> init() async {
+    _client = newClient(
       Prefs().webdavInfo['url'],
       user: Prefs().webdavInfo['username'],
       password: Prefs().webdavInfo['password'],
       debug: true,
     );
-    client.setHeaders({
+    _client.setHeaders({
       'accept-charset': 'utf-8',
       'Content-Type': 'application/octet-stream'
     });
-    client.setConnectTimeout(8000);
-    // client.setSendTimeout(8000);
-    // client.setReceiveTimeout(8000);
+    _client.setConnectTimeout(8000);
+    // __client.setSendTimeout(8000);
+    // __client.setReceiveTimeout(8000);
 
     try {
-      await client.ping();
+      await _client.ping();
     } catch (e) {
       AnxToast.show('WebDAV connection failed\n${e.toString()}',
           duration: 5000);
       AnxLog.severe('WebDAV connection failed, ping failed\n${e.toString()}');
     }
-    List<File> files = await client.readDir('/');
+    List<File> files = await _client.readDir('/');
     for (var element in files) {
       if (element.name == 'anx') {
         return;
       }
     }
-    await client.mkdir('anx');
+    await _client.mkdir('anx');
   }
 
-  static void setSyncing(bool value) {
-    isSyncing = value;
-    _syncingController.add(value);
-  }
-
-  static Future<void> syncData(SyncDirection direction, WidgetRef ref) async {
+  Future<void> syncData(SyncDirection direction, WidgetRef ref) async {
     BuildContext context = navigatorKey.currentContext!;
     // if is  syncing
-    if (isSyncing) {
+    if (state.isSyncing) {
       return;
     }
     if (!Prefs().webdavStatus) {
       AnxToast.show(L10n.of(context).webdav_webdav_not_enabled);
       return;
     }
-    setSyncing(true);
+    changeState(state.copyWith(isSyncing: true));
     AnxToast.show(L10n.of(context).webdav_syncing);
     try {
-      client.mkdir('anx/data').then((value) {
+      _client.mkdir('anx/data').then((value) {
         syncDatabase(direction).then((value) {
           AnxToast.show(L10n.of(context).webdav_syncing_files);
           syncFiles().then((value) {
             imageCache.clear();
             imageCache.clearLiveImages();
             // refresh book list
-            // const BookshelfPage().refreshBookList();
             ref.read(bookListProvider.notifier).refresh();
             AnxToast.show(L10n.of(context).webdav_sync_complete);
-            setSyncing(false);
+            changeState(state.copyWith(isSyncing: false));
           });
         });
       });
@@ -103,24 +115,26 @@ class AnxWebdav {
         AnxToast.show('Sync failed');
         AnxLog.severe('Sync failed\n$e');
       }
-      setSyncing(false);
+    } finally {
+      print('finally');
+      changeState(state.copyWith(isSyncing: false));
     }
   }
 
-  static Future<void> syncFiles() async {
+  Future<void> syncFiles() async {
     List<String> currentBooks = await getCurrentBooks();
     List<String> currentCover = await getCurrentCover();
-    List<File> remoteFiles = await client.readDir('/anx/data');
+    List<File> remoteFiles = await _client.readDir('/anx/data');
     List<String> remoteBooksName = [];
     List<String> remoteCoversName = [];
 
     for (var file in remoteFiles) {
       if (file.name == 'file') {
-        final remoteBooks = await client.readDir('/anx/data/file');
+        final remoteBooks = await _client.readDir('/anx/data/file');
         remoteBooksName = List.generate(
             remoteBooks.length, (index) => 'file/${remoteBooks[index].name!}');
       } else if (file.name == 'cover') {
-        final remoteCovers = await client.readDir('/anx/data/cover');
+        final remoteCovers = await _client.readDir('/anx/data/cover');
         remoteCoversName = List.generate(remoteCovers.length,
             (index) => 'cover/${remoteCovers[index].name!}');
       }
@@ -139,17 +153,18 @@ class AnxWebdav {
 
     // sync files
     for (var file in totalCurrentFiles) {
-      if (!totalRemoteFiles.contains(file)) {
+      if (!totalRemoteFiles.contains(file) && totalLocalFiles.contains(file)) {
         await uploadFile(getBasePath(file), 'anx/data/$file');
       }
-      if (!io.File(getBasePath(file)).existsSync()) {
+      if (!io.File(getBasePath(file)).existsSync() &&
+          totalRemoteFiles.contains(file)) {
         await downloadFile('anx/data/$file', getBasePath(file));
       }
     }
     // remove remote files not in database
     for (var file in totalRemoteFiles) {
       if (!totalCurrentFiles.contains(file)) {
-        await client.remove('anx/data/$file');
+        await _client.remove('anx/data/$file');
       }
     }
     // remove local files not in database
@@ -160,65 +175,98 @@ class AnxWebdav {
     }
   }
 
-  static Future<void> syncDatabase(SyncDirection direction) async {
-    File? remoteDb = await safeReadProps('anx/app_database.db');
+  Future<void> syncDatabase(SyncDirection direction) async {
+    File? remoteDb = await safeReadProps('anx/app_database.db', _client);
 
     final databasePath = await getAnxDataBasesPath();
     final path = join(databasePath, 'app_database.db');
 
+    // backup local database
+    String cachePath = (await getAnxCacheDir()).path;
+    io.File(path).copySync('$cachePath/app_database.db');
+
     io.File localDb = io.File(path);
-    switch (direction) {
-      case SyncDirection.upload:
-        DBHelper.close();
-        await uploadFile(path, 'anx/app_database.db');
-        DBHelper().initDB();
-        break;
-      case SyncDirection.download:
-        DBHelper.close();
-        await downloadFile('anx/app_database.db', path);
-        DBHelper().initDB();
-        break;
-      case SyncDirection.both:
-        if (remoteDb == null ||
-            remoteDb.mTime!.isBefore(localDb.lastModifiedSync())) {
+
+    try {
+      switch (direction) {
+        case SyncDirection.upload:
           DBHelper.close();
           await uploadFile(path, 'anx/app_database.db');
           DBHelper().initDB();
-        } else {
+          break;
+        case SyncDirection.download:
           DBHelper.close();
           await downloadFile('anx/app_database.db', path);
           DBHelper().initDB();
-        }
-        break;
+          break;
+        case SyncDirection.both:
+          if (remoteDb == null ||
+              remoteDb.mTime!.isBefore(localDb.lastModifiedSync())) {
+            DBHelper.close();
+            await uploadFile(path, 'anx/app_database.db');
+            DBHelper().initDB();
+          } else {
+            DBHelper.close();
+            await downloadFile('anx/app_database.db', path);
+            DBHelper().initDB();
+          }
+          break;
+      }
+    } catch (e) {
+      // restore local database
+      DBHelper.close();
+      io.File('$cachePath/app_database.db').copySync(path);
+      DBHelper().initDB();
+      AnxLog.severe('Failed to sync database\n$e');
+      rethrow;
+    } finally {
+      io.File('$cachePath/app_database.db').deleteSync();
     }
   }
 
-  static Future<void> uploadFile(String localPath, String remotePath,
-      [bool replace = false]) async {
+  Future<void> uploadFile(
+    String localPath,
+    String remotePath, [
+    bool replace = false,
+  ]) async {
     CancelToken c = CancelToken();
-    direction = SyncDirection.upload;
-    fileName = localPath.split('/').last;
+    changeState(state.copyWith(direction: SyncDirection.upload));
+    changeState(state.copyWith(fileName: localPath.split('/').last));
     if (replace) {
       try {
-        await client.remove(remotePath);
+        await _client.remove(remotePath);
       } catch (e) {
         AnxLog.severe('Failed to remove file\n$e');
       }
     }
-    await client.writeFromFile(localPath, remotePath, onProgress: (c, t) {
-      count = c;
-      total = t;
-      setSyncing(true);
+    await _client.writeFromFile(localPath, remotePath, onProgress: (c, t) {
+      changeState(state.copyWith(isSyncing: true));
+      changeState(state.copyWith(count: c));
+      changeState(state.copyWith(total: t));
     }, cancelToken: c);
+
+    // for (int i = 0; i <= 100; i++) {
+    //   changeState(state.copyWith(isSyncing: true));
+    //   changeState(state.copyWith(total: 100));
+    //   changeState(state.copyWith(count: i));
+    //   await Future.delayed(Duration(milliseconds: 50));
+    // }
   }
 
-  static Future<void> downloadFile(String remotePath, String localPath) async {
-    direction = SyncDirection.download;
-    fileName = remotePath.split('/').last;
-    await client.read2File(remotePath, localPath, onProgress: (c, t) {
-      count = c;
-      total = t;
-      setSyncing(true);
+  Future<void> downloadFile(String remotePath, String localPath) async {
+    changeState(state.copyWith(direction: SyncDirection.download));
+    changeState(state.copyWith(fileName: localPath.split('/').last));
+    await _client.read2File(remotePath, localPath, onProgress: (c, t) {
+      changeState(state.copyWith(isSyncing: true));
+      changeState(state.copyWith(count: c));
+      changeState(state.copyWith(total: t));
     });
+
+    // for (int i = 0; i <= 100; i++) {
+    //   changeState(state.copyWith(isSyncing: true));
+    //   changeState(state.copyWith(total: 100));
+    //   changeState(state.copyWith(count: i));
+    //   await Future.delayed(Duration(milliseconds: 50));
+    // }
   }
 }
