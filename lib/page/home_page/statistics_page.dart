@@ -7,7 +7,8 @@ import 'package:anx_reader/page/book_detail.dart';
 import 'package:anx_reader/utils/date/convert_seconds.dart';
 import 'package:anx_reader/widgets/bookshelf/book_cover.dart';
 import 'package:anx_reader/widgets/highlight_digit.dart';
-import 'package:anx_reader/widgets/statistic/chard_card.dart';
+import 'package:anx_reader/widgets/statistic/chart_tab.dart';
+import 'package:anx_reader/widgets/statistic/statistic_card.dart';
 import 'package:anx_reader/widgets/tips/statistic_tips.dart';
 import 'package:flutter/material.dart';
 
@@ -61,7 +62,7 @@ class _StatisticPageState extends State<StatisticPage> {
                           _totalReadTime(),
                           const SizedBox(height: 20),
                           baseStatistic(context),
-                          const ChartCard(),
+                          const StatisticCard(),
                         ],
                       ),
                     ),
@@ -85,7 +86,7 @@ class _StatisticPageState extends State<StatisticPage> {
                     const SizedBox(height: 30),
                     Expanded(
                       child: ListView(children: const [
-                        ChartCard(),
+                        StatisticCard(),
                         SizedBox(height: 20),
                         ThisWeekBooks(),
                       ]),
