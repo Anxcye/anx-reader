@@ -7,15 +7,17 @@
 * 新增：仿生阅读(#49)
 
 ## Unreleased
+* Feat: Import progress prompt(#61)
 * Feat： Add statistics chart switch time
 * Fix: some Windows systems cannot import books
 * Fix: enhance Webdav sync stability
-
 * Fix: Reading settings interface is incomplete on some devices
-* 修复：部分设备下阅读设置界面显示不完整
+
+* 新增：导入进度提示(#61)
 * 新增：统计图表切换时间
 * 修复：部分Windows系统下无法导入图书
 * 修复：增强 Webdav 同步稳定性
+* 修复：部分设备下阅读设置界面显示不完整
 
 ## 1.2.3 2024-12-26
 * Feat: Reader could add notes
