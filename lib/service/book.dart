@@ -42,10 +42,14 @@ void importBookList(List<File> fileList, BuildContext context, WidgetRef ref) {
     file.deleteSync();
   }
 
-  Widget bookItem(String path, Icon icon) {
+  Widget bookItem(String path, Widget icon) {
     return Row(
       children: [
-        icon,
+        SizedBox(
+          width: 24,
+          height: 24,
+          child: icon,
+        ),
         Expanded(
           child: Text(
             path.split('/').last,
@@ -62,50 +66,67 @@ void importBookList(List<File> fileList, BuildContext context, WidgetRef ref) {
   showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title:
-              Text(L10n.of(context).import_n_books_selected(fileList.length)),
-          content: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(L10n.of(context)
-                    .import_support_types(allowBookExtensions.join(' / '))),
-                const SizedBox(height: 10),
-                if (unsupportedFiles.isNotEmpty)
+        String currentHandlingFile = '';
+
+        return StatefulBuilder(builder: (context, setState) {
+          return AlertDialog(
+            title:
+                Text(L10n.of(context).import_n_books_selected(fileList.length)),
+            content: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   Text(L10n.of(context)
-                      .import_n_books_not_support(unsupportedFiles.length)),
-                const SizedBox(height: 20),
-                for (var file in unsupportedFiles)
-                  bookItem(file.path, const Icon(Icons.error)),
-                for (var file in supportedFiles)
-                  bookItem(file.path, const Icon(Icons.done)),
-              ],
+                      .import_support_types(allowBookExtensions.join(' / '))),
+                  const SizedBox(height: 10),
+                  if (unsupportedFiles.isNotEmpty)
+                    Text(L10n.of(context)
+                        .import_n_books_not_support(unsupportedFiles.length)),
+                  const SizedBox(height: 20),
+                  for (var file in unsupportedFiles)
+                    bookItem(file.path, const Icon(Icons.error)),
+                  for (var file in supportedFiles)
+                    file.path == currentHandlingFile
+                        ? bookItem(
+                            file.path,
+                            Container(
+                              padding: const EdgeInsets.all(3),
+                              width: 20,
+                              height: 20,
+                              child: const CircularProgressIndicator(),
+                            ))
+                        : bookItem(file.path, const Icon(Icons.done)),
+                  // bookItem(file.path, const Icon(Icons.done)),
+                ],
+              ),
             ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-                for (var file in supportedFiles) {
-                  file.deleteSync();
-                }
-              },
-              child: Text(L10n.of(context).common_cancel),
-            ),
-            if (supportedFiles.isNotEmpty)
+            actions: [
               TextButton(
-                  onPressed: () async {
-                    for (var file in supportedFiles) {
-                      AnxToast.show(file.path.split('/').last);
-                      await importBook(file, ref);
-                    }
-                    Navigator.of(context).pop('dialog');
-                  },
-                  child: Text(L10n.of(context)
-                      .import_import_n_books(supportedFiles.length))),
-          ],
-        );
+                onPressed: () {
+                  Navigator.pop(context);
+                  for (var file in supportedFiles) {
+                    file.deleteSync();
+                  }
+                },
+                child: Text(L10n.of(context).common_cancel),
+              ),
+              if (supportedFiles.isNotEmpty)
+                TextButton(
+                    onPressed: () async {
+                      for (var file in supportedFiles) {
+                        AnxToast.show(file.path.split('/').last);
+                        setState(() {
+                          currentHandlingFile = file.path;
+                        });
+                        await importBook(file, ref);
+                      }
+                      Navigator.of(context).pop('dialog');
+                    },
+                    child: Text(L10n.of(context)
+                        .import_import_n_books(supportedFiles.length))),
+            ],
+          );
+        });
       });
 }
 
