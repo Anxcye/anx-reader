@@ -20,10 +20,10 @@ void showMoreSettings(ReadingSettings settings) {
     Tab(text: L10n.of(context).reading_page_other),
   ];
 
-  List<Widget> childrens = [
-    readingSettings,
-    styleSettings,
-    otherSettings,
+  List<Widget> children = [
+    const ReadingMoreSettings(),
+    const StyleSettings(),
+    const OtherSettings(),
   ];
 
   TabController? tabController = TabController(
@@ -51,10 +51,12 @@ void showMoreSettings(ReadingSettings settings) {
                   maxHeight: MediaQuery.of(context).size.height * 0.5,
                   maxWidth: MediaQuery.of(context).size.width * 0.8,
                 ),
-                child: ContentSizeTabBarView(
-                  animationDuration: const Duration(milliseconds: 600),
-                  controller: tabController,
-                  children: childrens,
+                child: SingleChildScrollView(
+                  child: ContentSizeTabBarView(
+                    animationDuration: const Duration(milliseconds: 600),
+                    controller: tabController,
+                    children: children,
+                  ),
                 ),
               ),
             ],
