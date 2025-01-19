@@ -7,9 +7,11 @@
 * 新增：仿生阅读(#49)
 
 ## Unreleased
+* Feat： Add statistics chart switch time
 * Fix: some Windows systems cannot import books
 * Fix: enhance Webdav sync stability
 
+* 新增：统计图表切换时间
 * 修复：部分Windows系统下无法导入图书
 * 修复：增强 Webdav 同步稳定性
 

@@ -136,6 +136,7 @@
   "common_test": "Test",
   "common_dissolve": "Dissolve",
   "common_edit": "Edit",
+  "common_nth_week": "{count, plural, =1{1st week} =2{2nd week} few{3rd week} other{{count}th week}}",
 
   "service_import_success": "Import success",
   "service_import_n_books": "{count, plural, =1{importing 1 book} other{importing {count} books}}",

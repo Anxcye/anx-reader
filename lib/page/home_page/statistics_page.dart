@@ -4,7 +4,7 @@ import 'package:anx_reader/dao/reading_time.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/page/book_detail.dart';
-import 'package:anx_reader/utils/convert_seconds.dart';
+import 'package:anx_reader/utils/date/convert_seconds.dart';
 import 'package:anx_reader/widgets/bookshelf/book_cover.dart';
 import 'package:anx_reader/widgets/highlight_digit.dart';
 import 'package:anx_reader/widgets/statistic/chard_card.dart';
