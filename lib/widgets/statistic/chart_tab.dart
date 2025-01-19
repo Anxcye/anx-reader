@@ -43,15 +43,15 @@ class ChartTab extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final statisticData = ref.watch(statisticDataProvider);
 
-    return statisticData.when(
-      data: (data) => Container(
-        height: 300,
-        padding: const EdgeInsets.fromLTRB(10, 0, 10, 5),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceContainer,
-          borderRadius: BorderRadius.circular(15),
-        ),
-        child: Column(
+    return Container(
+      height: 300,
+      padding: const EdgeInsets.fromLTRB(10, 0, 10, 5),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainer,
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: statisticData.when(
+        data: (data) => Column(
           children: [
             const SizedBox(height: 10),
             Row(
@@ -139,10 +139,10 @@ class ChartTab extends ConsumerWidget {
             )
           ],
         ),
-      ),
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, stack) => Center(
-        child: Text('Error: $error'),
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stack) => Center(
+          child: Text('Error: $error'),
+        ),
       ),
     );
   }

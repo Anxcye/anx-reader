@@ -1,16 +1,20 @@
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/dao/book.dart';
 import 'package:anx_reader/dao/reading_time.dart';
+import 'package:anx_reader/enums/chart_mode.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/page/book_detail.dart';
+import 'package:anx_reader/providers/statistic_data.dart';
 import 'package:anx_reader/utils/date/convert_seconds.dart';
+import 'package:anx_reader/utils/date/week_of_year.dart';
 import 'package:anx_reader/widgets/bookshelf/book_cover.dart';
 import 'package:anx_reader/widgets/highlight_digit.dart';
 import 'package:anx_reader/widgets/statistic/chart_tab.dart';
 import 'package:anx_reader/widgets/statistic/statistic_card.dart';
 import 'package:anx_reader/widgets/tips/statistic_tips.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class StatisticPage extends StatefulWidget {
   const StatisticPage({super.key});
@@ -70,7 +74,7 @@ class _StatisticPageState extends State<StatisticPage> {
                     Expanded(
                       child: ListView(
                         children: const [
-                          ThisWeekBooks(),
+                          DateBooks(),
                         ],
                       ),
                     ),
@@ -88,7 +92,7 @@ class _StatisticPageState extends State<StatisticPage> {
                       child: ListView(children: const [
                         StatisticCard(),
                         SizedBox(height: 20),
-                        ThisWeekBooks(),
+                        DateBooks(),
                       ]),
                     ),
                   ],
@@ -188,8 +192,8 @@ Widget _totalReadTime() {
   );
 }
 
-class ThisWeekBooks extends StatelessWidget {
-  const ThisWeekBooks({super.key});
+class DateBooks extends ConsumerWidget {
+  const DateBooks({super.key});
 
   final TextStyle titleStyle = const TextStyle(
     fontSize: 30,
@@ -199,45 +203,109 @@ class ThisWeekBooks extends StatelessWidget {
   );
 
   @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<List<Map<int, int>>>(
-      future: selectThisWeekBooks(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.done) {
-          return Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(left: 10, top: 10, right: 10),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      L10n.of(context).statistic_this_week,
-                      style: titleStyle,
-                    ),
-                  ],
-                ),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final statisticData = ref.watch(statisticDataProvider);
+
+    return statisticData.when(
+      data: (data) {
+        final books = data.bookReadingTime;
+
+        return Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 10, top: 10, right: 10),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    data.mode == ChartMode.week
+                        ? weekOfYear(data.date)
+                        : data.mode == ChartMode.month
+                            ? '${data.date.year}.${data.date.month}'
+                            : data.date.year.toString(),
+                    style: titleStyle,
+                  ),
+                ],
               ),
-              snapshot.data!.isEmpty
-                  ? const Padding(
-                      padding: EdgeInsets.only(top: 50),
-                      child: StatisticsTips(),
-                    )
-                  : Column(
-                      children: snapshot.data!.map((e) {
-                        return BookStatisticItem(
-                            bookId: e.keys.first, readingTime: e.values.first);
-                      }).toList(),
-                    ),
-            ],
-          );
-        } else {
-          return const CircularProgressIndicator();
-        }
+            ),
+            if (books.isEmpty)
+              const Padding(
+                padding: EdgeInsets.only(top: 50),
+                child: StatisticsTips(),
+              )
+            else
+              Column(
+                children: books.map((bookMap) {
+                  final book = bookMap.keys.first;
+                  final readingTime = bookMap.values.first;
+                  return BookStatisticItem(
+                    bookId: book.id,
+                    readingTime: readingTime,
+                  );
+                }).toList(),
+              ),
+          ],
+        );
       },
+      loading: () => const Center(
+        child: CircularProgressIndicator(),
+      ),
+      error: (error, stack) => Center(
+        child: Text('Error: $error'),
+      ),
     );
   }
 }
+// class DateBooks extends StatelessWidget {
+//   const DateBooks({super.key});
+//
+//   final TextStyle titleStyle = const TextStyle(
+//     fontSize: 30,
+//     fontFamily: 'SourceHanSerif',
+//     fontWeight: FontWeight.bold,
+//     overflow: TextOverflow.ellipsis,
+//   );
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return FutureBuilder<List<Map<int, int>>>(
+//       future: selectThisWeekBooks(),
+//       builder: (context, snapshot) {
+//         if (snapshot.connectionState == ConnectionState.done) {
+//           return Column(
+//             children: [
+//               Padding(
+//                 padding: const EdgeInsets.only(left: 10, top: 10, right: 10),
+//                 child: Row(
+//                   crossAxisAlignment: CrossAxisAlignment.start,
+//                   children: [
+//                     Text(
+//                       L10n.of(context).statistic_this_week,
+//                       style: titleStyle,
+//                     ),
+//                   ],
+//                 ),
+//               ),
+//               snapshot.data!.isEmpty
+//                   ? const Padding(
+//                       padding: EdgeInsets.only(top: 50),
+//                       child: StatisticsTips(),
+//                     )
+//                   : Column(
+//                       children: snapshot.data!.map((e) {
+//                         return BookStatisticItem(
+//                             bookId: e.keys.first, readingTime: e.values.first);
+//                       }).toList(),
+//                     ),
+//             ],
+//           );
+//         } else {
+//           return const CircularProgressIndicator();
+//         }
+//       },
+//     );
+//   }
+// }
 
 class BookStatisticItem extends StatelessWidget {
   const BookStatisticItem(

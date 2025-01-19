@@ -48,7 +48,7 @@ class StatisticData extends _$StatisticData {
       date: date,
       readingTime: await _getReadingTime(mode, date),
       xLabels: _getxLabels(mode, date),
-      bookReadingTime: _getBookReadingTime(isSelectingDay, mode, date),
+      bookReadingTime: await _getBookReadingTime(isSelectingDay, mode, date),
     );
   }
 
@@ -83,11 +83,23 @@ class StatisticData extends _$StatisticData {
     return labelGenerators[mode]!();
   }
 
-  List<Map<Book, int>> _getBookReadingTime(
+  Future<List<Map<Book, int>>> _getBookReadingTime(
       bool isSelectingDay,
       ChartMode mode,
       DateTime date,
-      ) => [];
+      ) {
+    if (isSelectingDay) {
+      return selectBookReadingTimeOfDay(date);
+    }
+    else{
+      final bookReadingTimeMap = {
+        ChartMode.week: () => selectBookReadingTimeOfWeek(date),
+        ChartMode.month: () => selectBookReadingTimeOfMonth(date),
+        ChartMode.year: () => selectBookReadingTimeOfYear(date),
+      };
+      return bookReadingTimeMap[mode]!();
+    }
+  }
 
   @override
   FutureOr<StatisticDataModel> build() async {
@@ -100,4 +112,6 @@ class StatisticData extends _$StatisticData {
       initialDate,
     );
   }
+
+
 }

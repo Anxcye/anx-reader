@@ -6,6 +6,8 @@
 * Feat: Add bionic reading mode(#49)
 * 新增：仿生阅读(#49)
 
+* 修改统计界面tip
+
 ## Unreleased
 * Feat: Import progress prompt(#61)
 * Feat： Add statistics chart switch time
