@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/dao/database.dart';
 import 'package:anx_reader/enums/sync_direction.dart';
@@ -94,6 +96,12 @@ class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
       child: provider.Consumer<Prefs>(
         builder: (context, prefsNotifier, child) {
           return MaterialApp(
+            scrollBehavior: ScrollConfiguration.of(context).copyWith(
+              dragDevices: {
+                PointerDeviceKind.touch,
+                PointerDeviceKind.mouse,
+              },
+            ),
             navigatorObservers: [FlutterSmartDialog.observer],
             builder: FlutterSmartDialog.init(),
             navigatorKey: navigatorKey,
