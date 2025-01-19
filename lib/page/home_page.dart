@@ -40,6 +40,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     const NotesPage(),
     const SettingsPage(),
   ];
+  bool? _expanded;
 
   @override
   void initState() {
@@ -124,6 +125,7 @@ class _HomePageState extends ConsumerState<HomePage> {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
+        _expanded ??= constraints.maxWidth > 1000;
         if (constraints.maxWidth > 600) {
           return Scaffold(
             // floatingActionButton: FloatingActionButton(
@@ -135,10 +137,29 @@ class _HomePageState extends ConsumerState<HomePage> {
             body: Row(
               children: [
                 NavigationRail(
-                  extended: constraints.maxWidth > 800,
+                  trailing: Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        IconButton(
+                          alignment: Alignment.bottomLeft,
+                          icon: const Icon(Icons.menu),
+                          onPressed: () {
+                            _expanded = !_expanded!;
+                            setState(() {});
+                          },
+                        ),
+                        const SizedBox(height: 20),
+                      ],
+                    ),
+                  ),
+                  extended: _expanded!,
                   selectedIndex: _currentIndex,
                   onDestinationSelected: _onBottomTap,
                   destinations: _railBarItems(),
+                  labelType: _expanded!
+                      ? NavigationRailLabelType.none
+                      : NavigationRailLabelType.all,
                   backgroundColor: ElevationOverlay.applySurfaceTint(
                       Theme.of(context).colorScheme.surface,
                       Theme.of(context).colorScheme.primary,
