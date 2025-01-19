@@ -32,7 +32,7 @@ class ExcerptMenu extends StatefulWidget {
   final Function() toggleTranslationMenu;
 
   const ExcerptMenu({
-    Key? key,
+    super.key,
     required this.annoCfi,
     required this.annoContent,
     this.id,
@@ -40,7 +40,7 @@ class ExcerptMenu extends StatefulWidget {
     required this.footnote,
     required this.decoration,
     required this.toggleTranslationMenu,
-  }) : super(key: key);
+  });
 
   @override
   ExcerptMenuState createState() => ExcerptMenuState();

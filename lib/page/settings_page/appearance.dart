@@ -65,7 +65,7 @@ class _SubAppearanceSettingsState extends State<SubAppearanceSettings> {
                   await showColorPickerDialog(context);
                 }),
             SettingsTile.switchTile(
-              title: Text("OLED Dark Mode"),
+              title: const Text("OLED Dark Mode"),
               leading: const Icon(Icons.brightness_2),
               initialValue: Prefs().trueDarkMode,
               onToggle: (bool value) {

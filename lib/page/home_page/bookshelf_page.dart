@@ -70,21 +70,21 @@ class BookshelfPageState extends ConsumerState<BookshelfPage> {
       );
     }
 
-    List<int> _lockedIndices = [];
+    List<int> lockedIndices = [];
 
     Widget buildBookshelfBody = ref.watch(bookListProvider).when(
           data: (books) {
             for (int i = 0; i < books.length; i++) {
               // folder can't be dragged
               if (books[i].length != 1) {
-                _lockedIndices.add(i);
+                lockedIndices.add(i);
               }
             }
             return books.isEmpty
                 ? const Center(child: BookshelfTips())
                 : ReorderableBuilder(
                     // lock all index of books
-                    lockedIndices: _lockedIndices,
+                    lockedIndices: lockedIndices,
                     enableDraggable: true,
                     longPressDelay: const Duration(milliseconds: 300),
                     onDragStarted: (index) {
@@ -93,17 +93,17 @@ class BookshelfPageState extends ConsumerState<BookshelfPage> {
                         // add other books to lockedIndices
                         for (int i = 0; i < books.length; i++) {
                           if (i != index) {
-                            _lockedIndices.add(i);
+                            lockedIndices.add(i);
                           }
                         }
                       }
                     },
                     onDragEnd: (index) {
                       // remove all books from lockedIndices
-                      _lockedIndices = [];
+                      lockedIndices = [];
                       for (int i = 0; i < books.length; i++) {
                         if (books[i].length != 1) {
-                          _lockedIndices.add(i);
+                          lockedIndices.add(i);
                         }
                       }
                       setState(() {});
