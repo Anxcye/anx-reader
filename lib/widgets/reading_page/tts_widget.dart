@@ -40,7 +40,7 @@ class _TtsWidgetState extends State<TtsWidget> {
     return ValueListenableBuilder<TtsStateEnum>(
         valueListenable: Tts.ttsStateNotifier,
         builder: (context, ttsState, child) {
-          Widget _volume() {
+          Widget volume() {
             return Row(
               children: [
                 Text(L10n.of(context).tts_volume),
@@ -59,7 +59,7 @@ class _TtsWidgetState extends State<TtsWidget> {
             );
           }
 
-          Widget _pitch() {
+          Widget pitch() {
             return Row(
               children: [
                 Text(L10n.of(context).tts_pitch),
@@ -79,7 +79,7 @@ class _TtsWidgetState extends State<TtsWidget> {
             );
           }
 
-          Widget _rate() {
+          Widget rate() {
             return Row(
               children: [
                 Text(L10n.of(context).tts_rate),
@@ -104,9 +104,9 @@ class _TtsWidgetState extends State<TtsWidget> {
               padding: const EdgeInsets.fromLTRB(20, 5, 20, 0),
               child: Column(
                 children: [
-                  _volume(),
-                  _pitch(),
-                  _rate(),
+                  volume(),
+                  pitch(),
+                  rate(),
                 ],
               ),
             );
