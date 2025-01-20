@@ -98,7 +98,6 @@
   "book_detail_save": "保存",
   "book_detail_edit": "编辑",
   "book_detail_nth_book": "{count, plural, other{第{count}本读的书}}",
-
   "book_detail_last_read_date": "上次阅读",
   "book_detail_import_date": "首次导入",
 
