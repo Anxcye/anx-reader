@@ -8,6 +8,7 @@
 
 
 ## Unreleased
+* Feat: Export notes in CSV format(#71)
 * Feat: Add TTS stop timer
 * Feat: Add heat map to show reading time
 * Feat: Import progress prompt(#61)
@@ -16,6 +17,7 @@
 * Fix: enhance Webdav sync stability
 * Fix: Reading settings interface is incomplete on some devices
 
+* 新增：以 CSV 格式导出笔记(#71)
 * 新增：TTS 定时停止
 * 新增：用热力图展示阅读时长
 * 新增：导入进度提示(#61)

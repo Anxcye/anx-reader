@@ -139,6 +139,11 @@ class _BookNotesPageState extends State<BookNotesPage> {
                   Navigator.pop(context);
                   exportNotes(book, notes!, ExportType.txt);
                 }),
+                operateButton(context, const Icon(Icons.table_chart), 'CSV',
+                    () {
+                  Navigator.pop(context);
+                  exportNotes(book, notes!, ExportType.csv);
+                }),
               ],
             ),
           );
