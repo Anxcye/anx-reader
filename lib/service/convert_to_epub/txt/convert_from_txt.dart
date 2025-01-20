@@ -4,8 +4,7 @@ import 'dart:isolate';
 
 import 'package:anx_reader/service/convert_to_epub/create_epub.dart';
 import 'package:anx_reader/utils/log/common.dart';
-
-import 'package:flutter_gbk2utf8/flutter_gbk2utf8.dart';
+import 'package:fast_gbk/fast_gbk.dart';
 
 List<String> readFileWithEncoding(File file) {
   bool checkGarbled(List<String> lines) {

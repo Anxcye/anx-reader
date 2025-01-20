@@ -62,7 +62,6 @@ dependencies:
   sqlite3_flutter_libs: ^0.5.26
   flutter_reorderable_grid_view: ^5.4.0
   uuid: ^4.5.1
-  flutter_gbk2utf8: ^1.0.1
   receive_sharing_intent: ^1.8.1
   desktop_drop: ^0.5.0
   audio_service: ^0.18.16
@@ -72,6 +71,8 @@ dependencies:
   flutter_heatmap_calendar:
     git:
       url: https://github.com/Anxcye/flutter_heatmap_calendar
+  csv: ^6.0.0
+  fast_gbk: ^1.0.0
 
 dev_dependencies:
   flutter_test:
