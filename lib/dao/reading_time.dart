@@ -158,11 +158,9 @@ Future<List<Map<int, int>>> selectThisWeekBooks() async {
             .substring(0, 10)
       ]);
 
-
   return List.generate(maps.length, (i) {
     return {maps[i]['book_id']: maps[i]['total_sum']};
   });
-
 }
 
 Future<int> selectTotalReadingTimeByBookId(int bookId) async {
@@ -173,13 +171,11 @@ Future<int> selectTotalReadingTimeByBookId(int bookId) async {
   return maps[0]['total_sum'] ?? 0;
 }
 
-
 Future<List<Map<Book, int>>> selectBookReadingTimeOfDay(DateTime date) async {
   final db = await DBHelper().database;
   final List<Map<String, dynamic>> maps = await db.rawQuery(
       'SELECT book_id, SUM(reading_time) as total_time FROM tb_reading_time WHERE date = ? GROUP BY book_id ORDER BY total_time DESC',
-      [date.toString().substring(0, 10)]
-  );
+      [date.toString().substring(0, 10)]);
 
   List<Map<Book, int>> result = [];
   for (var map in maps) {
@@ -197,8 +193,10 @@ Future<List<Map<Book, int>>> selectBookReadingTimeOfWeek(DateTime date) async {
 
   final List<Map<String, dynamic>> maps = await db.rawQuery(
       'SELECT book_id, SUM(reading_time) as total_time FROM tb_reading_time WHERE date >= ? AND date <= ? GROUP BY book_id ORDER BY total_time DESC',
-      [weekStart.toString().substring(0, 10), weekEnd.toString().substring(0, 10)]
-  );
+      [
+        weekStart.toString().substring(0, 10),
+        weekEnd.toString().substring(0, 10)
+      ]);
 
   List<Map<Book, int>> result = [];
   for (var map in maps) {
@@ -216,8 +214,10 @@ Future<List<Map<Book, int>>> selectBookReadingTimeOfMonth(DateTime date) async {
 
   final List<Map<String, dynamic>> maps = await db.rawQuery(
       'SELECT book_id, SUM(reading_time) as total_time FROM tb_reading_time WHERE date >= ? AND date <= ? GROUP BY book_id ORDER BY total_time DESC',
-      [monthStart.toString().substring(0, 10), monthEnd.toString().substring(0, 10)]
-  );
+      [
+        monthStart.toString().substring(0, 10),
+        monthEnd.toString().substring(0, 10)
+      ]);
 
   List<Map<Book, int>> result = [];
   for (var map in maps) {
@@ -235,8 +235,40 @@ Future<List<Map<Book, int>>> selectBookReadingTimeOfYear(DateTime date) async {
 
   final List<Map<String, dynamic>> maps = await db.rawQuery(
       'SELECT book_id, SUM(reading_time) as total_time FROM tb_reading_time WHERE date >= ? AND date <= ? GROUP BY book_id ORDER BY total_time DESC',
-      [yearStart.toString().substring(0, 10), yearEnd.toString().substring(0, 10)]
-  );
+      [
+        yearStart.toString().substring(0, 10),
+        yearEnd.toString().substring(0, 10)
+      ]);
+
+  List<Map<Book, int>> result = [];
+  for (var map in maps) {
+    final book = await selectBookById(map['book_id']);
+    result.add({book: map['total_time']});
+  }
+
+  return result;
+}
+
+Future<Map<DateTime, int>> selectAllReadingTimeGroupByDay() async {
+  final db = await DBHelper().database;
+
+  final List<Map<String, dynamic>> maps = await db.rawQuery(
+      'SELECT date, SUM(reading_time) as total_time FROM tb_reading_time GROUP BY date ORDER BY date ASC');
+
+  Map<DateTime, int> result = {};
+  for (var map in maps) {
+    final date = DateTime.parse(map['date']);
+    result[date] = map['total_time'];
+  }
+
+  return result;
+}
+
+Future<List<Map<Book, int>>> selectBookReadingTimeOfAll(DateTime date) async {
+  final db = await DBHelper().database;
+
+  final List<Map<String, dynamic>> maps = await db.rawQuery(
+      'SELECT book_id, SUM(reading_time) as total_time FROM tb_reading_time GROUP BY book_id ORDER BY total_time DESC');
 
   List<Map<Book, int>> result = [];
   for (var map in maps) {

@@ -16,32 +16,30 @@ class StatisticData extends _$StatisticData {
     bool? isSelectingDay,
     DateTime? date,
   }) async {
-    state = const AsyncValue.loading();
-    try {
-      final currentState = state.valueOrNull!;
-      final newMode = mode ?? currentState.mode;
-      final newIsSelectingDay = isSelectingDay ?? currentState.isSelectingDay;
-      final newDate = date ?? currentState.date;
+    final currentState = state.valueOrNull!;
+    final newMode = mode ?? currentState.mode;
+    final newIsSelectingDay = isSelectingDay ?? currentState.isSelectingDay;
+    final newDate = date ?? currentState.date;
 
-      state = AsyncValue.data(await _fetchData(
-        newMode,
-        newIsSelectingDay,
-        newDate,
-      ));
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
-    }
+    state = AsyncValue.data(await _fetchData(
+      newMode,
+      newIsSelectingDay,
+      newDate,
+    ));
   }
 
   Future<void> setMode(ChartMode mode) => _updateState(mode: mode);
-  Future<void> setIsSelectingDay(bool value) => _updateState(isSelectingDay: value);
+
+  Future<void> setIsSelectingDay(bool value) =>
+      _updateState(isSelectingDay: value);
+
   Future<void> setDate(DateTime date) => _updateState(date: date);
 
   Future<StatisticDataModel> _fetchData(
-      ChartMode mode,
-      bool isSelectingDay,
-      DateTime date,
-      ) async {
+    ChartMode mode,
+    bool isSelectingDay,
+    DateTime date,
+  ) async {
     return StatisticDataModel(
       mode: mode,
       isSelectingDay: isSelectingDay,
@@ -57,6 +55,7 @@ class StatisticData extends _$StatisticData {
       ChartMode.week: () => selectReadingTimeOfWeek(date),
       ChartMode.month: () => selectReadingTimeOfMonth(date),
       ChartMode.year: () => selectReadingTimeOfYear(date),
+      ChartMode.heatmap: () => Future.value([0]),
     };
     return readingTimeMap[mode]!();
   }
@@ -65,37 +64,38 @@ class StatisticData extends _$StatisticData {
     BuildContext context = navigatorKey.currentContext!;
     final labelGenerators = {
       ChartMode.week: () => [
-        L10n.of(context).statistic_monday,
-        L10n.of(context).statistic_tuesday,
-        L10n.of(context).statistic_wednesday,
-        L10n.of(context).statistic_thursday,
-        L10n.of(context).statistic_friday,
-        L10n.of(context).statistic_saturday,
-        L10n.of(context).statistic_sunday,
-      ],
+            L10n.of(context).statistic_monday,
+            L10n.of(context).statistic_tuesday,
+            L10n.of(context).statistic_wednesday,
+            L10n.of(context).statistic_thursday,
+            L10n.of(context).statistic_friday,
+            L10n.of(context).statistic_saturday,
+            L10n.of(context).statistic_sunday,
+          ],
       ChartMode.month: () {
         final daysInMonth = DateTime(date.year, date.month + 1, 0).day;
         return List.generate(daysInMonth,
-                (i) => (i + 1) % 5 == 0 || i == 0 ? (i + 1).toString() : '');
+            (i) => (i + 1) % 5 == 0 || i == 0 ? (i + 1).toString() : '');
       },
       ChartMode.year: () => List.generate(12, (i) => (i + 1).toString()),
+      ChartMode.heatmap: () => [''],
     };
     return labelGenerators[mode]!();
   }
 
   Future<List<Map<Book, int>>> _getBookReadingTime(
-      bool isSelectingDay,
-      ChartMode mode,
-      DateTime date,
-      ) {
+    bool isSelectingDay,
+    ChartMode mode,
+    DateTime date,
+  ) {
     if (isSelectingDay) {
       return selectBookReadingTimeOfDay(date);
-    }
-    else{
+    } else {
       final bookReadingTimeMap = {
         ChartMode.week: () => selectBookReadingTimeOfWeek(date),
         ChartMode.month: () => selectBookReadingTimeOfMonth(date),
         ChartMode.year: () => selectBookReadingTimeOfYear(date),
+        ChartMode.heatmap: () => selectBookReadingTimeOfAll(date),
       };
       return bookReadingTimeMap[mode]!();
     }
@@ -112,6 +112,4 @@ class StatisticData extends _$StatisticData {
       initialDate,
     );
   }
-
-
 }
