@@ -1,20 +1,22 @@
 import 'package:anx_reader/main.dart';
+import 'package:anx_reader/providers/statistic_data.dart';
 import 'package:anx_reader/utils/date/convert_seconds.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-
-class StatisticChart extends StatefulWidget {
+class StatisticChart extends ConsumerStatefulWidget {
   final List<int> readingTime;
   final List<String> xLabels;
 
-  const StatisticChart({super.key, required this.readingTime, required this.xLabels});
+  const StatisticChart(
+      {super.key, required this.readingTime, required this.xLabels});
 
   @override
-  State<StatisticChart> createState() => _StatisticChartState();
+  ConsumerState<StatisticChart> createState() => _StatisticChartState();
 }
 
-class _StatisticChartState extends State<StatisticChart> {
+class _StatisticChartState extends ConsumerState<StatisticChart> {
   int? touchedIndex;
   final Color bottomColor =
       Theme
@@ -69,6 +71,17 @@ class _StatisticChartState extends State<StatisticChart> {
         if (response?.spot != null) {
           setState(() {
             touchedIndex = response!.spot!.touchedBarGroupIndex;
+            if (event is FlTapUpEvent) {
+              if (widget.readingTime.length == 12) {
+                ref
+                    .read(statisticDataProvider.notifier)
+                    .touchMonth(touchedIndex!);
+              } else {
+                ref
+                    .read(statisticDataProvider.notifier)
+                    .touchDay(widget.xLabels.length, touchedIndex!);
+              }
+            }
           });
         }
       },

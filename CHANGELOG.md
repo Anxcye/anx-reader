@@ -6,15 +6,17 @@
 * Feat: Add bionic reading mode(#49)
 * 新增：仿生阅读(#49)
 
-* 修改统计界面tip
 
 ## Unreleased
+* Feat: Add heat map to show reading time
 * Feat: Import progress prompt(#61)
 * Feat： Add statistics chart switch time
 * Fix: some Windows systems cannot import books
 * Fix: enhance Webdav sync stability
 * Fix: Reading settings interface is incomplete on some devices
 
+
+* 新增：用热力图展示阅读时长
 * 新增：导入进度提示(#61)
 * 新增：统计图表切换时间
 * 修复：部分Windows系统下无法导入图书

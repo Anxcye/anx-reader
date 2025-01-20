@@ -28,12 +28,32 @@ class StatisticData extends _$StatisticData {
     ));
   }
 
-  Future<void> setMode(ChartMode mode) => _updateState(mode: mode);
+  Future<void> setMode(ChartMode mode) =>
+      _updateState(mode: mode, isSelectingDay: false);
 
-  Future<void> setIsSelectingDay(bool value) =>
-      _updateState(isSelectingDay: value);
+  Future<void> setIsSelectingDay(bool value, DateTime date) =>
+      _updateState(isSelectingDay: value, date: date);
 
   Future<void> setDate(DateTime date) => _updateState(date: date);
+
+  Future<void> touchMonth(int index) async {
+    final date = state.valueOrNull!.date;
+    final newDate = DateTime(date.year, index + 1, 1);
+    const mode = ChartMode.month;
+    const isSelectingDay = false;
+    await _updateState(
+        date: newDate, mode: mode, isSelectingDay: isSelectingDay);
+  }
+
+  Future<void> touchDay(int days, int index) async {
+    bool isWeek = days == 7;
+    final date = state.valueOrNull!.date;
+    final newDate = isWeek
+        ? date.subtract(Duration(days: date.weekday - 1 - index))
+        : DateTime(date.year, date.month, index + 1);
+    const isSelectingDay = true;
+    await _updateState(date: newDate, isSelectingDay: isSelectingDay);
+  }
 
   Future<StatisticDataModel> _fetchData(
     ChartMode mode,
@@ -103,7 +123,7 @@ class StatisticData extends _$StatisticData {
 
   @override
   FutureOr<StatisticDataModel> build() async {
-    const initialMode = ChartMode.week;
+    const initialMode = ChartMode.heatmap;
     final initialDate = DateTime.now();
 
     return _fetchData(
