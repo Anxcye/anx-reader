@@ -197,6 +197,7 @@
   "tts_rate": "Rate",
   "tts_pitch": "Pitch",
   "tts_narrator": "Narrator",
+  "tts_stop_after": "{count, plural, =0{No timer} =1{Stop in 1 minute} other{stop after {count} minutes}}",
 
   "statistic_just_now": "just now",
   "statistic_minutes_ago": "{count, plural, =1{1 minute ago} other{{count} minutes ago}}",

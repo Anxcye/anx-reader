@@ -1,12 +1,12 @@
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/main.dart';
-import 'package:anx_reader/page/reading_page.dart';
 import 'package:anx_reader/service/tts.dart';
 import 'package:anx_reader/widgets/reading_page/widget_title.dart';
 import 'package:anx_reader/page/book_player/epub_player.dart';
 import 'package:anx_reader/widgets/reading_page/more_settings/more_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:icons_plus/icons_plus.dart';
+import 'dart:async';
 
 class TtsWidget extends StatefulWidget {
   const TtsWidget({super.key, required this.epubPlayerKey});
@@ -21,6 +21,8 @@ class _TtsWidgetState extends State<TtsWidget> {
   double volume = Tts.volume;
   double pitch = Tts.pitch;
   double rate = Tts.rate;
+  double stopSeconds = 0;
+  Timer? stopTimer;
 
   @override
   void initState() {
@@ -33,6 +35,11 @@ class _TtsWidgetState extends State<TtsWidget> {
     }
 
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override
@@ -120,7 +127,7 @@ class _TtsWidgetState extends State<TtsWidget> {
                     onPressed: () async {
                       audioHandler.stop();
                       Tts.speak(
-                          content: await epubPlayerKey.currentState!
+                          content: await widget.epubPlayerKey.currentState!
                               .ttsPrevSection());
                     },
                     icon: const Icon(EvaIcons.arrowhead_left)),
@@ -153,11 +160,62 @@ class _TtsWidgetState extends State<TtsWidget> {
                     onPressed: () async {
                       Tts.stopStatic();
                       Tts.speak(
-                          content: await epubPlayerKey.currentState!
+                          content: await widget.epubPlayerKey.currentState!
                               .ttsNextSection());
                     },
                     icon: const Icon(EvaIcons.arrowhead_right)),
               ],
+            );
+          }
+
+          Widget stopTimerWidget() {
+            return Padding(
+              padding: const EdgeInsets.fromLTRB(20, 5, 20, 0),
+              child: Row(
+                children: [
+                  const Icon(EvaIcons.clock_outline),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Slider(
+                      value: stopSeconds / 60,
+                      onChanged: (newValue) {
+                        setState(() {
+                          stopSeconds = newValue * 60;
+                          stopTimer?.cancel();
+
+                          if (stopSeconds > 0) {
+                            stopTimer = Timer.periodic(
+                              const Duration(seconds: 5),
+                              (timer) {
+                                if (stopSeconds > 5) {
+                                  stopSeconds -= 5;
+                                  if (mounted) {
+                                    setState(() {});
+                                  }
+                                  return;
+                                } else {
+                                  audioHandler.stop();
+                                  stopSeconds = 0;
+                                  timer.cancel();
+                                  if (mounted) {
+                                    setState(() {});
+                                  }
+                                }
+                              },
+                            );
+                          }
+                        });
+                      },
+                      min: 0.0,
+                      max: 60.0,
+                      label: L10n.of(context)
+                          .common_minutes_full((stopSeconds / 60).round()),
+                    ),
+                  ),
+                  Text(L10n.of(context)
+                      .tts_stop_after((stopSeconds / 60).ceil())),
+                ],
+              ),
             );
           }
 
@@ -169,6 +227,7 @@ class _TtsWidgetState extends State<TtsWidget> {
                     L10n.of(context).tts_narrator, ReadingSettings.style),
                 buttons(),
                 const Divider(),
+                stopTimerWidget(),
                 sliders(),
               ],
             ),
