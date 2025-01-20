@@ -66,9 +66,8 @@ class StatisticCard extends ConsumerWidget {
                   ),
                   ButtonSegment<ChartMode>(
                     value: ChartMode.heatmap,
-                    // label: Text(L10n.of(context).statistic_year),
-                    label: Text("heatmap"),
-                    icon: const Icon(Icons.calendar_today),
+                    label: Text(L10n.of(context).statistic_all),
+                    icon: const Icon(Icons.grid_view_rounded),
                   ),
                 ],
                 selected: {data.mode},
@@ -143,26 +142,32 @@ class StatisticCard extends ConsumerWidget {
             ],
           ),
         );
-    return Container(
-      // height: 300,
-      padding: const EdgeInsets.fromLTRB(10, 0, 10, 5),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainer,
-        borderRadius: BorderRadius.circular(15),
+    return AnimatedSize(
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOutBack,
+      alignment: Alignment.topCenter,
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(10, 0, 10, 5),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surfaceContainer,
+          borderRadius: BorderRadius.circular(15),
+        ),
+        child: statisticData.when(
+            data: (data) => Column(
+                  children: [
+                    const SizedBox(height: 10),
+                    segmentButton(data),
+                    const SizedBox(height: 10),
+                    if (data.mode == ChartMode.heatmap) const HeatmapChart(),
+                    if (data.mode != ChartMode.heatmap) barChart(data),
+                    // HeatmapChart(),
+                  ],
+                ),
+            loading: () => const Center(
+                  child: CircularProgressIndicator(),
+                ),
+            error: (error, stack) => throw error),
       ),
-      child: statisticData.when(
-          data: (data) => Column(
-                children: [
-                  const SizedBox(height: 10),
-                  segmentButton(data),
-                  const SizedBox(height: 10),
-                  if (data.mode == ChartMode.heatmap) HeatmapChart(),
-                  if (data.mode != ChartMode.heatmap) barChart(data),
-                  // HeatmapChart(),
-                ],
-              ),
-          loading: () {},
-          error: (error, stack) => throw error),
     );
   }
 }

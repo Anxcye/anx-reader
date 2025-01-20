@@ -1,4 +1,5 @@
 import 'package:anx_reader/providers/heatmap_data.dart';
+import 'package:anx_reader/providers/statistic_data.dart';
 import 'package:anx_reader/utils/error_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_heatmap_calendar/flutter_heatmap_calendar.dart';
@@ -29,8 +30,7 @@ class HeatmapChart extends ConsumerWidget {
         1: Theme.of(context).colorScheme.primary,
       },
       onClick: (value) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(value.toString())));
+        ref.read(statisticDataProvider.notifier).setIsSelectingDay(true, value);
       },
     );
   }

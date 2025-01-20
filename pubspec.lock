@@ -529,7 +529,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: "3c4bdda3024edda1f2eaef58bad2fce8f1308132"
+      resolved-ref: c14e6ebb29c209e318aea36cd715d5001bc26100
       url: "https://github.com/Anxcye/flutter_heatmap_calendar"
     source: git
     version: "1.0.6"

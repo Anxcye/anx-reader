@@ -218,11 +218,15 @@ class DateBooks extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    data.mode == ChartMode.week
-                        ? weekOfYear(data.date)
-                        : data.mode == ChartMode.month
-                            ? '${data.date.year}.${data.date.month}'
-                            : data.date.year.toString(),
+                    data.isSelectingDay
+                        ? data.date.toString().substring(0, 10)
+                        : data.mode == ChartMode.week
+                            ? weekOfYear(data.date)
+                            : data.mode == ChartMode.month
+                                ? '${data.date.year}.${data.date.month}'
+                                : data.mode == ChartMode.year
+                                    ? data.date.year.toString()
+                                    : L10n.of(context).statistic_all_time,
                     style: titleStyle,
                   ),
                 ],

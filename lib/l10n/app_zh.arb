@@ -28,6 +28,8 @@
   "statistic_week": "周",
   "statistic_month": "月",
   "statistic_year": "年",
+  "statistic_all": "总",
+  "statistic_all_time": "所有时间",
   "statistic_this_week": "本周",
   "statistic_monday": "一",
   "statistic_tuesday": "二",
@@ -83,7 +85,7 @@
 
   "bookshelf_tips_1": "书架上没有书",
   "bookshelf_tips_2": "点击添加按钮，添加一本 epub ！",
-  "statistics_tips_1": "这周还没有阅读",
+  "statistics_tips_1": "选定的时间段里没有阅读过呢",
   "statistics_tips_2": "问渠哪得清如许，为有源头活水来",
   "notes_tips_1": "还没有笔记",
   "notes_tips_2": "在书中划线，记录你的思绪！",

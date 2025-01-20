@@ -28,6 +28,8 @@
   "statistic_week": "week",
   "statistic_month": "month",
   "statistic_year": "year",
+  "statistic_all": "all",
+  "statistic_all_time": "All Time",
   "statistic_this_week": "This Week",
   "statistic_monday": "Mn",
   "statistic_tuesday": "Tu",
@@ -83,7 +85,7 @@
 
   "bookshelf_tips_1": "There are no books.",
   "bookshelf_tips_2": "Click the add button to add a book!",
-  "statistics_tips_1": "This week you have read",
+  "statistics_tips_1": "No reading in the selected time period.",
   "statistics_tips_2": "A book is a dream that you hold in your hands.",
   "notes_tips_1": "There are no notes.",
   "notes_tips_2": "Add a note while reading!",
