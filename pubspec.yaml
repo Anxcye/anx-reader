@@ -69,7 +69,9 @@ dependencies:
   audio_session: ^0.1.23
   freezed_annotation: ^2.4.4
   json_annotation: ^4.9.0
-  flutter_heatmap_calendar: ^1.0.5
+  flutter_heatmap_calendar:
+    git:
+      url: https://github.com/Anxcye/flutter_heatmap_calendar
 
 dev_dependencies:
   flutter_test:
