@@ -506,6 +506,7 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
   InAppWebViewSettings initialSettings = InAppWebViewSettings(
     supportZoom: false,
     transparentBackground: true,
+    isInspectable: kDebugMode,
   );
 
   Widget readingInfoWidget() {
