@@ -16,6 +16,7 @@
 安读是一款专注于阅读的应用，不包含任何在线推广内容，它可以帮助你更专注于阅读，提高阅读效率。
 
 支持 **epub / mobi / azw3 / fb2 / txt**
+
 现已支持 Android 和 Windows。
 
 ![](./docs/images/9_zh.jpg)
