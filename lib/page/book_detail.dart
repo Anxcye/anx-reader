@@ -32,6 +32,7 @@ class _BookDetailState extends ConsumerState<BookDetail> {
   late double rating;
   bool isEditing = false;
   late Book _book;
+  bool _isCollapsed = false;
 
   @override
   void initState() {
@@ -43,25 +44,28 @@ class _BookDetailState extends ConsumerState<BookDetail> {
   @override
   Widget build(BuildContext context) {
     Widget buildBackground() {
-      return ShaderMask(
-        shaderCallback: (rect) {
-          return LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Theme.of(context).colorScheme.surface.withOpacity(0.20),
-              Colors.transparent,
-            ],
-          ).createShader(
-            Rect.fromLTRB(0, 0, rect.width, rect.height),
-          );
-        },
-        blendMode: BlendMode.dstIn,
-        child: bookCover(
-          context,
-          _book,
-          height: 600,
-          width: MediaQuery.of(context).size.width,
+      return Container(
+        color: Theme.of(context).colorScheme.surface,
+        child: ShaderMask(
+          shaderCallback: (rect) {
+            return LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Theme.of(context).colorScheme.surface.withOpacity(0.20),
+                Colors.transparent,
+              ],
+            ).createShader(
+              Rect.fromLTRB(0, 0, rect.width, rect.height),
+            );
+          },
+          blendMode: BlendMode.dstIn,
+          child: bookCover(
+            context,
+            _book,
+            height: 600,
+            width: MediaQuery.of(context).size.width,
+          ),
         ),
       );
     }
@@ -503,61 +507,95 @@ class _BookDetailState extends ConsumerState<BookDetail> {
       );
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-      ),
-      extendBodyBehindAppBar: true,
-      body: Stack(
-        children: [
-          buildBackground(),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 80, 20, 20),
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                if (constraints.maxWidth > 600) {
-                  return Row(
-                    children: [
-                      Expanded(
-                        flex: 1,
-                        child: ListView(
-                          padding: const EdgeInsets.all(0),
-                          children: [
-                            buildBookBaseDetail(constraints.maxWidth / 2 - 20),
-                            buildEditButton(),
-                            const SizedBox(height: 5),
-                            buildBookStatistics(),
-                          ],
-                        ),
+    return Stack(
+      children: [
+        buildBackground(),
+        Scaffold(
+          backgroundColor: Colors.transparent,
+          body: NotificationListener<ScrollNotification>(
+            onNotification: (ScrollNotification notification) {
+              if (notification is ScrollUpdateNotification) {
+                setState(() {
+                  _isCollapsed = notification.metrics.pixels > 0;
+                });
+              }
+              return false;
+            },
+            child: CustomScrollView(
+              slivers: [
+                SliverAppBar(
+                  expandedHeight: 0,
+                  pinned: true,
+                  stretch: true,
+                  backgroundColor: _isCollapsed
+                      ? Theme.of(context).colorScheme.surface.withOpacity(0.8)
+                      : Colors.transparent,
+                  flexibleSpace: FlexibleSpaceBar(
+                    title: AnimatedOpacity(
+                      opacity: _isCollapsed ? 1.0 : 0.0,
+                      duration: const Duration(milliseconds: 300),
+                      child: Text(
+                        widget.book.title,
+                        style: const TextStyle(fontSize: 16),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(width: 20),
-                      Expanded(
-                        flex: 1,
-                        child: Padding(
-                          padding: const EdgeInsets.only(top: 20, bottom: 20),
-                          child: buildMoreDetail(),
-                        ),
-                      ),
-                    ],
-                  );
-                } else {
-                  return ListView(
-                    padding: const EdgeInsets.all(0),
-                    children: [
-                      buildBookBaseDetail(constraints.maxWidth),
-                      buildEditButton(),
-                      const SizedBox(height: 5),
-                      buildBookStatistics(),
-                      const SizedBox(height: 15),
-                      buildMoreDetail(),
-                    ],
-                  );
-                }
-              },
+                    ),
+                    centerTitle: true,
+                  ),
+                ),
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        if (constraints.maxWidth > 600) {
+                          return Row(
+                            children: [
+                              Expanded(
+                                flex: 1,
+                                child: Column(
+                                  children: [
+                                    buildBookBaseDetail(
+                                        constraints.maxWidth / 2 - 20),
+                                    buildEditButton(),
+                                    const SizedBox(height: 5),
+                                    buildBookStatistics(),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 20),
+                              Expanded(
+                                flex: 1,
+                                child: Padding(
+                                  padding: const EdgeInsets.only(
+                                      top: 20, bottom: 20),
+                                  child: buildMoreDetail(),
+                                ),
+                              ),
+                            ],
+                          );
+                        } else {
+                          return Column(
+                            children: [
+                              buildBookBaseDetail(constraints.maxWidth),
+                              buildEditButton(),
+                              const SizedBox(height: 5),
+                              buildBookStatistics(),
+                              const SizedBox(height: 15),
+                              buildMoreDetail(),
+                            ],
+                          );
+                        }
+                      },
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

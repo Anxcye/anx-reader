@@ -147,104 +147,122 @@ class BookshelfPageState extends ConsumerState<BookshelfPage> {
           error: (error, stack) => Center(child: Text(error.toString())),
         );
 
-    return Scaffold(
-        appBar: AppBar(
-          // title: Text(L10n.of(context).appName),
-          title: Container(
-            height: 34,
-            constraints: const BoxConstraints(maxWidth: 400),
-            child: SearchBar(
-              controller: searchBarController,
-              hintText: L10n.of(context).appName,
-              shadowColor:
-                  const WidgetStatePropertyAll<Color>(Colors.transparent),
-              padding: const WidgetStatePropertyAll<EdgeInsets>(
-                  EdgeInsets.symmetric(horizontal: 16.0)),
-              leading: const Icon(Icons.search),
-              trailing: [
-                _searchValue != null
-                    ? IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () {
-                          setState(() {
-                            _searchValue = null;
-                            searchBarController.clear();
-                            ref.read(bookListProvider.notifier).search(null);
-                          });
-                        },
-                      )
-                    : const SizedBox(),
-              ],
-              onSubmitted: (value) {
-                setState(() {
-                  if (value.isEmpty) {
-                    _searchValue = null;
-                  } else {
-                    _searchValue = value;
-                    ref.read(bookListProvider.notifier).search(value);
-                  }
-                });
-              },
-            ),
-          ),
-          actions: [
-            const SyncButton(),
-            IconButton(
-              icon: const Icon(Icons.add),
-              onPressed: _importBook,
-            ),
-          ],
-        ),
-        body: DropTarget(
-          onDragDone: (detail) async {
-            List<File> files = [];
-            for (var file in detail.files) {
-              final tempFilePath =
-                  '${(await getAnxCacheDir()).path}/${file.name}';
-              await File(file.path).copy(tempFilePath);
-              files.add(File(tempFilePath));
-            }
-            importBookList(files, context, ref);
-            setState(() {
-              _dragging = false;
-            });
-          },
-          onDragEntered: (detail) {
-            setState(() {
-              _dragging = true;
-            });
-          },
-          onDragExited: (detail) {
-            setState(() {
-              _dragging = false;
-            });
-          },
-          child: Stack(
-            children: [
-              buildBookshelfBody,
-              if (_dragging)
-                Container(
-                  color: Theme.of(context).colorScheme.surface.withOpacity(0.9),
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          EvaIcons.arrowhead_down_outline,
-                          size: 48,
-                          color: Theme.of(context).colorScheme.onSurface,
-                        ),
-                        Text(
-                          L10n.of(context).bookshelf_dragging,
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
-                      ],
+    Widget body = DropTarget(
+      onDragDone: (detail) async {
+        List<File> files = [];
+        for (var file in detail.files) {
+          final tempFilePath = '${(await getAnxCacheDir()).path}/${file.name}';
+          await File(file.path).copy(tempFilePath);
+          files.add(File(tempFilePath));
+        }
+        importBookList(files, context, ref);
+        setState(() {
+          _dragging = false;
+        });
+      },
+      onDragEntered: (detail) {
+        setState(() {
+          _dragging = true;
+        });
+      },
+      onDragExited: (detail) {
+        setState(() {
+          _dragging = false;
+        });
+      },
+      child: Stack(
+        children: [
+          buildBookshelfBody,
+          if (_dragging)
+            Container(
+              color: Theme.of(context).colorScheme.surface.withOpacity(0.9),
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      EvaIcons.arrowhead_down_outline,
+                      size: 48,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
-                  ),
+                    Text(
+                      L10n.of(context).bookshelf_dragging,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                  ],
                 ),
+              ),
+            ),
+        ],
+      ),
+    );
+
+    PreferredSizeWidget appBar = AppBar(
+      forceMaterialTransparency: true,
+      title: Container(
+        height: 34,
+        constraints: const BoxConstraints(maxWidth: 400),
+        child: SearchBar(
+          backgroundColor: WidgetStateProperty.all(
+              Theme.of(context).colorScheme.primary.withOpacity(0.05)),
+          controller: searchBarController,
+          hintText: L10n.of(context).appName,
+          shadowColor: const WidgetStatePropertyAll<Color>(Colors.transparent),
+          padding: const WidgetStatePropertyAll<EdgeInsets>(
+              EdgeInsets.symmetric(horizontal: 16.0)),
+          leading: const Icon(Icons.search),
+          trailing: [
+            _searchValue != null
+                ? IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () {
+                      setState(() {
+                        _searchValue = null;
+                        searchBarController.clear();
+                        ref.read(bookListProvider.notifier).search(null);
+                      });
+                    },
+                  )
+                : const SizedBox(),
+          ],
+          onSubmitted: (value) {
+            setState(() {
+              if (value.isEmpty) {
+                _searchValue = null;
+              } else {
+                _searchValue = value;
+                ref.read(bookListProvider.notifier).search(value);
+              }
+            });
+          },
+        ),
+      ),
+      actions: [
+        const SyncButton(),
+        IconButton(
+          icon: const Icon(Icons.add),
+          onPressed: _importBook,
+        ),
+      ],
+    );
+
+    return Container(
+        decoration: BoxDecoration(
+          gradient: RadialGradient(
+            tileMode: TileMode.decal,
+            center: const Alignment(3, -2),
+            radius: 2.5,
+            colors: [
+              Theme.of(context).colorScheme.primary.withOpacity(0.05),
+              Theme.of(context).scaffoldBackgroundColor,
             ],
           ),
+        ),
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          appBar: appBar,
+          body: body,
         ));
   }
 }
