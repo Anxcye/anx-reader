@@ -430,6 +430,7 @@ class _ThemeChangeWidgetState extends State<ThemeChangeWidget> {
         return AlertDialog(
           content: SingleChildScrollView(
             child: ColorPicker(
+              hexInputBar: true,
               pickerColor: pickedColor,
               onColorChanged: (Color color) {
                 pickedColor = color;
