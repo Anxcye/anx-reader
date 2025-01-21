@@ -251,7 +251,7 @@ class BookshelfPageState extends ConsumerState<BookshelfPage> {
         decoration: BoxDecoration(
           gradient: RadialGradient(
             tileMode: TileMode.clamp,
-            center: Alignment.bottomLeft,
+            center: Alignment.topRight,
             radius: 1,
             colors: [
               Theme.of(context).colorScheme.primary.withOpacity(0.05),
