@@ -8,6 +8,7 @@
 
 
 ## Unreleased
+* Feat: Color picker input hex code
 * Feat: Export notes in CSV format(#71)
 * Feat: Add TTS stop timer
 * Feat: Add heat map to show reading time
@@ -16,7 +17,7 @@
 * Fix: some Windows systems cannot import books
 * Fix: enhance Webdav sync stability
 * Fix: Reading settings interface is incomplete on some devices
-
+* 新增：选择颜色时能够输入十六进制代码
 * 新增：以 CSV 格式导出笔记(#71)
 * 新增：TTS 定时停止
 * 新增：用热力图展示阅读时长
