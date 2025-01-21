@@ -32,7 +32,7 @@ class HomePage extends ConsumerStatefulWidget {
   ConsumerState<ConsumerStatefulWidget> createState() => _HomePageState();
 }
 
-class _HomePageState extends ConsumerState<HomePage> {
+class _HomePageState extends ConsumerState<HomePage>  {
   int _currentIndex = 0;
   final List<Widget> _pages = [
     const BookshelfPage(),
@@ -47,6 +47,9 @@ class _HomePageState extends ConsumerState<HomePage> {
     super.initState();
     initAnx();
   }
+
+
+  
 
   Future<void> initAnx() async {
     AnxToast.init(context);

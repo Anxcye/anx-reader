@@ -73,6 +73,7 @@ dependencies:
       url: https://github.com/Anxcye/flutter_heatmap_calendar
   csv: ^6.0.0
   fast_gbk: ^1.0.0
+  window_manager: ^0.4.3
 
 dev_dependencies:
   flutter_test:
