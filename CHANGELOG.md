@@ -6,28 +6,28 @@
 * Feat: Add bionic reading mode(#49)
 * 新增：仿生阅读(#49)
 
-## Unreleased
+## 1.2.4 2025-01-21
 * Feat: Remember last window position and size(#67)
 * Feat: Color picker input hex code(#69)
 * Feat: Export notes in CSV format(#71)
-* Feat: Add TTS stop timer
-* Feat: Add heat map to show reading time
+* Feat: Add TTS stop timer(#81)
+* Feat: Add heat map to show reading time(#69)
 * Feat: Import progress prompt(#61)
 * Feat： Add statistics chart switch time
-* Fix: some Windows systems cannot import books
+* Fix: some Windows systems cannot import books(#75)
 * Fix: enhance Webdav sync stability
-* Fix: Reading settings interface is incomplete on some devices
+* Fix: Reading settings interface is incomplete on some devices(#70)
 
 * 新增：记忆上次窗口位置和大小(#67)
 * 新增：选择颜色时能够输入十六进制代码(#69)
 * 新增：以 CSV 格式导出笔记(#71)
-* 新增：TTS 定时停止
-* 新增：用热力图展示阅读时长
+* 新增：TTS 定时停止(#81)
+* 新增：用热力图展示阅读时长(#69)
 * 新增：导入进度提示(#61)
 * 新增：统计图表切换时间
-* 修复：部分Windows系统下无法导入图书
+* 修复：部分 Windows 系统下无法导入图书(#75)
 * 修复：增强 Webdav 同步稳定性
-* 修复：部分设备下阅读设置界面显示不完整
+* 修复：部分设备下阅读设置界面显示不完整(#70)
 
 ## 1.2.3 2024-12-26
 * Feat: Reader could add notes
