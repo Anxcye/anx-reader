@@ -111,13 +111,16 @@ class AnxWebdav extends _$AnxWebdav {
             imageCache.clear();
             imageCache.clearLiveImages();
             // refresh book list
-            ref.read(bookListProvider.notifier).refresh();
+            try {
+              ref.read(bookListProvider.notifier).refresh();
+            } catch (e) {}
             AnxToast.show(L10n.of(context).webdav_sync_complete);
             changeState(state.copyWith(isSyncing: false));
           });
         });
       });
     } catch (e) {
+      changeState(state.copyWith(isSyncing: false));
       if (e is DioException && e.type == DioExceptionType.connectionError) {
         AnxToast.show('WebDAV connection failed, check your network');
         AnxLog.severe('WebDAV connection failed, connection error\n$e');
