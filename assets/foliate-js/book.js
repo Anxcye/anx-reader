@@ -367,6 +367,9 @@ const convertChineseHandler = (mode, doc) => {
   const from = mode === 's2t' ? zh_s : zh_t
   const to = mode === 's2t' ? zh_t : zh_s
 
+
+
+
   const convertTextNode = (node, from, to) => {
     if (node.nodeType === Node.TEXT_NODE) {
       node.textContent = node.textContent.replace(/[\u4e00-\u9fa5]/g, (match) => {
@@ -640,10 +643,12 @@ class Reader {
     setSelectionHandler(this.view, doc, index)
 
     // if (!this.#originalContent) {
-    console.log('Saving original content', doc);
-    this.#originalContent = doc.cloneNode(true)
-    console.log('Original content saved', this.#originalContent);
+    // console.log('Saving original content', doc);
+    // this.#originalContent = doc.cloneNode(true)
+    // console.log('Original content saved', this.#originalContent);
     // }
+
+    this.#saveOriginalContent()
 
     this.readingFeatures(readingRules)
   }
@@ -666,8 +671,36 @@ class Reader {
     return this.#index
   }
 
+  #saveOriginalContent = () => {
+    // this.#originalContent = this.#doc.cloneNode(true)
+
+    // save original content
+      this.#originalContent = [];
+      const walker = document.createTreeWalker(
+        this.#doc.body,
+        NodeFilter.SHOW_TEXT,
+        null,
+        false
+      );
+      while (walker.nextNode()) {
+        this.#originalContent.push(walker.currentNode.textContent);
+      }
+  }
+
   #restoreOriginalContent = () => {
-    this.#doc.body.innerHTML = this.#originalContent.body.innerHTML
+    // this.#doc.body.innerHTML = this.#originalContent.body.innerHTML
+
+    const walker = document.createTreeWalker(
+      this.#doc.body,
+      NodeFilter.SHOW_TEXT,
+      null,
+      false
+    );
+    let node;
+    let index = 0;
+    while (node = walker.nextNode()) {
+      node.textContent = this.#originalContent[index++];
+    }
   }
 
   readingFeatures = () => {
