@@ -38,7 +38,7 @@ String getFontNameFromFile(File file) {
     }
   }
 
-  return file.path.split('/').last.split('.').first;
+  return file.path.split(Platform.pathSeparator).last.split('.').first;
 }
 
 String _readUnicodeString(Uint8List data, int offset, int length) {

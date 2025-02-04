@@ -19,7 +19,7 @@ class FontModel {
     {
       "label": "$label",
       "name": "$name",
-      "path": "${path.split(Platform.pathSeparator).last}"
+      "path": "${path.split('/').last}"
     }
     ''';
   }

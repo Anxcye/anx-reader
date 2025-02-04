@@ -1,7 +1,7 @@
 // //////// use for test //////////
 // const importing = false
 // const allAnnotations = [
-//  // { id: 1, type: 'highlight', value: "epubcfi(/6/6!/4/2,/1:3,/1:4)", color: 'blue', note: 'this is' },
+//  { id: 1, type: 'highlight', value: "epubcfi(/6/12!/4/2[pgepubid00006]/4,/1:1,/1:7)", color: 'blue', note: 'this is' },
 //  // { id: 2, type: 'highlight', value: "epubcfi(/6/6!/4/576,/1:2,/1:3)", color: 'yellow', note: 'this is' },
 //  // { id: 3, type: 'underline', value: "epubcfi(/6/4!/4/4,/1:294,/1:301)", color: 'red', note: 'this is' },
 // ]
@@ -10,7 +10,8 @@
 // //  let initialCfi = null
 // let style = {
 //  fontSize: 1.2,
-//  fontName: 'book',
+//  fontName: 'customFont0',
+//  fontPath: 'http://localhost:40443/fonts/Fast_Sans.ttf',
 //  letterSpacing: 0,
 //  spacing: 1.7,
 //  paragraphSpacing: 1,
@@ -33,7 +34,7 @@
 // }
 // setTimeout(() => {
 //  reader.renderAnnotation()
-// }, 1000)
+// }, 100)
 
 // let readingRules = {
 //  // 'none', 's2t', 't2s'
