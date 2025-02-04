@@ -16,6 +16,8 @@
 Anx Reader is an application focused on reading, without any online promotional content. It can help you concentrate more on reading and improve your reading efficiency.
 
 Support **epub / mobi / azw3 / fb2 / txt**
+
+
 Available on Android and Windows.
 
 ![](./docs/images/9.jpg)
