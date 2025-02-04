@@ -509,7 +509,7 @@ class _BookDetailState extends ConsumerState<BookDetail> {
 
     return Stack(
       children: [
-        buildBackground(),
+        Positioned.fill(child :buildBackground()),
         Scaffold(
           backgroundColor: Colors.transparent,
           body: NotificationListener<ScrollNotification>(
