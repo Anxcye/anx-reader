@@ -194,6 +194,7 @@ class _MyAppState extends ConsumerState<MyApp>
               Expanded(
                 child: MaterialApp(
                   scrollBehavior: ScrollConfiguration.of(context).copyWith(
+                    physics: const BouncingScrollPhysics(),
                     dragDevices: {
                       PointerDeviceKind.touch,
                       PointerDeviceKind.mouse,
@@ -207,13 +208,6 @@ class _MyAppState extends ConsumerState<MyApp>
                   supportedLocales: L10n.supportedLocales,
                   title: 'Anx',
                   themeMode: prefsNotifier.themeMode,
-                  // theme: ThemeData(
-                  //   brightness: Brightness.light,
-                  //   colorScheme: ColorScheme.fromSeed(
-                  //     seedColor: prefsNotifier.themeColor,
-                  //     brightness: Brightness.light,
-                  //   ),
-                  // ).useSystemChineseFont(Brightness.light),
                   theme: FlexThemeData.light(
                     useMaterial3: true,
                     swapLegacyOnMaterial3: true,
