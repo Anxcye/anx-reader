@@ -6,47 +6,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:settings_ui/settings_ui.dart';
 
-class TranslateSetting extends StatelessWidget {
-  const TranslateSetting(
-      {super.key,
-      required this.isMobile,
-      required this.id,
-      required this.selectedIndex,
-      required this.setDetail});
-
-  final bool isMobile;
-  final int id;
-  final int selectedIndex;
-  final void Function(Widget detail, int id) setDetail;
+class TranslateSetting extends StatefulWidget {
+  const TranslateSetting({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return settingsTitle(
-        icon: const Icon(Icons.translate_outlined),
-        title: L10n.of(context).settings_translate,
-        isMobile: isMobile,
-        id: id,
-        selectedIndex: selectedIndex,
-        setDetail: setDetail,
-        subPage: SubTranslateSetting(isMobile: isMobile));
-  }
+  State<TranslateSetting> createState() => _TranslateSettingState();
 }
 
-class SubTranslateSetting extends StatefulWidget {
-  const SubTranslateSetting({super.key, required this.isMobile});
-
-  final bool isMobile;
-
-  @override
-  State<SubTranslateSetting> createState() => _SubTranslateSettingState();
-}
-
-class _SubTranslateSettingState extends State<SubTranslateSetting> {
+class _TranslateSettingState extends State<TranslateSetting> {
   @override
   Widget build(BuildContext context) {
-    return settingsBody(
-      title: L10n.of(context).settings_translate,
-      isMobile: widget.isMobile,
+    return settingsSections(
       sections: [
         SettingsSection(
           tiles: [

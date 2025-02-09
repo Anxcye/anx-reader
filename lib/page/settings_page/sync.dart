@@ -22,48 +22,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as path;
 import 'package:settings_ui/settings_ui.dart';
 
-class SyncSetting extends ConsumerWidget {
-  const SyncSetting(
-      {super.key,
-      required this.isMobile,
-      required this.id,
-      required this.selectedIndex,
-      required this.setDetail});
-
-  final bool isMobile;
-  final int id;
-  final int selectedIndex;
-  final void Function(Widget detail, int id) setDetail;
+class SyncSetting extends ConsumerStatefulWidget {
+  const SyncSetting({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return settingsTitle(
-        icon: const Icon(Icons.sync),
-        title: L10n.of(context).settings_sync,
-        isMobile: isMobile,
-        id: id,
-        selectedIndex: selectedIndex,
-        setDetail: setDetail,
-        subPage: SubSyncSettings(isMobile: isMobile));
-  }
+  ConsumerState<SyncSetting> createState() => _AppearanceSettingState();
 }
 
-class SubSyncSettings extends ConsumerStatefulWidget {
-  const SubSyncSettings({super.key, required this.isMobile});
-
-  final bool isMobile;
-
-  @override
-  ConsumerState<ConsumerStatefulWidget> createState() =>
-      _SubSyncSettingsState();
-}
-
-class _SubSyncSettingsState extends ConsumerState<SubSyncSettings> {
+class _AppearanceSettingState extends ConsumerState<SyncSetting> {
   @override
   Widget build(BuildContext context) {
-    return settingsBody(
-      title: L10n.of(context).settings_sync,
-      isMobile: widget.isMobile,
+    return settingsSections(
       sections: [
         SettingsSection(
           title: Text(L10n.of(context).settings_sync_webdav),
