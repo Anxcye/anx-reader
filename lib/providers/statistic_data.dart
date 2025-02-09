@@ -123,7 +123,7 @@ class StatisticData extends _$StatisticData {
 
   @override
   FutureOr<StatisticDataModel> build() async {
-    const initialMode = ChartMode.heatmap;
+    const initialMode = ChartMode.week;
     final initialDate = DateTime.now();
 
     return _fetchData(

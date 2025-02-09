@@ -35,37 +35,40 @@ class _TocWidgetState extends State<TocWidget> {
       child: Column(
         children: [
           widgetTitle(L10n.of(context).reading_contents, null),
-          SearchBar(
-            controller: searchBarController,
-            shadowColor:
-                const WidgetStatePropertyAll<Color>(Colors.transparent),
-            padding: const WidgetStatePropertyAll<EdgeInsets>(
-                EdgeInsets.symmetric(horizontal: 16.0)),
-            leading: const Icon(Icons.search),
-            trailing: [
-              _searchValue != null
-                  ? IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: () {
-                        setState(() {
-                          _searchValue = null;
-                          searchBarController.clear();
-                          epubPlayerKey.currentState!.clearSearch();
-                        });
-                      },
-                    )
-                  : const SizedBox(),
-            ],
-            onSubmitted: (value) {
-              setState(() {
-                if (value.isEmpty) {
-                  _searchValue = null;
-                } else {
-                  _searchValue = value;
-                  epubPlayerKey.currentState!.search(value);
-                }
-              });
-            },
+          SizedBox(
+            height: 35,
+            child: SearchBar(
+              controller: searchBarController,
+              shadowColor:
+                  const WidgetStatePropertyAll<Color>(Colors.transparent),
+              padding: const WidgetStatePropertyAll<EdgeInsets>(
+                  EdgeInsets.symmetric(horizontal: 16.0)),
+              leading: const Icon(Icons.search),
+              trailing: [
+                _searchValue != null
+                    ? IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () {
+                          setState(() {
+                            _searchValue = null;
+                            searchBarController.clear();
+                            epubPlayerKey.currentState!.clearSearch();
+                          });
+                        },
+                      )
+                    : const SizedBox(),
+              ],
+              onSubmitted: (value) {
+                setState(() {
+                  if (value.isEmpty) {
+                    _searchValue = null;
+                  } else {
+                    _searchValue = value;
+                    epubPlayerKey.currentState!.search(value);
+                  }
+                });
+              },
+            ),
           ),
           _searchValue != null
               ? Expanded(
