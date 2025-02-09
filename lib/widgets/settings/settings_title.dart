@@ -1,7 +1,7 @@
 import 'package:anx_reader/main.dart';
+import 'package:anx_reader/widgets/settings/settings_section.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:settings_ui/settings_ui.dart';
 
 Widget settingsTitle(
     {required Icon icon,
@@ -33,5 +33,11 @@ Widget settingsTitle(
 Widget settingsSections({
   required List<AbstractSettingsSection> sections,
 }) {
-  return SettingsList(sections: sections);
+  // return SettingsList(sections: sections);
+  return ListView.builder(
+    itemCount: sections.length,
+    itemBuilder: (context, index) {
+      return sections[index];
+    },
+  );
 }
