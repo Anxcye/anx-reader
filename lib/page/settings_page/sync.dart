@@ -20,7 +20,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as path;
-import 'package:settings_ui/settings_ui.dart';
+import 'package:anx_reader/widgets/settings/settings_section.dart';
+import 'package:anx_reader/widgets/settings/settings_tile.dart';
 
 class SyncSetting extends ConsumerStatefulWidget {
   const SyncSetting({super.key});

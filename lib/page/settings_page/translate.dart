@@ -1,10 +1,11 @@
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/service/translate/index.dart';
+import 'package:anx_reader/widgets/settings/settings_tile.dart';
 import 'package:anx_reader/widgets/settings/settings_title.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
-import 'package:settings_ui/settings_ui.dart';
+import 'package:anx_reader/widgets/settings/settings_section.dart';
 
 class TranslateSetting extends StatefulWidget {
   const TranslateSetting({super.key});

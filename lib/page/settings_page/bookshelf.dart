@@ -1,9 +1,11 @@
 
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/widgets/settings/settings_app_bar.dart';
+import 'package:anx_reader/widgets/settings/settings_title.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:settings_ui/settings_ui.dart';
+import 'package:anx_reader/widgets/settings/settings_section.dart';
+import 'package:anx_reader/widgets/settings/settings_tile.dart';
 
 class BookshelfSettings extends StatelessWidget {
   const BookshelfSettings({super.key});
@@ -32,7 +34,7 @@ class SubBookshelfSettings extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: settingsAppBar(L10n.of(context).settings_appearance, context),
-      body: SettingsList(
+      body: settingsSections(
         sections: [
           SettingsSection(
             title: const Text('Common'),

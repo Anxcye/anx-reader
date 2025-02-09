@@ -1,10 +1,11 @@
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/page/settings_page/log_page.dart';
+import 'package:anx_reader/widgets/settings/settings_section.dart';
+import 'package:anx_reader/widgets/settings/settings_tile.dart';
 import 'package:anx_reader/widgets/settings/settings_title.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:settings_ui/settings_ui.dart';
 
 class AdvancedSetting extends StatefulWidget {
   const AdvancedSetting({super.key});
