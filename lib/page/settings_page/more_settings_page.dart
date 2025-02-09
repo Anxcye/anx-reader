@@ -1,12 +1,12 @@
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/page/settings_page/advanced.dart';
 import 'package:anx_reader/page/settings_page/appearance.dart';
+import 'package:anx_reader/page/settings_page/settings_page.dart';
 import 'package:anx_reader/page/settings_page/sync.dart';
 import 'package:anx_reader/page/settings_page/translate.dart';
 import 'package:anx_reader/widgets/settings/about.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
 
 class MoreSettings extends StatelessWidget {
   const MoreSettings({super.key});
@@ -38,12 +38,11 @@ class SubMoreSettings extends StatefulWidget {
 
 class _SubMoreSettingsState extends State<SubMoreSettings> {
   int selectedIndex = 0;
-  late Widget settingsDetail;
+  Widget? settingsDetail;
 
   @override
-  void initState() {
-    super.initState();
-    settingsDetail = const SubAppearanceSettings(isMobile: false);
+  void didChangeDependencies() {
+    super.didChangeDependencies();
   }
 
   @override
@@ -59,6 +58,62 @@ class _SubMoreSettingsState extends State<SubMoreSettings> {
         title: Text(L10n.of(context).settings_moreSettings),
       ),
       body: LayoutBuilder(builder: (context, constraints) {
+        List<Map<String, dynamic>> settings = [
+          {
+            "title": L10n.of(context).settings_appearance,
+            "icon": Icons.color_lens_outlined,
+            "sections": const AppearanceSetting(),
+          },
+          {
+            "title": L10n.of(context).settings_sync,
+            "icon": Icons.sync_outlined,
+            "sections": const SyncSetting(),
+          },
+          {
+            "title": L10n.of(context).settings_translate,
+            "icon": Icons.translate_outlined,
+            "sections": const TranslateSetting(),
+          },
+          {
+            "title": L10n.of(context).settings_advanced,
+            "icon": Icons.shield_outlined,
+            "sections": const AdvancedSetting(),
+          },
+        ];
+
+        settingsDetail ??= SettingsPageBody(
+          isMobile: false,
+          title: settings[0]["title"],
+          sections: settings[0]["sections"],
+        );
+
+        void setDetail(Widget detail, int id) {
+          setState(() {
+            settingsDetail = detail;
+            selectedIndex = id;
+          });
+        }
+
+        Widget settingsList(bool isMobile) {
+          return ListView.builder(
+            itemCount: settings.length + 1,
+            itemBuilder: (context, index) {
+              if (index == settings.length) {
+                return const About();
+              }
+              return SettingsPageBuilder(
+                isMobile: isMobile,
+                id: index,
+                selectedIndex: selectedIndex,
+                setDetail: setDetail,
+                icon: Icon(settings[index]["icon"]),
+                title: settings[index]["title"],
+                sections: settings[index]["sections"],
+              );
+            },
+          );
+        }
+
         if (constraints.maxWidth > 600) {
           return Row(
             children: [
@@ -69,7 +124,7 @@ class _SubMoreSettingsState extends State<SubMoreSettings> {
               const VerticalDivider(thickness: 1, width: 1),
               Expanded(
                 flex: 2,
-                child: settingsDetail,
+                child: settingsDetail!,
               ),
             ],
           );
@@ -77,44 +132,6 @@ class _SubMoreSettingsState extends State<SubMoreSettings> {
           return settingsList(true);
         }
       }),
-    );
-  }
-
-  void setDetail(Widget detail, int id) {
-    setState(() {
-      settingsDetail = detail;
-      selectedIndex = id;
-    });
-  }
-
-  Widget settingsList(bool isMobile) {
-    return ListView(
-      children: [
-        AppearanceSetting(
-          isMobile: isMobile,
-          id: 0,
-          selectedIndex: selectedIndex,
-          setDetail: setDetail,
-        ),
-        SyncSetting(
-          isMobile: isMobile,
-          id: 1,
-          selectedIndex: selectedIndex,
-          setDetail: setDetail,
-        ),
-        TranslateSetting(
-          isMobile: isMobile,
-          id: 2,
-          selectedIndex: selectedIndex,
-          setDetail: setDetail,
-        ),
-        AdvancedSetting(
-            isMobile: isMobile,
-            id: 3,
-            selectedIndex: selectedIndex,
-            setDetail: setDetail),
-        const About()
-      ],
     );
   }
 }

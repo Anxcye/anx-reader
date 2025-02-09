@@ -6,47 +6,17 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:settings_ui/settings_ui.dart';
 
-class AdvancedSetting extends StatelessWidget {
-  const AdvancedSetting(
-      {super.key,
-      required this.isMobile,
-      required this.id,
-      required this.selectedIndex,
-      required this.setDetail});
-
-  final bool isMobile;
-  final int id;
-  final int selectedIndex;
-  final void Function(Widget detail, int id) setDetail;
+class AdvancedSetting extends StatefulWidget {
+  const AdvancedSetting({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return settingsTitle(
-        icon: const Icon(Icons.shield_outlined),
-        title: L10n.of(context).settings_advanced,
-        isMobile: isMobile,
-        id: id,
-        selectedIndex: selectedIndex,
-        setDetail: setDetail,
-        subPage: SubAdvancedSettings(isMobile: isMobile));
-  }
+  State<AdvancedSetting> createState() => _AdvancedSettingState();
 }
 
-class SubAdvancedSettings extends StatefulWidget {
-  const SubAdvancedSettings({super.key, required this.isMobile});
-
-  final bool isMobile;
-
-  @override
-  State<SubAdvancedSettings> createState() => _SubAdvancedSettingsState();
-}
-
-class _SubAdvancedSettingsState extends State<SubAdvancedSettings> {
+class _AdvancedSettingState extends State<AdvancedSetting> {
   @override
   Widget build(BuildContext context) {
-    return settingsBody(
-      title: L10n.of(context).settings_advanced,
-      isMobile: widget.isMobile,
+    return settingsSections(
       sections: [
         SettingsSection(
           title: Text(L10n.of(context).settings_advanced_log),

@@ -8,47 +8,103 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:provider/provider.dart';
 import 'package:settings_ui/settings_ui.dart';
 
-class AppearanceSetting extends StatelessWidget {
-  const AppearanceSetting(
-      {super.key,
-      required this.isMobile,
-      required this.id,
-      required this.selectedIndex,
-      required this.setDetail});
+// class AppearanceSetting extends StatelessWidget {
+//   const AppearanceSetting(
+//       {super.key,
+//       required this.isMobile,
+//       required this.id,
+//       required this.selectedIndex,
+//       required this.setDetail});
 
-  final bool isMobile;
-  final int id;
-  final int selectedIndex;
-  final void Function(Widget detail, int id) setDetail;
+//   final bool isMobile;
+//   final int id;
+//   final int selectedIndex;
+//   final void Function(Widget detail, int id) setDetail;
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return settingsTitle(
+//         icon: const Icon(Icons.palette_outlined),
+//         title: L10n.of(context).settings_appearance,
+//         isMobile: isMobile,
+//         id: id,
+//         selectedIndex: selectedIndex,
+//         setDetail: setDetail,
+//         subPage: SubAppearanceSettings(isMobile: isMobile));
+//   }
+// }
+
+// class SubAppearanceSettings extends StatefulWidget {
+//   const SubAppearanceSettings({super.key, required this.isMobile});
+
+//   final bool isMobile;
+
+//   @override
+//   State<SubAppearanceSettings> createState() => _SubAppearanceSettingsState();
+// }
+
+// class _SubAppearanceSettingsState extends State<SubAppearanceSettings> {
+//   @override
+//   Widget build(BuildContext context) {
+//     return settingsBody(
+//       title: L10n.of(context).settings_appearance,
+//       isMobile: widget.isMobile,
+//       sections: [
+//         SettingsSection(
+//           title: Text(L10n.of(context).settings_appearance_theme),
+//           tiles: [
+//             const CustomSettingsTile(
+//                 child: Padding(
+//               padding: EdgeInsets.fromLTRB(20, 8, 20, 8),
+//               child: ChangeThemeMode(),
+//             )),
+//             SettingsTile.navigation(
+//                 title: Text(L10n.of(context).settings_appearance_themeColor),
+//                 leading: const Icon(Icons.color_lens),
+//                 onPressed: (context) async {
+//                   await showColorPickerDialog(context);
+//                 }),
+//             SettingsTile.switchTile(
+//               title: const Text("OLED Dark Mode"),
+//               leading: const Icon(Icons.brightness_2),
+//               initialValue: Prefs().trueDarkMode,
+//               onToggle: (bool value) {
+//                 setState(() {
+
+//                 Prefs().trueDarkMode = value;
+//                 });
+//               },
+//             ),
+//             const CustomSettingsTile(child: Divider()),
+//           ],
+//         ),
+//         SettingsSection(
+//             title: Text(L10n.of(context).settings_appearance_display),
+//             tiles: [
+//               SettingsTile.navigation(
+//                   title: Text(L10n.of(context).settings_appearance_language),
+//                   value: Text(Prefs().locale?.languageCode ?? 'system'),
+//                   leading: const Icon(Icons.language),
+//                   onPressed: (context) {
+//                     showLanguagePickerDialog(context);
+//                   })
+//             ])
+//       ],
+//     );
+//   }
+// }
+
+class AppearanceSetting extends StatefulWidget {
+  const AppearanceSetting({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return settingsTitle(
-        icon: const Icon(Icons.palette_outlined),
-        title: L10n.of(context).settings_appearance,
-        isMobile: isMobile,
-        id: id,
-        selectedIndex: selectedIndex,
-        setDetail: setDetail,
-        subPage: SubAppearanceSettings(isMobile: isMobile));
-  }
+  State<AppearanceSetting> createState() => _AppearanceSettingState();
 }
 
-class SubAppearanceSettings extends StatefulWidget {
-  const SubAppearanceSettings({super.key, required this.isMobile});
-
-  final bool isMobile;
-
-  @override
-  State<SubAppearanceSettings> createState() => _SubAppearanceSettingsState();
-}
-
-class _SubAppearanceSettingsState extends State<SubAppearanceSettings> {
+class _AppearanceSettingState extends State<AppearanceSetting> {
   @override
   Widget build(BuildContext context) {
-    return settingsBody(
-      title: L10n.of(context).settings_appearance,
-      isMobile: widget.isMobile,
+    return settingsSections(
       sections: [
         SettingsSection(
           title: Text(L10n.of(context).settings_appearance_theme),
@@ -70,8 +126,7 @@ class _SubAppearanceSettingsState extends State<SubAppearanceSettings> {
               initialValue: Prefs().trueDarkMode,
               onToggle: (bool value) {
                 setState(() {
-
-                Prefs().trueDarkMode = value;
+                  Prefs().trueDarkMode = value;
                 });
               },
             ),
