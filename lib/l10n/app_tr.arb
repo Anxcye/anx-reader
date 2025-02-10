@@ -110,7 +110,7 @@
   "notes_page_sort_time": "Zamana Göre",
   "notes_page_sort_chapter": "Bölüme Göre",
   "notes_page_filter_reset": "Sıfırla",
-  "notes_page_view_all_n_notes": "{count, plural, =0{Hiç not bulunamadı} =1{1 notu görüntüle} other{Tüm {count} notları görüntüle}}"
+  "notes_page_view_all_n_notes": "{count, plural, =0{Hiç not bulunamadı} =1{1 notu görüntüle} other{Tüm {count} notları görüntüle}}",
 
   "common_delete": "Sil",
   "common_hours_full": "{ count, plural, =1{1 saat} other{{count} saat} }",

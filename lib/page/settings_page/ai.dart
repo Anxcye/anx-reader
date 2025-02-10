@@ -2,6 +2,7 @@ import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/enums/ai_prompts.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/service/ai/index.dart';
+import 'package:anx_reader/service/ai/prompt_generate.dart';
 import 'package:anx_reader/widgets/settings/settings_section.dart';
 import 'package:anx_reader/widgets/settings/settings_tile.dart';
 import 'package:anx_reader/widgets/settings/settings_title.dart';
@@ -77,10 +78,16 @@ class _AISettingsState extends State<AISettings> {
   Widget build(BuildContext context) {
     List<Map<String, dynamic>> prompts = [
       {
+        "identifier": AiPrompts.test,
+        "title": L10n.of(context).settings_ai_prompt_test,
+        "variables": ["language_locale"],
+      },
+      {
         "identifier": AiPrompts.summaryTheChapter,
         "title": L10n.of(context).settings_ai_prompt_summary_the_chapter,
         "variables": ["chapter"],
       },
+
       {
         "identifier": AiPrompts.summaryTheBook,
         "title": L10n.of(context).settings_ai_prompt_summary_the_book,
@@ -133,7 +140,7 @@ class _AISettingsState extends State<AISettings> {
                         title: Text(L10n.of(context).common_test),
                         content: StreamBuilder(
                             stream: aiGenerateStream(
-                              "Introduce yourself in one sentence.",
+                              generatePromptTest(),
                               identifier: services[currentIndex]["identifier"],
                               config: services[currentIndex]["config"],
                             ),
@@ -184,7 +191,7 @@ class _AISettingsState extends State<AISettings> {
     );
     var servicesTile = CustomSettingsTile(
         child: AnimatedSize(
-      duration: const Duration(milliseconds: 400),
+      duration: const Duration(milliseconds: 200),
       curve: Curves.easeInOut,
       alignment: Alignment.topCenter,
       child: Padding(
@@ -206,7 +213,7 @@ class _AISettingsState extends State<AISettings> {
                         if (showSettings) {
                           showSettings = false;
                           Future.delayed(
-                            const Duration(milliseconds: 100),
+                            const Duration(milliseconds: 200),
                             () {
                               setState(() {
                                 showSettings = true;

@@ -10,9 +10,9 @@ Stream<String> geminiGenerateStream(
   if (apiKey == null) {
     throw Exception('api_key is required');
   }
-  Gemini.init(apiKey: apiKey);
 
   try {
+    Gemini.reInitialize(apiKey: apiKey);
     await for (final value in Gemini.instance.promptStream(parts: [
       Part.text(prompt),
     ])) {
