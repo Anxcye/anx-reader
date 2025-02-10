@@ -94,9 +94,9 @@ class DownloadUtil {
 
       final SaveResult result = await SaverGallery.saveImage(
         img,
-        name: '$name.$extension',
+        fileName: '$name.$extension',
+        skipIfExists: false,
         androidRelativePath: "Pictures/AnxReader",
-        androidExistNotSave: false,
       );
 
       SmartDialog.dismiss();

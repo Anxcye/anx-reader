@@ -39,7 +39,6 @@ class _AISettingsState extends State<AISettings> {
         "api_key": "YOUR_API_KEY",
         "model": "claude-3-5-sonnet-20240620",
       },
-
     },
     {
       "identifier": "gemini",
@@ -71,7 +70,6 @@ class _AISettingsState extends State<AISettings> {
       }
     }
     super.initState();
-
   }
 
   @override
@@ -87,7 +85,6 @@ class _AISettingsState extends State<AISettings> {
         "title": L10n.of(context).settings_ai_prompt_summary_the_chapter,
         "variables": ["chapter"],
       },
-
       {
         "identifier": AiPrompts.summaryTheBook,
         "title": L10n.of(context).settings_ai_prompt_summary_the_book,
@@ -211,6 +208,12 @@ class _AISettingsState extends State<AISettings> {
                     child: InkWell(
                       onTap: () {
                         if (showSettings) {
+                          if (currentIndex == index) {
+                            setState(() {
+                              showSettings = false;
+                            });
+                            return;
+                          }
                           showSettings = false;
                           Future.delayed(
                             const Duration(milliseconds: 200),
