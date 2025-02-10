@@ -74,6 +74,7 @@ dependencies:
   fast_gbk: ^1.0.0
   window_manager: ^0.4.3
   pretty_dio_logger: ^1.4.0
+  dio_intercept_to_curl: ^0.2.0
 
 dev_dependencies:
   flutter_test:
