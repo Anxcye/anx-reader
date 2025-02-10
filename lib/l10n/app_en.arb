@@ -139,6 +139,7 @@
   "common_dissolve": "Dissolve",
   "common_edit": "Edit",
   "common_nth_week": "{count, plural, =1{1st week} =2{2nd week} few{3rd week} other{{count}th week}}",
+  "common_apply": "Apply",
 
   "service_import_success": "Import success",
   "service_import_n_books": "{count, plural, =1{importing 1 book} other{importing {count} books}}",
@@ -179,6 +180,12 @@
   "settings_translate_to": "To",
 
   "settings_ai": "AI",
+  "settings_ai_services": "Services",
+  "settings_ai_prompt": "Prompt",
+  "settings_ai_prompt_test": "Test AI config",
+  "settings_ai_prompt_summary_the_chapter": "Summary the chapter",
+  "settings_ai_prompt_summary_the_book": "Summary the book",
+  "settings_ai_prompt_summary_the_previous_content": "Summary the previous content",
 
   "storage_permission_denied": "Storage permission denied",
   "gallery_permission_denied": "Gallery permission denied",

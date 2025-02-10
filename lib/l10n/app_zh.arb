@@ -139,6 +139,7 @@
   "common_dissolve": "解散",
   "common_edit": "编辑",
   "common_nth_week": "{count, plural, other{第{count}周}}",
+  "common_apply": "应用",
 
   "service_import_success":"导入成功",
   "service_import_n_books": "{count, plural, other{正在导入 {count} 本书}}",
@@ -179,6 +180,12 @@
   "settings_translate_to": "译文",
 
   "settings_ai": "AI",
+  "settings_ai_services": "服务商",
+  "settings_ai_prompt": "提示词",
+  "settings_ai_prompt_test": "测试 AI 配置",
+  "settings_ai_prompt_summary_the_chapter": "总结本章内容",
+  "settings_ai_prompt_summary_the_book": "总结整本书",
+  "settings_ai_prompt_summary_the_previous_content": "总结前文内容",
 
   "settings_advanced": "高级",
   "settings_advanced_log": "日志",
