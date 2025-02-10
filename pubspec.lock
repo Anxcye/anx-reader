@@ -1240,10 +1240,10 @@ packages:
     dependency: "direct main"
     description:
       name: saver_gallery
-      sha256: "35f838453cbf17d4b710d0783ced0d2c9aeb79a607f290684b9c3c798c22beb8"
+      sha256: bf59475e50b73d666630bed7a5fdb621fed92d637f64e3c61ce81653ec6a833c
       url: "https://pub.dev"
     source: hosted
-    version: "3.0.10"
+    version: "4.0.1"
   screen_retriever:
     dependency: transitive
     description:
