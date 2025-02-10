@@ -1,11 +1,9 @@
 import 'dart:async';
 
 import 'package:dio/dio.dart';
-import 'package:dio_intercept_to_curl/dio_intercept_to_curl.dart';
 import 'package:flutter/foundation.dart';
 import 'dart:convert';
 
-import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 Stream<String> claudeGenerateStream(
   String prompt,
@@ -15,18 +13,6 @@ Stream<String> claudeGenerateStream(
   final apiKey = config['api_key'];
   final model = config['model'];
   final dio = Dio();
-
-  dio.interceptors.add(PrettyDioLogger(
-    requestHeader: true,
-    requestBody: true,
-    responseBody: true,
-    responseHeader: false,
-    error: true,
-    compact: true,
-    maxWidth: 90,
-    enabled: kDebugMode,
-  ));
-  dio.interceptors.add(DioInterceptToCurl(printOnSuccess: true));
 
   try {
     final response = await dio.post(
