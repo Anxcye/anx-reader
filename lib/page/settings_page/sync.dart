@@ -313,7 +313,9 @@ void showWebdavDialog(BuildContext context) {
             : false,
         controller: controller,
         decoration: InputDecoration(
-            border: const OutlineInputBorder(), labelText: labelText),
+          border: const OutlineInputBorder(),
+          labelText: labelText,
+        ),
       ),
     );
   }

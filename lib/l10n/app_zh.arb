@@ -178,6 +178,8 @@
   "settings_translate_from": "原文",
   "settings_translate_to": "译文",
 
+  "settings_ai": "AI",
+
   "settings_advanced": "高级",
   "settings_advanced_log": "日志",
   "settings_advanced_log_clear_log": "清空日志",
