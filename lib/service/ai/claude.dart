@@ -44,6 +44,11 @@ Stream<String> claudeGenerateStream(
         },
       ),
     )) {
+      if (response.statusCode != 200) {
+        yield* Stream.error('error ${response.statusCode} \n $chunk');
+        continue;
+      }
+
       for (final line in chunk.split('\n')) {
         if (line.isEmpty || line.startsWith('event: ')) continue;
         final data = line.startsWith('data: ') ? line.substring(6) : line;

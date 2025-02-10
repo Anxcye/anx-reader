@@ -1,5 +1,6 @@
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/service/ai/claude.dart';
+import 'package:anx_reader/service/ai/deepseek.dart';
 import 'package:anx_reader/service/ai/gemini.dart';
 import 'package:anx_reader/service/ai/openai.dart';
 
@@ -23,8 +24,12 @@ Stream<String> aiGenerateStream(
     case "gemini":
       stream = geminiGenerateStream(prompt, config);
       break;
+    case "deepseek":
+      stream = deepSeekGenerateStream(prompt, config);
+      break;
     default:
       throw Exception("Invalid AI identifier");
+
 
   }
 

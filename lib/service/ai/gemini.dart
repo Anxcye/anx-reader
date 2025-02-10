@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter_gemini/flutter_gemini.dart';
 
-
 Stream<String> geminiGenerateStream(
   String prompt,
   Map<String, String> config,
@@ -13,11 +12,15 @@ Stream<String> geminiGenerateStream(
   }
   Gemini.init(apiKey: apiKey);
 
-  await for (final value in Gemini.instance.promptStream(parts: [
-    Part.text(prompt),
-  ])) {
-    if (value != null) {
-      yield value.output ?? '';
+  try {
+    await for (final value in Gemini.instance.promptStream(parts: [
+      Part.text(prompt),
+    ])) {
+      if (value != null) {
+        yield value.output ?? '';
+      }
     }
+  } catch (e) {
+    yield* Stream.error('Request failed: $e');
   }
 }
