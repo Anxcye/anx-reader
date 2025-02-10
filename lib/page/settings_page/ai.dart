@@ -45,9 +45,7 @@ class _AISettingsState extends State<AISettings> {
       "title": "Gemini",
       "logo": "assets/images/gemini.png",
       "config": {
-        "url": "",
-        "api_key": "",
-        "model": "",
+        "api_key": "YOUR_API_KEY",
       },
     },
     {

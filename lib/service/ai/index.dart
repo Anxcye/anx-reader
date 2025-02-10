@@ -1,5 +1,6 @@
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/service/ai/claude.dart';
+import 'package:anx_reader/service/ai/gemini.dart';
 import 'package:anx_reader/service/ai/openai.dart';
 
 Stream<String> aiGenerateStream(
@@ -19,8 +20,12 @@ Stream<String> aiGenerateStream(
     case "claude":
       stream = claudeGenerateStream(prompt, config);
       break;
+    case "gemini":
+      stream = geminiGenerateStream(prompt, config);
+      break;
     default:
       throw Exception("Invalid AI identifier");
+
   }
 
 
