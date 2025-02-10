@@ -24,9 +24,9 @@ class _AISettingsState extends State<AISettings> {
       "title": "OpenAI",
       "logo": "assets/images/openai.png",
       "config": {
-        "url": "",
-        "api_key": "",
-        "model": "",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "api_key": "YOUR_API_KEY",
+        "model": "gpt-4o-mini",
       },
     },
     {
@@ -34,10 +34,11 @@ class _AISettingsState extends State<AISettings> {
       "title": "Claude",
       "logo": "assets/images/claude.png",
       "config": {
-        "url": "",
-        "api_key": "",
-        "model": "",
+        "url": "https://api.anthropic.com/v1/messages",
+        "api_key": "YOUR_API_KEY",
+        "model": "claude-3-5-sonnet-20240620",
       },
+
     },
     {
       "identifier": "gemini",
@@ -54,11 +55,11 @@ class _AISettingsState extends State<AISettings> {
       "title": "DeepSeek",
       "logo": "assets/images/deepseek.png",
       "config": {
-        "url": "",
-        "api_key": "",
-        "model": "",
+        "url": "https://api.deepseek.com/v1/chat/completions",
+        "api_key": "YOUR_API_KEY",
+        "model": "deepseek-chat",
       },
-    }
+    },
   ];
 
   @override
@@ -66,10 +67,12 @@ class _AISettingsState extends State<AISettings> {
     for (var service in services) {
       for (var key in service["config"].keys) {
         service["config"][key] =
-            Prefs().getAiConfig(service["identifier"])[key] ?? "";
+            Prefs().getAiConfig(service["identifier"])[key] ??
+                service["config"][key];
       }
     }
     super.initState();
+
   }
 
   @override

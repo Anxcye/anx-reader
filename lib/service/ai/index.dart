@@ -1,4 +1,5 @@
 import 'package:anx_reader/config/shared_preference_provider.dart';
+import 'package:anx_reader/service/ai/claude.dart';
 import 'package:anx_reader/service/ai/openai.dart';
 
 Stream<String> aiGenerateStream(
@@ -15,9 +16,13 @@ Stream<String> aiGenerateStream(
     case "openai":
       stream = openAiGenerateStream(prompt, config);
       break;
+    case "claude":
+      stream = claudeGenerateStream(prompt, config);
+      break;
     default:
       throw Exception("Invalid AI identifier");
   }
+
 
   await for (final chunk in stream) {
     buffer += chunk;

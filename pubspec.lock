@@ -391,6 +391,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "5.7.0"
+  dio_intercept_to_curl:
+    dependency: "direct main"
+    description:
+      name: dio_intercept_to_curl
+      sha256: aaf22b05858385ee00dfabd8a1c74265f2e9057a266047a75d81c468f1fcf854
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.0"
   dio_web_adapter:
     dependency: transitive
     description:
