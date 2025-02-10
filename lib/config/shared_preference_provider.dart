@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:core';
 
+import 'package:anx_reader/enums/ai_prompts.dart';
 import 'package:anx_reader/enums/convert_chinese_mode.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/main.dart';
@@ -361,5 +362,28 @@ class Prefs extends ChangeNotifier {
 
   String get selectedAiService {
     return prefs.getString('selectedAiService') ?? 'openai';
+  }
+
+  void saveAiPrompt(AiPrompts identifier, String prompt) {
+    prefs.setString('aiPrompt_${identifier.name}', prompt);
+    notifyListeners();
+  }
+
+
+  String getAiPrompt(AiPrompts identifier) {
+    String? aiPrompt = prefs.getString('aiPrompt_${identifier.name}');
+    if (aiPrompt == null) {
+      switch (identifier) {
+        case AiPrompts.summaryTheChapter:
+          return 'Summary the chapter, the chapter is: {chapter}';
+        case AiPrompts.summaryTheBook:
+          return 'Summary the book, the book is: {book}, the author is: {author}';
+        case AiPrompts.summaryThePreviousContent:
+          return 'Summary the previous content, the previous content is: {previous_content}';
+
+      }
+
+    }
+    return aiPrompt;
   }
 }
