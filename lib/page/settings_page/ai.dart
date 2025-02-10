@@ -55,7 +55,7 @@ class _AISettingsState extends State<AISettings> {
       "config": {
         "url": "https://api.deepseek.com/v1/chat/completions",
         "api_key": "YOUR_API_KEY",
-        "model": "deepseek-chat",
+        "model": "deepseek-v3",
       },
     },
   ];

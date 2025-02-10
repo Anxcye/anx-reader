@@ -4,7 +4,7 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'dart:convert';
 
-Stream<String> openAiGenerateStream(
+Stream<String> deepSeekGenerateStream(
   String prompt,
   Map<String, String> config,
 ) async* {
@@ -12,18 +12,15 @@ Stream<String> openAiGenerateStream(
   final apiKey = config['api_key'];
   final model = config['model'];
   final dio = Dio();
+  Response? response;
 
   try {
-    final response = await dio.post(
+    response = await dio.post(
       url!,
-      options: Options(
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $apiKey',
-        },
-        responseType: ResponseType.stream,
-        validateStatus: (status) => true,
-      ),
+      options: Options(headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $apiKey',
+      }, responseType: ResponseType.stream, validateStatus: (status) => true),
       data: {
         'model': model,
         'messages': [
@@ -48,7 +45,6 @@ Stream<String> openAiGenerateStream(
 
       final lines = chunk.split('\n');
       for (final line in lines) {
-
         if (line.trim().isEmpty) continue;
 
         if (line.startsWith('data: ')) {
@@ -57,8 +53,8 @@ Stream<String> openAiGenerateStream(
 
           try {
             final json = jsonDecode(data);
-            final delta = json['choices'][0]['delta'];
-            final content = delta['content'];
+            String? content = json['choices'][0]['delta']['content'];
+            content ??= json['choices'][0]['delta']['reasoning_content'];
             if (content != null) {
               yield content;
             }
