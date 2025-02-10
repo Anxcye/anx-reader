@@ -178,6 +178,8 @@
   "settings_translate_from": "From",
   "settings_translate_to": "To",
 
+  "settings_ai": "AI",
+
   "storage_permission_denied": "Storage permission denied",
   "gallery_permission_denied": "Gallery permission denied",
   "goto_authorize": "Go to authorize",

@@ -1,4 +1,5 @@
 import 'package:anx_reader/l10n/generated/L10n.dart';
+import 'package:anx_reader/page/settings_page/AI.dart';
 import 'package:anx_reader/page/settings_page/advanced.dart';
 import 'package:anx_reader/page/settings_page/appearance.dart';
 import 'package:anx_reader/page/settings_page/settings_page.dart';
@@ -73,6 +74,11 @@ class _SubMoreSettingsState extends State<SubMoreSettings> {
             "title": L10n.of(context).settings_translate,
             "icon": Icons.translate_outlined,
             "sections": const TranslateSetting(),
+          },
+          {
+            "title": L10n.of(context).settings_ai,
+            "icon": Icons.auto_awesome,
+            "sections": const AISettings(),
           },
           {
             "title": L10n.of(context).settings_advanced,

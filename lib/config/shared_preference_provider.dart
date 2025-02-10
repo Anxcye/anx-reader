@@ -339,4 +339,27 @@ class Prefs extends ChangeNotifier {
     }
     return WindowInfo.fromJson(jsonDecode(windowInfoJson));
   }
+
+  void saveAiConfig(String identifier, Map<String, String> config) {
+    prefs.setString('aiConfig_$identifier', jsonEncode(config));
+    notifyListeners();
+  }
+
+  Map<String, String> getAiConfig(String identifier) {
+    String? aiConfigJson = prefs.getString('aiConfig_$identifier');
+    if (aiConfigJson == null) {
+      return {};
+    }
+    Map<String, dynamic> decoded = jsonDecode(aiConfigJson);
+    return decoded.map((key, value) => MapEntry(key, value.toString()));
+  }
+
+  set selectedAiService(String identifier) {
+    prefs.setString('selectedAiService', identifier);
+    notifyListeners();
+  }
+
+  String get selectedAiService {
+    return prefs.getString('selectedAiService') ?? 'openai';
+  }
 }
