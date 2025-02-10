@@ -1,4 +1,4 @@
-[English](README.md) | **简体中文**
+[English](README.md) | **简体中文** | [Türkçe](README_tr.md)
 
 <p align="center">
   <img src="./docs/images/Anx-logo.jpg" alt="Anx-logo" width="100" />
