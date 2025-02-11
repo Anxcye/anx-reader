@@ -76,6 +76,7 @@ dependencies:
   pretty_dio_logger: ^1.4.0
   dio_intercept_to_curl: ^0.2.0
   flutter_gemini: ^3.0.0
+  flutter_markdown: ^0.7.6+2
 
 dev_dependencies:
   flutter_test:

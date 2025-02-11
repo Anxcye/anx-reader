@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
+import 'package:anx_reader/service/ai/ai_dio.dart';
 import 'dart:convert';
 
 Stream<String> openAiGenerateStream(
@@ -11,7 +12,7 @@ Stream<String> openAiGenerateStream(
   final url = config['url'];
   final apiKey = config['api_key'];
   final model = config['model'];
-  final dio = Dio();
+  final dio = AiDio.instance.dio;
 
   try {
     final response = await dio.post(

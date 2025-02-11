@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:anx_reader/service/ai/ai_dio.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'dart:convert';
@@ -12,7 +13,7 @@ Stream<String> claudeGenerateStream(
   final url = config['url'];
   final apiKey = config['api_key'];
   final model = config['model'];
-  final dio = Dio();
+  final dio = AiDio.instance.dio;
 
   try {
     final response = await dio.post(

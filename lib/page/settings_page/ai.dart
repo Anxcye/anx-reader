@@ -1,8 +1,9 @@
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/enums/ai_prompts.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
-import 'package:anx_reader/service/ai/index.dart';
+import 'package:anx_reader/service/ai/ai_dio.dart';
 import 'package:anx_reader/service/ai/prompt_generate.dart';
+import 'package:anx_reader/widgets/ai_stream.dart';
 import 'package:anx_reader/widgets/settings/settings_section.dart';
 import 'package:anx_reader/widgets/settings/settings_tile.dart';
 import 'package:anx_reader/widgets/settings/settings_title.dart';
@@ -133,26 +134,14 @@ class _AISettingsState extends State<AISettings> {
             TextButton(
                 onPressed: () {
                   SmartDialog.show(
+                    onDismiss: () {
+                      AiDio.instance.cancel();
+                    },
                     builder: (context) => AlertDialog(
                         title: Text(L10n.of(context).common_test),
-                        content: StreamBuilder(
-                            stream: aiGenerateStream(
-                              generatePromptTest(),
-                              identifier: services[currentIndex]["identifier"],
-                              config: services[currentIndex]["config"],
-                            ),
-                            builder: (context, snapshot) {
-                              if (snapshot.hasError) {
-                                return Text(snapshot.error.toString());
-                              }
-
-                              if (!snapshot.hasData) {
-                                return const Center(
-                                  child: CircularProgressIndicator(),
-                                );
-                              }
-                              return Text(snapshot.data!);
-                            })),
+                        content: aiStream(generatePromptTest(),
+                            identifier: services[currentIndex]["identifier"],
+                            config: services[currentIndex]["config"])),
                   );
                 },
                 child: Text(L10n.of(context).common_test)),
