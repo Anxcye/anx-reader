@@ -9,3 +9,22 @@ String generatePromptTest() {
   prompt = prompt.replaceAll('{{language_locale}}', currentLocale);
   return prompt;
 }
+
+String generatePromptSummaryTheChapter(String chapter) {
+  String prompt = Prefs().getAiPrompt(AiPrompts.summaryTheChapter);
+  prompt = prompt.replaceAll('{{chapter}}', chapter);
+  return prompt;
+}
+
+String generatePromptSummaryTheBook(String book, String author) {
+  String prompt = Prefs().getAiPrompt(AiPrompts.summaryTheBook);
+  prompt = prompt.replaceAll('{{book}}', book);
+  prompt = prompt.replaceAll('{{author}}', author);
+  return prompt;
+}
+
+String generatePromptSummaryThePreviousContent(String previousContent) {
+  String prompt = Prefs().getAiPrompt(AiPrompts.summaryThePreviousContent);
+  prompt = prompt.replaceAll('{{previous_content}}', previousContent);
+  return prompt;
+}

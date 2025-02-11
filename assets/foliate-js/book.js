@@ -1,45 +1,45 @@
 // //////// use for test //////////
 // const importing = false
 // const allAnnotations = [
-//  { id: 1, type: 'highlight', value: "epubcfi(/6/12!/4/2[pgepubid00006]/4,/1:1,/1:7)", color: 'blue', note: 'this is' },
-//  // { id: 2, type: 'highlight', value: "epubcfi(/6/6!/4/576,/1:2,/1:3)", color: 'yellow', note: 'this is' },
-//  // { id: 3, type: 'underline', value: "epubcfi(/6/4!/4/4,/1:294,/1:301)", color: 'red', note: 'this is' },
+//   { id: 1, type: 'highlight', value: "epubcfi(/6/12!/4/2[pgepubid00006]/4,/1:1,/1:7)", color: 'blue', note: 'this is' },
+//   // { id: 2, type: 'highlight', value: "epubcfi(/6/6!/4/576,/1:2,/1:3)", color: 'yellow', note: 'this is' },
+//   // { id: 3, type: 'underline', value: "epubcfi(/6/4!/4/4,/1:294,/1:301)", color: 'red', note: 'this is' },
 // ]
 // let url = '../local/alice.epub'
 // let initialCfi = "epubcfi(/6/12!/4,/2[CHP3],/8/1:29)"
 // //  let initialCfi = null
 // let style = {
-//  fontSize: 1.2,
-//  fontName: 'customFont0',
-//  fontPath: 'http://localhost:40443/fonts/Fast_Sans.ttf',
-//  letterSpacing: 0,
-//  spacing: 1.7,
-//  paragraphSpacing: 1,
-//  textIndent: 5,
-//  fontColor: '#0000ff',
-//  backgroundColor: '#ffffff',
-//  topMargin: 100,
-//  bottomMargin: 100,
-//  sideMargin: 5,
-//  justify: true,
-//  hyphenate: true,
-//  // scroll: false,
-//  // animated: true,
-//  pageTurnStyle: 'slide',
-//  maxColumnCount: 2,
+//   fontSize: 1.2,
+//   fontName: 'customFont0',
+//   fontPath: 'http://localhost:40443/fonts/Fast_Sans.ttf',
+//   letterSpacing: 0,
+//   spacing: 1.7,
+//   paragraphSpacing: 1,
+//   textIndent: 5,
+//   fontColor: '#0000ff',
+//   backgroundColor: '#ffffff',
+//   topMargin: 100,
+//   bottomMargin: 100,
+//   sideMargin: 5,
+//   justify: true,
+//   hyphenate: true,
+//   // scroll: false,
+//   // animated: true,
+//   pageTurnStyle: 'slide',
+//   maxColumnCount: 2,
 // }
 // window.flutter_inappwebview = {}
 // window.flutter_inappwebview.callHandler = (name, data) => {
-//  console.log(name, data)
+//   console.log(name, data)
 // }
 // setTimeout(() => {
-//  reader.renderAnnotation()
+//   reader.renderAnnotation()
 // }, 100)
 
 // let readingRules = {
-//  // 'none', 's2t', 't2s'
-//  convertChineseMode: 's2t',
-//  bionicReadingMode: true,
+//   // 'none', 's2t', 't2s'
+//   convertChineseMode: 's2t',
+//   bionicReadingMode: true,
 // }
 
 
@@ -675,16 +675,16 @@ class Reader {
     // this.#originalContent = this.#doc.cloneNode(true)
 
     // save original content
-      this.#originalContent = [];
-      const walker = document.createTreeWalker(
-        this.#doc.body,
-        NodeFilter.SHOW_TEXT,
-        null,
-        false
-      );
-      while (walker.nextNode()) {
-        this.#originalContent.push(walker.currentNode.textContent);
-      }
+    this.#originalContent = [];
+    const walker = document.createTreeWalker(
+      this.#doc.body,
+      NodeFilter.SHOW_TEXT,
+      null,
+      false
+    );
+    while (walker.nextNode()) {
+      this.#originalContent.push(walker.currentNode.textContent);
+    }
   }
 
   #restoreOriginalContent = () => {
@@ -706,6 +706,24 @@ class Reader {
   readingFeatures = () => {
     this.#restoreOriginalContent()
     readingFeaturesDocHandler(this.#doc)
+  }
+
+  getChapterContent = () => {
+    return this.#doc.body.textContent
+  }
+
+  getPreviousContent = (count = 2000) => {
+    let currentContainer = this.view.lastLocation?.range?.endContainer?.parentElement;
+    if (!currentContainer) return '';
+
+    let text = '';
+    while (text.length < count && currentContainer) {
+      text = currentContainer.textContent + text;
+      currentContainer = currentContainer.previousSibling;
+    }
+
+    return text;
+
   }
 }
 
@@ -950,6 +968,10 @@ window.back = () => reader.view.history.back()
 window.forward = () => reader.view.history.forward()
 
 window.renderAnnotations = () => reader.renderAnnotation()
+
+window.theChapterContent = () => reader.getChapterContent()
+
+window.previousContent = (count = 2000) => reader.getPreviousContent(count)
 
 // window.convertChinese = (mode) => reader.convertChinese(mode)
 
