@@ -236,6 +236,14 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
     webViewController.evaluateJavascript(source: "forward()");
   }
 
+  void theChapterContent() {
+    webViewController.evaluateJavascript(source: "theChapterContent()");
+  }
+
+  void previousContent(int count) {
+    webViewController.evaluateJavascript(source: "previousContent($count)");
+  }
+
   void onClick(Map<String, dynamic> location) {
     readingPageKey.currentState?.resetAwakeTimer();
     if (contextMenuEntry != null) {
