@@ -11,8 +11,11 @@ import 'package:anx_reader/models/read_theme.dart';
 import 'package:anx_reader/page/book_detail.dart';
 import 'package:anx_reader/page/book_player/epub_player.dart';
 import 'package:anx_reader/providers/anx_webdav.dart';
+import 'package:anx_reader/service/ai/ai_dio.dart';
+import 'package:anx_reader/service/ai/prompt_generate.dart';
 import 'package:anx_reader/utils/toast/common.dart';
 import 'package:anx_reader/utils/ui/status_bar.dart';
+import 'package:anx_reader/widgets/ai_stream.dart';
 import 'package:anx_reader/widgets/reading_page/notes_widget.dart';
 import 'package:anx_reader/models/reading_time.dart';
 import 'package:anx_reader/widgets/reading_page/progress_widget.dart';
@@ -23,6 +26,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
@@ -212,6 +216,28 @@ class ReadingPageState extends ConsumerState<ReadingPage>
                   },
                 ),
                 actions: [
+                  IconButton(
+                    icon: const Icon(Icons.auto_awesome),
+                    onPressed: () {
+                      SmartDialog.show(
+                        builder: (context) => AlertDialog(
+                          title: Text("summary"),
+                          content: FutureBuilder(
+                            future:
+                                epubPlayerKey.currentState!.theChapterContent(),
+                            builder: (context, snapshot) {
+                              return aiStream(generatePromptSummaryTheChapter(
+                                snapshot.data ?? '',
+                              ));
+                            },
+                          ),
+                        ),
+                        onDismiss: () {
+                          AiDio.instance.cancel();
+                        },
+                      );
+                    },
+                  ),
                   IconButton(
                     icon: const Icon(EvaIcons.more_vertical),
                     onPressed: () {
