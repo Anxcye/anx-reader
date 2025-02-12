@@ -733,6 +733,7 @@ const open = async (file, cfi) => {
   globalThis.reader = reader
   await reader.open(file, cfi)
   if (!importing) {
+    callFlutter('onLoadEnd')
     onSetToc()
     callFlutter('renderAnnotations')
   }

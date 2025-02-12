@@ -188,6 +188,25 @@ class ReadingPageState extends ConsumerState<ReadingPage>
     });
   }
 
+  void onLoadEnd() {
+    SmartDialog.show(
+      builder: (context) => AlertDialog(
+        title: Text(L10n.of(context).reading_page_summary_previous_content),
+        content: FutureBuilder(
+          future: epubPlayerKey.currentState!.theChapterContent(),
+          builder: (context, snapshot) {
+            return aiStream(generatePromptSummaryThePreviousContent(
+              snapshot.data ?? '',
+            ));
+          },
+        ),
+      ),
+      onDismiss: () {
+        AiDio.instance.cancel();
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     Offstage controller = Offstage(
@@ -221,7 +240,8 @@ class ReadingPageState extends ConsumerState<ReadingPage>
                     onPressed: () {
                       SmartDialog.show(
                         builder: (context) => AlertDialog(
-                          title: Text("summary"),
+                          title: Text(L10n.of(context)
+                              .reading_page_summary_the_chapter),
                           content: FutureBuilder(
                             future:
                                 epubPlayerKey.currentState!.theChapterContent(),
@@ -334,6 +354,7 @@ class ReadingPageState extends ConsumerState<ReadingPage>
                 book: _book,
                 cfi: widget.cfi,
                 showOrHideAppBarAndBottomBar: showOrHideAppBarAndBottomBar,
+                onLoadEnd: onLoadEnd,
               ),
               controller,
             ],

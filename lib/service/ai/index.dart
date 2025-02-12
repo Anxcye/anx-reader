@@ -3,6 +3,7 @@ import 'package:anx_reader/service/ai/claude.dart';
 import 'package:anx_reader/service/ai/deepseek.dart';
 import 'package:anx_reader/service/ai/gemini.dart';
 import 'package:anx_reader/service/ai/openai.dart';
+import 'package:anx_reader/utils/log/common.dart';
 
 Stream<String> aiGenerateStream(
   String prompt, {
@@ -13,6 +14,8 @@ Stream<String> aiGenerateStream(
   config ??= Prefs().getAiConfig(identifier);
   String buffer = '';
   Stream<String> stream;
+
+  AnxLog.info('aiGenerateStream: $identifier, ${prompt.substring(0, 100)}');
 
   switch (identifier) {
     case "openai":
@@ -29,10 +32,7 @@ Stream<String> aiGenerateStream(
       break;
     default:
       throw Exception("Invalid AI identifier");
-
-
   }
-
 
   await for (final chunk in stream) {
     buffer += chunk;
