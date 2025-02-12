@@ -1,6 +1,12 @@
 # Anx Reader
 
 **[English](README.md)** | **Türkçe** | [简体中文](README_zh.md)
+ 
+> [!WARNING]
+> Some features or descriptions may be outdated. Please check the [English README](README.md) for the latest information.  
+> Feel free to help us update this translation by submitting a PR!
+
+
 
 <br>
 
