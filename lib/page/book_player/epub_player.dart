@@ -40,12 +40,14 @@ class EpubPlayer extends ConsumerStatefulWidget {
   final Book book;
   final String? cfi;
   final Function showOrHideAppBarAndBottomBar;
+  final Function onLoadEnd;
 
   const EpubPlayer(
       {super.key,
       required this.showOrHideAppBarAndBottomBar,
       required this.book,
-      this.cfi});
+      this.cfi,
+      required this.onLoadEnd});
 
   @override
   ConsumerState<EpubPlayer> createState() => EpubPlayerState();
@@ -288,6 +290,12 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
     String initialCfi = widget.cfi ?? widget.book.lastReadPosition;
 
     webviewInitialVariable(controller, url, initialCfi);
+
+    controller.addJavaScriptHandler(
+        handlerName: 'onLoadEnd',
+        callback: (args) {
+          widget.onLoadEnd();
+        });
 
     controller.addJavaScriptHandler(
         handlerName: 'onRelocated',

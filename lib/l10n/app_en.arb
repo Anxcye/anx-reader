@@ -94,6 +94,8 @@
   "reading_page_current_page": "Current Page",
   "reading_page_auto_translate_selection": "Auto Translate Selection",
   "translate_error": "Translate Error",
+  "reading_page_summary_the_chapter": "Summary the chapter",
+  "reading_page_summary_previous_content": "Summary the previous content",
   
   "book_detail_save": "Save",
   "book_detail_edit": "Edit",
