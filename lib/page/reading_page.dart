@@ -189,22 +189,24 @@ class ReadingPageState extends ConsumerState<ReadingPage>
   }
 
   void onLoadEnd() {
-    SmartDialog.show(
-      builder: (context) => AlertDialog(
-        title: Text(L10n.of(context).reading_page_summary_previous_content),
-        content: FutureBuilder(
-          future: epubPlayerKey.currentState!.theChapterContent(),
-          builder: (context, snapshot) {
-            return aiStream(generatePromptSummaryThePreviousContent(
-              snapshot.data ?? '',
-            ));
-          },
+    if (Prefs().autoSummaryPreviousContent) {
+      SmartDialog.show(
+        builder: (context) => AlertDialog(
+          title: Text(L10n.of(context).reading_page_summary_previous_content),
+          content: FutureBuilder(
+            future: epubPlayerKey.currentState!.theChapterContent(),
+            builder: (context, snapshot) {
+              return aiStream(generatePromptSummaryThePreviousContent(
+                snapshot.data ?? '',
+              ));
+            },
+          ),
         ),
-      ),
-      onDismiss: () {
-        AiDio.instance.cancel();
-      },
-    );
+        onDismiss: () {
+          AiDio.instance.cancel();
+        },
+      );
+    }
   }
 
   @override
