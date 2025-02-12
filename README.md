@@ -13,20 +13,47 @@
   <a href="https://github.com/anxcye/anx-reader/stargazers"><img src="https://img.shields.io/github/stars/anxcye/anx-reader" alt="stars"></a>
 </p>
 
-Anx Reader is an application focused on reading, without any online promotional content. It can help you concentrate more on reading and improve your reading efficiency.
+Anx Reader, a thoughtfully crafted e-book reader for book lovers. Featuring powerful AI capabilities and supporting various e-book formats, it makes reading smarter and more focused. With its modern interface design, open-source nature, and ad-free experience, we're committed to delivering pure reading pleasure.
 
-Support **epub / mobi / azw3 / fb2 / txt**
-
-
-Available on Android and Windows.
 
 ![](./docs/images/9.jpg)
 
-- More comprehensive synchronization features. Supports using WebDAV to sync reading progress, notes, and book files.
-- Rich and customizable reading color schemes for a more comfortable reading experience.
-- Powerful reading statistics to record your every reading session.
-- Rich reading note-taking features for deeper reading.
-- Interface adapted for phones and tablets.
+
+📚 **Rich Format Support**
+- Support for major e-book formats: EPUB, MOBI, AZW3, FB2, TXT
+- Perfect parsing for optimal reading experience
+
+☁️ **Seamless Sync**
+- Cross-device synchronization of reading progress, notes, and books via WebDAV
+- Continue your reading journey anywhere, anytime
+
+🤖 **Smart AI Assistant**
+- Integration with leading AI services: OpenAI, DeepSeek, Claude, Gemini
+- Intelligent content summarization and reading position recall for enhanced efficiency
+
+🎨 **Personalized Reading Experience**
+- Carefully designed theme colors with customization options
+- Switch freely between scrolling and pagination modes
+- Import custom fonts to create your personal reading space
+
+📊 **Professional Reading Analytics**
+- Comprehensive reading statistics
+- Weekly, monthly, and yearly reading reports
+- Intuitive reading heatmap to track every moment of your reading journey
+
+📝 **Powerful Note System**
+- Flexible text annotation features
+- Export options in TXT, CSV, and Markdown formats
+- Easily organize and share your reading insights
+
+🛠️ **Practical Tools**
+- Smart TTS reading to rest your eyes
+- Full-text search for quick content location
+- Instant word translation to enhance reading efficiency
+
+💻 **Cross-Platform Support**
+- Seamless experience on Android and Windows
+- Consistent user interface across devices
 
 ### TODO
 - [X] UI adaptation for tablets
