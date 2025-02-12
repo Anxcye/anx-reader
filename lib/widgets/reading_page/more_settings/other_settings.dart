@@ -134,12 +134,26 @@ class _OtherSettingsState extends State<OtherSettings> {
       );
     }
 
+    ListTile autoSummaryPreviousContent() {
+      return ListTile(
+        contentPadding: EdgeInsets.zero,
+        title: Text(L10n.of(context).reading_page_auto_summary_previous_content),
+        trailing: Switch(
+          value: Prefs().autoSummaryPreviousContent,
+          onChanged: (bool value) => setState(() {
+            Prefs().autoSummaryPreviousContent = value;
+          }),
+        ),
+      );
+    }
+
     return Container(
       padding: const EdgeInsets.all(8.0),
       child: Column(
         children: [
           fullScreen(),
           autoTranslateSelection(),
+          autoSummaryPreviousContent(),
           screenTimeout(),
           pageTurningControl(),
         ],

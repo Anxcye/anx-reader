@@ -389,4 +389,13 @@ class Prefs extends ChangeNotifier {
     }
     return aiPrompt;
   }
+
+  set autoSummaryPreviousContent(bool status) {
+    prefs.setBool('autoSummaryPreviousContent', status);
+    notifyListeners();
+  }
+
+  bool get autoSummaryPreviousContent {
+    return prefs.getBool('autoSummaryPreviousContent') ?? false;
+  }
 }
