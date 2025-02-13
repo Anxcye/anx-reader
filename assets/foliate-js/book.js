@@ -5,7 +5,7 @@
 //   // { id: 2, type: 'highlight', value: "epubcfi(/6/6!/4/576,/1:2,/1:3)", color: 'yellow', note: 'this is' },
 //   // { id: 3, type: 'underline', value: "epubcfi(/6/4!/4/4,/1:294,/1:301)", color: 'red', note: 'this is' },
 // ]
-// let url = '../local/alice.epub'
+// let url = '../local/shj.epub'
 // let initialCfi = "epubcfi(/6/12!/4,/2[CHP3],/8/1:29)"
 // //  let initialCfi = null
 // let style = {
@@ -496,7 +496,7 @@ const replaceFootnote = (view) => {
   renderer.setStyles(getCSS(footNoteStyle))
   // set background color of dialog
   // if #rrggbbaa, replace aa to ee
-  footnoteDialog.style.backgroundColor = style.backgroundColor.slice(0, 7) + 'ee'
+  footnoteDialog.style.backgroundColor = style.backgroundColor.slice(0, 7) + '33'
 }
 footnoteDialog.addEventListener('click', e =>
   e.target === footnoteDialog ? footnoteDialog.close() : null)

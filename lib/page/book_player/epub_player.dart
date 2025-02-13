@@ -5,6 +5,7 @@ import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/dao/book.dart';
 import 'package:anx_reader/dao/book_note.dart';
 import 'package:anx_reader/dao/theme.dart';
+import 'package:anx_reader/main.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/models/book_style.dart';
 import 'package:anx_reader/models/font_model.dart';
@@ -295,15 +296,13 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
 
     if (Prefs().autoAdjustReadingTheme) {
       List<ReadTheme> themes = await selectThemes();
-      final isDayMode = Theme.of(context).brightness == Brightness.light;
+      final isDayMode = Theme.of(navigatorKey.currentContext!).brightness == Brightness.light;
       backgroundColor = isDayMode ? themes[0].backgroundColor : themes[1].backgroundColor;
       textColor = isDayMode ? themes[0].textColor : themes[1].textColor;
     } else {
       backgroundColor = null;
       textColor = null;
     }
-    print('@@$backgroundColor');
-    print(textColor);
 
     webviewInitialVariable(
       controller,
@@ -499,7 +498,7 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
       },
     );
     _animationController = AnimationController(
-      duration: const Duration(milliseconds: 400),
+      duration: const Duration(milliseconds: 600),
       vsync: this,
     );
     _animation =
