@@ -1,20 +1,23 @@
-String generateNestedToc(List<String> chapters) {
-  List<_TocItem> tocItems = [];
+import 'package:anx_reader/service/convert_to_epub/section.dart';
 
-  for (int i = 0; i < chapters.length; i++) {
-    String title = chapters[i].split('\n').first;
-    int level = title.indexOf(RegExp(r'[^#]'));
-    String cleanTitle = title.replaceAll(RegExp(r'^[#]+\s*'), '');
-    if (cleanTitle.isEmpty) {
-      cleanTitle = title.length > 10 ? title.substring(0, 10) : title;
-    }
-    tocItems.add(_TocItem(i, level, cleanTitle));
-  }
+String generateNestedToc(List<Section> sections) {
+  final tocItems = sections
+      .map((s) => _TocItem(
+            title: s.title.isNotEmpty ? s.title : s.content.trim().split('\n').first,
+            index: sections.indexOf(s),
+            level: s.level,
+          ))
+      .toList();
 
-  while (tocItems.every((item) => item.level > 1 || item.level == 0)) {
+  while (tocItems.every((item) => item.level > 1 || item.level == 0) &&
+      tocItems.any((item) => item.level != 0)) {
     for (int i = 0; i < tocItems.length; i++) {
       tocItems[i].level = tocItems[i].level == 0 ? 0 : tocItems[i].level - 1;
     }
+  }
+
+  for (int i = 0; i < tocItems.length; i++) {
+    print('${tocItems[i].title} ${tocItems[i].level}');
   }
 
   String buildNavPoints(
@@ -60,9 +63,13 @@ String generateNestedToc(List<String> chapters) {
 }
 
 class _TocItem {
+  final String title;
   final int index;
   int level;
-  final String title;
 
-  _TocItem(this.index, this.level, this.title);
+  _TocItem({
+    required this.title,
+    required this.index,
+    required this.level,
+  });
 }

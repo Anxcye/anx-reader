@@ -6,6 +6,15 @@
 * Feat: Add bionic reading mode(#49)
 * 新增：仿生阅读(#49)
 
+## Unreleased
+- Feat: Add OpenAI、Claude、DeepSeek AI models(#100)
+- Perf: Optimize txt file import speed
+- UI: Optimize multiple UI interfaces
+
+- 功能：接入 OpenAI、Claude、DeepSeek 等多个 AI 模型
+- 性能：大幅提高了 txt 文件的导入速度
+- UI: 优化多个 UI 界面
+
 ## 1.2.4 2025-01-21
 * Feat: Remember last window position and size(#67)
 * Feat: Color picker input hex code(#69)
