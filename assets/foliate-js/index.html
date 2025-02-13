@@ -3,7 +3,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- <meta http-equiv="Content-Security-Policy"
   content="default-src 'self' blob:; script-src 'self'; style-src 'self' blob: 'unsafe-inline'; img-src 'self' blob: data:; connect-src 'self' blob: data: *; frame-src blob: data:; object-src blob: data:; form-action 'none';"> -->
-<title>E-Book Reader</title>
+<title>Anx Reader</title>
 <style>
   html {
     height: 100%;
@@ -24,8 +24,10 @@
     min-width: 200px;
     min-height: 100px;
     border-radius: 15px;
-    border: 2px solid grey;
+    border: 1px solid grey;
     user-select: none;
+    backdrop-filter: blur(10px);
+    outline: none;
   }
 
   #footnote-dialog div {
