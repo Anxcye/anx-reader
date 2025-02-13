@@ -3,6 +3,8 @@ on:
   push:
     tags:
       - 'v*'
+      - 'beta-*'
+      - 'alpha-*'
 
 permissions:
   contents: write
@@ -21,13 +23,25 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          ref: 'main'
 
-      - name: Get version from pubspec.yaml
+      - name: Get version from pubspec.yaml and determine release type
         id: get_version
         shell: bash
-        run: echo "VERSION=$( grep '^version:' pubspec.yaml | cut -d ' ' -f 2 | cut -d '+' -f 1 )" >> $GITHUB_ENV
+        run: |
+          VERSION=$( grep '^version:' pubspec.yaml | cut -d ' ' -f 2 | cut -d '+' -f 1 )
+          if [[ ${{ github.ref }} == refs/tags/alpha-* ]]; then
+            echo "IS_ALPHA=true" >> $GITHUB_ENV
+            echo "IS_BETA=false" >> $GITHUB_ENV
+            echo "VERSION=alpha-${VERSION}" >> $GITHUB_ENV
+          elif [[ ${{ github.ref }} == refs/tags/beta-* ]]; then
+            echo "IS_ALPHA=false" >> $GITHUB_ENV
+            echo "IS_BETA=true" >> $GITHUB_ENV
+            echo "VERSION=beta-${VERSION}" >> $GITHUB_ENV
+          else
+            echo "IS_ALPHA=false" >> $GITHUB_ENV
+            echo "IS_BETA=false" >> $GITHUB_ENV
+            echo "VERSION=${VERSION}" >> $GITHUB_ENV
+          fi
         
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -124,18 +138,19 @@ jobs:
           echo "EOF" >> $GITHUB_ENV
         shell: bash
       
-    #   - name: Upload artifacts
-    #     uses: actions/upload-artifact@v4
-    #     with:
-    #       name: ${{ matrix.platform }}-artifacts
-    #       path: |
-    #         build/app/outputs/flutter-apk/*.apk
-    #         build/windows/*.zip
-    #         build/windows/*.exe
-    #       if-no-files-found: warn
-
+      - name: Upload artifacts
+        if: env.IS_ALPHA == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.platform }}-artifacts
+          path: |
+            build/app/outputs/flutter-apk/*.apk
+            build/windows/*.zip
+            build/windows/*.exe
+          if-no-files-found: warn
 
       - name: Create Release
+        if: env.IS_ALPHA != 'true'
         uses: softprops/action-gh-release@v2
         with:
           files: |
@@ -144,3 +159,4 @@ jobs:
             build/windows/*.exe
           body: ${{ env.RELEASE_NOTES }}
           generate_release_notes: false
+          prerelease: ${{ env.IS_BETA == 'true' }}
