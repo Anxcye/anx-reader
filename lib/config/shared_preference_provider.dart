@@ -380,10 +380,14 @@ class Prefs extends ChangeNotifier {
         case AiPrompts.summaryTheBook:
           return 'Summary the book, the book is: {{book}}, the author is: {{author}}';
         case AiPrompts.summaryThePreviousContent:
-          return 'Summary the previous content, the previous content is: {{previous_content}}';
+          return 'This is the content of a book, I read it a long time ago, summarize the content, so I can quickly recall the previous content. The content is: {{previous_content}}';
       }
     }
     return aiPrompt;
+  }
+  void deleteAiPrompt(AiPrompts identifier) {
+    prefs.remove('aiPrompt_${identifier.name}');
+    notifyListeners();
   }
 
   set autoSummaryPreviousContent(bool status) {
@@ -401,6 +405,6 @@ class Prefs extends ChangeNotifier {
   }
 
   bool get autoAdjustReadingTheme {
-    return prefs.getBool('autoAdjustReadingTheme') ?? false;
+    return prefs.getBool('autoAdjustReadingTheme') ?? true;
   }
 }

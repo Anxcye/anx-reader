@@ -278,6 +278,7 @@ class _AISettingsState extends State<AISettings> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       TextField(
+                        maxLines: 10,
                         controller: controller,
                         decoration: const InputDecoration(
                           border: OutlineInputBorder(),
@@ -315,6 +316,15 @@ class _AISettingsState extends State<AISettings> {
                     ],
                   ),
                   actions: [
+                    TextButton(
+                      onPressed: () {
+                        Prefs().deleteAiPrompt(AiPrompts.values[index]);
+                        controller.text = Prefs().getAiPrompt(
+                          AiPrompts.values[index],
+                        );
+                      },
+                      child: Text(L10n.of(context).common_restore),
+                    ),
                     TextButton(
                       onPressed: () {
                         Prefs().saveAiPrompt(
