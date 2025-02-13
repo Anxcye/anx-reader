@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:anx_reader/service/convert_to_epub/generate_toc.dart';
+import 'package:anx_reader/service/convert_to_epub/section.dart';
 import 'package:anx_reader/utils/get_path/cache_path.dart';
 import 'package:archive/archive_io.dart';
 import 'package:uuid/uuid.dart';
@@ -8,7 +9,8 @@ import 'package:uuid/uuid.dart';
 Future<File> createEpub(
   String titleString,
   String authorString,
-  List<String> chapters,
+  // List<String> chapters,
+  List<Section> sections,
 ) async {
   // create epub
   final cacheDir = await getAnxCacheDir();
@@ -53,11 +55,11 @@ Future<File> createEpub(
   <manifest>
     <item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/>
     <item id="css" href="style.css" media-type="text/css"/>
-    ${chapters.map((e) => '    <item id="${chapters.indexOf(e)}" href="xhtml/${chapters.indexOf(e)}.xhtml" media-type="application/xhtml+xml"/>').join('\n')}
+    ${sections.map((e) => '    <item id="${sections.indexOf(e)}" href="xhtml/${sections.indexOf(e)}.xhtml" media-type="application/xhtml+xml"/>').join('\n')}
   </manifest>
 
   <spine toc="ncx">
-    ${chapters.map((e) => '    <itemref idref="${chapters.indexOf(e)}"/>').join('\n')}
+    ${sections.map((e) => '    <itemref idref="${sections.indexOf(e)}"/>').join('\n')}
   </spine>
 </package>''');
 
@@ -69,13 +71,13 @@ Future<File> createEpub(
   <head>
     <meta name="dtb:uid" content="urn:uuid:${const Uuid().v4()}"/>
     <meta name="dtb:depth" content="1"/>
-    <meta name="dtb:totalPageCount" content="${chapters.length}"/>
+    <meta name="dtb:totalPageCount" content="${sections.length}"/>
   </head>
   <docTitle>
     <text>$titleString</text>
   </docTitle>
   <navMap>
-    ${generateNestedToc(chapters)}
+    ${generateNestedToc(sections)}
   </navMap>
 </ncx>''');
 
@@ -89,14 +91,13 @@ Future<File> createEpub(
   // xhtml
   final xhtmlDir = Directory('${oebpsDir.path}/xhtml');
   xhtmlDir.createSync();
-  for (var i = 0; i < chapters.length; i++) {
+  for (var i = 0; i < sections.length; i++) {
     final xhtmlFile = File('${xhtmlDir.path}/$i.xhtml');
     xhtmlFile.createSync();
 
-    final lines = chapters[i].split('\n');
-    final title = lines.first.replaceAll(RegExp(r'^[#]+'), '');
-    final sharpCount = lines.first.split(' ').first.length;
-    final content = lines.sublist(1);
+    final title = sections[i].title;
+    final level = sections[i].level;
+    final content = sections[i].content;
 
     xhtmlFile.writeAsStringSync('''<?xml version="1.0" encoding="utf-8"?>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
@@ -104,8 +105,8 @@ Future<File> createEpub(
     <title>$title</title>
   </head>
   <body>
-    <h$sharpCount>$title</h$sharpCount>
-    ${content.map((e) => '<p>$e</p>').join('\n')}
+    <h$level>$title</h$level>
+    ${content.split('\n').map((e) => e.trim().isNotEmpty ? '<p>${e.trim()}</p>' : '').join('\n')}
   </body>
 </html>''');
   }

@@ -74,7 +74,7 @@ Future<File> convertFromTxt(File file) async {
   AnxLog.info('matches: ${matches.length}');
 
   if (matches.isEmpty) {
-    return createEpub(titleString, authorString, ['#$content}']);
+    return createEpub(titleString, authorString, [Section('', content, 0)]);
   }
 
   if (matches.first.start > 0) {
@@ -93,16 +93,16 @@ Future<File> convertFromTxt(File file) async {
     final contentWithoutTitle = fullContent.substring(title.length).trim();
 
     final volumeKeyword = ['卷', 'Book', 'bk', 'Vol'];
-    final level =
-        volumeKeyword.any((keyword) => title.contains(keyword)) ? 1 : 2;
+    final chapterKeyword = ['章', 'Chapter', 'chap', 'Ch'];
+    final level = chapterKeyword.any((keyword) => title.contains(keyword))
+        ? 2
+        : volumeKeyword.any((keyword) => title.contains(keyword))
+            ? 1
+            : 0;
 
     sections.add(Section(title.trim(), contentWithoutTitle.trim(), level));
   }
 
-  final volumes = sections.map((section) {
-    return section.toString();
-  }).toList();
-
-  final epubFile = await createEpub(titleString, authorString, volumes);
+  final epubFile = await createEpub(titleString, authorString, sections);
   return epubFile;
 }
