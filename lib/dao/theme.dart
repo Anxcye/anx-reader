@@ -1,4 +1,7 @@
+import 'package:anx_reader/l10n/generated/L10n.dart';
+import 'package:anx_reader/main.dart';
 import 'package:anx_reader/models/read_theme.dart';
+import 'package:anx_reader/utils/toast/common.dart';
 
 import 'database.dart';
 
@@ -22,6 +25,11 @@ Future<List<ReadTheme>> selectThemes() async {
 
 void deleteTheme(int id) async {
   final db = await DBHelper().database;
+  final numberOfCurrentThemes = await db.query('tb_themes');
+  if (numberOfCurrentThemes.length <= 2) {
+    AnxToast.show(L10n.of(navigatorKey.currentContext!).reading_page_at_least_two_themes);
+    return;
+  }
   await db.delete(
     'tb_themes',
     where: 'id = ?',

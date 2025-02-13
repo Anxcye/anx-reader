@@ -369,7 +369,6 @@ class Prefs extends ChangeNotifier {
     notifyListeners();
   }
 
-
   String getAiPrompt(AiPrompts identifier) {
     String? aiPrompt = prefs.getString('aiPrompt_${identifier.name}');
     if (aiPrompt == null) {
@@ -382,10 +381,7 @@ class Prefs extends ChangeNotifier {
           return 'Summary the book, the book is: {{book}}, the author is: {{author}}';
         case AiPrompts.summaryThePreviousContent:
           return 'Summary the previous content, the previous content is: {{previous_content}}';
-
-
       }
-
     }
     return aiPrompt;
   }
@@ -397,5 +393,14 @@ class Prefs extends ChangeNotifier {
 
   bool get autoSummaryPreviousContent {
     return prefs.getBool('autoSummaryPreviousContent') ?? false;
+  }
+
+  set autoAdjustReadingTheme(bool status) {
+    prefs.setBool('autoAdjustReadingTheme', status);
+    notifyListeners();
+  }
+
+  bool get autoAdjustReadingTheme {
+    return prefs.getBool('autoAdjustReadingTheme') ?? false;
   }
 }

@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/dao/book.dart';
 import 'package:anx_reader/dao/book_note.dart';
+import 'package:anx_reader/dao/theme.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/models/book_style.dart';
 import 'package:anx_reader/models/font_model.dart';
@@ -284,12 +285,33 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
     ''');
   }
 
-  void setHandler(InAppWebViewController controller) {
+  Future<void> setHandler(InAppWebViewController controller) async {
     String uri = Uri.encodeComponent(widget.book.fileFullPath);
     String url = 'http://localhost:${Server().port}/book/$uri';
     String initialCfi = widget.cfi ?? widget.book.lastReadPosition;
 
-    webviewInitialVariable(controller, url, initialCfi);
+    String? backgroundColor;
+    String? textColor;
+
+    if (Prefs().autoAdjustReadingTheme) {
+      List<ReadTheme> themes = await selectThemes();
+      final isDayMode = Theme.of(context).brightness == Brightness.light;
+      backgroundColor = isDayMode ? themes[0].backgroundColor : themes[1].backgroundColor;
+      textColor = isDayMode ? themes[0].textColor : themes[1].textColor;
+    } else {
+      backgroundColor = null;
+      textColor = null;
+    }
+    print('@@$backgroundColor');
+    print(textColor);
+
+    webviewInitialVariable(
+      controller,
+      url,
+      initialCfi,
+      backgroundColor: backgroundColor,
+      textColor: textColor,
+    );
 
     controller.addJavaScriptHandler(
         handlerName: 'onLoadEnd',

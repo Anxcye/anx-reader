@@ -97,7 +97,10 @@
   "reading_page_summary_the_chapter": "Summary the chapter",
   "reading_page_summary_previous_content": "Summary the previous content",
   "reading_page_auto_summary_previous_content": "Auto Summary Previous Content",
-  
+  "reading_page_at_least_two_themes": "At least 2 themes are required",
+  "reading_page_auto_adjust_reading_theme": "Auto Adjust Reading Theme",
+  "reading_page_auto_adjust_reading_theme_tips": "Use the 1st and 2nd colors in the color table as the day and night modes respectively",
+
   "book_detail_save": "Save",
   "book_detail_edit": "Edit",
   "book_detail_nth_book": "{count, plural, =1{1st book you've read} =2{2nd book you've read} few{3rd book you've read} other{{count}th book you've read}}",
