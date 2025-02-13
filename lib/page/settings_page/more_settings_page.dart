@@ -1,5 +1,5 @@
 import 'package:anx_reader/l10n/generated/L10n.dart';
-import 'package:anx_reader/page/settings_page/AI.dart';
+import 'package:anx_reader/page/settings_page/ai.dart';
 import 'package:anx_reader/page/settings_page/advanced.dart';
 import 'package:anx_reader/page/settings_page/appearance.dart';
 import 'package:anx_reader/page/settings_page/settings_page.dart';
