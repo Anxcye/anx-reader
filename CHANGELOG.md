@@ -6,7 +6,7 @@
 * Feat: Add bionic reading mode(#49)
 * 新增：仿生阅读(#49)
 
-## Unreleased
+## 1.2.5
 - Feat: Add auto background color(#78)
 - Feat: Add OpenAI、Claude、DeepSeek AI models(#100)
 - Perf: Optimize txt file import speed
