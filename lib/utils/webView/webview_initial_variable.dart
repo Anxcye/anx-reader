@@ -21,11 +21,14 @@ void webviewInitialVariable(
 }) {
   ReadTheme readTheme = Prefs().readTheme;
   bookStyle ??= Prefs().bookStyle;
-  textColor ??= convertDartColorToJs(readTheme.textColor);
+  textColor ??= readTheme.textColor;
   fontName ??= Prefs().font.name;
   fontPath ??= Prefs().font.path;
-  backgroundColor ??= convertDartColorToJs(readTheme.backgroundColor);
+  backgroundColor ??= readTheme.backgroundColor;
   importing ??= false;
+
+  textColor = convertDartColorToJs(textColor);
+  backgroundColor = convertDartColorToJs(backgroundColor);
 
   const minWebviewVersion = 92;
 

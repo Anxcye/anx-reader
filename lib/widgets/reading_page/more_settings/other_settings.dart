@@ -147,11 +147,26 @@ class _OtherSettingsState extends State<OtherSettings> {
       );
     }
 
+    ListTile autoAdjustReadingTheme() {
+      return ListTile(
+        contentPadding: EdgeInsets.zero,
+        title: Text(L10n.of(context).reading_page_auto_adjust_reading_theme),
+        subtitle: Text(L10n.of(context).reading_page_auto_adjust_reading_theme_tips),
+        trailing: Switch(
+          value: Prefs().autoAdjustReadingTheme,
+          onChanged: (bool value) => setState(() {
+            Prefs().autoAdjustReadingTheme = value;
+          }),
+        ),
+      );
+    }
+
     return Container(
       padding: const EdgeInsets.all(8.0),
       child: Column(
         children: [
           fullScreen(),
+          autoAdjustReadingTheme(),
           autoTranslateSelection(),
           autoSummaryPreviousContent(),
           screenTimeout(),
