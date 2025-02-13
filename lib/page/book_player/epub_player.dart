@@ -75,6 +75,8 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
   bool canGoBack = false;
   bool canGoForward = false;
   late Book book;
+  String? backgroundColor;
+  String? textColor;
 
   final StreamController<double> _searchProgressController =
       StreamController<double>.broadcast();
@@ -286,23 +288,25 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
     ''');
   }
 
-  Future<void> setHandler(InAppWebViewController controller) async {
-    String uri = Uri.encodeComponent(widget.book.fileFullPath);
-    String url = 'http://localhost:${Server().port}/book/$uri';
-    String initialCfi = widget.cfi ?? widget.book.lastReadPosition;
-
-    String? backgroundColor;
-    String? textColor;
-
+  Future<void> getThemeColor() async {
     if (Prefs().autoAdjustReadingTheme) {
       List<ReadTheme> themes = await selectThemes();
-      final isDayMode = Theme.of(navigatorKey.currentContext!).brightness == Brightness.light;
-      backgroundColor = isDayMode ? themes[0].backgroundColor : themes[1].backgroundColor;
+      final isDayMode =
+          Theme.of(navigatorKey.currentContext!).brightness == Brightness.light;
+      backgroundColor =
+          isDayMode ? themes[0].backgroundColor : themes[1].backgroundColor;
       textColor = isDayMode ? themes[0].textColor : themes[1].textColor;
     } else {
       backgroundColor = null;
       textColor = null;
     }
+  }
+
+  Future<void> setHandler(InAppWebViewController controller) async {
+    String uri = Uri.encodeComponent(widget.book.fileFullPath);
+    String url = 'http://localhost:${Server().port}/book/$uri';
+    String initialCfi = widget.cfi ?? widget.book.lastReadPosition;
+
 
     webviewInitialVariable(
       controller,
@@ -486,6 +490,7 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
 
   @override
   void initState() {
+    getThemeColor();
     book = widget.book;
     focusNode.requestFocus();
     contextMenu = ContextMenu(
@@ -553,8 +558,7 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
       return const SizedBox();
     }
     TextStyle textStyle = TextStyle(
-        color:
-            Color(int.parse('0x${Prefs().readTheme.textColor}')).withAlpha(150),
+        color: Color(int.parse('0x$textColor')).withAlpha(150),
         fontSize: 10);
 
     Widget time = StreamBuilder(
