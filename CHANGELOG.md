@@ -7,11 +7,13 @@
 * 新增：仿生阅读(#49)
 
 ## 1.2.5
+- Feat: Add volume key page turn(#95)
 - Feat: Add auto background color(#78)
 - Feat: Add OpenAI、Claude、DeepSeek AI models(#100)
 - Perf: Optimize txt file import speed
 - UI: Optimize multiple UI interfaces
 
+- 新增：音量键翻页(#95)
 - 功能：自动背景色(#78)
 - 功能：接入 OpenAI、Claude、DeepSeek 等多个 AI 模型
 - 性能：大幅提高了 txt 文件的导入速度

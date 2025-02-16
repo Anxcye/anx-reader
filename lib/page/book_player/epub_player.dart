@@ -37,6 +37,7 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:intl/intl.dart';
+import 'package:volume_key_board/volume_key_board.dart';
 
 class EpubPlayer extends ConsumerStatefulWidget {
   final Book book;
@@ -307,7 +308,6 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
     String url = 'http://localhost:${Server().port}/book/$uri';
     String initialCfi = widget.cfi ?? widget.book.lastReadPosition;
 
-
     webviewInitialVariable(
       controller,
       url,
@@ -493,6 +493,15 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
     getThemeColor();
     book = widget.book;
     focusNode.requestFocus();
+
+    VolumeKeyBoard.instance.addListener((event) {
+      if (event == VolumeKey.up) {
+        prevPage();
+      } else if (event == VolumeKey.down) {
+        nextPage();
+      }
+    });
+
     contextMenu = ContextMenu(
       settings: ContextMenuSettings(hideDefaultSystemContextMenuItems: true),
       onCreateContextMenu: (hitTestResult) async {
@@ -535,6 +544,7 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
   void dispose() {
     super.dispose();
     _animationController.dispose();
+    VolumeKeyBoard.instance.removeListener();
     if (defaultTargetPlatform == TargetPlatform.android ||
         defaultTargetPlatform == TargetPlatform.iOS ||
         defaultTargetPlatform == TargetPlatform.macOS) {
@@ -558,8 +568,9 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
       return const SizedBox();
     }
     TextStyle textStyle = TextStyle(
-        color: Color(int.parse('0x$textColor')).withAlpha(150),
-        fontSize: 10);
+      color: Color(int.parse('0x$textColor')).withAlpha(150),
+      fontSize: 10,
+    );
 
     Widget time = StreamBuilder(
         stream: Stream.periodic(const Duration(seconds: 1)),
