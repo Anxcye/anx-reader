@@ -4,6 +4,8 @@
   "app_version": "版本",
   "app_license": "开源许可",
   "app_author": "开发者",
+  "app_donate": "捐赠",
+  "app_donate_tips": "安读是一款开源软件，坚持免费使用。如果安读对你有帮助，请捐赠支持我们以继续完善。",
 
   "navBar_bookshelf": "书架",
   "navBar_statistics": "统计",

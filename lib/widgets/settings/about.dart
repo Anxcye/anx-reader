@@ -1,6 +1,7 @@
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/widgets/settings/link_icon.dart';
 import 'package:anx_reader/utils/check_update.dart';
+import 'package:anx_reader/widgets/settings/show_donate_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:icons_plus/icons_plus.dart';
@@ -82,6 +83,12 @@ class _AboutState extends State<About> {
                   ListTile(
                       title: Text(L10n.of(context).about_check_for_updates),
                       onTap: () => checkUpdate(true)),
+                  ListTile(
+                    title: Text(L10n.of(context).app_donate),
+                    onTap: () {
+                      showDonateDialog(context);
+                    },
+                  ),
                   ListTile(
                     title: Text(L10n.of(context).app_license),
                     onTap: () {
