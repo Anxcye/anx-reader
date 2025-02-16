@@ -301,12 +301,15 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
       backgroundColor = null;
       textColor = null;
     }
+    setState(() {});
   }
 
   Future<void> setHandler(InAppWebViewController controller) async {
     String uri = Uri.encodeComponent(widget.book.fileFullPath);
     String url = 'http://localhost:${Server().port}/book/$uri';
     String initialCfi = widget.cfi ?? widget.book.lastReadPosition;
+
+    await getThemeColor();
 
     webviewInitialVariable(
       controller,
@@ -490,7 +493,6 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
 
   @override
   void initState() {
-    getThemeColor();
     book = widget.book;
     focusNode.requestFocus();
 
@@ -589,14 +591,14 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
                 padding: const EdgeInsets.fromLTRB(0, 2, 2, 0),
                 child: Text('${snapshot.data}',
                     style: TextStyle(
-                      color: textStyle.color,
+                      color: Color(int.parse('0x$textColor')),
                       fontSize: 9,
                     )),
               ),
               Icon(
                 HeroIcons.battery_0,
                 size: 27,
-                color: textStyle.color,
+                color: Color(int.parse('0x$textColor')),
               ),
             ]);
           } else {
