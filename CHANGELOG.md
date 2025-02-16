@@ -6,6 +6,10 @@
 * Feat: Add bionic reading mode(#49)
 * 新增：仿生阅读(#49)
 
+## 1.2.6
+- Fix: Fix ai stream error
+- 修复：修复 AI 流错误
+  
 ## 1.2.5
 - Feat: Add volume key page turn(#95)
 - Feat: Add auto background color(#78)

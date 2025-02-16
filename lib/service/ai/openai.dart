@@ -71,6 +71,7 @@ Stream<String> openAiGenerateStream(
       }
     }
   } catch (e) {
+    throw Exception('Request failed: $e');
     yield* Stream.error('Request failed: $e');
   } finally {
     dio.close();

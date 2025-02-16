@@ -1,6 +1,7 @@
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/service/ai/index.dart';
 import 'package:anx_reader/utils/toast/common.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
@@ -19,6 +20,9 @@ Widget aiStream(
       ),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
+          if (kDebugMode) {
+            throw snapshot.error!;
+          }
           return Text(snapshot.error.toString());
         }
 
