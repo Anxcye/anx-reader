@@ -15,7 +15,7 @@ Stream<String> aiGenerateStream(
   String buffer = '';
   Stream<String> stream;
 
-  AnxLog.info('aiGenerateStream: $identifier, ${prompt.substring(0, 100)}');
+  AnxLog.info('aiGenerateStream: $identifier');
 
   switch (identifier) {
     case "openai":
