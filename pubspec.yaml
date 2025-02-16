@@ -77,6 +77,8 @@ dependencies:
   dio_intercept_to_curl: ^0.2.0
   flutter_gemini: ^3.0.0
   flutter_markdown: ^0.7.6+2
+  volume_key_board: ^0.0.1
+
 
 dev_dependencies:
   flutter_test:

@@ -1753,6 +1753,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "14.2.5"
+  volume_key_board:
+    dependency: "direct main"
+    description:
+      name: volume_key_board
+      sha256: b51a03ad332dd95d022320208630868cf386cd8b0c08af2c1bddda5dbc95f069
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.1"
   wakelock_plus:
     dependency: "direct main"
     description:
