@@ -10,9 +10,10 @@ Future<String> getAnxDataBasesPath() async {
     case TargetPlatform.android:
       final path = await getDatabasesPath();
       return path;
+    case TargetPlatform.linux:
     case TargetPlatform.windows:
       final documentsPath = await getAnxDocumentsPath();
-      return '$documentsPath\\databases';
+      return '$documentsPath${Platform.pathSeparator}databases';
     default:
       throw Exception('Unsupported platform');
   }

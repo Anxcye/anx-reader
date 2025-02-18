@@ -50,12 +50,12 @@ Future<void> main() async {
     await WindowManager.instance.focus();
   }
 
+  initBasePath();
   AnxLog.init();
   AnxError.init();
 
   await DBHelper().initDB();
   Server().start();
-  initBasePath();
 
   audioHandler = await AudioService.init(
     builder: () => Tts(),

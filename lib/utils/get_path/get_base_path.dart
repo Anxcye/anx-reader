@@ -13,6 +13,9 @@ Future<String> getAnxDocumentsPath() async {
     case TargetPlatform.windows:
       // return '${directory.path}\\AnxReader';
       return (await getApplicationSupportDirectory()).path;
+    case TargetPlatform.linux:
+    final path = '${directory.path}/AnxReader';
+    return path;
     default:
       throw Exception('Unsupported platform');
   }
@@ -30,13 +33,13 @@ void initBasePath() async {
   final coverDir = getCoverDir();
   final fontDir = getFontDir();
   if (!fileDir.existsSync()) {
-    fileDir.createSync();
+    fileDir.createSync( recursive: true);
   }
   if (!coverDir.existsSync()) {
-    coverDir.createSync();
+    coverDir.createSync(recursive: true);
   }
   if (!fontDir.existsSync()) {
-    fontDir.createSync();
+    fontDir.createSync(recursive: true);
   }
 }
 
@@ -46,20 +49,17 @@ String getBasePath(String path) {
   return '$documentPath${Platform.pathSeparator}$path';
 }
 
-
-Directory getFontDir({String? path}){
+Directory getFontDir({String? path}) {
   path ??= documentPath;
   return Directory('$path${Platform.pathSeparator}font');
 }
 
-
-Directory getCoverDir({String? path}){
+Directory getCoverDir({String? path}) {
   path ??= documentPath;
   return Directory('$path${Platform.pathSeparator}cover');
 }
 
-Directory getFileDir({String? path}){
+Directory getFileDir({String? path}) {
   path ??= documentPath;
   return Directory('$path${Platform.pathSeparator}file');
 }
-

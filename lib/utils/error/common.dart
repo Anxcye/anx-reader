@@ -11,7 +11,7 @@ class AnxError{
     };
     PlatformDispatcher.instance.onError = (error, stack) {
       AnxLog.severe(error.toString(), stack);
-      return true;
+      return false;
     };
   }
 }
