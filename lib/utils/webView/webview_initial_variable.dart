@@ -39,8 +39,15 @@ void webviewInitialVariable(
   final script = '''
      console.log(navigator.userAgent)
      const webviewVersion = navigator.userAgent.match(/Chrome\\/(\\d+)/)?.[1]
+     const appleWebkitVersion = navigator.userAgent.match(/AppleWebKit\\/(\\d+)/)?.[1]
+     const isMac = navigator.userAgent.includes('Macintosh')
      console.log('webviewVersion', webviewVersion)
-     if (webviewVersion && webviewVersion < $minWebviewVersion || !webviewVersion) {
+     console.log('appleWebkitVersion', appleWebkitVersion)
+     console.log('isMac', isMac)
+     if (
+        (!isMac && (webviewVersion && webviewVersion < $minWebviewVersion || !webviewVersion))
+        || (isMac && (appleWebkitVersion && appleWebkitVersion < 605 ))
+     ) {
        window.flutter_inappwebview.callHandler('webviewVersion', webviewVersion)
      }
      const importing = $importing
