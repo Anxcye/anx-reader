@@ -93,7 +93,7 @@ void webviewInitialVariable(
                   Text(L10n.of(context).webview_unsupported_version,
                       style: Theme.of(context).textTheme.titleMedium),
                   Text(L10n.of(context)
-                      .webview_unsupported_message(minWebviewVersion, version)),
+                      .webview_unsupported_message(minWebviewVersion, version ?? -1)),
                 ],
               ),
               actions: [
