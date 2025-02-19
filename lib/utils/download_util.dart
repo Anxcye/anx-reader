@@ -140,9 +140,10 @@ class DownloadUtil {
       case TargetPlatform.android:
         return await androidImgSaver(img, extension, picName);
       case TargetPlatform.windows:
+      case TargetPlatform.macOS:
         return await windowsImgSaver(img, extension, picName);
       default:
-        return true;
+      throw Exception('Unsupported platform');
     }
   }
 }

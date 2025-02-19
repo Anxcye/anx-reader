@@ -22,6 +22,7 @@ Future<String?> fileSaver(
       final filePath = await FlutterFileDialog.saveFile(params: params);
       return filePath;
     case TargetPlatform.windows:
+    case TargetPlatform.macOS:
       final file = File(fileSavePath);
 
       if (!await file.exists()) {
