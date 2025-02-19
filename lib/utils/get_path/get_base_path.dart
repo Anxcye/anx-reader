@@ -16,6 +16,8 @@ Future<String> getAnxDocumentsPath() async {
     case TargetPlatform.linux:
     final path = '${directory.path}/AnxReader';
     return path;
+    case TargetPlatform.macOS:
+    return directory.path;
     default:
       throw Exception('Unsupported platform');
   }
