@@ -147,8 +147,8 @@ const handleSelection = (view, doc, index) => {
 
 const setSelectionHandler = (view, doc, index) => {
   //    doc.addEventListener('pointerdown', () => isSelecting = true);
-  // if windows
-  if (navigator.platform.includes('Win')) {
+  // if windows or macos
+  if (navigator.platform.includes('Win') || navigator.platform.includes('Mac')) {
     doc.addEventListener('pointerup', () => handleSelection(view, doc, index));
   }
   // doc.addEventListener('selectionchange', () => handleSelection(view, doc, index));
