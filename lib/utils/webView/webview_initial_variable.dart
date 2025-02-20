@@ -40,13 +40,13 @@ void webviewInitialVariable(
      console.log(navigator.userAgent)
      const webviewVersion = navigator.userAgent.match(/Chrome\\/(\\d+)/)?.[1]
      const appleWebkitVersion = navigator.userAgent.match(/AppleWebKit\\/(\\d+)/)?.[1]
-     const isMac = navigator.userAgent.includes('Macintosh')
+     const isApple = navigator.userAgent.includes('Macintosh') || navigator.userAgent.includes('iPhone') || navigator.userAgent.includes('iPad')
      console.log('webviewVersion', webviewVersion)
      console.log('appleWebkitVersion', appleWebkitVersion)
-     console.log('isMac', isMac)
+     console.log('isApple', isApple)
      if (
-        (!isMac && (webviewVersion && webviewVersion < $minWebviewVersion || !webviewVersion))
-        || (isMac && (appleWebkitVersion && appleWebkitVersion < 605 ))
+        (!isApple && (webviewVersion && webviewVersion < $minWebviewVersion || !webviewVersion))
+        || (isApple && (appleWebkitVersion && appleWebkitVersion < 605 ))
      ) {
        window.flutter_inappwebview.callHandler('webviewVersion', webviewVersion)
      }

@@ -25,6 +25,7 @@ String getSharedPrefsFileName() {
     case TargetPlatform.windows:
       return 'shared_preferences.json';
     case TargetPlatform.macOS:
+    case TargetPlatform.iOS:
       return 'com.anxcye.anxReader.plist';
     default:
       throw Exception('Unsupported platform');
@@ -43,6 +44,7 @@ Future<File> getAnxShredPrefsFile() async {
       return File(
           "${(await getApplicationSupportDirectory()).path}\\${getSharedPrefsFileName()}");
     case TargetPlatform.macOS:
+    case TargetPlatform.iOS:
       final baseDir =
           '${(await getAnxDocumentsPath()).split('Documents')[0]}Library/Preferences';
       return File("$baseDir/${getSharedPrefsFileName()}");
