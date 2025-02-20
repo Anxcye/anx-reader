@@ -112,6 +112,7 @@ class DBHelper {
           },
           onUpgrade: onUpgradeDatabase,
         );
+      case TargetPlatform.iOS:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         sqfliteFfiInit();
@@ -227,7 +228,6 @@ class DBHelper {
       case 5:
         // add a column (reader_note) to tb_notes, null default
         await db.execute("ALTER TABLE tb_notes ADD COLUMN reader_note TEXT");
-      
     }
   }
 }
