@@ -23,6 +23,7 @@ Future<String?> fileSaver(
       return filePath;
     case TargetPlatform.windows:
     case TargetPlatform.macOS:
+    case TargetPlatform.iOS:
       final file = File(fileSavePath);
 
       if (!await file.exists()) {

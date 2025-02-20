@@ -8,6 +8,7 @@ Future<Directory> getAnxCacheDir() async {
     case TargetPlatform.android:
     case TargetPlatform.windows:
     case TargetPlatform.macOS:
+    case TargetPlatform.iOS:
       return await getApplicationCacheDirectory();
     case TargetPlatform.linux:
       final path = (await getTemporaryDirectory()).path;
