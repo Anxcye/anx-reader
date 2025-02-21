@@ -98,7 +98,12 @@ Want to build Anx Reader from source? Please follow these steps:
 
 You may encounter Flutter version incompatibility issues. Please refer to the [Flutter documentation](https://flutter.dev/docs/get-started/install).
 
-# License
+## Code signing policy
+- Committers and reviewers: [Members team](https://github.com/anxcye/anx-reader/graphs/contributors)
+- Approvers: [Owners](https://github.com/anxcye)
+Free code signing on Windows provided by [SignPath.io](https://about.signpath.io/),certficate by [SignPath Foundation](https://signpath.org/)
+
+## License
 Anx Reader is licensed under the [GPL-3.0 License](./LICENSE).
 
 Starting from version 1.1.4, the open source license for the Anx Reader project has been changed from the MIT License to the GNU General Public License version 3 (GPLv3).
