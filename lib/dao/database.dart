@@ -100,6 +100,7 @@ class DBHelper {
   Future<Database> initDB() async {
     int dbVersion = 6;
     switch (defaultTargetPlatform) {
+      case TargetPlatform.macOS:
       case TargetPlatform.android:
         final databasePath = await getAnxDataBasesPath();
         final path = join(databasePath, 'app_database.db');

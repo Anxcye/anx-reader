@@ -235,6 +235,7 @@ Future<void> getBookMetadata(
       "http://localhost:${Server().port}/foliate-js/index.html";
 
   String bookUrl = "http://localhost:${Server().port}/$serverFileName";
+  AnxLog.info("import start: book url: $bookUrl");
 
   HeadlessInAppWebView webview = HeadlessInAppWebView(
     webViewEnvironment: webViewEnvironment,
