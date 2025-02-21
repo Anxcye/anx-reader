@@ -46,7 +46,9 @@ class _AISettingsState extends State<AISettings> {
       "title": "Gemini",
       "logo": "assets/images/gemini.png",
       "config": {
+        "url": "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
         "api_key": "YOUR_API_KEY",
+        "model": "gemini-2.0-flash"
       },
     },
     {
