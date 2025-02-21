@@ -10,13 +10,16 @@ Widget settingsTitle(
     required int id,
     required int selectedIndex,
     required Function setDetail,
-    required Widget subPage}) {
+    required Widget subPage,
+    required List<String>  subtitle,
+    }) {
   BuildContext context = navigatorKey.currentContext!;
   return ListTile(
     leading: icon,
     title: Text(title),
     trailing: const Icon(Icons.chevron_right),
     selected: !isMobile && selectedIndex == id,
+    subtitle: Text(subtitle.join(' • ')),
     onTap: () {
       if (!isMobile) {
         setDetail(subPage, id);
