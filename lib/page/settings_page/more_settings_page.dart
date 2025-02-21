@@ -76,7 +76,7 @@ class _SubMoreSettingsState extends State<SubMoreSettings> {
             "subtitles": [
               L10n.of(context).settings_sync_webdav,
               L10n.of(context).export_and_import,
-            ],  
+            ],
           },
           {
             "title": L10n.of(context).settings_translate,
@@ -123,14 +123,17 @@ class _SubMoreSettingsState extends State<SubMoreSettings> {
             itemCount: settings.length + 1,
             itemBuilder: (context, index) {
               if (index == settings.length) {
-                return const About();
+                return const About(leadingColor: true);
               }
               return SettingsPageBuilder(
                 isMobile: isMobile,
                 id: index,
                 selectedIndex: selectedIndex,
                 setDetail: setDetail,
-                icon: Icon(settings[index]["icon"]),
+                icon: Icon(
+                  settings[index]["icon"],
+                  color: Theme.of(context).colorScheme.primary,
+                ),
                 title: settings[index]["title"],
                 sections: settings[index]["sections"],
                 subTitles: settings[index]["subtitles"],
