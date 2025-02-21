@@ -364,6 +364,11 @@ class Prefs extends ChangeNotifier {
     return prefs.getString('selectedAiService') ?? 'openai';
   }
 
+  void deleteAiConfig(String identifier) {
+    prefs.remove('aiConfig_$identifier');
+    notifyListeners();
+  }
+
   void saveAiPrompt(AiPrompts identifier, String prompt) {
     prefs.setString('aiPrompt_${identifier.name}', prompt);
     notifyListeners();

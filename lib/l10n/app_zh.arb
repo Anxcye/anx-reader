@@ -148,7 +148,7 @@
   "common_edit": "编辑",
   "common_nth_week": "{count, plural, other{第{count}周}}",
   "common_apply": "应用",
-  "common_restore": "恢复",
+  "common_reset": "重置",
 
   "service_import_success":"导入成功",
   "service_import_n_books": "{count, plural, other{正在导入 {count} 本书}}",
