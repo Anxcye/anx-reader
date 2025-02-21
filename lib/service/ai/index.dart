@@ -1,5 +1,6 @@
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/service/ai/ai_cache.dart';
+import 'package:anx_reader/service/ai/ai_dio.dart';
 import 'package:anx_reader/service/ai/claude.dart';
 import 'package:anx_reader/service/ai/deepseek.dart';
 import 'package:anx_reader/service/ai/gemini.dart';
@@ -20,14 +21,14 @@ Stream<String> aiGenerateStream(
   AnxLog.info('aiGenerateStream: $identifier');
 
   final hash = prompt.hashCode;
-  final aiCache =await AiCache.getAiCache(hash);
+  final aiCache = await AiCache.getAiCache(hash);
 
   if (aiCache != null && aiCache.isNotEmpty && !regenerate) {
-    AnxLog.info('aiGenerateStream: cache hit');
+    AnxLog.info('aiGenerateStream: cache hit hash: $hash');
     yield aiCache;
     return;
   }
-  
+
   switch (identifier) {
     case "openai":
       stream = openAiGenerateStream(prompt, config);
@@ -49,6 +50,7 @@ Stream<String> aiGenerateStream(
     buffer += chunk;
     yield buffer;
   }
+  AiDio.instance.cancel();
   await AiCache.setAiCache(hash, buffer, identifier);
 }
 
