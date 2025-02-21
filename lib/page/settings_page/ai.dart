@@ -158,7 +158,8 @@ class _AISettingsState extends State<AISettings> {
                       },
                       builder: (context) => AlertDialog(
                           title: Text(L10n.of(context).common_test),
-                          content: aiStream(generatePromptTest(),
+                          content: AiStream(
+                              prompt: generatePromptTest(),
                               identifier: services[currentIndex]["identifier"],
                               config: services[currentIndex]["config"])),
                     );

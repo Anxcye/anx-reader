@@ -9,9 +9,6 @@ Future<Directory> getAnxCacheDir() async {
     case TargetPlatform.windows:
     case TargetPlatform.macOS:
       return await getApplicationCacheDirectory();
-    case TargetPlatform.linux:
-      final path = (await getTemporaryDirectory()).path;
-      return Directory(path);
     default:
       throw Exception('Unsupported platform');
   }

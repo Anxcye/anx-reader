@@ -196,6 +196,9 @@
   "settings_ai_prompt_summary_the_book": "总结整本书",
   "settings_ai_prompt_summary_the_previous_content": "打开书时帮助回忆前文内容",
 
+  "ai_cached_by": "缓存来自 {service}",
+  "ai_regenerate": "重新生成",
+
   "settings_advanced": "高级",
   "settings_advanced_log": "日志",
   "settings_advanced_log_clear_log": "清空日志",

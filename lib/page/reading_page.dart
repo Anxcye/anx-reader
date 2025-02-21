@@ -196,7 +196,8 @@ class ReadingPageState extends ConsumerState<ReadingPage>
           content: FutureBuilder(
             future: epubPlayerKey.currentState!.theChapterContent(),
             builder: (context, snapshot) {
-              return aiStream(generatePromptSummaryThePreviousContent(
+              return AiStream(
+                  prompt: generatePromptSummaryThePreviousContent(
                 snapshot.data ?? '',
               ));
             },
@@ -248,9 +249,9 @@ class ReadingPageState extends ConsumerState<ReadingPage>
                             future:
                                 epubPlayerKey.currentState!.theChapterContent(),
                             builder: (context, snapshot) {
-                              return aiStream(generatePromptSummaryTheChapter(
-                                snapshot.data ?? '',
-                              ));
+                              return AiStream(
+                                  prompt: generatePromptSummaryTheChapter(
+                                      snapshot.data ?? ''));
                             },
                           ),
                         ),

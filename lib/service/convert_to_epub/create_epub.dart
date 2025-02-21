@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:anx_reader/service/convert_to_epub/generate_toc.dart';
 import 'package:anx_reader/service/convert_to_epub/section.dart';
-import 'package:anx_reader/utils/get_path/cache_path.dart';
+import 'package:anx_reader/utils/get_path/get_temp_dir.dart';
 import 'package:archive/archive_io.dart';
 import 'package:uuid/uuid.dart';
 
@@ -13,7 +13,7 @@ Future<File> createEpub(
   List<Section> sections,
 ) async {
   // create epub
-  final cacheDir = await getAnxCacheDir();
+  final cacheDir = await getAnxTempDir();
   final epubDir = Directory('${cacheDir.path}/$titleString');
   if (epubDir.existsSync()) {
     epubDir.deleteSync(recursive: true);

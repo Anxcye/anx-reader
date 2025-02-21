@@ -6,18 +6,41 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 
-Widget aiStream(
-  String prompt, {
-  String? identifier,
-  Map<String, String>? config,
-  bool canCopy = true,
-}) {
-  return StreamBuilder(
-      stream: aiGenerateStream(
-        prompt,
-        identifier: identifier,
-        config: config,
-      ),
+class AiStream extends StatefulWidget {
+  final String prompt;
+  final String? identifier;
+  final Map<String, String>? config;
+  final bool canCopy;
+
+  const AiStream({
+    super.key,
+    required this.prompt,
+    this.identifier,
+    this.config,
+    this.canCopy = true,
+  });
+
+  @override
+  AiStreamState createState() => AiStreamState();
+}
+
+class AiStreamState extends State<AiStream> {
+  late Stream stream;
+
+  @override
+  void initState() {
+    super.initState();
+    stream = aiGenerateStream(
+      widget.prompt,
+      identifier: widget.identifier,
+      config: widget.config,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder(
+      stream: stream,
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           if (kDebugMode) {
@@ -44,10 +67,23 @@ Widget aiStream(
                   Expanded(child: MarkdownBody(data: snapshot.data!)),
                 ],
               ),
-              if (canCopy)
+              if (widget.canCopy)
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
+                    TextButton(
+                      onPressed: () {
+                        setState(() {
+                          stream = aiGenerateStream(
+                            widget.prompt,
+                            identifier: widget.identifier,
+                            config: widget.config,
+                            regenerate: true,
+                          );
+                        });
+                      },
+                      child: Text(L10n.of(context).ai_regenerate),
+                    ),
                     TextButton(
                       onPressed: () {
                         Clipboard.setData(ClipboardData(text: snapshot.data!));
@@ -60,5 +96,7 @@ Widget aiStream(
             ],
           ),
         );
-      });
+      },
+    );
+  }
 }

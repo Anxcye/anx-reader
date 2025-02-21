@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:anx_reader/dao/database.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/utils/file_saver.dart';
-import 'package:anx_reader/utils/get_path/cache_path.dart';
+import 'package:anx_reader/utils/get_path/get_temp_dir.dart';
 import 'package:anx_reader/utils/get_path/databases_path.dart';
 import 'package:anx_reader/utils/get_path/get_base_path.dart';
 import 'package:anx_reader/utils/get_path/shared_prefs_path.dart';
@@ -38,8 +38,7 @@ class _AppearanceSettingState extends ConsumerState<SyncSetting> {
         SettingsSection(
           title: Text(L10n.of(context).settings_sync_webdav),
           tiles: [
-            webdavSwitch(context,  setState, ref),
-
+            webdavSwitch(context, setState, ref),
             SettingsTile.navigation(
                 title: Text(L10n.of(context).settings_sync_webdav),
                 leading: const Icon(Icons.cloud),
@@ -161,7 +160,7 @@ class _AppearanceSettingState extends ConsumerState<SyncSetting> {
 
     String pathSeparator = Platform.pathSeparator;
 
-    Directory cacheDir = await getAnxCacheDir();
+    Directory cacheDir = await getAnxTempDir();
     String cachePath = cacheDir.path;
     String extractPath = '$cachePath${pathSeparator}anx_reader_import';
 
@@ -231,7 +230,7 @@ Future<String> createZipFile(RootIsolateToken token) async {
   BackgroundIsolateBinaryMessenger.ensureInitialized(token);
   final date =
       '${DateTime.now().year}-${DateTime.now().month}-${DateTime.now().day}';
-  final zipPath = '${(await getAnxCacheDir()).path}/AnxReader-Backup-$date.zip';
+  final zipPath = '${(await getAnxTempDir()).path}/AnxReader-Backup-$date.zip';
   final docPath = await getAnxDocumentsPath();
   final directoryList = [
     getFileDir(path: docPath),

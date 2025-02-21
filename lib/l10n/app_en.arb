@@ -196,6 +196,9 @@
   "settings_ai_prompt_summary_the_book": "Summary the book",
   "settings_ai_prompt_summary_the_previous_content": "Summary the previous content",
 
+  "ai_cached_by": "Cached by {service}",
+  "ai_regenerate": "Regenerate",
+
   "storage_permission_denied": "Storage permission denied",
   "gallery_permission_denied": "Gallery permission denied",
   "goto_authorize": "Go to authorize",
