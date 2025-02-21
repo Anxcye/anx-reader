@@ -93,9 +93,6 @@ dev_dependencies:
   json_serializable: ^6.9.0
 #  flutter_launcher_icons: ^0.11.0
 
-dependency_overrides:
-  analyzer: ^6.3.0
-  custom_lint_core: ^0.6.6
 
 flutter:
   uses-material-design: true
