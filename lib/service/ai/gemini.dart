@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:anx_reader/service/ai/ai_dio.dart';
@@ -35,38 +34,50 @@ Stream<String> geminiGenerateStream(
     );
 
     final stream = response.data.stream;
-    await for (final chunk in stream.transform(
-      StreamTransformer<Uint8List, String>.fromHandlers(
-        handleData: (Uint8List data, EventSink<String> sink) {
-          sink.add(utf8.decode(data));
-        },
-      ),
-    )) {
-      if (response.statusCode != 200) {
-        yield* Stream.error('error ${response.statusCode} \n $chunk');
-        continue;
-      }
+    List<int> buffer = [];
+    String remainingData = '';
 
-      final lines = chunk.split('\n');
-      for (final line in lines) {
-        if (line.trim().isEmpty) continue;
+    await for (final chunk in stream) {
+      buffer.addAll(chunk);
 
-        if (line.startsWith('data: ')) {
-          final data = line.substring(6);
-          if (data.trim() == '[DONE]') break;
+      try {
+        final String decodedData = utf8.decode(buffer);
+        buffer.clear();
 
-          try {
-            final json = jsonDecode(data);
-            final delta = json['choices'][0]['delta'];
-            final content = delta['content'];
-            if (content != null) {
-              yield content;
+        final String processData = remainingData + decodedData;
+        final lines = processData.split('\n');
+        remainingData = '';
+
+        for (int i = 0; i < lines.length; i++) {
+          final line = lines[i];
+          if (line.trim().isEmpty) continue;
+
+          if (line.startsWith('data: ')) {
+            final data = line.substring(6);
+            if (data.trim() == '[DONE]') break;
+
+            try {
+              final json = jsonDecode(data);
+              final delta = json['choices'][0]['delta'];
+              final content = delta['content'];
+              if (content != null) {
+                yield content;
+              }
+            } catch (e) {
+              if (i == lines.length - 1) {
+                remainingData = line;
+                continue;
+              }
+              yield* Stream.error('Parse error: $e\nData: $data');
+              continue;
             }
-          } catch (e) {
-            yield* Stream.error('Parse error: $e\nData: $data');
-            continue;
           }
         }
+      } catch (e) {
+        if (e is FormatException && e.message.contains('Unfinished UTF-8')) {
+          continue;
+        }
+        yield* Stream.error('Decode error: $e');
       }
     }
   } catch (e) {
