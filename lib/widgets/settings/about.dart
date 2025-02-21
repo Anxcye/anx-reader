@@ -1,4 +1,5 @@
 import 'package:anx_reader/l10n/generated/L10n.dart';
+import 'package:anx_reader/utils/toast/common.dart';
 import 'package:anx_reader/widgets/settings/link_icon.dart';
 import 'package:anx_reader/utils/check_update.dart';
 import 'package:anx_reader/widgets/settings/show_donate_dialog.dart';
@@ -8,11 +9,12 @@ import 'package:icons_plus/icons_plus.dart';
 import 'package:pubspec_parse/pubspec_parse.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-
 class About extends StatefulWidget {
   const About({
     super.key,
+    this.leadingColor = false,
   });
+  final bool leadingColor;
 
   @override
   State<About> createState() => _AboutState();
@@ -39,7 +41,10 @@ class _AboutState extends State<About> {
   Widget build(BuildContext context) {
     return ListTile(
       title: Text(L10n.of(context).app_about),
-      leading: const Icon(Icons.info_outline),
+      leading: Icon(Icons.info_outline,
+          color: widget.leadingColor
+              ? Theme.of(context).colorScheme.primary
+              : null),
       onTap: () => openAboutDialog(context),
     );
   }
@@ -49,8 +54,6 @@ class _AboutState extends State<About> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-
-            // title: Text(L10n.of(context).appName),
             content: ConstrainedBox(
           constraints: const BoxConstraints(
             maxWidth: 500,
@@ -77,9 +80,12 @@ class _AboutState extends State<About> {
                   ),
                   const Divider(),
                   ListTile(
-                    title: Text(L10n.of(context).app_version),
-                    subtitle: Text(version),
-                  ),
+                      title: Text(L10n.of(context).app_version),
+                      subtitle: Text(version),
+                      onTap: () {
+                        Clipboard.setData(ClipboardData(text: version));
+                        AnxToast.show(L10n.of(context).notes_page_copied);
+                      }),
                   ListTile(
                       title: Text(L10n.of(context).about_check_for_updates),
                       onTap: () => checkUpdate(true)),
