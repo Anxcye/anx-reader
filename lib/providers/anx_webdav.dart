@@ -97,7 +97,7 @@ class AnxWebdav extends _$AnxWebdav {
     io.File localDb = io.File(path);
     // less than 5s return
     if (remoteDb != null &&
-        localDb.lastModifiedSync().difference(remoteDb.mTime!).inSeconds < 5) {
+        localDb.lastModifiedSync().difference(remoteDb.mTime!).inSeconds.abs() < 5) {
       return;
     }
 
