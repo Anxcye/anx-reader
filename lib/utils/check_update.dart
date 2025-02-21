@@ -6,6 +6,8 @@ import 'package:anx_reader/utils/log/common.dart';
 import 'package:anx_reader/utils/toast/common.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 Future<void> checkUpdate(bool manualCheck) async {
@@ -47,28 +49,20 @@ Future<void> checkUpdate(bool manualCheck) async {
     if (manualCheck) {
       Navigator.of(context).pop();
     }
-    showDialog(
-      context: context,
+    SmartDialog.show(
       builder: (BuildContext context) {
+        final body =
+            response.data['body'].toString().split('\n').skip(1).join('\n');
         return AlertDialog(
           title: Text(L10n.of(context).common_new_version,
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
               )),
           content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(L10n.of(context).update_new_version + newVersion,
-                    style: const TextStyle(
-                      fontSize: 20,
-                    )),
-                Text(L10n.of(context).update_current_version + currentVersion),
-                const Divider(),
-                Text(response.data['body'].toString()),
-              ],
-            ),
+            child: MarkdownBody(
+                data: '''### ${L10n.of(context).update_new_version} $newVersion
+${L10n.of(context).update_current_version} $currentVersion
+$body'''),
           ),
           actions: <Widget>[
             TextButton(
