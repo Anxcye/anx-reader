@@ -249,9 +249,12 @@ class ReadingPageState extends ConsumerState<ReadingPage>
                             future:
                                 epubPlayerKey.currentState!.theChapterContent(),
                             builder: (context, snapshot) {
-                              return AiStream(
-                                  prompt: generatePromptSummaryTheChapter(
-                                      snapshot.data ?? ''));
+                              if (snapshot.hasData) {
+                                return AiStream(
+                                    prompt: generatePromptSummaryTheChapter(
+                                        snapshot.data!));
+                              }
+                              return const SizedBox.shrink();
                             },
                           ),
                         ),
