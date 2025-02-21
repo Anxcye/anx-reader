@@ -6,8 +6,8 @@ import 'package:path_provider/path_provider.dart';
 Future<Directory> getAnxCacheDir() async {
   switch (defaultTargetPlatform) {
     case TargetPlatform.android:
-      return await getApplicationCacheDirectory();
     case TargetPlatform.windows:
+    case TargetPlatform.macOS:
       return await getApplicationCacheDirectory();
     case TargetPlatform.linux:
       final path = (await getTemporaryDirectory()).path;

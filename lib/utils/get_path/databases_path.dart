@@ -12,6 +12,7 @@ Future<String> getAnxDataBasesPath() async {
       return path;
     case TargetPlatform.linux:
     case TargetPlatform.windows:
+    case TargetPlatform.macOS:
       final documentsPath = await getAnxDocumentsPath();
       return '$documentsPath${Platform.pathSeparator}databases';
     default:
