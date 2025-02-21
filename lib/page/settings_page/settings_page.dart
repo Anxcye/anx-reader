@@ -11,31 +11,34 @@ class SettingsPageBuilder extends StatelessWidget {
       required this.setDetail,
       required this.icon,
       required this.title,
-      required this.sections});
+      required this.sections,
+      required this.subTitles});
 
   final bool isMobile;
   final int id;
   final int selectedIndex;
   final void Function(Widget detail, int id) setDetail;
-
   final Icon icon;
   final String title;
   final Widget sections;
+  final List<String> subTitles;
 
   @override
   Widget build(BuildContext context) {
     return settingsTitle(
-        icon: icon,
+      icon: icon,
+      title: title,
+      isMobile: isMobile,
+      id: id,
+      selectedIndex: selectedIndex,
+      setDetail: setDetail,
+      subPage: SettingsPageBody(
         title: title,
         isMobile: isMobile,
-        id: id,
-        selectedIndex: selectedIndex,
-        setDetail: setDetail,
-        subPage: SettingsPageBody(
-          title: title,
-          isMobile: isMobile,
-          sections: sections,
-        ));
+        sections: sections,
+      ),
+      subtitle: subTitles,
+    );
   }
 }
 

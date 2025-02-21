@@ -64,26 +64,44 @@ class _SubMoreSettingsState extends State<SubMoreSettings> {
             "title": L10n.of(context).settings_appearance,
             "icon": Icons.color_lens_outlined,
             "sections": const AppearanceSetting(),
+            "subtitles": [
+              L10n.of(context).settings_appearance_theme,
+              L10n.of(context).settings_appearance_display,
+            ],
           },
           {
             "title": L10n.of(context).settings_sync,
             "icon": Icons.sync_outlined,
             "sections": const SyncSetting(),
+            "subtitles": [
+              L10n.of(context).settings_sync_webdav,
+              L10n.of(context).export_and_import,
+            ],  
           },
           {
             "title": L10n.of(context).settings_translate,
             "icon": Icons.translate_outlined,
             "sections": const TranslateSetting(),
+            "subtitles": [
+              L10n.of(context).settings_translate,
+            ],
           },
           {
             "title": L10n.of(context).settings_ai,
             "icon": Icons.auto_awesome,
             "sections": const AISettings(),
+            "subtitles": [
+              L10n.of(context).settings_ai_services,
+              L10n.of(context).settings_ai_prompt,
+            ],
           },
           {
             "title": L10n.of(context).settings_advanced,
             "icon": Icons.shield_outlined,
             "sections": const AdvancedSetting(),
+            "subtitles": [
+              L10n.of(context).settings_advanced_log,
+            ],
           },
         ];
 
@@ -115,6 +133,7 @@ class _SubMoreSettingsState extends State<SubMoreSettings> {
                 icon: Icon(settings[index]["icon"]),
                 title: settings[index]["title"],
                 sections: settings[index]["sections"],
+                subTitles: settings[index]["subtitles"],
               );
             },
           );
