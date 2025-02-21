@@ -8,7 +8,7 @@ import 'package:anx_reader/page/home_page/settings_page.dart';
 import 'package:anx_reader/page/home_page/statistics_page.dart';
 import 'package:anx_reader/service/book.dart';
 import 'package:anx_reader/utils/check_update.dart';
-import 'package:anx_reader/utils/get_path/cache_path.dart';
+import 'package:anx_reader/utils/get_path/get_temp_dir.dart';
 import 'package:anx_reader/utils/load_default_font.dart';
 import 'package:anx_reader/utils/log/common.dart';
 import 'package:anx_reader/providers/anx_webdav.dart';
@@ -32,7 +32,7 @@ class HomePage extends ConsumerStatefulWidget {
   ConsumerState<ConsumerStatefulWidget> createState() => _HomePageState();
 }
 
-class _HomePageState extends ConsumerState<HomePage>  {
+class _HomePageState extends ConsumerState<HomePage> {
   int _currentIndex = 0;
   final List<Widget> _pages = [
     const BookshelfPage(),
@@ -47,9 +47,6 @@ class _HomePageState extends ConsumerState<HomePage>  {
     super.initState();
     initAnx();
   }
-
-
-  
 
   Future<void> initAnx() async {
     AnxToast.init(context);
@@ -85,7 +82,7 @@ class _HomePageState extends ConsumerState<HomePage>  {
       } else {
         webViewEnvironment = await WebViewEnvironment.create(
           settings: WebViewEnvironmentSettings(
-              userDataFolder: (await getAnxCacheDir()).path),
+              userDataFolder: (await getAnxTempDir()).path),
         );
       }
     }

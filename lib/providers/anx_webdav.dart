@@ -6,7 +6,7 @@ import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/main.dart';
 import 'package:anx_reader/models/sync_state_model.dart';
 import 'package:anx_reader/providers/book_list.dart';
-import 'package:anx_reader/utils/get_path/cache_path.dart';
+import 'package:anx_reader/utils/get_path/get_temp_dir.dart';
 import 'package:anx_reader/utils/get_path/get_base_path.dart';
 import 'package:anx_reader/utils/get_path/databases_path.dart';
 import 'package:anx_reader/utils/log/common.dart';
@@ -97,7 +97,8 @@ class AnxWebdav extends _$AnxWebdav {
     io.File localDb = io.File(path);
     // less than 5s return
     if (remoteDb != null &&
-        localDb.lastModifiedSync().difference(remoteDb.mTime!).inSeconds.abs() < 5) {
+        localDb.lastModifiedSync().difference(remoteDb.mTime!).inSeconds.abs() <
+            5) {
       return;
     }
 
@@ -195,7 +196,7 @@ class AnxWebdav extends _$AnxWebdav {
     final path = join(databasePath, 'app_database.db');
 
     // backup local database
-    String cachePath = (await getAnxCacheDir()).path;
+    String cachePath = (await getAnxTempDir()).path;
     io.File(path).copySync('$cachePath/app_database.db');
 
     io.File localDb = io.File(path);

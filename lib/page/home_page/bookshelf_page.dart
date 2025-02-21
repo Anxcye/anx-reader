@@ -4,7 +4,7 @@ import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/providers/book_list.dart';
 import 'package:anx_reader/service/book.dart';
-import 'package:anx_reader/utils/get_path/cache_path.dart';
+import 'package:anx_reader/utils/get_path/get_temp_dir.dart';
 import 'package:anx_reader/utils/log/common.dart';
 import 'package:anx_reader/widgets/bookshelf/book_bottom_sheet.dart';
 import 'package:anx_reader/widgets/bookshelf/book_folder.dart';
@@ -49,7 +49,7 @@ class BookshelfPageState extends ConsumerState<BookshelfPage> {
     // So we need to save the files to the temp directory.
     if (!Platform.isAndroid) {
       fileList = await Future.wait(files.map((file) async {
-        Directory tempDir = await getAnxCacheDir();
+        Directory tempDir = await getAnxTempDir();
         File tempFile = File('${tempDir.path}/${file.name}');
         await File(file.path!).copy(tempFile.path);
         return tempFile;
@@ -151,7 +151,7 @@ class BookshelfPageState extends ConsumerState<BookshelfPage> {
       onDragDone: (detail) async {
         List<File> files = [];
         for (var file in detail.files) {
-          final tempFilePath = '${(await getAnxCacheDir()).path}/${file.name}';
+          final tempFilePath = '${(await getAnxTempDir()).path}/${file.name}';
           await File(file.path).copy(tempFilePath);
           files.add(File(tempFilePath));
         }

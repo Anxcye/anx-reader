@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:anx_reader/utils/download_util.dart';
-import 'package:anx_reader/utils/get_path/cache_path.dart';
+import 'package:anx_reader/utils/get_path/get_temp_dir.dart';
 import 'package:anx_reader/utils/log/common.dart';
 import 'package:anx_reader/utils/save_image_to_path.dart';
 import 'package:flutter/material.dart';
@@ -44,7 +44,6 @@ class ImageViewer extends StatelessWidget {
           ),
           minScale: PhotoViewComputedScale.contained * 0.8,
           maxScale: PhotoViewComputedScale.covered * 3,
-
         ),
         Positioned.fill(
           child: SafeArea(
@@ -76,7 +75,7 @@ class ImageViewer extends StatelessWidget {
                         onPressed: () async {
                           final path = await saveImageToPath(
                             image,
-                            (await getAnxCacheDir()).path,
+                            (await getAnxTempDir()).path,
                             "AnxReader_$bookName",
                           );
 
