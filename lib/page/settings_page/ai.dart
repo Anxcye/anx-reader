@@ -20,6 +20,7 @@ class AISettings extends StatefulWidget {
 class _AISettingsState extends State<AISettings> {
   bool showSettings = false;
   int currentIndex = 0;
+  late List<Map<String, dynamic>> initialServicesConfig;
   List<Map<String, dynamic>> services = [
     {
       "identifier": "openai",
@@ -46,7 +47,8 @@ class _AISettingsState extends State<AISettings> {
       "title": "Gemini",
       "logo": "assets/images/gemini.png",
       "config": {
-        "url": "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
+        "url":
+            "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
         "api_key": "YOUR_API_KEY",
         "model": "gemini-2.0-flash"
       },
@@ -65,6 +67,12 @@ class _AISettingsState extends State<AISettings> {
 
   @override
   void initState() {
+    initialServicesConfig = services.map((service) {
+      return {
+        ...service,
+        'config': Map<String, String>.from(service['config']),
+      };
+    }).toList();
     for (var service in services) {
       for (var key in service["config"].keys) {
         service["config"][key] =
@@ -101,82 +109,93 @@ class _AISettingsState extends State<AISettings> {
       }
     ];
 
-    Widget aiConfig = Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(bottom: 10),
-          child: Text(
-            services[currentIndex]["title"],
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-        ),
-        for (var key in services[currentIndex]["config"].keys)
+    Widget aiConfig() {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
           Padding(
             padding: const EdgeInsets.only(bottom: 10),
-            child: TextField(
-              controller: TextEditingController(
-                text: Prefs().getAiConfig(
-                        services[currentIndex]['identifier'])[key] ??
-                    services[currentIndex]["config"][key],
-              ),
-              decoration: InputDecoration(
-                border: const OutlineInputBorder(),
-                labelText: key,
-                hintText: services[currentIndex]["config"][key],
-              ),
-              onChanged: (value) {
-                services[currentIndex]["config"][key] = value;
-              },
+            child: Text(
+              services[currentIndex]["title"],
+              style: Theme.of(context).textTheme.titleLarge,
             ),
           ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            TextButton(
-                onPressed: () {
-                  SmartDialog.show(
-                    onDismiss: () {
-                      AiDio.instance.cancel();
-                    },
-                    builder: (context) => AlertDialog(
-                        title: Text(L10n.of(context).common_test),
-                        content: aiStream(generatePromptTest(),
-                            identifier: services[currentIndex]["identifier"],
-                            config: services[currentIndex]["config"])),
-                  );
+          for (var key in services[currentIndex]["config"].keys)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: TextField(
+                controller: TextEditingController(
+                    text: services[currentIndex]["config"][key] ??
+                        initialServicesConfig[currentIndex]["config"][key]),
+                decoration: InputDecoration(
+                  border: const OutlineInputBorder(),
+                  labelText: key,
+                  hintText: services[currentIndex]["config"][key],
+                ),
+                onChanged: (value) {
+                  services[currentIndex]["config"][key] = value;
                 },
-                child: Text(L10n.of(context).common_test)),
-            TextButton(
-                onPressed: () {
-                  Prefs().saveAiConfig(
-                    services[currentIndex]["identifier"],
-                    services[currentIndex]["config"],
-                  );
+              ),
+            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              TextButton(
+                  onPressed: () {
+                    Prefs().deleteAiConfig(
+                      services[currentIndex]["identifier"],
+                    );
+                    services[currentIndex]["config"] = Map<String, String>.from(
+                        initialServicesConfig[currentIndex]["config"]);
+                    setState(() {});
+                  },
+                  child: Text(L10n.of(context).common_reset)),
+              TextButton(
+                  onPressed: () {
+                    SmartDialog.show(
+                      onDismiss: () {
+                        AiDio.instance.cancel();
+                      },
+                      builder: (context) => AlertDialog(
+                          title: Text(L10n.of(context).common_test),
+                          content: aiStream(generatePromptTest(),
+                              identifier: services[currentIndex]["identifier"],
+                              config: services[currentIndex]["config"])),
+                    );
+                  },
+                  child: Text(L10n.of(context).common_test)),
+              TextButton(
+                  onPressed: () {
+                    Prefs().saveAiConfig(
+                      services[currentIndex]["identifier"],
+                      services[currentIndex]["config"],
+                    );
 
-                  setState(() {
-                    showSettings = false;
-                  });
-                },
-                child: Text(L10n.of(context).common_save)),
-            TextButton(
-                onPressed: () {
-                  Prefs().selectedAiService =
-                      services[currentIndex]["identifier"];
-                  Prefs().saveAiConfig(
-                    services[currentIndex]["identifier"],
-                    services[currentIndex]["config"],
-                  );
+                    setState(() {
+                      showSettings = false;
+                    });
+                  },
+                  child: Text(L10n.of(context).common_save)),
+              TextButton(
+                  onPressed: () {
+                    Prefs().selectedAiService =
+                        services[currentIndex]["identifier"];
+                    Prefs().saveAiConfig(
+                      services[currentIndex]["identifier"],
+                      services[currentIndex]["config"],
+                    );
 
-                  setState(() {
-                    showSettings = false;
-                  });
-                },
-                child: Text(L10n.of(context).common_apply)),
-          ],
-        )
-      ],
-    );
+                    setState(() {
+                      showSettings = false;
+                    });
+                  },
+                  child: Text(L10n.of(context).common_apply)),
+            ],
+          )
+        ],
+      );
+    }
+
     var servicesTile = CustomSettingsTile(
         child: AnimatedSize(
       duration: const Duration(milliseconds: 200),
@@ -252,7 +271,7 @@ class _AISettingsState extends State<AISettings> {
                 },
               ),
             ),
-            !showSettings ? const SizedBox() : aiConfig,
+            !showSettings ? const SizedBox() : aiConfig(),
           ],
         ),
       ),
@@ -325,7 +344,7 @@ class _AISettingsState extends State<AISettings> {
                           AiPrompts.values[index],
                         );
                       },
-                      child: Text(L10n.of(context).common_restore),
+                      child: Text(L10n.of(context).common_reset),
                     ),
                     TextButton(
                       onPressed: () {
