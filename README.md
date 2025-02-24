@@ -104,7 +104,7 @@ You may encounter Flutter version incompatibility issues. Please refer to the [F
 Free code signing on Windows provided by [SignPath.io](https://about.signpath.io/),certficate by [SignPath Foundation](https://signpath.org/)
 
 ## License
-Anx Reader is licensed under the [GPL-3.0 License](./LICENSE).
+This project is licensed under the [GPL-3.0 License](./LICENSE) with a special exception for [App Store distribution](./APP_STORE_EXCEPTION.md).
 
 Starting from version 1.1.4, the open source license for the Anx Reader project has been changed from the MIT License to the GNU General Public License version 3 (GPLv3).
 
