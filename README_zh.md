@@ -94,7 +94,7 @@ Telegram 群组：[https://t.me/AnxReader](https://t.me/AnxReader)
 
 
 ## 构建
-希望从源码构建安读？请参考以下步骤：
+希望从源码构建安装？请参考以下步骤：
 - 安装 [Flutter](https://flutter.dev)。
 - 克隆并进入项目目录。
 - 运行 `flutter pub get` 。
