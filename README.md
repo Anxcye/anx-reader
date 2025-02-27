@@ -101,6 +101,8 @@ You may encounter Flutter version incompatibility issues. Please refer to the [F
 ## Code signing policy
 - Committers and reviewers: [Members team](https://github.com/anxcye/anx-reader/graphs/contributors)
 - Approvers: [Owners](https://github.com/anxcye)
+
+
 Free code signing on Windows provided by [SignPath.io](https://about.signpath.io/),certficate by [SignPath Foundation](https://signpath.org/)
 
 ## License
@@ -108,7 +110,7 @@ This project is licensed under the [MIT License](./LICENSE).
 
 Starting from version 1.1.4, the open source license for the Anx Reader project has been changed from the MIT License to the GNU General Public License version 3 (GPLv3).
 
-Starting from version 1.2.6, the selection and highlight feature has been rewritten, and the open source license has been changed from the GPL-3.0 License to the MIT License. All contributors agree to this change(# 116).
+After version 1.2.6, the selection and highlight feature has been rewritten, and the open source license has been changed from the GPL-3.0 License to the MIT License. All contributors agree to this change(#116).
 
 ## Thanks
 [foliate-js](https://github.com/johnfactotum/foliate-js), which is MIT licensed, it used as the ebook renderer. Thanks to the author for providing such a great project.
