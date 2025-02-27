@@ -186,7 +186,10 @@ Future<void> saveBook(
 }) async {
   final newBookName =
       '${title.length > 20 ? title.substring(0, 20) : title}-${DateTime.now().millisecondsSinceEpoch}'
-          .replaceAll(' ', '_');
+          .replaceAll(RegExp(r'[<>:"/\\|?*]'), '_')
+          .replaceAll('\n', '')
+          .replaceAll('\r', '')
+          .trim();
 
   final extension = file.path.split('.').last;
 

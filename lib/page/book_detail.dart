@@ -163,7 +163,10 @@ class _BookDetailState extends ConsumerState<BookDetail> {
 
                   String newPath =
                       '${widget.book.coverPath.split('/').sublist(0, widget.book.coverPath.split('/').length - 1).join('/')}/${widget.book.title.length > 20 ? widget.book.title.substring(0, 20) : widget.book.title}-${DateTime.now().millisecond.toString()}.png'
-                          .replaceAll(' ', '_');
+                          .replaceAll(RegExp(r'[<>:"/\\|?*]'), '_')
+                          .replaceAll('\n', '')
+                          .replaceAll('\r', '')
+                          .trim();
 
                   AnxLog.info('BookDetail: New path: $newPath');
                   String newFullPath = getBasePath(newPath);
@@ -509,7 +512,7 @@ class _BookDetailState extends ConsumerState<BookDetail> {
 
     return Stack(
       children: [
-        Positioned.fill(child :buildBackground()),
+        Positioned.fill(child: buildBackground()),
         Scaffold(
           backgroundColor: Colors.transparent,
           body: NotificationListener<ScrollNotification>(
