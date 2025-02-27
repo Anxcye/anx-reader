@@ -52,6 +52,11 @@ Stream<String> geminiGenerateStream(
           final line = lines[i];
           if (line.trim().isEmpty) continue;
 
+          if (i == lines.length - 1 && !line.endsWith(']')) {
+            remainingData = line;
+            continue;
+          }
+
           if (line.startsWith('data: ')) {
             final data = line.substring(6);
             if (data.trim() == '[DONE]') break;
