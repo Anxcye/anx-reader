@@ -195,6 +195,9 @@
   "settings_ai_prompt_summary_the_chapter": "总结本章内容",
   "settings_ai_prompt_summary_the_book": "总结整本书",
   "settings_ai_prompt_summary_the_previous_content": "打开书时帮助回忆前文内容",
+  "settings_ai_cache": "AI 缓存",
+  "settings_ai_cache_size": "缓存大小",
+  "settings_ai_cache_current_size": "当前共 {count, plural, other{{count} 条缓存}}",
 
   "ai_cached_by": "缓存来自 {service}",
   "ai_regenerate": "重新生成",

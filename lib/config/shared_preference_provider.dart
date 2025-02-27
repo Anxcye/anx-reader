@@ -412,4 +412,13 @@ class Prefs extends ChangeNotifier {
   bool get autoAdjustReadingTheme {
     return prefs.getBool('autoAdjustReadingTheme') ?? true;
   }
+
+  set maxAiCacheCount(int count) {
+    prefs.setInt('maxAiCacheCount', count);
+    notifyListeners();
+  }
+    
+  int get maxAiCacheCount {
+    return prefs.getInt('maxAiCacheCount') ?? 300;
+  }
 }
