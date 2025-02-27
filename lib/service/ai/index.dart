@@ -1,4 +1,5 @@
 import 'package:anx_reader/config/shared_preference_provider.dart';
+import 'package:anx_reader/providers/ai_cache_count.dart';
 import 'package:anx_reader/service/ai/ai_cache.dart';
 import 'package:anx_reader/service/ai/ai_dio.dart';
 import 'package:anx_reader/service/ai/claude.dart';
@@ -6,8 +7,10 @@ import 'package:anx_reader/service/ai/deepseek.dart';
 import 'package:anx_reader/service/ai/gemini.dart';
 import 'package:anx_reader/service/ai/openai.dart';
 import 'package:anx_reader/utils/log/common.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 Stream<String> aiGenerateStream(
+  WidgetRef ref,
   String prompt, {
   String? identifier,
   Map<String, String>? config,
@@ -52,16 +55,18 @@ Stream<String> aiGenerateStream(
   }
   AiDio.instance.cancel();
   await AiCache.setAiCache(hash, buffer, identifier);
+  ref.read(aiCacheCountProvider.notifier).refresh();
 }
-
+  
 Future<String> aiGenerate(
+  WidgetRef ref,
   String prompt, {
   String? identifier,
   Map<String, String>? config,
 }) async {
   final buffer = StringBuffer();
   await for (final chunk
-      in aiGenerateStream(prompt, identifier: identifier, config: config)) {
+      in aiGenerateStream(ref, prompt, identifier: identifier, config: config)) {
     buffer.write(chunk);
   }
   return buffer.toString();
