@@ -1,6 +1,7 @@
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/enums/ai_prompts.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
+import 'package:anx_reader/providers/ai_cache_count.dart';
 import 'package:anx_reader/service/ai/ai_dio.dart';
 import 'package:anx_reader/service/ai/prompt_generate.dart';
 import 'package:anx_reader/widgets/ai_stream.dart';
@@ -8,16 +9,17 @@ import 'package:anx_reader/widgets/settings/settings_section.dart';
 import 'package:anx_reader/widgets/settings/settings_tile.dart';
 import 'package:anx_reader/widgets/settings/settings_title.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 
-class AISettings extends StatefulWidget {
+class AISettings extends ConsumerStatefulWidget {
   const AISettings({super.key});
 
   @override
-  State<AISettings> createState() => _AISettingsState();
+  ConsumerState<AISettings> createState() => _AISettingsState();
 }
 
-class _AISettingsState extends State<AISettings> {
+class _AISettingsState extends ConsumerState<AISettings> {
   bool showSettings = false;
   int currentIndex = 0;
   late List<Map<String, dynamic>> initialServicesConfig;
@@ -364,6 +366,7 @@ class _AISettingsState extends State<AISettings> {
         },
       ),
     );
+
     return settingsSections(sections: [
       SettingsSection(
         title: Text(L10n.of(context).settings_ai_services),
@@ -375,6 +378,47 @@ class _AISettingsState extends State<AISettings> {
         title: Text(L10n.of(context).settings_ai_prompt),
         tiles: [
           promptTile,
+        ],
+      ),
+      SettingsSection(
+        title: Text(L10n.of(context).settings_ai_cache),
+        tiles: [
+          CustomSettingsTile(
+            child: ListTile(
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(L10n.of(context).settings_ai_cache_size),
+                  Text(
+                    L10n.of(context).settings_ai_cache_current_size(ref
+                        .watch(aiCacheCountProvider)
+                        .when(
+                            data: (value) => value,
+                            loading: () => 0,
+                            error: (error, stack) => 0)),
+                  ),
+                ],
+              ),
+              subtitle: Row(
+                children: [
+                  Text(Prefs().maxAiCacheCount.toString()),
+                  Expanded(
+                    child: Slider(
+                      value: Prefs().maxAiCacheCount.toDouble(),
+                      min: 0,
+                      max: 1000,
+                      divisions: 100,
+                      label: Prefs().maxAiCacheCount.toString(),
+                      onChanged: (value) {
+                        Prefs().maxAiCacheCount = value.toInt();
+                        setState(() {});
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     ]);

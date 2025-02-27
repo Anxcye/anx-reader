@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/main.dart';
 import 'package:anx_reader/utils/get_path/get_cache_dir.dart';
@@ -8,21 +9,31 @@ import 'package:anx_reader/utils/get_path/get_cache_dir.dart';
 class AiCache {
   static const String cacheFileName = 'ai_cache.json';
 
-  static Future<Map<String, dynamic>> _readCache() async {
+  static Future<Map<String, dynamic>> readCache() async {
     final cacheDir = await getAnxCacheDir();
     final file = File('${cacheDir.path}/$cacheFileName');
 
     if (await file.exists()) {
-      final content = await file.readAsString();
-      return json.decode(content) as Map<String, dynamic>;
+      try {
+        final content = await file.readAsString();
+        return json.decode(content) as Map<String, dynamic>;
+      } catch (e) {
+        file.delete();
+        return {};
+      }
     }
     return {};
   }
 
-  static Future<void> setAiCache(int hash, String data, String identifier) async {
+  static Future<void> setAiCache(
+    int hash,
+    String data,
+    String identifier,
+  ) async {
+
     final cacheDir = await getAnxCacheDir();
     final file = File('${cacheDir.path}/$cacheFileName');
-    final cache = await _readCache();
+    final cache = await readCache();
 
     cache[hash.toString()] = {
       'data': data,
@@ -31,11 +42,12 @@ class AiCache {
     };
 
     await file.writeAsString(json.encode(cache));
+    await cleanCache();
   }
 
   static Future<String?> getAiCache(int hash) async {
     final context = navigatorKey.currentContext!;
-    final cache = await _readCache();
+    final cache = await readCache();
     final entry = cache[hash.toString()];
     if (entry != null) {
       String data = entry['data'] as String;
@@ -45,21 +57,24 @@ class AiCache {
     return null;
   }
 
-  static Future<void> cleanOldCache(
-      {Duration maxAge = const Duration(days: 7)}) async {
-    final cache = await _readCache();
-    final now = DateTime.now().millisecondsSinceEpoch;
+  static Future<void> cleanCache() async {
+    final maxCount = Prefs().maxAiCacheCount;
+    var cache = await readCache();
+    if (cache.length > maxCount) {
 
-    cache.removeWhere(
-        (_, value) => now - value['timestamp'] > maxAge.inMilliseconds);
+      final keys = cache.keys.toList();
+      keys.sort((a, b) => cache[a]['timestamp'] - cache[b]['timestamp']);
+      final keysToRemove = keys.sublist(0, cache.length - maxCount);
+      cache.removeWhere((key, _) => keysToRemove.contains(key));
 
-    final cacheDir = await getAnxCacheDir();
-    final file = File('${cacheDir.path}/$cacheFileName');
-    await file.writeAsString(json.encode(cache));
+      final cacheDir = await getAnxCacheDir();
+      final file = File('${cacheDir.path}/$cacheFileName');
+      await file.writeAsString(json.encode(cache), mode: FileMode.writeOnly);
+    }
   }
 
-  Future<int> get cacheCount async {
-    final cache = await _readCache();
+  static Future<int> get cacheCount async {
+    final cache = await readCache();
     return cache.length;
   }
 
