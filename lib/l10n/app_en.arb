@@ -197,7 +197,9 @@
   "settings_ai_prompt_summary_the_previous_content": "Summary the previous content",
   "settings_ai_cache": "AI Cache",
   "settings_ai_cache_size": "Max Cache Size",
-    "settings_ai_cache_current_size": "Current {count, plural, other{{count} cache}}",
+  "settings_ai_cache_current_size": "Current {count, plural, other{{count} caches}}",
+  "settings_ai_cache_clear": "Clear cache",
+  
 
   "ai_cached_by": "Cached by {service}",
   "ai_regenerate": "Regenerate",

@@ -419,6 +419,30 @@ class _AISettingsState extends ConsumerState<AISettings> {
               ),
             ),
           ),
+          SettingsTile.navigation(
+              title: Text(L10n.of(context).settings_ai_cache_clear),
+              onPressed: (context) {
+                SmartDialog.show(
+                  builder: (context) => AlertDialog(
+                    title: Text(L10n.of(context).common_confirm),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          SmartDialog.dismiss();
+                        },
+                        child: Text(L10n.of(context).common_cancel),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          ref.read(aiCacheCountProvider.notifier).clearCache();
+                          SmartDialog.dismiss();
+                        },
+                        child: Text(L10n.of(context).common_confirm),
+                      ),
+                    ],
+                  ),
+                );
+              }),
         ],
       ),
     ]);

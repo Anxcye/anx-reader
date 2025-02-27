@@ -198,6 +198,7 @@
   "settings_ai_cache": "AI 缓存",
   "settings_ai_cache_size": "缓存大小",
   "settings_ai_cache_current_size": "当前共 {count, plural, other{{count} 条缓存}}",
+  "settings_ai_cache_clear": "清空缓存",
 
   "ai_cached_by": "缓存来自 {service}",
   "ai_regenerate": "重新生成",
