@@ -5,8 +5,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class AiStream extends StatefulWidget {
+class AiStream extends ConsumerStatefulWidget {
   final String prompt;
   final String? identifier;
   final Map<String, String>? config;
@@ -24,13 +25,14 @@ class AiStream extends StatefulWidget {
   AiStreamState createState() => AiStreamState();
 }
 
-class AiStreamState extends State<AiStream> {
+class AiStreamState extends ConsumerState<AiStream> {
   late Stream stream;
 
   @override
   void initState() {
     super.initState();
     stream = aiGenerateStream(
+      ref,
       widget.prompt,
       identifier: widget.identifier,
       config: widget.config,
@@ -75,6 +77,7 @@ class AiStreamState extends State<AiStream> {
                       onPressed: () {
                         setState(() {
                           stream = aiGenerateStream(
+                            ref,
                             widget.prompt,
                             identifier: widget.identifier,
                             config: widget.config,
