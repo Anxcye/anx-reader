@@ -15,6 +15,7 @@
 - Fix: Android TTS slider value not updating
 - Fix: Txt file chapter title detection(#107)
 - Fix: DeepSeek default model name(#123)
+- Fix: Sync problem(#94，#89)
 
 - 新增：调整字体粗细
 - 新增：AI 回答缓存
@@ -24,6 +25,7 @@
 - 修复：Android TTS 滑块数值不更新
 - 修复：txt 文件章节标题检测(#107)
 - 修复：DeepSeek 默认模型名称(#123)
+- 修复：无法同步的问题(#94，#89)
 
 ## 1.2.6
 - Fix: Fix ai stream error
