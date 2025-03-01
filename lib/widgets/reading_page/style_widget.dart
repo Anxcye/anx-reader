@@ -9,6 +9,7 @@ import 'package:anx_reader/service/book_player/book_player_server.dart';
 import 'package:anx_reader/service/font.dart';
 import 'package:anx_reader/utils/font_parser.dart';
 import 'package:anx_reader/utils/get_path/get_base_path.dart';
+import 'package:anx_reader/widgets/debounce_slider.dart';
 import 'package:anx_reader/widgets/reading_page/more_settings/more_settings.dart';
 import 'package:anx_reader/widgets/reading_page/widget_title.dart';
 import 'package:anx_reader/dao/theme.dart';
@@ -191,7 +192,7 @@ class _StyleWidgetState extends State<StyleWidget> {
       children: [
         const Icon(Icons.line_weight),
         Expanded(
-          child: Slider(
+          child: DebounceSlider(
               value: bookStyle.lineHeight,
               onChanged: (double value) {
                 setState(() {
@@ -207,7 +208,7 @@ class _StyleWidgetState extends State<StyleWidget> {
         ),
         const Icon(Icons.height),
         Expanded(
-          child: Slider(
+          child: DebounceSlider(
             value: bookStyle.paragraphSpacing,
             onChanged: (double value) {
               setState(() {
@@ -231,7 +232,7 @@ class _StyleWidgetState extends State<StyleWidget> {
       children: [
         const Icon(Icons.format_size),
         Expanded(
-          child: Slider(
+          child: DebounceSlider(
             value: bookStyle.fontSize,
             onChanged: (double value) {
               setState(() {
@@ -241,8 +242,8 @@ class _StyleWidgetState extends State<StyleWidget> {
               });
             },
             min: 0.5,
-            max: 2.0,
-            divisions: 30,
+            max: 3.0,
+            divisions: 25,
             label: bookStyle.fontSize.toStringAsFixed(2),
           ),
         ),
