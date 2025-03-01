@@ -12,11 +12,13 @@
 - Feat: Add custom Gemini api url
 - Fix: Android TTS slider value not updating
 - Fix: Txt file chapter title detection(#107)
+- Fix: DeepSeek default model name(#123)
 - 新增：扩大自定义字体大小范围
 - 新增：音量键翻页开关
 - 新增：自定义 Gemini api url
 - 修复：Android TTS 滑块数值不更新
 - 修复：txt 文件章节标题检测(#107)
+- 修复：DeepSeek 默认模型名称(#123)
 
 ## 1.2.6
 - Fix: Fix ai stream error
