@@ -55,7 +55,9 @@ class _TtsWidgetState extends State<TtsWidget> {
                   child: Slider(
                       value: Tts.volume,
                       onChanged: (newVolume) {
-                        Tts.volume = newVolume;
+                        setState(() {
+                          Tts.volume = newVolume;
+                        });
                       },
                       min: 0.0,
                       max: 1.0,
@@ -74,7 +76,9 @@ class _TtsWidgetState extends State<TtsWidget> {
                   child: Slider(
                     value: Tts.pitch,
                     onChanged: (newPitch) {
-                      Tts.pitch = newPitch;
+                      setState(() {
+                        Tts.pitch = newPitch;
+                      });
                     },
                     min: 0.5,
                     max: 2.0,
@@ -94,7 +98,9 @@ class _TtsWidgetState extends State<TtsWidget> {
                   child: Slider(
                     value: Tts.rate,
                     onChanged: (newRate) {
-                      Tts.rate = newRate;
+                      setState(() {
+                        Tts.rate = newRate;
+                      });
                     },
                     min: 0.0,
                     max: 2.0,
