@@ -19,6 +19,8 @@ jobs:
             os: ubuntu-latest
           - platform: windows
             os: windows-latest
+          - platform: macos
+            os: macos-latest
             
     steps:
       - name: Checkout repository
@@ -88,13 +90,19 @@ jobs:
           echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> android/key.properties    
           echo "storeFile=keystore.jks" >> android/key.properties
 
-      - name: Prepare for platform
+      - name: Prepare for Windows
         if: matrix.platform == 'windows'
         shell: bash
         run: |
           flutter config --enable-windows-desktop
           sed -i "1i #define MyAppVersion \"${{ env.VERSION }}\"" scripts/compile_windows_setup-inno.iss
 
+      - name: Prepare for macOS
+        if: matrix.platform == 'macos'
+        shell: bash
+        run: |
+          flutter config --enable-macos-desktop
+          
       - name: Build for Android
         if: matrix.platform == 'android'
         run: |
@@ -113,6 +121,20 @@ jobs:
         shell: pwsh
         run: ./scripts/build_windows.ps1
 
+      - name: Build for macOS
+        if: matrix.platform == 'macos'
+        shell: bash
+        run: |
+          flutter gen-l10n
+          dart run build_runner build --delete-conflicting-outputs
+          flutter build macos --release
+          cd build/macos/Build/Products/Release
+          mkdir -p "Anx Reader"
+          cp -r anx_reader.app "Anx Reader/AnxReader.app"
+          ln -s /Applications "Anx Reader/Applications"
+          hdiutil create -volname "Anx Reader" -srcfolder "Anx Reader" -ov -format UDZO Anx-Reader-${{ env.VERSION }}.dmg
+          ditto -c -k --keepParent anx_reader.app "Anx-Reader-${{ env.VERSION }}.zip"
+
       - name: Rename builds
         run: |
           cd build
@@ -125,6 +147,10 @@ jobs:
           elif [ "${{ matrix.platform }}" == "windows" ]; then
             mv windows/app.zip windows/Anx-Reader-${{ matrix.platform }}-${{ env.VERSION }}.zip
             mv windows/app.exe windows/Anx-Reader-${{ matrix.platform }}-${{ env.VERSION }}.exe
+          elif [ "${{ matrix.platform }}" == "macos" ]; then
+            mkdir -p macos
+            mv macos/Build/Products/Release/Anx-Reader-${{ env.VERSION }}.dmg macos/Anx-Reader-${{ matrix.platform }}-${{ env.VERSION }}.dmg
+            mv macos/Build/Products/Release/Anx-Reader-${{ env.VERSION }}.zip macos/Anx-Reader-${{ matrix.platform }}-${{ env.VERSION }}.zip
           fi
         shell: bash
 
@@ -147,6 +173,8 @@ jobs:
             build/app/outputs/flutter-apk/*.apk
             build/windows/*.zip
             build/windows/*.exe
+            build/macos/*.dmg
+            build/macos/*.zip
           if-no-files-found: warn
 
       - name: Create Release
@@ -157,6 +185,8 @@ jobs:
             build/app/outputs/flutter-apk/*.apk
             build/windows/*.zip
             build/windows/*.exe
+            build/macos/*.dmg
+            build/macos/*.zip
           body: ${{ env.RELEASE_NOTES }}
           generate_release_notes: false
           prerelease: ${{ env.IS_BETA == 'true' }}
