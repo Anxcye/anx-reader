@@ -64,8 +64,9 @@ Future<File> convertFromTxt(File file) async {
   AnxLog.info('convert from txt. content: ${content.length}');
 
   final patternStr = RegExp(
-    r'^(.* +|　*)?([第][一二三四五六七八九十零〇百千万两0123456789]+[章卷]|[卷][一二三四五六七八九十零〇百千万两0123456789]+|[Cc]hap(?:ter)\.?|[Vv]ol(?:ume)?\.?|[Bb]ook|[Bb]k)( +.*)?$',
+    r'^(?:(.+ +)|())(第[一二三四五六七八九十零〇百千万两0123456789]+[章卷]|卷[一二三四五六七八九十零〇百千万两0123456789]+|chap(?:ter)\.?|vol(?:ume)?\.?|book|bk)(?:(?: +.+)?|(?:\S.*)?)$',
     multiLine: true,
+    caseSensitive: false,
   );
 
   final matches = patternStr.allMatches(content).toList();
