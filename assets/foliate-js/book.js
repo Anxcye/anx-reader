@@ -56,6 +56,107 @@ const { configure, ZipReader, BlobReader, TextWriter, BlobWriter } =
 const { EPUB } = await import('./epub.js')
 
 
+
+const getPosition = (target) => {
+  const pointIsInView = (point) => {
+    const { x, y } = point;
+    return x >= 0 &&
+      y >= 0 &&
+      x <= window.innerWidth &&
+      y <= window.innerHeight;
+  };
+
+  const frameRect = (framePos, elementRect, scaleX = 1, scaleY = 1) => {
+    return {
+      left: scaleX * elementRect.left + framePos.left,
+      right: scaleX * elementRect.right + framePos.left,
+      top: scaleY * elementRect.top + framePos.top,
+      bottom: scaleY * elementRect.bottom + framePos.top
+    };
+  };
+  const rootNode = target.getRootNode?.() ?? target?.endContainer?.getRootNode?.();
+  const frameElement = rootNode?.defaultView?.frameElement;
+
+  let scaleX = 1, scaleY = 1;
+  if (frameElement) {
+    const transform = getComputedStyle(frameElement).transform;
+    const matches = transform.match(/matrix\((.+)\)/);
+    if (matches) {
+      [scaleX, , , scaleY] = matches[1].split(/\s*,\s*/).map(Number);
+    }
+  }
+
+  const frame = frameElement?.getBoundingClientRect() ?? { top: 0, left: 0 };
+
+  const rects = Array.from(target.getClientRects());
+  const firstRect = frameRect(frame, rects[0], scaleX, scaleY);
+  const lastRect = frameRect(frame, rects[rects.length - 1], scaleX, scaleY);
+
+  const screenWidth = window.innerWidth;
+  const screenHeight = window.innerHeight;
+
+  const startPoint = {
+    point: {
+      x: ((firstRect.left + firstRect.right) / 2) / screenWidth,
+      y: firstRect.top / screenHeight
+    },
+    dir: 'up'
+  };
+
+  const endPoint = {
+    point: {
+      x: ((lastRect.left + lastRect.right) / 2) / screenWidth,
+      y: lastRect.bottom / screenHeight
+    },
+    dir: 'down'
+  };
+
+  const isStartInView = pointIsInView(startPoint.point);
+  const isEndInView = pointIsInView(endPoint.point);
+
+  if (!isStartInView && !isEndInView) {
+    return { point: { x: 0, y: 0 } };
+  }
+  if (!isStartInView) return endPoint;
+  if (!isEndInView) return startPoint;
+
+  return (startPoint.point.y * screenHeight > screenHeight - endPoint.point.y * screenHeight)
+    ? startPoint
+    : endPoint;
+};
+
+const getSelectionRange = (selection) => {
+  if (!selection?.rangeCount) return null;
+  const range = selection.getRangeAt(0);
+  return range.collapsed ? null : range;
+};
+
+const handleSelection = (view, doc, index) => {
+  const selection = doc.getSelection();
+  const range = getSelectionRange(selection);
+
+  if (!range) return;
+
+  const position = getPosition(range);
+  const cfi = view.getCFI(index, range);
+
+  let text = selection.toString();
+  if (!text) {
+    const newSelection = range.startContainer.ownerDocument.getSelection();
+    newSelection.removeAllRanges();
+    newSelection.addRange(range);
+    text = newSelection.toString();
+  }
+
+  onSelectionEnd({
+    index,
+    range,
+    cfi,
+    pos: position,
+    text
+  });
+};
+
 const setSelectionHandler = (view, doc, index) => {
   //    doc.addEventListener('pointerdown', () => isSelecting = true);
   // if windows or macos
@@ -64,23 +165,49 @@ const setSelectionHandler = (view, doc, index) => {
   }
   // doc.addEventListener('selectionchange', () => handleSelection(view, doc, index));
 
-  if (!view.isFixedLayout)
+  if (!view.isFixedLayout) {
     // go to the next page when selecting to the end of a page
     // this makes it possible to select across pages
-    doc.addEventListener('selectionchange', debounce(() => {
-      //            if (!isSelecting) return
+
+    doc.addEventListener('selectstart', () => {
+      const container = view.shadowRoot.querySelector('foliate-paginator').shadowRoot.querySelector("#container");
+      if (!container) return;
+      globalThis.originalScrollLeft = container.scrollLeft;
+    });
+
+
+    doc.addEventListener('selectionchange', () => {
       if (view.renderer.getAttribute('flow') !== 'paginated') return
       const { lastLocation } = view
       if (!lastLocation) return
+
       const selRange = getSelectionRange(doc.getSelection())
       if (!selRange) return
+
       if (selRange.compareBoundaryPoints(Range.END_TO_END, lastLocation.range) >= 0) {
         view.next()
+        return
       }
-    }, 1000))
 
-};
+      const container = view.shadowRoot.querySelector('foliate-paginator').shadowRoot.querySelector("#container");
+      const preventScroll = () => {
+        const selRange = getSelectionRange(doc.getSelection());
+        if (!selRange || !view.lastLocation || !view.lastLocation.range) return;
 
+        if (view.lastLocation.range.startContainer.data === selRange.endContainer.data) {
+          container.scrollLeft = globalThis.originalScrollLeft;
+        }
+      };
+
+      container.addEventListener('scroll', preventScroll);
+
+      doc.addEventListener('pointerup', () => {
+        container.removeEventListener('scroll', preventScroll);
+      }, { once: true });
+    })
+
+  }
+}
 const isZip = async file => {
   const arr = new Uint8Array(await file.slice(0, 4).arrayBuffer())
   return arr[0] === 0x50 && arr[1] === 0x4b && arr[2] === 0x03 && arr[3] === 0x04
