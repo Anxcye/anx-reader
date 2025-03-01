@@ -1,6 +1,7 @@
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/models/book_style.dart';
 import 'package:anx_reader/page/reading_page.dart';
+import 'package:anx_reader/widgets/debounce_slider.dart';
 import 'package:flutter/material.dart';
 
 class StyleSettings extends StatefulWidget {
@@ -17,7 +18,7 @@ class _StyleSettingsState extends State<StyleSettings> {
       return ListTile(
         contentPadding: EdgeInsets.zero,
         leading: const Icon(Icons.format_indent_increase),
-        title: Slider(
+        title: DebounceSlider(
           value: bookStyle.indent,
           onChanged: (double value) {
             setState(() {
@@ -38,7 +39,7 @@ class _StyleSettingsState extends State<StyleSettings> {
       return ListTile(
         contentPadding: EdgeInsets.zero,
         leading: const Icon(Icons.margin_rounded),
-        title: Slider(
+        title: DebounceSlider(
           value: bookStyle.sideMargin,
           onChanged: (double value) {
             setState(() {
@@ -59,7 +60,7 @@ class _StyleSettingsState extends State<StyleSettings> {
       return ListTile(
         contentPadding: EdgeInsets.zero,
         leading: const Icon(Icons.compare_arrows),
-        title: Slider(
+        title: DebounceSlider(
           value: bookStyle.letterSpacing,
           onChanged: (double value) {
             setState(() {
@@ -83,7 +84,7 @@ class _StyleSettingsState extends State<StyleSettings> {
           children: [
             const Icon(Icons.vertical_align_top_outlined),
             Expanded(
-              child: Slider(
+              child: DebounceSlider(
                 value: bookStyle.topMargin,
                 onChanged: (double value) {
                   setState(() {
@@ -100,7 +101,7 @@ class _StyleSettingsState extends State<StyleSettings> {
             ),
             const Icon(Icons.vertical_align_bottom_outlined),
             Expanded(
-              child: Slider(
+              child: DebounceSlider(
                 value: bookStyle.bottomMargin,
                 onChanged: (double value) {
                   setState(() {
