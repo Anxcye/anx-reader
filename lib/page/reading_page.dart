@@ -23,8 +23,8 @@ import 'package:anx_reader/widgets/reading_page/tts_widget.dart';
 import 'package:anx_reader/widgets/reading_page/style_widget.dart';
 import 'package:anx_reader/widgets/reading_page/toc_widget.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:icons_plus/icons_plus.dart';
@@ -54,6 +54,8 @@ class ReadingPageState extends ConsumerState<ReadingPage>
   bool tocOffstage = true;
   Widget? _tocWidget;
 
+  late FocusOnKeyEventCallback _handleKeyEvent;
+
   @override
   void initState() {
     if (widget.book.isDeleted) {
@@ -69,8 +71,10 @@ class ReadingPageState extends ConsumerState<ReadingPage>
     setAwakeTimer(Prefs().awakeTime);
 
     _book = widget.book;
+    _addKeyboardListener();
     super.initState();
   }
+
 
   @override
   void dispose() {
@@ -83,7 +87,33 @@ class ReadingPageState extends ConsumerState<ReadingPage>
     insertReadingTime(ReadingTime(
         bookId: _book.id, readingTime: _readTimeWatch.elapsed.inSeconds));
     audioHandler.stop();
+    _removeKeyboardListener();
     super.dispose();
+  }
+
+  void _addKeyboardListener() {
+    _handleKeyEvent = (FocusNode node, KeyEvent event) {
+      if (!Prefs().volumeKeyTurnPage) {
+        return KeyEventResult.ignored;
+      }
+
+      if (event is KeyDownEvent) {
+        if (event.physicalKey == PhysicalKeyboardKey.audioVolumeUp) {
+          epubPlayerKey.currentState?.prevPage();
+          return KeyEventResult.handled;
+        } else if (event.physicalKey == PhysicalKeyboardKey.audioVolumeDown) {
+          epubPlayerKey.currentState?.nextPage();
+          return KeyEventResult.handled;
+        }
+      }
+      return KeyEventResult.ignored;
+    };
+  }
+
+  void _removeKeyboardListener() {
+    _handleKeyEvent = (FocusNode node, KeyEvent event) {
+      return KeyEventResult.ignored;
+    };
   }
 
   @override
@@ -116,10 +146,12 @@ class ReadingPageState extends ConsumerState<ReadingPage>
     setState(() {
       showStatusBarWithoutResize();
       bottomBarOffstage = false;
+      _removeKeyboardListener();
     });
   }
 
   void hideBottomBar() {
+    print('hideBottomBar');
     setState(() {
       tocOffstage = true;
       _currentPage = const SizedBox(height: 1);
@@ -127,6 +159,7 @@ class ReadingPageState extends ConsumerState<ReadingPage>
       if (Prefs().hideStatusBar) {
         hideStatusBar();
       }
+      _addKeyboardListener();
     });
   }
 
@@ -355,12 +388,16 @@ class ReadingPageState extends ConsumerState<ReadingPage>
           },
           child: Stack(
             children: [
-              EpubPlayer(
-                key: epubPlayerKey,
-                book: _book,
-                cfi: widget.cfi,
-                showOrHideAppBarAndBottomBar: showOrHideAppBarAndBottomBar,
-                onLoadEnd: onLoadEnd,
+              Focus(
+                focusNode: FocusNode(),
+                onKeyEvent: _handleKeyEvent,
+                child: EpubPlayer(
+                  key: epubPlayerKey,
+                  book: _book,
+                  cfi: widget.cfi,
+                  showOrHideAppBarAndBottomBar: showOrHideAppBarAndBottomBar,
+                  onLoadEnd: onLoadEnd,
+                ),
               ),
               controller,
             ],

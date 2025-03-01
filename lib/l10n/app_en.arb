@@ -102,6 +102,7 @@
   "reading_page_at_least_two_themes": "At least 2 themes are required",
   "reading_page_auto_adjust_reading_theme": "Auto Adjust Reading Theme",
   "reading_page_auto_adjust_reading_theme_tips": "Use the 1st and 2nd colors in the color table as the day and night modes respectively",
+  "reading_page_volume_key_turn_page": "Volume Key Turn Page",
 
   "book_detail_save": "Save",
   "book_detail_edit": "Edit",

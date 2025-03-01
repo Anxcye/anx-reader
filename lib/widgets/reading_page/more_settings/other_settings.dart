@@ -1,4 +1,3 @@
-
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/page/reading_page.dart';
@@ -63,10 +62,7 @@ class _OtherSettingsState extends State<OtherSettings> {
                     showStatusBar();
                   }
                 })),
-        title: Text(
-          L10n.of(context).reading_page_full_screen,
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
+        title: Text(L10n.of(context).reading_page_full_screen),
       );
     }
 
@@ -127,17 +123,15 @@ class _OtherSettingsState extends State<OtherSettings> {
             Prefs().autoTranslateSelection = value;
           }),
         ),
-        title: Text(
-          L10n.of(context).reading_page_auto_translate_selection,
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
+        title: Text(L10n.of(context).reading_page_auto_translate_selection),
       );
     }
 
     ListTile autoSummaryPreviousContent() {
       return ListTile(
         contentPadding: EdgeInsets.zero,
-        title: Text(L10n.of(context).reading_page_auto_summary_previous_content),
+        title:
+            Text(L10n.of(context).reading_page_auto_summary_previous_content),
         trailing: Switch(
           value: Prefs().autoSummaryPreviousContent,
           onChanged: (bool value) => setState(() {
@@ -151,11 +145,25 @@ class _OtherSettingsState extends State<OtherSettings> {
       return ListTile(
         contentPadding: EdgeInsets.zero,
         title: Text(L10n.of(context).reading_page_auto_adjust_reading_theme),
-        subtitle: Text(L10n.of(context).reading_page_auto_adjust_reading_theme_tips),
+        subtitle:
+            Text(L10n.of(context).reading_page_auto_adjust_reading_theme_tips),
         trailing: Switch(
           value: Prefs().autoAdjustReadingTheme,
           onChanged: (bool value) => setState(() {
             Prefs().autoAdjustReadingTheme = value;
+          }),
+        ),
+      );
+    }
+
+    ListTile keyboardTurnPage() {
+      return ListTile(
+        contentPadding: EdgeInsets.zero,
+        title: Text(L10n.of(context).reading_page_volume_key_turn_page),
+        trailing: Switch(
+          value: Prefs().volumeKeyTurnPage,
+          onChanged: (bool value) => setState(() {
+            Prefs().volumeKeyTurnPage = value;
           }),
         ),
       );
@@ -166,6 +174,7 @@ class _OtherSettingsState extends State<OtherSettings> {
       child: Column(
         children: [
           fullScreen(),
+          keyboardTurnPage(),
           autoAdjustReadingTheme(),
           autoTranslateSelection(),
           autoSummaryPreviousContent(),
