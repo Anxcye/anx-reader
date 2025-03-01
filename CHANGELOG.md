@@ -6,6 +6,13 @@
 * Feat: Add bionic reading mode(#49)
 * 新增：仿生阅读(#49)
 
+## 1.2.7
+- Feat: Add volume key page turn switch
+- Feat: Add custom Gemini api url
+
+- 新增：音量键翻页开关
+- 新增：自定义 Gemini api url
+
 ## 1.2.6
 - Fix: Fix ai stream error
 - 修复：修复 AI 流错误

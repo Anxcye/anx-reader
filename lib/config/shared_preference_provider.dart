@@ -390,6 +390,7 @@ class Prefs extends ChangeNotifier {
     }
     return aiPrompt;
   }
+
   void deleteAiPrompt(AiPrompts identifier) {
     prefs.remove('aiPrompt_${identifier.name}');
     notifyListeners();
@@ -417,8 +418,17 @@ class Prefs extends ChangeNotifier {
     prefs.setInt('maxAiCacheCount', count);
     notifyListeners();
   }
-    
+
   int get maxAiCacheCount {
     return prefs.getInt('maxAiCacheCount') ?? 300;
+  }
+
+  set volumeKeyTurnPage(bool status) {
+    prefs.setBool('volumeKeyTurnPage', status);
+    notifyListeners();
+  }
+
+  bool get volumeKeyTurnPage {
+    return prefs.getBool('volumeKeyTurnPage') ?? false;
   }
 }

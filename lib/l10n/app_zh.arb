@@ -102,6 +102,7 @@
   "reading_page_at_least_two_themes": "至少需要保留两个配色",
   "reading_page_auto_adjust_reading_theme": "自动调整日夜模式",
   "reading_page_auto_adjust_reading_theme_tips": "使用配色表中的第1、2个配色分别作为日、夜模式",
+  "reading_page_volume_key_turn_page": "音量键翻页",
 
   "book_detail_save": "保存",
   "book_detail_edit": "编辑",
