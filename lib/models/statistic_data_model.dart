@@ -5,7 +5,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'statistic_data_model.freezed.dart';
 
 @freezed
-class StatisticDataModel with _$StatisticDataModel {
+abstract class StatisticDataModel with _$StatisticDataModel {
   const factory StatisticDataModel({
     required ChartMode mode,
     required bool isSelectingDay,

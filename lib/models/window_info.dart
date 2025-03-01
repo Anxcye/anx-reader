@@ -4,7 +4,7 @@ part 'window_info.freezed.dart';
 part 'window_info.g.dart';
 
 @freezed
-class WindowInfo with _$WindowInfo {
+abstract class WindowInfo with _$WindowInfo {
   const factory WindowInfo({
     required double x,
     required double y,

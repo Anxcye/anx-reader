@@ -5,7 +5,7 @@ part 'sync_state_model.freezed.dart';
 part 'sync_state_model.g.dart';
 
 @freezed
-class SyncStateModel with _$SyncStateModel {
+abstract class SyncStateModel with _$SyncStateModel {
   const factory SyncStateModel({
     required SyncDirection direction,
     required bool isSyncing,

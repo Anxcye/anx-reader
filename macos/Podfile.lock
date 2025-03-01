@@ -1,5 +1,6 @@
 PODS:
-  - audio_service (0.14.1):
+  - audio_service (0.0.1):
+    - Flutter
     - FlutterMacOS
   - audio_session (0.0.1):
     - FlutterMacOS
@@ -8,6 +9,8 @@ PODS:
   - desktop_drop (0.0.1):
     - FlutterMacOS
   - device_info_plus (0.0.1):
+    - FlutterMacOS
+  - file_picker (0.0.1):
     - FlutterMacOS
   - flutter_inappwebview_macos (0.0.1):
     - FlutterMacOS
@@ -31,21 +34,21 @@ PODS:
   - sqflite_darwin (0.0.4):
     - Flutter
     - FlutterMacOS
-  - sqlite3 (3.47.2):
-    - sqlite3/common (= 3.47.2)
-  - sqlite3/common (3.47.2)
-  - sqlite3/dbstatvtab (3.47.2):
+  - sqlite3 (3.49.1):
+    - sqlite3/common (= 3.49.1)
+  - sqlite3/common (3.49.1)
+  - sqlite3/dbstatvtab (3.49.1):
     - sqlite3/common
-  - sqlite3/fts5 (3.47.2):
+  - sqlite3/fts5 (3.49.1):
     - sqlite3/common
-  - sqlite3/perf-threadsafe (3.47.2):
+  - sqlite3/perf-threadsafe (3.49.1):
     - sqlite3/common
-  - sqlite3/rtree (3.47.2):
+  - sqlite3/rtree (3.49.1):
     - sqlite3/common
   - sqlite3_flutter_libs (0.0.1):
     - Flutter
     - FlutterMacOS
-    - sqlite3 (~> 3.47.2)
+    - sqlite3 (~> 3.49.1)
     - sqlite3/dbstatvtab
     - sqlite3/fts5
     - sqlite3/perf-threadsafe
@@ -58,11 +61,12 @@ PODS:
     - FlutterMacOS
 
 DEPENDENCIES:
-  - audio_service (from `Flutter/ephemeral/.symlinks/plugins/audio_service/macos`)
+  - audio_service (from `Flutter/ephemeral/.symlinks/plugins/audio_service/darwin`)
   - audio_session (from `Flutter/ephemeral/.symlinks/plugins/audio_session/macos`)
   - battery_plus (from `Flutter/ephemeral/.symlinks/plugins/battery_plus/macos`)
   - desktop_drop (from `Flutter/ephemeral/.symlinks/plugins/desktop_drop/macos`)
   - device_info_plus (from `Flutter/ephemeral/.symlinks/plugins/device_info_plus/macos`)
+  - file_picker (from `Flutter/ephemeral/.symlinks/plugins/file_picker/macos`)
   - flutter_inappwebview_macos (from `Flutter/ephemeral/.symlinks/plugins/flutter_inappwebview_macos/macos`)
   - flutter_tts (from `Flutter/ephemeral/.symlinks/plugins/flutter_tts/macos`)
   - FlutterMacOS (from `Flutter/ephemeral`)
@@ -84,7 +88,7 @@ SPEC REPOS:
 
 EXTERNAL SOURCES:
   audio_service:
-    :path: Flutter/ephemeral/.symlinks/plugins/audio_service/macos
+    :path: Flutter/ephemeral/.symlinks/plugins/audio_service/darwin
   audio_session:
     :path: Flutter/ephemeral/.symlinks/plugins/audio_session/macos
   battery_plus:
@@ -93,6 +97,8 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/desktop_drop/macos
   device_info_plus:
     :path: Flutter/ephemeral/.symlinks/plugins/device_info_plus/macos
+  file_picker:
+    :path: Flutter/ephemeral/.symlinks/plugins/file_picker/macos
   flutter_inappwebview_macos:
     :path: Flutter/ephemeral/.symlinks/plugins/flutter_inappwebview_macos/macos
   flutter_tts:
@@ -121,11 +127,12 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/window_manager/macos
 
 SPEC CHECKSUMS:
-  audio_service: 0d9e4e25347bb3efb768f3b9f005911a81e587a7
-  audio_session: 48ab6500f7a5e7c64363e206565a5dfe5a0c1441
+  audio_service: aa99a6ba2ae7565996015322b0bb024e1d25c6fd
+  audio_session: eaca2512cf2b39212d724f35d11f46180ad3a33e
   battery_plus: f51ad29136e025b714b96f7d096f44f604615da7
   desktop_drop: e0b672a7d84c0a6cbc378595e82cdb15f2970a43
-  device_info_plus: a56e6e74dbbd2bb92f2da12c64ddd4f67a749041
+  device_info_plus: 4fb280989f669696856f8b129e4a5e3cd6c48f76
+  file_picker: 7584aae6fa07a041af2b36a2655122d42f578c1a
   flutter_inappwebview_macos: c2d68649f9f8f1831bfcd98d73fd6256366d9d1d
   flutter_tts: ae915565cc6948444b513acc8ee021993281e027
   FlutterMacOS: 8f6f14fa908a6fb3fba0cd85dbd81ec4b251fb24
@@ -136,8 +143,8 @@ SPEC CHECKSUMS:
   share_plus: 510bf0af1a42cd602274b4629920c9649c52f4cc
   shared_preferences_foundation: 9e1978ff2562383bd5676f64ec4e9aa8fa06a6f7
   sqflite_darwin: 20b2a3a3b70e43edae938624ce550a3cbf66a3d0
-  sqlite3: 7559e33dae4c78538df563795af3a86fc887ee71
-  sqlite3_flutter_libs: 5235ce0546528db87927a3ef1baff8b7d5107f0e
+  sqlite3: fc1400008a9b3525f5914ed715a5d1af0b8f4983
+  sqlite3_flutter_libs: f8fc13346870e73fe35ebf6dbb997fbcd156b241
   url_launcher_macos: 0fba8ddabfc33ce0a9afe7c5fef5aab3d8d2d673
   wakelock_plus: 21ddc249ac4b8d018838dbdabd65c5976c308497
   window_manager: 1d01fa7ac65a6e6f83b965471b1a7fdd3f06166c
