@@ -55,96 +55,6 @@ const { configure, ZipReader, BlobReader, TextWriter, BlobWriter } =
   await import('./vendor/zip.js')
 const { EPUB } = await import('./epub.js')
 
-// https://github.com/johnfactotum/foliate
-const debounce = (f, wait, immediate) => {
-  let timeout
-  return (...args) => {
-    const later = () => {
-      timeout = null
-      if (!immediate) f(...args)
-    }
-    const callNow = immediate && !timeout
-    if (timeout) clearTimeout(timeout)
-    timeout = setTimeout(later, wait)
-    if (callNow) f(...args)
-  }
-}
-
-const pointIsInView = ({ x, y }) =>
-  x > 0 && y > 0 && x < window.innerWidth && y < window.innerHeight;
-
-const frameRect = (frame, rect, sx = 1, sy = 1) => {
-  const left = sx * rect.left + frame.left;
-  const right = sx * rect.right + frame.left;
-  const top = sy * rect.top + frame.top;
-  const bottom = sy * rect.bottom + frame.top;
-  return { left, right, top, bottom };
-};
-
-const getLang = el => {
-  const lang = el.lang || el?.getAttributeNS?.('http://www.w3.org/XML/1998/namespace', 'lang');
-  if (lang) return lang;
-  if (el.parentElement) return getLang(el.parentElement);
-};
-
-const getPosition = target => {
-  const frameElement = (target.getRootNode?.() ?? target?.endContainer?.getRootNode?.())
-    ?.defaultView?.frameElement;
-
-  const transform = frameElement ? getComputedStyle(frameElement).transform : '';
-  const match = transform.match(/matrix\((.+)\)/);
-  const [sx, , , sy] = match?.[1]?.split(/\s*,\s*/)?.map(x => parseFloat(x)) ?? [];
-
-  const frame = frameElement?.getBoundingClientRect() ?? { top: 0, left: 0 };
-  const rects = Array.from(target.getClientRects());
-  const first = frameRect(frame, rects[0], sx, sy);
-  const last = frameRect(frame, rects.at(-1), sx, sy);
-  const screenWidth = window.innerWidth;
-  const screenHeight = window.innerHeight;
-  const start = {
-    point: { x: ((first.left + first.right) / 2) / screenWidth, y: first.top / screenHeight },
-    dir: 'up',
-  };
-  const end = {
-    point: { x: ((last.left + last.right) / 2) / screenWidth, y: last.bottom / screenHeight },
-    dir: 'down',
-  };
-  const startInView = pointIsInView(start.point);
-  const endInView = pointIsInView(end.point);
-  if (!startInView && !endInView) return { point: { x: 0, y: 0 } };
-  if (!startInView) return end;
-  if (!endInView) return start;
-  return start.point.y * screenHeight > window.innerHeight - end.point.y * screenHeight ? start : end;
-};
-
-const getSelectionRange = sel => {
-  if (!sel || !sel.rangeCount) return;
-  const range = sel?.getRangeAt(0);
-  if (range.collapsed) return;
-  return range;
-};
-
-//    let isSelecting = false;
-
-const handleSelection = (view, doc, index) => {
-  //    isSelecting = false;
-  const sel = doc.getSelection();
-  const range = getSelectionRange(sel);
-  if (!range) return;
-  const pos = getPosition(range);
-  const cfi = view.getCFI(index, range);
-  const lang = getLang(range.commonAncestorContainer);
-  const text = sel.toString();
-  if (!text) {
-    const newSel = range.startContainer.ownerDocument.getSelection()
-    newSel.removeAllRanges()
-    newSel.addRange(range)
-    text = newSel.toString()
-  }
-  // onSelectionEnd({ index, range, lang, cfi, pos, text });
-  // return 
-  onSelectionEnd({ index, range, lang, cfi, pos, text })
-}
 
 const setSelectionHandler = (view, doc, index) => {
   //    doc.addEventListener('pointerdown', () => isSelecting = true);
@@ -986,7 +896,7 @@ window.readingFeatures = (rules) => {
   readingRules = { ...readingRules, ...rules }
   reader.readingFeatures()
 }
-const ua = navigator.userAgent  
+const ua = navigator.userAgent
 console.log('ua', ua)
 await callFlutter('webviewInitialVariable')
 
