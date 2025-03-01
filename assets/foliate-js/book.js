@@ -184,17 +184,28 @@ const setSelectionHandler = (view, doc, index) => {
       const selRange = getSelectionRange(doc.getSelection())
       if (!selRange) return
 
-      if (selRange.compareBoundaryPoints(Range.END_TO_END, lastLocation.range) >= 0) {
-        view.next()
-        return
+      if (globalThis.pageDebounceTimer) {
+        clearTimeout(globalThis.pageDebounceTimer);
+        globalThis.pageDebounceTimer = null;
       }
 
       const container = view.shadowRoot.querySelector('foliate-paginator').shadowRoot.querySelector("#container");
+
+      if (selRange.compareBoundaryPoints(Range.END_TO_END, lastLocation.range) >= 0) {
+        globalThis.pageDebounceTimer = setTimeout(async () => {
+          await view.next();
+          globalThis.originalScrollLeft = container.scrollLeft;
+          globalThis.pageDebounceTimer = null;
+        }, 1000);
+        return
+      }
+
       const preventScroll = () => {
         const selRange = getSelectionRange(doc.getSelection());
         if (!selRange || !view.lastLocation || !view.lastLocation.range) return;
+        console.log(view.lastLocation.range, selRange)
 
-        if (view.lastLocation.range.startContainer.data === selRange.endContainer.data) {
+        if (view.lastLocation.range.startContainer === selRange.endContainer) {
           container.scrollLeft = globalThis.originalScrollLeft;
         }
       };
