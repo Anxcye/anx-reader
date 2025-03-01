@@ -57,6 +57,7 @@ void webviewInitialVariable(
          fontSize: ${bookStyle.fontSize},
          fontName: '${replaceSingleQuote(fontName)}',
          fontPath: '${replaceSingleQuote(fontPath)}',
+         fontWeight: ${bookStyle.fontWeight},
          letterSpacing: ${bookStyle.letterSpacing},
          spacing: ${bookStyle.lineHeight},
          paragraphSpacing: ${bookStyle.paragraphSpacing},

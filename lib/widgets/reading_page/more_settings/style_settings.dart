@@ -121,6 +121,27 @@ class _StyleSettingsState extends State<StyleSettings> {
       );
     }
 
+    Widget fontWeightSlider(BookStyle bookStyle, StateSetter setState) {
+      return ListTile(
+        contentPadding: EdgeInsets.zero,
+        leading: const Icon(Icons.format_bold),
+        title: DebounceSlider(
+          value: bookStyle.fontWeight,
+          onChanged: (double value) {
+            setState(() {
+              bookStyle.fontWeight = value;
+              epubPlayerKey.currentState!.changeStyle(bookStyle);
+              Prefs().saveBookStyleToPrefs(bookStyle);
+            });
+          },
+          min: 100,
+          max: 900,
+          divisions: 8,
+          label: bookStyle.fontWeight.toString(),
+        ),
+      );
+    }
+
     Widget sliders() {
       BookStyle bookStyle = Prefs().bookStyle;
       return StatefulBuilder(
@@ -130,6 +151,7 @@ class _StyleSettingsState extends State<StyleSettings> {
             sideMarginSlider(bookStyle, setState),
             topBottomMarginSlider(bookStyle, setState),
             letterSpacingSlider(bookStyle, setState),
+            fontWeightSlider(bookStyle, setState),
           ],
         ),
       );

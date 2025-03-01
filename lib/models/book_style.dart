@@ -3,6 +3,7 @@ import 'dart:convert';
 class BookStyle {
   double fontSize;
   String fontFamily;
+  double fontWeight;
   double lineHeight;
   double letterSpacing;
   double wordSpacing;
@@ -16,6 +17,7 @@ class BookStyle {
   BookStyle({
     this.fontSize = 1.0,
     this.fontFamily = 'Arial',
+    this.fontWeight = 400,
     this.lineHeight = 1.8,
     this.letterSpacing = 2.0,
     this.wordSpacing = 2.0,
@@ -30,6 +32,7 @@ class BookStyle {
   BookStyle copyWith({
     double? fontSize,
     String? fontFamily,
+    double? fontWeight,
     double? lineHeight,
     double? letterSpacing,
     double? wordSpacing,
@@ -43,6 +46,7 @@ class BookStyle {
     return BookStyle(
       fontSize: fontSize ?? this.fontSize,
       fontFamily: fontFamily ?? this.fontFamily,
+      fontWeight: fontWeight ?? this.fontWeight,
       lineHeight: lineHeight ?? this.lineHeight,
       letterSpacing: letterSpacing ?? this.letterSpacing,
       wordSpacing: wordSpacing ?? this.wordSpacing,
@@ -59,6 +63,7 @@ class BookStyle {
     return {
       'fontSize': fontSize,
       'fontFamily': fontFamily,
+      'fontWeight': fontWeight,
       'lineHeight': lineHeight,
       'letterSpacing': letterSpacing,
       'wordSpacing': wordSpacing,
@@ -76,6 +81,7 @@ class BookStyle {
     {
       "fontSize": $fontSize,
       "fontFamily": "$fontFamily",
+      "fontWeight": $fontWeight,
       "lineHeight": $lineHeight,
       "letterSpacing": $letterSpacing,
       "wordSpacing": $wordSpacing,
@@ -97,6 +103,11 @@ class BookStyle {
     double paragraphSpacing = data['paragraphSpacing'] is String
         ? double.parse(data['paragraphSpacing'])
         : data['paragraphSpacing'];
+    double fontWeight = data['fontWeight'] == null
+        ? 400
+        : data['fontWeight'] is String
+            ? double.parse(data['fontWeight'])
+            : data['fontWeight'];
 
     if (fontsSize > 2 || fontsSize < 0.5) {
       fontsSize = 1;
@@ -108,6 +119,7 @@ class BookStyle {
     return BookStyle(
       fontSize: fontsSize,
       fontFamily: data['fontFamily'],
+      fontWeight: fontWeight,
       lineHeight: data['lineHeight'] is String
           ? double.parse(data['lineHeight'])
           : data['lineHeight'],

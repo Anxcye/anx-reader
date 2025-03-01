@@ -7,12 +7,17 @@
 * 新增：仿生阅读(#49)
 
 ## 1.2.7
+- Feat: Add font weight slider
+- Fix: AI answer cache(#124)
 - Feat: Expand the range of custom font size
 - Feat: Add volume key page turn switch
 - Feat: Add custom Gemini api url
 - Fix: Android TTS slider value not updating
 - Fix: Txt file chapter title detection(#107)
 - Fix: DeepSeek default model name(#123)
+
+- 新增：调整字体粗细
+- 新增：AI 回答缓存
 - 新增：扩大自定义字体大小范围
 - 新增：音量键翻页开关
 - 新增：自定义 Gemini api url
