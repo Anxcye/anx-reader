@@ -12,6 +12,7 @@
 //   fontSize: 1.2,
 //   fontName: 'customFont0',
 //   fontPath: 'http://localhost:40443/fonts/Fast_Sans.ttf',
+//   fontWeight: 400,
 //   letterSpacing: 0,
 //   spacing: 1.7,
 //   paragraphSpacing: 1,
@@ -275,6 +276,7 @@ const getView = async file => {
 const getCSS = ({ fontSize,
   fontName,
   fontPath,
+  fontWeight,
   letterSpacing,
   spacing,
   textIndent,
@@ -330,6 +332,7 @@ const getCSS = ({ fontSize,
     p, li, blockquote, dd, div, font {
         color: ${fontColor} !important;
         // line-height: ${spacing} !important;
+        font-weight: ${fontWeight} !important;
         padding-bottom: ${paragraphSpacing}em !important;
         text-align: ${justify ? 'justify' : 'start'};
         -webkit-hyphens: ${hyphenate ? 'auto' : 'manual'};
@@ -778,6 +781,7 @@ const setStyle = () => {
     fontSize: style.fontSize,
     fontName: style.fontName,
     fontPath: style.fontPath,
+    fontWeight: style.fontWeight,
     letterSpacing: style.letterSpacing,
     spacing: style.spacing,
     paragraphSpacing: style.paragraphSpacing,

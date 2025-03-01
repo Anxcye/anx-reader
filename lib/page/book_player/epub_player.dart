@@ -134,6 +134,7 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
       changeStyle({
         fontSize: ${bookStyle.fontSize},
         spacing: ${bookStyle.lineHeight},
+        fontWeight: ${bookStyle.fontWeight},
         paragraphSpacing: ${bookStyle.paragraphSpacing},
         topMargin: ${bookStyle.topMargin},
         bottomMargin: ${bookStyle.bottomMargin},
