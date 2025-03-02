@@ -29,10 +29,10 @@ packages:
     dependency: "direct main"
     description:
       name: archive
-      sha256: "0c64e928dcbefddecd234205422bcfc2b5e6d31be0b86fef0d0dd48d7b4c9742"
+      sha256: cb6a278ef2dbb298455e1a713bda08524a175630ec643a242c399c932a0a1f7d
       url: "https://pub.dev"
     source: hosted
-    version: "4.0.4"
+    version: "3.6.1"
   args:
     dependency: transitive
     description:
@@ -827,10 +827,10 @@ packages:
     dependency: "direct main"
     description:
       name: image
-      sha256: "13d3349ace88f12f4a0d175eb5c12dcdd39d35c4c109a8a13dfeb6d0bd9e31c3"
+      sha256: f31d52537dc417fdcde36088fdf11d191026fd5e4fae742491ebd40e5a8bea7d
       url: "https://pub.dev"
     source: hosted
-    version: "4.5.3"
+    version: "4.3.0"
   image_size_getter:
     dependency: transitive
     description:
@@ -1159,14 +1159,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.5.1"
-  posix:
-    dependency: transitive
-    description:
-      name: posix
-      sha256: a0117dc2167805aa9125b82eee515cc891819bac2f538c83646d355b16f58b9a
-      url: "https://pub.dev"
-    source: hosted
-    version: "6.0.1"
   pretty_dio_logger:
     dependency: "direct main"
     description:

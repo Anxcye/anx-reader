@@ -55,8 +55,6 @@ const { configure, ZipReader, BlobReader, TextWriter, BlobWriter } =
   await import('./vendor/zip.js')
 const { EPUB } = await import('./epub.js')
 
-
-
 const getPosition = (target) => {
   const pointIsInView = (point) => {
     const { x, y } = point;
@@ -139,6 +137,7 @@ const handleSelection = (view, doc, index) => {
 
   const position = getPosition(range);
   const cfi = view.getCFI(index, range);
+  const lang = 'en-US'
 
   let text = selection.toString();
   if (!text) {
@@ -151,6 +150,7 @@ const handleSelection = (view, doc, index) => {
   onSelectionEnd({
     index,
     range,
+    lang,
     cfi,
     pos: position,
     text
