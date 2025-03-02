@@ -7,6 +7,10 @@
 * 新增：仿生阅读(#49)
 
 ## 1.2.7
+
+> MacOs 版本处于测试阶段
+> MacOS version in beta
+
 - Feat: Add font weight slider
 - Fix: AI answer cache(#124)
 - Feat: Expand the range of custom font size
