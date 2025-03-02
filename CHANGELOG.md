@@ -6,6 +6,14 @@
 * Feat: Add bionic reading mode(#49)
 * 新增：仿生阅读(#49)
 
+
+## 1.3.1
+> MacOs 版本处于测试阶段
+> MacOS version in beta
+
+- Fix: Some Android devices cannot import txt format books
+- 修复：部分安卓设备无法导入 txt 格式的书籍
+
 ## 1.3.0
 
 > MacOs 版本处于测试阶段
