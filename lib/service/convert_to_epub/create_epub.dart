@@ -116,9 +116,9 @@ Future<File> createEpub(
   zipFile.createSync();
   final encoder = ZipFileEncoder();
   encoder.create(zipFile.path);
+  await encoder.addFile(mimetypeFile);
   await encoder.addDirectory(metainfDir);
   await encoder.addDirectory(oebpsDir);
-  await encoder.addFile(mimetypeFile);
   await encoder.close();
 
   epubDir.deleteSync(recursive: true);

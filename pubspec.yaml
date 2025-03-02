@@ -2,7 +2,7 @@ name: anx_reader
 description: "An e-book reader."
 publish_to: 'none'
 
-version: 1.3.1+2061
+version: 1.3.1+2062
 
 environment:
   sdk: '>=3.5.2 <4.0.0'
@@ -16,7 +16,7 @@ dependencies:
   cupertino_icons: ^1.0.6
   file_picker: ^9.0.2
   path_provider: ^2.1.2
-  image: ^4.5.3
+  image: ^4.3.0
   sqflite: ^2.3.2
   path: ^1.9.0
   shared_preferences: ^2.2.2
@@ -26,7 +26,7 @@ dependencies:
   flutter_colorpicker: ^1.0.3
   html: ^0.15.4
   flutter_html: ^3.0.0-beta.2
-  archive: ^4.0.4
+  archive: ^3.6.1
   flutter_inappwebview: ^6.1.5
   shelf: ^1.4.1
   fl_chart: ^0.70.2
