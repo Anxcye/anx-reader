@@ -6,7 +6,7 @@
 * Feat: Add bionic reading mode(#49)
 * 新增：仿生阅读(#49)
 
-## 1.2.7
+## 1.3.0
 
 > MacOs 版本处于测试阶段
 > MacOS version in beta
