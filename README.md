@@ -52,7 +52,7 @@ Anx Reader, a thoughtfully crafted e-book reader for book lovers. Featuring powe
 - Instant word translation to enhance reading efficiency
 
 💻 **Cross-Platform Support**
-- Seamless experience on Android and Windows
+- Seamless experience on Android / Windows / MacOS(beta)
 - Consistent user interface across devices
 
 ### TODO
