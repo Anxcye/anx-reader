@@ -64,6 +64,8 @@ PODS:
     - FlutterMacOS
   - permission_handler_apple (9.3.0):
     - Flutter
+  - pointer_interceptor_ios (0.0.1):
+    - Flutter
   - receive_sharing_intent (1.8.1):
     - Flutter
   - saver_gallery (0.0.1):
@@ -118,6 +120,7 @@ DEPENDENCIES:
   - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
+  - pointer_interceptor_ios (from `.symlinks/plugins/pointer_interceptor_ios/ios`)
   - receive_sharing_intent (from `.symlinks/plugins/receive_sharing_intent/ios`)
   - saver_gallery (from `.symlinks/plugins/saver_gallery/ios`)
   - share_plus (from `.symlinks/plugins/share_plus/ios`)
@@ -163,6 +166,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/path_provider_foundation/darwin"
   permission_handler_apple:
     :path: ".symlinks/plugins/permission_handler_apple/ios"
+  pointer_interceptor_ios:
+    :path: ".symlinks/plugins/pointer_interceptor_ios/ios"
   receive_sharing_intent:
     :path: ".symlinks/plugins/receive_sharing_intent/ios"
   saver_gallery:
@@ -197,6 +202,7 @@ SPEC CHECKSUMS:
   package_info_plus: af8e2ca6888548050f16fa2f1938db7b5a5df499
   path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
   permission_handler_apple: 4ed2196e43d0651e8ff7ca3483a069d469701f2d
+  pointer_interceptor_ios: ec847ef8b0915778bed2b2cef636f4d177fa8eed
   receive_sharing_intent: 222384f00ffe7e952bbfabaa9e3967cb87e5fe00
   saver_gallery: af2d0c762dafda254e0ad025ef0dabd6506cd490
   SDWebImage: f84b0feeb08d2d11e6a9b843cb06d75ebf5b8868
