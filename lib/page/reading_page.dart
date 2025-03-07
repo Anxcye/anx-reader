@@ -28,6 +28,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:icons_plus/icons_plus.dart';
+import 'package:pointer_interceptor/pointer_interceptor.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 class ReadingPage extends ConsumerStatefulWidget {
@@ -247,131 +248,131 @@ class ReadingPageState extends ConsumerState<ReadingPage>
   Widget build(BuildContext context) {
     Offstage controller = Offstage(
       offstage: bottomBarOffstage,
-      child: Stack(
-        children: [
-          Positioned.fill(
-            child: GestureDetector(
-                onTap: () {
-                  showOrHideAppBarAndBottomBar(false);
-                },
-                child: Container(
-                  color: Colors.black.withOpacity(0.1),
-                )),
-          ),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              AppBar(
-                title: Text(_book.title, overflow: TextOverflow.ellipsis),
-                leading: IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: () {
-                    // close reading page
-                    Navigator.pop(context);
+      child: PointerInterceptor(
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: GestureDetector(
+                  onTap: () {
+                    showOrHideAppBarAndBottomBar(false);
                   },
-                ),
-                actions: [
-                  IconButton(
-                    icon: const Icon(Icons.auto_awesome),
-                    onPressed: () {
-                      SmartDialog.show(
-                        builder: (context) => AlertDialog(
-                          title: Text(L10n.of(context)
-                              .reading_page_summary_the_chapter),
-                          content: FutureBuilder(
-                            future:
-                                epubPlayerKey.currentState!.theChapterContent(),
-                            builder: (context, snapshot) {
-                              if (snapshot.hasData) {
-                                return AiStream(
-                                    prompt: generatePromptSummaryTheChapter(
-                                        snapshot.data!));
-                              }
-                              return const SizedBox.shrink();
-                            },
-                          ),
-                        ),
-                        onDismiss: () {
-                          AiDio.instance.cancel();
-                        },
-                      );
-                    },
-                  ),
-                  IconButton(
-                    icon: const Icon(EvaIcons.more_vertical),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        CupertinoPageRoute(
-                          builder: (context) => BookDetail(book: widget.book),
-                        ),
-                      );
-                    },
-                  ),
-                ],
-              ),
-              const Spacer(),
-              SafeArea(
-                child: ClipRRect(
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(20),
-                    topRight: Radius.circular(20),
-                  ),
                   child: Container(
-                    constraints: const BoxConstraints(maxWidth: 600),
-                    child: Material(
-                      child: StatefulBuilder(
-                        builder: (BuildContext context, StateSetter setState) {
-                          return IntrinsicHeight(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Expanded(child: _currentPage),
-                                Offstage(
-                                  offstage:
-                                      tocOffstage || _currentPage is! SizedBox,
-                                  child: _tocWidget,
-                                ),
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceAround,
-                                  children: [
-                                    IconButton(
-                                      icon: const Icon(Icons.toc),
-                                      onPressed: tocHandler,
-                                    ),
-                                    IconButton(
-                                      icon: const Icon(EvaIcons.edit),
-                                      onPressed: noteHandler,
-                                    ),
-                                    IconButton(
-                                      icon: const Icon(Icons.data_usage),
-                                      onPressed: progressHandler,
-                                    ),
-                                    IconButton(
-                                      icon: const Icon(Icons.color_lens),
-                                      onPressed: () {
-                                        styleHandler(setState);
-                                      },
-                                    ),
-                                    IconButton(
-                                      icon: const Icon(EvaIcons.headphones),
-                                      onPressed: ttsHandler,
-                                    ),
-                                  ],
-                                ),
-                              ],
+                    color: Colors.black.withOpacity(0.1),
+                  )),
+            ),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                AppBar(
+                  title: Text(_book.title, overflow: TextOverflow.ellipsis),
+                  leading: IconButton(
+                    icon: const Icon(Icons.arrow_back),
+                    onPressed: () {
+                      // close reading page
+                      Navigator.pop(context);
+                    },
+                  ),
+                  actions: [
+                    IconButton(
+                      icon: const Icon(Icons.auto_awesome),
+                      onPressed: () {
+                        SmartDialog.show(
+                          builder: (context) => AlertDialog(
+                            title: Text(L10n.of(context)
+                                .reading_page_summary_the_chapter),
+                            content: FutureBuilder(
+                              future:
+                                  epubPlayerKey.currentState!.theChapterContent(),
+                              builder: (context, snapshot) {
+                                if (snapshot.hasData) {
+                                  return AiStream(
+                                      prompt: generatePromptSummaryTheChapter(
+                                          snapshot.data!));
+                                }
+                                return const SizedBox.shrink();
+                              },
                             ),
-                          );
-                        },
+                          ),
+                          onDismiss: () {
+                            AiDio.instance.cancel();
+                          },
+                        );
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(EvaIcons.more_vertical),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          CupertinoPageRoute(
+                            builder: (context) => BookDetail(book: widget.book),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+                const Spacer(),
+                BottomSheet(onClosing: (){},
+                enableDrag: false,
+                 builder: (context) =>
+                    SafeArea(
+                      top:false,
+                      child: Container(
+                        constraints: const BoxConstraints(maxWidth: 600),
+                        child: StatefulBuilder(
+                          builder: (BuildContext context, StateSetter setState) {
+                            return IntrinsicHeight(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Expanded(child: _currentPage),
+                                  Offstage(
+                                    offstage:
+                                        tocOffstage || _currentPage is! SizedBox,
+                                    child: _tocWidget,
+                                  ),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceAround,
+                                    children: [
+                                      IconButton(
+                                        icon: const Icon(Icons.toc),
+                                        onPressed: tocHandler,
+                                      ),
+                                      IconButton(
+                                        icon: const Icon(EvaIcons.edit),
+                                        onPressed: noteHandler,
+                                      ),
+                                      IconButton(
+                                        icon: const Icon(Icons.data_usage),
+                                        onPressed: progressHandler,
+                                      ),
+                                      IconButton(
+                                        icon: const Icon(Icons.color_lens),
+                                        onPressed: () {
+                                          styleHandler(setState);
+                                        },
+                                      ),
+                                      IconButton(
+                                        icon: const Icon(EvaIcons.headphones),
+                                        onPressed: ttsHandler,
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ),
-            ],
-          ),
-        ],
+                
+              ],
+            ),
+          ],
+        ),
       ),
     );
 
