@@ -70,6 +70,7 @@ void showLanguagePickerDialog(BuildContext context) {
     dialogOption('System', '', saveToPrefs),
     dialogOption('English', 'en', saveToPrefs),
     dialogOption('简体中文', 'zh', saveToPrefs),
+    dialogOption('繁體中文', 'zh-TW', saveToPrefs),
     dialogOption('Türkçe', 'tr', saveToPrefs)
   ];
   showSimpleDialog(title, saveToPrefs, children);
