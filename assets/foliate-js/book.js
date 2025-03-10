@@ -203,7 +203,6 @@ const setSelectionHandler = (view, doc, index) => {
       const preventScroll = () => {
         const selRange = getSelectionRange(doc.getSelection());
         if (!selRange || !view.lastLocation || !view.lastLocation.range) return;
-        console.log(view.lastLocation.range, selRange)
 
         if (view.lastLocation.range.startContainer === selRange.endContainer) {
           container.scrollLeft = globalThis.originalScrollLeft;

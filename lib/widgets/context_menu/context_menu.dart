@@ -3,6 +3,7 @@ import 'package:anx_reader/page/reading_page.dart';
 import 'package:anx_reader/widgets/context_menu/excerpt_menu.dart';
 import 'package:anx_reader/widgets/context_menu/translation_menu.dart';
 import 'package:flutter/material.dart';
+import 'package:pointer_interceptor/pointer_interceptor.dart';
 
 void showContextMenu(
   BuildContext context,
@@ -62,33 +63,35 @@ void showContextMenu(
             });
           }
 
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Row(
-                children: [
-                  ExcerptMenu(
-                    annoCfi: annoCfi,
-                    annoContent: annoContent,
-                    id: annoId,
-                    onClose: onClose,
-                    footnote: footnote,
-                    decoration: decoration,
-                    toggleTranslationMenu: toggleTranslationMenu,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              if (showTranslationMenu)
+          return PointerInterceptor(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
                 Row(
                   children: [
-                    TranslationMenu(
-                      content: annoContent,
+                    ExcerptMenu(
+                      annoCfi: annoCfi,
+                      annoContent: annoContent,
+                      id: annoId,
+                      onClose: onClose,
+                      footnote: footnote,
                       decoration: decoration,
+                      toggleTranslationMenu: toggleTranslationMenu,
                     ),
                   ],
                 ),
-            ],
+                const SizedBox(height: 10),
+                if (showTranslationMenu)
+                  Row(
+                    children: [
+                      TranslationMenu(
+                        content: annoContent,
+                        decoration: decoration,
+                      ),
+                    ],
+                  ),
+              ],
+            ),
           );
         }),
       ),
