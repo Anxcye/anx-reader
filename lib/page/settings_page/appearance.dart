@@ -9,6 +9,14 @@ import 'package:provider/provider.dart';
 import 'package:anx_reader/widgets/settings/settings_section.dart';
 import 'package:anx_reader/widgets/settings/settings_tile.dart';
 
+const List<Map<String, String>> languageOptions = [
+  {'system': 'System'},
+  {'English': 'en'},
+  {'简体中文': 'zh'},
+  {'繁體中文': 'zh-TW'},
+  {'Türkçe': 'tr'}
+];
+
 class AppearanceSetting extends StatefulWidget {
   const AppearanceSetting({super.key});
 
@@ -52,7 +60,19 @@ class _AppearanceSettingState extends State<AppearanceSetting> {
             tiles: [
               SettingsTile.navigation(
                   title: Text(L10n.of(context).settings_appearance_language),
-                  value: Text(Prefs().locale?.languageCode ?? 'system'),
+                  value: Text(
+                    Prefs().locale == null
+                        ? languageOptions[0].values.first
+                        : languageOptions
+                            .firstWhere((element) =>
+                                element.values.first ==
+                                Prefs().locale!.languageCode +
+                                    (Prefs().locale!.countryCode != null
+                                        ? "-${Prefs().locale!.countryCode}"
+                                        : ""))
+                            .keys
+                            .first,
+                  ),
                   leading: const Icon(Icons.language),
                   onPressed: (context) {
                     showLanguagePickerDialog(context);
@@ -66,13 +86,12 @@ class _AppearanceSettingState extends State<AppearanceSetting> {
 void showLanguagePickerDialog(BuildContext context) {
   final title = L10n.of(context).settings_appearance_language;
   final saveToPrefs = Prefs().saveLocaleToPrefs;
-  final children = [
-    dialogOption('System', '', saveToPrefs),
-    dialogOption('English', 'en', saveToPrefs),
-    dialogOption('简体中文', 'zh', saveToPrefs),
-    dialogOption('繁體中文', 'zh-TW', saveToPrefs),
-    dialogOption('Türkçe', 'tr', saveToPrefs)
-  ];
+
+  final children = languageOptions.map((e) {
+    final key = e.keys.first;
+    final value = e[key]!;
+    return dialogOption(key, value, saveToPrefs);
+  }).toList();
   showSimpleDialog(title, saveToPrefs, children);
 }
 
