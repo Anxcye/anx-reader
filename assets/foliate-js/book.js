@@ -776,6 +776,12 @@ class Reader {
     return text;
 
   }
+
+  getSelection = () => {
+    const selection = this.#doc.getSelection();
+    const range = getSelectionRange(selection);
+    return range;
+  }
 }
 
 
@@ -944,6 +950,8 @@ window.showContextMenu = () => {
     reader.showContextMenu()
   }
 }
+
+window.getSelection = () => reader.getSelection()
 
 window.clearSelection = () => reader.view.deselect()
 

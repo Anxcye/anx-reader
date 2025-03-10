@@ -720,6 +720,8 @@ export class Paginator extends HTMLElement {
         }
     }
     #onTouchMove(e) {
+        if (window.getSelection()) return
+
         const state = this.#touchState
         if (state.pinched) return
         state.pinched = globalThis.visualViewport.scale > 1
