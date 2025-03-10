@@ -152,7 +152,6 @@ class ReadingPageState extends ConsumerState<ReadingPage>
   }
 
   void hideBottomBar() {
-    print('hideBottomBar');
     setState(() {
       tocOffstage = true;
       _currentPage = const SizedBox(height: 1);
