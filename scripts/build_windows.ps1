@@ -29,6 +29,7 @@ Copy-Item "scripts\ChineseSimplified.isl" "$innoSetupDir\Languages\"
 Copy-Item "scripts\ChineseTraditional.isl" "$innoSetupDir\Languages\"
 & "$innoSetupDir\ISCC.exe" ".\scripts\compile_windows_setup-inno.iss"
 
+New-Item -ItemType Directory -Force -Path "build\windows\unsigned"
 Copy-Item "D:\inno-result\app.exe" "build\windows\unsigned\app.exe"
 Copy-Item "D:\inno-result\app.zip" "build\windows\unsigned\app.zip"
 ls "D:\inno-result\app.exe"
