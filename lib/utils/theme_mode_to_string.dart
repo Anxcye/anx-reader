@@ -8,7 +8,5 @@ String themeModeToString(ThemeMode themeMode) {
       return 'light';
     case ThemeMode.system:
       return 'auto';
-    default:
-      return 'auto';
   }
 }

@@ -4,7 +4,6 @@ import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/page/reading_page.dart';
 import 'package:flutter/material.dart';
 import 'package:icons_plus/icons_plus.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class ReadingMoreSettings extends StatefulWidget {
   const ReadingMoreSettings({super.key});
@@ -82,43 +81,43 @@ class _ReadingMoreSettingsState extends State<ReadingMoreSettings> {
       );
     }
 
-    Widget bionicReading() {
-      return StatefulBuilder(
-        builder: (context, setState) => ListTile(
-          contentPadding: EdgeInsets.zero,
-          title: Text(L10n.of(context).reading_page_bionic_reading,
-              style: Theme.of(context).textTheme.titleMedium),
-          subtitle: GestureDetector(
-            child: Text(
-              textAlign: TextAlign.start,
-              L10n.of(context).reading_page_bionic_reading_tips,
-              style: const TextStyle(
-                fontSize: 12,
-                color: Color(0xFF666666),
-                decoration: TextDecoration.underline,
-              ),
-            ),
-            onTap: () {
-              launchUrl(
-                Uri.parse('https://github.com/Anxcye/anx-reader/issues/49'),
-                mode: LaunchMode.externalApplication,
-              );
-            },
-          ),
-          trailing: Switch(
-            value: Prefs().readingRules.bionicReading,
-            onChanged: (value) {
-              setState(() {
-                Prefs().readingRules =
-                    Prefs().readingRules.copyWith(bionicReading: value);
-                epubPlayerKey.currentState!
-                    .changeReadingRules(Prefs().readingRules);
-              });
-            },
-          ),
-        ),
-      );
-    }
+    // Widget bionicReading() {
+    //   return StatefulBuilder(
+    //     builder: (context, setState) => ListTile(
+    //       contentPadding: EdgeInsets.zero,
+    //       title: Text(L10n.of(context).reading_page_bionic_reading,
+    //           style: Theme.of(context).textTheme.titleMedium),
+    //       subtitle: GestureDetector(
+    //         child: Text(
+    //           textAlign: TextAlign.start,
+    //           L10n.of(context).reading_page_bionic_reading_tips,
+    //           style: const TextStyle(
+    //             fontSize: 12,
+    //             color: Color(0xFF666666),
+    //             decoration: TextDecoration.underline,
+    //           ),
+    //         ),
+    //         onTap: () {
+    //           launchUrl(
+    //             Uri.parse('https://github.com/Anxcye/anx-reader/issues/49'),
+    //             mode: LaunchMode.externalApplication,
+    //           );
+    //         },
+    //       ),
+    //       trailing: Switch(
+    //         value: Prefs().readingRules.bionicReading,
+    //         onChanged: (value) {
+    //           setState(() {
+    //             Prefs().readingRules =
+    //                 Prefs().readingRules.copyWith(bionicReading: value);
+    //             epubPlayerKey.currentState!
+    //                 .changeReadingRules(Prefs().readingRules);
+    //           });
+    //         },
+    //       ),
+    //     ),
+    //   );
+    // }
 
     Widget columnCount() {
       return StatefulBuilder(

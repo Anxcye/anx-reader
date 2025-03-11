@@ -96,7 +96,5 @@ Future<String> translateText(String text, {TranslateService? service}) async {
     // return TranslateApi().deepl(text);
     // case TranslateService.openai:
     // return TranslateApi().openai(text);
-    default:
-      throw Exception('Unsupported translate service: $service');
   }
 }
