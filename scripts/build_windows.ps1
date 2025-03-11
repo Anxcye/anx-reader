@@ -29,10 +29,10 @@ Copy-Item "scripts\ChineseSimplified.isl" "$innoSetupDir\Languages\"
 Copy-Item "scripts\ChineseTraditional.isl" "$innoSetupDir\Languages\"
 & "$innoSetupDir\ISCC.exe" ".\scripts\compile_windows_setup-inno.iss"
 
-Copy-Item "D:\inno-result\app.exe" "build\windows\app.exe"
-Copy-Item "D:\inno-result\app.zip" "build\windows\app.zip"
+Copy-Item "D:\inno-result\app.exe" "build\windows\unsigned\app.exe"
+Copy-Item "D:\inno-result\app.zip" "build\windows\unsigned\app.zip"
 ls "D:\inno-result\app.exe"
-ls "build\windows"
+ls "build\windows\unsigned"
 
 Write-Output 'Generated Windows exe installer!'
 

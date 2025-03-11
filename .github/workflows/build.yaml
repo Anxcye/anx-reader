@@ -121,20 +121,13 @@ jobs:
         shell: pwsh
         run: ./scripts/build_windows.ps1
 
-      - name: Prepare Windows exe for signing
-        if: matrix.platform == 'windows'
-        shell: pwsh
-        run: |
-          cd build/windows
-          Move-Item "app.exe" "unsigned.exe"
-          Compress-Archive -Path "unsigned.exe" -DestinationPath "unsigned.zip"
-
       - name: Upload unsigned Windows exe
         if: matrix.platform == 'windows'
         uses: actions/upload-artifact@v4
+        id: upload-unsigned-exe
         with:
           name: windows-unsigned-exe
-          path: build/windows/unsigned.zip
+          path: build/windows/unsigned/app.zip
           if-no-files-found: error
 
       - name: Sign Windows exe
@@ -148,27 +141,18 @@ jobs:
           artifact-configuration-slug: 'initial_exe'
           github-artifact-id: ${{ steps.upload-unsigned-exe.outputs.artifact-id }}
           wait-for-completion: true
-          output-artifact-directory: 'build/windows/signed'
+          output-artifact-directory: 'build/windows'
 
-      - name: Process signed Windows exe
-        if: matrix.platform == 'windows'
-        shell: pwsh
-        run: |
-          cd build/windows
-          Expand-Archive -Path "signed/unsigned.zip" -DestinationPath "signed"
-          Move-Item "signed/unsigned.exe" "signed/app.exe"
-          Remove-Item -Path "unsigned.exe"
-          Remove-Item -Path "unsigned.zip"
-
-      - name: Upload unsigned Windows portable
+      - name: Upload unsigned Windows zip
         if: matrix.platform == 'windows'
         uses: actions/upload-artifact@v4
+        id: upload-unsigned-zip
         with:
-          name: windows-unsigned-portable
-          path: build/windows/app.zip
+          name: windows-unsigned-zip
+          path: build/windows/unsigned/app.zip
           if-no-files-found: error
 
-      - name: Sign Windows portable
+      - name: Sign Windows zip
         if: matrix.platform == 'windows'
         uses: signpath/github-action-submit-signing-request@v1.1
         with:
@@ -177,9 +161,9 @@ jobs:
           project-slug: 'anx-reader'
           signing-policy-slug: 'test-signing'
           artifact-configuration-slug: 'initial_zip'
-          github-artifact-id: ${{ steps.upload-unsigned-portable.outputs.artifact-id }}
+          github-artifact-id: ${{ steps.upload-unsigned-zip.outputs.artifact-id }}
           wait-for-completion: true
-          output-artifact-directory: 'build/windows/signed'
+          output-artifact-directory: 'build/windows'
 
       - name: Build for macOS
         if: matrix.platform == 'macos'
@@ -205,8 +189,8 @@ jobs:
             mv app-x86_64-release.apk Anx-Reader-${{ matrix.platform }}-${{ env.VERSION }}-x86_64.apk
             mv app-release.apk Anx-Reader-${{ matrix.platform }}-${{ env.VERSION }}-universal.apk
           elif [ "${{ matrix.platform }}" == "windows" ]; then
-            mv windows/signed/app.zip windows/Anx-Reader-${{ matrix.platform }}-${{ env.VERSION }}.zip
-            mv windows/signed/app.exe windows/Anx-Reader-${{ matrix.platform }}-${{ env.VERSION }}.exe
+            mv windows/app.zip windows/Anx-Reader-${{ matrix.platform }}-${{ env.VERSION }}.zip
+            mv windows/app.exe windows/Anx-Reader-${{ matrix.platform }}-${{ env.VERSION }}.exe
           elif [ "${{ matrix.platform }}" == "macos" ]; then
             mkdir -p macos
             mv macos/Build/Products/Release/Anx-Reader-${{ env.VERSION }}.dmg macos/Anx-Reader-${{ matrix.platform }}-${{ env.VERSION }}.dmg
