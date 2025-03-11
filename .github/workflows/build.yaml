@@ -127,7 +127,7 @@ jobs:
         id: upload-unsigned-exe
         with:
           name: windows-unsigned-exe
-          path: build/windows/unsigned/app.zip
+          path: build/windows/unsigned/app.exe
           if-no-files-found: error
 
       - name: Sign Windows exe
