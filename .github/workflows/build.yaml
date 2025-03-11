@@ -121,6 +121,67 @@ jobs:
         shell: pwsh
         run: ./scripts/build_windows.ps1
 
+      - name: Prepare Windows exe for signing
+        if: matrix.platform == 'windows'
+        shell: pwsh
+        run: |
+          cd build/windows
+          Move-Item "Anx-Reader-windows-${{ env.VERSION }}.exe" "unsigned.exe"
+          Compress-Archive -Path "unsigned.exe" -DestinationPath "unsigned.zip"
+
+      - name: Upload unsigned Windows exe
+        if: matrix.platform == 'windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-unsigned-exe
+          path: build/windows/unsigned.zip
+          if-no-files-found: error
+
+      - name: Sign Windows exe
+        if: matrix.platform == 'windows'
+        uses: signpath/github-action-submit-signing-request@v1.1
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: 254a26d6-6c3a-4a55-9ca6-890d0d34deb1
+          project-slug: 'anx-reader'
+          signing-policy-slug: 'test-signing'
+          artifact-configuration-slug: 'initial_exe'
+          github-artifact-id: ${{ steps.upload-unsigned-exe.outputs.artifact-id }}
+          wait-for-completion: true
+          output-artifact-directory: 'build/windows/signed-exe'
+
+      - name: Process signed Windows exe
+        if: matrix.platform == 'windows'
+        shell: pwsh
+        run: |
+          cd build/windows
+          Expand-Archive -Path "signed-exe/unsigned.zip" -DestinationPath "signed-exe"
+          Move-Item "signed-exe/unsigned.exe" "Anx-Reader-windows-${{ env.VERSION }}.exe"
+          Remove-Item -Path "unsigned.exe"
+          Remove-Item -Path "unsigned.zip"
+          Remove-Item -Path "signed-exe" -Recurse
+
+      - name: Upload unsigned Windows portable
+        if: matrix.platform == 'windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-unsigned-portable
+          path: build/windows/Anx-Reader-windows-${{ env.VERSION }}.zip
+          if-no-files-found: error
+
+      - name: Sign Windows portable
+        if: matrix.platform == 'windows'
+        uses: signpath/github-action-submit-signing-request@v1.1
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: '254a26d6-6c3a-4a55-9ca6-890d0d34deb1'
+          project-slug: 'anx-reader'
+          signing-policy-slug: 'test-signing'
+          artifact-configuration-slug: 'initial_zip'
+          github-artifact-id: ${{ steps.upload-unsigned-portable.outputs.artifact-id }}
+          wait-for-completion: true
+          output-artifact-directory: 'build/windows'
+
       - name: Build for macOS
         if: matrix.platform == 'macos'
         shell: bash
