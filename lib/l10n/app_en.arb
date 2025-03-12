@@ -200,7 +200,7 @@
   "settings_ai_cache_size": "Max Cache Size",
   "settings_ai_cache_current_size": "Current {count, plural, other{{count} caches}}",
   "settings_ai_cache_clear": "Clear cache",
-  
+  "ai_service_not_configured": "Please configure the AI service in settins page.",
 
   "ai_cached_by": "Cached by {service}",
   "ai_regenerate": "Regenerate",
