@@ -23,7 +23,7 @@ class _StyleSettingsState extends State<StyleSettings> {
           onChanged: (double value) {
             setState(() {
               bookStyle.indent = value;
-              epubPlayerKey.currentState!.changeStyle(bookStyle);
+              epubPlayerKey.currentState?.changeStyle(bookStyle);
               Prefs().saveBookStyleToPrefs(bookStyle);
             });
           },
@@ -44,7 +44,7 @@ class _StyleSettingsState extends State<StyleSettings> {
           onChanged: (double value) {
             setState(() {
               bookStyle.sideMargin = value;
-              epubPlayerKey.currentState!.changeStyle(bookStyle);
+              epubPlayerKey.currentState?.changeStyle(bookStyle);
               Prefs().saveBookStyleToPrefs(bookStyle);
             });
           },
@@ -65,7 +65,7 @@ class _StyleSettingsState extends State<StyleSettings> {
           onChanged: (double value) {
             setState(() {
               bookStyle.letterSpacing = value;
-              epubPlayerKey.currentState!.changeStyle(bookStyle);
+              epubPlayerKey.currentState?.changeStyle(bookStyle);
               Prefs().saveBookStyleToPrefs(bookStyle);
             });
           },
@@ -89,7 +89,7 @@ class _StyleSettingsState extends State<StyleSettings> {
                 onChanged: (double value) {
                   setState(() {
                     bookStyle.topMargin = value;
-                    epubPlayerKey.currentState!.changeStyle(bookStyle);
+                    epubPlayerKey.currentState?.changeStyle(bookStyle);
                     Prefs().saveBookStyleToPrefs(bookStyle);
                   });
                 },
@@ -106,7 +106,7 @@ class _StyleSettingsState extends State<StyleSettings> {
                 onChanged: (double value) {
                   setState(() {
                     bookStyle.bottomMargin = value;
-                    epubPlayerKey.currentState!.changeStyle(bookStyle);
+                    epubPlayerKey.currentState?.changeStyle(bookStyle);
                     Prefs().saveBookStyleToPrefs(bookStyle);
                   });
                 },
@@ -130,7 +130,7 @@ class _StyleSettingsState extends State<StyleSettings> {
           onChanged: (double value) {
             setState(() {
               bookStyle.fontWeight = value;
-              epubPlayerKey.currentState!.changeStyle(bookStyle);
+              epubPlayerKey.currentState?.changeStyle(bookStyle);
               Prefs().saveBookStyleToPrefs(bookStyle);
             });
           },

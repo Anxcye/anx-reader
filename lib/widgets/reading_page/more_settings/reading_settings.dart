@@ -55,8 +55,8 @@ class _ReadingMoreSettingsState extends State<ReadingMoreSettings> {
                           Prefs().readingRules = Prefs()
                               .readingRules
                               .copyWith(convertChineseMode: value.first);
-                          epubPlayerKey.currentState!
-                              .changeReadingRules(Prefs().readingRules);
+                          epubPlayerKey.currentState
+                              ?.changeReadingRules(Prefs().readingRules);
                         });
                       },
                     ),
@@ -110,7 +110,7 @@ class _ReadingMoreSettingsState extends State<ReadingMoreSettings> {
     //           setState(() {
     //             Prefs().readingRules =
     //                 Prefs().readingRules.copyWith(bionicReading: value);
-    //             epubPlayerKey.currentState!
+    //             epubPlayerKey.currentState?
     //                 .changeReadingRules(Prefs().readingRules);
     //           });
     //         },
@@ -155,7 +155,7 @@ class _ReadingMoreSettingsState extends State<ReadingMoreSettings> {
                             .bookStyle
                             .copyWith(maxColumnCount: value.first);
                         Prefs().saveBookStyleToPrefs(newBookStyle);
-                        epubPlayerKey.currentState!.changeStyle(newBookStyle);
+                        epubPlayerKey.currentState?.changeStyle(newBookStyle);
                       });
                     },
                   ),

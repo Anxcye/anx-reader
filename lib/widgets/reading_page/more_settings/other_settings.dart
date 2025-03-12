@@ -37,8 +37,8 @@ class _OtherSettingsState extends State<OtherSettings> {
                   label: Prefs().awakeTime.toString(),
                   value: Prefs().awakeTime.toDouble(),
                   onChangeEnd: (value) => setState(() {
-                        readingPageKey.currentState!
-                            .setAwakeTimer(value.toInt());
+                        readingPageKey.currentState
+                            ?.setAwakeTimer(value.toInt());
                       }),
                   onChanged: (value) => setState(() {
                         Prefs().awakeTime = value.toInt();

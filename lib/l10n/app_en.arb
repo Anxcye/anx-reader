@@ -202,6 +202,8 @@
   "settings_ai_cache_clear": "Clear cache",
   "ai_service_not_configured": "Please configure the AI service in settins page.",
 
+  "settings_reading": "Reading",
+
   "ai_cached_by": "Cached by {service}",
   "ai_regenerate": "Regenerate",
 
