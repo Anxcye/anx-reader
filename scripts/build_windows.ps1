@@ -17,8 +17,6 @@ New-Item -ItemType Directory -Force -Path "D:\inno-result"
 
 New-Item -ItemType Directory -Force -Path "build\windows\unsigned"
 Copy-Item "D:\inno-result\app.zip" "build\windows\unsigned\app.zip"
-ls "D:\inno-result\app.exe"
-ls "build\windows\unsigned"
 
 Write-Output 'Generated Windows zip!'
 
