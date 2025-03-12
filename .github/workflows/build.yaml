@@ -121,28 +121,6 @@ jobs:
         shell: pwsh
         run: ./scripts/build_windows.ps1
 
-      - name: Upload unsigned Windows exe
-        if: matrix.platform == 'windows'
-        uses: actions/upload-artifact@v4
-        id: upload-unsigned-exe
-        with:
-          name: windows-unsigned-exe
-          path: build/windows/unsigned/app.exe
-          if-no-files-found: error
-
-      - name: Sign Windows exe
-        if: matrix.platform == 'windows'
-        uses: signpath/github-action-submit-signing-request@v1.1
-        with:
-          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
-          organization-id: 254a26d6-6c3a-4a55-9ca6-890d0d34deb1
-          project-slug: 'anx-reader'
-          signing-policy-slug: 'test-signing'
-          artifact-configuration-slug: 'initial_exe'
-          github-artifact-id: ${{ steps.upload-unsigned-exe.outputs.artifact-id }}
-          wait-for-completion: true
-          output-artifact-directory: 'build/windows'
-
       - name: Upload unsigned Windows zip
         if: matrix.platform == 'windows'
         uses: actions/upload-artifact@v4
@@ -162,6 +140,33 @@ jobs:
           signing-policy-slug: 'test-signing'
           artifact-configuration-slug: 'initial_zip'
           github-artifact-id: ${{ steps.upload-unsigned-zip.outputs.artifact-id }}
+          wait-for-completion: true
+          output-artifact-directory: 'build/windows'
+      
+      - name: Build unsigned Windows exe
+        if: matrix.platform == 'windows'
+        shell: pwsh
+        run: ./scripts/build_windows_exe.ps1
+
+      - name: Upload unsigned Windows exe
+        if: matrix.platform == 'windows'
+        uses: actions/upload-artifact@v4
+        id: upload-unsigned-exe
+        with:
+          name: windows-unsigned-exe
+          path: build/windows/unsigned/app.exe
+          if-no-files-found: error
+
+      - name: Sign Windows exe
+        if: matrix.platform == 'windows'
+        uses: signpath/github-action-submit-signing-request@v1.1
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: 254a26d6-6c3a-4a55-9ca6-890d0d34deb1
+          project-slug: 'anx-reader'
+          signing-policy-slug: 'test-signing'
+          artifact-configuration-slug: 'initial_exe'
+          github-artifact-id: ${{ steps.upload-unsigned-exe.outputs.artifact-id }}
           wait-for-completion: true
           output-artifact-directory: 'build/windows'
 
