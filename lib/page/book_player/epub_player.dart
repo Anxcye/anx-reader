@@ -607,12 +607,14 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
     );
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
+      padding: const EdgeInsets.fromLTRB(20, 10, 20, 30),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(chapterCurrentPage == 1 ? widget.book.title : chapterTitle,
-              style: textStyle),
+          SafeArea(
+            child: Text(chapterCurrentPage == 1 ? widget.book.title : chapterTitle,
+                style: textStyle),
+          ),
           const Spacer(),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
