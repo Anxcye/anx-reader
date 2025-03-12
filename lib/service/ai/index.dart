@@ -1,4 +1,6 @@
 import 'package:anx_reader/config/shared_preference_provider.dart';
+import 'package:anx_reader/l10n/generated/L10n.dart';
+import 'package:anx_reader/main.dart';
 import 'package:anx_reader/providers/ai_cache_count.dart';
 import 'package:anx_reader/service/ai/ai_cache.dart';
 import 'package:anx_reader/service/ai/ai_dio.dart';
@@ -8,6 +10,7 @@ import 'package:anx_reader/service/ai/gemini.dart';
 import 'package:anx_reader/service/ai/openai.dart';
 import 'package:anx_reader/utils/log/common.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:path/path.dart';
 
 Stream<String> aiGenerateStream(
   WidgetRef ref,
@@ -21,6 +24,13 @@ Stream<String> aiGenerateStream(
   String buffer = '';
   Stream<String> stream;
 
+  final url = config['url'];
+  if (url == null || url.isEmpty) {
+    yield L10n.of(navigatorKey.currentContext!).ai_service_not_configured;
+    return;
+  }
+
+  
   AnxLog.info('aiGenerateStream: $identifier');
 
   final hash = prompt.hashCode;
