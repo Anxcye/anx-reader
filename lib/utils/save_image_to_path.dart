@@ -4,7 +4,7 @@ import 'dart:typed_data';
 
 import 'package:anx_reader/utils/log/common.dart';
 
-Future<String> saveImageToPath(String image, String path, String? name) async {
+Future<String> saveB64ImageToPath(String image, String path, String? name) async {
   try {
     // image is base64 encoded
     // data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD//gA8Q1JFQVRPUjogZ2...

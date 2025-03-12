@@ -4,7 +4,7 @@ import 'package:anx_reader/utils/get_path/get_download_path.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_file_dialog/flutter_file_dialog.dart';
 
-Future<String?> fileSaver(
+Future<String?> saveFileToDownload(
     {required Uint8List bytes,
     required String fileName,
     String? mimeType}) async {
@@ -13,6 +13,7 @@ Future<String?> fileSaver(
 
   switch (defaultTargetPlatform) {
     case TargetPlatform.android:
+    case TargetPlatform.iOS:
       SaveFileDialogParams params = SaveFileDialogParams(
         // sourceFilePath: file.path,
         data: bytes,
@@ -23,7 +24,6 @@ Future<String?> fileSaver(
       return filePath;
     case TargetPlatform.windows:
     case TargetPlatform.macOS:
-    case TargetPlatform.iOS:
       final file = File(fileSavePath);
 
       if (!await file.exists()) {

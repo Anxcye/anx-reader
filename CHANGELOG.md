@@ -6,6 +6,8 @@
 * Feat: Add bionic reading mode(#49)
 * 新增：仿生阅读(#49)
 
+## 1.3.2
+- feat: save image on ios
 
 ## 1.3.1
 > MacOs 版本处于测试阶段

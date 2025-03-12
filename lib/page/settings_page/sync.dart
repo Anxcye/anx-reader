@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:anx_reader/dao/database.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
-import 'package:anx_reader/utils/file_saver.dart';
+import 'package:anx_reader/utils/save_file_to_download.dart';
 import 'package:anx_reader/utils/get_path/get_temp_dir.dart';
 import 'package:anx_reader/utils/get_path/databases_path.dart';
 import 'package:anx_reader/utils/get_path/get_base_path.dart';
@@ -113,7 +113,7 @@ class _AppearanceSettingState extends ConsumerState<SyncSetting> {
       // final filePath = await FlutterFileDialog.saveFile(params: params);
       String fileName =
           'AnxReader-Backup-${DateTime.now().year}-${DateTime.now().month}-${DateTime.now().day}-v2.zip';
-      String? filePath = await fileSaver(
+      String? filePath = await saveFileToDownload(
           bytes: await file.readAsBytes(),
           fileName: fileName,
           mimeType: 'application/zip');
