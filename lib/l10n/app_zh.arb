@@ -202,6 +202,8 @@
   "settings_ai_cache_clear": "清空缓存",
   "ai_service_not_configured": "需要先完成设置中的AI配置",
 
+  "settings_reading": "阅读",
+
   "ai_cached_by": "缓存来自 {service}",
   "ai_regenerate": "重新生成",
 

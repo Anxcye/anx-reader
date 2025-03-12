@@ -10,7 +10,6 @@ import 'package:anx_reader/service/ai/gemini.dart';
 import 'package:anx_reader/service/ai/openai.dart';
 import 'package:anx_reader/utils/log/common.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:path/path.dart';
 
 Stream<String> aiGenerateStream(
   WidgetRef ref,

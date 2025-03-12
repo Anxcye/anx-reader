@@ -6,6 +6,7 @@ import 'package:anx_reader/widgets/reading_page/more_settings/reading_settings.d
 import 'package:anx_reader/widgets/reading_page/more_settings/style_settings.dart';
 import 'package:contentsize_tabbarview/contentsize_tabbarview.dart';
 import 'package:flutter/material.dart';
+import 'package:pointer_interceptor/pointer_interceptor.dart';
 
 enum ReadingSettings { theme, style }
 
@@ -36,30 +37,32 @@ void showMoreSettings(ReadingSettings settings) {
     context: context,
     builder: (context) {
       return Dialog(
-        child: Container(
-          constraints: const BoxConstraints(maxWidth: 600),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TabBar(
-                controller: tabController,
-                tabs: tabs,
-              ),
-              const Divider(height: 0),
-              ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxHeight: MediaQuery.of(context).size.height * 0.5,
-                  maxWidth: MediaQuery.of(context).size.width * 0.8,
+        child: PointerInterceptor(
+          child: Container(
+            constraints: const BoxConstraints(maxWidth: 600),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TabBar(
+                  controller: tabController,
+                  tabs: tabs,
                 ),
-                child: SingleChildScrollView(
-                  child: ContentSizeTabBarView(
-                    animationDuration: const Duration(milliseconds: 600),
-                    controller: tabController,
-                    children: children,
+                const Divider(height: 0),
+                ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxHeight: MediaQuery.of(context).size.height * 0.5,
+                    maxWidth: MediaQuery.of(context).size.width * 0.8,
+                  ),
+                  child: SingleChildScrollView(
+                    child: ContentSizeTabBarView(
+                      animationDuration: const Duration(milliseconds: 600),
+                      controller: tabController,
+                      children: children,
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       );
