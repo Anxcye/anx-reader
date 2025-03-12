@@ -204,6 +204,10 @@
 
   "settings_reading": "Reading",
 
+  "settings_bookshelf": "Bookshelf",
+  "settings_bookshelf_cover": "Book cover",
+  "settings_bookshelf_cover_width": "Book cover width",
+
   "ai_cached_by": "Cached by {service}",
   "ai_regenerate": "Regenerate",
 

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/providers/book_list.dart';
@@ -133,7 +134,7 @@ class BookshelfPageState extends ConsumerState<BookshelfPage> {
                           padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
                           gridDelegate:
                               SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: constraints.maxWidth ~/ 110,
+                            crossAxisCount: constraints.maxWidth ~/ Prefs().bookCoverWidth,
                             childAspectRatio: 0.55,
                             mainAxisSpacing: 30,
                             crossAxisSpacing: 20,

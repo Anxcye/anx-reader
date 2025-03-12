@@ -435,4 +435,13 @@ class Prefs extends ChangeNotifier {
   bool get volumeKeyTurnPage {
     return prefs.getBool('volumeKeyTurnPage') ?? false;
   }
+
+  set bookCoverWidth(double width) {
+    prefs.setDouble('bookCoverWidth', width);
+    notifyListeners();
+  }
+
+  double get bookCoverWidth {
+    return prefs.getDouble('bookCoverWidth') ?? 110;
+  }
 }
