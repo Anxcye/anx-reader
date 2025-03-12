@@ -1,8 +1,5 @@
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
-import 'package:anx_reader/widgets/reading_page/more_settings/other_settings.dart';
-import 'package:anx_reader/widgets/reading_page/more_settings/reading_settings.dart';
-import 'package:anx_reader/widgets/reading_page/more_settings/style_settings.dart';
 import 'package:anx_reader/widgets/settings/settings_section.dart';
 import 'package:anx_reader/widgets/settings/settings_tile.dart';
 import 'package:anx_reader/widgets/settings/settings_title.dart';
