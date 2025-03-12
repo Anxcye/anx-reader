@@ -1,6 +1,6 @@
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/main.dart';
-import 'package:anx_reader/utils/file_saver.dart';
+import 'package:anx_reader/utils/save_file_to_download.dart';
 import 'package:anx_reader/utils/log/common.dart';
 import 'package:anx_reader/utils/toast/common.dart';
 import 'package:device_info_plus/device_info_plus.dart';
@@ -10,7 +10,7 @@ import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:saver_gallery/saver_gallery.dart';
 
-class DownloadUtil {
+class SaveImg {
   static Future<bool> requestStoragePer() async {
     await Permission.storage.request();
     PermissionStatus status = await Permission.storage.status;
@@ -135,7 +135,7 @@ class DownloadUtil {
     String extension,
     String name,
   ) async {
-    String? path = await fileSaver(
+    String? path = await saveFileToDownload(
       bytes: img,
       fileName: '$name.$extension',
       mimeType: 'image/$extension',

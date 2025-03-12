@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:anx_reader/l10n/generated/L10n.dart';
-import 'package:anx_reader/utils/file_saver.dart';
+import 'package:anx_reader/utils/save_file_to_download.dart';
 import 'package:anx_reader/utils/get_path/log_file.dart';
 import 'package:anx_reader/utils/toast/common.dart';
 import 'package:anx_reader/utils/log/common.dart';
@@ -96,7 +96,7 @@ class _LogPageState extends State<LogPage> {
     // await FlutterFileDialog.saveFile(params: params);
     String fileName =
         'AnxReader-Log-${DateTime.now().year}-${DateTime.now().month}-${DateTime.now().day}.txt';
-    String? filePath = await fileSaver(
+    String? filePath = await saveFileToDownload(
         bytes: await logFile.readAsBytes(),
         fileName: fileName,
         mimeType: 'text/plain');

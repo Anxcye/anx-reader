@@ -3,7 +3,7 @@ import 'package:anx_reader/main.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/models/book_note.dart';
 import 'package:anx_reader/utils/convert_string_to_uint8list.dart';
-import 'package:anx_reader/utils/file_saver.dart';
+import 'package:anx_reader/utils/save_file_to_download.dart';
 import 'package:csv/csv.dart';
 import 'package:fast_gbk/fast_gbk.dart';
 import 'package:flutter/cupertino.dart';
@@ -56,7 +56,7 @@ Future<void> exportNotes(
         return exportContent;
       }).join('');
 
-      String? filePath = await fileSaver(
+      String? filePath = await saveFileToDownload(
           bytes: convertStringToUint8List(notes),
           fileName: '${book.title.replaceAll('\n', ' ')}.md',
           mimeType: 'text/markdown');
@@ -76,7 +76,7 @@ Future<void> exportNotes(
         }
         return exportContent;
       }).join('\n\n');
-      String? filePath = await fileSaver(
+      String? filePath = await saveFileToDownload(
           bytes: convertStringToUint8List(notes),
           fileName: '${book.title}.txt',
           mimeType: 'text/plain');
@@ -113,7 +113,7 @@ Future<void> exportNotes(
 
       final string = const ListToCsvConverter().convert(list);
 
-      String? filePath = await fileSaver(
+      String? filePath = await saveFileToDownload(
           bytes: Uint8List.fromList(gbk.encode(string)),
           fileName: '${book.title}.csv',
           mimeType: 'text/csv');

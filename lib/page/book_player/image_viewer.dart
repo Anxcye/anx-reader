@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:anx_reader/utils/download_util.dart';
+import 'package:anx_reader/utils/save_img.dart';
 import 'package:anx_reader/utils/get_path/get_temp_dir.dart';
 import 'package:anx_reader/utils/log/common.dart';
 import 'package:anx_reader/utils/save_image_to_path.dart';
@@ -66,14 +66,14 @@ class ImageViewer extends StatelessWidget {
                     children: [
                       IconButton(
                         onPressed: () {
-                          DownloadUtil.downloadImg(
+                          SaveImg.downloadImg(
                               imageBytes!, imgType!, bookName);
                         },
                         icon: const Icon(Icons.download, color: Colors.white),
                       ),
                       IconButton(
                         onPressed: () async {
-                          final path = await saveImageToPath(
+                          final path = await saveB64ImageToPath(
                             image,
                             (await getAnxTempDir()).path,
                             "AnxReader_$bookName",
