@@ -204,6 +204,10 @@
 
   "settings_reading": "阅读",
 
+  "settings_bookshelf": "书架",
+  "settings_bookshelf_cover": "封面",
+  "settings_bookshelf_cover_width": "封面宽度",
+
   "ai_cached_by": "缓存来自 {service}",
   "ai_regenerate": "重新生成",
 

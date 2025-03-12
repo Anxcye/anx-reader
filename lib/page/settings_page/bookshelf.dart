@@ -1,59 +1,45 @@
-
+import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
-import 'package:anx_reader/widgets/settings/settings_app_bar.dart';
-import 'package:anx_reader/widgets/settings/settings_title.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+import 'package:anx_reader/widgets/reading_page/more_settings/other_settings.dart';
+import 'package:anx_reader/widgets/reading_page/more_settings/reading_settings.dart';
+import 'package:anx_reader/widgets/reading_page/more_settings/style_settings.dart';
 import 'package:anx_reader/widgets/settings/settings_section.dart';
 import 'package:anx_reader/widgets/settings/settings_tile.dart';
+import 'package:anx_reader/widgets/settings/settings_title.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class BookshelfSettings extends StatelessWidget {
+class BookshelfSettings extends ConsumerStatefulWidget {
   const BookshelfSettings({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      leading: const Icon(Icons.palette),
-      title: Text(L10n.of(context).settings_appearance),
-      trailing: const Icon(Icons.chevron_right),
-      onTap: () {
-        Navigator.push(
-          context,
-          CupertinoPageRoute(
-              builder: (context) => const SubBookshelfSettings()),
-        );
-      },
-    );
-  }
+  ConsumerState<BookshelfSettings> createState() => _BookshelfSettingsState();
 }
 
-class SubBookshelfSettings extends StatelessWidget {
-  const SubBookshelfSettings({super.key});
-
+class _BookshelfSettingsState extends ConsumerState<BookshelfSettings> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: settingsAppBar(L10n.of(context).settings_appearance, context),
-      body: settingsSections(
-        sections: [
-          SettingsSection(
-            title: const Text('Common'),
-            tiles: <SettingsTile>[
-              SettingsTile.navigation(
-                leading: const Icon(Icons.language),
-                title: const Text('Language'),
-                value: const Text('English'),
-              ),
-              SettingsTile.switchTile(
-                onToggle: (value) {},
-                initialValue: true,
-                leading: const Icon(Icons.format_paint),
-                title: const Text('Enable custom theme'),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
+    return settingsSections(sections: [
+      SettingsSection(
+          title: Text(L10n.of(context).settings_bookshelf_cover),
+          tiles: [
+            CustomSettingsTile(
+                child: ListTile(
+                  title: Text(L10n.of(context).settings_bookshelf_cover_width),
+                  subtitle: Slider(
+                                value: Prefs().bookCoverWidth,
+                                onChanged: (value) {
+                  setState(() {
+                    Prefs().bookCoverWidth = value;
+                  });
+                                },
+                                max: 260,
+                                min: 80,
+                                divisions: 18,
+                                label: Prefs().bookCoverWidth.toStringAsFixed(0),
+                              ),
+                )),
+          ]),
+    ]);
   }
 }

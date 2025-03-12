@@ -1,3 +1,4 @@
+import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/providers/book_list.dart';
@@ -30,8 +31,8 @@ class _BookOpenedFolderState extends ConsumerState<BookOpenedFolder> {
         width: MediaQuery.of(context).size.width * 0.7,
         child: GridView.builder(
             shrinkWrap: true,
-            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-              maxCrossAxisExtent: 100,
+            gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: Prefs().bookCoverWidth,
               childAspectRatio: 1 / 1.9,
               crossAxisSpacing: 10,
               mainAxisSpacing: 10,
