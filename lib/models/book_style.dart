@@ -15,16 +15,16 @@ class BookStyle {
   int maxColumnCount;
 
   BookStyle({
-    this.fontSize = 1.0,
+    this.fontSize = 1.4,
     this.fontFamily = 'Arial',
     this.fontWeight = 400,
     this.lineHeight = 1.8,
     this.letterSpacing = 2.0,
-    this.wordSpacing = 2.0,
+    this.wordSpacing = 0.0,
     this.paragraphSpacing = 1.0,
     this.sideMargin = 6.0,
-    this.topMargin = 80.0,
-    this.bottomMargin = 40.0,
+    this.topMargin = 90.0,
+    this.bottomMargin = 50.0,
     this.indent = 0,
     this.maxColumnCount = 0,
   });
@@ -109,8 +109,8 @@ class BookStyle {
             ? double.parse(data['fontWeight'])
             : data['fontWeight'];
 
-    if (fontsSize > 2 || fontsSize < 0.5) {
-      fontsSize = 1;
+    if (fontsSize > 3 || fontsSize < 0.5) {
+      fontsSize = 1.4;
     }
     if (paragraphSpacing > 3 || paragraphSpacing < 0) {
       paragraphSpacing = 1.5;
