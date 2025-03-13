@@ -77,7 +77,33 @@ class _AppearanceSettingState extends State<AppearanceSetting> {
                   onPressed: (context) {
                     showLanguagePickerDialog(context);
                   })
-            ])
+            ]),
+        SettingsSection(
+            title: Text(L10n.of(context).settings_bookshelf_cover),
+            tiles: [
+              CustomSettingsTile(
+                  child: ListTile(
+                title: Text(L10n.of(context).settings_bookshelf_cover_width),
+                subtitle: Row(
+                  children: [
+                    Text(Prefs().bookCoverWidth.toStringAsFixed(0)),
+                    Expanded(
+                      child: Slider(
+                        value: Prefs().bookCoverWidth,
+                        onChanged: (value) {
+                          setState(() {
+                            Prefs().bookCoverWidth = value;
+                          });
+                        },
+                        max: 260,
+                        min: 80,
+                        divisions: 18,
+                      ),
+                    ),
+                  ],
+                ),
+              )),
+            ]),
       ],
     );
   }
