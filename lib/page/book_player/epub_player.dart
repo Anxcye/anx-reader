@@ -77,6 +77,7 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
   late Book book;
   String? backgroundColor;
   String? textColor;
+  Timer? styleTimer;
 
   final StreamController<double> _searchProgressController =
       StreamController<double>.broadcast();
@@ -130,7 +131,9 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
   }
 
   void changeStyle(BookStyle bookStyle) {
-    webViewController.evaluateJavascript(source: '''
+    styleTimer?.cancel();
+    styleTimer = Timer(const Duration(milliseconds: 300), () {
+      webViewController.evaluateJavascript(source: '''
       changeStyle({
         fontSize: ${bookStyle.fontSize},
         spacing: ${bookStyle.lineHeight},
@@ -143,7 +146,8 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
         textIndent: ${bookStyle.indent},
         maxColumnCount: ${bookStyle.maxColumnCount},
       })
-    ''');
+      ''');
+    });
   }
 
   void changeReadingRules(ReadingRules readingRules) {
@@ -612,7 +616,8 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SafeArea(
-            child: Text(chapterCurrentPage == 1 ? widget.book.title : chapterTitle,
+            child: Text(
+                chapterCurrentPage == 1 ? widget.book.title : chapterTitle,
                 style: textStyle),
           ),
           const Spacer(),
