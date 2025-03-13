@@ -64,6 +64,14 @@
   "reading_page_bionic_reading_tips": "什么是仿生阅读？",
 
   "context_menu_add_note_tips": "写下你的想法！",
+  "context_menu_copy": "复制",
+  "context_menu_search": "搜索",
+  "context_menu_translate": "翻译",
+  "context_menu_write_idea": "写想法",
+  "context_menu_delete": "删除",
+  "context_menu_confirm": "确认",
+  "context_menu_highlight": "高亮",
+  "context_menu_underline": "下划线",
 
   "reading_page_full_screen": "全屏",
   "reading_page_screen_timeout": "屏幕超时",
