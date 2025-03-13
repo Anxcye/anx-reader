@@ -7,11 +7,13 @@
 * 新增：仿生阅读(#49)
 
 ## 1.3.2
+- Feat: add text for slider(#48)
 - Feat: add tips for AI configuration
 - Feat: custom shelf cover width
 - Feat: toc item scroll to current chapter(#141)
 - Fix: save image on iOS
 
+- 新增：样式调节滑块的文字说明(#48)
 - 新增：AI 配置提示
 - 新增：自定义书架封面宽度
 - 新增：目录项滚动到当前章节(#141)
