@@ -7,7 +7,15 @@
 * 新增：仿生阅读(#49)
 
 ## 1.3.2
-- feat: save image on ios
+- Feat: add tips for AI configuration
+- Feat: custom shelf cover width
+- Feat: toc item scroll to current chapter(#141)
+- Fix: save image on iOS
+
+- 新增：AI 配置提示
+- 新增：自定义书架封面宽度
+- 新增：目录项滚动到当前章节(#141)
+- 修复：iOS 端保存图片
 
 ## 1.3.1
 > MacOs 版本处于测试阶段

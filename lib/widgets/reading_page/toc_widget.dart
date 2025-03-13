@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/main.dart';
 import 'package:anx_reader/models/search_result_model.dart';
@@ -26,91 +28,121 @@ class TocWidget extends StatefulWidget {
 class _TocWidgetState extends State<TocWidget> {
   String? _searchValue;
   TextEditingController searchBarController = TextEditingController();
+  ScrollController listViewController = ScrollController();
+  List<bool> isExpanded = [];
+
+  @override
+  void initState() {
+    super.initState();
+    for (var item in widget.tocItems) {
+      isExpanded.add(_isSelected(item));
+    }
+
+    final offset = isExpanded.indexWhere((isExpanded) => isExpanded);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (listViewController.hasClients) {
+        listViewController.jumpTo(
+            min(offset * 48, listViewController.position.maxScrollExtent - 48));
+      }
+    });
+  }
+
+  bool _isSelected(TocItem tocItem) {
+    if (tocItem.href == widget.epubPlayerKey.currentState!.chapterHref) {
+      return true;
+    }
+    for (var subItem in tocItem.subitems) {
+      if (_isSelected(subItem)) {
+        return true;
+      }
+    }
+    return false;
+  }
 
   @override
   Widget build(BuildContext context) {
+    var searchBox = SizedBox(
+      height: 35,
+      child: SearchBar(
+        controller: searchBarController,
+        shadowColor: const WidgetStatePropertyAll<Color>(Colors.transparent),
+        padding: const WidgetStatePropertyAll<EdgeInsets>(
+            EdgeInsets.symmetric(horizontal: 16.0)),
+        leading: const Icon(Icons.search),
+        trailing: [
+          _searchValue != null
+              ? IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () {
+                    setState(() {
+                      _searchValue = null;
+                      searchBarController.clear();
+                      epubPlayerKey.currentState!.clearSearch();
+                    });
+                  },
+                )
+              : const SizedBox(),
+        ],
+        onSubmitted: (value) {
+          setState(() {
+            if (value.isEmpty) {
+              _searchValue = null;
+            } else {
+              _searchValue = value;
+              epubPlayerKey.currentState!.search(value);
+            }
+          });
+        },
+      ),
+    );
+    var searchResult = Expanded(
+        child: Column(
+      children: [
+        const SizedBox(height: 6.0),
+        StreamBuilder<double>(
+          stream: epubPlayerKey.currentState!.searchProgressStream,
+          builder: (context, snapshot) {
+            return snapshot.data == 1.0
+                ? const SizedBox()
+                : LinearProgressIndicator(
+                    value: snapshot.data ?? 0.0,
+                  );
+          },
+        ),
+        StreamBuilder(
+            stream: epubPlayerKey.currentState!.searchResultStream,
+            builder: (context, snapshot) {
+              if (snapshot.data == null) {
+                return const SizedBox();
+              }
+              List<SearchResultModel> searchResults = snapshot.data!;
+              return Expanded(
+                child: ListView.builder(
+                  itemCount: searchResults.length,
+                  itemBuilder: (context, index) {
+                    return searchResultWidget(
+                      searchResult: searchResults[index],
+                      hideAppBarAndBottomBar: widget.hideAppBarAndBottomBar,
+                      epubPlayerKey: widget.epubPlayerKey,
+                    );
+                  },
+                ),
+              );
+            }),
+      ],
+    ));
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       height: 0.6 * MediaQuery.of(context).size.height,
       child: Column(
         children: [
           widgetTitle(L10n.of(context).reading_contents, null),
-          SizedBox(
-            height: 35,
-            child: SearchBar(
-              controller: searchBarController,
-              shadowColor:
-                  const WidgetStatePropertyAll<Color>(Colors.transparent),
-              padding: const WidgetStatePropertyAll<EdgeInsets>(
-                  EdgeInsets.symmetric(horizontal: 16.0)),
-              leading: const Icon(Icons.search),
-              trailing: [
-                _searchValue != null
-                    ? IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () {
-                          setState(() {
-                            _searchValue = null;
-                            searchBarController.clear();
-                            epubPlayerKey.currentState!.clearSearch();
-                          });
-                        },
-                      )
-                    : const SizedBox(),
-              ],
-              onSubmitted: (value) {
-                setState(() {
-                  if (value.isEmpty) {
-                    _searchValue = null;
-                  } else {
-                    _searchValue = value;
-                    epubPlayerKey.currentState!.search(value);
-                  }
-                });
-              },
-            ),
-          ),
+          searchBox,
           _searchValue != null
-              ? Expanded(
-                  child: Column(
-                  children: [
-                    const SizedBox(height: 6.0),
-                    StreamBuilder<double>(
-                      stream: epubPlayerKey.currentState!.searchProgressStream,
-                      builder: (context, snapshot) {
-                        return snapshot.data == 1.0
-                            ? const SizedBox()
-                            : LinearProgressIndicator(
-                                value: snapshot.data ?? 0.0,
-                              );
-                      },
-                    ),
-                    StreamBuilder(
-                        stream: epubPlayerKey.currentState!.searchResultStream,
-                        builder: (context, snapshot) {
-                          if (snapshot.data == null) {
-                            return const SizedBox();
-                          }
-                          List<SearchResultModel> searchResults =
-                              snapshot.data!;
-                          return Expanded(
-                            child: ListView.builder(
-                              itemCount: searchResults.length,
-                              itemBuilder: (context, index) {
-                                return searchResultWidget(
-                                  searchResult: searchResults[index],
-                                  hideAppBarAndBottomBar:
-                                      widget.hideAppBarAndBottomBar,
-                                  epubPlayerKey: widget.epubPlayerKey,
-                                );
-                              },
-                            ),
-                          );
-                        }),
-                  ],
-                ))
+              ? searchResult
               : Expanded(
                   child: ListView.builder(
+                    controller: listViewController,
                     itemCount: widget.tocItems.length,
                     itemBuilder: (context, index) {
                       return TocItemWidget(
@@ -205,7 +237,13 @@ class TocItemWidget extends StatefulWidget {
 }
 
 class TocItemWidgetState extends State<TocItemWidget> {
-  bool _isExpanded = false;
+  late bool _isExpanded;
+
+  @override
+  void initState() {
+    super.initState();
+    _isExpanded = _isSelected(widget.tocItem);
+  }
 
   TextStyle tocStyle(content) => TextStyle(
         fontSize: 16,
@@ -217,6 +255,18 @@ class TocItemWidgetState extends State<TocItemWidget> {
         color: Theme.of(context).colorScheme.primary,
         fontWeight: FontWeight.bold,
       );
+
+  bool _isSelected(TocItem tocItem) {
+    if (tocItem.href == widget.epubPlayerKey.currentState!.chapterHref) {
+      return true;
+    }
+    for (var subItem in tocItem.subitems) {
+      if (_isSelected(subItem)) {
+        return true;
+      }
+    }
+    return false;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -271,17 +321,5 @@ class TocItemWidgetState extends State<TocItemWidget> {
             color: Colors.grey.withAlpha(110)),
       ],
     );
-  }
-
-  bool _isSelected(TocItem tocItem) {
-    if (tocItem.href == widget.epubPlayerKey.currentState!.chapterHref) {
-      return true;
-    }
-    for (var subItem in tocItem.subitems) {
-      if (_isSelected(subItem)) {
-        return true;
-      }
-    }
-    return false;
   }
 }
