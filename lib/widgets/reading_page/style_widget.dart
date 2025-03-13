@@ -9,6 +9,7 @@ import 'package:anx_reader/service/book_player/book_player_server.dart';
 import 'package:anx_reader/service/font.dart';
 import 'package:anx_reader/utils/font_parser.dart';
 import 'package:anx_reader/utils/get_path/get_base_path.dart';
+import 'package:anx_reader/widgets/icon_and_text.dart';
 import 'package:anx_reader/widgets/reading_page/more_settings/more_settings.dart';
 import 'package:anx_reader/widgets/reading_page/widget_title.dart';
 import 'package:anx_reader/dao/theme.dart';
@@ -48,10 +49,10 @@ class StyleWidget extends StatefulWidget {
   final Function setCurrentPage;
 
   @override
-  _StyleWidgetState createState() => _StyleWidgetState();
+  StyleWidgetState createState() => StyleWidgetState();
 }
 
-class _StyleWidgetState extends State<StyleWidget> {
+class StyleWidgetState extends State<StyleWidget> {
   BookStyle bookStyle = Prefs().bookStyle;
   int? currentThemeId = Prefs().readTheme.id;
 
@@ -64,6 +65,7 @@ class _StyleWidgetState extends State<StyleWidget> {
           widgetTitle(
               L10n.of(context).reading_page_style, ReadingSettings.theme),
           sliders(),
+          const SizedBox(height: 10),
           fontAndPageTurn(),
           const Divider(),
           themeSelector(),
@@ -189,12 +191,16 @@ class _StyleWidgetState extends State<StyleWidget> {
   Row lineHeightAndParagraphSpacingSlider() {
     return Row(
       children: [
-        const Icon(Icons.line_weight),
+        IconAndText(
+          icon: const Icon(Icons.line_weight),
+          text: L10n.of(context).reading_page_line_spacing,
+        ),
         Expanded(
           child: Slider(
-              value: bookStyle.lineHeight,
-              onChanged: (double value) {
-                setState(() {
+            padding: EdgeInsets.symmetric(horizontal: 8),
+            value: bookStyle.lineHeight,
+            onChanged: (double value) {
+              setState(() {
                   bookStyle.lineHeight = value;
                   widget.epubPlayerKey.currentState!.changeStyle(bookStyle);
                   Prefs().saveBookStyleToPrefs(bookStyle);
@@ -205,9 +211,13 @@ class _StyleWidgetState extends State<StyleWidget> {
               divisions: 10,
               label: (bookStyle.lineHeight / 3 * 10).round().toString()),
         ),
-        const Icon(Icons.height),
+        IconAndText(
+          icon: const Icon(Icons.height),
+          text: L10n.of(context).reading_page_paragraph_spacing,
+        ),
         Expanded(
           child: Slider(
+            padding: EdgeInsets.symmetric(horizontal: 8),
             value: bookStyle.paragraphSpacing,
             onChanged: (double value) {
               setState(() {
@@ -229,7 +239,10 @@ class _StyleWidgetState extends State<StyleWidget> {
   Row fontSizeSlider() {
     return Row(
       children: [
-        const Icon(Icons.format_size),
+        IconAndText(
+          icon: const Icon(Icons.format_size),
+          text: L10n.of(context).reading_page_font_size,
+        ),
         Expanded(
           child: Slider(
             value: bookStyle.fontSize,

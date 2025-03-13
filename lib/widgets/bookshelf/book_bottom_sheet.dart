@@ -68,7 +68,7 @@ class BookBottomSheet extends ConsumerWidget {
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis),
           ),
-          iconAndText(
+          IconAndText(
             icon: const Icon(EvaIcons.more_vertical),
             text: L10n.of(context).notes_page_detail,
             onTap: () {
@@ -79,11 +79,11 @@ class BookBottomSheet extends ConsumerWidget {
             delete: () {
               handleDelete(context);
             },
-            deleteIcon: iconAndText(
+            deleteIcon: IconAndText(
               icon: const Icon(EvaIcons.trash),
               text: L10n.of(context).common_delete,
             ),
-            confirmIcon: iconAndText(
+            confirmIcon: IconAndText(
               icon: const Icon(
                 EvaIcons.checkmark_circle_2,
                 color: Colors.red,
