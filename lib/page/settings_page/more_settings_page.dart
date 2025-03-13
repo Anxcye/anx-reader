@@ -2,7 +2,6 @@ import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/page/settings_page/ai.dart';
 import 'package:anx_reader/page/settings_page/advanced.dart';
 import 'package:anx_reader/page/settings_page/appearance.dart';
-import 'package:anx_reader/page/settings_page/bookshelf.dart';
 import 'package:anx_reader/page/settings_page/reading.dart';
 import 'package:anx_reader/page/settings_page/settings_page.dart';
 import 'package:anx_reader/page/settings_page/sync.dart';
@@ -69,6 +68,7 @@ class _SubMoreSettingsState extends State<SubMoreSettings> {
             "subtitles": [
               L10n.of(context).settings_appearance_theme,
               L10n.of(context).settings_appearance_display,
+              L10n.of(context).settings_bookshelf_cover,
             ],
           },
           {
@@ -79,14 +79,6 @@ class _SubMoreSettingsState extends State<SubMoreSettings> {
               L10n.of(context).reading_page_reading,
               L10n.of(context).reading_page_style,
               L10n.of(context).reading_page_other,
-            ],
-          },
-          {
-            "title": L10n.of(context).settings_bookshelf,
-            "icon": Icons.book_outlined,
-            "sections": const BookshelfSettings(),
-            "subtitles": [
-              L10n.of(context).settings_bookshelf_cover,
             ],
           },
           {
