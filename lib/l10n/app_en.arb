@@ -64,7 +64,15 @@
   "reading_page_bionic_reading_tips": "What is Bionic Reading?",
 
   "context_menu_add_note_tips": "Add your note",
-  
+  "context_menu_copy": "Copy",
+  "context_menu_search": "Search",
+  "context_menu_translate": "Translate",
+  "context_menu_write_idea": "Write Idea",
+  "context_menu_delete": "Delete",
+  "context_menu_confirm": "Confirm",
+  "context_menu_highlight": "Highlight",
+  "context_menu_underline": "Underline",
+
   "reading_page_full_screen": "Full Screen",
   "reading_page_screen_timeout": "Screen Timeout",
   "reading_page_page_turning_method": "Page Turning Method",

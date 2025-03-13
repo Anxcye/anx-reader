@@ -5,6 +5,7 @@ import 'package:anx_reader/models/book_note.dart';
 import 'package:anx_reader/page/reading_page.dart';
 import 'package:anx_reader/utils/toast/common.dart';
 import 'package:anx_reader/widgets/context_menu/reader_note_menu.dart';
+import 'package:anx_reader/widgets/icon_and_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:icons_plus/icons_plus.dart';
@@ -150,66 +151,91 @@ class ExcerptMenuState extends State<ExcerptMenu> {
     Widget annotationMenu = Container(
       height: 48,
       decoration: widget.decoration,
-      child: Row(children: [
-        iconButton(
-          onPressed: deleteHandler,
-          icon: deleteIcon(),
-        ),
-        for (Map<String, dynamic> type in notesType)
-          typeButton(type['type'], type['icon']),
-        for (String color in notesColors) colorButton(color),
-      ]),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          iconButton(
+            onPressed: deleteHandler,
+            icon: deleteIcon(),
+          ),
+          for (Map<String, dynamic> type in notesType)
+            typeButton(type['type'], type['icon']),
+          for (String color in notesColors) colorButton(color),
+        ],
+      ),
     );
 
     Widget operatorMenu = Container(
       height: 48,
       decoration: widget.decoration,
-      child: Row(children: [
-        // copy
-        iconButton(
-          icon: const Icon(EvaIcons.copy),
-          onPressed: () {
-            Clipboard.setData(ClipboardData(text: widget.annoContent));
-            AnxToast.show(L10n.of(context).notes_page_copied);
-            widget.onClose();
-          },
-        ),
-        // Web search
-        iconButton(
-          icon: const Icon(EvaIcons.globe),
-          onPressed: () {
-            widget.onClose();
-            launchUrl(
-              Uri.parse('https://www.bing.com/search?q=${widget.annoContent}'),
-              mode: LaunchMode.externalApplication,
-            );
-          },
-        ),
-        // toggle translation menu
-        iconButton(
-          icon: const Icon(Icons.translate),
-          onPressed: widget.toggleTranslationMenu,
-        ),
-        // edit note
-        iconButton(
-          icon: const Icon(EvaIcons.edit_2_outline),
-          onPressed: () async {
-            await onColorSelected(annoColor, close: false);
-            // update that noteId is not null
-            setState(() {});
-            await readerNoteMenuKey.currentState!.showNoteDialog(noteId!);
-          },
-        ),
-      ]),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // copy
+          InkWell(
+            onTap: () {
+              Clipboard.setData(ClipboardData(text: widget.annoContent));
+              AnxToast.show(L10n.of(context).notes_page_copied);
+              widget.onClose();
+            },
+            child: IconAndText(
+              icon: const Icon(EvaIcons.copy),
+              text: L10n.of(context).context_menu_copy,
+            ),
+          ),
+          // Web search
+          InkWell(
+            onTap: () {
+              widget.onClose();
+              launchUrl(
+                Uri.parse(
+                    'https://www.bing.com/search?q=${widget.annoContent}'),
+                mode: LaunchMode.externalApplication,
+              );
+            },
+            child: IconAndText(
+              icon: const Icon(EvaIcons.globe),
+              text: L10n.of(context).context_menu_search,
+            ),
+          ),
+          // toggle translation menu
+          InkWell(
+            onTap: widget.toggleTranslationMenu,
+            child: IconAndText(
+              icon: const Icon(Icons.translate),
+              text: L10n.of(context).context_menu_translate,
+            ),
+          ),
+          // edit note
+          if (!widget.footnote)
+            InkWell(
+              onTap: () async {
+                await onColorSelected(annoColor, close: false);
+                // update that noteId is not null
+                setState(() {});
+                await readerNoteMenuKey.currentState!.showNoteDialog(noteId!);
+              },
+              child: IconAndText(
+                icon: const Icon(EvaIcons.edit_2_outline),
+                text: L10n.of(context).context_menu_write_idea,
+              ),
+            ),
+        ],
+      ),
     );
 
     return Expanded(
       child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
+          Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               operatorMenu,
+              const SizedBox(height: 10),
               if (!widget.footnote) annotationMenu,
             ],
           ),
