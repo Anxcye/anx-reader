@@ -54,7 +54,6 @@ class ReadingPageState extends ConsumerState<ReadingPage>
   bool bottomBarOffstage = true;
   bool tocOffstage = true;
   Widget? _tocWidget;
-  late String heroTag;
 
   late FocusOnKeyEventCallback _handleKeyEvent;
 
@@ -73,16 +72,8 @@ class ReadingPageState extends ConsumerState<ReadingPage>
     setAwakeTimer(Prefs().awakeTime);
 
     _book = widget.book;
-    heroTag = '${_book.coverFullPath}preventHeroEffect';
     _addKeyboardListener();
     super.initState();
-
-    // delay 1000ms to prevent hero effect
-    Future.delayed(const Duration(milliseconds: 1000), () {
-      setState(() {
-        heroTag = _book.coverFullPath;
-      });
-    });
   }
 
   @override
@@ -288,8 +279,8 @@ class ReadingPageState extends ConsumerState<ReadingPage>
                             title: Text(L10n.of(context)
                                 .reading_page_summary_the_chapter),
                             content: FutureBuilder(
-                              future:
-                                  epubPlayerKey.currentState!.theChapterContent(),
+                              future: epubPlayerKey.currentState!
+                                  .theChapterContent(),
                               builder: (context, snapshot) {
                                 if (snapshot.hasData) {
                                   return AiStream(
@@ -320,62 +311,61 @@ class ReadingPageState extends ConsumerState<ReadingPage>
                   ],
                 ),
                 const Spacer(),
-                BottomSheet(onClosing: (){},
-                enableDrag: false,
-                 builder: (context) =>
-                    SafeArea(
-                      top:false,
-                      child: Container(
-                        constraints: const BoxConstraints(maxWidth: 600),
-                        child: StatefulBuilder(
-                          builder: (BuildContext context, StateSetter setState) {
-                            return IntrinsicHeight(
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Expanded(child: _currentPage),
-                                  Offstage(
-                                    offstage:
-                                        tocOffstage || _currentPage is! SizedBox,
-                                    child: _tocWidget,
-                                  ),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceAround,
-                                    children: [
-                                      IconButton(
-                                        icon: const Icon(Icons.toc),
-                                        onPressed: tocHandler,
-                                      ),
-                                      IconButton(
-                                        icon: const Icon(EvaIcons.edit),
-                                        onPressed: noteHandler,
-                                      ),
-                                      IconButton(
-                                        icon: const Icon(Icons.data_usage),
-                                        onPressed: progressHandler,
-                                      ),
-                                      IconButton(
-                                        icon: const Icon(Icons.color_lens),
-                                        onPressed: () {
-                                          styleHandler(setState);
-                                        },
-                                      ),
-                                      IconButton(
-                                        icon: const Icon(EvaIcons.headphones),
-                                        onPressed: ttsHandler,
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                        ),
+                BottomSheet(
+                  onClosing: () {},
+                  enableDrag: false,
+                  builder: (context) => SafeArea(
+                    top: false,
+                    child: Container(
+                      constraints: const BoxConstraints(maxWidth: 600),
+                      child: StatefulBuilder(
+                        builder: (BuildContext context, StateSetter setState) {
+                          return IntrinsicHeight(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Expanded(child: _currentPage),
+                                Offstage(
+                                  offstage:
+                                      tocOffstage || _currentPage is! SizedBox,
+                                  child: _tocWidget,
+                                ),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceAround,
+                                  children: [
+                                    IconButton(
+                                      icon: const Icon(Icons.toc),
+                                      onPressed: tocHandler,
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(EvaIcons.edit),
+                                      onPressed: noteHandler,
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(Icons.data_usage),
+                                      onPressed: progressHandler,
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(Icons.color_lens),
+                                      onPressed: () {
+                                        styleHandler(setState);
+                                      },
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(EvaIcons.headphones),
+                                      onPressed: ttsHandler,
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          );
+                        },
                       ),
                     ),
                   ),
-                
+                ),
               ],
             ),
           ],
@@ -384,7 +374,7 @@ class ReadingPageState extends ConsumerState<ReadingPage>
     );
 
     return Hero(
-      tag: heroTag,
+      tag: _book.coverFullPath,
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         body: MouseRegion(
