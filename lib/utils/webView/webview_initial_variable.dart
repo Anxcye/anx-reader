@@ -36,8 +36,11 @@ void webviewInitialVariable(
     return value.replaceAll("'", "\\'");
   }
 
+  controller.evaluateJavascript(source: '''
+    console.log('navigator.userAgent', navigator.userAgent)
+  ''');
+
   final script = '''
-     console.log(navigator.userAgent)
      const webviewVersion = navigator.userAgent.match(/Chrome\\/(\\d+)/)?.[1]
      const appleWebkitVersion = navigator.userAgent.match(/AppleWebKit\\/(\\d+)/)?.[1]
      const isApple = navigator.userAgent.includes('Macintosh') || navigator.userAgent.includes('iPhone') || navigator.userAgent.includes('iPad')
