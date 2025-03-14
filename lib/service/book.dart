@@ -162,7 +162,6 @@ Future<void> pushToReadingPage(
 }
 
 Future<void> openBook(BuildContext context, Book book, WidgetRef ref) async {
-  ref.read(bookListProvider.notifier).moveBookToTop(book.id);
   await pushToReadingPage(context, book);
 }
 
