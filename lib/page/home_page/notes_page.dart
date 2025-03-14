@@ -223,7 +223,9 @@ class _NotesPageState extends State<NotesPage> {
                       ),
                       // Expanded(child: SizedBox()),
                       Hero(
-                        tag: snapshot.data!.coverFullPath,
+                        tag: isMobile
+                            ? snapshot.data!.coverFullPath
+                            : '${snapshot.data!.coverFullPath}notMobile',
                         child: bookCover(
                           context,
                           snapshot.data!,

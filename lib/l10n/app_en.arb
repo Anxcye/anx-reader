@@ -41,7 +41,7 @@
   "statistic_saturday": "Sa",
   "statistic_sunday": "Su",
 
-  "notes_notes_across": "{ count, plural, =0{No notes Across} =1{1 note Across} other{{count} notes Across} } across",
+  "notes_notes_across": "{ count, plural, =0{No notes} =1{1 note} other{{count} notes} } across",
   "notes_books": "{ count, plural, =0{No books} =1{1 book} other{{count} books} }",
   "notes_notes": "{ count, plural, =0{No notes} =1{1 note} other{{count} notes} }",
   "notes_read_percentage": "{percentage} read",
