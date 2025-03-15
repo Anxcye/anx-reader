@@ -78,6 +78,7 @@ dependencies:
   flutter_gemini: ^3.0.0
   flutter_markdown: ^0.7.6+2
   pointer_interceptor: ^0.10.1+2
+  connectivity_plus: ^6.1.3
 
 
 dev_dependencies:
