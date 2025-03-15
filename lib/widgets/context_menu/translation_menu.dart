@@ -5,6 +5,7 @@ import 'package:anx_reader/utils/toast/common.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:icons_plus/icons_plus.dart';
+import 'package:pointer_interceptor/pointer_interceptor.dart';
 
 class TranslationMenu extends StatefulWidget {
   const TranslationMenu(
@@ -55,44 +56,48 @@ class _TranslationMenuState extends State<TranslationMenu> {
   Widget _langPicker(bool isFrom) {
     final MenuController menuController = MenuController();
 
-    return MenuAnchor(
-      style: MenuStyle(
-        backgroundColor: WidgetStateProperty.all(
-          Theme.of(context).colorScheme.secondaryContainer,
+    return PointerInterceptor(
+      child: MenuAnchor(
+        style: MenuStyle(
+          backgroundColor: WidgetStateProperty.all(
+            Theme.of(context).colorScheme.secondaryContainer,
+          ),
+          maximumSize: WidgetStateProperty.all(const Size(300, 300)),
         ),
-        maximumSize: WidgetStateProperty.all(const Size(300, 300)),
-      ),
-      controller: menuController,
-      menuChildren: [
-        for (var lang in LangList.values)
-          MenuItemButton(
-            onPressed: () {
-              if (isFrom) {
-                Prefs().translateFrom = lang;
+        controller: menuController,
+        menuChildren: [
+          for (var lang in LangList.values)
+            PointerInterceptor(
+              child: MenuItemButton(
+                onPressed: () {
+                  if (isFrom) {
+                    Prefs().translateFrom = lang;
+                  } else {
+                    Prefs().translateTo = lang;
+                  }
+                  setState(() {});
+                },
+                child: Text(lang.getNative(context)),
+              ),
+            ),
+        ],
+        builder: (context, controller, child) {
+          return GestureDetector(
+            onTap: () {
+              if (controller.isOpen) {
+                controller.close();
               } else {
-                Prefs().translateTo = lang;
+                controller.open();
               }
-              setState(() {});
             },
-            child: Text(lang.getNative(context)),
-          ),
-      ],
-      builder: (context, controller, child) {
-        return GestureDetector(
-          onTap: () {
-            if (controller.isOpen) {
-              controller.close();
-            } else {
-              controller.open();
-            }
-          },
-          child: Text(
-            isFrom
-                ? Prefs().translateFrom.getNative(context)
-                : Prefs().translateTo.getNative(context),
-          ),
-        );
-      },
+            child: Text(
+              isFrom
+                  ? Prefs().translateFrom.getNative(context)
+                  : Prefs().translateTo.getNative(context),
+            ),
+          );
+        },
+      ),
     );
   }
 
