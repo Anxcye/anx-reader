@@ -857,6 +857,15 @@ const onRelocated = (currentInfo) => {
   const cfi = currentInfo.cfi
   const percentage = currentInfo.fraction
 
+  // ignore the first and second call
+  if (!globalThis.onRelocatedCount) {
+    globalThis.onRelocatedCount = 0;
+  }
+  if (globalThis.onRelocatedCount < 2) {
+    globalThis.onRelocatedCount++;
+    return;
+  }
+
   callFlutter('onRelocated', {
     chapterTitle,
     chapterHref,
