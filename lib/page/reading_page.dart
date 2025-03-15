@@ -54,6 +54,7 @@ class ReadingPageState extends ConsumerState<ReadingPage>
   bool bottomBarOffstage = true;
   bool tocOffstage = true;
   Widget? _tocWidget;
+  String heroTag = 'preventHeroWhenStart';
 
   late FocusOnKeyEventCallback _handleKeyEvent;
 
@@ -73,6 +74,12 @@ class ReadingPageState extends ConsumerState<ReadingPage>
 
     _book = widget.book;
     _addKeyboardListener();
+    // delay 1000ms to prevent hero animation
+    Future.delayed(const Duration(milliseconds: 2000), () {
+      setState(() {
+        heroTag = _book.coverFullPath;
+      });
+    });
     super.initState();
   }
 
@@ -374,7 +381,7 @@ class ReadingPageState extends ConsumerState<ReadingPage>
     );
 
     return Hero(
-      tag: _book.coverFullPath,
+      tag: heroTag,
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         body: MouseRegion(

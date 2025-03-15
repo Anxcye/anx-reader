@@ -66,8 +66,8 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
   int chapterTotalPages = 0;
   List<TocItem> toc = [];
   OverlayEntry? contextMenuEntry;
-  late AnimationController _animationController;
-  late Animation<double> _animation;
+  // late AnimationController _animationController;
+  // late Animation<double> _animation;
   double searchProcess = 0.0;
   List<SearchResultModel> searchResult = [];
   bool showHistory = false;
@@ -508,16 +508,16 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
         removeOverlay();
       },
     );
-    _animationController = AnimationController(
-      duration: const Duration(milliseconds: 600),
-      vsync: this,
-    );
-    _animation =
-        Tween<double>(begin: 1.0, end: 0.0).animate(_animationController);
+    // _animationController = AnimationController(
+    //   duration: const Duration(milliseconds: 600),
+    //   vsync: this,
+    // );
+    // _animation =
+    //     Tween<double>(begin: 1.0, end: 0.0).animate(_animationController);
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _animationController.forward();
-    });
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   _animationController.forward();
+    // });
     super.initState();
   }
 
@@ -537,7 +537,7 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
   @override
   void dispose() {
     super.dispose();
-    _animationController.dispose();
+    // _animationController.dispose();
     if (defaultTargetPlatform == TargetPlatform.android ||
         defaultTargetPlatform == TargetPlatform.iOS ||
         defaultTargetPlatform == TargetPlatform.macOS) {
@@ -645,9 +645,12 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
           body: Stack(
             children: [
               SizedBox.expand(
-                child: FadeTransition(
-                    opacity: _animation,
-                    child: bookCover(context, widget.book)),
+                child:
+                //  FadeTransition(
+                //     opacity: _animation,
+                //     child: 
+                //     bookCover(context, widget.book)),
+                    bookCover(context, widget.book),
               ),
               SizedBox.expand(
                 child: InAppWebView(
