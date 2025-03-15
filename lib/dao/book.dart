@@ -43,7 +43,7 @@ Future<List<Book>> selectNotDeleteBooks() {
 Future<void> updateBook(Book book) async {
   book.updateTime = DateTime.now();
   final db = await DBHelper().database;
-  AnxLog.info('dao: update book: ${book.toMap()}');
+  // AnxLog.info('dao: update book: ${book.toMap()}');
   await db.update(
     'tb_books',
     book.toMap(),

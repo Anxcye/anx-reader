@@ -44,9 +44,6 @@ void webviewInitialVariable(
      const webviewVersion = navigator.userAgent.match(/Chrome\\/(\\d+)/)?.[1]
      const appleWebkitVersion = navigator.userAgent.match(/AppleWebKit\\/(\\d+)/)?.[1]
      const isApple = navigator.userAgent.includes('Macintosh') || navigator.userAgent.includes('iPhone') || navigator.userAgent.includes('iPad')
-     console.log('webviewVersion', webviewVersion)
-     console.log('appleWebkitVersion', appleWebkitVersion)
-     console.log('isApple', isApple)
      if (
         (!isApple && (webviewVersion && webviewVersion < $minWebviewVersion || !webviewVersion))
         || (isApple && (appleWebkitVersion && appleWebkitVersion < 605 ))
