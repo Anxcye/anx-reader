@@ -54,6 +54,13 @@ class _AppearanceSettingState extends ConsumerState<SyncSetting> {
                 enabled: Prefs().webdavStatus,
                 onPressed: (context) {
                   chooseDirection(ref);
+                }),
+            SettingsTile.switchTile(
+                title: Text(L10n.of(context).webdav_only_wifi),
+                leading: const Icon(Icons.wifi),
+                initialValue: Prefs().onlySyncWhenWifi,
+                onToggle: (bool value) {
+                  Prefs().onlySyncWhenWifi = value;
                 })
           ],
         ),

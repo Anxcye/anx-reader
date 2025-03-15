@@ -14,6 +14,7 @@ import 'package:anx_reader/utils/toast/common.dart';
 import 'package:anx_reader/utils/webdav/safe_read.dart';
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/dao/book.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -83,6 +84,13 @@ class AnxWebdav extends _$AnxWebdav {
 
   Future<void> syncData(SyncDirection direction, WidgetRef ref) async {
     BuildContext context = navigatorKey.currentContext!;
+    if (Prefs().onlySyncWhenWifi &&
+        !(await Connectivity().checkConnectivity())
+            .contains(ConnectivityResult.wifi)) {
+      AnxToast.show(L10n.of(navigatorKey.currentContext!).webdav_only_wifi);
+      return;
+    }
+
     if (!Prefs().webdavStatus) {
       return;
     }

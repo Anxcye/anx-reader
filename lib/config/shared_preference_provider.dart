@@ -453,4 +453,13 @@ class Prefs extends ChangeNotifier {
   bool get openBookAnimation {
     return prefs.getBool('openBookAnimation') ?? true;
   }
+
+  set onlySyncWhenWifi(bool status) {
+    prefs.setBool('onlySyncWhenWifi', status);
+    notifyListeners();
+  }
+
+  bool get onlySyncWhenWifi {
+    return prefs.getBool('onlySyncWhenWifi') ?? false;
+  }
 }

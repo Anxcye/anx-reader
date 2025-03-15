@@ -182,6 +182,7 @@
   "webdav_choose_Sources": "Choose Sources",
   "webdav_download": "Download from WebDAV",
   "webdav_upload": "Upload to WebDAV",
+  "webdav_only_wifi": "Only sync when WiFi is connected",
 
   "settings_sync": "Sync",
   "settings_sync_webdav": "WebDAV",
