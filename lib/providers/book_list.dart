@@ -1,4 +1,4 @@
-import 'package:anx_reader/dao/book.dart' as bookDao;
+import 'package:anx_reader/dao/book.dart' as book_dao;
 import 'package:anx_reader/models/book.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -28,12 +28,11 @@ class BookList extends _$BookList {
 
   @override
   Future<List<List<Book>>> build() async {
-    final books = await bookDao.selectNotDeleteBooks();
+    final books = await book_dao.selectNotDeleteBooks();
     return groupBooks(books);
   }
 
   Future<void> refresh() async {
-    // ignore: invalid_use_of_protected_member
     state = AsyncData(await build());
   }
 
@@ -43,7 +42,7 @@ class BookList extends _$BookList {
   }
 
   void updateBook(Book book) {
-    bookDao.updateBook(book);
+    book_dao.updateBook(book);
     refresh();
   }
 
@@ -86,7 +85,7 @@ class BookList extends _$BookList {
       return;
     }
 
-    final books = await bookDao.selectNotDeleteBooks();
+    final books = await book_dao.selectNotDeleteBooks();
 
     final filteredBooks = books.where((book) {
       return book.title.contains(value) || book.author.contains(value);
