@@ -381,7 +381,7 @@ class ReadingPageState extends ConsumerState<ReadingPage>
     );
 
     return Hero(
-      tag: heroTag,
+      tag: Prefs().openBookAnimation ? _book.coverFullPath : heroTag,
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         body: MouseRegion(
