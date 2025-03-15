@@ -444,4 +444,13 @@ class Prefs extends ChangeNotifier {
   double get bookCoverWidth {
     return prefs.getDouble('bookCoverWidth') ?? 110;
   }
+
+  set openBookAnimation(bool status) {
+    prefs.setBool('openBookAnimation', status);
+    notifyListeners();
+  }
+
+  bool get openBookAnimation {
+    return prefs.getBool('openBookAnimation') ?? true;
+  }
 }

@@ -76,7 +76,17 @@ class _AppearanceSettingState extends State<AppearanceSetting> {
                   leading: const Icon(Icons.language),
                   onPressed: (context) {
                     showLanguagePickerDialog(context);
-                  })
+                  }),
+              SettingsTile.switchTile(
+                title: Text(L10n.of(context).settings_appearance_open_book_animation),
+                leading: const Icon(Icons.animation),
+                initialValue: Prefs().openBookAnimation,
+                onToggle: (bool value) {
+                  setState(() {
+                    Prefs().openBookAnimation = value;
+                  });
+                },
+              ),
             ]),
         SettingsSection(
             title: Text(L10n.of(context).settings_bookshelf_cover),
