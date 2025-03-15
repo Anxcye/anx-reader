@@ -53,35 +53,46 @@ class _TranslationMenuState extends State<TranslationMenu> {
   }
 
   Widget _langPicker(bool isFrom) {
-    return PopupMenuButton<LangList>(
-      elevation: 100,
-      position: PopupMenuPosition.under,
-      useRootNavigator: true,
-      constraints: const BoxConstraints(
-        minWidth: 120,
-        maxWidth: 240,
-        // Currently blocked by https://github.com/flutter/flutter/issues/116504
-        maxHeight: 200,
+    final MenuController menuController = MenuController();
+
+    return MenuAnchor(
+      style: MenuStyle(
+        backgroundColor: WidgetStateProperty.all(
+          Theme.of(context).colorScheme.secondaryContainer,
+        ),
+        maximumSize: WidgetStateProperty.all(const Size(300, 300)),
       ),
-      color: Theme.of(context).colorScheme.secondaryContainer,
-      itemBuilder: (context) => [
+      controller: menuController,
+      menuChildren: [
         for (var lang in LangList.values)
-          PopupMenuItem(
-            child: Text(lang.getNative(context)),
-            onTap: () {
+          MenuItemButton(
+            onPressed: () {
               if (isFrom) {
                 Prefs().translateFrom = lang;
               } else {
                 Prefs().translateTo = lang;
               }
+              setState(() {});
             },
+            child: Text(lang.getNative(context)),
           ),
       ],
-      child: Text(
-        isFrom
-            ? Prefs().translateFrom.getNative(context)
-            : Prefs().translateTo.getNative(context),
-      ),
+      builder: (context, controller, child) {
+        return GestureDetector(
+          onTap: () {
+            if (controller.isOpen) {
+              controller.close();
+            } else {
+              controller.open();
+            }
+          },
+          child: Text(
+            isFrom
+                ? Prefs().translateFrom.getNative(context)
+                : Prefs().translateTo.getNative(context),
+          ),
+        );
+      },
     );
   }
 
