@@ -28,6 +28,7 @@ class BookshelfPage extends ConsumerStatefulWidget {
 
 class BookshelfPageState extends ConsumerState<BookshelfPage> {
   final _scrollController = ScrollController();
+  final _gridViewKey = GlobalKey();
   bool _dragging = false;
   String? _searchValue;
   TextEditingController searchBarController = TextEditingController();
@@ -88,6 +89,8 @@ class BookshelfPageState extends ConsumerState<BookshelfPage> {
                     lockedIndices: lockedIndices,
                     enableDraggable: true,
                     longPressDelay: const Duration(milliseconds: 300),
+                    onReorder: (ReorderedListFunction reorderedListFunction) {},
+                    scrollController: _scrollController,
                     onDragStarted: (index) {
                       if (books[index].length == 1) {
                         handleBottomSheet(context, books[index].first);
@@ -109,8 +112,6 @@ class BookshelfPageState extends ConsumerState<BookshelfPage> {
                       }
                       setState(() {});
                     },
-                    onReorder: (ReorderedListFunction reorderedListFunction) {},
-                    scrollController: _scrollController,
                     children: [
                       ...books.map(
                         (book) {
@@ -129,12 +130,13 @@ class BookshelfPageState extends ConsumerState<BookshelfPage> {
                     builder: (children) {
                       return LayoutBuilder(builder: (context, constraints) {
                         return GridView(
-                          key: GlobalKey(),
+                          key: _gridViewKey,
                           controller: _scrollController,
                           padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
                           gridDelegate:
                               SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: constraints.maxWidth ~/ Prefs().bookCoverWidth,
+                            crossAxisCount:
+                                constraints.maxWidth ~/ Prefs().bookCoverWidth,
                             childAspectRatio: 0.55,
                             mainAxisSpacing: 30,
                             crossAxisSpacing: 20,
@@ -150,33 +152,20 @@ class BookshelfPageState extends ConsumerState<BookshelfPage> {
 
     Widget body = DropTarget(
       onDragDone: (detail) async {
-        List<File> files = [];
-        for (var file in detail.files) {
-          final tempFilePath = '${(await getAnxTempDir()).path}/${file.name}';
-          await File(file.path).copy(tempFilePath);
-          files.add(File(tempFilePath));
-        }
-        importBookList(files, context, ref);
-        setState(() {
-          _dragging = false;
-        });
+        _dragging = false;
       },
       onDragEntered: (detail) {
-        setState(() {
-          _dragging = true;
-        });
+        _dragging = true;
       },
       onDragExited: (detail) {
-        setState(() {
-          _dragging = false;
-        });
+        _dragging = false;
       },
       child: Stack(
         children: [
           buildBookshelfBody,
           if (_dragging)
             Container(
-              color: Theme.of(context).colorScheme.surface.withOpacity(0.9),
+              color: Theme.of(context).colorScheme.surface.withAlpha(90),
               child: Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -206,7 +195,7 @@ class BookshelfPageState extends ConsumerState<BookshelfPage> {
         constraints: const BoxConstraints(maxWidth: 400),
         child: SearchBar(
           backgroundColor: WidgetStateProperty.all(
-              Theme.of(context).colorScheme.primary.withOpacity(0.05)),
+              Theme.of(context).colorScheme.primary.withAlpha(5)),
           controller: searchBarController,
           hintText: L10n.of(context).appName,
           shadowColor: const WidgetStatePropertyAll<Color>(Colors.transparent),
@@ -255,7 +244,7 @@ class BookshelfPageState extends ConsumerState<BookshelfPage> {
             center: Alignment.topRight,
             radius: 1,
             colors: [
-              Theme.of(context).colorScheme.primary.withOpacity(0.05),
+              Theme.of(context).colorScheme.primary.withAlpha(5),
               Theme.of(context).scaffoldBackgroundColor,
             ],
           ),
