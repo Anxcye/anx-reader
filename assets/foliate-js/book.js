@@ -1050,8 +1050,6 @@ window.readingFeatures = (rules) => {
   readingRules = { ...readingRules, ...rules }
   reader.readingFeatures()
 }
-const ua = navigator.userAgent
-console.log('ua', ua)
 await callFlutter('webviewInitialVariable')
 
 fetch(url)
