@@ -5,6 +5,7 @@ import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/main.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/page/home_page.dart';
+import 'package:anx_reader/providers/ai_chat.dart';
 import 'package:anx_reader/providers/book_list.dart';
 import 'package:anx_reader/service/convert_to_epub/txt/convert_from_txt.dart';
 import 'package:anx_reader/utils/get_path/get_base_path.dart';
@@ -142,6 +143,7 @@ Future<void> importBook(File file, WidgetRef ref) async {
 }
 
 Future<void> pushToReadingPage(
+  WidgetRef ref,
   BuildContext context,
   Book book, {
   String? cfi,
@@ -158,11 +160,13 @@ Future<void> pushToReadingPage(
           book: book,
           cfi: cfi,
         ),
-      ));
+      )).then((value) {
+    ref.read(aiChatProvider.notifier).clear();
+  });
 }
 
 Future<void> openBook(BuildContext context, Book book, WidgetRef ref) async {
-  await pushToReadingPage(context, book);
+  await pushToReadingPage(ref, context, book);
 }
 
 void updateBookRating(Book book, double rating) {

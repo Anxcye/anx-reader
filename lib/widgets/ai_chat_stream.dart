@@ -7,9 +7,11 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class AiChatStream extends ConsumerStatefulWidget {
-  const AiChatStream({super.key, this.initialMessage});
+  const AiChatStream(
+      {super.key, this.initialMessage, this.sendImmediate = false});
 
   final String? initialMessage;
+  final bool sendImmediate;
 
   @override
   ConsumerState<AiChatStream> createState() => _AiChatStreamState();
@@ -23,11 +25,11 @@ class _AiChatStreamState extends ConsumerState<AiChatStream> {
   @override
   void initState() {
     super.initState();
-    if (widget.initialMessage != null &&
-        ref.read(aiChatProvider).value?.isEmpty == true) {
-      _controller.text = widget.initialMessage!;
+    _controller.text = widget.initialMessage ?? '';
+    if (widget.sendImmediate) {
       _sendMessage();
     }
+    _scrollToBottom();
   }
 
   @override
@@ -152,7 +154,11 @@ class _AiChatStreamState extends ConsumerState<AiChatStream> {
     final isLongMessage = message.content.length > 300;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
+      padding: EdgeInsets.only(
+        bottom: 8.0,
+        left: isUser ? 8.0 : 0,
+        right: isUser ? 0 : 8.0,
+      ),
       child: Row(
         mainAxisAlignment:
             isUser ? MainAxisAlignment.end : MainAxisAlignment.start,

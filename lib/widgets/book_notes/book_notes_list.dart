@@ -83,7 +83,7 @@ class _BookNotesListState extends ConsumerState<BookNotesList> {
           if (widget.reading) {
             epubPlayerKey.currentState!.goToCfi(bookNote.cfi);
           } else {
-            pushToReadingPage(context, widget.book, cfi: bookNote.cfi);
+            pushToReadingPage(ref, context, widget.book, cfi: bookNote.cfi);
           }
         }
       },
