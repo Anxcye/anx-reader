@@ -353,6 +353,13 @@ const getCSS = ({ fontSize,
         background-color: transparent !important;
         letter-spacing: ${letterSpacing}px;
         font-size: ${fontSize}em;
+        // selectioncolor
+        ::selection {
+            background-color: #66ccff !important;
+        }
+        ::-moz-selection {
+            background-color: #66ccff !important;
+        }
     }
 
     body {
