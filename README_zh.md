@@ -77,13 +77,16 @@
 Telegram 群组：[https://t.me/AnxReader](https://t.me/AnxReader)
 
 ### 截图
-| ![](./docs/images/windows_main.png)**windows** | ![](./docs/images/2wen.png) **Android Tablet**|
-|:--:|:-:|
-| ![](./docs/images/1wen.png) | ![](./docs/images/3wen.png) |
+| ![](./docs/images/wide_main.png) | ![](./docs/images/wide_ai.png) |
+| :------------------------------: | :----------------------------: |
+|   ![](./docs/images/wide1.png)   |  ![](./docs/images/wide2.png)  |
+|   ![](./docs/images/wide3.png)   |  ![](./docs/images/wide4.png)  |
+|   ![](./docs/images/wide5.png)   |  ![](./docs/images/wide6.png)  |
 
-| ![](./docs/images/5men.jpg) | ![](./docs/images/1men.jpg) |![](./docs/images/7men.jpg)|
-|:--:|:--:|:--:|
-| ![](./docs/images/10men.jpg) | ![](./docs/images/9men.jpg) | ![](./docs/images/8men.jpg)|
+
+| ![](./docs/images/mobile1.png) | ![](./docs/images/mobile2.png) | ![](./docs/images/mobile3.png) |
+| :----------------------------: | :----------------------------: | :----------------------------: |
+| ![](./docs/images/mobile4.png) | ![](./docs/images/mobile5.png) | ![](./docs/images/mobile6.png) |
 
 
 ## 捐赠
