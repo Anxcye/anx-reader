@@ -229,6 +229,8 @@
   "ai_chat": "AI 对话",
   "ai_hint_text": "开始对话吧",
   "ai_hint_input_placeholder": "输入消息...",
+  "ai_hint_collapse": "收起",
+  "ai_hint_expand": "展开",
 
   "settings_reading": "阅读",
 

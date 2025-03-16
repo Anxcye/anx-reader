@@ -15,6 +15,7 @@ import 'package:anx_reader/service/ai/ai_dio.dart';
 import 'package:anx_reader/service/ai/prompt_generate.dart';
 import 'package:anx_reader/utils/toast/common.dart';
 import 'package:anx_reader/utils/ui/status_bar.dart';
+import 'package:anx_reader/widgets/ai_chat_stream.dart';
 import 'package:anx_reader/widgets/ai_stream.dart';
 import 'package:anx_reader/widgets/reading_page/notes_widget.dart';
 import 'package:anx_reader/models/reading_time.dart';
@@ -249,8 +250,33 @@ class ReadingPageState extends ConsumerState<ReadingPage>
     }
   }
 
+  void showAiChat() {
+    if (MediaQuery.of(context).size.width < 600) {
+      showModalBottomSheet(
+        context: context,
+        builder: (context) => FutureBuilder(
+          future: epubPlayerKey.currentState!.theChapterContent(),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              return AiChatStream(
+                  initialMessage:
+                      generatePromptSummaryTheChapter(snapshot.data!));
+            }
+            return const SizedBox.shrink();
+          },
+        ),
+      );
+    } else {}
+  }
+
   @override
   Widget build(BuildContext context) {
+    var aiButton = IconButton(
+      icon: const Icon(Icons.auto_awesome),
+      onPressed: () {
+        showAiChat();
+      },
+    );
     Offstage controller = Offstage(
       offstage: bottomBarOffstage,
       child: PointerInterceptor(
@@ -278,32 +304,7 @@ class ReadingPageState extends ConsumerState<ReadingPage>
                     },
                   ),
                   actions: [
-                    IconButton(
-                      icon: const Icon(Icons.auto_awesome),
-                      onPressed: () {
-                        SmartDialog.show(
-                          builder: (context) => AlertDialog(
-                            title: Text(L10n.of(context)
-                                .reading_page_summary_the_chapter),
-                            content: FutureBuilder(
-                              future: epubPlayerKey.currentState!
-                                  .theChapterContent(),
-                              builder: (context, snapshot) {
-                                if (snapshot.hasData) {
-                                  return AiStream(
-                                      prompt: generatePromptSummaryTheChapter(
-                                          snapshot.data!));
-                                }
-                                return const SizedBox.shrink();
-                              },
-                            ),
-                          ),
-                          onDismiss: () {
-                            AiDio.instance.cancel();
-                          },
-                        );
-                      },
-                    ),
+                    aiButton,
                     IconButton(
                       icon: const Icon(EvaIcons.more_vertical),
                       onPressed: () {
