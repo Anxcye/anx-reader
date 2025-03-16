@@ -5,7 +5,7 @@ import 'package:anx_reader/service/ai/ai_dio.dart';
 import 'dart:convert';
 
 Stream<String> geminiGenerateStream(
-  String prompt,
+  List<Map<String, dynamic>> messages,
   Map<String, String> config,
 ) async* {
   final url = config['url'];
@@ -26,9 +26,7 @@ Stream<String> geminiGenerateStream(
       ),
       data: {
         'model': model,
-        'messages': [
-          {'role': 'user', 'content': prompt}
-        ],
+        'messages': messages,
         'stream': true,
       },
     );

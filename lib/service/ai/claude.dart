@@ -5,9 +5,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'dart:convert';
 
-
 Stream<String> claudeGenerateStream(
-  String prompt,
+  List<Map<String, dynamic>> messages,
   Map<String, String> config,
 ) async* {
   final url = config['url'];
@@ -30,9 +29,7 @@ Stream<String> claudeGenerateStream(
       data: {
         'model': model,
         'max_tokens': 2048,
-        'messages': [
-          {'role': 'user', 'content': prompt}
-        ],
+        'messages': messages,
         'stream': true,
       },
     );

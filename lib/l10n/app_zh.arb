@@ -208,9 +208,15 @@
   "settings_translate_from": "原文",
   "settings_translate_to": "译文",
 
-  "settings_ai": "AI",
-  "settings_ai_services": "服务商",
-  "settings_ai_prompt": "提示词",
+  "settings_ai": "AI 设置",
+  "settings_ai_services": "AI 服务",
+  "settings_ai_prompt": "AI 提示词",
+  "settings_ai_cache": "AI 缓存",
+  "settings_ai_chat": "AI 聊天",
+  "settings_ai_prompt_test": "测试",
+  "settings_ai_prompt_summary_the_chapter": "总结本章",
+  "settings_ai_prompt_summary_the_book": "总结本书",
+  "settings_ai_prompt_summary_the_previous_content": "总结前文",
   "settings_ai_prompt_test": "测试 AI 配置",
   "settings_ai_prompt_summary_the_chapter": "总结本章内容",
   "settings_ai_prompt_summary_the_book": "总结整本书",
@@ -220,6 +226,9 @@
   "settings_ai_cache_current_size": "当前共 {count, plural, other{{count} 条缓存}}",
   "settings_ai_cache_clear": "清空缓存",
   "ai_service_not_configured": "需要先完成设置中的AI配置",
+  "ai_chat": "AI 对话",
+  "ai_hint_text": "开始对话吧",
+  "ai_hint_input_placeholder": "输入消息...",
 
   "settings_reading": "阅读",
 
