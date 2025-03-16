@@ -224,10 +224,15 @@ class ExcerptMenuState extends State<ExcerptMenu> {
           InkWell(
             onTap: () {
               widget.onClose();
-              readingPageKey.currentState!.showAiChat(
-                content: widget.annoContent,
-                sendImmediate: false,
-              );
+              final key = readingPageKey.currentState;
+              if (key != null) {
+                key.showAiChat(
+                  content: widget.annoContent,
+                  sendImmediate: false,
+                );
+                key.aiChatKey.currentState?.inputController.text =
+                    widget.annoContent;
+              }
             },
             child: IconAndText(
               icon: const Icon(EvaIcons.message_circle_outline),

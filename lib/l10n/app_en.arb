@@ -225,6 +225,16 @@
   "ai_hint_input_placeholder": "Input message...",
   "ai_hint_collapse": "Collapse",
   "ai_hint_expand": "Expand",
+  "ai_quick_prompt_explain": "Explain",
+  "ai_quick_prompt_explain_text": "Please explain",
+  "ai_quick_prompt_opinion": "Your opinion",
+  "ai_quick_prompt_opinion_text": "What's your opinion on this?",
+  "ai_quick_prompt_summary": "Summarize",
+  "ai_quick_prompt_summary_text": "Please summarize",
+  "ai_quick_prompt_analyze": "Analyze",
+  "ai_quick_prompt_analyze_text": "Please analyze",
+  "ai_quick_prompt_suggest": "Suggest",
+  "ai_quick_prompt_suggest_text": "Any suggestions?",
 
   "settings_reading": "Reading",
 
