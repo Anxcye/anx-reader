@@ -176,15 +176,20 @@ class AiChatStreamState extends ConsumerState<AiChatStream> {
                 onPressed: _clearMessage,
               ),
               Expanded(
-                child: TextField(
-                  controller: inputController,
-                  decoration: InputDecoration(
-                    hintText: L10n.of(context).ai_hint_input_placeholder,
-                    border: const OutlineInputBorder(),
+                child: SizedBox(
+                  height: 40,
+                  child: TextField(
+                    controller: inputController,
+                    decoration: InputDecoration(
+                      hintText: L10n.of(context).ai_hint_input_placeholder,
+                      border: const OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(30)),
+                      ),
+                    ),
+                    maxLines: null,
+                    textInputAction: TextInputAction.send,
+                    onSubmitted: (_) => _sendMessage(),
                   ),
-                  maxLines: null,
-                  textInputAction: TextInputAction.send,
-                  onSubmitted: (_) => _sendMessage(),
                 ),
               ),
               IconButton(
