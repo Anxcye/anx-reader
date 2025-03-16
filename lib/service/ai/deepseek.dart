@@ -6,7 +6,7 @@ import 'package:dio/dio.dart';
 import 'dart:convert';
 
 Stream<String> deepSeekGenerateStream(
-  String prompt,
+  List<Map<String, dynamic>> messages,
   Map<String, String> config,
 ) async* {
   final url = config['url'];
@@ -24,9 +24,7 @@ Stream<String> deepSeekGenerateStream(
       }, responseType: ResponseType.stream, validateStatus: (status) => true),
       data: {
         'model': model,
-        'messages': [
-          {'role': 'user', 'content': prompt}
-        ],
+        'messages': messages,
         'stream': true,
       },
     );

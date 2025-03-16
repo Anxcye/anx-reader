@@ -220,6 +220,9 @@
   "settings_ai_cache_current_size": "Current {count, plural, other{{count} caches}}",
   "settings_ai_cache_clear": "Clear cache",
   "ai_service_not_configured": "Please configure the AI service in settins page.",
+  "ai_chat": "Chat",
+  "ai_hint_text": "Start chatting",
+  "ai_hint_input_placeholder": "Input message...",
 
   "settings_reading": "Reading",
 
@@ -264,6 +267,6 @@
   "webview_update": "How to update",
   "webview_cancel": "I know",
   "webview2_not_installed": "Failed to find an installed WebView2 Runtime or non-stable Microsoft Edge installation.",
-  "webview2_install": "Go to download"
+  "webview2_install": "Go to diownload"
 
 }

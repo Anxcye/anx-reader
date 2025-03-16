@@ -6,7 +6,7 @@ import 'package:anx_reader/service/ai/ai_dio.dart';
 import 'dart:convert';
 
 Stream<String> openAiGenerateStream(
-  String prompt,
+  List<Map<String, dynamic>> messages,
   Map<String, String> config,
 ) async* {
   final url = config['url'];
@@ -27,9 +27,7 @@ Stream<String> openAiGenerateStream(
       ),
       data: {
         'model': model,
-        'messages': [
-          {'role': 'user', 'content': prompt}
-        ],
+        'messages': messages,
         'stream': true,
       },
     );
@@ -49,7 +47,6 @@ Stream<String> openAiGenerateStream(
 
       final lines = chunk.split('\n');
       for (final line in lines) {
-
         if (line.trim().isEmpty) continue;
 
         if (line.startsWith('data: ')) {

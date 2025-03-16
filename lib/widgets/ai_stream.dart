@@ -1,4 +1,6 @@
+import 'package:anx_reader/enums/ai_role.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
+import 'package:anx_reader/models/ai_message.dart';
 import 'package:anx_reader/service/ai/index.dart';
 import 'package:anx_reader/utils/toast/common.dart';
 import 'package:flutter/foundation.dart';
@@ -33,7 +35,7 @@ class AiStreamState extends ConsumerState<AiStream> {
     super.initState();
     stream = aiGenerateStream(
       ref,
-      widget.prompt,
+      [AiMessage(content: widget.prompt, role: AiRole.user)],
       identifier: widget.identifier,
       config: widget.config,
     );
@@ -78,7 +80,7 @@ class AiStreamState extends ConsumerState<AiStream> {
                         setState(() {
                           stream = aiGenerateStream(
                             ref,
-                            widget.prompt,
+                            [AiMessage(content: widget.prompt, role: AiRole.user)],
                             identifier: widget.identifier,
                             config: widget.config,
                             regenerate: true,
