@@ -7,7 +7,9 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class AiChatStream extends ConsumerStatefulWidget {
-  const AiChatStream({super.key});
+  const AiChatStream({super.key, this.initialMessage});
+
+  final String? initialMessage;
 
   @override
   ConsumerState<AiChatStream> createState() => _AiChatStreamState();
@@ -17,6 +19,16 @@ class _AiChatStreamState extends ConsumerState<AiChatStream> {
   final TextEditingController _controller = TextEditingController();
   Stream<List<AiMessage>>? _messageStream;
   final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialMessage != null &&
+        ref.read(aiChatProvider).value?.isEmpty == true) {
+      _controller.text = widget.initialMessage!;
+      _sendMessage();
+    }
+  }
 
   @override
   void dispose() {
@@ -61,28 +73,28 @@ class _AiChatStreamState extends ConsumerState<AiChatStream> {
     return Column(
       children: [
         Expanded(
-          child: _messageStream != null
-              ? StreamBuilder<List<AiMessage>>(
-                  stream: _messageStream,
-                  builder: (context, snapshot) {
-                    if (!snapshot.hasData) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
+            child: _messageStream != null
+                ? StreamBuilder<List<AiMessage>>(
+                    stream: _messageStream,
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
 
-                    final messages = snapshot.data!;
-                    _scrollToBottom();
+                      final messages = snapshot.data!;
+                      _scrollToBottom();
 
-                    return ListView.builder(
-                      controller: _scrollController,
-                      itemCount: messages.length,
-                      itemBuilder: (context, index) {
-                        final message = messages[index];
-                        return _buildMessageItem(message);
-                      },
-                    );
-                  },
-                )
-              : ref.watch(aiChatProvider).when(
+                      return ListView.builder(
+                        controller: _scrollController,
+                        itemCount: messages.length,
+                        itemBuilder: (context, index) {
+                          final message = messages[index];
+                          return _buildMessageItem(message);
+                        },
+                      );
+                    },
+                  )
+                : ref.watch(aiChatProvider).when(
                       data: (messages) {
                         if (messages.isEmpty) {
                           return Center(
@@ -103,10 +115,7 @@ class _AiChatStreamState extends ConsumerState<AiChatStream> {
                           const Center(child: CircularProgressIndicator()),
                       error: (error, stack) =>
                           Center(child: Text('error: $error')),
-                    )
-                  
-                
-        ),
+                    )),
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: Row(
@@ -140,6 +149,7 @@ class _AiChatStreamState extends ConsumerState<AiChatStream> {
 
   Widget _buildMessageItem(AiMessage message) {
     final isUser = message.role == AiRole.user;
+    final isLongMessage = message.content.length > 300;
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
@@ -157,20 +167,162 @@ class _AiChatStreamState extends ConsumerState<AiChatStream> {
                     ? Theme.of(context).colorScheme.primaryContainer
                     : Theme.of(context).colorScheme.surfaceContainer,
                 borderRadius: BorderRadius.only(
-                  topLeft: isUser ? Radius.circular(12) : Radius.zero,
-                  topRight: isUser ? Radius.zero : Radius.circular(12),
-                  bottomLeft: isUser ? Radius.zero : Radius.circular(12),
-                  bottomRight: isUser ? Radius.circular(12) : Radius.zero,
+                  topLeft: isUser ? const Radius.circular(12) : Radius.zero,
+                  topRight: isUser ? Radius.zero : const Radius.circular(12),
+                  bottomLeft: isUser ? Radius.zero : const Radius.circular(12),
+                  bottomRight: isUser ? const Radius.circular(12) : Radius.zero,
                 ),
               ),
               child: isUser
-                  ? Text(message.content)
-                  : MarkdownBody(data: message.content),
+                  ? _buildCollapsibleText(message.content, isLongMessage)
+                  : _buildCollapsibleMarkdown(message.content, isLongMessage),
             ),
           ),
           const SizedBox(width: 8),
         ],
       ),
+    );
+  }
+
+  Widget _buildCollapsibleText(String text, bool isLongMessage) {
+    if (!isLongMessage) {
+      return Text(text);
+    }
+
+    return _CollapsibleText(text: text);
+  }
+
+  Widget _buildCollapsibleMarkdown(String markdownText, bool isLongMessage) {
+    if (!isLongMessage) {
+      return MarkdownBody(data: markdownText);
+    }
+
+    return _CollapsibleMarkdown(markdownText: markdownText);
+  }
+}
+
+class _CollapsibleText extends StatefulWidget {
+  final String text;
+
+  const _CollapsibleText({required this.text});
+
+  @override
+  State<_CollapsibleText> createState() => _CollapsibleTextState();
+}
+
+class _CollapsibleTextState extends State<_CollapsibleText> {
+  bool _isExpanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (_isExpanded)
+          Text(widget.text)
+        else
+          Stack(
+            children: [
+              Text(
+                widget.text.substring(0, 300),
+              ),
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: Container(
+                  height: 40,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Theme.of(context)
+                            .colorScheme
+                            .primaryContainer
+                            .withValues(alpha: 0),
+                        Theme.of(context).colorScheme.primaryContainer,
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        TextButton(
+          onPressed: () {
+            setState(() {
+              _isExpanded = !_isExpanded;
+            });
+          },
+          child: Text(_isExpanded
+              ? L10n.of(context).ai_hint_collapse
+              : L10n.of(context).ai_hint_expand),
+        ),
+      ],
+    );
+  }
+}
+
+class _CollapsibleMarkdown extends StatefulWidget {
+  final String markdownText;
+
+  const _CollapsibleMarkdown({required this.markdownText});
+
+  @override
+  State<_CollapsibleMarkdown> createState() => _CollapsibleMarkdownState();
+}
+
+class _CollapsibleMarkdownState extends State<_CollapsibleMarkdown> {
+  bool _isExpanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (_isExpanded)
+          MarkdownBody(data: widget.markdownText)
+        else
+          Stack(
+            children: [
+              MarkdownBody(
+                data: widget.markdownText.substring(0, 300),
+              ),
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: Container(
+                  height: 40,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Theme.of(context)
+                            .colorScheme
+                            .surfaceContainer
+                            .withValues(alpha: 0),
+                        Theme.of(context).colorScheme.surfaceContainer,
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        TextButton(
+          onPressed: () {
+            setState(() {
+              _isExpanded = !_isExpanded;
+            });
+          },
+          child: Text(_isExpanded
+              ? L10n.of(context).ai_hint_collapse
+              : L10n.of(context).ai_hint_expand),
+        ),
+      ],
     );
   }
 }

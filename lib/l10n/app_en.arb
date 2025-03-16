@@ -223,6 +223,8 @@
   "ai_chat": "Chat",
   "ai_hint_text": "Start chatting",
   "ai_hint_input_placeholder": "Input message...",
+  "ai_hint_collapse": "Collapse",
+  "ai_hint_expand": "Expand",
 
   "settings_reading": "Reading",
 
