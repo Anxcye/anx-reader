@@ -693,9 +693,12 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
                 ),
               SizedBox.expand(
                 child: Prefs().openBookAnimation
-                    ? FadeTransition(
-                        opacity: _animation!,
-                        child: bookCover(context, widget.book))
+                    ? IgnorePointer(
+                      ignoring: true,
+                      child: FadeTransition(
+                          opacity: _animation!,
+                          child: bookCover(context, widget.book)),
+                    )
                     : bookCover(context, widget.book),
               ),
             ],
