@@ -14,18 +14,43 @@ class AiChatStream extends ConsumerStatefulWidget {
   final bool sendImmediate;
 
   @override
-  ConsumerState<AiChatStream> createState() => _AiChatStreamState();
+  ConsumerState<AiChatStream> createState() => AiChatStreamState();
 }
 
-class _AiChatStreamState extends ConsumerState<AiChatStream> {
-  final TextEditingController _controller = TextEditingController();
+class AiChatStreamState extends ConsumerState<AiChatStream> {
+  final TextEditingController inputController = TextEditingController();
   Stream<List<AiMessage>>? _messageStream;
   final ScrollController _scrollController = ScrollController();
+
+  List<Map<String, String>> _getQuickPrompts(BuildContext context) {
+    return [
+      {
+        'label': L10n.of(context).ai_quick_prompt_explain,
+        'prompt': L10n.of(context).ai_quick_prompt_explain_text
+      },
+      {
+        'label': L10n.of(context).ai_quick_prompt_opinion,
+        'prompt': L10n.of(context).ai_quick_prompt_opinion_text
+      },
+      {
+        'label': L10n.of(context).ai_quick_prompt_summary,
+        'prompt': L10n.of(context).ai_quick_prompt_summary_text
+      },
+      {
+        'label': L10n.of(context).ai_quick_prompt_analyze,
+        'prompt': L10n.of(context).ai_quick_prompt_analyze_text
+      },
+      {
+        'label': L10n.of(context).ai_quick_prompt_suggest,
+        'prompt': L10n.of(context).ai_quick_prompt_suggest_text
+      },
+    ];
+  }
 
   @override
   void initState() {
     super.initState();
-    _controller.text = widget.initialMessage ?? '';
+    inputController.text = widget.initialMessage ?? '';
     if (widget.sendImmediate) {
       _sendMessage();
     }
@@ -34,7 +59,7 @@ class _AiChatStreamState extends ConsumerState<AiChatStream> {
 
   @override
   void dispose() {
-    _controller.dispose();
+    inputController.dispose();
     _scrollController.dispose();
     super.dispose();
   }
@@ -52,15 +77,20 @@ class _AiChatStreamState extends ConsumerState<AiChatStream> {
   }
 
   void _sendMessage() {
-    if (_controller.text.trim().isEmpty) return;
+    if (inputController.text.trim().isEmpty) return;
 
-    final message = _controller.text.trim();
-    _controller.clear();
+    final message = inputController.text.trim();
+    inputController.clear();
 
     setState(() {
       _messageStream =
           ref.read(aiChatProvider.notifier).sendMessageStream(message, ref);
     });
+  }
+
+  void _useQuickPrompt(String prompt) {
+    inputController.text = '$prompt "${inputController.text}"';
+    _sendMessage();
   }
 
   void _clearMessage() {
@@ -72,6 +102,8 @@ class _AiChatStreamState extends ConsumerState<AiChatStream> {
 
   @override
   Widget build(BuildContext context) {
+    final quickPrompts = _getQuickPrompts(context);
+
     return Column(
       children: [
         Expanded(
@@ -119,6 +151,23 @@ class _AiChatStreamState extends ConsumerState<AiChatStream> {
                           Center(child: Text('error: $error')),
                     )),
         Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: quickPrompts.map((prompt) {
+                return Padding(
+                  padding: const EdgeInsets.only(right: 8.0),
+                  child: ActionChip(
+                    label: Text(prompt['label']!),
+                    onPressed: () => _useQuickPrompt(prompt['prompt']!),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+        ),
+        Padding(
           padding: const EdgeInsets.all(8.0),
           child: Row(
             children: [
@@ -128,7 +177,7 @@ class _AiChatStreamState extends ConsumerState<AiChatStream> {
               ),
               Expanded(
                 child: TextField(
-                  controller: _controller,
+                  controller: inputController,
                   decoration: InputDecoration(
                     hintText: L10n.of(context).ai_hint_input_placeholder,
                     border: const OutlineInputBorder(),
@@ -181,7 +230,7 @@ class _AiChatStreamState extends ConsumerState<AiChatStream> {
               ),
               child: isUser
                   ? _buildCollapsibleText(message.content, isLongMessage)
-                  : _buildCollapsibleMarkdown(message.content, isLongMessage),
+                  : _buildCollapsibleMarkdown(message.content, false),
             ),
           ),
           const SizedBox(width: 8),

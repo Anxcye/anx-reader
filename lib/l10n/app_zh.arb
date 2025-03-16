@@ -231,7 +231,17 @@
   "ai_hint_input_placeholder": "输入消息...",
   "ai_hint_collapse": "收起",
   "ai_hint_expand": "展开",
-
+  "ai_quick_prompt_explain": "解释",
+  "ai_quick_prompt_explain_text": "请解释",
+  "ai_quick_prompt_opinion": "你的看法",
+  "ai_quick_prompt_opinion_text": "你对这个有什么看法？",
+  "ai_quick_prompt_summary": "总结",
+  "ai_quick_prompt_summary_text": "请总结一下",
+  "ai_quick_prompt_analyze": "分析",
+  "ai_quick_prompt_analyze_text": "请分析一下",
+  "ai_quick_prompt_suggest": "建议",
+  "ai_quick_prompt_suggest_text": "有什么建议？",
+  
   "settings_reading": "阅读",
 
   "settings_bookshelf": "书架",

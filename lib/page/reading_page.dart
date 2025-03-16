@@ -58,6 +58,7 @@ class ReadingPageState extends ConsumerState<ReadingPage>
   Widget? _tocWidget;
   String heroTag = 'preventHeroWhenStart';
   Widget? _aiChat;
+  final aiChatKey = GlobalKey<AiChatStreamState>();
 
   late FocusOnKeyEventCallback _handleKeyEvent;
 
@@ -266,27 +267,23 @@ class ReadingPageState extends ConsumerState<ReadingPage>
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(30),
                   child: AiChatStream(
+                    key: aiChatKey,
                     initialMessage: content,
                     sendImmediate: sendImmediate,
                   ),
                 ),
               ));
     } else {
-      if (_aiChat == null) {
         setState(() {
           _aiChat = SizedBox(
             width: 300,
             child: AiChatStream(
+              key: aiChatKey,
               initialMessage: content,
               sendImmediate: sendImmediate,
             ),
           );
         });
-      } else {
-        setState(() {
-          _aiChat = null;
-        });
-      }
     }
   }
 
@@ -295,11 +292,17 @@ class ReadingPageState extends ConsumerState<ReadingPage>
     var aiButton = IconButton(
       icon: const Icon(Icons.auto_awesome),
       onPressed: () async {
+        if (MediaQuery.of(context).size.width > 600 && _aiChat != null) {
+          setState(() {
+            _aiChat = null;
+          });
+          return;
+        }
+
         showOrHideAppBarAndBottomBar(false);
         final String chapterContent =
             await epubPlayerKey.currentState!.theChapterContent();
-        final sendImmediate =
-            (ref.read(aiChatProvider).value?.isEmpty ?? true);
+        final sendImmediate = (ref.read(aiChatProvider).value?.isEmpty ?? true);
         final content = generatePromptSummaryTheChapter(chapterContent);
         showAiChat(
             content: sendImmediate ? content : null,
