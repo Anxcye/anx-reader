@@ -3,6 +3,7 @@ import 'package:anx_reader/utils/toast/common.dart';
 import 'package:anx_reader/widgets/settings/link_icon.dart';
 import 'package:anx_reader/utils/check_update.dart';
 import 'package:anx_reader/widgets/settings/show_donate_dialog.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:icons_plus/icons_plus.dart';
@@ -81,7 +82,8 @@ class _AboutState extends State<About> {
                   const Divider(),
                   ListTile(
                       title: Text(L10n.of(context).app_version),
-                      subtitle: Text(version),
+                      subtitle: Text(version +
+                          (kDebugMode ? ' (debug)' : '')),
                       onTap: () {
                         Clipboard.setData(ClipboardData(text: version));
                         AnxToast.show(L10n.of(context).notes_page_copied);
