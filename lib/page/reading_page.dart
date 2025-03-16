@@ -262,17 +262,19 @@ class ReadingPageState extends ConsumerState<ReadingPage>
           context: navigatorKey.currentContext!,
           isScrollControlled: true,
           showDragHandle: true,
-          builder: (context) => Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(30),
-                  child: AiChatStream(
-                    key: aiChatKey,
-                    initialMessage: content,
-                    sendImmediate: sendImmediate,
+          builder: (context) => PointerInterceptor(
+            child: Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(30),
+                    child: AiChatStream(
+                      key: aiChatKey,
+                      initialMessage: content,
+                      sendImmediate: sendImmediate,
+                    ),
                   ),
                 ),
-              ));
+          ));
     } else {
         setState(() {
           _aiChat = SizedBox(
