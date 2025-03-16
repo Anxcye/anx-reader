@@ -13,7 +13,10 @@ class AiChatPage extends ConsumerWidget {
         title: Text(L10n.of(context).ai_chat),
       ),
       body: const SafeArea(
-        child: AiChatStream(),
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
+          child: AiChatStream(),
+        ),
       ),
     );
   }

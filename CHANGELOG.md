@@ -7,6 +7,7 @@
 * 新增：仿生阅读(#49)
 
 ## 1.3.2
+- Feat: excerpt AI chat
 - Feat: add AI chat in reading page
 - Feat: control webdav sync only when wifi is connected
 - Feat: manage open book animation
@@ -17,6 +18,7 @@
 - Feat: toc item scroll to current chapter(#141)
 - Fix: save image on iOS
 
+- 新增：划线 AI 对话
 - 新增：阅读界面可以与 AI 对话
 - 新增：控制 WebDAV 是否仅在 WiFi 下同步
 - 新增：管理打开书的动画

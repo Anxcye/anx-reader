@@ -220,6 +220,20 @@ class ExcerptMenuState extends State<ExcerptMenu> {
                 text: L10n.of(context).context_menu_write_idea,
               ),
             ),
+          // AI chat
+          InkWell(
+            onTap: () {
+              widget.onClose();
+              readingPageKey.currentState!.showAiChat(
+                content: widget.annoContent,
+                sendImmediate: false,
+              );
+            },
+            child: IconAndText(
+              icon: const Icon(EvaIcons.message_circle_outline),
+              text: 'AI 对话',
+            ),
+          ),
         ],
       ),
     );

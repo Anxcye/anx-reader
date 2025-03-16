@@ -10,6 +10,7 @@ import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/models/read_theme.dart';
 import 'package:anx_reader/page/book_detail.dart';
 import 'package:anx_reader/page/book_player/epub_player.dart';
+import 'package:anx_reader/providers/ai_chat.dart';
 import 'package:anx_reader/providers/anx_webdav.dart';
 import 'package:anx_reader/service/ai/ai_dio.dart';
 import 'package:anx_reader/service/ai/prompt_generate.dart';
@@ -56,6 +57,7 @@ class ReadingPageState extends ConsumerState<ReadingPage>
   bool tocOffstage = true;
   Widget? _tocWidget;
   String heroTag = 'preventHeroWhenStart';
+  Widget? _aiChat;
 
   late FocusOnKeyEventCallback _handleKeyEvent;
 
@@ -250,31 +252,58 @@ class ReadingPageState extends ConsumerState<ReadingPage>
     }
   }
 
-  void showAiChat() {
-    if (MediaQuery.of(context).size.width < 600) {
+  Future<void> showAiChat({
+    String? content,
+    bool sendImmediate = false,
+  }) async {
+    if (MediaQuery.of(navigatorKey.currentContext!).size.width < 600) {
       showModalBottomSheet(
-        context: context,
-        builder: (context) => FutureBuilder(
-          future: epubPlayerKey.currentState!.theChapterContent(),
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              return AiChatStream(
-                  initialMessage:
-                      generatePromptSummaryTheChapter(snapshot.data!));
-            }
-            return const SizedBox.shrink();
-          },
-        ),
-      );
-    } else {}
+          context: navigatorKey.currentContext!,
+          isScrollControlled: true,
+          showDragHandle: true,
+          builder: (context) => Padding(
+                padding: const EdgeInsets.only(top: 8.0),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(30),
+                  child: AiChatStream(
+                    initialMessage: content,
+                    sendImmediate: sendImmediate,
+                  ),
+                ),
+              ));
+    } else {
+      if (_aiChat == null) {
+        setState(() {
+          _aiChat = SizedBox(
+            width: 300,
+            child: AiChatStream(
+              initialMessage: content,
+              sendImmediate: sendImmediate,
+            ),
+          );
+        });
+      } else {
+        setState(() {
+          _aiChat = null;
+        });
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     var aiButton = IconButton(
       icon: const Icon(Icons.auto_awesome),
-      onPressed: () {
-        showAiChat();
+      onPressed: () async {
+        showOrHideAppBarAndBottomBar(false);
+        final String chapterContent =
+            await epubPlayerKey.currentState!.theChapterContent();
+        final sendImmediate =
+            (ref.read(aiChatProvider).value?.isEmpty ?? true);
+        final content = generatePromptSummaryTheChapter(chapterContent);
+        showAiChat(
+            content: sendImmediate ? content : null,
+            sendImmediate: sendImmediate);
       },
     );
     Offstage controller = Offstage(
@@ -288,7 +317,7 @@ class ReadingPageState extends ConsumerState<ReadingPage>
                     showOrHideAppBarAndBottomBar(false);
                   },
                   child: Container(
-                    color: Colors.black.withOpacity(0.1),
+                    color: Colors.black.withAlpha(30),
                   )),
             ),
             Column(
@@ -394,16 +423,30 @@ class ReadingPageState extends ConsumerState<ReadingPage>
           },
           child: Stack(
             children: [
-              Focus(
-                focusNode: FocusNode(),
-                onKeyEvent: _handleKeyEvent,
-                child: EpubPlayer(
-                  key: epubPlayerKey,
-                  book: _book,
-                  cfi: widget.cfi,
-                  showOrHideAppBarAndBottomBar: showOrHideAppBarAndBottomBar,
-                  onLoadEnd: onLoadEnd,
-                ),
+              Row(
+                children: [
+                  Expanded(
+                    child: Focus(
+                      focusNode: FocusNode(),
+                      onKeyEvent: _handleKeyEvent,
+                      child: EpubPlayer(
+                        key: epubPlayerKey,
+                        book: _book,
+                        cfi: widget.cfi,
+                        showOrHideAppBarAndBottomBar:
+                            showOrHideAppBarAndBottomBar,
+                        onLoadEnd: onLoadEnd,
+                      ),
+                    ),
+                  ),
+                  _aiChat != null
+                      ? const VerticalDivider(width: 1)
+                      : const SizedBox.shrink(),
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 200),
+                    child: _aiChat,
+                  ),
+                ],
               ),
               controller,
             ],

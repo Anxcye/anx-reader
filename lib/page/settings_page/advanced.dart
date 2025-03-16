@@ -1,6 +1,6 @@
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
-import 'package:anx_reader/page/settings_page/log_page.dart';
+import 'package:anx_reader/page/settings_page/subpage/log_page.dart';
 import 'package:anx_reader/widgets/settings/settings_section.dart';
 import 'package:anx_reader/widgets/settings/settings_tile.dart';
 import 'package:anx_reader/widgets/settings/settings_title.dart';
