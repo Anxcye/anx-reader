@@ -21,6 +21,8 @@ jobs:
             os: windows-latest
           - platform: macos
             os: macos-latest
+          - platform: ios
+            os: macos-latest
             
     steps:
       - name: Checkout repository
@@ -110,6 +112,22 @@ jobs:
             dart run build_runner build --delete-conflicting-outputs
             flutter build apk --release
             flutter build apk --split-per-abi
+        shell: bash
+
+      - name: Build for iOS
+        if: matrix.platform == 'ios'
+        run: |
+          flutter gen-l10n
+          dart run build_runner build --delete-conflicting-outputs
+          flutter build ios --release --no-codesign
+          cd build/ios/Release-iphoneos
+          mkdir -p Payload
+          cp -r Runner.app Payload/
+          zip -r Anx-Reader-${{ matrix.platform }}-${{ env.VERSION }}-unsigned.zip Payload
+          cp Anx-Reader-${{ matrix.platform }}-${{ env.VERSION }}-unsigned.zip Anx-Reader-${{ matrix.platform }}-${{ env.VERSION }}-unsigned.ipa
+          mkdir -p ../../ios
+          cp Anx-Reader-${{ matrix.platform }}-no_sign-${{ env.VERSION }}.ipa ../../ios/
+          cp Anx-Reader-${{ matrix.platform }}-no_sign-${{ env.VERSION }}.zip ../../ios/
         shell: bash
 
       - name: Install winget
@@ -224,6 +242,8 @@ jobs:
             build/windows/*.exe
             build/macos/*.dmg
             build/macos/*.zip
+            build/ios/*.ipa
+            build/ios/*.zip
           if-no-files-found: warn
 
       - name: Create Release
@@ -236,6 +256,8 @@ jobs:
             build/windows/*.exe
             build/macos/*.dmg
             build/macos/*.zip
+            build/ios/*.ipa
+            build/ios/*.zip
           body: ${{ env.RELEASE_NOTES }}
           generate_release_notes: false
           prerelease: ${{ env.IS_BETA == 'true' }}
