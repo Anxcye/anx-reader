@@ -16,7 +16,7 @@
 Anx Reader, a thoughtfully crafted e-book reader for book lovers. Featuring powerful AI capabilities and supporting various e-book formats, it makes reading smarter and more focused. With its modern interface design, we're committed to delivering pure reading pleasure.
 
 
-![](./docs/images/9.jpg)
+![](./docs/images/main.jpg)
 
 
 📚 **Rich Format Support**
@@ -74,13 +74,16 @@ Submit an [issue](https://github.com/Anxcye/anx-reader/issues/new/choose), and w
 Telegram Group: [https://t.me/AnxReader](https://t.me/AnxReader)
 
 ### Screenshots
-| ![](./docs/images/windows_main.png)**windows** | ![](./docs/images/2wen.png) **Android Tablet**|
-|:--:|:-:|
-| ![](./docs/images/1wen.png) | ![](./docs/images/3wen.png) |
+| ![](./docs/images/wide_main.png) | ![](./docs/images/wide_ai.png) |
+| :------------------------------: | :----------------------------: |
+|   ![](./docs/images/wide1.png)   |  ![](./docs/images/wide2.png)  |
+|   ![](./docs/images/wide3.png)   |  ![](./docs/images/wide4.png)  |
+|   ![](./docs/images/wide5.png)   |  ![](./docs/images/wide6.png)  |
 
-| ![](./docs/images/5men.jpg) | ![](./docs/images/1men.jpg) |![](./docs/images/7men.jpg)|
-|:--:|:--:|:--:|
-| ![](./docs/images/10men.jpg) | ![](./docs/images/9men.jpg) | ![](./docs/images/8men.jpg)|
+
+| ![](./docs/images/mobile1.png) | ![](./docs/images/mobile2.png) | ![](./docs/images/mobile3.png) |
+| :----------------------------: | :----------------------------: | :----------------------------: |
+| ![](./docs/images/mobile4.png) | ![](./docs/images/mobile5.png) | ![](./docs/images/mobile6.png) |
 
 ## Donations
 If you like Anx Reader, please consider supporting the project by donating. Your donation will help me maintain and improve the project.
