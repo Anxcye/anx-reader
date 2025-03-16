@@ -199,6 +199,7 @@ class _MyAppState extends ConsumerState<MyApp>
               // dragToMoveArea,
               Expanded(
                 child: MaterialApp(
+                  debugShowCheckedModeBanner: false,
                   scrollBehavior: ScrollConfiguration.of(context).copyWith(
                     physics: const BouncingScrollPhysics(),
                     dragDevices: {

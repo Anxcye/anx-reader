@@ -152,13 +152,26 @@ class BookshelfPageState extends ConsumerState<BookshelfPage> {
 
     Widget body = DropTarget(
       onDragDone: (detail) async {
-        _dragging = false;
+        List<File> files = [];
+        for (var file in detail.files) {
+          final tempFilePath = '${(await getAnxTempDir()).path}/${file.name}';
+          await File(file.path).copy(tempFilePath);
+          files.add(File(tempFilePath));
+        }
+        importBookList(files, context, ref);
+        setState(() {
+          _dragging = false;
+        });
       },
       onDragEntered: (detail) {
-        _dragging = true;
+        setState(() {
+          _dragging = true;
+        });
       },
       onDragExited: (detail) {
-        _dragging = false;
+        setState(() {
+          _dragging = false;
+        });
       },
       child: Stack(
         children: [
