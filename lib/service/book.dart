@@ -160,9 +160,7 @@ Future<void> pushToReadingPage(
           book: book,
           cfi: cfi,
         ),
-      )).then((value) {
-    ref.read(aiChatProvider.notifier).clear();
-  });
+      ));
 }
 
 Future<void> openBook(BuildContext context, Book book, WidgetRef ref) async {
