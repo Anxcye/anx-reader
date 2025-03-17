@@ -126,8 +126,8 @@ jobs:
           zip -r Anx-Reader-${{ matrix.platform }}-${{ env.VERSION }}-unsigned.zip Payload
           cp Anx-Reader-${{ matrix.platform }}-${{ env.VERSION }}-unsigned.zip Anx-Reader-${{ matrix.platform }}-${{ env.VERSION }}-unsigned.ipa
           mkdir -p ../../ios
-          cp Anx-Reader-${{ matrix.platform }}-no_sign-${{ env.VERSION }}.ipa ../../ios/
-          cp Anx-Reader-${{ matrix.platform }}-no_sign-${{ env.VERSION }}.zip ../../ios/
+          cp Anx-Reader-${{ matrix.platform }}-${{ env.VERSION }}-unsigned.ipa ../../ios/
+          cp Anx-Reader-${{ matrix.platform }}-${{ env.VERSION }}-unsigned.zip ../../ios/
         shell: bash
 
       - name: Install winget
