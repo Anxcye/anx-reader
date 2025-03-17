@@ -64,6 +64,7 @@ class ReadingPageState extends ConsumerState<ReadingPage>
 
   @override
   void initState() {
+    ref.read(aiChatProvider.notifier).clear();
     if (widget.book.isDeleted) {
       Navigator.pop(context);
       AnxToast.show(L10n.of(context).book_deleted);
@@ -80,9 +81,11 @@ class ReadingPageState extends ConsumerState<ReadingPage>
     _addKeyboardListener();
     // delay 1000ms to prevent hero animation
     Future.delayed(const Duration(milliseconds: 2000), () {
-      setState(() {
-        heroTag = _book.coverFullPath;
-      });
+      if (mounted) {
+        setState(() {
+          heroTag = _book.coverFullPath;
+        });
+      }
     });
     super.initState();
   }
@@ -274,16 +277,16 @@ class ReadingPageState extends ConsumerState<ReadingPage>
                 ),
               ));
     } else {
-        setState(() {
-          _aiChat = SizedBox(
-            width: 300,
-            child: AiChatStream(
-              key: aiChatKey,
-              initialMessage: content,
-              sendImmediate: sendImmediate,
-            ),
-          );
-        });
+      setState(() {
+        _aiChat = SizedBox(
+          width: 300,
+          child: AiChatStream(
+            key: aiChatKey,
+            initialMessage: content,
+            sendImmediate: sendImmediate,
+          ),
+        );
+      });
     }
   }
 
