@@ -19,7 +19,7 @@ class BookStyle {
     this.fontFamily = 'Arial',
     this.fontWeight = 400,
     this.lineHeight = 1.8,
-    this.letterSpacing = 2.0,
+    this.letterSpacing = 0.0,
     this.wordSpacing = 0.0,
     this.paragraphSpacing = 1.0,
     this.sideMargin = 6.0,
