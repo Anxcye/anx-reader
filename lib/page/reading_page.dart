@@ -264,20 +264,22 @@ class ReadingPageState extends ConsumerState<ReadingPage>
           context: navigatorKey.currentContext!,
           isScrollControlled: true,
           showDragHandle: true,
-          builder: (context) => ConstrainedBox(
-            constraints: BoxConstraints(
-              maxHeight: MediaQuery.of(context).size.height * 0.8,
-            ),
-            child: Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: AiChatStream(
-                      key: aiChatKey,
-                      initialMessage: content,
-                      sendImmediate: sendImmediate,
-                    ),
-                  
+          builder: (context) => PointerInterceptor(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * 0.8,
+              ),
+              child: Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: AiChatStream(
+                        key: aiChatKey,
+                        initialMessage: content,
+                        sendImmediate: sendImmediate,
+                      ),
+                    
+                  ),
                 ),
-              ));
+          ));
     } else {
       setState(() {
         _aiChat = SizedBox(
