@@ -108,6 +108,8 @@ flutter:
     - assets/images/claude.png
     - assets/images/deepseek.png
     - assets/images/gemini.png
+    - assets/term.md
+    - assets/privacy.md
 
 
   fonts:
