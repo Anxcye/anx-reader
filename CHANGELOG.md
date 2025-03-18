@@ -18,6 +18,7 @@
 - Feat: toc item scroll to current chapter(#141)
 - Fix: save image on iOS
 - Fix: click page turn button may return to previous page
+- Fix: scroll page turn cannot set margin(#139)
 
 - 新增：划线 AI 对话
 - 新增：阅读界面可以与 AI 对话
@@ -30,6 +31,7 @@
 - 新增：目录项滚动到当前章节(#141)
 - 修复：iOS 端保存图片
 - 修复：有时点击翻页会返回上一页
+- 修复：滚动翻页无法设置上下边距(#139)
 
 ## 1.3.1
 > MacOs 版本处于测试阶段

@@ -26,7 +26,7 @@
 //   hyphenate: true,
 //   // scroll: false,
 //   // animated: true,
-//   pageTurnStyle: 'slide',
+//   pageTurnStyle: 'scroll',
 //   maxColumnCount: 2,
 // }
 // window.flutter_inappwebview = {}
