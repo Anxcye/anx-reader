@@ -104,37 +104,22 @@ class AiChatStreamState extends ConsumerState<AiChatStream> {
   Widget build(BuildContext context) {
     final quickPrompts = _getQuickPrompts(context);
 
-    return Column(
-      children: [
-        Expanded(
-            child: _messageStream != null
-                ? StreamBuilder<List<AiMessage>>(
-                    stream: _messageStream,
-                    builder: (context, snapshot) {
-                      if (!snapshot.hasData) {
-                        return const Center(child: CircularProgressIndicator());
-                      }
-
-                      final messages = snapshot.data!;
-                      _scrollToBottom();
-
-                      return ListView.builder(
-                        controller: _scrollController,
-                        itemCount: messages.length,
-                        itemBuilder: (context, index) {
-                          final message = messages[index];
-                          return _buildMessageItem(message);
-                        },
-                      );
-                    },
-                  )
-                : ref.watch(aiChatProvider).when(
-                      data: (messages) {
-                        if (messages.isEmpty) {
-                          return Center(
-                            child: Text(L10n.of(context).ai_hint_text),
-                          );
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: Column(
+        children: [
+          Expanded(
+              child: _messageStream != null
+                  ? StreamBuilder<List<AiMessage>>(
+                      stream: _messageStream,
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData) {
+                          return const Center(
+                              child: CircularProgressIndicator());
                         }
+
+                        final messages = snapshot.data!;
+                        _scrollToBottom();
 
                         return ListView.builder(
                           controller: _scrollController,
@@ -145,42 +130,59 @@ class AiChatStreamState extends ConsumerState<AiChatStream> {
                           },
                         );
                       },
-                      loading: () =>
-                          const Center(child: CircularProgressIndicator()),
-                      error: (error, stack) =>
-                          Center(child: Text('error: $error')),
-                    )),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: quickPrompts.map((prompt) {
-                return Padding(
-                  padding: const EdgeInsets.only(right: 8.0),
-                  child: ActionChip(
-                    label: Text(prompt['label']!),
-                    onPressed: () => _useQuickPrompt(prompt['prompt']!),
-                  ),
-                );
-              }).toList(),
+                    )
+                  : ref.watch(aiChatProvider).when(
+                        data: (messages) {
+                          if (messages.isEmpty) {
+                            return Center(
+                              child: Text(L10n.of(context).ai_hint_text),
+                            );
+                          }
+
+                          return ListView.builder(
+                            controller: _scrollController,
+                            itemCount: messages.length,
+                            itemBuilder: (context, index) {
+                              final message = messages[index];
+                              return _buildMessageItem(message);
+                            },
+                          );
+                        },
+                        loading: () =>
+                            const Center(child: CircularProgressIndicator()),
+                        error: (error, stack) =>
+                            Center(child: Text('error: $error')),
+                      )),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: quickPrompts.map((prompt) {
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 8.0),
+                    child: ActionChip(
+                      label: Text(prompt['label']!),
+                      onPressed: () => _useQuickPrompt(prompt['prompt']!),
+                    ),
+                  );
+                }).toList(),
+              ),
             ),
           ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            children: [
-              IconButton(
-                icon: const Icon(Icons.clear),
-                onPressed: _clearMessage,
-              ),
-              Expanded(
-                child: SizedBox(
-                  height: 40,
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.clear),
+                  onPressed: _clearMessage,
+                ),
+                Expanded(
                   child: TextField(
                     controller: inputController,
                     decoration: InputDecoration(
+                      isDense: true,
                       hintText: L10n.of(context).ai_hint_input_placeholder,
                       border: const OutlineInputBorder(
                         borderRadius: BorderRadius.all(Radius.circular(30)),
@@ -191,15 +193,15 @@ class AiChatStreamState extends ConsumerState<AiChatStream> {
                     onSubmitted: (_) => _sendMessage(),
                   ),
                 ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.send),
-                onPressed: _sendMessage,
-              ),
-            ],
+                IconButton(
+                  icon: const Icon(Icons.send),
+                  onPressed: _sendMessage,
+                ),
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 

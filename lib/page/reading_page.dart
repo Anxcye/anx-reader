@@ -64,7 +64,6 @@ class ReadingPageState extends ConsumerState<ReadingPage>
 
   @override
   void initState() {
-    ref.read(aiChatProvider.notifier).clear();
     if (widget.book.isDeleted) {
       Navigator.pop(context);
       AnxToast.show(L10n.of(context).book_deleted);
@@ -265,15 +264,18 @@ class ReadingPageState extends ConsumerState<ReadingPage>
           context: navigatorKey.currentContext!,
           isScrollControlled: true,
           showDragHandle: true,
-          builder: (context) => Padding(
+          builder: (context) => ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.8,
+            ),
+            child: Padding(
                 padding: const EdgeInsets.only(top: 8.0),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(30),
-                  child: AiChatStream(
-                    key: aiChatKey,
-                    initialMessage: content,
-                    sendImmediate: sendImmediate,
-                  ),
+                child: AiChatStream(
+                      key: aiChatKey,
+                      initialMessage: content,
+                      sendImmediate: sendImmediate,
+                    ),
+                  
                 ),
               ));
     } else {

@@ -152,6 +152,7 @@ Future<void> pushToReadingPage(
     AnxToast.show(L10n.of(context).book_deleted);
     return;
   }
+  ref.read(aiChatProvider.notifier).clear();
   await Navigator.push(
       context,
       CupertinoPageRoute(
