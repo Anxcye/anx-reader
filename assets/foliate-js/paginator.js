@@ -460,7 +460,7 @@ export class Paginator extends HTMLElement {
         }
         :host([flow="scrolled"]) #container {
             grid-column: 1 / -1;
-            grid-row: 1 / -1;
+            grid-row: 2;
             overflow: auto;
         }
         #header {
