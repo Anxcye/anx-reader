@@ -259,6 +259,8 @@
   "about_check_for_updates": "Check for updates",
   "update_new_version": "New version: ",
   "update_current_version": "Current version: ",
+  "about_privacy_policy": "Privacy Policy",
+  "about_terms_of_use": "Terms of Use",
 
   "tts_volume": "Volume",
   "tts_rate": "Rate",
