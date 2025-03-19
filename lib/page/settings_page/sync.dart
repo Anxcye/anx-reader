@@ -60,7 +60,9 @@ class _AppearanceSettingState extends ConsumerState<SyncSetting> {
                 leading: const Icon(Icons.wifi),
                 initialValue: Prefs().onlySyncWhenWifi,
                 onToggle: (bool value) {
-                  Prefs().onlySyncWhenWifi = value;
+                  setState(() {
+                    Prefs().onlySyncWhenWifi = value;
+                  });
                 })
           ],
         ),
