@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/page/reading_page.dart';
@@ -174,7 +176,7 @@ class _OtherSettingsState extends State<OtherSettings> {
       child: Column(
         children: [
           fullScreen(),
-          keyboardTurnPage(),
+          if (Platform.isAndroid) keyboardTurnPage(),
           autoAdjustReadingTheme(),
           autoTranslateSelection(),
           autoSummaryPreviousContent(),
