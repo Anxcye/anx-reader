@@ -90,10 +90,11 @@ class _AboutState extends State<About> {
                         Clipboard.setData(ClipboardData(text: version));
                         AnxToast.show(L10n.of(context).notes_page_copied);
                       }),
+                  if (!EnvVar.isAppStore)
                   ListTile(
                       title: Text(L10n.of(context).about_check_for_updates),
                       onTap: () => checkUpdate(true)),
-                  if (!EnvVar.cn && !EnvVar.isAppStore)
+                  if (!EnvVar.isAppStore)
                     ListTile(
                       title: Text(L10n.of(context).app_donate),
                       onTap: () {
@@ -154,8 +155,8 @@ class _AboutState extends State<About> {
                       );
                     },
                   ),
-                  if (EnvVar.cn) const Divider(),
-                  if (EnvVar.cn)
+                  if (EnvVar.isCn) const Divider(),
+                  if (EnvVar.isCn)
                     GestureDetector(
                       onTap: () {
                         launchUrl(
@@ -164,8 +165,8 @@ class _AboutState extends State<About> {
                       },
                       child: const Text('闽ICP备2025091402号-1A'),
                     ),
-                  if (!EnvVar.cn) const Divider(),
-                  if (!EnvVar.cn)
+                  if (!EnvVar.isCn) const Divider(),
+                  if (!EnvVar.isCn)
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
