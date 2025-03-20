@@ -302,8 +302,8 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
           isDayMode ? themes[0].backgroundColor : themes[1].backgroundColor;
       textColor = isDayMode ? themes[0].textColor : themes[1].textColor;
     } else {
-      backgroundColor = null;
-      textColor = null;
+      backgroundColor =Prefs().readTheme.backgroundColor;
+      textColor = Prefs().readTheme.textColor;
     }
     setState(() {});
   }
