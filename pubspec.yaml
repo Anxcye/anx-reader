@@ -27,7 +27,10 @@ dependencies:
   html: ^0.15.4
   flutter_html: ^3.0.0-beta.2
   archive: ^3.6.1
-  flutter_inappwebview: ^6.1.5
+  flutter_inappwebview: 
+    git:
+      url: https://github.com/Anxcye/flutter_inappwebview.git
+      path: flutter_inappwebview
   shelf: ^1.4.1
   fl_chart: ^0.70.2
   flutter_rating_bar: ^4.0.1
