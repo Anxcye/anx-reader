@@ -2,6 +2,7 @@ import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/main.dart';
 import 'package:anx_reader/utils/app_version.dart';
+import 'package:anx_reader/utils/env_var.dart';
 import 'package:anx_reader/utils/log/common.dart';
 import 'package:anx_reader/utils/toast/common.dart';
 import 'package:dio/dio.dart';
@@ -11,6 +12,9 @@ import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 Future<void> checkUpdate(bool manualCheck) async {
+  if (EnvVar.isAppStore) {
+    return;
+  }
   // if is today
   if (!manualCheck &&
       DateTime.now().difference(Prefs().lastShowUpdate) <
