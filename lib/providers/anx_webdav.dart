@@ -17,7 +17,9 @@ import 'package:anx_reader/dao/book.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:path/path.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:webdav_client/webdav_client.dart';
@@ -83,7 +85,6 @@ class AnxWebdav extends _$AnxWebdav {
   }
 
   Future<void> syncData(SyncDirection direction, WidgetRef ref) async {
-    BuildContext context = navigatorKey.currentContext!;
     if (Prefs().onlySyncWhenWifi &&
         !(await Connectivity().checkConnectivity())
             .contains(ConnectivityResult.wifi)) {
@@ -111,19 +112,23 @@ class AnxWebdav extends _$AnxWebdav {
     }
 
     changeState(state.copyWith(isSyncing: true));
-    AnxToast.show(L10n.of(context).webdav_syncing);
+    AnxToast.show(L10n.of(navigatorKey.currentContext!).webdav_syncing);
     try {
       _client.mkdir('anx/data').then((value) {
         syncDatabase(direction).then((value) {
-          AnxToast.show(L10n.of(context).webdav_syncing_files);
+          AnxToast.show(
+              L10n.of(navigatorKey.currentContext!).webdav_syncing_files);
           syncFiles().then((value) {
             imageCache.clear();
             imageCache.clearLiveImages();
             // refresh book list
             try {
               ref.read(bookListProvider.notifier).refresh();
-            } catch (e) {}
-            AnxToast.show(L10n.of(context).webdav_sync_complete);
+            } catch (e) {
+              AnxLog.warning('webdav: Failed to refresh book list\n$e');
+            }
+            AnxToast.show(
+                L10n.of(navigatorKey.currentContext!).webdav_sync_complete);
             changeState(state.copyWith(isSyncing: false));
           });
         });
@@ -138,7 +143,6 @@ class AnxWebdav extends _$AnxWebdav {
         AnxLog.severe('Sync failed\n$e');
       }
     } finally {
-      print('finally');
       changeState(state.copyWith(isSyncing: false));
     }
   }
@@ -172,6 +176,25 @@ class AnxWebdav extends _$AnxWebdav {
       return 'cover/${basename(e.path)}';
     }).toList();
     List<String> totalLocalFiles = [...localBooks, ...localCovers];
+
+    // abort if totalCurrentFiles is none
+    if (totalCurrentFiles.isEmpty) {
+      SmartDialog.show(
+        builder: (context) => AlertDialog(
+          title: Text(L10n.of(context).webdav_sync_aborted),
+          content: Text(L10n.of(context).webdav_sync_aborted_content),
+          actions: [
+            TextButton(
+              onPressed: () {
+                SmartDialog.dismiss();
+              },
+              child: Text(L10n.of(context).common_ok),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
 
     // sync files
     for (var file in totalCurrentFiles) {
@@ -214,23 +237,23 @@ class AnxWebdav extends _$AnxWebdav {
         case SyncDirection.upload:
           DBHelper.close();
           await uploadFile(path, 'anx/app_database.db');
-          DBHelper().initDB();
+          await DBHelper().initDB();
           break;
         case SyncDirection.download:
           DBHelper.close();
           await downloadFile('anx/app_database.db', path);
-          DBHelper().initDB();
+          await DBHelper().initDB();
           break;
         case SyncDirection.both:
           if (remoteDb == null ||
               remoteDb.mTime!.isBefore(localDb.lastModifiedSync())) {
             DBHelper.close();
             await uploadFile(path, 'anx/app_database.db');
-            DBHelper().initDB();
+            await DBHelper().initDB();
           } else if (remoteDb.mTime!.isAfter(localDb.lastModifiedSync())) {
             DBHelper.close();
             await downloadFile('anx/app_database.db', path);
-            DBHelper().initDB();
+            await DBHelper().initDB();
           }
           break;
       }
@@ -238,7 +261,7 @@ class AnxWebdav extends _$AnxWebdav {
       // restore local database
       DBHelper.close();
       io.File('$cachePath/app_database.db').copySync(path);
-      DBHelper().initDB();
+      await DBHelper().initDB();
       AnxLog.severe('Failed to sync database\n$e');
       rethrow;
     } finally {

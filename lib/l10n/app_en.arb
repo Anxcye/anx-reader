@@ -183,6 +183,8 @@
   "webdav_download": "Download from WebDAV",
   "webdav_upload": "Upload to WebDAV",
   "webdav_only_wifi": "Only sync when WiFi is connected",
+  "webdav_sync_aborted": "Sync aborted",
+  "webdav_sync_aborted_content": "Failed to get data from WebDAV, this may be due to network fluctuations, please try again later.",
 
   "settings_sync": "Sync",
   "settings_sync_webdav": "WebDAV",
