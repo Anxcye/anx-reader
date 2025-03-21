@@ -183,6 +183,8 @@
   "webdav_download": "从 WebDAV 下载",
   "webdav_upload": "上传到 WebDAV",
   "webdav_only_wifi": "仅在 WiFi 下同步",
+  "webdav_sync_aborted": "同步已取消",
+  "webdav_sync_aborted_content": "未能从 WebDAV 获取数据，这可能是由于网络波动，请稍后再试。",
 
   "settings_sync": "同步",
   "settings_sync_webdav": "WebDAV",

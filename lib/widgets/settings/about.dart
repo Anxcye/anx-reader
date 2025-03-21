@@ -1,8 +1,6 @@
 import 'package:anx_reader/l10n/generated/L10n.dart';
-import 'package:anx_reader/main.dart';
 import 'package:anx_reader/utils/env_var.dart';
 import 'package:anx_reader/utils/toast/common.dart';
-import 'package:anx_reader/widgets/md_page.dart';
 import 'package:anx_reader/widgets/settings/link_icon.dart';
 import 'package:anx_reader/utils/check_update.dart';
 import 'package:anx_reader/widgets/settings/show_donate_dialog.dart';
@@ -91,9 +89,9 @@ class _AboutState extends State<About> {
                         AnxToast.show(L10n.of(context).notes_page_copied);
                       }),
                   if (!EnvVar.isAppStore)
-                  ListTile(
-                      title: Text(L10n.of(context).about_check_for_updates),
-                      onTap: () => checkUpdate(true)),
+                    ListTile(
+                        title: Text(L10n.of(context).about_check_for_updates),
+                        onTap: () => checkUpdate(true)),
                   if (!EnvVar.isAppStore)
                     ListTile(
                       title: Text(L10n.of(context).app_donate),
@@ -124,39 +122,23 @@ class _AboutState extends State<About> {
                   ListTile(
                     title: Text(L10n.of(context).about_privacy_policy),
                     onTap: () async {
-                      final content =
-                          await rootBundle.loadString('assets/privacy.md');
-                      Navigator.push(
-                        navigatorKey.currentContext!,
-                        MaterialPageRoute(
-                          builder: (context) {
-                            return MdPage(
-                                title: L10n.of(context).about_privacy_policy,
-                                content: content);
-                          },
-                        ),
+                      launchUrl(
+                        Uri.parse('https://anx.anxcye.com/privacy.html'),
+                        mode: LaunchMode.externalApplication,
                       );
                     },
                   ),
                   ListTile(
                     title: Text(L10n.of(context).about_terms_of_use),
                     onTap: () async {
-                      final content =
-                          await rootBundle.loadString('assets/term.md');
-                      Navigator.push(
-                        navigatorKey.currentContext!,
-                        MaterialPageRoute(
-                          builder: (context) {
-                            return MdPage(
-                                title: L10n.of(context).about_terms_of_use,
-                                content: content);
-                          },
-                        ),
+                      launchUrl(
+                        Uri.parse('https://anx.anxcye.com/terms.html'),
+                        mode: LaunchMode.externalApplication,
                       );
                     },
                   ),
-                  if (EnvVar.isCn) const Divider(),
-                  if (EnvVar.isCn)
+                  if (EnvVar.isBeian) const Divider(),
+                  if (EnvVar.isBeian)
                     GestureDetector(
                       onTap: () {
                         launchUrl(
@@ -165,8 +147,8 @@ class _AboutState extends State<About> {
                       },
                       child: const Text('闽ICP备2025091402号-1A'),
                     ),
-                  if (!EnvVar.isCn) const Divider(),
-                  if (!EnvVar.isCn)
+                  if (!EnvVar.isBeian) const Divider(),
+                  if (!EnvVar.isBeian)
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
