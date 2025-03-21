@@ -6,6 +6,9 @@ Future<File?> safeReadProps(String path, Client client) async {
   try {
     file = await client.readProps(path);
   } catch (e) {
+    if (e is DioException && e.response == null) {
+      rethrow;
+    }
     if (e is DioException && e.response!.statusCode == 404) {
       return null;
     }
