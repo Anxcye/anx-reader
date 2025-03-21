@@ -39,12 +39,6 @@ end
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
-  end
-end
-
-post_install do |installer|
-  installer.pods_project.targets.each do |target|
-    flutter_additional_ios_build_settings(target)
     target.build_configurations.each do |config|
         # Removing unused permissions by setting their value to to 0
         # for more information: https://github.com/BaseflowIT/flutter-permission-handler/blob/develop/permission_handler/ios/Classes/PermissionHandlerEnums.h
@@ -67,7 +61,7 @@ post_install do |installer|
             ## dart: PermissionGroup.microphone
             'PERMISSION_MICROPHONE=0',
 
-            'AUDIO_SESSION_MICROPHONE=0'
+            'AUDIO_SESSION_MICROPHONE=0',
 
             ## dart: PermissionGroup.speech
             'PERMISSION_SPEECH_RECOGNIZER=0',
