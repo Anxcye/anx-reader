@@ -15,14 +15,12 @@ extension AiPromptsJson on AiPrompts {
 
       case AiPrompts.summaryTheChapter:
         return '''
-Summarize the chapter content with these requirements:
-[Structure]
-8-10 complete sentences
-Three paragraphs: Main plot → Core characters → Themes/messages
-[Content rules]
-Use the same language as the original chapter content
-Avoid meaningless boilerplate phrases like "This chapter describes..."
-Maintain literary analysis perspective rather than mere narration
+Summarize the chapter content. Your reply must follow these requirements:
+Language: Use the same language as the original chapter content.
+Length: 8-10 complete sentences.
+Structure: Three paragraphs: Main plot, Core characters, Themes/messages.
+Style: Avoid boilerplate phrases like "This chapter describes..."
+Perspective: Maintain a literary analysis perspective, not just narration.
 Chapter content: {{chapter}}
         ''';
 
@@ -42,10 +40,10 @@ Avoid spoiling the final outcome
 I'm revisiting a book I read long ago. Help me quickly recall the previous content to continue reading:
 [Requirements]
 3-5 sentences
-Same language as original text
+Same language as original previous content
 Avoid verbatim repetition; preserve core information
 
-[Content]
+[Previous Content]
 {{previous_content}}
         ''';
     }

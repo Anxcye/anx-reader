@@ -233,21 +233,16 @@ class ReadingPageState extends ConsumerState<ReadingPage>
     });
   }
 
-  void onLoadEnd() {
+  Future<void> onLoadEnd() async {
     if (Prefs().autoSummaryPreviousContent) {
+      final previousContent =
+          await epubPlayerKey.currentState!.previousContent(2000);
       SmartDialog.show(
         builder: (context) => AlertDialog(
-          title: Text(L10n.of(context).reading_page_summary_previous_content),
-          content: FutureBuilder(
-            future: epubPlayerKey.currentState!.theChapterContent(),
-            builder: (context, snapshot) {
-              return AiStream(
-                  prompt: generatePromptSummaryThePreviousContent(
-                snapshot.data ?? '',
-              ));
-            },
-          ),
-        ),
+            title: Text(L10n.of(context).reading_page_summary_previous_content),
+            content: AiStream(
+              prompt: generatePromptSummaryThePreviousContent(previousContent),
+            )),
         onDismiss: () {
           AiDio.instance.cancel();
         },
@@ -265,21 +260,20 @@ class ReadingPageState extends ConsumerState<ReadingPage>
           isScrollControlled: true,
           showDragHandle: true,
           builder: (context) => PointerInterceptor(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                maxHeight: MediaQuery.of(context).size.height * 0.8,
-              ),
-              child: Padding(
-                  padding: const EdgeInsets.only(top: 8.0),
-                  child: AiChatStream(
-                        key: aiChatKey,
-                        initialMessage: content,
-                        sendImmediate: sendImmediate,
-                      ),
-                    
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxHeight: MediaQuery.of(context).size.height * 0.8,
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: AiChatStream(
+                      key: aiChatKey,
+                      initialMessage: content,
+                      sendImmediate: sendImmediate,
+                    ),
                   ),
                 ),
-          ));
+              ));
     } else {
       setState(() {
         _aiChat = SizedBox(
