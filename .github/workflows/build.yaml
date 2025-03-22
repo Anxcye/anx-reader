@@ -201,10 +201,10 @@ jobs:
           flutter build macos
           cd build/macos/Build/Products/Release
           mkdir -p "Anx Reader"
-          cp -r anx_reader.app "Anx Reader/AnxReader.app"
+          cp -r "Anx Reader.app" "Anx Reader/AnxReader.app"
           ln -s /Applications "Anx Reader/Applications"
           hdiutil create -volname "Anx Reader" -srcfolder "Anx Reader" -ov -format UDZO Anx-Reader-${{ env.VERSION }}.dmg
-          ditto -c -k --keepParent anx_reader.app "Anx-Reader-${{ env.VERSION }}.zip"
+          ditto -c -k --keepParent "Anx Reader.app" "Anx-Reader-${{ env.VERSION }}.zip"
 
       - name: Rename builds
         run: |
