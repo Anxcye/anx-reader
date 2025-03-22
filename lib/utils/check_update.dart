@@ -71,8 +71,8 @@ $body'''),
           actions: <Widget>[
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop();
-              },
+                SmartDialog.dismiss();
+              },  
               child: Text(L10n.of(context).common_cancel),
             ),
             TextButton(

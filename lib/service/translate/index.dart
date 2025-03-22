@@ -74,6 +74,8 @@ enum LangList {
 }
 
 LangList getLang(String code) {
+  if (code == 'auto') return LangList.auto;
+
   return LangList.values
       .firstWhere((e) => e.code == code, orElse: () => LangList.english);
 }
