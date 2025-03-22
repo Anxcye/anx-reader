@@ -12,7 +12,7 @@ import 'package:anx_reader/widgets/settings/settings_tile.dart';
 const List<Map<String, String>> languageOptions = [
   {'system': 'System'},
   {'English': 'en'},
-  {'简体中文': 'zh'},
+  {'简体中文': 'zh-CN'},
   {'繁體中文': 'zh-TW'},
   {'Türkçe': 'tr'}
 ];
@@ -27,6 +27,18 @@ class AppearanceSetting extends StatefulWidget {
 class _AppearanceSettingState extends State<AppearanceSetting> {
   @override
   Widget build(BuildContext context) {
+    final languageSubtitle = Prefs().locale == null
+        ? languageOptions[0].values.first
+        : languageOptions
+            .firstWhere((element) =>
+                element.values.first ==
+                Prefs().locale!.languageCode +
+                    (Prefs().locale!.countryCode != null
+                        ? "-${Prefs().locale!.countryCode}"
+                        : ""), orElse: () => languageOptions[0])
+            .keys
+            .first;
+
     return settingsSections(
       sections: [
         SettingsSection(
@@ -60,25 +72,14 @@ class _AppearanceSettingState extends State<AppearanceSetting> {
             tiles: [
               SettingsTile.navigation(
                   title: Text(L10n.of(context).settings_appearance_language),
-                  value: Text(
-                    Prefs().locale == null
-                        ? languageOptions[0].values.first
-                        : languageOptions
-                            .firstWhere((element) =>
-                                element.values.first ==
-                                Prefs().locale!.languageCode +
-                                    (Prefs().locale!.countryCode != null
-                                        ? "-${Prefs().locale!.countryCode}"
-                                        : ""))
-                            .keys
-                            .first,
-                  ),
+                  value: Text(languageSubtitle),
                   leading: const Icon(Icons.language),
                   onPressed: (context) {
                     showLanguagePickerDialog(context);
                   }),
               SettingsTile.switchTile(
-                title: Text(L10n.of(context).settings_appearance_open_book_animation),
+                title: Text(
+                    L10n.of(context).settings_appearance_open_book_animation),
                 leading: const Icon(Icons.animation),
                 initialValue: Prefs().openBookAnimation,
                 onToggle: (bool value) {
