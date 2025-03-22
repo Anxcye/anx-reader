@@ -1,6 +1,5 @@
 import 'package:anx_reader/dao/database.dart';
 import 'package:anx_reader/models/book.dart';
-import 'package:anx_reader/utils/log/common.dart';
 
 Future<int> insertBook(Book book) async {
   if (book.id != -1) {
