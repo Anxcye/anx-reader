@@ -6,7 +6,7 @@
 * Feat: Add bionic reading mode(#49)
 * 新增：仿生阅读(#49)
 
-## 1.3.2
+## 1.4.1
 - Feat: excerpt AI chat
 - Feat: add AI chat in reading page
 - Feat: control webdav sync only when wifi is connected
