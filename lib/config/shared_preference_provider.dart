@@ -381,16 +381,7 @@ class Prefs extends ChangeNotifier {
   String getAiPrompt(AiPrompts identifier) {
     String? aiPrompt = prefs.getString('aiPrompt_${identifier.name}');
     if (aiPrompt == null) {
-      switch (identifier) {
-        case AiPrompts.test:
-          return 'Introduce yourself in one sentence, the language locale is {{language_locale}}';
-        case AiPrompts.summaryTheChapter:
-          return 'Summary the chapter, the chapter is: {{chapter}}';
-        case AiPrompts.summaryTheBook:
-          return 'Summary the book, the book is: {{book}}, the author is: {{author}}';
-        case AiPrompts.summaryThePreviousContent:
-          return 'This is the content of a book, I read it a long time ago, summarize the content, so I can quickly recall the previous content. The content is: {{previous_content}}';
-      }
+      return identifier.getPrompt();
     }
     return aiPrompt;
   }
