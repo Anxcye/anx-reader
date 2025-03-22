@@ -5,8 +5,8 @@ class EnvVar {
     if (!isAppStore) {
       return false;
     }
-    return Platform.localeName.length >= 9
-        ? Platform.localeName.substring(0, 9) == 'zh_Hans_CN'
+    return Platform.localeName.length >= 10
+        ? Platform.localeName.substring(0, 10) == 'zh_Hans_CN'
         : false;
   }
 

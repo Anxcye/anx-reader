@@ -143,6 +143,7 @@ class _AboutState extends State<About> {
                       onTap: () {
                         launchUrl(
                           Uri.parse('https://beian.miit.gov.cn/'),
+                          mode: LaunchMode.externalApplication
                         );
                       },
                       child: const Text('闽ICP备2025091402号-1A'),

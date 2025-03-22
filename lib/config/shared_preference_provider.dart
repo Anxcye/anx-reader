@@ -45,7 +45,7 @@ class Prefs extends ChangeNotifier {
 
   Locale? get locale {
     String? localeCode = prefs.getString('locale');
-    if (localeCode == null || localeCode == '') return null;
+    if (localeCode == null || localeCode == 'System') return null;
     if (localeCode.contains('-')) {
       List<String> codes = localeCode.split('-');
       return Locale(codes[0], codes[1]);
