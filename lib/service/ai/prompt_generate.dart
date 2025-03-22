@@ -12,7 +12,7 @@ String generatePromptTest() {
 
 String generatePromptSummaryTheChapter(String chapter) {
   String prompt = Prefs().getAiPrompt(AiPrompts.summaryTheChapter);
-  prompt = prompt.replaceAll('{{chapter}}', chapter);
+  prompt = prompt.replaceAll('{{chapter}}', chapter.trim());
   return prompt;
 }
 
@@ -25,6 +25,6 @@ String generatePromptSummaryTheBook(String book, String author) {
 
 String generatePromptSummaryThePreviousContent(String previousContent) {
   String prompt = Prefs().getAiPrompt(AiPrompts.summaryThePreviousContent);
-  prompt = prompt.replaceAll('{{previous_content}}', previousContent);
+  prompt = prompt.replaceAll('{{previous_content}}', previousContent.trim());
   return prompt;
 }
