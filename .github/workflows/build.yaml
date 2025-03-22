@@ -117,6 +117,7 @@ jobs:
       - name: Build for iOS
         if: matrix.platform == 'ios'
         run: |
+          sudo xcode-select -switch /Applications/Xcode_16.2.app/Contents/Developer
           flutter gen-l10n
           dart run build_runner build --delete-conflicting-outputs
           flutter build ios --release --no-codesign
@@ -192,6 +193,7 @@ jobs:
         if: matrix.platform == 'macos'
         shell: bash
         run: |
+          sudo xcode-select -switch /Applications/Xcode_16.2.app/Contents/Developer
           flutter gen-l10n
           dart run build_runner build --delete-conflicting-outputs
           chmod +x ./scripts/macos_nosign.sh
