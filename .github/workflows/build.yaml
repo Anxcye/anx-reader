@@ -194,7 +194,7 @@ jobs:
         run: |
           flutter gen-l10n
           dart run build_runner build --delete-conflicting-outputs
-          flutter build macos --release
+          flutter build macos --no-codesign
           cd build/macos/Build/Products/Release
           mkdir -p "Anx Reader"
           cp -r anx_reader.app "Anx Reader/AnxReader.app"
