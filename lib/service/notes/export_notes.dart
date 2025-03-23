@@ -60,7 +60,10 @@ Future<void> exportNotes(
           bytes: convertStringToUint8List(notes),
           fileName: '${book.title.replaceAll('\n', ' ')}.md',
           mimeType: 'text/markdown');
-      AnxToast.show('${L10n.of(context).notes_page_exported_to} $filePath');
+
+      if (filePath != null) {
+        AnxToast.show('${L10n.of(context).notes_page_exported_to} $filePath');
+      }
       break;
 
     case ExportType.txt:
@@ -80,7 +83,9 @@ Future<void> exportNotes(
           bytes: convertStringToUint8List(notes),
           fileName: '${book.title}.txt',
           mimeType: 'text/plain');
-      AnxToast.show('${L10n.of(context).notes_page_exported_to} $filePath');
+      if (filePath != null) {
+        AnxToast.show('${L10n.of(context).notes_page_exported_to} $filePath');
+      }
       break;
 
     case ExportType.csv:
@@ -117,8 +122,9 @@ Future<void> exportNotes(
           bytes: Uint8List.fromList(gbk.encode(string)),
           fileName: '${book.title}.csv',
           mimeType: 'text/csv');
-
-      AnxToast.show('${L10n.of(context).notes_page_exported_to} $filePath');
+      if (filePath != null) {
+        AnxToast.show('${L10n.of(context).notes_page_exported_to} $filePath');
+      }
       break;
   }
 }
