@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:anx_reader/utils/get_path/get_download_path.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_file_dialog/flutter_file_dialog.dart';
 
@@ -22,8 +23,17 @@ Future<String?> saveFileToDownload(
       );
       final filePath = await FlutterFileDialog.saveFile(params: params);
       return filePath;
-    case TargetPlatform.windows:
     case TargetPlatform.macOS:
+      String? outputFile = await FilePicker.platform.saveFile(
+        fileName: fileName,
+      );
+      if (outputFile != null) {
+        final file = File(outputFile);
+        await file.writeAsBytes(bytes);
+        return outputFile;
+      }
+      return outputFile;
+    case TargetPlatform.windows:
       final file = File(fileSavePath);
 
       if (!await file.exists()) {
