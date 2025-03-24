@@ -1,19 +1,19 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<!-- <meta http-equiv="Content-Security-Policy"
-  content="default-src 'self' blob:; script-src 'self'; style-src 'self' blob: 'unsafe-inline'; img-src 'self' blob: data:; connect-src 'self' blob: data: *; frame-src blob: data:; object-src blob: data:; form-action 'none';"> -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Anx Reader</title>
 <style>
   html {
-    height: 100%;
+    height: 100vh;
   }
 
   body {
-    margin: 0 auto;
-    height: 100%;
     user-select: none;
+    min-height: 100vh;
+    margin: 0 !important;
+    
   }
+
 
   #footnote-dialog {
     padding: 0;
@@ -24,7 +24,6 @@
     min-width: 200px;
     min-height: 100px;
     border-radius: 15px;
-    border: 1px solid grey;
     user-select: none;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
