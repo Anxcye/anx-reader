@@ -18,6 +18,24 @@ Anx Reader, a thoughtfully crafted e-book reader for book lovers. Featuring powe
 
 ![](./docs/images/main.jpg)
 
+**Cross-Platform** iOS/macOS/Windows/Android
+
+**Full Sync** Reading Progress/Book Files/Highlighted Notes
+
+**Multiple AI** OpenAI/Claude/Gemini/DeepSeek
+
+**Insightful Data** Detailed and Intuitive Charts - Weekly/Monthly/Yearly/Heatmap
+
+**Notes** Multiple Ways to Filter/Sort - Export as TXT, Markdown, CSV
+
+**Highly Customizable Styles** Line Spacing/Paragraph Spacing/Margins/Fonts/Color Schemes/Page Turning Methods
+
+**Practical Features** Translation/Search/Quick Ask AI/Write Ideas/Text-to-Speech
+
+
+| iOS | macOS | Windows | Android |
+|---|---|---|---|
+| [![Download on the App Store](https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg)](https://apps.apple.com/app/anx-reader/id6743196413) | [![Download on the App Store](https://developer.apple.com/app-store/marketing/guidelines/images/badge-download-on-the-mac-app-store.svg)](https://apps.apple.com/app/anx-reader/id6743196413) | [![Download on GitHub](https://img.shields.io/badge/Download_on-GitHub-181717?style=for-the-badge&logo=github&logoColor=ffffff)](https://github.com/Anxcye/anx-reader/releases/latest) | [![Download on GitHub](https://img.shields.io/badge/Download_on-GitHub-181717?style=for-the-badge&logo=github&logoColor=ffffff)](https://github.com/Anxcye/anx-reader/releases/latest) |
 
 📚 **Rich Format Support**
 - Support for major e-book formats: EPUB, MOBI, AZW3, FB2, TXT
@@ -52,7 +70,7 @@ Anx Reader, a thoughtfully crafted e-book reader for book lovers. Featuring powe
 - Instant word translation to enhance reading efficiency
 
 💻 **Cross-Platform Support**
-- Seamless experience on Android / Windows / MacOS(beta)
+- Seamless experience on Android / Windows / MacOS / iOS
 - Consistent user interface across devices
 
 ### TODO
@@ -64,7 +82,7 @@ Anx Reader, a thoughtfully crafted e-book reader for book lovers. Featuring powe
 - [ ] Full-text translation
 - [ ] Support for more file types (pdf)
 - [X] Support for WebDAV synchronization
-- [ ] Support for Linux, MacOS
+- [ ] Support for Linux
 
 ### I Encountered a Problem, What Should I Do?
 Check [Troubleshooting](./docs/troubleshooting.md#English)
