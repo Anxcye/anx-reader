@@ -414,6 +414,7 @@ export class Paginator extends HTMLElement {
             height: 100%;
         }
         #top {
+            height: 100vh;
             // --_gap: 7%;
             background-color: var(--_background-color);
             --_max-inline-size: 720px;
@@ -432,9 +433,9 @@ export class Paginator extends HTMLElement {
                 var(--_half-gap)
                 minmax(var(--_half-gap), 1fr);
             grid-template-rows:
-                minmax(var(--_top-margin), 1fr)
-                minmax(0, var(--_max-height))
-                minmax(var(--_bottom-margin), 1fr);
+                var(--_top-margin)
+                1fr
+                var(--_bottom-margin);
             &.vertical {
                 --_max-column-count-spread: var(--_max-column-count-portrait);
                 --_max-width: var(--_max-block-size);
