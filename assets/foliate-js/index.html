@@ -10,12 +10,13 @@
   body {
     user-select: none;
     margin: 0 !important;
-    
+    height: 100dvh;  
   }
 
 
   #footnote-dialog {
-    padding: 0;
+    padding: var(safe-area-inset-top) var(safe-area-inset-right) var(safe-area-inset-bottom) var(safe-area-inset-left);
+    position: fixed;
     width: auto;
     height: auto;
     max-width: 80vw;
@@ -23,6 +24,7 @@
     min-width: 200px;
     min-height: 100px;
     border-radius: 15px;
+    border: 1px solid grey;
     user-select: none;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
