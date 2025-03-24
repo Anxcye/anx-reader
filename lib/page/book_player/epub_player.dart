@@ -655,7 +655,7 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
                   initialUrlRequest: URLRequest(url: WebUri(indexHtmlPath)),
                   initialSettings: initialSettings,
                   contextMenu: contextMenu,
-                  onWebViewCreated: (controller) =>
+                  onLoadStop: (controller, url) =>
                       onWebViewCreated(controller),
                   onConsoleMessage: (controller, consoleMessage) {
                     webviewConsoleMessage(controller, consoleMessage);

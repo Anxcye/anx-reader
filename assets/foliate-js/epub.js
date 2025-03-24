@@ -579,7 +579,7 @@ class Resources {
     }
 }
 
-class Loader {
+ class Loader {
     #cache = new Map()
     #children = new Map()
     #refCount = new Map()
@@ -737,7 +737,7 @@ class Loader {
         const h = window?.innerHeight ?? 600
         return replacedImports
             // unprefix as most of the props are (only) supported unprefixed
-            .replace(/(?<=[{\s;])-epub-/gi, '')
+            .replace(/([{\s;])-epub-/gi, '$1')
             // replace vw and vh as they cause problems with layout
             .replace(/(\d*\.?\d+)vw/gi, (_, d) => parseFloat(d) * w / 100 + 'px')
             .replace(/(\d*\.?\d+)vh/gi, (_, d) => parseFloat(d) * h / 100 + 'px')

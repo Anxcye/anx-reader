@@ -245,7 +245,7 @@ Future<void> getBookMetadata(
   HeadlessInAppWebView webview = HeadlessInAppWebView(
     webViewEnvironment: webViewEnvironment,
     initialUrlRequest: URLRequest(url: WebUri(indexHtmlPath)),
-    onLoadStart: (controller, url) async {
+    onLoadStop: (controller, url) async {
       webviewInitialVariable(controller, bookUrl, cfi, importing: true);
       controller.addJavaScriptHandler(
           handlerName: 'onMetadata',
