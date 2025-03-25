@@ -2,7 +2,7 @@ name: anx_reader
 description: "An e-book reader."
 publish_to: 'none'
 
-version: 1.4.1+2084
+version: 1.4.1+2086
 
 environment:
   sdk: '>=3.5.2 <4.0.0'
@@ -111,6 +111,7 @@ flutter:
     - assets/images/claude.png
     - assets/images/deepseek.png
     - assets/images/gemini.png
+    - assets/images/commonAi.png
 
 
   fonts:
