@@ -2,8 +2,6 @@ import 'dart:io';
 
 class EnvVar {
   static bool get isBeian {
-
-    return true;
     if (!isAppStore) {
       return false;
     }
