@@ -5,6 +5,7 @@ import 'package:anx_reader/page/settings_page/subpage/ai_chat_page.dart';
 import 'package:anx_reader/providers/ai_cache_count.dart';
 import 'package:anx_reader/service/ai/ai_dio.dart';
 import 'package:anx_reader/service/ai/prompt_generate.dart';
+import 'package:anx_reader/utils/env_var.dart';
 import 'package:anx_reader/widgets/ai_stream.dart';
 import 'package:anx_reader/widgets/settings/settings_section.dart';
 import 'package:anx_reader/widgets/settings/settings_tile.dart';
@@ -25,7 +26,49 @@ class _AISettingsState extends ConsumerState<AISettings> {
   bool showSettings = false;
   int currentIndex = 0;
   late List<Map<String, dynamic>> initialServicesConfig;
-  List<Map<String, dynamic>> services = [
+  List<Map<String, dynamic>> services = EnvVar.isBeian ? [
+    {
+      "identifier": "openai",
+      "title": "通用",
+      "logo": "assets/images/commonAi.png",
+      "config": {
+        "url": "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions",
+        "api_key": "YOUR_API_KEY",
+        "model": "qwen-long",
+      },
+    },
+    {
+      "identifier": "claude",
+      "title": "Claude",
+      "logo": "assets/images/claude.png",
+      "config": {
+        "url": "https://api.anthropic.com/v1/messages",
+        "api_key": "YOUR_API_KEY",
+        "model": "claude-3-5-sonnet-20240620",
+      },
+    },
+    {
+      "identifier": "gemini",
+      "title": "Gemini",
+      "logo": "assets/images/gemini.png",
+      "config": {
+        "url":
+            "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
+        "api_key": "YOUR_API_KEY",
+        "model": "gemini-2.0-flash"
+      },
+    },
+    {
+      "identifier": "deepseek",
+      "title": "DeepSeek",
+      "logo": "assets/images/deepseek.png",
+      "config": {
+        "url": "https://api.deepseek.com/v1/chat/completions",
+        "api_key": "YOUR_API_KEY",
+        "model": "deepseek-chat",
+      },
+    },
+  ]: [
     {
       "identifier": "openai",
       "title": "OpenAI",
