@@ -6,6 +6,11 @@
 * Feat: Add bionic reading mode(#49)
 * 新增：仿生阅读(#49)
 
+## 1.4.2
+
+- Fix: Some old versions of Webview cannot import books
+- 修复：部分旧版本Webview无法导入图书
+
 ## 1.4.1
 - Feat: excerpt AI chat
 - Feat: add AI chat in reading page
