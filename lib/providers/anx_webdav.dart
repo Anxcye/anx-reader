@@ -124,7 +124,7 @@ class AnxWebdav extends _$AnxWebdav {
             try {
               ref.read(bookListProvider.notifier).refresh();
             } catch (e) {
-              AnxLog.warning('webdav: Failed to refresh book list\n$e');
+              
             }
             AnxToast.show(
                 L10n.of(navigatorKey.currentContext!).webdav_sync_complete);
