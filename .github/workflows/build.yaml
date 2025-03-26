@@ -156,7 +156,7 @@ jobs:
           api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
           organization-id: '254a26d6-6c3a-4a55-9ca6-890d0d34deb1'
           project-slug: 'anx-reader'
-          signing-policy-slug: 'test-signing'
+          signing-policy-slug: 'release-signing'
           artifact-configuration-slug: 'initial_zip'
           github-artifact-id: ${{ steps.upload-unsigned-zip.outputs.artifact-id }}
           wait-for-completion: true
@@ -183,7 +183,7 @@ jobs:
           api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
           organization-id: 254a26d6-6c3a-4a55-9ca6-890d0d34deb1
           project-slug: 'anx-reader'
-          signing-policy-slug: 'test-signing'
+          signing-policy-slug: 'release-signing'
           artifact-configuration-slug: 'initial_exe'
           github-artifact-id: ${{ steps.upload-unsigned-exe.outputs.artifact-id }}
           wait-for-completion: true

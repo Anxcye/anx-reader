@@ -119,12 +119,17 @@ Want to build Anx Reader from source? Please follow these steps:
 
 You may encounter Flutter version incompatibility issues. Please refer to the [Flutter documentation](https://flutter.dev/docs/get-started/install).
 
+
 ## Code signing policy
 - Committers and reviewers: [Members team](https://github.com/anxcye/anx-reader/graphs/contributors)
 - Approvers: [Owners](https://github.com/anxcye)
+- [Privacy Policy](https://anx.anxcye.com/privacy.html)
+- [Terms of Service](https://anx.anxcye.com/terms.html)
 
+### Sponsors
+| ![signpath](https://signpath.org/assets/favicon-50x50.png) | Free code signing on Windows provided by [SignPath.io](https://about.signpath.io/),certficate by [SignPath Foundation](https://signpath.org/) |
+|------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
 
-Free code signing on Windows provided by [SignPath.io](https://about.signpath.io/),certficate by [SignPath Foundation](https://signpath.org/)
 
 ## License
 This project is licensed under the [MIT License](./LICENSE).
