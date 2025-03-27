@@ -76,6 +76,9 @@
 
 Telegram 群组：[https://t.me/AnxReader](https://t.me/AnxReader)
 
+QQ群：1042905699
+
+
 ### 截图
 | ![](./docs/images/wide_main.png) | ![](./docs/images/wide_ai.png) |
 | :------------------------------: | :----------------------------: |
