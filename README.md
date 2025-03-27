@@ -91,6 +91,8 @@ Submit an [issue](https://github.com/Anxcye/anx-reader/issues/new/choose), and w
 
 Telegram Group: [https://t.me/AnxReader](https://t.me/AnxReader)
 
+QQ Group：1042905699
+
 ### Screenshots
 | ![](./docs/images/wide_main.png) | ![](./docs/images/wide_ai.png) |
 | :------------------------------: | :----------------------------: |
