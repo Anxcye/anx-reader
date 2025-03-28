@@ -1051,9 +1051,15 @@ window.readingFeatures = (rules) => {
   readingRules = { ...readingRules, ...rules }
   reader.readingFeatures()
 }
-await callFlutter('webviewInitialVariable')
+// await callFlutter('webviewInitialVariable')
 
-fetch(url)
-  .then(res => res.blob())
-  .then(blob => open(new File([blob], new URL(url, window.location.origin).pathname), initialCfi))
-  .catch(e => console.error(e))
+// fetch(url)
+//   .then(res => res.blob())
+//   .then(blob => open(new File([blob], new URL(url, window.location.origin).pathname), initialCfi))
+//   .catch(e => console.error(e))
+window.loadBook = () => {
+  fetch(url)
+    .then(res => res.blob())
+    .then(blob => open(new File([blob], new URL(url, window.location.origin).pathname), initialCfi))
+    .catch(e => console.error(e))
+}

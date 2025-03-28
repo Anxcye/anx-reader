@@ -7,6 +7,7 @@ import 'package:anx_reader/page/home_page/notes_page.dart';
 import 'package:anx_reader/page/home_page/settings_page.dart';
 import 'package:anx_reader/page/home_page/statistics_page.dart';
 import 'package:anx_reader/service/book.dart';
+import 'package:anx_reader/service/webview.dart';
 import 'package:anx_reader/utils/check_update.dart';
 import 'package:anx_reader/utils/get_path/get_temp_dir.dart';
 import 'package:anx_reader/utils/load_default_font.dart';
@@ -119,6 +120,7 @@ class _HomePageState extends ConsumerState<HomePage> {
         AnxLog.severe('share: Receive share intent');
       });
     }
+    WebviewService().init();
   }
 
   @override

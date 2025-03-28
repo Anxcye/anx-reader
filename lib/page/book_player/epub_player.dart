@@ -18,6 +18,7 @@ import 'package:anx_reader/page/home_page.dart';
 import 'package:anx_reader/page/reading_page.dart';
 import 'package:anx_reader/providers/book_list.dart';
 import 'package:anx_reader/service/book_player/book_player_server.dart';
+import 'package:anx_reader/service/webview.dart';
 import 'package:anx_reader/utils/coordinates_to_part.dart';
 import 'package:anx_reader/utils/js/convert_dart_color_to_js.dart';
 import 'package:anx_reader/models/book_note.dart';
@@ -79,16 +80,16 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
   String? textColor;
   Timer? styleTimer;
 
-  final StreamController<double> _searchProgressController =
+  final StreamController<double> searchProgressController =
       StreamController<double>.broadcast();
 
-  Stream<double> get searchProgressStream => _searchProgressController.stream;
+  Stream<double> get searchProgressStream => searchProgressController.stream;
 
-  final StreamController<List<SearchResultModel>> _searchResultController =
+  final StreamController<List<SearchResultModel>> searchResultController =
       StreamController<List<SearchResultModel>>.broadcast();
 
   Stream<List<SearchResultModel>> get searchResultStream =>
-      _searchResultController.stream;
+      searchResultController.stream;
 
   FocusNode focusNode = FocusNode();
 
@@ -200,7 +201,7 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
   void clearSearch() {
     webViewController.evaluateJavascript(source: "clearSearch()");
     searchResult.clear();
-    _searchResultController.add(searchResult);
+    searchResultController.add(searchResult);
   }
 
   void search(String text) {
@@ -302,10 +303,110 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
           isDayMode ? themes[0].backgroundColor : themes[1].backgroundColor;
       textColor = isDayMode ? themes[0].textColor : themes[1].textColor;
     } else {
-      backgroundColor =Prefs().readTheme.backgroundColor;
+      backgroundColor = Prefs().readTheme.backgroundColor;
       textColor = Prefs().readTheme.textColor;
     }
     setState(() {});
+  }
+
+  void onLoadEndHandler(dynamic args) {
+    widget.onLoadEnd();
+  }
+
+  void onRelocatedHandler(dynamic args) {
+    Map<String, dynamic> location = args[0];
+    if (cfi == location['cfi']) return;
+    setState(() {
+      cfi = location['cfi'];
+      percentage = location['percentage'] ?? 0.0;
+      chapterTitle = location['chapterTitle'] ?? '';
+      chapterHref = location['chapterHref'] ?? '';
+      chapterCurrentPage = location['chapterCurrentPage'];
+      chapterTotalPages = location['chapterTotalPages'];
+    });
+    saveReadingProgress();
+    readingPageKey.currentState?.resetAwakeTimer();
+  }
+
+  void onClickHandler(args) {
+    Map<String, dynamic> location = args[0];
+    onClick(location);
+  }
+
+  void onSetTocHandler(args) {
+    List<dynamic> t = args[0];
+    toc = t.map((i) => TocItem.fromJson(i)).toList();
+  }
+
+  void onSelectionEndHandler(args) {
+    removeOverlay();
+    Map<String, dynamic> location = args[0];
+    String cfi = location['cfi'];
+    String text = location['text'];
+    bool footnote = location['footnote'];
+    double x = location['pos']['point']['x'];
+    double y = location['pos']['point']['y'];
+    String dir = location['pos']['dir'];
+    showContextMenu(context, x, y, dir, text, cfi, null, footnote);
+  }
+
+  void onAnnotationClickHandler(args) {
+    Map<String, dynamic> annotation = args[0];
+    int id = annotation['annotation']['id'];
+    String cfi = annotation['annotation']['value'];
+    String note = annotation['annotation']['note'];
+    double x = annotation['pos']['point']['x'];
+    double y = annotation['pos']['point']['y'];
+    String dir = annotation['pos']['dir'];
+    showContextMenu(context, x, y, dir, note, cfi, id, false);
+  }
+
+  void onSearchHandler(args) {
+    Map<String, dynamic> search = args[0];
+    setState(() {
+      if (search['process'] != null) {
+        searchProcess = search['process'].toDouble();
+        searchProgressController.add(searchProcess);
+      } else {
+        searchResult.add(SearchResultModel.fromJson(search));
+        searchResultController.add(searchResult);
+      }
+    });
+  }
+
+  void onRenderAnnotationsHandler(args) {
+    renderAnnotations(webViewController);
+  }
+
+  void onPushStateHandler(args) {
+    Map<String, dynamic> state = args[0];
+    canGoBack = state['canGoBack'];
+    canGoForward = state['canGoForward'];
+    if (!mounted) return;
+    setState(() {
+      showHistory = true;
+    });
+    Future.delayed(const Duration(seconds: 20), () {
+      if (!mounted) return;
+      setState(() {
+        showHistory = false;
+      });
+    });
+  }
+
+  void onImageClickHandler(args) {
+    String image = args[0];
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => ImageViewer(
+                  image: image,
+                  bookName: widget.book.title,
+                )));
+  }
+
+  void onFootnoteCloseHandler(args) {
+    removeOverlay();
   }
 
   Future<void> setHandler(InAppWebViewController controller) async {
@@ -322,130 +423,9 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
       backgroundColor: backgroundColor,
       textColor: textColor,
     );
-
-    controller.addJavaScriptHandler(
-        handlerName: 'onLoadEnd',
-        callback: (args) {
-          widget.onLoadEnd();
-        });
-
-    controller.addJavaScriptHandler(
-        handlerName: 'onRelocated',
-        callback: (args) {
-          Map<String, dynamic> location = args[0];
-          if (cfi == location['cfi']) return;
-          setState(() {
-            cfi = location['cfi'];
-            percentage = location['percentage'] ?? 0.0;
-            chapterTitle = location['chapterTitle'] ?? '';
-            chapterHref = location['chapterHref'] ?? '';
-            chapterCurrentPage = location['chapterCurrentPage'];
-            chapterTotalPages = location['chapterTotalPages'];
-          });
-          saveReadingProgress();
-          readingPageKey.currentState?.resetAwakeTimer();
-        });
-    controller.addJavaScriptHandler(
-        handlerName: 'onClick',
-        callback: (args) {
-          Map<String, dynamic> location = args[0];
-          onClick(location);
-        });
-    controller.addJavaScriptHandler(
-        handlerName: 'onSetToc',
-        callback: (args) {
-          List<dynamic> t = args[0];
-          toc = t.map((i) => TocItem.fromJson(i)).toList();
-        });
-    controller.addJavaScriptHandler(
-        handlerName: 'onSelectionEnd',
-        callback: (args) {
-          removeOverlay();
-          Map<String, dynamic> location = args[0];
-          String cfi = location['cfi'];
-          String text = location['text'];
-          bool footnote = location['footnote'];
-          double x = location['pos']['point']['x'];
-          double y = location['pos']['point']['y'];
-          String dir = location['pos']['dir'];
-          showContextMenu(context, x, y, dir, text, cfi, null, footnote);
-        });
-    controller.addJavaScriptHandler(
-        handlerName: 'onAnnotationClick',
-        callback: (args) {
-          Map<String, dynamic> annotation = args[0];
-          int id = annotation['annotation']['id'];
-          String cfi = annotation['annotation']['value'];
-          String note = annotation['annotation']['note'];
-          double x = annotation['pos']['point']['x'];
-          double y = annotation['pos']['point']['y'];
-          String dir = annotation['pos']['dir'];
-          showContextMenu(context, x, y, dir, note, cfi, id, false);
-        });
-    controller.addJavaScriptHandler(
-      handlerName: 'onSearch',
-      callback: (args) {
-        Map<String, dynamic> search = args[0];
-        setState(() {
-          if (search['process'] != null) {
-            searchProcess = search['process'].toDouble();
-            _searchProgressController.add(searchProcess);
-          } else {
-            searchResult.add(SearchResultModel.fromJson(search));
-            _searchResultController.add(searchResult);
-          }
-        });
-      },
-    );
-    controller.addJavaScriptHandler(
-      handlerName: 'renderAnnotations',
-      callback: (args) {
-        renderAnnotations(controller);
-      },
-    );
-    controller.addJavaScriptHandler(
-      handlerName: 'onPushState',
-      callback: (args) {
-        Map<String, dynamic> state = args[0];
-        canGoBack = state['canGoBack'];
-        canGoForward = state['canGoForward'];
-        if (!mounted) return;
-        setState(() {
-          showHistory = true;
-        });
-        Future.delayed(const Duration(seconds: 20), () {
-          if (!mounted) return;
-          setState(() {
-            showHistory = false;
-          });
-        });
-      },
-    );
-    controller.addJavaScriptHandler(
-      handlerName: 'onImageClick',
-      callback: (args) {
-        String image = args[0];
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => ImageViewer(
-                      image: image,
-                      bookName: widget.book.title,
-                    )));
-      },
-    );
-    controller.addJavaScriptHandler(
-      handlerName: 'onFootnoteClose',
-      callback: (args) {
-        removeOverlay();
-      },
-    );
   }
 
   Future<void> onWebViewCreated(InAppWebViewController controller) async {
-    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
-      await InAppWebViewController.setWebContentsDebuggingEnabled(true);
-    }
     webViewController = controller;
     setHandler(controller);
   }
@@ -651,15 +631,19 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
             children: [
               SizedBox.expand(
                 child: InAppWebView(
-                  webViewEnvironment: webViewEnvironment,
-                  initialUrlRequest: URLRequest(url: WebUri(indexHtmlPath)),
-                  initialSettings: initialSettings,
-                  contextMenu: contextMenu,
-                  onLoadStop: (controller, url) =>
-                      onWebViewCreated(controller),
-                  onConsoleMessage: (controller, consoleMessage) {
-                    webviewConsoleMessage(controller, consoleMessage);
-                  },
+                  headlessWebView: WebviewService().headlessWebView,
+                //   webViewEnvironment: webViewEnvironment,
+                //   initialUrlRequest: URLRequest(url: WebUri(indexHtmlPath)),
+                //   initialSettings: initialSettings,
+                //   contextMenu: contextMenu,
+                //   onLoadStop: (controller, url) => onWebViewCreated(controller),
+                //   onConsoleMessage: (controller, consoleMessage) {
+                    // webviewConsoleMessage(controller, consoleMessage);
+                //   },
+
+                onWebViewCreated: (controller) {
+                  onWebViewCreated(controller);
+                },
                 ),
               ),
               readingInfoWidget(),

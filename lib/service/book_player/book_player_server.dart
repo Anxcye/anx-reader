@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:anx_reader/utils/get_path/get_base_path.dart';
 import 'package:anx_reader/utils/log/common.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart' as path;
 import 'package:shelf/shelf.dart' as shelf;
@@ -51,7 +52,9 @@ class Server {
 
   Future<shelf.Response> _handleRequests(shelf.Request request) async {
     final uriPath = request.requestedUri.path;
-    // AnxLog.info('Server: Request for $uriPath');
+    if (kDebugMode) {
+      AnxLog.info('Server: Request for $uriPath');
+    }
 
     if (_tempFileName != null && uriPath == "/${_tempFileName!}") {
       return shelf.Response.ok(

@@ -41,49 +41,49 @@ void webviewInitialVariable(
   ''');
 
   final script = '''
-     const webviewVersion = navigator.userAgent.match(/Chrome\\/(\\d+)/)?.[1]
-     const appleWebkitVersion = navigator.userAgent.match(/AppleWebKit\\/(\\d+)/)?.[1]
-     const isApple = navigator.userAgent.includes('Macintosh') || navigator.userAgent.includes('iPhone') || navigator.userAgent.includes('iPad')
-     if (
-        (!isApple && (webviewVersion && webviewVersion < $minWebviewVersion || !webviewVersion))
-        || (isApple && (appleWebkitVersion && appleWebkitVersion < 605 ))
-     ) {
-       window.flutter_inappwebview.callHandler('webviewVersion', webviewVersion)
-     }
-     const importing = $importing
-     const url = '${replaceSingleQuote(url)}'
-     let initialCfi = '${replaceSingleQuote(cfi)}'
-     let style = {
-         fontSize: ${bookStyle.fontSize},
-         fontName: '${replaceSingleQuote(fontName)}',
-         fontPath: '${replaceSingleQuote(fontPath)}',
-         fontWeight: ${bookStyle.fontWeight},
-         letterSpacing: ${bookStyle.letterSpacing},
-         spacing: ${bookStyle.lineHeight},
-         paragraphSpacing: ${bookStyle.paragraphSpacing},
-         textIndent: ${bookStyle.indent},
-         fontColor: '#$textColor',
-         backgroundColor: '#$backgroundColor',
-         topMargin: ${bookStyle.topMargin},
-         bottomMargin: ${bookStyle.bottomMargin},
-         sideMargin: ${bookStyle.sideMargin},
-         justify: true,
-         hyphenate: true,
-         pageTurnStyle: '${Prefs().pageTurnStyle.name}',
-         maxColumnCount: ${bookStyle.maxColumnCount},
-     }
-        let readingRules = {
-          convertChineseMode: '${Prefs().readingRules.convertChineseMode.name}',
-          bionicReadingMode: ${Prefs().readingRules.bionicReading},
-        }
+    const webviewVersion = navigator.userAgent.match(/Chrome\\/(\\d+)/)?.[1]
+    const appleWebkitVersion = navigator.userAgent.match(/AppleWebKit\\/(\\d+)/)?.[1]
+    const isApple = navigator.userAgent.includes('Macintosh') || navigator.userAgent.includes('iPhone') || navigator.userAgent.includes('iPad')
+    if (
+      (!isApple && (webviewVersion && webviewVersion < $minWebviewVersion || !webviewVersion))
+      || (isApple && (appleWebkitVersion && appleWebkitVersion < 605 ))
+    ) {
+      window.flutter_inappwebview.callHandler('webviewVersion', webviewVersion)
+    }
+    const importing = $importing
+    const url = '${replaceSingleQuote(url)}'
+    let initialCfi = '${replaceSingleQuote(cfi)}'
+    let style = {
+        fontSize: ${bookStyle.fontSize},
+        fontName: '${replaceSingleQuote(fontName)}',
+        fontPath: '${replaceSingleQuote(fontPath)}',
+        fontWeight: ${bookStyle.fontWeight},
+        letterSpacing: ${bookStyle.letterSpacing},
+        spacing: ${bookStyle.lineHeight},
+        paragraphSpacing: ${bookStyle.paragraphSpacing},
+        textIndent: ${bookStyle.indent},
+        fontColor: '#$textColor',
+        backgroundColor: '#$backgroundColor',
+        topMargin: ${bookStyle.topMargin},
+        bottomMargin: ${bookStyle.bottomMargin},
+        sideMargin: ${bookStyle.sideMargin},
+        justify: true,
+        hyphenate: true,
+        pageTurnStyle: '${Prefs().pageTurnStyle.name}',
+        maxColumnCount: ${bookStyle.maxColumnCount},
+    }
+    
+    let readingRules = {
+      convertChineseMode: '${Prefs().readingRules.convertChineseMode.name}',
+      bionicReadingMode: ${Prefs().readingRules.bionicReading},
+    }
+
+    window.loadBook()
 
   ''';
-  controller.addJavaScriptHandler(
-      handlerName: 'webviewInitialVariable',
-      callback: (args) async {
-        await controller.evaluateJavascript(source: script);
-        return null;
-      });
+
+  controller.evaluateJavascript(source: script);
+
   controller.addJavaScriptHandler(
       handlerName: 'webviewVersion',
       callback: (args) async {
