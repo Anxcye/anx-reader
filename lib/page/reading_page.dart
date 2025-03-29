@@ -416,44 +416,51 @@ class ReadingPageState extends ConsumerState<ReadingPage>
 
     return Hero(
       tag: Prefs().openBookAnimation ? _book.coverFullPath : heroTag,
-      child: Scaffold(
-        resizeToAvoidBottomInset: false,
-        body: MouseRegion(
-          onHover: (PointerHoverEvent detail) {
-            var y = detail.position.dy;
-            if (y < 30 || y > MediaQuery.of(context).size.height - 30) {
-              showOrHideAppBarAndBottomBar(true);
-            }
-          },
-          child: Stack(
-            children: [
-              Row(
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: SizedBox(
+          height: MediaQuery.of(context).size.height,
+          width: MediaQuery.of(context).size.width,
+          child: Scaffold(
+            resizeToAvoidBottomInset: false,
+            body: MouseRegion(
+              onHover: (PointerHoverEvent detail) {
+                var y = detail.position.dy;
+                if (y < 30 || y > MediaQuery.of(context).size.height - 30) {
+                  showOrHideAppBarAndBottomBar(true);
+                }
+              },
+              child: Stack(
                 children: [
-                  Expanded(
-                    child: Focus(
-                      focusNode: FocusNode(),
-                      onKeyEvent: _handleKeyEvent,
-                      child: EpubPlayer(
-                        key: epubPlayerKey,
-                        book: _book,
-                        cfi: widget.cfi,
-                        showOrHideAppBarAndBottomBar:
-                            showOrHideAppBarAndBottomBar,
-                        onLoadEnd: onLoadEnd,
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Focus(
+                          focusNode: FocusNode(),
+                          onKeyEvent: _handleKeyEvent,
+                          child: EpubPlayer(
+                            key: epubPlayerKey,
+                            book: _book,
+                            cfi: widget.cfi,
+                            showOrHideAppBarAndBottomBar:
+                                showOrHideAppBarAndBottomBar,
+                            onLoadEnd: onLoadEnd,
+                          ),
+                        ),
                       ),
-                    ),
+                      _aiChat != null
+                          ? const VerticalDivider(width: 1)
+                          : const SizedBox.shrink(),
+                      AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 200),
+                        child: _aiChat,
+                      ),
+                    ],
                   ),
-                  _aiChat != null
-                      ? const VerticalDivider(width: 1)
-                      : const SizedBox.shrink(),
-                  AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 200),
-                    child: _aiChat,
-                  ),
+                  controller,
                 ],
               ),
-              controller,
-            ],
+            ),
           ),
         ),
       ),
