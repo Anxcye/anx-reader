@@ -204,6 +204,7 @@
   "import_cannot_get_file_path": "Cannot get file path",
   "import_success_restart_app": "Import success, please restart the app",
   "import_failed": "Import failed: {error}",
+  "settings_sync_completed_toast": "Show toast when sync completed",
 
   "settings_translate": "Translate",
   "settings_translate_current_service": "Current Service",

@@ -471,4 +471,13 @@ class Prefs extends ChangeNotifier {
   bool get bottomNavigatorShowStatistics {
     return prefs.getBool('bottomNavigatorShowStatistics') ?? true;
   }
+
+  set syncCompletedToast(bool status) {
+    prefs.setBool('syncCompletedToast', status);
+    notifyListeners();
+  }
+
+  bool get syncCompletedToast {
+    return prefs.getBool('syncCompletedToast') ?? true;
+  }
 }

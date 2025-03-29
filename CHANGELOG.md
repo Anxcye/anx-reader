@@ -8,8 +8,15 @@
 
 ## 1.4.2
 
+- Feat: Navigation bar custom
+- Feat: Sync completed toast
 - Fix: Some old versions of Webview cannot import books
+- Fix: Footnotes cannot be displayed on some devices
+
+- 新增：导航栏自定义
+- 新增：同步完成显示提示
 - 修复：部分旧版本Webview无法导入图书
+- 修复：部分设备无法显示脚注
 
 ## 1.4.1
 - Feat: excerpt AI chat
