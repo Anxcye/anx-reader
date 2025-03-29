@@ -204,6 +204,7 @@
   "import_cannot_get_file_path": "无法获取文件路径",
   "import_success_restart_app": "导入成功，请重启应用",
   "import_failed": "导入失败: {error}",
+  "settings_sync_completed_toast": "同步完成显示提示",
 
   "settings_translate": "翻译",
   "settings_translate_current_service": "当前服务",

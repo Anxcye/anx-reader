@@ -63,6 +63,15 @@ class _AppearanceSettingState extends ConsumerState<SyncSetting> {
                   setState(() {
                     Prefs().onlySyncWhenWifi = value;
                   });
+                }),
+            SettingsTile.switchTile(
+                title: Text(L10n.of(context).settings_sync_completed_toast),
+                leading: const Icon(Icons.notifications),
+                initialValue: Prefs().syncCompletedToast,
+                onToggle: (bool value) {
+                  setState(() {
+                    Prefs().syncCompletedToast = value;
+                  });
                 })
           ],
         ),

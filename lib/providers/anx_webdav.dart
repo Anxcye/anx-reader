@@ -87,7 +87,9 @@ class AnxWebdav extends _$AnxWebdav {
     if (Prefs().onlySyncWhenWifi &&
         !(await Connectivity().checkConnectivity())
             .contains(ConnectivityResult.wifi)) {
-      AnxToast.show(L10n.of(navigatorKey.currentContext!).webdav_only_wifi);
+      if (Prefs().syncCompletedToast) {
+        AnxToast.show(L10n.of(navigatorKey.currentContext!).webdav_only_wifi);
+      }
       return;
     }
 
@@ -111,23 +113,27 @@ class AnxWebdav extends _$AnxWebdav {
     }
 
     changeState(state.copyWith(isSyncing: true));
-    AnxToast.show(L10n.of(navigatorKey.currentContext!).webdav_syncing);
+    if (Prefs().syncCompletedToast) {
+      AnxToast.show(L10n.of(navigatorKey.currentContext!).webdav_syncing);
+    }
     try {
       _client.mkdir('anx/data').then((value) {
         syncDatabase(direction).then((value) {
-          AnxToast.show(
-              L10n.of(navigatorKey.currentContext!).webdav_syncing_files);
+          if (Prefs().syncCompletedToast) {
+            AnxToast.show(
+                L10n.of(navigatorKey.currentContext!).webdav_syncing_files);
+          }
           syncFiles().then((value) {
             imageCache.clear();
             imageCache.clearLiveImages();
             // refresh book list
             try {
               ref.read(bookListProvider.notifier).refresh();
-            } catch (e) {
-              
+            } catch (e) {}
+            if (Prefs().syncCompletedToast) {
+              AnxToast.show(
+                  L10n.of(navigatorKey.currentContext!).webdav_sync_complete);
             }
-            AnxToast.show(
-                L10n.of(navigatorKey.currentContext!).webdav_sync_complete);
             changeState(state.copyWith(isSyncing: false));
           });
         });
