@@ -533,6 +533,8 @@ const replaceFootnote = (view) => {
   const { renderer } = view
   renderer.setAttribute('flow', 'scrolled')
   renderer.setAttribute('gap', '5%')
+  renderer.setAttribute('top-margin', '0px')
+  renderer.setAttribute('bottom-margin', '0px')
   const footNoteStyle = {
     fontSize: style.fontSize,
     fontName: style.fontName,
