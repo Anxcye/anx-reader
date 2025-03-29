@@ -19,7 +19,7 @@ void showContextMenu(
   double screenWidth = MediaQuery.of(context).size.width;
   double screenHeight = MediaQuery.of(context).size.height;
 
-  double menuWidth = 350 > screenWidth ? screenWidth - 20 : 350;
+  double menuWidth = 370 > screenWidth ? screenWidth - 20 : 350;
   x *= screenWidth;
   y *= screenHeight;
 
@@ -47,11 +47,17 @@ void showContextMenu(
   );
 
   bool showTranslationMenu = Prefs().autoTranslateSelection;
+
+  double bottomPosition =
+      y > 350 ? (screenHeight - y + 20) : screenHeight - 370;
+
+  double topPosition = screenHeight - y > 350 ? y + 20 : screenHeight - 350;
+
   playerKey.contextMenuEntry = OverlayEntry(builder: (context) {
     return Positioned(
       left: widgetLeft,
-      bottom: dir == "up" ? screenHeight - y + 20 : null,
-      top: dir != "up" ? y + 20 : null,
+      bottom: dir == "up" ? bottomPosition : null,
+      top: dir != "up" ? topPosition : null,
       child: Container(
         width: menuWidth,
         // height: menuHeight,

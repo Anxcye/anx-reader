@@ -253,9 +253,14 @@ class ExcerptMenuState extends State<ExcerptMenu> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              operatorMenu,
+              SingleChildScrollView(
+                  scrollDirection: Axis.horizontal, child: operatorMenu),
               const SizedBox(height: 10),
-              if (!widget.footnote) annotationMenu,
+              if (!widget.footnote)
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: annotationMenu,
+                ),
             ],
           ),
           const SizedBox(height: 10),

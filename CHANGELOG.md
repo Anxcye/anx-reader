@@ -15,15 +15,17 @@
 - Fix: Image as link cannot be clicked
 - Fix: Reading information does not follow style changes
 - Fix: First line indent affects images
+- Fix: Context menu position error when it exceeds the screen
 
 - 新增：阅读信息自定义
 - 新增：导航栏自定义
-- 新增：同步完成显示提示
+- 新增：同步完成是否显示提示
 - 修复：部分旧版本Webview无法导入图书
 - 修复：部分设备无法显示脚注
-- 修复：以图片作为链接时无法点击
+- 修复：以图片作为脚注时无法点击
 - 修复：阅读信息无法跟随样式变化
 - 修复：首行缩进影响图片
+- 修复：上下文菜单超出屏幕时位置错误
 
 ## 1.4.1
 - Feat: excerpt AI chat
