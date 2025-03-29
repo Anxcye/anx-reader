@@ -391,8 +391,12 @@ const getCSS = ({ fontSize,
         -webkit-hyphenate-limit-lines: 2;
         hanging-punctuation: allow-end last;
         widows: 2;
+    }
+
+    p, li, blockquote, dd, font {
         text-indent: ${textIndent}em !important;
     }
+    
         
     /* prevent the above from overriding the align attribute */
     [align="left"] { text-align: left; }

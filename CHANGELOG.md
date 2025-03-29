@@ -14,6 +14,7 @@
 - Fix: Footnotes cannot be displayed on some devices
 - Fix: Image as link cannot be clicked
 - Fix: Reading information does not follow style changes
+- Fix: First line indent affects images
 
 - 新增：阅读信息自定义
 - 新增：导航栏自定义
@@ -22,6 +23,7 @@
 - 修复：部分设备无法显示脚注
 - 修复：以图片作为链接时无法点击
 - 修复：阅读信息无法跟随样式变化
+- 修复：首行缩进影响图片
 
 ## 1.4.1
 - Feat: excerpt AI chat
