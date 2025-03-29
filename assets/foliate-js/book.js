@@ -1049,6 +1049,8 @@ window.previousContent = (count = 2000) => reader.getPreviousContent(count)
 
 // window.bionicReading = (enable) => reader.bionicReading(enable)
 
+window.isFootNoteOpen = () => footnoteDialog.open
+
 window.readingFeatures = (rules) => {
   readingRules = { ...readingRules, ...rules }
   reader.readingFeatures()
