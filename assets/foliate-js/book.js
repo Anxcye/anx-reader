@@ -370,7 +370,7 @@ const getCSS = ({ fontSize,
     }
 
     a:link {
-        color: #66ccff !important;
+        color:rgb(167, 96, 52) !important;
     }
 
     * {

@@ -216,6 +216,8 @@ export class View extends HTMLElement {
 
     #handleImage(doc) {
        for (const img of doc.querySelectorAll('img')) {
+         // disable for a link
+         if (img.closest('a[href]')) continue;
             img.addEventListener('click', e => {
                 e.preventDefault()
                 e.stopPropagation()
