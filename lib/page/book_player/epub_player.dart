@@ -239,6 +239,9 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
   Future<String> ttsPrepare() async =>
       (await webViewController.evaluateJavascript(source: "ttsPrepare()"));
 
+  Future<bool> isFootNoteOpen() async => (await webViewController
+      .evaluateJavascript(source: "window.isFootNoteOpen()"));
+
   void backHistory() {
     webViewController.evaluateJavascript(source: "back()");
   }
@@ -302,7 +305,7 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
           isDayMode ? themes[0].backgroundColor : themes[1].backgroundColor;
       textColor = isDayMode ? themes[0].textColor : themes[1].textColor;
     } else {
-      backgroundColor =Prefs().readTheme.backgroundColor;
+      backgroundColor = Prefs().readTheme.backgroundColor;
       textColor = Prefs().readTheme.textColor;
     }
     setState(() {});
@@ -485,7 +488,8 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
     }
   }
 
-  void _handlePointerEvents(PointerEvent event) {
+  Future<void> _handlePointerEvents(PointerEvent event) async {
+    if (await isFootNoteOpen()) return;
     if (event is PointerScrollEvent) {
       if (event.scrollDelta.dy > 0) {
         nextPage();
@@ -655,8 +659,7 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
                   initialUrlRequest: URLRequest(url: WebUri(indexHtmlPath)),
                   initialSettings: initialSettings,
                   contextMenu: contextMenu,
-                  onLoadStop: (controller, url) =>
-                      onWebViewCreated(controller),
+                  onLoadStop: (controller, url) => onWebViewCreated(controller),
                   onConsoleMessage: (controller, consoleMessage) {
                     webviewConsoleMessage(controller, consoleMessage);
                   },
