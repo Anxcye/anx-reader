@@ -5,6 +5,7 @@ import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/dao/book.dart';
 import 'package:anx_reader/dao/book_note.dart';
 import 'package:anx_reader/dao/theme.dart';
+import 'package:anx_reader/enums/reading_info.dart';
 import 'package:anx_reader/main.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/models/book_style.dart';
@@ -568,55 +569,106 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
     isInspectable: kDebugMode,
   );
 
+  void changeReadingInfo() {
+    setState(() {});
+  }
+
   Widget readingInfoWidget() {
     if (chapterCurrentPage == 0) {
       return const SizedBox();
     }
+
     TextStyle textStyle = TextStyle(
       color: Color(int.parse('0x$textColor')).withAlpha(150),
       fontSize: 10,
     );
 
-    Widget time = StreamBuilder(
+    Widget chapterTitleWidget = Text(
+      (chapterCurrentPage == 1 ? widget.book.title : chapterTitle),
+      style: textStyle,
+    );
+
+    Widget chapterProgressWidget = Text(
+      '$chapterCurrentPage/$chapterTotalPages',
+      style: textStyle,
+    );
+
+    Widget bookProgressWidget =
+        Text('${(percentage * 100).toStringAsFixed(2)}%', style: textStyle);
+
+    Widget timeWidget() => StreamBuilder(
         stream: Stream.periodic(const Duration(seconds: 1)),
         builder: (context, snapshot) {
           String currentTime = DateFormat('HH:mm').format(DateTime.now());
           return Text(currentTime, style: textStyle);
         });
-    Battery battery = Battery();
 
-    Widget batteryInfo = FutureBuilder(
-        future: battery.batteryLevel,
+    Widget batteryWidget = FutureBuilder(
+        future: Battery().batteryLevel,
         builder: (context, snapshot) {
           if (snapshot.hasData) {
-            return Stack(alignment: Alignment.center, children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(0, 2, 2, 0),
-                child: Text('${snapshot.data}',
-                    style: TextStyle(
-                      color: Color(int.parse('0x$textColor')),
-                      fontSize: 9,
-                    )),
-              ),
-              Icon(
-                HeroIcons.battery_0,
-                size: 27,
-                color: Color(int.parse('0x$textColor')),
-              ),
-            ]);
+            return Stack(
+              alignment: Alignment.center,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 0.8, 2, 0),
+                  child: Text('${snapshot.data}',
+                      style: TextStyle(
+                        color: Color(int.parse('0x$textColor')),
+                        fontSize: 9,
+                      )),
+                ),
+                Icon(
+                  HeroIcons.battery_0,
+                  size: 27,
+                  color: Color(int.parse('0x$textColor')),
+                ),
+              ],
+            );
           } else {
             return const SizedBox();
           }
         });
 
-    Widget batteryAndTime = Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        batteryInfo,
-        const SizedBox(width: 5),
-        time,
-      ],
-    );
+    Widget batteryAndTimeWidget() => Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            batteryWidget,
+            const SizedBox(width: 5),
+            timeWidget(),
+          ],
+        );
+
+    Widget getWidget(ReadingInfoEnum readingInfoEnum) {
+      switch (readingInfoEnum) {
+        case ReadingInfoEnum.chapterTitle:
+          return chapterTitleWidget;
+        case ReadingInfoEnum.chapterProgress:
+          return chapterProgressWidget;
+        case ReadingInfoEnum.bookProgress:
+          return bookProgressWidget;
+        case ReadingInfoEnum.battery:
+          return batteryWidget;
+        case ReadingInfoEnum.time:
+          return timeWidget();
+        case ReadingInfoEnum.batteryAndTime:
+          return batteryAndTimeWidget();
+        case ReadingInfoEnum.none:
+          return const SizedBox();
+      }
+    }
+
+    List<Widget> headerWidgets = [
+      getWidget(Prefs().readingInfo.headerLeft),
+      getWidget(Prefs().readingInfo.headerCenter),
+      getWidget(Prefs().readingInfo.headerRight),
+    ];
+
+    List<Widget> footerWidgets = [
+      getWidget(Prefs().readingInfo.footerLeft),
+      getWidget(Prefs().readingInfo.footerCenter),
+      getWidget(Prefs().readingInfo.footerRight),
+    ];
 
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 10, 20, 30),
@@ -624,19 +676,15 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SafeArea(
-            child: Text(
-                chapterCurrentPage == 1 ? widget.book.title : chapterTitle,
-                style: textStyle),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: headerWidgets,
+            ),
           ),
           const Spacer(),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              batteryAndTime,
-              Text('$chapterCurrentPage/$chapterTotalPages', style: textStyle),
-              Text('${(percentage * 100).toStringAsFixed(2)}%',
-                  style: textStyle),
-            ],
+            children: footerWidgets,
           ),
         ],
       ),

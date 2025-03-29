@@ -64,6 +64,11 @@
   "reading_page_double": "Double",
   "reading_page_bionic_reading": "Bionic Reading",
   "reading_page_bionic_reading_tips": "What is Bionic Reading?",
+  "reading_page_header_settings": "Header Settings",
+  "reading_page_footer_settings": "Footer Settings",
+  "reading_page_left": "Left",
+  "reading_page_center": "Center",
+  "reading_page_right": "Right",
 
   "context_menu_add_note_tips": "Add your note",
   "context_menu_copy": "Copy",
@@ -128,6 +133,13 @@
   "book_detail_nth_book": "{count, plural, =1{1st book you've read} =2{2nd book you've read} few{3rd book you've read} other{{count}th book you've read}}",
   "book_detail_last_read_date": "Last read: ",
   "book_detail_import_date": "Import date: ",
+  "reading_page_reading_info": "Reading Info",
+  "reading_page_reading_info_chapter_title": "Chapter Title",
+  "reading_page_reading_info_battery": "Battery",
+  "reading_page_reading_info_time": "Time",
+  "reading_page_reading_info_battery_and_time": "Battery and Time",
+  "reading_page_reading_info_chapter_progress": "Chapter Progress",
+  "reading_page_reading_info_book_progress": "Book Progress",
 
   "bookshelf_dragging": "Release to import",
 
@@ -169,6 +181,7 @@
   "common_nth_week": "{count, plural, =1{1st week} =2{2nd week} few{3rd week} other{{count}th week}}",
   "common_apply": "Apply",
   "common_reset": "Reset",
+  "common_none": "None",
 
   "service_import_success": "Import success",
   "service_import_n_books": "{count, plural, =1{importing 1 book} other{importing {count} books}}",

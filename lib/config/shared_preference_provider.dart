@@ -8,6 +8,7 @@ import 'package:anx_reader/main.dart';
 import 'package:anx_reader/models/book_style.dart';
 import 'package:anx_reader/models/font_model.dart';
 import 'package:anx_reader/models/read_theme.dart';
+import 'package:anx_reader/models/reading_info.dart';
 import 'package:anx_reader/models/reading_rules.dart';
 import 'package:anx_reader/models/window_info.dart';
 import 'package:anx_reader/service/translate/index.dart';
@@ -479,5 +480,18 @@ class Prefs extends ChangeNotifier {
 
   bool get syncCompletedToast {
     return prefs.getBool('syncCompletedToast') ?? true;
+  }
+
+  set readingInfo(ReadingInfoModel info) {
+    prefs.setString('readingInfo', jsonEncode(info.toJson()));
+    notifyListeners();
+  }
+
+  ReadingInfoModel get readingInfo {
+    String? readingInfoJson = prefs.getString('readingInfo');
+    if (readingInfoJson == null) {
+      return ReadingInfoModel();
+    }
+    return ReadingInfoModel.fromJson(jsonDecode(readingInfoJson));
   }
 }

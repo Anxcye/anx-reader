@@ -7,7 +7,7 @@
 * 新增：仿生阅读(#49)
 
 ## 1.4.2
-
+- Feat: Reading info custom
 - Feat: Navigation bar custom
 - Feat: Sync completed toast
 - Fix: Some old versions of Webview cannot import books
@@ -15,6 +15,7 @@
 - Fix: Image as link cannot be clicked
 - Fix: Reading information does not follow style changes
 
+- 新增：阅读信息自定义
 - 新增：导航栏自定义
 - 新增：同步完成显示提示
 - 修复：部分旧版本Webview无法导入图书

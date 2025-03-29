@@ -64,6 +64,11 @@
   "reading_page_double": "双列",
   "reading_page_bionic_reading": "仿生阅读",
   "reading_page_bionic_reading_tips": "什么是仿生阅读？",
+  "reading_page_header_settings": "页眉设置",
+  "reading_page_footer_settings": "页脚设置",
+  "reading_page_left": "左侧",
+  "reading_page_center": "中间",
+  "reading_page_right": "右侧",
 
   "context_menu_add_note_tips": "写下你的想法！",
   "context_menu_copy": "复制",
@@ -122,6 +127,13 @@
   "reading_page_bottom_margin": "下边距",
   "reading_page_font_weight": "字重",
   "reading_page_letter_spacing": "字间距",
+  "reading_page_reading_info": "阅读信息",
+  "reading_page_reading_info_chapter_title": "章节标题",
+  "reading_page_reading_info_battery": "电量",
+  "reading_page_reading_info_time": "时间",
+  "reading_page_reading_info_battery_and_time": "电量和时间",
+  "reading_page_reading_info_chapter_progress": "本章进度",
+  "reading_page_reading_info_book_progress": "全书进度",
 
   "book_detail_save": "保存",
   "book_detail_edit": "编辑",
@@ -169,6 +181,7 @@
   "common_nth_week": "{count, plural, other{第{count}周}}",
   "common_apply": "应用",
   "common_reset": "重置",
+  "common_none": "无",
 
   "service_import_success":"导入成功",
   "service_import_n_books": "{count, plural, other{正在导入 {count} 本书}}",
