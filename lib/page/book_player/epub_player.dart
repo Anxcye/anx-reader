@@ -119,13 +119,16 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
   }
 
   void changeTheme(ReadTheme readTheme) {
-    String backgroundColor = convertDartColorToJs(readTheme.backgroundColor);
-    String textColor = convertDartColorToJs(readTheme.textColor);
+    textColor = readTheme.textColor;
+    backgroundColor = readTheme.backgroundColor;
+
+    String bc = convertDartColorToJs(readTheme.backgroundColor);
+    String tc = convertDartColorToJs(readTheme.textColor);
 
     webViewController.evaluateJavascript(source: '''
       changeStyle({
-        backgroundColor: '#$backgroundColor',
-        fontColor: '#$textColor',
+        backgroundColor: '#$bc',
+        fontColor: '#$tc',
       })
       ''');
   }
