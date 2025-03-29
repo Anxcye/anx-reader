@@ -34,12 +34,7 @@ class HomePage extends ConsumerStatefulWidget {
 
 class _HomePageState extends ConsumerState<HomePage> {
   int _currentIndex = 0;
-  final List<Widget> _pages = [
-    const BookshelfPage(),
-    const StatisticPage(),
-    const NotesPage(),
-    const SettingsPage(),
-  ];
+
   bool? _expanded;
 
   @override
@@ -123,6 +118,44 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    List<Widget> pages = [
+      const BookshelfPage(),
+      if (Prefs().bottomNavigatorShowStatistics) const StatisticPage(),
+      if (Prefs().bottomNavigatorShowNote) const NotesPage(),
+      const SettingsPage(),
+    ];
+    List<Map<String, dynamic>> navBarItems = [
+      {
+        'icon': EvaIcons.book_open,
+          'label': L10n.of(context).navBar_bookshelf
+        },
+        if (Prefs().bottomNavigatorShowStatistics)
+          {
+            'icon': Icons.show_chart,
+            'label': L10n.of(context).navBar_statistics
+          },
+        if (Prefs().bottomNavigatorShowNote)
+          {'icon': Icons.note, 'label': L10n.of(context).navBar_notes},
+        {
+          'icon': EvaIcons.settings_2,
+          'label': L10n.of(context).navBar_settings
+        },
+    ];  
+
+    List<NavigationRailDestination> railBarItems = navBarItems.map((item) {
+      return NavigationRailDestination(
+        icon: Icon(item['icon'] as IconData),
+        label: Text(item['label'] as String),
+      );
+    }).toList();
+
+    List<NavigationDestination> bottomBarItems = navBarItems.map((item) {
+      return NavigationDestination(
+          icon: Icon(item['icon'] as IconData),
+          label: item['label'] as String,
+        );
+    }).toList();
+
     return LayoutBuilder(
       builder: (context, constraints) {
         _expanded ??= constraints.maxWidth > 1000;
@@ -156,7 +189,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                   extended: _expanded!,
                   selectedIndex: _currentIndex,
                   onDestinationSelected: _onBottomTap,
-                  destinations: _railBarItems(),
+                  destinations: railBarItems,
                   labelType: _expanded!
                       ? NavigationRailLabelType.none
                       : NavigationRailLabelType.all,
@@ -165,17 +198,17 @@ class _HomePageState extends ConsumerState<HomePage> {
                       Theme.of(context).colorScheme.primary,
                       1),
                 ),
-                Expanded(child: _pages[_currentIndex]),
+                Expanded(child: pages[_currentIndex]),
               ],
             ),
           );
         } else {
           return Scaffold(
-            body: _pages[_currentIndex],
+            body: pages[_currentIndex],
             bottomNavigationBar: NavigationBar(
               selectedIndex: _currentIndex,
               onDestinationSelected: _onBottomTap,
-              destinations: _bottomBarItems(),
+              destinations: bottomBarItems,
             ),
             // ],
           );
@@ -188,32 +221,5 @@ class _HomePageState extends ConsumerState<HomePage> {
     setState(() {
       _currentIndex = index;
     });
-  }
-
-  List<Map<String, dynamic>> _navBarItems() {
-    return [
-      {'icon': EvaIcons.book_open, 'label': L10n.of(context).navBar_bookshelf},
-      {'icon': Icons.show_chart, 'label': L10n.of(context).navBar_statistics},
-      {'icon': Icons.note, 'label': L10n.of(context).navBar_notes},
-      {'icon': EvaIcons.settings_2, 'label': L10n.of(context).navBar_settings},
-    ];
-  }
-
-  List<NavigationRailDestination> _railBarItems() {
-    return _navBarItems().map((item) {
-      return NavigationRailDestination(
-        icon: Icon(item['icon'] as IconData),
-        label: Text(item['label'] as String),
-      );
-    }).toList();
-  }
-
-  List<NavigationDestination> _bottomBarItems() {
-    return _navBarItems().map((item) {
-      return NavigationDestination(
-        icon: Icon(item['icon'] as IconData),
-        label: item['label'] as String,
-      );
-    }).toList();
   }
 }

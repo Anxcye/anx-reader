@@ -453,4 +453,22 @@ class Prefs extends ChangeNotifier {
   bool get onlySyncWhenWifi {
     return prefs.getBool('onlySyncWhenWifi') ?? false;
   }
+
+  set bottomNavigatorShowNote(bool status) {
+    prefs.setBool('bottomNavigatorShowNote', status);
+    notifyListeners();
+  }
+
+  bool get bottomNavigatorShowNote {
+    return prefs.getBool('bottomNavigatorShowNote') ?? true;
+  }
+
+  set bottomNavigatorShowStatistics(bool status) {
+    prefs.setBool('bottomNavigatorShowStatistics', status);
+    notifyListeners();
+  }
+
+  bool get bottomNavigatorShowStatistics {
+    return prefs.getBool('bottomNavigatorShowStatistics') ?? true;
+  }
 }

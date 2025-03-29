@@ -115,6 +115,29 @@ class _AppearanceSettingState extends State<AppearanceSetting> {
                 ),
               )),
             ]),
+        SettingsSection(
+            title: Text(L10n.of(context).settings_appearance_bottom_navigator_show),
+            tiles: [
+              SettingsTile.switchTile(
+                title: Text(L10n.of(context).navBar_statistics),
+                initialValue: Prefs().bottomNavigatorShowStatistics,
+                onToggle: (bool value) {
+                  setState(() {
+                    Prefs().bottomNavigatorShowStatistics = value;
+                  });
+                },
+              ),
+              SettingsTile.switchTile(
+                title: Text(L10n.of(context).navBar_notes),
+                initialValue: Prefs().bottomNavigatorShowNote,
+                onToggle: (bool value) {
+                  setState(() {
+                    Prefs().bottomNavigatorShowNote = value;
+                  });
+                },
+              ),
+            ],
+          ),
       ],
     );
   }
