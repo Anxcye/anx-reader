@@ -62,6 +62,11 @@
   "reading_page_double": "雙欄",
   "reading_page_bionic_reading": "仿生閱讀",
   "reading_page_bionic_reading_tips": "什麼是仿生閱讀？",
+  "reading_page_header_settings": "頁眉設置",
+  "reading_page_footer_settings": "頁腳設置",
+  "reading_page_left": "左側",
+  "reading_page_center": "中間",
+  "reading_page_right": "右側",
 
   "context_menu_add_note_tips": "寫下你的想法！",
 

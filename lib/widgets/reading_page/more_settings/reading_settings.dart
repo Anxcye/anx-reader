@@ -1,5 +1,6 @@
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/enums/convert_chinese_mode.dart';
+import 'package:anx_reader/enums/reading_info.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/page/reading_page.dart';
 import 'package:flutter/material.dart';
@@ -167,6 +168,176 @@ class _ReadingMoreSettingsState extends State<ReadingMoreSettings> {
       );
     }
 
+    Widget buildInfoDropdown(
+      BuildContext context,
+      String label,
+      ReadingInfoEnum currentValue,
+      Function(ReadingInfoEnum) onChanged,
+    ) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(label, style: Theme.of(context).textTheme.bodySmall),
+          DropdownButton<ReadingInfoEnum>(
+            isDense: true,
+            isExpanded: true,
+            value: currentValue,
+            onChanged: (value) {
+              if (value != null) {
+                onChanged(value);
+              }
+            },
+            dropdownColor: Theme.of(context).colorScheme.surfaceContainer,
+            borderRadius: BorderRadius.circular(8),
+            items: ReadingInfoEnum.values.map((info) {
+              return DropdownMenuItem<ReadingInfoEnum>(
+                value: info,
+                child: Text(
+                  info.getL10n(context),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              );
+            }).toList(),
+          ),
+        ],
+      );
+    }
+
+    Widget readingInfo() {
+      return StatefulBuilder(
+        builder: (context, setState) {
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                L10n.of(context).reading_page_header_settings,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: buildInfoDropdown(
+                      context,
+                      L10n.of(context).reading_page_left,
+                      Prefs().readingInfo.headerLeft,
+                      (value) {
+                        setState(() {
+                          final newRules = Prefs().readingInfo.copyWith(
+                                headerLeft: value,
+                              );
+                          Prefs().readingInfo = newRules;
+                          epubPlayerKey.currentState?.changeReadingInfo();
+                        });
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: buildInfoDropdown(
+                      context,
+                      L10n.of(context).reading_page_center,
+                      Prefs().readingInfo.headerCenter,
+                      (value) {
+                        setState(() {
+                          final newRules = Prefs().readingInfo.copyWith(
+                                headerCenter: value,
+                              );
+                          Prefs().readingInfo = newRules;
+                          // epubPlayerKey.currentState
+                          //     ?.changeReadingInfo(newRules);
+                        });
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: buildInfoDropdown(
+                      context,
+                      L10n.of(context).reading_page_right,
+                      Prefs().readingInfo.headerRight,
+                      (value) {
+                        setState(() {
+                          final newRules = Prefs().readingInfo.copyWith(
+                                headerRight: value,
+                              );
+                          Prefs().readingInfo = newRules;
+                          epubPlayerKey.currentState?.changeReadingInfo();
+                        });
+                      },
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              // 页脚设置标题
+              Text(L10n.of(context).reading_page_footer_settings,
+                  style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(height: 8),
+              // 页脚设置（左中右）
+              Row(
+                children: [
+                  Expanded(
+                    child: buildInfoDropdown(
+                      context,
+                      L10n.of(context).reading_page_left,
+                      Prefs().readingInfo.footerLeft,
+                      (value) {
+                        setState(() {
+                          final newRules = Prefs().readingInfo.copyWith(
+                                footerLeft: value,
+                              );
+                          Prefs().readingInfo = newRules;
+                          epubPlayerKey.currentState?.changeReadingInfo();
+                        });
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: buildInfoDropdown(
+                      context,
+                      L10n.of(context).reading_page_center,
+                      Prefs().readingInfo.footerCenter,
+                      (value) {
+                        setState(() {
+                          final newRules = Prefs().readingInfo.copyWith(
+                                footerCenter: value,
+                              );
+                          Prefs().readingInfo = newRules;
+                          epubPlayerKey.currentState?.changeReadingInfo();
+                        });
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: buildInfoDropdown(
+                      context,
+                      L10n.of(context).reading_page_right,
+                      Prefs().readingInfo.footerRight,
+                      (value) {
+                        setState(() {
+                          final newRules = Prefs().readingInfo.copyWith(
+                                footerRight: value,
+                              );
+                          Prefs().readingInfo = newRules;
+                          epubPlayerKey.currentState?.changeReadingInfo();
+                        });
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          );
+        },
+      );
+    }
+
     return Container(
       padding: const EdgeInsets.all(18.0),
       child: Column(
@@ -174,6 +345,8 @@ class _ReadingMoreSettingsState extends State<ReadingMoreSettings> {
           columnCount(),
           const Divider(height: 8),
           convertChinese(),
+          const Divider(height: 8),
+          readingInfo(),
           // const Divider(height: 8),
           // bionicReading(),
         ],
