@@ -14,6 +14,7 @@ import 'package:anx_reader/providers/ai_chat.dart';
 import 'package:anx_reader/providers/anx_webdav.dart';
 import 'package:anx_reader/service/ai/ai_dio.dart';
 import 'package:anx_reader/service/ai/prompt_generate.dart';
+import 'package:anx_reader/service/webview.dart';
 import 'package:anx_reader/utils/toast/common.dart';
 import 'package:anx_reader/utils/ui/status_bar.dart';
 import 'package:anx_reader/widgets/ai_chat_stream.dart';
@@ -86,6 +87,17 @@ class ReadingPageState extends ConsumerState<ReadingPage>
         });
       }
     });
+
+    // 确保WebView已经准备就绪
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      WebviewService().ensureWebViewReady().then((isReady) {
+        if (!isReady) {
+          AnxToast.show("WebView加载失败，请重试");
+          Navigator.pop(context);
+        }
+      });
+    });
+
     super.initState();
   }
 

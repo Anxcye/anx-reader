@@ -7,6 +7,7 @@ import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/page/home_page.dart';
 import 'package:anx_reader/providers/ai_chat.dart';
 import 'package:anx_reader/providers/book_list.dart';
+import 'package:anx_reader/providers/webview_status.dart';
 import 'package:anx_reader/service/convert_to_epub/txt/convert_from_txt.dart';
 import 'package:anx_reader/utils/get_path/get_base_path.dart';
 import 'package:anx_reader/page/reading_page.dart';
@@ -161,7 +162,9 @@ Future<void> pushToReadingPage(
           book: book,
           cfi: cfi,
         ),
-      ));
+      )).then((value) {
+    ref.read(webviewStatusProvider.notifier).hide();
+  });
 }
 
 Future<void> openBook(BuildContext context, Book book, WidgetRef ref) async {

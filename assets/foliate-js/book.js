@@ -49,6 +49,7 @@
 console.log('book.js')
 
 import './view.js'
+import './paginator.js'
 import { FootnoteHandler } from './footnotes.js'
 import { Overlayer } from './overlayer.js'
 const { configure, ZipReader, BlobReader, TextWriter, BlobWriter } =
@@ -160,11 +161,11 @@ const handleSelection = (view, doc, index) => {
 const setSelectionHandler = (view, doc, index) => {
   //    doc.addEventListener('pointerdown', () => isSelecting = true);
   // if windows or macos or iOS
-  if (navigator.platform.includes('Win') || navigator.platform.includes('Mac')
-   || navigator.platform.includes('iPhone') || navigator.platform.includes('iPad')
-  ){
+  // if (navigator.platform.includes('Win') || navigator.platform.includes('Mac')
+  //  || navigator.platform.includes('iPhone') || navigator.platform.includes('iPad')
+  // ){
     doc.addEventListener('pointerup', () => handleSelection(view, doc, index));
-  }
+  // }
   // doc.addEventListener('selectionchange', () => handleSelection(view, doc, index));
 
   if (!view.isFixedLayout) {
@@ -1062,4 +1063,26 @@ window.loadBook = () => {
     .then(res => res.blob())
     .then(blob => open(new File([blob], new URL(url, window.location.origin).pathname), initialCfi))
     .catch(e => console.error(e))
+}
+
+window.resetReader = () => {
+  console.log('Resetting reader state...')
+  
+  if (reader) {
+    try {
+      reader.view?.close?.()
+      
+      url = ''
+      initialCfi = ''
+      
+      reader.clearAnnotations?.()
+      reader.clearSearch?.()
+      
+      console.log('Reader state reset successfully')
+    } catch (e) {
+      console.error('Error resetting reader:', e)
+    }
+  }
+  
+  return true
 }

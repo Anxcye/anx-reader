@@ -1,10 +1,9 @@
-import 'package:anx_reader/page/book_player/epub_player.dart';
 import 'package:anx_reader/page/home_page.dart';
-import 'package:anx_reader/page/reading_page.dart';
 import 'package:anx_reader/service/book_player/book_player_server.dart';
 import 'package:anx_reader/utils/log/common.dart';
 import 'package:anx_reader/utils/webView/webview_console_message.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 class WebviewService {
@@ -14,103 +13,50 @@ class WebviewService {
 
   WebviewService._internal();
 
-  HeadlessInAppWebView? headlessWebView;
-
   InAppWebViewController? webViewController;
-  Future<void> init() async {
-    String indexHtmlPath =
-        "http://localhost:${Server().port}/foliate-js/index.html";
+  InAppWebView? webView;
+  InAppWebViewKeepAlive? keepAlive;
 
+  bool _isWebViewInitialized = false;
+  bool _isWebViewLoaded = false;
+
+  bool _isInitializing = false;
+
+  Widget get webViewWidget => webView ?? const SizedBox();
+
+  bool get isWebViewReady => _isWebViewInitialized && _isWebViewLoaded;
+
+  Future<void> init() async {
+    if (_isInitializing || _isWebViewInitialized) {
+      return;
+    }
+
+    _isInitializing = true;
+    AnxLog.info("WebviewService: Starting initialization");
+
+    String indexHtmlPath =
+            "http://localhost:${Server().port}/foliate-js/index.html";
+        // "https://flutter.dev";
     InAppWebViewSettings initialSettings = InAppWebViewSettings(
       supportZoom: false,
       transparentBackground: true,
       isInspectable: kDebugMode,
     );
 
-    Future<void> setHandler(InAppWebViewController controller) async {
-      EpubPlayerState? epubPlayerState = epubPlayerKey.currentState;
-
-      controller.addJavaScriptHandler(
-          handlerName: 'onLoadEnd',
-          callback: (args) {
-            epubPlayerState?.onLoadEndHandler(args);
-          });
-
-      controller.addJavaScriptHandler(
-          handlerName: 'onRelocated',
-          callback: (args) {
-            epubPlayerState?.onRelocatedHandler(args);
-          });
-      controller.addJavaScriptHandler(
-          handlerName: 'onClick',
-          callback: (args) {
-            epubPlayerState?.onClickHandler(args);
-          });
-      controller.addJavaScriptHandler(
-          handlerName: 'onSetToc',
-          callback: (args) {
-            epubPlayerState?.onSetTocHandler(args);
-          });
-      controller.addJavaScriptHandler(
-          handlerName: 'onSelectionEnd',
-          callback: (args) {
-            epubPlayerState?.onSelectionEndHandler(args);
-          });
-      controller.addJavaScriptHandler(
-          handlerName: 'onAnnotationClick',
-          callback: (args) {
-            epubPlayerState?.onAnnotationClickHandler(args);
-          });
-      controller.addJavaScriptHandler(
-        handlerName: 'onSearch',
-        callback: (args) {
-          epubPlayerState?.onSearchHandler(args);
-        },
-      );
-      controller.addJavaScriptHandler(
-        handlerName: 'renderAnnotations',
-        callback: (args) {
-          epubPlayerState?.onRenderAnnotationsHandler(args);
-        },
-      );
-      controller.addJavaScriptHandler(
-        handlerName: 'onPushState',
-        callback: (args) {
-          epubPlayerState?.onPushStateHandler(args);
-        },
-      );
-      controller.addJavaScriptHandler(
-        handlerName: 'onImageClick',
-        callback: (args) {
-          epubPlayerState?.onImageClickHandler(args);
-        },
-      );
-      controller.addJavaScriptHandler(
-        handlerName: 'onFootnoteClose',
-        callback: (args) {
-          epubPlayerState?.onFootnoteCloseHandler(args);
-        },
-      );
-    }
-
     Future<void> onWebViewCreated(InAppWebViewController controller) async {
       if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
         await InAppWebViewController.setWebContentsDebuggingEnabled(true);
       }
       webViewController = controller;
-      setHandler(controller);
+      // await setHandler(controller);
+      _isWebViewInitialized = true;
+      AnxLog.info("WebviewService: WebView创建成功");
     }
 
-    final contextMenu = ContextMenu(
-      settings: ContextMenuSettings(hideDefaultSystemContextMenuItems: true),
-      onCreateContextMenu: (hitTestResult) async {
-        webViewController!.evaluateJavascript(source: "showContextMenu()");
-      },
-      onHideContextMenu: () {
-        epubPlayerKey.currentState?.removeOverlay();
-      },
-    );
-    headlessWebView = HeadlessInAppWebView(
+    keepAlive = InAppWebViewKeepAlive();
+
+    webView = InAppWebView(
+      keepAlive: keepAlive,
       webViewEnvironment: webViewEnvironment,
       initialUrlRequest: URLRequest(url: WebUri(indexHtmlPath)),
       onConsoleMessage: (controller, consoleMessage) {
@@ -120,15 +66,40 @@ class WebviewService {
         AnxLog.info("onWebViewCreated: ${controller.toString()}");
       },
       initialSettings: initialSettings,
-      contextMenu: contextMenu,
-      onLoadStop: (controller, url) => onWebViewCreated(controller),
+      // contextMenu: contextMenu,
+      onLoadStop: (controller, url) {
+        onWebViewCreated(controller);
+        _isWebViewLoaded = true;
+        _isInitializing = false;
+        AnxLog.info("WebviewService: WebView加载完成");
+      },
     );
-    if (headlessWebView != null && !headlessWebView!.isRunning()) {
-      await headlessWebView!.run();
+
+    AnxLog.info("WebviewService: WebView初始化完成");
+  }
+
+  void resetWebViewState() {
+    AnxLog.info("WebviewService: 重置WebView状态");
+    if (webViewController != null) {
+      webViewController!.evaluateJavascript(source: "resetReader()");
     }
   }
 
+  Future<bool> ensureWebViewReady() async {
+    if (!isWebViewReady) {
+      await init();
+      int attempts = 0;
+      while (!isWebViewReady && attempts < 10) {
+        await Future.delayed(const Duration(milliseconds: 200));
+        attempts++;
+      }
+    }
+    return isWebViewReady;
+  }
+
   Future<void> dispose() async {
-    await headlessWebView?.dispose();
+    if (webViewController != null) {
+      resetWebViewState();
+    }
   }
 }

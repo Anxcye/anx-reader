@@ -14,15 +14,15 @@ import 'package:anx_reader/models/reading_rules.dart';
 import 'package:anx_reader/models/search_result_model.dart';
 import 'package:anx_reader/models/toc_item.dart';
 import 'package:anx_reader/page/book_player/image_viewer.dart';
-import 'package:anx_reader/page/home_page.dart';
 import 'package:anx_reader/page/reading_page.dart';
 import 'package:anx_reader/providers/book_list.dart';
+import 'package:anx_reader/providers/webview_status.dart';
 import 'package:anx_reader/service/book_player/book_player_server.dart';
 import 'package:anx_reader/service/webview.dart';
 import 'package:anx_reader/utils/coordinates_to_part.dart';
 import 'package:anx_reader/utils/js/convert_dart_color_to_js.dart';
 import 'package:anx_reader/models/book_note.dart';
-import 'package:anx_reader/utils/webView/webview_console_message.dart';
+import 'package:anx_reader/utils/log/common.dart';
 import 'package:anx_reader/utils/webView/webview_initial_variable.dart';
 import 'package:anx_reader/widgets/bookshelf/book_cover.dart';
 import 'package:anx_reader/widgets/context_menu/context_menu.dart';
@@ -309,106 +309,6 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
     setState(() {});
   }
 
-  void onLoadEndHandler(dynamic args) {
-    widget.onLoadEnd();
-  }
-
-  void onRelocatedHandler(dynamic args) {
-    Map<String, dynamic> location = args[0];
-    if (cfi == location['cfi']) return;
-    setState(() {
-      cfi = location['cfi'];
-      percentage = location['percentage'] ?? 0.0;
-      chapterTitle = location['chapterTitle'] ?? '';
-      chapterHref = location['chapterHref'] ?? '';
-      chapterCurrentPage = location['chapterCurrentPage'];
-      chapterTotalPages = location['chapterTotalPages'];
-    });
-    saveReadingProgress();
-    readingPageKey.currentState?.resetAwakeTimer();
-  }
-
-  void onClickHandler(args) {
-    Map<String, dynamic> location = args[0];
-    onClick(location);
-  }
-
-  void onSetTocHandler(args) {
-    List<dynamic> t = args[0];
-    toc = t.map((i) => TocItem.fromJson(i)).toList();
-  }
-
-  void onSelectionEndHandler(args) {
-    removeOverlay();
-    Map<String, dynamic> location = args[0];
-    String cfi = location['cfi'];
-    String text = location['text'];
-    bool footnote = location['footnote'];
-    double x = location['pos']['point']['x'];
-    double y = location['pos']['point']['y'];
-    String dir = location['pos']['dir'];
-    showContextMenu(context, x, y, dir, text, cfi, null, footnote);
-  }
-
-  void onAnnotationClickHandler(args) {
-    Map<String, dynamic> annotation = args[0];
-    int id = annotation['annotation']['id'];
-    String cfi = annotation['annotation']['value'];
-    String note = annotation['annotation']['note'];
-    double x = annotation['pos']['point']['x'];
-    double y = annotation['pos']['point']['y'];
-    String dir = annotation['pos']['dir'];
-    showContextMenu(context, x, y, dir, note, cfi, id, false);
-  }
-
-  void onSearchHandler(args) {
-    Map<String, dynamic> search = args[0];
-    setState(() {
-      if (search['process'] != null) {
-        searchProcess = search['process'].toDouble();
-        searchProgressController.add(searchProcess);
-      } else {
-        searchResult.add(SearchResultModel.fromJson(search));
-        searchResultController.add(searchResult);
-      }
-    });
-  }
-
-  void onRenderAnnotationsHandler(args) {
-    renderAnnotations(webViewController);
-  }
-
-  void onPushStateHandler(args) {
-    Map<String, dynamic> state = args[0];
-    canGoBack = state['canGoBack'];
-    canGoForward = state['canGoForward'];
-    if (!mounted) return;
-    setState(() {
-      showHistory = true;
-    });
-    Future.delayed(const Duration(seconds: 20), () {
-      if (!mounted) return;
-      setState(() {
-        showHistory = false;
-      });
-    });
-  }
-
-  void onImageClickHandler(args) {
-    String image = args[0];
-    Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => ImageViewer(
-                  image: image,
-                  bookName: widget.book.title,
-                )));
-  }
-
-  void onFootnoteCloseHandler(args) {
-    removeOverlay();
-  }
-
   Future<void> setHandler(InAppWebViewController controller) async {
     String uri = Uri.encodeComponent(widget.book.fileFullPath);
     String url = 'http://localhost:${Server().port}/book/$uri';
@@ -423,7 +323,133 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
       backgroundColor: backgroundColor,
       textColor: textColor,
     );
+
+    controller.addJavaScriptHandler(
+        handlerName: 'onLoadEnd',
+        callback: (args) {
+          widget.onLoadEnd();
+        });
+
+    controller.addJavaScriptHandler(
+        handlerName: 'onRelocated',
+        callback: (args) {
+          Map<String, dynamic> location = args[0];
+          if (cfi == location['cfi']) return;
+          setState(() {
+            cfi = location['cfi'];
+            percentage = location['percentage'] ?? 0.0;
+            chapterTitle = location['chapterTitle'] ?? '';
+            chapterHref = location['chapterHref'] ?? '';
+            chapterCurrentPage = location['chapterCurrentPage'];
+            chapterTotalPages = location['chapterTotalPages'];
+          });
+          saveReadingProgress();
+          readingPageKey.currentState?.resetAwakeTimer();
+        });
+    controller.addJavaScriptHandler(
+        handlerName: 'onClick',
+        callback: (args) {
+          // Map<String, dynamic> location = args[0];
+          // onClick(location);
+        });
+    controller.addJavaScriptHandler(
+        handlerName: 'onSetToc',
+        callback: (args) {
+          List<dynamic> t = args[0];
+          toc = t.map((i) => TocItem.fromJson(i)).toList();
+        });
+    controller.addJavaScriptHandler(
+        handlerName: 'onSelectionEnd',
+        callback: (args) {
+          removeOverlay();
+          Map<String, dynamic> location = args[0];
+          String cfi = location['cfi'];
+          String text = location['text'];
+          bool footnote = location['footnote'];
+          double x = location['pos']['point']['x'];
+          double y = location['pos']['point']['y'];
+          String dir = location['pos']['dir'];
+          showContextMenu(context, x, y, dir, text, cfi, null, footnote);
+        });
+    controller.addJavaScriptHandler(
+        handlerName: 'onAnnotationClick',
+        callback: (args) {
+          Map<String, dynamic> annotation = args[0];
+          int id = annotation['annotation']['id'];
+          String cfi = annotation['annotation']['value'];
+          String note = annotation['annotation']['note'];
+          double x = annotation['pos']['point']['x'];
+          double y = annotation['pos']['point']['y'];
+          String dir = annotation['pos']['dir'];
+          showContextMenu(context, x, y, dir, note, cfi, id, false);
+        });
+    controller.addJavaScriptHandler(
+      handlerName: 'onSearch',
+      callback: (args) {
+        Map<String, dynamic> search = args[0];
+        setState(() {
+          if (search['process'] != null) {
+            searchProcess = search['process'].toDouble();
+            searchProgressController.add(searchProcess);
+          } else {
+            searchResult.add(SearchResultModel.fromJson(search));
+            searchResultController.add(searchResult);
+          }
+        });
+      },
+    );
+    controller.addJavaScriptHandler(
+      handlerName: 'renderAnnotations',
+      callback: (args) {
+        renderAnnotations(controller);
+      },
+    );
+    controller.addJavaScriptHandler(
+      handlerName: 'onPushState',
+      callback: (args) {
+        Map<String, dynamic> state = args[0];
+        canGoBack = state['canGoBack'];
+        canGoForward = state['canGoForward'];
+        if (!mounted) return;
+        setState(() {
+          showHistory = true;
+        });
+        Future.delayed(const Duration(seconds: 20), () {
+          if (!mounted) return;
+          setState(() {
+            showHistory = false;
+          });
+        });
+      },
+    );
+    controller.addJavaScriptHandler(
+      handlerName: 'onImageClick',
+      callback: (args) {
+        String image = args[0];
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => ImageViewer(
+                      image: image,
+                      bookName: widget.book.title,
+                    )));
+      },
+    );
+    controller.addJavaScriptHandler(
+      handlerName: 'onFootnoteClose',
+      callback: (args) {
+        removeOverlay();
+      },
+    );
+
+    controller.addJavaScriptHandler(
+      handlerName: 'hideContextMenu',
+      callback: (args) {
+        removeOverlay();
+      },
+    );
   }
+
 
   Future<void> onWebViewCreated(InAppWebViewController controller) async {
     webViewController = controller;
@@ -500,6 +526,20 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
         _animationController!.forward();
       });
     }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      bool isReady = await WebviewService().ensureWebViewReady();
+      ref.read(webviewStatusProvider.notifier).show();
+
+      if (isReady && WebviewService().webViewController != null) {
+        webViewController = WebviewService().webViewController!;
+        await onWebViewCreated(webViewController);
+        widget.onLoadEnd();
+      } else {
+        AnxLog.severe("WebView初始化失败，无法加载电子书");
+      }
+    });
+
     super.initState();
   }
 
@@ -523,23 +563,21 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
   void dispose() {
     super.dispose();
     _animationController?.dispose();
-    if (defaultTargetPlatform == TargetPlatform.android ||
-        defaultTargetPlatform == TargetPlatform.iOS ||
-        defaultTargetPlatform == TargetPlatform.macOS) {
-      InAppWebViewController.clearAllCache();
-    }
+
     saveReadingProgress();
     removeOverlay();
+
+    WebviewService().resetWebViewState();
   }
 
-  String indexHtmlPath =
-      "http://localhost:${Server().port}/foliate-js/index.html";
+  // String indexHtmlPath =
+  //     "http://localhost:${Server().port}/foliate-js/index.html";
 
-  InAppWebViewSettings initialSettings = InAppWebViewSettings(
-    supportZoom: false,
-    transparentBackground: true,
-    isInspectable: kDebugMode,
-  );
+  // InAppWebViewSettings initialSettings = InAppWebViewSettings(
+  //   supportZoom: false,
+  //   transparentBackground: true,
+  //   isInspectable: kDebugMode,
+  // );
 
   Widget readingInfoWidget() {
     if (chapterCurrentPage == 0) {
@@ -629,23 +667,7 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
           resizeToAvoidBottomInset: false,
           body: Stack(
             children: [
-              SizedBox.expand(
-                child: InAppWebView(
-                  headlessWebView: WebviewService().headlessWebView,
-                //   webViewEnvironment: webViewEnvironment,
-                //   initialUrlRequest: URLRequest(url: WebUri(indexHtmlPath)),
-                //   initialSettings: initialSettings,
-                //   contextMenu: contextMenu,
-                //   onLoadStop: (controller, url) => onWebViewCreated(controller),
-                //   onConsoleMessage: (controller, consoleMessage) {
-                    // webviewConsoleMessage(controller, consoleMessage);
-                //   },
-
-                onWebViewCreated: (controller) {
-                  onWebViewCreated(controller);
-                },
-                ),
-              ),
+              SizedBox.expand(child: WebviewService().webViewWidget),
               readingInfoWidget(),
               if (showHistory)
                 Positioned(

@@ -120,69 +120,83 @@ class _HomePageState extends ConsumerState<HomePage> {
         AnxLog.severe('share: Receive share intent');
       });
     }
-    WebviewService().init();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+      AnxLog.info("HomePage: 开始预加载WebView");
+      await WebviewService().init();
+      if (mounted) {
+        setState(() {});
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        _expanded ??= constraints.maxWidth > 1000;
-        if (constraints.maxWidth > 600) {
-          return Scaffold(
-            // floatingActionButton: FloatingActionButton(
-            //   onPressed: () {
-            //     checkUpdate(false);
-            //   },
-            //   child: const Icon(Icons.sync),
-            // ),
-            body: Row(
-              children: [
-                NavigationRail(
-                  trailing: Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        IconButton(
-                          alignment: Alignment.bottomLeft,
-                          icon: const Icon(Icons.menu),
-                          onPressed: () {
-                            _expanded = !_expanded!;
-                            setState(() {});
-                          },
+    return Stack(
+      children: [
+        // Offstage(
+        //   offstage: true,
+        //   child: WebviewService().webViewWidget,
+        // ),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            _expanded ??= constraints.maxWidth > 1000;
+            if (constraints.maxWidth > 600) {
+              return Scaffold(
+                // floatingActionButton: FloatingActionButton(
+                //   onPressed: () {
+                //     checkUpdate(false);
+                //   },
+                //   child: const Icon(Icons.sync),
+                // ),
+                body: Row(
+                  children: [
+                    NavigationRail(
+                      trailing: Expanded(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            IconButton(
+                              alignment: Alignment.bottomLeft,
+                              icon: const Icon(Icons.menu),
+                              onPressed: () {
+                                _expanded = !_expanded!;
+                                setState(() {});
+                              },
+                            ),
+                            const SizedBox(height: 20),
+                          ],
                         ),
-                        const SizedBox(height: 20),
-                      ],
+                      ),
+                      extended: _expanded!,
+                      selectedIndex: _currentIndex,
+                      onDestinationSelected: _onBottomTap,
+                      destinations: _railBarItems(),
+                      labelType: _expanded!
+                          ? NavigationRailLabelType.none
+                          : NavigationRailLabelType.all,
+                      backgroundColor: ElevationOverlay.applySurfaceTint(
+                          Theme.of(context).colorScheme.surface,
+                          Theme.of(context).colorScheme.primary,
+                          1),
                     ),
-                  ),
-                  extended: _expanded!,
+                    Expanded(child: _pages[_currentIndex]),
+                  ],
+                ),
+              );
+            } else {
+              return Scaffold(
+                body: _pages[_currentIndex],
+                bottomNavigationBar: NavigationBar(
                   selectedIndex: _currentIndex,
                   onDestinationSelected: _onBottomTap,
-                  destinations: _railBarItems(),
-                  labelType: _expanded!
-                      ? NavigationRailLabelType.none
-                      : NavigationRailLabelType.all,
-                  backgroundColor: ElevationOverlay.applySurfaceTint(
-                      Theme.of(context).colorScheme.surface,
-                      Theme.of(context).colorScheme.primary,
-                      1),
+                  destinations: _bottomBarItems(),
                 ),
-                Expanded(child: _pages[_currentIndex]),
-              ],
-            ),
-          );
-        } else {
-          return Scaffold(
-            body: _pages[_currentIndex],
-            bottomNavigationBar: NavigationBar(
-              selectedIndex: _currentIndex,
-              onDestinationSelected: _onBottomTap,
-              destinations: _bottomBarItems(),
-            ),
-            // ],
-          );
-        }
-      },
+                // ],
+              );
+            }
+          },
+        ),
+      ],
     );
   }
 
