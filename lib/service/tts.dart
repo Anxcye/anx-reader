@@ -1,18 +1,16 @@
 import 'dart:async';
-import 'dart:io' show Platform;
-
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/page/reading_page.dart';
+import 'package:anx_reader/service/edge_tts.dart';
 import 'package:audio_service/audio_service.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_tts/flutter_tts.dart';
+import 'package:flutter/services.dart';
 import 'package:audio_session/audio_session.dart';
 
 enum TtsStateEnum { playing, stopped, paused, continued }
 
 class Tts extends BaseAudioHandler with QueueHandler, SeekHandler {
-  static FlutterTts flutterTts = FlutterTts();
   static String? language;
   static String? engine;
 
@@ -23,7 +21,7 @@ class Tts extends BaseAudioHandler with QueueHandler, SeekHandler {
   static double get pitch => Prefs().ttsPitch;
 
   static double get rate => Prefs().ttsRate;
-
+  static AudioPlayer? player;
   static set volume(double volume) {
     restart();
     Prefs().ttsVolume = volume;
@@ -49,18 +47,11 @@ class Tts extends BaseAudioHandler with QueueHandler, SeekHandler {
   static bool isCurrentLanguageInstalled = false;
 
   static String? _currentVoiceText;
-
-  static String? _prevVoiceText;
+  static String? _nextVoiceText;
+  static Uint8List? _nextAudio;
+  static bool _isLoadingNextAudio = false;
 
   static bool get isPlaying => ttsStateNotifier.value == TtsStateEnum.playing;
-
-  static bool get isIOS => !kIsWeb && Platform.isIOS;
-
-  static bool get isAndroid => !kIsWeb && Platform.isAndroid;
-
-  static bool get isWindows => !kIsWeb && Platform.isWindows;
-
-  static bool get isWeb => kIsWeb;
 
   static Function getNextVoiceText = () => '';
 
@@ -68,153 +59,94 @@ class Tts extends BaseAudioHandler with QueueHandler, SeekHandler {
 
   static Function getHere = () => '';
 
+  static Uint8List? audioToPlay;
   static Future<void> init(Function here, Function next, Function prev) async {
     if (isInit) return;
     getHere = here;
     isInit = true;
     getNextVoiceText = next;
     getPrevVoiceText = prev;
+  }
 
-    setAwaitOptions();
+  static Future<void> _preloadNextAudio() async {
+    if (_isLoadingNextAudio) return;
 
-    if (isAndroid) {
-      getDefaultEngine();
-      getDefaultVoice();
+    _isLoadingNextAudio = true;
+    try {
+      String prepareText = await epubPlayerKey.currentState!.ttsPrepare();
+      if (prepareText.isNotEmpty) {
+        _nextVoiceText = prepareText;
+        _nextAudio = await EdgeTTS.getAudio(_nextVoiceText!);
+      }
+    } finally {
+      _isLoadingNextAudio = false;
     }
-
-    flutterTts.setStartHandler(() async {
-      updateTtsState(TtsStateEnum.playing);
-      if (isWindows) {
-        return;
-      }
-      _prevVoiceText = _currentVoiceText;
-      _currentVoiceText = await epubPlayerKey.currentState!.ttsPrepare();
-
-      if (_currentVoiceText?.isNotEmpty ?? false) {
-        flutterTts.speak(_currentVoiceText!);
-      }
-    });
-
-    flutterTts.setCompletionHandler(() async {
-      updateTtsState(TtsStateEnum.playing);
-      if (isWindows) {
-        return;
-      }
-      if (_currentVoiceText?.isEmpty ?? true) {
-        _currentVoiceText = await getNextVoiceText();
-        speak();
-      } else {
-        getNextVoiceText();
-      }
-    });
-  }
-
-  static Future<dynamic> getLanguages() async => await flutterTts.getLanguages;
-
-  static Future<dynamic> getEngines() async => await flutterTts.getEngines;
-
-  static Future<void> getDefaultEngine() async {
-    var engine = await flutterTts.getDefaultEngine;
-    if (engine != null) {}
-  }
-
-  static Future<void> getDefaultVoice() async {
-    var voice = await flutterTts.getDefaultVoice;
-    if (voice != null) {}
   }
 
   static Future<void> speak({String? content}) async {
-    await setAwaitOptions();
+    player ??= AudioPlayer();
+    player!.onPlayerComplete.listen((_) async {
+      getNextVoiceText();
+      if (ttsStateNotifier.value == TtsStateEnum.playing) {
+        if (_nextVoiceText != null && _nextAudio != null) {
+          _currentVoiceText = _nextVoiceText;
+          _nextVoiceText = null;
+          audioToPlay = _nextAudio;
+          _nextAudio = null;
+
+          player!.play(BytesSource(audioToPlay!));
+
+          _preloadNextAudio();
+        } else {
+          _currentVoiceText = await getNextVoiceText();
+          speak();
+        }
+      }
+    });
     if (content != null) {
       _currentVoiceText = content;
     }
     _currentVoiceText ??= await getHere();
-    await flutterTts.setVolume(volume);
-    await flutterTts.setSpeechRate(rate);
-    await flutterTts.setPitch(pitch);
 
-    // at speak begin, ttsStartHandler will be called,
-    // a new voice text will be set there and begin synthesize
+    EdgeTTS.pitch = pitch;
+    EdgeTTS.rate = rate;
+    EdgeTTS.volume = volume;
 
-    // at speak complete, ttsCompletionHandler will be called,
-    // a new voice text will be set there and begin synthesize
-    await flutterTts.speak(_currentVoiceText!);
-    if (isWindows && ttsStateNotifier.value == TtsStateEnum.playing) {
-      _currentVoiceText = await getNextVoiceText();
-      speak();
-    }
+    audioToPlay = await EdgeTTS.getAudio(_currentVoiceText!);
+
+    player!.play(BytesSource(audioToPlay!));
+
+    _preloadNextAudio();
   }
 
-  static Future<void> setAwaitOptions() async {
-    await flutterTts.awaitSpeakCompletion(true);
-    if (isAndroid) {
-      await flutterTts.awaitSynthCompletion(true);
-      await flutterTts.setQueueMode(1);
-    }
+  static Future<void> stopStatic() async {
+    await player?.stop();
+    player?.dispose();
+    player = null;
+    _nextAudio = null;
+    _nextVoiceText = null;
+    _isLoadingNextAudio = false;
   }
 
-  static Future<int> stopStatic() async {
-    return await flutterTts.stop();
+  static void pauseStatic() async {
+    await player?.pause();
   }
 
-  static Future<void> pauseStatic() async {
-    var result = await flutterTts.pause();
-    if (result == 1) {
-      updateTtsState(TtsStateEnum.paused);
-    }
-  }
-
-  static Future<void> prev() async {
-    await stopStatic();
+  static void prev() async {
+    stopStatic();
     _currentVoiceText = await getPrevVoiceText();
     speak();
   }
 
-  static Future<void> next() async {
-    await stopStatic();
+  static void next() async {
+    stopStatic();
     _currentVoiceText = await getNextVoiceText();
     speak();
   }
 
   static Future<void> restart() async {
-    await stopStatic();
-    await speak();
-  }
-
-  static List<DropdownMenuItem<String>> getEnginesDropDownMenuItems(
-      List<dynamic> engines) {
-    var items = <DropdownMenuItem<String>>[];
-    for (dynamic type in engines) {
-      items.add(DropdownMenuItem(
-          value: type as String?, child: Text((type as String))));
-    }
-    return items;
-  }
-
-  static void changedEnginesDropDownItem(String? selectedEngine) async {
-    await flutterTts.setEngine(selectedEngine!);
-    language = null;
-    engine = selectedEngine;
-  }
-
-  static List<DropdownMenuItem<String>> getLanguageDropDownMenuItems(
-      List<dynamic> languages) {
-    var items = <DropdownMenuItem<String>>[];
-    for (dynamic type in languages) {
-      items.add(DropdownMenuItem(
-          value: type as String?, child: Text((type as String))));
-    }
-    return items;
-  }
-
-  static void changedLanguageDropDownItem(String? selectedType) {
-    language = selectedType;
-    flutterTts.setLanguage(language!);
-    if (isAndroid) {
-      flutterTts
-          .isLanguageInstalled(language!)
-          .then((value) => isCurrentLanguageInstalled = (value as bool));
-    }
+   await  stopStatic();
+    speak();
   }
 
   @override
@@ -227,6 +159,8 @@ class Tts extends BaseAudioHandler with QueueHandler, SeekHandler {
     stopStatic();
     isInit = false;
     _currentVoiceText = null;
+    _nextVoiceText = null;
+    _nextAudio = null;
     epubPlayerKey.currentState?.ttsStop();
     updateTtsState(TtsStateEnum.stopped);
   }
@@ -239,19 +173,14 @@ class Tts extends BaseAudioHandler with QueueHandler, SeekHandler {
       playing: false,
     ));
 
-    await stopStatic();
+    pauseStatic();
     updateTtsState(TtsStateEnum.paused);
   }
 
   @override
   Future<void> play() async {
     final session = await AudioSession.instance;
-    // flutter_tts doesn't activate the session, so we do it here. This
-    // allows the app to stop other apps from playing audio while we are
-    // playing audio.
     if (await session.setActive(true)) {
-      // If we successfully activated the session, set the state to playing
-      // and resume playback.
       playbackState.add(playbackState.value.copyWith(
         controls: [MediaControl.pause, MediaControl.stop],
         processingState: AudioProcessingState.ready,
@@ -268,10 +197,12 @@ class Tts extends BaseAudioHandler with QueueHandler, SeekHandler {
           'file://${epubPlayerKey.currentState!.book.coverFullPath}'),
     ));
 
-    if (isAndroid && ttsStateNotifier.value == TtsStateEnum.paused) {
-      _currentVoiceText = _prevVoiceText;
+    if (ttsStateNotifier.value == TtsStateEnum.paused) {
+      await player?.resume();
+    } else {
+      await speak();
     }
-    await speak();
+
     updateTtsState(TtsStateEnum.playing);
   }
 

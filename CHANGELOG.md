@@ -7,6 +7,7 @@
 * 新增：仿生阅读(#49)
 
 ## 1.4.2
+- Feat: TTS integration
 - Feat: Reading info custom
 - Feat: Navigation bar custom
 - Feat: Sync completed toast
@@ -18,6 +19,7 @@
 - Fix: Context menu position error when it exceeds the screen
 - Fix: Optimize book opening speed
 
+- 新增：集成的 TTS
 - 新增：阅读信息自定义
 - 新增：导航栏自定义
 - 新增：同步完成是否显示提示
