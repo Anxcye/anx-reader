@@ -2,7 +2,9 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/utils/log/common.dart';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:web_socket_channel/io.dart';
 import 'package:crypto/crypto.dart';
@@ -15,13 +17,12 @@ const String wssUrl =
     "wss://$baseUrl/edge/v1?TrustedClientToken=$trustedClientToken";
 const String voiceListUrl =
     "https://$baseUrl/voices/list?trustedclienttoken=$trustedClientToken";
-const String defaultVoice = "zh-CN-XiaoxiaoNeural";
 const String chromiumFullVersion = "130.0.2849.68";
 const String secMsGecVersion = "1-$chromiumFullVersion";
 
 class EdgeTTS {
   static String text = "";
-  static String voice = defaultVoice;
+  static String voice = Prefs().ttsVoiceModel;
   static double rate = 0;
   static double volume = 0;
   static double pitch = 0;
@@ -213,6 +214,8 @@ $ssml
   }
 
   static Future<Uint8List> getAudio(String text) async {
+    debugPrint(text);
+    EdgeTTS.voice = Prefs().ttsVoiceModel;
     EdgeTTS.text = text;
     List<int> audioData = [];
     try {

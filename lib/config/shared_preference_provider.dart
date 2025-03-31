@@ -12,8 +12,11 @@ import 'package:anx_reader/models/reading_info.dart';
 import 'package:anx_reader/models/reading_rules.dart';
 import 'package:anx_reader/models/window_info.dart';
 import 'package:anx_reader/service/translate/index.dart';
+import 'package:anx_reader/utils/get_current_language_code.dart';
+import 'package:anx_reader/utils/tts_model_list.dart';
 import 'package:anx_reader/widgets/reading_page/style_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Prefs extends ChangeNotifier {
@@ -214,7 +217,7 @@ class Prefs extends ChangeNotifier {
   }
 
   double get ttsVolume {
-    return prefs.getDouble('ttsVolume') ?? 0.5;
+    return prefs.getDouble('ttsVolume') ?? 1.0;
   }
 
   set ttsPitch(double pitch) {
@@ -232,7 +235,49 @@ class Prefs extends ChangeNotifier {
   }
 
   double get ttsRate {
-    return prefs.getDouble('ttsRate') ?? 0.8;
+    return prefs.getDouble('ttsRate') ?? 1.0;
+  }
+
+  set ttsVoiceModel(String shortName) {
+    prefs.setString('ttsVoiceModel', shortName);
+    notifyListeners();
+  }
+
+  void removeTtsVoiceModel() {
+    prefs.remove('ttsVoiceModel');
+    notifyListeners();
+  }
+
+  String get ttsVoiceModel {
+    String? model = prefs.getString('ttsVoiceModel');
+    if (model == null) {
+      final languageCode = getCurrentLanguageCode().toLowerCase();
+
+      final data = ttsModelList;
+
+      for (var voice in data) {
+        String voiceLocale = voice['Locale'] as String;
+        if (voiceLocale.toLowerCase().startsWith(languageCode.toLowerCase())) {
+          model = voice['ShortName'] as String;
+          break;
+        }
+      }
+
+      if (model == null || model.isEmpty) {
+        for (var voice in data) {
+          String voiceLocale = voice['Locale'] as String;
+          if (voiceLocale.startsWith('en-')) {
+            model = voice['ShortName'] as String;
+            break;
+          }
+        }
+      }
+
+      if (model == null || model.isEmpty) {
+        model = 'en-US-JennyNeural';
+      }
+    }
+    return model;
   }
 
   set pageTurnStyle(PageTurn style) {

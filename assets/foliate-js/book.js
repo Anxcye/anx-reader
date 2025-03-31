@@ -527,21 +527,21 @@ const replaceFootnote = (view) => {
  
       dialog.style.display = 'block'
 
-      dialog.style.width = 'auto'
-      dialog.style.height = 'auto'
+      // dialog.style.width = 'auto'
+      // dialog.style.height = 'auto'
 
-      const contentWidth = content.clientWidth
-      const contentHeight = content.clientHeight
+      // const contentWidth = content.clientWidth
+      // const contentHeight = content.clientHeight
 
-      const squareSize = contentWidth * contentHeight
+      // const squareSize = contentWidth * contentHeight
 
-      dialog.style.height = 100 + 'px'
-      dialog.style.width = squareSize / 100 + 'px'
+      // dialog.style.height = 100 + 'px'
+      // dialog.style.width = squareSize / 100 + 'px'
 
-      if (squareSize > window.innerWidth * 100 * 0.8) {
-        dialog.style.width = window.innerWidth * 0.8 + 'px'
-        dialog.style.height = squareSize / (window.innerWidth * 3.0) + 'px'
-      }
+      // if (squareSize > window.innerWidth * 100 * 0.8) {
+      //   dialog.style.width = window.innerWidth * 0.8 + 'px'
+      //   dialog.style.height = squareSize / (window.innerWidth * 3.0) + 'px'
+      // }
 
       //dialog.style.width = `${Math.min(Math.max(contentWidth, 200), window.innerWidth * 0.8)}px`
       //dialog.style.height = `${Math.min(Math.max(contentHeight, 100), window.innerHeight * 0.8)}px`
