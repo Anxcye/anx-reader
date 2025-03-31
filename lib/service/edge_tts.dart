@@ -213,7 +213,6 @@ $ssml
   }
 
   static Future<Uint8List> getAudio(String text) async {
-    print('getAudio: $text');
     EdgeTTS.text = text;
     List<int> audioData = [];
     try {

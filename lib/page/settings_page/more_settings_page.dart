@@ -91,6 +91,15 @@ class _SubMoreSettingsState extends State<SubMoreSettings> {
             ],
           },
           {
+            "title": L10n.of(context).settings_sync,
+            "icon": Icons.speaker,
+            "sections": const SyncSetting(),
+            "subtitles": [
+              L10n.of(context).settings_sync_webdav,
+              L10n.of(context).export_and_import,
+            ],
+          },
+          {
             "title": L10n.of(context).settings_translate,
             "icon": Icons.translate_outlined,
             "sections": const TranslateSetting(),
