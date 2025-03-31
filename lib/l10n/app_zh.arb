@@ -225,6 +225,15 @@
   "settings_translate_from": "原文",
   "settings_translate_to": "译文",
 
+  "settings_narrate": "朗读",
+  "settings_narrate_voice": "语音",
+  "settings_narrate_voice_model": "语音模型",
+  "settings_narrate_voice_model_current_model": "当前模型",
+  "settings_narrate_voice_model_not_selected": "未选择",
+  "settings_narrate_voice_model_click_to_view": "点击查看",
+  "settings_narrate_voice_model_male": "男性",
+  "settings_narrate_voice_model_female": "女性",
+
   "settings_ai": "AI 设置",
   "settings_ai_services": "AI 服务",
   "settings_ai_prompt": "AI 提示词",

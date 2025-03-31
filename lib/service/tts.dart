@@ -87,22 +87,25 @@ class Tts extends BaseAudioHandler with QueueHandler, SeekHandler {
     player ??= AudioPlayer();
     player!.onPlayerComplete.listen((_) async {
       getNextVoiceText();
+
       if (ttsStateNotifier.value == TtsStateEnum.playing) {
-        if (_nextVoiceText != null && _nextAudio != null) {
-          _currentVoiceText = _nextVoiceText;
-          _nextVoiceText = null;
-          audioToPlay = _nextAudio;
-          _nextAudio = null;
-
-          player!.play(BytesSource(audioToPlay!));
-
-          _preloadNextAudio();
-        } else {
-          _currentVoiceText = await getNextVoiceText();
-          speak();
+        while (_nextVoiceText == null || _nextAudio == null) {
+          await Future.delayed(const Duration(milliseconds: 100));
         }
+        _currentVoiceText = _nextVoiceText;
+        _nextVoiceText = null;
+        audioToPlay = _nextAudio;
+        _nextAudio = null;
+
+        player!.play(BytesSource(audioToPlay!));
+
+        _preloadNextAudio();
+      } else {
+        _currentVoiceText = await getNextVoiceText();
+        speak();
       }
     });
+
     if (content != null) {
       _currentVoiceText = content;
     }
@@ -111,6 +114,8 @@ class Tts extends BaseAudioHandler with QueueHandler, SeekHandler {
     EdgeTTS.pitch = pitch;
     EdgeTTS.rate = rate;
     EdgeTTS.volume = volume;
+
+    player!.setVolume(volume);
 
     audioToPlay = await EdgeTTS.getAudio(_currentVoiceText!);
 
@@ -145,7 +150,7 @@ class Tts extends BaseAudioHandler with QueueHandler, SeekHandler {
   }
 
   static Future<void> restart() async {
-   await  stopStatic();
+    await stopStatic();
     speak();
   }
 

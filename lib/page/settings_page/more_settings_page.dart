@@ -2,6 +2,7 @@ import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/page/settings_page/ai.dart';
 import 'package:anx_reader/page/settings_page/advanced.dart';
 import 'package:anx_reader/page/settings_page/appearance.dart';
+import 'package:anx_reader/page/settings_page/narrate.dart';
 import 'package:anx_reader/page/settings_page/reading.dart';
 import 'package:anx_reader/page/settings_page/settings_page.dart';
 import 'package:anx_reader/page/settings_page/sync.dart';
@@ -9,6 +10,7 @@ import 'package:anx_reader/page/settings_page/translate.dart';
 import 'package:anx_reader/widgets/settings/about.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:icons_plus/icons_plus.dart';
 
 class MoreSettings extends StatelessWidget {
   const MoreSettings({super.key});
@@ -91,12 +93,12 @@ class _SubMoreSettingsState extends State<SubMoreSettings> {
             ],
           },
           {
-            "title": L10n.of(context).settings_sync,
-            "icon": Icons.speaker,
-            "sections": const SyncSetting(),
+            "title": L10n.of(context).settings_narrate,
+            "icon": EvaIcons.headphones  ,
+            "sections": const NarrateSettings(),
             "subtitles": [
-              L10n.of(context).settings_sync_webdav,
-              L10n.of(context).export_and_import,
+              L10n.of(context).settings_narrate_voice,
+              L10n.of(context).settings_narrate_voice_model,
             ],
           },
           {

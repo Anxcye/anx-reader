@@ -225,6 +225,15 @@
   "settings_translate_from": "From",
   "settings_translate_to": "To",
 
+  "settings_narrate": "Narrate",
+  "settings_narrate_voice": "Voice",
+  "settings_narrate_voice_model": "Voice Model",
+  "settings_narrate_voice_model_current_model": "Current Model",
+  "settings_narrate_voice_model_not_selected": "Not Selected",
+  "settings_narrate_voice_model_click_to_view": "Click to View",
+  "settings_narrate_voice_model_male": "Male",
+  "settings_narrate_voice_model_female": "Female",
+
   "settings_ai": "AI",
   "settings_ai_services": "Services",
   "settings_ai_prompt": "Prompt",
