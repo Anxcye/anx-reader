@@ -10,14 +10,16 @@
   body {
     user-select: none;
     margin: 0 !important;
-    height: 100dvh;  
+    height: 100vh;  
   }
 
 
   #footnote-dialog {
+    /*
     padding: var(safe-area-inset-top) var(safe-area-inset-right) var(safe-area-inset-bottom) var(safe-area-inset-left);
+    */
     position: fixed;
-    width: auto;
+    width: fit-content;
     height: auto;
     max-width: 80vw;
     max-height: 80vh;
@@ -29,23 +31,22 @@
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     outline: none;
-  }
-
-  #footnote-dialog div {
+    z-index: 1000;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     display: flex;
     flex-direction: column;
-    height: 100%;
   }
 
   #footnote-dialog main {
     overflow: auto;
-    flex: 1;
+    width: 100%;
+    height: 100%;
   }
 </style>
-<dialog id="footnote-dialog">
-  <div>
-    <main></main>
-  </div>
-</dialog>
+<div id="footnote-dialog">
+  <main></main>
+</div>
 <script src="../foliate-js/vendor/pdfjs/pdf.js"></script>
 <script src="book.js" type="module"></script>

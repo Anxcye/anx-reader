@@ -500,7 +500,10 @@ const readingFeaturesDocHandler = (doc) => {
 
 
 const footnoteDialog = document.getElementById('footnote-dialog')
-footnoteDialog.addEventListener('close', () => {
+footnoteDialog.style.display = 'none'
+footnoteDialog.addEventListener('click', () => {
+  // display none
+  footnoteDialog.style.display = 'none'
   callFlutter("onFootnoteClose")
 })
 
@@ -518,19 +521,30 @@ const replaceFootnote = (view) => {
 
     setTimeout(() => {
       const dialog = document.getElementById('footnote-dialog')
-      const content = document.querySelector("#footnote-dialog > div > main > foliate-view")
+      const content = document.querySelector("#footnote-dialog > main > foliate-view")
         .shadowRoot.querySelector("foliate-paginator")
         .shadowRoot.querySelector("#container > div > iframe")
-
+ 
+      dialog.style.display = 'block'
 
       dialog.style.width = 'auto'
       dialog.style.height = 'auto'
 
-      const contentWidth = content.scrollWidth
-      const contentHeight = content.scrollHeight
+      const contentWidth = content.clientWidth
+      const contentHeight = content.clientHeight
 
-      dialog.style.width = `${Math.min(Math.max(contentWidth, 200), window.innerWidth * 0.8)}px`
-      dialog.style.height = `${Math.min(Math.max(contentHeight, 100), window.innerHeight * 0.8)}px`
+      const squareSize = contentWidth * contentHeight
+
+      dialog.style.height = 100 + 'px'
+      dialog.style.width = squareSize / 100 + 'px'
+
+      if (squareSize > window.innerWidth * 100 * 0.8) {
+        dialog.style.width = window.innerWidth * 0.8 + 'px'
+        dialog.style.height = squareSize / (window.innerWidth * 3.0) + 'px'
+      }
+
+      //dialog.style.width = `${Math.min(Math.max(contentWidth, 200), window.innerWidth * 0.8)}px`
+      //dialog.style.height = `${Math.min(Math.max(contentHeight, 100), window.innerHeight * 0.8)}px`
     }, 0)
   })
 
@@ -1053,7 +1067,13 @@ window.previousContent = (count = 2000) => reader.getPreviousContent(count)
 
 // window.bionicReading = (enable) => reader.bionicReading(enable)
 
-window.isFootNoteOpen = () => footnoteDialog.open
+window.isFootNoteOpen = () => footnoteDialog.getAttribute('style').includes('display: block')
+
+window.closeFootNote = () => {
+  // set zindex to 0
+  footnoteDialog.style.display = 'none'
+  callFlutter("onFootnoteClose")
+}
 
 window.readingFeatures = (rules) => {
   readingRules = { ...readingRules, ...rules }
