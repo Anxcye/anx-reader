@@ -414,7 +414,7 @@ export class Paginator extends HTMLElement {
             height: 100%;
         }
         #top {
-            // height: 100vh;
+            height: 100%;
             // --_gap: 7%;
             background-color: var(--_background-color);
             --_max-inline-size: 720px;
