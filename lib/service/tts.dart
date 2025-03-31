@@ -219,9 +219,9 @@ class Tts extends BaseAudioHandler with QueueHandler, SeekHandler {
     final session = await AudioSession.instance;
     session.interruptionEventStream.listen((event) {
       if (event.begin) {
-        if (isPlaying) {
-          pause();
-        }
+        // if (isPlaying) {
+        //   pause();
+        // }
       } else {
         switch (event.type) {
           case AudioInterruptionType.pause:
