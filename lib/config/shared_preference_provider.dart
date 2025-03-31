@@ -16,7 +16,6 @@ import 'package:anx_reader/utils/get_current_language_code.dart';
 import 'package:anx_reader/utils/tts_model_list.dart';
 import 'package:anx_reader/widgets/reading_page/style_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Prefs extends ChangeNotifier {
