@@ -1,7 +1,6 @@
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/service/edge_tts.dart';
-import 'package:anx_reader/utils/get_current_language_code.dart';
 import 'package:anx_reader/utils/tts_model_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -273,7 +272,8 @@ class _NarrateSettingsState extends ConsumerState<NarrateSettings>
   }
 
   String _getCurrentModelDisplayName() {
-    if (_currentModelDetails == null) return L10n.of(context).settings_narrate_voice_model_not_selected;
+    if (_currentModelDetails == null)
+      return L10n.of(context).settings_narrate_voice_model_not_selected;
 
     String shortName = _currentModelDetails!['ShortName'] as String;
     String personName = shortName.split('-').last;
@@ -300,7 +300,6 @@ class _NarrateSettingsState extends ConsumerState<NarrateSettings>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-    
       body: Column(
         children: [
           Padding(
@@ -322,7 +321,8 @@ class _NarrateSettingsState extends ConsumerState<NarrateSettings>
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            L10n.of(context).settings_narrate_voice_model_current_model,
+                            L10n.of(context)
+                                .settings_narrate_voice_model_current_model,
                             style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
@@ -380,7 +380,8 @@ class _NarrateSettingsState extends ConsumerState<NarrateSettings>
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           Text(
-                            L10n.of(context).settings_narrate_voice_model_click_to_view,
+                            L10n.of(context)
+                                .settings_narrate_voice_model_click_to_view,
                             style: TextStyle(
                               fontSize: 14,
                               color: Theme.of(context).colorScheme.primary,
@@ -399,7 +400,6 @@ class _NarrateSettingsState extends ConsumerState<NarrateSettings>
               ),
             ),
           ),
-
           Expanded(
             child: ListView.builder(
               controller: _scrollController,
@@ -435,7 +435,6 @@ class _NarrateSettingsState extends ConsumerState<NarrateSettings>
                         onTap: () => _toggleGroup(languageName),
                       ),
                     ),
-
                     if (expandedGroups.contains(languageName))
                       ...voicesInLanguage.map((voice) {
                         String shortName = voice['ShortName'] as String;
@@ -485,7 +484,11 @@ class _NarrateSettingsState extends ConsumerState<NarrateSettings>
                                     : FontWeight.normal,
                               ),
                             ),
-                            subtitle: Text(gender),
+                            subtitle: Text(gender == 'Male'
+                                ? L10n.of(context)
+                                    .settings_narrate_voice_model_male
+                                : L10n.of(context)
+                                    .settings_narrate_voice_model_female),
                             trailing: Radio<String>(
                               value: shortName,
                               groupValue: selectedVoiceModel,
@@ -501,7 +504,6 @@ class _NarrateSettingsState extends ConsumerState<NarrateSettings>
                           ),
                         );
                       }),
-
                     const Divider(height: 1),
                   ],
                 );
@@ -513,4 +515,3 @@ class _NarrateSettingsState extends ConsumerState<NarrateSettings>
     );
   }
 }
-
