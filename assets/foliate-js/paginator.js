@@ -1002,7 +1002,7 @@ export class Paginator extends HTMLElement {
       if (this.sections[index]?.linear !== 'no') return index
   }
   async #turnPage(dir, distance) {
-    if (this.#locked) return
+    // if (this.#locked) return
     this.#locked = true
     const prev = dir === -1
     const shouldGo = await (prev ? this.#scrollPrev(distance) : this.#scrollNext(distance))
