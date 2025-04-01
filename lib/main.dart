@@ -136,6 +136,10 @@ class _MyAppState extends ConsumerState<MyApp>
             .read(anxWebdavProvider.notifier)
             .syncData(SyncDirection.upload, ref);
       }
+    } else if (state == AppLifecycleState.resumed) {
+      if (Platform.isIOS) {
+        Server().start();
+      }
     }
   }
 
