@@ -93,19 +93,19 @@ class AnxWebdav extends _$AnxWebdav {
       return;
     }
 
+    if (!Prefs().webdavStatus) {
+      return;
+    }
+
     // test ping
     try {
       await _client.ping();
     } catch (e) {
-      AnxToast.show('WebDAV connection failed\n${e.toString()}',
-          duration: 5000);
-      AnxLog.severe('WebDAV connection failed, ping failed\n${e.toString()}');
+      AnxLog.severe('WebDAV connection failed, ping failed2\n${e.toString()}');
       return;
     }
 
-    if (!Prefs().webdavStatus) {
-      return;
-    }
+    AnxLog.info('WebDAV connection success');
     // if is  syncing
     if (state.isSyncing) {
       return;
