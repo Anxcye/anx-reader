@@ -97,7 +97,7 @@ class Tts extends BaseAudioHandler with QueueHandler, SeekHandler {
         audioToPlay = _nextAudio;
         _nextAudio = null;
 
-        player!.play(BytesSource(audioToPlay!));
+        player!.play(BytesSource(audioToPlay!, mimeType: 'audio/mp3'));
 
         _preloadNextAudio();
       } else {
@@ -119,7 +119,7 @@ class Tts extends BaseAudioHandler with QueueHandler, SeekHandler {
 
     audioToPlay = await EdgeTTS.getAudio(_currentVoiceText!);
 
-    player!.play(BytesSource(audioToPlay!));
+    player!.play(BytesSource(audioToPlay!, mimeType: 'audio/mp3'));
 
     _preloadNextAudio();
   }

@@ -234,7 +234,7 @@ class Prefs extends ChangeNotifier {
   }
 
   double get ttsRate {
-    return prefs.getDouble('ttsRate') ?? 1.0;
+    return prefs.getDouble('ttsRate') ?? 0.6;
   }
 
   set ttsVoiceModel(String shortName) {
