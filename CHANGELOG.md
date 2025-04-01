@@ -20,6 +20,8 @@
 - Fix: Optimize book opening speed
 - Fix: some device cant open footnote
 - Fix: click page turn button may return to previous page
+- Fix: iOS blank screen after resume from background
+
 - 新增：集成的 TTS
 - 新增：阅读信息自定义
 - 新增：导航栏自定义
@@ -33,6 +35,7 @@
 - 修复: 优化书籍打开速度
 - 修复: 部分设备无法打开脚注
 - 修复：跨章节后无法点击翻页的问题
+- 修复：ios设备从后台回复后有时白屏的问题
 
 ## 1.4.1
 - Feat: excerpt AI chat
