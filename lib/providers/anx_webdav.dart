@@ -93,6 +93,16 @@ class AnxWebdav extends _$AnxWebdav {
       return;
     }
 
+    // test ping
+    try {
+      await _client.ping();
+    } catch (e) {
+      AnxToast.show('WebDAV connection failed\n${e.toString()}',
+          duration: 5000);
+      AnxLog.severe('WebDAV connection failed, ping failed\n${e.toString()}');
+      return;
+    }
+
     if (!Prefs().webdavStatus) {
       return;
     }
@@ -270,7 +280,9 @@ class AnxWebdav extends _$AnxWebdav {
       AnxLog.severe('Failed to sync database\n$e');
       rethrow;
     } finally {
-      io.File('$cachePath/app_database.db').deleteSync();
+      if (io.File('$cachePath/app_database.db').existsSync()) {
+        io.File('$cachePath/app_database.db').deleteSync();
+      }
     }
   }
 
