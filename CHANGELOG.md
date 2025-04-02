@@ -26,7 +26,7 @@
 - Fix: note input box may be covered by keyboard(#183)
 - Fix: txt file with special characters cannot be imported
 
-- 新增：添加链接图标
+- 新增：添加更多社区链接
 - 新增：AI 对话可重新生成和复制
 - 新增：集成的 TTS
 - 新增：阅读信息自定义

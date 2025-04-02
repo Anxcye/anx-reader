@@ -161,8 +161,8 @@ const setSelectionHandler = (view, doc, index) => {
   //    doc.addEventListener('pointerdown', () => isSelecting = true);
   // if windows or macos or iOS
   if (navigator.platform.includes('Win') || navigator.platform.includes('Mac')
-   || navigator.platform.includes('iPhone') || navigator.platform.includes('iPad')
-  ){
+    || navigator.platform.includes('iPhone') || navigator.platform.includes('iPad')
+  ) {
     doc.addEventListener('pointerup', () => handleSelection(view, doc, index));
   }
   // doc.addEventListener('selectionchange', () => handleSelection(view, doc, index));
@@ -483,7 +483,7 @@ const replaceFootnote = (view) => {
       const content = document.querySelector("#footnote-dialog > main > foliate-view")
         .shadowRoot.querySelector("foliate-paginator")
         .shadowRoot.querySelector("#container > div > iframe")
- 
+
       dialog.style.display = 'block'
 
       // dialog.style.width = 'auto'
@@ -1038,9 +1038,17 @@ window.readingFeatures = (rules) => {
   readingRules = { ...readingRules, ...rules }
   reader.readingFeatures()
 }
-await callFlutter('webviewInitialVariable')
 
-fetch(url)
-  .then(res => res.blob())
-  .then(blob => open(new File([blob], new URL(url, window.location.origin).pathname), initialCfi))
-  .catch(e => console.error(e))
+window.loadBook = () => {
+  fetch(url)
+    .then(res => res.blob())
+    .then(blob => open(new File([blob], new URL(url, window.location.origin).pathname), initialCfi))
+    .catch(e => console.error(e))
+}
+
+// callFlutter('webviewInitialVariable')
+
+// don't remove this
+console.log('loadBook')
+
+

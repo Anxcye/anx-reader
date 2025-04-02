@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 
-void webviewInitialVariable(
+Future<void> webviewInitialVariable(
   InAppWebViewController controller,
   String url,
   String cfi, {
@@ -18,7 +18,7 @@ void webviewInitialVariable(
   String? fontPath,
   String? backgroundColor,
   bool? importing,
-}) {
+}) async {
   ReadTheme readTheme = Prefs().readTheme;
   bookStyle ??= Prefs().bookStyle;
   textColor ??= readTheme.textColor;
@@ -41,49 +41,50 @@ void webviewInitialVariable(
   ''');
 
   final script = '''
-     const webviewVersion = navigator.userAgent.match(/Chrome\\/(\\d+)/)?.[1]
-     const appleWebkitVersion = navigator.userAgent.match(/AppleWebKit\\/(\\d+)/)?.[1]
-     const isApple = navigator.userAgent.includes('Macintosh') || navigator.userAgent.includes('iPhone') || navigator.userAgent.includes('iPad')
-     if (
-        (!isApple && (webviewVersion && webviewVersion < $minWebviewVersion || !webviewVersion))
-        || (isApple && (appleWebkitVersion && appleWebkitVersion < 605 ))
-     ) {
-       window.flutter_inappwebview.callHandler('webviewVersion', webviewVersion)
-     }
-     const importing = $importing
-     const url = '${replaceSingleQuote(url)}'
-     let initialCfi = '${replaceSingleQuote(cfi)}'
-     let style = {
-         fontSize: ${bookStyle.fontSize},
-         fontName: '${replaceSingleQuote(fontName)}',
-         fontPath: '${replaceSingleQuote(fontPath)}',
-         fontWeight: ${bookStyle.fontWeight},
-         letterSpacing: ${bookStyle.letterSpacing},
-         spacing: ${bookStyle.lineHeight},
-         paragraphSpacing: ${bookStyle.paragraphSpacing},
-         textIndent: ${bookStyle.indent},
-         fontColor: '#$textColor',
-         backgroundColor: '#$backgroundColor',
-         topMargin: ${bookStyle.topMargin},
-         bottomMargin: ${bookStyle.bottomMargin},
-         sideMargin: ${bookStyle.sideMargin},
-         justify: true,
-         hyphenate: true,
-         pageTurnStyle: '${Prefs().pageTurnStyle.name}',
-         maxColumnCount: ${bookStyle.maxColumnCount},
-     }
-        let readingRules = {
-          convertChineseMode: '${Prefs().readingRules.convertChineseMode.name}',
-          bionicReadingMode: ${Prefs().readingRules.bionicReading},
-        }
+      const webviewVersion = navigator.userAgent.match(/Chrome\\/(\\d+)/)?.[1]
+      const appleWebkitVersion = navigator.userAgent.match(/AppleWebKit\\/(\\d+)/)?.[1]
+      const isApple = navigator.userAgent.includes('Macintosh') || navigator.userAgent.includes('iPhone') || navigator.userAgent.includes('iPad')
+      if (
+          (!isApple && (webviewVersion && webviewVersion < $minWebviewVersion || !webviewVersion))
+          || (isApple && (appleWebkitVersion && appleWebkitVersion < 605 ))
+      ) {
+        window.flutter_inappwebview.callHandler('webviewVersion', webviewVersion)
+      }
+      const importing = $importing
+      const url = '${replaceSingleQuote(url)}'
+      let initialCfi = '${replaceSingleQuote(cfi)}'
+      let style = {
+          fontSize: ${bookStyle.fontSize},
+          fontName: '${replaceSingleQuote(fontName)}',
+          fontPath: '${replaceSingleQuote(fontPath)}',
+          fontWeight: ${bookStyle.fontWeight},
+          letterSpacing: ${bookStyle.letterSpacing},
+          spacing: ${bookStyle.lineHeight},
+          paragraphSpacing: ${bookStyle.paragraphSpacing},
+          textIndent: ${bookStyle.indent},
+          fontColor: '#$textColor',
+          backgroundColor: '#$backgroundColor',
+          topMargin: ${bookStyle.topMargin},
+          bottomMargin: ${bookStyle.bottomMargin},
+          sideMargin: ${bookStyle.sideMargin},
+          justify: true,
+          hyphenate: true,
+          pageTurnStyle: '${Prefs().pageTurnStyle.name}',
+          maxColumnCount: ${bookStyle.maxColumnCount},
+      }
+      let readingRules = {
+        convertChineseMode: '${Prefs().readingRules.convertChineseMode.name}',
+        bionicReadingMode: ${Prefs().readingRules.bionicReading},
+      }
 
+      window.loadBook()
   ''';
-  controller.addJavaScriptHandler(
-      handlerName: 'webviewInitialVariable',
-      callback: (args) async {
+  // controller.addJavaScriptHandler(
+  //     handlerName: 'webviewInitialVariable',
+  //     callback: (args) async {
         await controller.evaluateJavascript(source: script);
-        return null;
-      });
+      //   return null;
+      // });
   controller.addJavaScriptHandler(
       handlerName: 'webviewVersion',
       callback: (args) async {
@@ -100,8 +101,8 @@ void webviewInitialVariable(
                 children: [
                   Text(L10n.of(context).webview_unsupported_version,
                       style: Theme.of(context).textTheme.titleMedium),
-                  Text(L10n.of(context)
-                      .webview_unsupported_message(minWebviewVersion, version ?? -1)),
+                  Text(L10n.of(context).webview_unsupported_message(
+                      minWebviewVersion, version ?? -1)),
                 ],
               ),
               actions: [
