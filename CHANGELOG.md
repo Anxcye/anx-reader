@@ -7,6 +7,7 @@
 * 新增：仿生阅读(#49)
 
 ## 1.4.2
+- Feat: AI chat regenerate and copy
 - Feat: TTS integration
 - Feat: Reading info custom
 - Feat: Navigation bar custom
@@ -22,6 +23,7 @@
 - Fix: click page turn button may return to previous page
 - Fix: iOS blank screen after resume from background
 
+- 新增：AI 对话可重新生成和复制
 - 新增：集成的 TTS
 - 新增：阅读信息自定义
 - 新增：导航栏自定义

@@ -2,9 +2,11 @@ import 'package:anx_reader/enums/ai_role.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/models/ai_message.dart';
 import 'package:anx_reader/providers/ai_chat.dart';
+import 'package:anx_reader/utils/toast/common.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/services.dart';
 
 class AiChatStream extends ConsumerStatefulWidget {
   const AiChatStream(
@@ -76,15 +78,18 @@ class AiChatStreamState extends ConsumerState<AiChatStream> {
     });
   }
 
-  void _sendMessage() {
+  void _sendMessage({bool isRegenerate = false}) {
     if (inputController.text.trim().isEmpty) return;
 
     final message = inputController.text.trim();
     inputController.clear();
 
     setState(() {
-      _messageStream =
-          ref.read(aiChatProvider.notifier).sendMessageStream(message, ref);
+      _messageStream = ref.read(aiChatProvider.notifier).sendMessageStream(
+            message,
+            ref,
+            isRegenerate,
+          );
     });
   }
 
@@ -98,6 +103,43 @@ class AiChatStreamState extends ConsumerState<AiChatStream> {
       ref.read(aiChatProvider.notifier).clear();
       _messageStream = null;
     });
+  }
+
+  void _regenerateLastMessage() {
+    final messages = ref.read(aiChatProvider).value;
+    if (messages != null && messages.isNotEmpty) {
+      for (int i = messages.length - 1; i >= 0; i--) {
+        if (messages[i].role == AiRole.user) {
+          final userMessage = messages[i].content;
+          ref.read(aiChatProvider.notifier).clear();
+          for (int j = 0; j < i; j++) {
+            ref.read(aiChatProvider.notifier).sendMessage(messages[j].content);
+          }
+          setState(() {
+            inputController.text = userMessage;
+            _sendMessage(isRegenerate: true);
+          });
+          break;
+        }
+      }
+    }
+  }
+
+  void _copyMessageContent(String content) {
+    Clipboard.setData(ClipboardData(text: content));
+    AnxToast.show(L10n.of(context).notes_page_copied);
+  }
+
+  AiMessage? _getLastAssistantMessage() {
+    final messages = ref.watch(aiChatProvider).asData?.value;
+    if (messages == null || messages.isEmpty) return null;
+
+    for (int i = messages.length - 1; i >= 0; i--) {
+      if (messages[i].role == AiRole.assistant) {
+        return messages[i];
+      }
+    }
+    return null;
   }
 
   @override
@@ -208,6 +250,7 @@ class AiChatStreamState extends ConsumerState<AiChatStream> {
   Widget _buildMessageItem(AiMessage message) {
     final isUser = message.role == AiRole.user;
     final isLongMessage = message.content.length > 300;
+    final lastAssistantMessage = _getLastAssistantMessage();
 
     return Padding(
       padding: EdgeInsets.only(
@@ -235,9 +278,33 @@ class AiChatStreamState extends ConsumerState<AiChatStream> {
                   bottomRight: isUser ? const Radius.circular(12) : Radius.zero,
                 ),
               ),
-              child: isUser
-                  ? _buildCollapsibleText(message.content, isLongMessage)
-                  : _buildCollapsibleMarkdown(message.content, false),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  isUser
+                      ? _buildCollapsibleText(
+                          message.content,
+                          isLongMessage,
+                        )
+                      : _buildCollapsibleMarkdown(
+                          message.content, false),
+                  if (!isUser)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        if (message == lastAssistantMessage)
+                          TextButton(
+                            onPressed: _regenerateLastMessage,
+                            child: Text(L10n.of(context).ai_regenerate),
+                          ),
+                        TextButton(
+                          onPressed: () => _copyMessageContent(message.content),
+                          child: Text(L10n.of(context).common_copy),
+                        ),
+                      ],
+                    ),
+                ],
+              ),
             ),
           ),
           const SizedBox(width: 8),
@@ -248,7 +315,10 @@ class AiChatStreamState extends ConsumerState<AiChatStream> {
 
   Widget _buildCollapsibleText(String text, bool isLongMessage) {
     if (!isLongMessage) {
-      return Text(text);
+      return SelectableText(
+        text,
+        selectionControls: MaterialTextSelectionControls(),
+      );
     }
 
     return _CollapsibleText(text: text);
@@ -256,7 +326,10 @@ class AiChatStreamState extends ConsumerState<AiChatStream> {
 
   Widget _buildCollapsibleMarkdown(String markdownText, bool isLongMessage) {
     if (!isLongMessage) {
-      return MarkdownBody(data: markdownText);
+      return MarkdownBody(
+        data: markdownText,
+        selectable: true,
+      );
     }
 
     return _CollapsibleMarkdown(markdownText: markdownText);
@@ -281,12 +354,16 @@ class _CollapsibleTextState extends State<_CollapsibleText> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (_isExpanded)
-          Text(widget.text)
+          SelectableText(
+            widget.text,
+            selectionControls: MaterialTextSelectionControls(),
+          )
         else
           Stack(
             children: [
-              Text(
+              SelectableText(
                 widget.text.substring(0, 300),
+                selectionControls: MaterialTextSelectionControls(),
               ),
               Positioned(
                 bottom: 0,
@@ -344,12 +421,16 @@ class _CollapsibleMarkdownState extends State<_CollapsibleMarkdown> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (_isExpanded)
-          MarkdownBody(data: widget.markdownText)
+          MarkdownBody(
+            data: widget.markdownText,
+            selectable: true,
+          )
         else
           Stack(
             children: [
               MarkdownBody(
                 data: widget.markdownText.substring(0, 300),
+                selectable: true,
               ),
               Positioned(
                 bottom: 0,
