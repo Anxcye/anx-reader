@@ -453,6 +453,7 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
       await InAppWebViewController.setWebContentsDebuggingEnabled(true);
     }
+    print('@@@ onWebViewCreated');
     webViewController = controller;
     setHandler(controller);
   }
@@ -710,8 +711,11 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
                   initialUrlRequest: URLRequest(url: WebUri(indexHtmlPath)),
                   initialSettings: initialSettings,
                   contextMenu: contextMenu,
-                  onLoadStop: (controller, url) => onWebViewCreated(controller),
+                  // onLoadStop: (controller, url) => onWebViewCreated(controller),
                   onConsoleMessage: (controller, consoleMessage) {
+                    if (consoleMessage.message.contains('loadBook')) {
+                      onWebViewCreated(controller);
+                    }
                     webviewConsoleMessage(controller, consoleMessage);
                   },
                 ),

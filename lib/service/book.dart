@@ -245,31 +245,32 @@ Future<void> getBookMetadata(
   HeadlessInAppWebView webview = HeadlessInAppWebView(
     webViewEnvironment: webViewEnvironment,
     initialUrlRequest: URLRequest(url: WebUri(indexHtmlPath)),
-    onLoadStop: (controller, url) async {
-      webviewInitialVariable(controller, bookUrl, cfi, importing: true);
-      controller.addJavaScriptHandler(
-          handlerName: 'onMetadata',
-          callback: (args) async {
-            Map<String, dynamic> metadata = args[0];
-            String title = metadata['title'] ?? 'Unknown';
-            dynamic authorData = metadata['author'];
-            String author = authorData is String
-                ? authorData
-                : authorData
-                        ?.map((author) =>
-                            author is String ? author : author['name'])
-                        ?.join(', ') ??
-                    'Unknown';
-
-            // base64 cover
-            String cover = metadata['cover'] ?? '';
-            String description = metadata['description'] ?? '';
-            saveBook(file, title, author, description, cover);
-            ref?.read(bookListProvider.notifier).refresh();
-            // return;
-          });
-    },
+    onLoadStop: (controller, url) async {},
     onConsoleMessage: (controller, consoleMessage) {
+      if (consoleMessage.message.contains('loadBook')) {
+        controller.addJavaScriptHandler(
+            handlerName: 'onMetadata',
+            callback: (args) async {
+              Map<String, dynamic> metadata = args[0];
+              String title = metadata['title'] ?? 'Unknown';
+              dynamic authorData = metadata['author'];
+              String author = authorData is String
+                  ? authorData
+                  : authorData
+                          ?.map((author) =>
+                              author is String ? author : author['name'])
+                          ?.join(', ') ??
+                      'Unknown';
+
+              // base64 cover
+              String cover = metadata['cover'] ?? '';
+              String description = metadata['description'] ?? '';
+              saveBook(file, title, author, description, cover);
+              ref?.read(bookListProvider.notifier).refresh();
+              // return;
+            });
+        webviewInitialVariable(controller, bookUrl, cfi, importing: true);
+      }
       if (consoleMessage.messageLevel == ConsoleMessageLevel.ERROR) {
         headlessInAppWebView?.dispose();
         headlessInAppWebView = null;
