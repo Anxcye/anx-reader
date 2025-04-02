@@ -73,19 +73,31 @@ void showContextMenu(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Row(
-                  children: [
-                    ExcerptMenu(
-                      annoCfi: annoCfi,
-                      annoContent: annoContent,
-                      id: annoId,
-                      onClose: onClose,
-                      footnote: footnote,
-                      decoration: decoration,
-                      toggleTranslationMenu: toggleTranslationMenu,
-                    ),
-                  ],
-                ),
+                LayoutBuilder(builder: (context, constraints) {
+                  double bottom =
+                      bottomPosition > MediaQuery.of(context).viewInsets.bottom
+                          ? 0
+                          : MediaQuery.of(context).viewInsets.bottom -
+                              bottomPosition;
+                  return Column(
+                    children: [
+                      Row(
+                        children: [
+                          ExcerptMenu(
+                            annoCfi: annoCfi,
+                            annoContent: annoContent,
+                            id: annoId,
+                            onClose: onClose,
+                            footnote: footnote,
+                            decoration: decoration,
+                            toggleTranslationMenu: toggleTranslationMenu,
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: bottom),
+                    ],
+                  );
+                }),
                 const SizedBox(height: 10),
                 if (showTranslationMenu)
                   Row(

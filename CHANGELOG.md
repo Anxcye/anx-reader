@@ -7,6 +7,7 @@
 * 新增：仿生阅读(#49)
 
 ## 1.4.2
+- Feat: add link icon
 - Feat: AI chat regenerate and copy
 - Feat: TTS integration
 - Feat: Reading info custom
@@ -22,7 +23,7 @@
 - Fix: some device cant open footnote
 - Fix: Android click page turn button may return to previous page
 - Fix: iOS blank screen after resume from background
-- Feat: add link icon
+- Fix: note input box may be covered by keyboard(#183)
 
 - 新增：添加链接图标
 - 新增：AI 对话可重新生成和复制
@@ -40,6 +41,7 @@
 - 修复: 部分设备无法打开脚注
 - 修复：Android 跨章节后无法点击翻页的问题
 - 修复：iOS 设备从后台恢复后有时白屏的问题
+- 修复：写想法的输入框有时被键盘遮挡(#183)
 
 ## 1.4.1
 - Feat: excerpt AI chat
