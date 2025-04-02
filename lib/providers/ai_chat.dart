@@ -21,7 +21,10 @@ class AiChat extends _$AiChat {
   }
 
   Stream<List<AiMessage>> sendMessageStream(
-      String message, WidgetRef widgetRef) async* {
+    String message,
+    WidgetRef widgetRef,
+    bool isRegenerate,
+  ) async* {
     List<AiMessage> messages = [
       ...state.whenOrNull(data: (data) => data) ?? [],
       AiMessage(content: message, role: AiRole.user),
@@ -37,7 +40,11 @@ class AiChat extends _$AiChat {
     yield updatedMessages;
 
     String assistantResponse = "";
-    await for (final chunk in aiGenerateStream(widgetRef, messages)) {
+    await for (final chunk in aiGenerateStream(
+      widgetRef,
+      messages,
+      regenerate: isRegenerate,
+    )) {
       assistantResponse = chunk;
 
       final updatedMessagesWithResponse = List<AiMessage>.from(updatedMessages);
