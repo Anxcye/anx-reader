@@ -415,6 +415,7 @@ class ReadingPageState extends ConsumerState<ReadingPage>
     );
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: Hero(
         tag: Prefs().openBookAnimation ? _book.coverFullPath : heroTag,
         child: FittedBox(

@@ -71,59 +71,51 @@ class ReaderNoteMenuState extends State<ReaderNoteMenu> {
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: AnimatedSize(
-        duration: const Duration(milliseconds: 400),
-        curve: Curves.easeOut,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxHeight: 200),
-          child: !_showNoteDialog
-              ? null
-              : Container(
-                  decoration: widget.decoration,
-                  padding: const EdgeInsets.all(8),
-                  child: SingleChildScrollView(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        TextField(
-                          controller: textFieldController,
-                          decoration: InputDecoration(
-                            border: InputBorder.none,
-                            hintText:
-                                L10n.of(context).context_menu_add_note_tips,
-                            suffixIcon: !showSaveButton
-                                ? null
-                                : IconButton(
-                                    icon: const Icon(
-                                        EvaIcons.checkmark_circle_2_outline),
-                                    onPressed: () {
-                                      saveNote();
-                                      // remove focus
-                                      FocusScope.of(context).unfocus();
-                                      setState(() {
-                                        showSaveButton = false;
-                                      });
-                                    },
-                                  ),
-                          ),
-                          maxLines: 5,
-                          minLines: 1,
-                          onSubmitted: (String value) {
-                            saveNote();
-                          },
-                          onChanged: (String value) {
-                            setState(() {
-                              showSaveButton = true;
-                            });
-                          },
-                        )
-                      ],
+        child: AnimatedSize(
+      duration: const Duration(milliseconds: 400),
+      curve: Curves.easeOut,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxHeight: 200),
+        child: !_showNoteDialog
+            ? null
+            : Container(
+                decoration: widget.decoration,
+                padding: const EdgeInsets.all(8),
+                child: SingleChildScrollView(
+                  child: TextField(
+                    controller: textFieldController,
+                    decoration: InputDecoration(
+                      border: InputBorder.none,
+                      hintText: L10n.of(context).context_menu_add_note_tips,
+                      suffixIcon: !showSaveButton
+                          ? null
+                          : IconButton(
+                              icon: const Icon(
+                                  EvaIcons.checkmark_circle_2_outline),
+                              onPressed: () {
+                                saveNote();
+                                // remove focus
+                                FocusScope.of(context).unfocus();
+                                setState(() {
+                                  showSaveButton = false;
+                                });
+                              },
+                            ),
                     ),
+                    maxLines: 5,
+                    minLines: 1,
+                    onSubmitted: (String value) {
+                      saveNote();
+                    },
+                    onChanged: (String value) {
+                      setState(() {
+                        showSaveButton = true;
+                      });
+                    },
                   ),
                 ),
-        ),
+              ),
       ),
-    );
+    ));
   }
 }
