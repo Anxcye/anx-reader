@@ -445,47 +445,6 @@ const bionicReadingHandler = (doc) => {
 
   return;
 
-  const walker = document.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT, {
-    acceptNode: (node) => {
-      if (node.parentNode.nodeName === 'SCRIPT' ||
-        node.parentNode.nodeName === 'STYLE' ||
-        node.parentNode.nodeName === 'B') {
-        return NodeFilter.FILTER_REJECT;
-      }
-      return NodeFilter.FILTER_ACCEPT;
-    }
-  }, false);
-
-  const nodes = [];
-  while (walker.nextNode()) {
-    nodes.push(walker.currentNode);
-  }
-
-  nodes.forEach(textNode => {
-    const text = textNode.textContent.trim();
-    if (!text) return;
-
-    const words = text.split(/\s+/);
-    const fragment = doc.createDocumentFragment();
-
-    words.forEach((word, i) => {
-      if (word.length === 0) return;
-
-      const midPoint = Math.ceil(word.length / 2);
-      const bold = doc.createElement('b');
-      bold.textContent = word.slice(0, midPoint);
-      fragment.appendChild(bold);
-
-      const rest = doc.createTextNode(word.slice(midPoint));
-      fragment.appendChild(rest);
-
-      if (i < words.length - 1) {
-        fragment.appendChild(doc.createTextNode(' '));
-      }
-    });
-
-    textNode.parentNode.replaceChild(fragment, textNode);
-  });
 };
 
 
