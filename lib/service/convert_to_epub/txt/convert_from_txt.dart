@@ -8,7 +8,7 @@ import 'package:fast_gbk/fast_gbk.dart';
 
 String readFileWithEncoding(File file) {
   bool checkGarbled(String content) {
-    final garbledPattern = RegExp(r'[¡-ÿ]{2,}|[²-º]|Õ|Ê|Ç|³|¾|Ð|Ó|Î|Á|É|�');
+    final garbledPattern = RegExp(r'Õ|Ê|Ç|³|¾|Ð|Ó|Î|Á|É|�');
 
     final lines = content.split('\n');
 
@@ -48,7 +48,8 @@ String readFileWithEncoding(File file) {
 Future<File> convertFromTxt(File file) async {
   var filename = file.path.split('/').last;
 
-  filename = filename.split('.').first;
+  filename =
+      filename.split('.').sublist(0, filename.split('.').length - 1).join('.');
   final titleString =
       RegExp(r'(?<=《)[^》]+').firstMatch(filename)?.group(0) ?? filename;
   final authorString =

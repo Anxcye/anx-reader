@@ -24,6 +24,7 @@
 - Fix: Android click page turn button may return to previous page
 - Fix: iOS blank screen after resume from background
 - Fix: note input box may be covered by keyboard(#183)
+- Fix: txt file with special characters cannot be imported
 
 - 新增：添加链接图标
 - 新增：AI 对话可重新生成和复制
@@ -42,6 +43,7 @@
 - 修复：Android 跨章节后无法点击翻页的问题
 - 修复：iOS 设备从后台恢复后有时白屏的问题
 - 修复：写想法的输入框有时被键盘遮挡(#183)
+- 修复：部分含有特殊字符的 txt 文件无法导入的问题
 
 ## 1.4.1
 - Feat: excerpt AI chat
