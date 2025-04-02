@@ -116,6 +116,8 @@ flutter:
     - assets/images/deepseek.png
     - assets/images/gemini.png
     - assets/images/commonAi.png
+    - assets/images/qq.png
+    - assets/images/xiaohongshu.png
 
 
   fonts:

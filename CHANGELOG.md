@@ -22,7 +22,9 @@
 - Fix: some device cant open footnote
 - Fix: Android click page turn button may return to previous page
 - Fix: iOS blank screen after resume from background
+- Feat: add link icon
 
+- 新增：添加链接图标
 - 新增：AI 对话可重新生成和复制
 - 新增：集成的 TTS
 - 新增：阅读信息自定义

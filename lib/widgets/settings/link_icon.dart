@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 Widget linkIcon({
-  required IconData icon,
+  required Widget icon,
   required String url,
   required LaunchMode mode,
   double size = 30,
@@ -12,9 +12,10 @@ Widget linkIcon({
       Uri.parse(url),
       mode: mode,
     ),
-    icon: Icon(
-      icon,
-      size: size,
+    icon: SizedBox(
+      width: size,
+      height: size,
+      child: icon,
     ),
   );
 }

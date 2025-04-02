@@ -141,28 +141,52 @@ class _AboutState extends State<About> {
                   if (EnvVar.isBeian)
                     GestureDetector(
                       onTap: () {
-                        launchUrl(
-                          Uri.parse('https://beian.miit.gov.cn/'),
-                          mode: LaunchMode.externalApplication
-                        );
+                        launchUrl(Uri.parse('https://beian.miit.gov.cn/'),
+                            mode: LaunchMode.externalApplication);
                       },
                       child: const Text('闽ICP备2025091402号-1A'),
                     ),
                   if (!EnvVar.isBeian) const Divider(),
-                  if (!EnvVar.isBeian)
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      linkIcon(
+                          icon: Icon(
+                            IonIcons.logo_github,
+                            color: Theme.of(context).colorScheme.secondary,
+                          ),
+                          url: 'https://github.com/Anxcye/anx-reader',
+                          mode: LaunchMode.externalApplication),
+                      if (!EnvVar.isBeian)
                         linkIcon(
-                            icon: IonIcons.logo_github,
-                            url: 'https://github.com/Anxcye/anx-reader',
-                            mode: LaunchMode.externalApplication),
-                        linkIcon(
-                            icon: Icons.telegram,
+                            icon: Icon(
+                              Icons.telegram,
+                              color: Theme.of(context).colorScheme.secondary,
+                            ),
                             url: 'https://t.me/AnxReader',
                             mode: LaunchMode.externalApplication),
-                      ],
-                    ),
+                      linkIcon(
+                          icon: Image.asset(
+                            'assets/images/xiaohongshu.png',
+                            color: Theme.of(context).colorScheme.secondary,
+                          ),
+                          url:
+                              'https://www.xiaohongshu.com/user/profile/5d403f3e00000000100151ff',
+                          mode: LaunchMode.externalApplication),
+                      linkIcon(
+                          icon: Padding(
+                            padding: const EdgeInsets.all(4.0),
+                            child: Image.asset(
+                              'assets/images/qq.png',
+                              color: Theme.of(context).colorScheme.secondary,
+                            ),
+                          ),
+                          // qq group url is so crazy
+                          url:
+                              'http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=8BYItJOMz4RCQJoHAAei7FV-nGB0iT8O&authKey=MD6a7gI%2FENiMr32rQRTLx2BpzTaa1wO9Qfmhx9ETcaLS%2FdcOFeptvVH9FWfvUpL2&noverify=0&group_code=1042905699',
+                          mode: LaunchMode.externalApplication),
+                    ],
+                  ),
                 ],
               ),
             ),
