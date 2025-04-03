@@ -2,7 +2,6 @@
 
 ## Todo
 - 选择时移动
-- 自动背景色
 * Feat: Add bionic reading mode(#49)
 * 新增：仿生阅读(#49)
 
