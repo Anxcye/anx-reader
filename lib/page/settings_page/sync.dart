@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:anx_reader/dao/database.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
+import 'package:anx_reader/main.dart';
 import 'package:anx_reader/utils/save_file_to_download.dart';
 import 'package:anx_reader/utils/get_path/get_temp_dir.dart';
 import 'package:anx_reader/utils/get_path/databases_path.dart';
@@ -19,6 +20,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:path/path.dart' as path;
 import 'package:anx_reader/widgets/settings/settings_section.dart';
 import 'package:anx_reader/widgets/settings/settings_tile.dart';
@@ -96,19 +98,18 @@ class _AppearanceSettingState extends ConsumerState<SyncSetting> {
     );
   }
 
-  void _showDataDialog(BuildContext context, String title) {
+  void _showDataDialog(String title) {
     Future.microtask(() {
-      showDialog(
-          barrierDismissible: false,
-          context: context,
-          builder: (context) => SimpleDialog(
-                title: Center(child: Text(title)),
-                children: const [
-                  Center(
-                    child: CircularProgressIndicator(),
-                  ),
-                ],
-              ));
+      SmartDialog.show(
+        builder: (BuildContext context) => SimpleDialog(
+          title: Center(child: Text(title)),
+          children: const [
+            Center(
+              child: CircularProgressIndicator(),
+            ),
+          ],
+        ),
+      );
     });
   }
 
@@ -116,13 +117,13 @@ class _AppearanceSettingState extends ConsumerState<SyncSetting> {
     AnxLog.info('exportData: start');
     if (!mounted) return;
 
-    _showDataDialog(context, L10n.of(context).exporting);
+    _showDataDialog(L10n.of(context).exporting);
 
     RootIsolateToken token = RootIsolateToken.instance!;
     final zipPath = await compute(createZipFile, token);
 
     final file = File(zipPath);
-    Navigator.of(context).pop('dialog');
+    SmartDialog.dismiss();
     if (await file.exists()) {
       // SaveFileDialogParams params = SaveFileDialogParams(
       //   sourceFilePath: file.path,
@@ -131,8 +132,9 @@ class _AppearanceSettingState extends ConsumerState<SyncSetting> {
       // final filePath = await FlutterFileDialog.saveFile(params: params);
       String fileName =
           'AnxReader-Backup-${DateTime.now().year}-${DateTime.now().month}-${DateTime.now().day}-v2.zip';
+
       String? filePath = await saveFileToDownload(
-          bytes: await file.readAsBytes(),
+          sourceFilePath: file.path,
           fileName: fileName,
           mimeType: 'application/zip');
 
@@ -140,10 +142,10 @@ class _AppearanceSettingState extends ConsumerState<SyncSetting> {
 
       if (filePath != null) {
         AnxLog.info('exportData: Saved to: $filePath');
-        AnxToast.show(L10n.of(context).export_to(filePath));
+        AnxToast.show(L10n.of(navigatorKey.currentContext!).export_to(filePath));
       } else {
         AnxLog.info('exportData: Cancelled');
-        AnxToast.show(L10n.of(context).common_canceled);
+        AnxToast.show(L10n.of(navigatorKey.currentContext!).common_canceled);
       }
     }
   }
@@ -164,17 +166,17 @@ class _AppearanceSettingState extends ConsumerState<SyncSetting> {
     String? filePath = result.files.single.path;
     if (filePath == null) {
       AnxLog.info('importData: cannot get file path');
-      AnxToast.show(L10n.of(context).import_cannot_get_file_path);
+      AnxToast.show(L10n.of(navigatorKey.currentContext!).import_cannot_get_file_path);
       return;
     }
 
     File zipFile = File(filePath);
     if (!await zipFile.exists()) {
       AnxLog.info('importData: zip file not found');
-      AnxToast.show(L10n.of(context).import_cannot_get_file_path);
+      AnxToast.show(L10n.of(navigatorKey.currentContext!).import_cannot_get_file_path);
       return;
     }
-    _showDataDialog(context, L10n.of(context).importing);
+    _showDataDialog(L10n.of(navigatorKey.currentContext!).importing);
 
     String pathSeparator = Platform.pathSeparator;
 
@@ -207,12 +209,12 @@ class _AppearanceSettingState extends ConsumerState<SyncSetting> {
           await getAnxShredPrefsFile());
 
       AnxLog.info('importData: import success');
-      AnxToast.show(L10n.of(context).import_success_restart_app);
+      AnxToast.show(L10n.of(navigatorKey.currentContext!).import_success_restart_app);
     } catch (e) {
       AnxLog.info('importData: error while unzipping or copying files: $e');
-      AnxToast.show(L10n.of(context).import_failed(e.toString()));
+      AnxToast.show(L10n.of(navigatorKey.currentContext!).import_failed(e.toString()));
     } finally {
-      Navigator.of(context).pop('dialog');
+      SmartDialog.dismiss();
       await Directory(extractPath).delete(recursive: true);
     }
   }

@@ -25,6 +25,7 @@
 - Fix: iOS blank screen after resume from background
 - Fix: note input box may be covered by keyboard(#183)
 - Fix: txt file with special characters cannot be imported
+- Fix: some Android devices cannot export backup file
 
 - 新增：添加更多社区链接
 - 新增：AI 对话可重新生成和复制
@@ -44,6 +45,7 @@
 - 修复：iOS 设备从后台恢复后有时白屏的问题
 - 修复：写想法的输入框有时被键盘遮挡(#183)
 - 修复：部分含有特殊字符的 txt 文件无法导入的问题
+- 修复：部分 Android 设备无法导出备份文件
 
 ## 1.4.1
 - Feat: excerpt AI chat
