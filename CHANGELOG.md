@@ -5,6 +5,10 @@
 * Feat: Add bionic reading mode(#49)
 * 新增：仿生阅读(#49)
 
+## 1.4.3
+- Fix: TTS cannot play after resume from background(#196)
+- 修复：TTS 无法在从后台恢复后播放(#196)
+
 ## 1.4.2
 - Feat: add link icon
 - Feat: AI chat regenerate and copy
