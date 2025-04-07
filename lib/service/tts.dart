@@ -86,23 +86,22 @@ class Tts extends BaseAudioHandler with QueueHandler, SeekHandler {
   static Future<void> speak({String? content}) async {
     player ??= AudioPlayer();
     player!.onPlayerComplete.listen((_) async {
-      getNextVoiceText();
+      String temp = await getNextVoiceText();
 
       if (ttsStateNotifier.value == TtsStateEnum.playing) {
-        while (_nextVoiceText == null || _nextAudio == null) {
-          await Future.delayed(const Duration(milliseconds: 100));
+        if (_nextVoiceText != null && _nextAudio != null) {
+          _currentVoiceText = _nextVoiceText;
+          _nextVoiceText = null;
+          audioToPlay = _nextAudio;
+          _nextAudio = null;
+
+          player!.play(BytesSource(audioToPlay!, mimeType: 'audio/mp3'));
+          _preloadNextAudio();
+        } else {
+          await stopStatic();
+          _currentVoiceText = temp;
+          speak();
         }
-        _currentVoiceText = _nextVoiceText;
-        _nextVoiceText = null;
-        audioToPlay = _nextAudio;
-        _nextAudio = null;
-
-        player!.play(BytesSource(audioToPlay!, mimeType: 'audio/mp3'));
-
-        _preloadNextAudio();
-      } else {
-        _currentVoiceText = await getNextVoiceText();
-        speak();
       }
     });
 
