@@ -193,8 +193,6 @@ class Tts extends BaseAudioHandler with QueueHandler, SeekHandler {
       ));
     }
 
-    updateTtsState(TtsStateEnum.playing);
-
     mediaItem.add(MediaItem(
       id: epubPlayerKey.currentState!.chapterTitle,
       title: epubPlayerKey.currentState!.chapterTitle,
@@ -209,6 +207,7 @@ class Tts extends BaseAudioHandler with QueueHandler, SeekHandler {
     } else {
       await speak();
     }
+    updateTtsState(TtsStateEnum.playing);
   }
 
   Tts() {
