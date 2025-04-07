@@ -50,11 +50,14 @@ class AnxLog {
           colorCode = '\x1B[34m';
         }
         print(
-            '$colorCode${record.level.name}: ${record.time}: ${record.message} ');
-        print('${record.error} \x1B[0m');
+            '$colorCode${record.level.name}: ${record.time}: ${record.message} \x1B[0m');
+        if (record.error != null) {
+          print('${record.error} \x1B[0m');
+        }
       }
+      String error = record.error == null ? '' : ' : ${record.error}';
       logFile!.writeAsStringSync(
-          '${'${record.level.name}^*^ ${record.time}^*^ [${record.message}]:${record.error}'.replaceAll('\n', ' ')}\n',
+          '${'${record.level.name}^*^ ${record.time}^*^ [${record.message}]$error'.replaceAll('\n', ' ')}\n',
           mode: FileMode.append);
     });
     if (Prefs().clearLogWhenStart) {
