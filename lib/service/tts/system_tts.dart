@@ -20,7 +20,7 @@ class SystemTts extends BaseTts {
 
   String? _currentVoiceText;
 
-  String? _prevVoiceText;
+  bool restarting = false;
 
   late Function getHereFunction;
   late Function getNextTextFunction;
@@ -45,8 +45,8 @@ class SystemTts extends BaseTts {
 
   @override
   set volume(double volume) {
-    restart();
     Prefs().ttsVolume = volume;
+    restart();
   }
 
   @override
@@ -54,8 +54,8 @@ class SystemTts extends BaseTts {
 
   @override
   set pitch(double pitch) {
-    restart();
     Prefs().ttsPitch = pitch;
+    restart();
   }
 
   @override
@@ -63,8 +63,8 @@ class SystemTts extends BaseTts {
 
   @override
   set rate(double rate) {
-    restart();
     Prefs().ttsRate = rate;
+    restart();
   }
 
   @override
@@ -89,10 +89,9 @@ class SystemTts extends BaseTts {
 
     flutterTts.setStartHandler(() async {
       updateTtsState(TtsStateEnum.playing);
-      if (isWindows) {
+      if (!isAndroid) {
         return;
       }
-      _prevVoiceText = _currentVoiceText;
       _currentVoiceText = await getCurrentText();
 
       if (_currentVoiceText?.isNotEmpty ?? false) {
@@ -101,10 +100,10 @@ class SystemTts extends BaseTts {
     });
 
     flutterTts.setCompletionHandler(() async {
-      updateTtsState(TtsStateEnum.playing);
-      if (isWindows) {
+      if (!isAndroid) {
         return;
       }
+      updateTtsState(TtsStateEnum.playing);
       if (_currentVoiceText?.isEmpty ?? true) {
         _currentVoiceText = await getNextText();
         await speak();
@@ -144,7 +143,8 @@ class SystemTts extends BaseTts {
     await flutterTts.setPitch(pitch);
 
     await flutterTts.speak(_currentVoiceText!);
-    if (isWindows && ttsStateNotifier.value == TtsStateEnum.playing) {
+
+    if (!isAndroid && ttsStateNotifier.value == TtsStateEnum.playing) {
       _currentVoiceText = await getNextTextFunction();
       speak();
     }
@@ -152,10 +152,10 @@ class SystemTts extends BaseTts {
 
   @override
   Future<dynamic> stop() async {
+    updateTtsState(TtsStateEnum.stopped);
     final result = await flutterTts.stop();
     _currentVoiceText = null;
-    updateTtsState(TtsStateEnum.stopped);
-    return result;
+     return result;
   }
 
   @override
@@ -176,22 +176,37 @@ class SystemTts extends BaseTts {
 
   @override
   Future<void> prev() async {
+    if (restarting) {
+      return;
+    }
+    restarting = true;
     await stop();
     _currentVoiceText = await getPrevTextFunction();
     await speak();
+    restarting = false;
   }
 
   @override
   Future<void> next() async {
+    if (restarting) {
+      return;
+    }
+    restarting = true;
     await stop();
     _currentVoiceText = await getNextTextFunction();
     await speak();
+    restarting = false;
   }
 
   @override
   Future<void> restart() async {
+    if (restarting) {
+      return;
+    }
+    restarting = true;
     await stop();
     await speak();
+    restarting = false;
   }
 
   @override
