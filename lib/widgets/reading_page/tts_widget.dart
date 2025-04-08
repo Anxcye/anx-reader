@@ -1,7 +1,8 @@
 import 'package:anx_reader/l10n/generated/L10n.dart';
-import 'package:anx_reader/main.dart';
-import 'package:anx_reader/service/tts.dart';
+// import 'package:anx_reader/main.dart';
 import 'package:anx_reader/config/shared_preference_provider.dart';
+import 'package:anx_reader/service/tts/base_tts.dart';
+import 'package:anx_reader/service/tts/tts_handler.dart';
 import 'package:anx_reader/widgets/reading_page/widget_title.dart';
 import 'package:anx_reader/page/book_player/epub_player.dart';
 import 'package:anx_reader/widgets/reading_page/more_settings/more_settings.dart';
@@ -19,20 +20,23 @@ class TtsWidget extends StatefulWidget {
 }
 
 class _TtsWidgetState extends State<TtsWidget> {
-  double volume = Tts.volume;
-  double pitch = Tts.pitch;
-  double rate = Tts.rate;
+  double volume = TtsHandler().volume;
+  double pitch = TtsHandler().pitch;
+  double rate = TtsHandler().rate;
   double stopSeconds = 0;
   Timer? stopTimer;
 
   @override
   void initState() {
-    if (Tts.ttsStateNotifier.value != TtsStateEnum.playing) {
-      Tts.init(
-          widget.epubPlayerKey.currentState!.initTts,
-          widget.epubPlayerKey.currentState!.ttsNext,
-          widget.epubPlayerKey.currentState!.ttsPrev);
-      audioHandler.play();
+    if (TtsHandler().ttsStateNotifier.value != TtsStateEnum.playing) {
+      TtsHandler()
+          .init(
+              widget.epubPlayerKey.currentState!.initTts,
+              widget.epubPlayerKey.currentState!.ttsNext,
+              widget.epubPlayerKey.currentState!.ttsPrev)
+          .then((value) {
+        TtsHandler().play();
+      });
     }
 
     super.initState();
@@ -46,7 +50,7 @@ class _TtsWidgetState extends State<TtsWidget> {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<TtsStateEnum>(
-        valueListenable: Tts.ttsStateNotifier,
+        valueListenable: TtsHandler().ttsStateNotifier,
         builder: (context, ttsState, child) {
           Widget volume() {
             return Row(
@@ -54,16 +58,16 @@ class _TtsWidgetState extends State<TtsWidget> {
                 Text(L10n.of(context).tts_volume),
                 Expanded(
                   child: Slider(
-                      value: Tts.volume,
+                      value: TtsHandler().volume,
                       onChanged: (newVolume) {
                         setState(() {
-                          Tts.volume = newVolume;
+                          TtsHandler().volume = newVolume;
                         });
                       },
                       min: 0.0,
                       max: 1.0,
                       divisions: 10,
-                      label: Tts.volume.toStringAsFixed(1)),
+                      label: TtsHandler().volume.toStringAsFixed(1)),
                 ),
               ],
             );
@@ -75,16 +79,16 @@ class _TtsWidgetState extends State<TtsWidget> {
                 Text(L10n.of(context).tts_pitch),
                 Expanded(
                   child: Slider(
-                    value: Tts.pitch,
+                    value: TtsHandler().pitch,
                     onChanged: (newPitch) {
                       setState(() {
-                        Tts.pitch = newPitch;
+                        TtsHandler().pitch = newPitch;
                       });
                     },
                     min: 0.5,
                     max: 2.0,
                     divisions: 15,
-                    label: Tts.pitch.toStringAsFixed(1),
+                    label: TtsHandler().pitch.toStringAsFixed(1),
                   ),
                 ),
               ],
@@ -97,16 +101,16 @@ class _TtsWidgetState extends State<TtsWidget> {
                 Text(L10n.of(context).tts_rate),
                 Expanded(
                   child: Slider(
-                    value: Tts.rate,
+                    value: TtsHandler().rate,
                     onChanged: (newRate) {
                       setState(() {
-                        Tts.rate = newRate;
+                        TtsHandler().rate = newRate;
                       });
                     },
                     min: 0.0,
                     max: 2.0,
                     divisions: 10,
-                    label: Tts.rate.toStringAsFixed(1),
+                    label: TtsHandler().rate.toStringAsFixed(1),
                   ),
                 ),
               ],
@@ -131,7 +135,17 @@ class _TtsWidgetState extends State<TtsWidget> {
                           Switch(
                             value: Prefs().isSystemTts,
                             onChanged: (value) async {
-                              await getTtsFactory().switchTtsType(value);
+                              if (TtsHandler().isPlaying) {
+                                await TtsHandler().stop();
+                              }
+
+                              await TtsHandler().switchTtsType(value);
+
+                              await TtsHandler().init(
+                                  widget.epubPlayerKey.currentState!.initTts,
+                                  widget.epubPlayerKey.currentState!.ttsNext,
+                                  widget.epubPlayerKey.currentState!.ttsPrev);
+
                               setState(() {});
                             },
                           ),
@@ -151,43 +165,41 @@ class _TtsWidgetState extends State<TtsWidget> {
               children: [
                 IconButton(
                     onPressed: () async {
-                      audioHandler.stop();
-                      Tts.speak(
-                          content: await widget.epubPlayerKey.currentState!
-                              .ttsPrevSection());
+                      TtsHandler().stop();
+                      await widget.epubPlayerKey.currentState!.ttsPrevSection();
+                      TtsHandler().playPrevious();
                     },
                     icon: const Icon(EvaIcons.arrowhead_left)),
                 IconButton(
                     onPressed: () {
-                      Tts.prev();
+                      TtsHandler().playPrevious();
                     },
                     icon: const Icon(EvaIcons.chevron_left)),
                 IconButton(
                     onPressed: () async {
                       // Tts.toggle();
                       ttsState == TtsStateEnum.playing
-                          ? audioHandler.pause()
-                          : audioHandler.play();
+                          ? TtsHandler().pause()
+                          : TtsHandler().play();
                     },
                     icon: ttsState == TtsStateEnum.playing
                         ? const Icon(EvaIcons.pause_circle_outline)
                         : const Icon(EvaIcons.play_circle_outline)),
                 IconButton(
                     onPressed: () {
-                      audioHandler.stop();
+                      TtsHandler().stop();
                     },
                     icon: const Icon(EvaIcons.stop_circle_outline)),
                 IconButton(
                     onPressed: () {
-                      Tts.next();
+                      TtsHandler().playNext();
                     },
                     icon: const Icon(EvaIcons.chevron_right)),
                 IconButton(
                     onPressed: () async {
-                      Tts.stopStatic();
-                      Tts.speak(
-                          content: await widget.epubPlayerKey.currentState!
-                              .ttsNextSection());
+                      TtsHandler().stop();
+                      await widget.epubPlayerKey.currentState!.ttsNextSection();
+                      TtsHandler().playNext();
                     },
                     icon: const Icon(EvaIcons.arrowhead_right)),
               ],
@@ -220,7 +232,7 @@ class _TtsWidgetState extends State<TtsWidget> {
                                   }
                                   return;
                                 } else {
-                                  audioHandler.stop();
+                                  TtsHandler().stop();
                                   stopSeconds = 0;
                                   timer.cancel();
                                   if (mounted) {
