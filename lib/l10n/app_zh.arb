@@ -298,6 +298,9 @@
   "tts_pitch": "音调",
   "tts_narrator": "朗读",
   "tts_stop_after": "{count, plural, =0{没有计时器} =1{1 分钟内停止} other{{count}分钟停止}}",
+  "tts_type": "朗读引擎类型",
+  "tts_type_internal": "内置朗读",
+  "tts_type_system": "系统朗读",
 
   "statistic_just_now": "刚刚",
   "statistic_minutes_ago": "{count, plural, =1{1分钟前} other{{count}分钟前}}",
