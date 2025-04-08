@@ -57,17 +57,10 @@ Future<void> main() async {
   await DBHelper().initDB();
   Server().start();
 
-  audioHandler = await AudioService.init(
-    builder: () => Tts(),
-    config: const AudioServiceConfig(
-      androidNotificationChannelId: 'com.anxcye.anx_reader.channel.audio',
-      androidNotificationChannelName: 'TTS playback',
-      androidNotificationOngoing: true,
-    ),
-  );
+  audioHandler = await initTtsService();
 
   SmartDialog.config.custom = SmartConfigCustom(
-    maskColor: Colors.black.withOpacity(0.35),
+    maskColor: Colors.black.withAlpha(35),
     useAnimation: true,
     animationType: SmartAnimationType.centerFade_otherSlide,
   );
