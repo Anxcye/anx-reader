@@ -167,6 +167,14 @@ class SystemTts extends BaseTts {
   }
 
   @override
+  Future<void> resume() async {
+    final result = await flutterTts.speak(_currentVoiceText!);
+    if (result == 1) {
+      updateTtsState(TtsStateEnum.playing);
+    }
+  }
+
+  @override
   Future<void> prev() async {
     await stop();
     _currentVoiceText = await getPrevTextFunction();

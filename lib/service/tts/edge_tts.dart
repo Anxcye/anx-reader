@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:anx_reader/config/shared_preference_provider.dart';
+import 'package:anx_reader/page/reading_page.dart';
 import 'package:anx_reader/service/tts/edge_tts_api.dart';
 import 'package:anx_reader/service/tts/base_tts.dart';
 import 'package:audioplayers/audioplayers.dart';
@@ -93,7 +94,7 @@ class EdgeTts extends BaseTts {
 
     _isLoadingNextAudio = true;
     try {
-      String prepareText = await getNextTextFunction();
+      String prepareText = await epubPlayerKey.currentState!.ttsPrepare();
       if (prepareText.isNotEmpty) {
         _nextVoiceText = prepareText;
         _nextAudio = await EdgeTTSApi.getAudio(_nextVoiceText!);
@@ -111,13 +112,20 @@ class EdgeTts extends BaseTts {
 
       if (ttsStateNotifier.value == TtsStateEnum.playing) {
         if (_nextVoiceText != null && _nextAudio != null) {
-          _currentVoiceText = _nextVoiceText;
-          _nextVoiceText = null;
-          audioToPlay = _nextAudio;
-          _nextAudio = null;
+          if (_nextAudio!.isEmpty) {
+            await stop();
+            _currentVoiceText = await getNextTextFunction();
+            speak();
+          } else {
+            _currentVoiceText = _nextVoiceText;
+            _nextVoiceText = null;
+            audioToPlay = _nextAudio;
+            _nextAudio = null;
 
-          await player!.play(BytesSource(audioToPlay!, mimeType: 'audio/mp3'));
-          _preloadNextAudio();
+            await player!
+                .play(BytesSource(audioToPlay!, mimeType: 'audio/mp3'));
+            _preloadNextAudio();
+          }
         } else {
           await stop();
           _currentVoiceText = temp;
@@ -139,29 +147,31 @@ class EdgeTts extends BaseTts {
 
     audioToPlay = await EdgeTTSApi.getAudio(_currentVoiceText!);
 
-    await player!.play(BytesSource(audioToPlay!, mimeType: 'audio/mp3'));
+    player!.play(BytesSource(audioToPlay!, mimeType: 'audio/mp3'));
 
-    updateTtsState(TtsStateEnum.playing);
     _preloadNextAudio();
   }
 
   @override
-  Future<dynamic> stop() async {
+  Future<void> stop() async {
     await player?.stop();
-    player?.dispose();
+    await player?.dispose();
     player = null;
     _nextAudio = null;
     _nextVoiceText = null;
     _isLoadingNextAudio = false;
     _currentVoiceText = null;
-    updateTtsState(TtsStateEnum.stopped);
-    return 1;
+    audioToPlay = null;
   }
 
   @override
   Future<void> pause() async {
     await player?.pause();
-    updateTtsState(TtsStateEnum.paused);
+  }
+
+  @override
+  Future<void> resume() async {
+    await player?.resume();
   }
 
   @override
@@ -193,6 +203,7 @@ class EdgeTts extends BaseTts {
     _nextVoiceText = null;
     _isLoadingNextAudio = false;
     _currentVoiceText = null;
+    audioToPlay = null;
     isInit = false;
   }
 }

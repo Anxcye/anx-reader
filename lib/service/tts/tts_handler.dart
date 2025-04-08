@@ -23,9 +23,9 @@ class TtsHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
     final session = await AudioSession.instance;
     session.interruptionEventStream.listen((event) {
       if (event.begin) {
-        if (tts.isPlaying) {
-          pause();
-        }
+        // if (tts.isPlaying) {
+        //   pause();
+        // }
       } else {
         switch (event.type) {
           case AudioInterruptionType.pause:
@@ -63,9 +63,13 @@ class TtsHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
       artUri: Uri.tryParse(
           'file://${epubPlayerKey.currentState!.book.coverFullPath}'),
     ));
-
-    await tts.speak();
-    tts.updateTtsState(TtsStateEnum.playing);
+    if (tts.ttsStateNotifier.value == TtsStateEnum.paused) {
+      tts.updateTtsState(TtsStateEnum.playing);
+      await tts.resume();
+    } else {
+      tts.updateTtsState(TtsStateEnum.playing);
+      await tts.speak();
+    }
   }
 
   @override
@@ -77,6 +81,7 @@ class TtsHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
     ));
 
     await tts.pause();
+    tts.updateTtsState(TtsStateEnum.paused);
   }
 
   @override
@@ -89,6 +94,7 @@ class TtsHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
 
     await tts.stop();
     epubPlayerKey.currentState?.ttsStop();
+    tts.updateTtsState(TtsStateEnum.stopped);
   }
 
   Future<void> playPrevious() async {

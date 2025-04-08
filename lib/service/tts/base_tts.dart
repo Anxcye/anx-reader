@@ -25,6 +25,8 @@ abstract class BaseTts {
 
   Future<void> pause();
 
+  Future<void> resume();
+
   Future<void> prev();
 
   Future<void> next();
