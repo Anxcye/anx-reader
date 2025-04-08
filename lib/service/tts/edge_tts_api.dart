@@ -20,7 +20,7 @@ const String voiceListUrl =
 const String chromiumFullVersion = "130.0.2849.68";
 const String secMsGecVersion = "1-$chromiumFullVersion";
 
-class EdgeTTS {
+class EdgeTTSApi {
   static String text = "";
   static String voice = Prefs().ttsVoiceModel;
   static double rate = 0;
@@ -108,8 +108,9 @@ class EdgeTTS {
     int rateValue = (rate * 100).toInt();
     int volumeValue = (volume * 100).toInt();
 
-    String pitchStr = pitchValue > 0 ? '+${pitchValue}Hz' : '-${pitchValue.abs()}Hz';
- 
+    String pitchStr =
+        pitchValue > 0 ? '+${pitchValue}Hz' : '-${pitchValue.abs()}Hz';
+
     return """
 <speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='en-US'>
 <voice name='$voice'>
@@ -215,8 +216,8 @@ $ssml
 
   static Future<Uint8List> getAudio(String text) async {
     debugPrint(text);
-    EdgeTTS.voice = Prefs().ttsVoiceModel;
-    EdgeTTS.text = text;
+    EdgeTTSApi.voice = Prefs().ttsVoiceModel;
+    EdgeTTSApi.text = text;
     List<int> audioData = [];
     try {
       await for (final chunk in stream()) {

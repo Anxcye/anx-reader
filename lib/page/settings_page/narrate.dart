@@ -1,7 +1,10 @@
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
-import 'package:anx_reader/service/edge_tts.dart';
+import 'package:anx_reader/service/tts.dart';
+import 'package:anx_reader/service/tts/edge_tts_api.dart';
 import 'package:anx_reader/utils/tts_model_list.dart';
+import 'package:anx_reader/widgets/settings/settings_section.dart';
+import 'package:anx_reader/widgets/settings/settings_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -255,7 +258,7 @@ class _NarrateSettingsState extends ConsumerState<NarrateSettings>
     setState(() {
       selectedVoiceModel = shortName;
       Prefs().ttsVoiceModel = shortName;
-      EdgeTTS.voice = shortName;
+      EdgeTTSApi.voice = shortName;
       _updateCurrentModelDetails();
     });
   }
@@ -272,8 +275,9 @@ class _NarrateSettingsState extends ConsumerState<NarrateSettings>
   }
 
   String _getCurrentModelDisplayName() {
-    if (_currentModelDetails == null)
+    if (_currentModelDetails == null) {
       return L10n.of(context).settings_narrate_voice_model_not_selected;
+    }
 
     String shortName = _currentModelDetails!['ShortName'] as String;
     String personName = shortName.split('-').last;
@@ -299,219 +303,239 @@ class _NarrateSettingsState extends ConsumerState<NarrateSettings>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Card(
-              elevation: 4,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              clipBehavior: Clip.antiAlias,
-              child: InkWell(
-                onTap: _scrollToSelectedModel,
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            L10n.of(context)
-                                .settings_narrate_voice_model_current_model,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.grey,
-                            ),
-                          ),
-                          Icon(
-                            _getGenderIcon(_getCurrentModelGender()),
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          CircleAvatar(
-                            backgroundColor:
-                                Theme.of(context).colorScheme.primaryContainer,
-                            radius: 24,
-                            child: Icon(
-                              _getGenderIcon(_getCurrentModelGender()),
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onPrimaryContainer,
-                              size: 24,
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  _getCurrentModelDisplayName(),
-                                  style: const TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  _getCurrentModelLanguageName(),
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.grey[600],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Text(
-                            L10n.of(context)
-                                .settings_narrate_voice_model_click_to_view,
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
-                          ),
-                          Icon(
-                            Icons.arrow_downward,
-                            size: 16,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SettingsSection(title: Text("TTS类型"), tiles: [
+          SettingsTile.switchTile(
+              title: Text("使用系统TTS"),
+              initialValue: Prefs().isSystemTts,
+              onToggle: (value) async {
+                await getTtsFactory().switchTtsType(value);
+                setState(() {});
+              }),
+        ]),
+        Visibility(
+          visible: !Prefs().isSystemTts,
+          child: Expanded(
+            child: _buildVoiceModelSelector(),
           ),
-          Expanded(
-            child: ListView.builder(
-              controller: _scrollController,
-              itemCount: groupedVoices.length,
-              itemBuilder: (context, index) {
-                String languageName = groupedVoices.keys.elementAt(index);
-                List<Map<String, dynamic>> voicesInLanguage =
-                    groupedVoices[languageName]!;
+        ),
+      ],
+    );
+  }
 
-                return Column(
+  Widget _buildVoiceModelSelector() {
+    return ListView(
+      controller: _scrollController,
+      children: [
+        _buildCurrentModelSection(),
+        const Divider(),
+        ..._buildVoiceModelList(),
+      ],
+    );
+  }
+
+  Widget _buildCurrentModelSection() {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Card(
+        elevation: 4,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: _scrollToSelectedModel,
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Container(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .surfaceContainerHighest
-                          .withAlpha(100),
-                      child: ListTile(
-                        title: Text(
-                          languageName,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                            color:
-                                Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                        trailing: Icon(
-                          expandedGroups.contains(languageName)
-                              ? Icons.keyboard_arrow_up
-                              : Icons.keyboard_arrow_down,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                        onTap: () => _toggleGroup(languageName),
+                    Text(
+                      L10n.of(context)
+                          .settings_narrate_voice_model_current_model,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey,
                       ),
                     ),
-                    if (expandedGroups.contains(languageName))
-                      ...voicesInLanguage.map((voice) {
-                        String shortName = voice['ShortName'] as String;
-                        String friendlyName = voice['FriendlyName'] as String;
-                        String gender = voice['Gender'] as String;
-
-                        String displayName = friendlyName.split(' - ').last;
-                        if (displayName.contains('(')) {
-                          displayName = displayName.split('(')[0].trim();
-                        }
-
-                        String personName = shortName.split('-').last;
-                        if (personName.endsWith('Neural')) {
-                          personName =
-                              personName.substring(0, personName.length - 6);
-                        }
-
-                        bool isHighlighted = _highlightedModel == shortName;
-
-                        return AnimatedBuilder(
-                          animation: _highlightAnimation,
-                          builder: (context, child) {
-                            return Container(
-                              color: isHighlighted
-                                  ? _highlightAnimation.value
-                                  : Colors.transparent,
-                              child: child,
-                            );
-                          },
-                          child: ListTile(
-                            leading: CircleAvatar(
-                              backgroundColor: Theme.of(context)
-                                  .colorScheme
-                                  .primaryContainer,
-                              child: Icon(
-                                _getGenderIcon(gender),
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onPrimaryContainer,
-                              ),
-                            ),
-                            title: Text(
-                              personName,
-                              style: TextStyle(
-                                fontWeight: selectedVoiceModel == shortName
-                                    ? FontWeight.bold
-                                    : FontWeight.normal,
-                              ),
-                            ),
-                            subtitle: Text(gender == 'Male'
-                                ? L10n.of(context)
-                                    .settings_narrate_voice_model_male
-                                : L10n.of(context)
-                                    .settings_narrate_voice_model_female),
-                            trailing: Radio<String>(
-                              value: shortName,
-                              groupValue: selectedVoiceModel,
-                              activeColor:
-                                  Theme.of(context).colorScheme.primary,
-                              onChanged: (value) {
-                                if (value != null) {
-                                  _selectVoiceModel(value);
-                                }
-                              },
-                            ),
-                            onTap: () => _selectVoiceModel(shortName),
-                          ),
-                        );
-                      }),
-                    const Divider(height: 1),
+                    Icon(
+                      _getGenderIcon(_getCurrentModelGender()),
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
                   ],
-                );
-              },
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    CircleAvatar(
+                      backgroundColor:
+                          Theme.of(context).colorScheme.primaryContainer,
+                      radius: 24,
+                      child: Icon(
+                        _getGenderIcon(_getCurrentModelGender()),
+                        color: Theme.of(context).colorScheme.onPrimaryContainer,
+                        size: 24,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            _getCurrentModelDisplayName(),
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            _getCurrentModelLanguageName(),
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Text(
+                      L10n.of(context)
+                          .settings_narrate_voice_model_click_to_view,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                    Icon(
+                      Icons.arrow_downward,
+                      size: 16,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
-        ],
+        ),
       ),
     );
+  }
+
+  List<Widget> _buildVoiceModelList() {
+    List<Widget> voiceModelList = [];
+
+    for (var language in groupedVoices.entries) {
+      String languageName = language.key;
+      List<Map<String, dynamic>> voicesInLanguage = language.value;
+
+      voiceModelList.add(
+        Column(
+          children: [
+            Container(
+              color: Theme.of(context)
+                  .colorScheme
+                  .surfaceContainerHighest
+                  .withAlpha(100),
+              child: ListTile(
+                title: Text(
+                  languageName,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                trailing: Icon(
+                  expandedGroups.contains(languageName)
+                      ? Icons.keyboard_arrow_up
+                      : Icons.keyboard_arrow_down,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                onTap: () => _toggleGroup(languageName),
+              ),
+            ),
+            if (expandedGroups.contains(languageName))
+              ...voicesInLanguage.map((voice) {
+                String shortName = voice['ShortName'] as String;
+                String friendlyName = voice['FriendlyName'] as String;
+                String gender = voice['Gender'] as String;
+
+                String displayName = friendlyName.split(' - ').last;
+                if (displayName.contains('(')) {
+                  displayName = displayName.split('(')[0].trim();
+                }
+
+                String personName = shortName.split('-').last;
+                if (personName.endsWith('Neural')) {
+                  personName = personName.substring(0, personName.length - 6);
+                }
+
+                bool isHighlighted = _highlightedModel == shortName;
+
+                return AnimatedBuilder(
+                  animation: _highlightAnimation,
+                  builder: (context, child) {
+                    return Container(
+                      color: isHighlighted
+                          ? _highlightAnimation.value
+                          : Colors.transparent,
+                      child: child,
+                    );
+                  },
+                  child: ListTile(
+                    leading: CircleAvatar(
+                      backgroundColor:
+                          Theme.of(context).colorScheme.primaryContainer,
+                      child: Icon(
+                        _getGenderIcon(gender),
+                        color: Theme.of(context).colorScheme.onPrimaryContainer,
+                      ),
+                    ),
+                    title: Text(
+                      personName,
+                      style: TextStyle(
+                        fontWeight: selectedVoiceModel == shortName
+                            ? FontWeight.bold
+                            : FontWeight.normal,
+                      ),
+                    ),
+                    subtitle: Text(gender == 'Male'
+                        ? L10n.of(context).settings_narrate_voice_model_male
+                        : L10n.of(context).settings_narrate_voice_model_female),
+                    trailing: Radio<String>(
+                      value: shortName,
+                      groupValue: selectedVoiceModel,
+                      activeColor: Theme.of(context).colorScheme.primary,
+                      onChanged: (value) {
+                        if (value != null) {
+                          _selectVoiceModel(value);
+                        }
+                      },
+                    ),
+                    onTap: () => _selectVoiceModel(shortName),
+                  ),
+                );
+              }),
+            const Divider(height: 1),
+          ],
+        ),
+      );
+    }
+
+    return voiceModelList;
   }
 }

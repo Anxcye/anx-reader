@@ -538,4 +538,14 @@ class Prefs extends ChangeNotifier {
     }
     return ReadingInfoModel.fromJson(jsonDecode(readingInfoJson));
   }
+
+
+  bool get isSystemTts {
+    return prefs.getBool('isSystemTts') ?? false;
+  }
+
+  set isSystemTts(bool status) {
+    prefs.setBool('isSystemTts', status);
+    notifyListeners();
+  }
 }

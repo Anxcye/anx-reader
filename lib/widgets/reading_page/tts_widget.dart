@@ -1,6 +1,7 @@
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/main.dart';
 import 'package:anx_reader/service/tts.dart';
+import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/widgets/reading_page/widget_title.dart';
 import 'package:anx_reader/page/book_player/epub_player.dart';
 import 'package:anx_reader/widgets/reading_page/more_settings/more_settings.dart';
@@ -120,6 +121,25 @@ class _TtsWidgetState extends State<TtsWidget> {
                   volume(),
                   pitch(),
                   rate(),
+                  Row(
+                    children: [
+                      Text("TTS类型"),
+                      const Spacer(),
+                      Row(
+                        children: [
+                          Text("Edge TTS"),
+                          Switch(
+                            value: Prefs().isSystemTts,
+                            onChanged: (value) async {
+                              await getTtsFactory().switchTtsType(value);
+                              setState(() {});
+                            },
+                          ),
+                          Text("系统 TTS"),
+                        ],
+                      ),
+                    ],
+                  ),
                 ],
               ),
             );
