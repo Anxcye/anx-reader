@@ -6,10 +6,14 @@
 * 新增：仿生阅读(#49)
 
 ## 1.4.3
+- Feat: recover system TTS(#197)
 - Fix: TTS cannot play after resume from background(#196)
 - Fix: TTS cannot play when encountering images or cross-chapter
+- Fix: System TTS continuous backward movement(#197)
+- 新增：重新引入了系统 TTS(#197)
 - 修复：TTS 无法在从后台恢复后播放(#196)
-- 修复：TTS 遇到图片或跨章节时无法播放
+- 修复：集成 TTS 遇到图片或跨章节时无法播放
+- 修复：系统 TTS 连续向后移动
 
 ## 1.4.2
 - Feat: add link icon

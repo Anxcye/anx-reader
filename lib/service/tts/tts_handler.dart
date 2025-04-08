@@ -92,9 +92,9 @@ class TtsHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
       playing: false,
     ));
 
+    tts.updateTtsState(TtsStateEnum.stopped);
     await tts.stop();
     epubPlayerKey.currentState?.ttsStop();
-    tts.updateTtsState(TtsStateEnum.stopped);
   }
 
   Future<void> playPrevious() async {

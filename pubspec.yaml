@@ -50,7 +50,7 @@ dependencies:
   url_launcher: ^6.2.6
   sqflite_common_ffi: ^2.3.3
   battery_plus: ^6.2.1
-  flutter_tts: ^4.1.0
+  flutter_tts: ^4.2.2
   sticky_headers: ^0.3.0+2
   photo_view: ^0.15.0
   flutter_smart_dialog: ^4.9.8+1
