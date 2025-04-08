@@ -1,4 +1,5 @@
 import 'package:anx_reader/l10n/generated/L10n.dart';
+import 'package:anx_reader/page/iap.dart';
 import 'package:anx_reader/page/settings_page/ai.dart';
 import 'package:anx_reader/page/settings_page/advanced.dart';
 import 'package:anx_reader/page/settings_page/appearance.dart';
@@ -94,7 +95,7 @@ class _SubMoreSettingsState extends State<SubMoreSettings> {
           },
           {
             "title": L10n.of(context).settings_narrate,
-            "icon": EvaIcons.headphones  ,
+            "icon": EvaIcons.headphones,
             "sections": const NarrateSettings(),
             "subtitles": [
               L10n.of(context).settings_narrate_voice,

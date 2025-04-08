@@ -1,4 +1,6 @@
+import 'package:anx_reader/page/iap.dart';
 import 'package:anx_reader/page/settings_page/more_settings_page.dart';
+import 'package:anx_reader/utils/env_var.dart';
 import 'package:anx_reader/widgets/settings/about.dart';
 import 'package:anx_reader/widgets/settings/theme_mode.dart';
 import 'package:anx_reader/widgets/settings/webdav_switch.dart';
@@ -13,7 +15,6 @@ class SettingsPage extends ConsumerStatefulWidget {
 }
 
 class _SettingsPageState extends ConsumerState<SettingsPage> {
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -47,6 +48,16 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           ),
           const Divider(),
           const MoreSettings(),
+          if (EnvVar.isAppStore)
+          ListTile(
+            title: const Text("购买"),
+            leading: const Icon(Icons.star_outline),
+            subtitle: const Text("试用剩余7天"),
+            onTap: () {
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => const IAPPage()));
+            },
+          ),
           const About(),
         ],
       ),
