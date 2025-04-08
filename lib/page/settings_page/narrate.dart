@@ -306,9 +306,9 @@ class _NarrateSettingsState extends ConsumerState<NarrateSettings>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SettingsSection(title: Text("TTS类型"), tiles: [
+        SettingsSection(title: Text(L10n.of(context).tts_type), tiles: [
           SettingsTile.switchTile(
-              title: Text("使用系统TTS"),
+              title: Text(L10n.of(context).tts_type_system),
               initialValue: Prefs().isSystemTts,
               onToggle: (value) async {
                 await getTtsFactory().switchTtsType(value);

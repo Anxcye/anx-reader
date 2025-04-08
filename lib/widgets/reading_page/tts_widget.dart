@@ -123,11 +123,11 @@ class _TtsWidgetState extends State<TtsWidget> {
                   rate(),
                   Row(
                     children: [
-                      Text("TTS类型"),
+                      Text(L10n.of(context).tts_type),
                       const Spacer(),
                       Row(
                         children: [
-                          Text("Edge TTS"),
+                          Text(L10n.of(context).tts_type_internal),
                           Switch(
                             value: Prefs().isSystemTts,
                             onChanged: (value) async {
@@ -135,7 +135,7 @@ class _TtsWidgetState extends State<TtsWidget> {
                               setState(() {});
                             },
                           ),
-                          Text("系统 TTS"),
+                          Text(L10n.of(context).tts_type_system),
                         ],
                       ),
                     ],
