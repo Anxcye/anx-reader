@@ -25,6 +25,9 @@ class _IAPPageState extends State<IAPPage> {
   void initState() {
     super.initState();
     _initInAppPurchase();
+    _inAppPurchase.isAvailable().then((value) {
+      print(value);
+    });
   }
 
   @override
@@ -81,7 +84,7 @@ class _IAPPageState extends State<IAPPage> {
     final Set<String> productIds = {IAPService.kLifetimeProductId};
     final ProductDetailsResponse response =
         await _inAppPurchase.queryProductDetails(productIds);
-
+        print(response.productDetails);
     if (response.notFoundIDs.isNotEmpty) {
       setState(() {
         _purchaseError = '商品ID不存在: ${response.notFoundIDs.join(", ")}';
