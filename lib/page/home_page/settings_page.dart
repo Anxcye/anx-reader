@@ -1,4 +1,4 @@
-import 'package:anx_reader/page/iap.dart';
+import 'package:anx_reader/page/iap_page.dart';
 import 'package:anx_reader/page/settings_page/more_settings_page.dart';
 import 'package:anx_reader/utils/env_var.dart';
 import 'package:anx_reader/widgets/settings/about.dart';

@@ -16,6 +16,7 @@
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
 		C5988192A52F49758802CFE1 /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F3506A27362E161C260D510D /* Pods_Runner.framework */; };
+		FCC05C1B2DA64F4D00FD1EDD /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCC05C1A2DA64F4D00FD1EDD /* StoreKit.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -65,6 +66,7 @@
 		F3506A27362E161C260D510D /* Pods_Runner.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Runner.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F542B1EE7CF977C0D26E2A42 /* Pods-Runner.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.profile.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.profile.xcconfig"; sourceTree = "<group>"; };
 		F5CC069C62A25F6396F23ADB /* Pods-Runner.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.release.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"; sourceTree = "<group>"; };
+		FCC05C1A2DA64F4D00FD1EDD /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -73,6 +75,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C5988192A52F49758802CFE1 /* Pods_Runner.framework in Frameworks */,
+				FCC05C1B2DA64F4D00FD1EDD /* StoreKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -111,6 +114,7 @@
 		905A336D856FE1899D03B9B6 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				FCC05C1A2DA64F4D00FD1EDD /* StoreKit.framework */,
 				F3506A27362E161C260D510D /* Pods_Runner.framework */,
 				D9948AB460EAD02E1411ED00 /* Pods_RunnerTests.framework */,
 			);
