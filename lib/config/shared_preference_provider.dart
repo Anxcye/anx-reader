@@ -548,4 +548,13 @@ class Prefs extends ChangeNotifier {
     prefs.setBool('isSystemTts', status);
     notifyListeners();
   }
+
+  bool get showTextUnderIconButton {
+    return prefs.getBool('showTextUnderIconButton') ?? true;
+  }
+
+  set showTextUnderIconButton(bool show){
+    prefs.setBool('showTextUnderIconButton', show);
+    notifyListeners();
+  }
 }
