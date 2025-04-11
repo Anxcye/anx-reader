@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:anx_reader/service/iap_service.dart';
 
+
 class IAPPage extends StatefulWidget {
   const IAPPage({super.key});
 
@@ -25,14 +26,11 @@ class _IAPPageState extends State<IAPPage> {
   void initState() {
     super.initState();
     _initInAppPurchase();
-    _inAppPurchase.isAvailable().then((value) {
-      print(value);
-    });
   }
 
   @override
   void dispose() {
-    _subscription.cancel();
+    _subscription?.cancel();
     super.dispose();
   }
 
@@ -66,7 +64,7 @@ class _IAPPageState extends State<IAPPage> {
     // 监听购买更新
     _subscription = _inAppPurchase.purchaseStream.listen(
       _listenToPurchaseUpdated,
-      onDone: () => _subscription.cancel(),
+      onDone: () => _subscription?.cancel(),
       onError: (error) {
         setState(() {
           _purchaseError = error.toString();
@@ -82,21 +80,47 @@ class _IAPPageState extends State<IAPPage> {
   // 加载产品信息
   Future<void> _loadProducts() async {
     final Set<String> productIds = {IAPService.kLifetimeProductId};
-    final ProductDetailsResponse response =
-        await _inAppPurchase.queryProductDetails(productIds);
-        print(response.productDetails);
-    if (response.notFoundIDs.isNotEmpty) {
+    print('Querying product IDs: $productIds');
+
+    try {
+      final ProductDetailsResponse response =
+          await _inAppPurchase.queryProductDetails(productIds);
+
+      if (response.error != null) {
+        setState(() {
+          _purchaseError = '连接商店时出错: ${response.error!.message}';
+          _isLoading = false;
+        });
+        return;
+      }
+
+      if (response.notFoundIDs.isNotEmpty) {
+        setState(() {
+          _purchaseError = '商品ID不存在: ${response.notFoundIDs.join(", ")}';
+          _isLoading = false;
+        });
+        return;
+      }
+
+      if (response.productDetails.isEmpty) {
+        setState(() {
+          _purchaseError = '没有找到产品信息，请确保产品已在App Store配置正确';
+          _isLoading = false;
+        });
+        return;
+      }
+
       setState(() {
-        _purchaseError = '商品ID不存在: ${response.notFoundIDs.join(", ")}';
+        _products = response.productDetails;
         _isLoading = false;
       });
-      return;
+    } catch (e) {
+      print('Error loading products: $e');
+      setState(() {
+        _purchaseError = '加载产品信息时出错: $e';
+        _isLoading = false;
+      });
     }
-
-    setState(() {
-      _products = response.productDetails;
-      _isLoading = false;
-    });
   }
 
   // 处理购买更新
@@ -284,17 +308,17 @@ class _IAPPageState extends State<IAPPage> {
 
             // 特性介绍
             const Text(
-              '高级版特权',
+              '我们提供',
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 10),
-            _buildFeatureItem(Icons.format_quote, '无限书籍导入', '移除免费版书籍数量限制'),
-            _buildFeatureItem(Icons.color_lens, '全部主题', '解锁所有高级主题和定制选项'),
+            _buildFeatureItem(Icons.format_quote, '无限书籍导入', '无书籍数量限制'),
+            _buildFeatureItem(Icons.color_lens, '全部主题', '任意主题和定制选项'),
             _buildFeatureItem(Icons.auto_awesome, '高级功能', '包括批注、同步和更多功能'),
-            _buildFeatureItem(Icons.support_agent, '优先支持', '获得优先客户支持'),
+            _buildFeatureItem(Icons.support_agent, '特色功能', 'AI、同步、朗读'),
 
             const SizedBox(height: 30),
 

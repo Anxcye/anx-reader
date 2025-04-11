@@ -87,6 +87,7 @@ dependencies:
   crypto: ^3.0.6
   audioplayers: ^6.4.0
   in_app_purchase: ^3.2.1
+  asn1lib: ^1.6.2
 
 
 dev_dependencies:
