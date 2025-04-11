@@ -41,6 +41,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.6.0"
+  asn1lib:
+    dependency: "direct main"
+    description:
+      name: asn1lib
+      sha256: e02d018628c870ef2d7f03e33f9ad179d89ff6ec52ca6c56bcb80bcef979867f
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.6.2"
   async:
     dependency: transitive
     description:

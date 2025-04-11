@@ -10,4 +10,7 @@ class EnvVar {
 
   static const bool isAppStore =
       String.fromEnvironment('isAppStore', defaultValue: 'false') == 'true';
+
+  static const String sharingSecret =
+      String.fromEnvironment('sharingSecret', defaultValue: '');
 }
