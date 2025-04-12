@@ -111,6 +111,9 @@ class EdgeTts extends BaseTts {
       String temp = await getNextTextFunction();
 
       if (ttsStateNotifier.value == TtsStateEnum.playing) {
+        while (_nextVoiceText != null && _nextAudio == null) {
+          await Future.delayed(const Duration(milliseconds: 100));
+        }
         if (_nextVoiceText != null && _nextAudio != null) {
           if (_nextAudio!.isEmpty) {
             await stop();

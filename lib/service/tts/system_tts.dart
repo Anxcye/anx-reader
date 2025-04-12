@@ -160,7 +160,7 @@ class SystemTts extends BaseTts {
 
   @override
   Future<void> pause() async {
-    final result = await flutterTts.pause();
+    final result = await flutterTts.stop();
     if (result == 1) {
       updateTtsState(TtsStateEnum.paused);
     }
@@ -168,10 +168,7 @@ class SystemTts extends BaseTts {
 
   @override
   Future<void> resume() async {
-    final result = await flutterTts.speak(_currentVoiceText!);
-    if (result == 1) {
-      updateTtsState(TtsStateEnum.playing);
-    }
+    speak(content: _currentVoiceText);
   }
 
   @override
@@ -182,7 +179,7 @@ class SystemTts extends BaseTts {
     restarting = true;
     await stop();
     _currentVoiceText = await getPrevTextFunction();
-    await speak();
+    speak();
     restarting = false;
   }
 
@@ -194,7 +191,7 @@ class SystemTts extends BaseTts {
     restarting = true;
     await stop();
     _currentVoiceText = await getNextTextFunction();
-    await speak();
+    speak();
     restarting = false;
   }
 
@@ -205,7 +202,7 @@ class SystemTts extends BaseTts {
     }
     restarting = true;
     await stop();
-    await speak();
+    speak();
     restarting = false;
   }
 
