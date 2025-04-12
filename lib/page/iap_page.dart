@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:anx_reader/service/iap_service.dart';
@@ -222,7 +223,6 @@ class _IAPPageState extends State<IAPPage> {
 
             const SizedBox(height: 30),
 
-            // 仅当用户未购买且商店可用时显示购买按钮
             if (!_iapService.isPurchased &&
                 _isAvailable &&
                 _products.isNotEmpty)
@@ -233,7 +233,11 @@ class _IAPPageState extends State<IAPPage> {
                   padding: const EdgeInsets.symmetric(vertical: 15),
                 ),
                 child: _isLoading
-                    ? const Center(child: CircularProgressIndicator())
+                    ?  Center(
+                        child: CircularProgressIndicator(
+                          color: Theme.of(context).colorScheme.onPrimary,
+                        ),
+                      )
                     : Text(
                         '一次性付费 ${_products.first.price} 永久使用',
                         style:
@@ -276,7 +280,7 @@ class _IAPPageState extends State<IAPPage> {
       case IAPStatus.purchased:
         statusIcon = Icons.verified;
         statusDescription = '感谢您的支持！您可以使用所有高级功能';
-        cardColor = Colors.green.shade50;
+        cardColor = Colors.green;
         // 获取购买时间
         final purchaseDate = _iapService.purchaseDate;
         if (purchaseDate != null) {
@@ -286,7 +290,7 @@ class _IAPPageState extends State<IAPPage> {
       case IAPStatus.trial:
         statusIcon = Icons.access_time;
         statusDescription = '您还有 ${_iapService.trialDaysLeft} 天试用期';
-        cardColor = Colors.blue.shade50;
+        cardColor = Colors.blue;
         // 获取试用开始时间
         final originalDate = _iapService.originalDate;
         if (originalDate.millisecondsSinceEpoch > 0) {
@@ -296,7 +300,7 @@ class _IAPPageState extends State<IAPPage> {
       case IAPStatus.trialExpired:
         statusIcon = Icons.timer_off;
         statusDescription = '购买永久版以继续使用高级功能';
-        cardColor = Colors.orange.shade50;
+        cardColor = Colors.orange;
         // 获取试用开始时间
         final originalDate = _iapService.originalDate;
         if (originalDate.millisecondsSinceEpoch > 0) {
@@ -306,7 +310,7 @@ class _IAPPageState extends State<IAPPage> {
       case IAPStatus.originalUser:
         statusIcon = Icons.stars;
         statusDescription = '您是我们的早期用户，感谢您的支持！';
-        cardColor = Colors.purple.shade50;
+        cardColor = Colors.purple;
         // 获取原始用户时间
         final originalDate = _iapService.originalDate;
         if (originalDate.millisecondsSinceEpoch > 0) {
@@ -316,13 +320,13 @@ class _IAPPageState extends State<IAPPage> {
       case IAPStatus.unknown:
         statusIcon = Icons.help_outline;
         statusDescription = '无法确定您的会员状态';
-        cardColor = Colors.grey.shade50;
+        cardColor = Colors.grey;
         break;
     }
 
     return Card(
       elevation: 4,
-      color: cardColor,
+      color: cardColor.blend(Theme.of(context).colorScheme.surfaceContainer, 85),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(

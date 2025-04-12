@@ -232,7 +232,6 @@ class IAPService {
       try {
         value = parser.nextObject();
       } catch (e) {
-        AnxLog.severe('IAP: Error in getFieldValue: $e');
         return '';
       }
 
