@@ -6,23 +6,35 @@ import 'package:http/http.dart' as http;
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:in_app_purchase_storekit/in_app_purchase_storekit.dart';
 import 'package:asn1lib/asn1lib.dart';
+
 enum IAPStatus {
   purchased,
   trial,
   trialExpired,
-  originalUser
+  originalUser,
+  unknown,
 }
+
 class IAPService {
   static final IAPService _instance = IAPService._internal();
   factory IAPService() {
     return _instance;
   }
-  IAPService._internal();
+  IAPService._internal() {
+    _parsedReceipt = {
+      "receipt": <String, dynamic>{
+        "in_app": [],
+      },
+      "environment": "Sandbox",
+      "status": 0
+    };
+  }
 
   final InAppPurchase _inAppPurchase = InAppPurchase.instance;
   static const String kLifetimeProductId = 'anx_reader_lifetime';
 
   static const List<String> kOriginalUserVersion = [
+    '1.0',
     '1.4.0',
     '1.4.1',
     '1.4.2',
@@ -34,23 +46,50 @@ class IAPService {
 
   static const int kTrialDays = 7;
   late Map<String, dynamic> _parsedReceipt;
+  bool _isInitialized = false;
 
-  bool get isPurchased =>
-      _parsedReceipt['receipt']['in_app'].isNotEmpty || _isOriginalUser();
-  int get trialDaysLeft =>
-      kTrialDays - DateTime.now().difference(_getOriginalDate()).inDays;
+  bool get isPurchased {
+    try {
+      if (!_isInitialized) return false;
+      final inApp = _parsedReceipt['receipt']?['in_app'];
+      return (inApp != null && inApp.isNotEmpty) || _isOriginalUser();
+    } catch (e) {
+      AnxLog.severe('IAP: Error checking isPurchased: $e');
+      return false;
+    }
+  }
+
+  int get trialDaysLeft {
+    try {
+      if (!_isInitialized) return 0;
+      return kTrialDays - DateTime.now().difference(_getOriginalDate()).inDays;
+    } catch (e) {
+      AnxLog.severe('IAP: Error calculating trialDaysLeft: $e');
+      return 0;
+    }
+  }
+
   bool get isFeatureAvailable => isPurchased || trialDaysLeft > 0;
-  IAPStatus get iapStatus{
-    if(_parsedReceipt['receipt']['in_app'].isNotEmpty){
-      return IAPStatus.purchased;
+
+  IAPStatus get iapStatus {
+    try {
+      if (!_isInitialized) return IAPStatus.unknown;
+
+      final inApp = _parsedReceipt['receipt']?['in_app'];
+      if (inApp != null && inApp.isNotEmpty) {
+        return IAPStatus.purchased;
+      }
+      if (_isOriginalUser()) {
+        return IAPStatus.originalUser;
+      }
+      if (trialDaysLeft > 0) {
+        return IAPStatus.trial;
+      }
+      return IAPStatus.trialExpired;
+    } catch (e) {
+      AnxLog.severe('IAP: Error determining iapStatus: $e');
+      return IAPStatus.unknown;
     }
-    if(_isOriginalUser()){
-      return IAPStatus.originalUser;
-    }
-    if(trialDaysLeft > 0){
-      return IAPStatus.trial;
-    }
-    return IAPStatus.trialExpired;
   }
 
   Future<void> refresh() async {
@@ -58,21 +97,41 @@ class IAPService {
   }
 
   Future<void> initialize() async {
-    _parsedReceipt = _parseReceiptLocally(await _getReceiptBase64());
-    AnxLog.info('IAP: initialize: ${jsonEncode(_parsedReceipt, toEncodable: (object) {
-      if (object is DateTime) {
-        return object.toIso8601String();
+    try {
+      final receiptBase64 = await _getReceiptBase64();
+      if (receiptBase64.isEmpty) {
+        AnxLog.warning('IAP: Empty receipt during initialization');
+        _isInitialized = true; // 标记为已初始化，但使用空数据
+        return;
       }
-      return object;
-    })}');
+
+      _parsedReceipt = _parseReceiptLocally(receiptBase64);
+      _isInitialized = true;
+
+      AnxLog.info(
+          'IAP: initialize: ${jsonEncode(_parsedReceipt, toEncodable: (object) {
+        if (object is DateTime) {
+          return object.toIso8601String();
+        }
+        return object;
+      })}');
+    } catch (e) {
+      AnxLog.severe('IAP: Error initializing: $e');
+      _isInitialized = false;
+    }
   }
 
   Future<String> _getReceiptBase64() async {
-    var iosPlatformAddition = _inAppPurchase
-        .getPlatformAddition<InAppPurchaseStoreKitPlatformAddition>();
-    var receiptBase64 =
-        await iosPlatformAddition.refreshPurchaseVerificationData();
-    return receiptBase64?.localVerificationData ?? '';
+    try {
+      var iosPlatformAddition = _inAppPurchase
+          .getPlatformAddition<InAppPurchaseStoreKitPlatformAddition>();
+      var receiptBase64 =
+          await iosPlatformAddition.refreshPurchaseVerificationData();
+      return receiptBase64?.localVerificationData ?? '';
+    } catch (e) {
+      AnxLog.severe('IAP: Error getting receipt base64: $e');
+      return '';
+    }
   }
 
   Future<Map<String, dynamic>> parseReceiptViaServer(
@@ -122,6 +181,7 @@ class IAPService {
         return handleReceiptResponse(productionResponse);
       }
     } catch (e) {
+      AnxLog.severe('IAP: Server verification error: $e');
       rethrow;
     }
   }
@@ -157,6 +217,7 @@ class IAPService {
       try {
         value = parser.nextObject();
       } catch (e) {
+        AnxLog.severe('IAP: Error in getFieldValue: $e');
         return '';
       }
 
@@ -219,7 +280,11 @@ class IAPService {
           List<ASN1Object> set = (obj as ASN1Set).elements.toList();
           for (var field in set) {
             if (field is ASN1Sequence) {
-              parseInappPurchaseField(field, purchase);
+              try {
+                parseInappPurchaseField(field, purchase);
+              } catch (e) {
+                AnxLog.severe('IAP: Error parsing in-app purchase field: $e');
+              }
             }
           }
 
@@ -243,7 +308,11 @@ class IAPService {
         var fieldValue = fieldSeq.elements[2];
 
         if (fieldType == 17 && fieldValue is ASN1OctetString) {
-          parseInAppPurchase(ASN1Parser(fieldValue.valueBytes()), result);
+          try {
+            parseInAppPurchase(ASN1Parser(fieldValue.valueBytes()), result);
+          } catch (e) {
+            AnxLog.severe('IAP: Error parsing in-app purchase: $e');
+          }
           return;
         }
 
@@ -286,7 +355,11 @@ class IAPService {
 
       for (var field in set.elements) {
         if (field is ASN1Sequence) {
-          extractFieldValue(field, result);
+          try {
+            extractFieldValue(field, result);
+          } catch (e) {
+            AnxLog.severe('IAP: Error extracting field value: $e');
+          }
         }
       }
     }
@@ -314,19 +387,28 @@ class IAPService {
         ASN1Parser(eContent.valueBytes()).nextObject() as ASN1OctetString;
     ASN1Set set = ASN1Parser(octetString.valueBytes()).nextObject() as ASN1Set;
 
-    parseReceipt(set, result);
+    try {
+      parseReceipt(set, result);
+    } catch (e) {
+      AnxLog.severe('IAP: Error parsing receipt fields: $e');
+    }
 
     return result;
   }
 
   bool _isOriginalUser() {
-    final receipt = _parsedReceipt;
-    final originalUserVersion = receipt['original_user_version'];
-    if (originalUserVersion != null &&
-        kOriginalUserVersion.contains(originalUserVersion.toString())) {
-      return true;
+    try {
+      final receipt = _parsedReceipt;
+      final originalUserVersion = receipt['original_user_version'];
+      if (originalUserVersion != null &&
+          kOriginalUserVersion.contains(originalUserVersion.toString())) {
+        return true;
+      }
+      return false;
+    } catch (e) {
+      AnxLog.severe('IAP: Error checking original user: $e');
+      return false;
     }
-    return false;
   }
 
   DateTime _getOriginalDate() {
