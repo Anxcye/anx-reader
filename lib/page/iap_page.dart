@@ -1,9 +1,11 @@
 import 'dart:async';
 
+import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:anx_reader/service/iap_service.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class IAPPage extends StatefulWidget {
   const IAPPage({super.key});
@@ -184,7 +186,7 @@ class _IAPPageState extends State<IAPPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('高级会员'),
+        title: const Text('激活产品'),
         actions: [
           TextButton(
             onPressed: _restorePurchases,
@@ -209,19 +211,44 @@ class _IAPPageState extends State<IAPPage> {
 
             // 特性介绍
             const Text(
-              'AnxReader 提供功能',
+              '为什么选择 Anx Reader',
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 10),
-            _buildFeatureItem(Icons.format_quote, '无限书籍导入', '无书籍数量限制'),
-            _buildFeatureItem(Icons.color_lens, '全部主题', '任意主题和定制选项'),
-            _buildFeatureItem(Icons.auto_awesome, '高级功能', '包括批注、同步和更多功能'),
-            _buildFeatureItem(Icons.support_agent, '特色功能', 'AI、同步、朗读'),
+            _buildFeatureItem(Icons.auto_awesome, 'AI 阅读', 'AI 助力，总结、问答，轻松阅读'),
+            _buildFeatureItem(Icons.sync, '全平台同步', '让进度、数据随时同步'),
+            _buildFeatureItem(Icons.bar_chart, '详细统计', '阅读时长、阅读热力图'),
+            _buildFeatureItem(Icons.color_lens, '自定义任何样式', '字体、颜色、大小、行距、间距...'),
+            _buildFeatureItem(Icons.more_horiz, '丰富功能', '批注、朗读、翻译'),
 
             const SizedBox(height: 30),
+            const Text('如更换设备、重新安装，请点击右上角 恢复购买 \n仅针对当前AppleID下的设备生效'),
+         
+            Row(
+              children: [
+                TextButton(
+                  child: Text(L10n.of(context).about_privacy_policy),
+                  onPressed: () async {
+                    launchUrl(
+                      Uri.parse('https://anx.anxcye.com/privacy.html'),
+                      mode: LaunchMode.externalApplication,
+                    );
+                  },
+                ),
+            TextButton(
+              child: Text(L10n.of(context).about_terms_of_use),
+              onPressed: () async {
+                launchUrl(
+                  Uri.parse('https://anx.anxcye.com/terms.html'),
+                  mode: LaunchMode.externalApplication,
+                );
+              },
+            ),
+              ],
+            ),
 
             if (!_iapService.isPurchased &&
                 _isAvailable &&
@@ -233,7 +260,7 @@ class _IAPPageState extends State<IAPPage> {
                   padding: const EdgeInsets.symmetric(vertical: 15),
                 ),
                 child: _isLoading
-                    ?  Center(
+                    ? Center(
                         child: CircularProgressIndicator(
                           color: Theme.of(context).colorScheme.onPrimary,
                         ),
@@ -279,7 +306,7 @@ class _IAPPageState extends State<IAPPage> {
     switch (_iapService.iapStatus) {
       case IAPStatus.purchased:
         statusIcon = Icons.verified;
-        statusDescription = '感谢您的支持！您可以使用所有高级功能';
+        statusDescription = '感谢您的支持！您已经成功激活产品';
         cardColor = Colors.green;
         // 获取购买时间
         final purchaseDate = _iapService.purchaseDate;
@@ -299,7 +326,7 @@ class _IAPPageState extends State<IAPPage> {
         break;
       case IAPStatus.trialExpired:
         statusIcon = Icons.timer_off;
-        statusDescription = '购买永久版以继续使用高级功能';
+        statusDescription = '购买永久版以继续阅读';
         cardColor = Colors.orange;
         // 获取试用开始时间
         final originalDate = _iapService.originalDate;
@@ -319,14 +346,15 @@ class _IAPPageState extends State<IAPPage> {
         break;
       case IAPStatus.unknown:
         statusIcon = Icons.help_outline;
-        statusDescription = '无法确定您的会员状态';
+        statusDescription = '无法确定您的激活状态';
         cardColor = Colors.grey;
         break;
     }
 
     return Card(
       elevation: 4,
-      color: cardColor.blend(Theme.of(context).colorScheme.surfaceContainer, 85),
+      color:
+          cardColor.blend(Theme.of(context).colorScheme.surfaceContainer, 85),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
