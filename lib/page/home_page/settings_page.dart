@@ -1,5 +1,6 @@
 import 'package:anx_reader/page/iap_page.dart';
 import 'package:anx_reader/page/settings_page/more_settings_page.dart';
+import 'package:anx_reader/service/iap_service.dart';
 import 'package:anx_reader/utils/env_var.dart';
 import 'package:anx_reader/widgets/settings/about.dart';
 import 'package:anx_reader/widgets/settings/theme_mode.dart';
@@ -50,9 +51,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           const MoreSettings(),
           if (EnvVar.isAppStore)
           ListTile(
-            title: const Text("购买"),
+            title: const Text("激活"),
             leading: const Icon(Icons.star_outline),
-            subtitle: const Text("试用剩余7天"),
+            subtitle: Text(IAPService().statusTitle),
             onTap: () {
               Navigator.push(context,
                   MaterialPageRoute(builder: (context) => const IAPPage()));
