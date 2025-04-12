@@ -34,7 +34,7 @@ class IAPService {
   static const String kLifetimeProductId = 'anx_reader_lifetime';
 
   static const List<String> kOriginalUserVersion = [
-    '1.0',
+    // '1.0',
     '1.4.0',
     '1.4.1',
     '1.4.2',
@@ -399,7 +399,10 @@ class IAPService {
   bool _isOriginalUser() {
     try {
       final receipt = _parsedReceipt;
-      final originalUserVersion = receipt['original_user_version'];
+      final originalUserVersion =
+          receipt['receipt']['original_application_version'];
+      print('originalUserVersion: $originalUserVersion');
+
       if (originalUserVersion != null &&
           kOriginalUserVersion.contains(originalUserVersion.toString())) {
         return true;
@@ -413,7 +416,7 @@ class IAPService {
 
   DateTime _getOriginalDate() {
     final receipt = _parsedReceipt;
-    final originalDate = receipt['original_purchase_date'];
+    final originalDate = receipt['receipt']['original_purchase_date'];
     if (originalDate == null || originalDate is! DateTime) {
       return DateTime.fromMillisecondsSinceEpoch(0);
     }

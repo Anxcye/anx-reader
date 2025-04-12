@@ -37,15 +37,11 @@ class _IAPPageState extends State<IAPPage> {
   // 初始化应用内购买
   Future<void> _initInAppPurchase() async {
     // 初始化IAP服务
-    await _iapService.initialize();
-
-    // 如果已购买，不需要继续初始化IAP
-    if (_iapService.isPurchased) {
+     _iapService.initialize().then((value) {
       setState(() {
-        _isLoading = false;
+        
       });
-      return;
-    }
+     });
 
     // 检查商店是否可用
     final available = await _inAppPurchase.isAvailable();
@@ -75,6 +71,10 @@ class _IAPPageState extends State<IAPPage> {
 
     // 获取商品信息
     await _loadProducts();
+    
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   // 加载产品信息
@@ -89,7 +89,6 @@ class _IAPPageState extends State<IAPPage> {
       if (response.error != null) {
         setState(() {
           _purchaseError = '连接商店时出错: ${response.error!.message}';
-          _isLoading = false;
         });
         return;
       }
@@ -97,7 +96,6 @@ class _IAPPageState extends State<IAPPage> {
       if (response.notFoundIDs.isNotEmpty) {
         setState(() {
           _purchaseError = '商品ID不存在: ${response.notFoundIDs.join(", ")}';
-          _isLoading = false;
         });
         return;
       }
@@ -105,20 +103,17 @@ class _IAPPageState extends State<IAPPage> {
       if (response.productDetails.isEmpty) {
         setState(() {
           _purchaseError = '没有找到产品信息，请确保产品已在App Store配置正确';
-          _isLoading = false;
         });
         return;
       }
 
       setState(() {
         _products = response.productDetails;
-        _isLoading = false;
       });
     } catch (e) {
       print('Error loading products: $e');
       setState(() {
         _purchaseError = '加载产品信息时出错: $e';
-        _isLoading = false;
       });
     }
   }
@@ -195,11 +190,10 @@ class _IAPPageState extends State<IAPPage> {
       appBar: AppBar(
         title: const Text('高级会员'),
         actions: [
-          if (!_iapService.isPurchased)
-            TextButton(
-              onPressed: _restorePurchases,
-              child: const Text('恢复购买', style: TextStyle(color: Colors.white)),
-            ),
+          TextButton(
+            onPressed: _restorePurchases,
+            child: const Text('恢复购买' ),
+          ),
         ],
       ),
       body: _isLoading
@@ -209,106 +203,19 @@ class _IAPPageState extends State<IAPPage> {
   }
 
   Widget _buildContent() {
-    if (_iapService.isPurchased) {
-      return _buildPurchasedContent();
-    } else if (!_isAvailable) {
-      return _buildErrorContent('商店不可用，请稍后再试');
-    } else if (_purchaseError.isNotEmpty) {
-      return _buildErrorContent(_purchaseError);
-    } else {
-      return _buildPurchaseContent();
-    }
-  }
-
-  Widget _buildPurchasedContent() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(
-            Icons.verified,
-            size: 100,
-            color: Colors.green,
-          ),
-          const SizedBox(height: 20),
-          const Text(
-            '您已购买永久高级版',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 10),
-          const Text(
-            '感谢您的支持',
-            style: TextStyle(fontSize: 18),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildErrorContent(String error) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(
-              Icons.error_outline,
-              size: 80,
-              color: Colors.red,
-            ),
-            const SizedBox(height: 20),
-            Text(
-              error,
-              style: const TextStyle(fontSize: 18),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPurchaseContent() {
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // 试用信息卡片
-            Card(
-              elevation: 4,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                    const Text(
-                      '试用期',
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    _iapService.trialDaysLeft > 0
-                        ? Text(
-                            '您还有 ${_iapService.trialDaysLeft} 天试用期',
-                            style: const TextStyle(fontSize: 18),
-                          )
-                        : const Text(
-                            '试用期已结束',
-                            style: TextStyle(fontSize: 18, color: Colors.red),
-                          ),
-                  ],
-                ),
-              ),
-            ),
+            // 用户状态卡片
+            _buildStatusCard(),
             const SizedBox(height: 20),
-
+            
             // 特性介绍
             const Text(
-              '我们提供',
+              'AnxReader 提供功能',
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
@@ -322,8 +229,8 @@ class _IAPPageState extends State<IAPPage> {
 
             const SizedBox(height: 30),
 
-            // 购买按钮
-            if (_products.isNotEmpty)
+            // 仅当用户未购买且商店可用时显示购买按钮
+            if (!_iapService.isPurchased && _isAvailable && _products.isNotEmpty)
               ElevatedButton(
                 onPressed: _buy,
                 style: ElevatedButton.styleFrom(
@@ -335,12 +242,110 @@ class _IAPPageState extends State<IAPPage> {
                   style: const TextStyle(fontSize: 18, color: Colors.white),
                 ),
               ),
-            const SizedBox(height: 10),
-            const Text(
-              '* 一次性付费，无订阅，终身使用',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontStyle: FontStyle.italic),
+            
+            if (!_iapService.isPurchased && _isAvailable)
+              const Padding(
+                padding: EdgeInsets.only(top: 10.0),
+                child: Text(
+                  '* 一次性付费，无订阅，终身使用',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontStyle: FontStyle.italic),
+                ),
+              ),
+              
+            // 显示错误信息
+            if (_purchaseError.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 20.0),
+                child: Text(
+                  _purchaseError,
+                  style: const TextStyle(color: Colors.red),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatusCard() {
+    Widget statusContent;
+    Color cardColor;
+    IconData statusIcon;
+    String statusTitle;
+    String statusDescription;
+
+    switch (_iapService.iapStatus) {
+      case IAPStatus.purchased:
+        statusIcon = Icons.verified;
+        statusTitle = '永久高级版用户';
+        statusDescription = '感谢您的支持！您可以使用所有高级功能';
+        cardColor = Colors.green.shade50;
+        break;
+      case IAPStatus.trial:
+        statusIcon = Icons.access_time;
+        statusTitle = '试用期内';
+        statusDescription = '您还有 ${_iapService.trialDaysLeft} 天试用期';
+        cardColor = Colors.blue.shade50;
+        break;
+      case IAPStatus.trialExpired:
+        statusIcon = Icons.timer_off;
+        statusTitle = '试用期已结束';
+        statusDescription = '购买永久版以继续使用高级功能';
+        cardColor = Colors.orange.shade50;
+        break;
+      case IAPStatus.originalUser:
+        statusIcon = Icons.stars;
+        statusTitle = '原始用户';
+        statusDescription = '您是我们的早期用户，感谢您的支持！';
+        cardColor = Colors.purple.shade50;
+        break;
+      case IAPStatus.unknown:
+      default:
+        statusIcon = Icons.help_outline;
+        statusTitle = '状态未知';
+        statusDescription = '无法确定您的会员状态';
+        cardColor = Colors.grey.shade50;
+        break;
+    }
+
+    return Card(
+      elevation: 4,
+      color: cardColor,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            Icon(
+              statusIcon,
+              size: 50,
+              color: Theme.of(context).primaryColor,
             ),
+            const SizedBox(height: 10),
+            Text(
+              statusTitle,
+              style: const TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 5),
+            Text(
+              statusDescription,
+              style: const TextStyle(fontSize: 16),
+              textAlign: TextAlign.center,
+            ),
+            
+            if (_iapService.iapStatus == IAPStatus.trial)
+              Padding(
+                padding: const EdgeInsets.only(top: 8.0),
+                child: LinearProgressIndicator(
+                  value: _iapService.trialDaysLeft / IAPService.kTrialDays,
+                  backgroundColor: Colors.grey.shade300,
+                  valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).primaryColor),
+                ),
+              ),
           ],
         ),
       ),
