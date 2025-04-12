@@ -58,7 +58,7 @@ Future<void> main() async {
 
   await DBHelper().initDB();
   if (EnvVar.isAppStore) {
-    await IAPService().initialize();
+    IAPService();
   }
   Server().start();
 

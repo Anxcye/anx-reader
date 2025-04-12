@@ -37,7 +37,6 @@ class _IAPPageState extends State<IAPPage> {
   // 初始化应用内购买
   Future<void> _initInAppPurchase() async {
     // 初始化IAP服务
-    await _iapService.initialize();
 
     // 如果已购买，不需要继续初始化IAP
     if (_iapService.isPurchased) {
