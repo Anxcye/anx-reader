@@ -36,14 +36,14 @@ class _IAPPageState extends State<IAPPage> {
     super.dispose();
   }
 
-  // 初始化应用内购买
+  // Initialize in-app purchase
   Future<void> _initInAppPurchase() async {
-    // 初始化IAP服务
+    // Initialize IAP service
     _iapService.initialize().then((value) {
       setState(() {});
     });
 
-    // 检查商店是否可用
+    // Check if store is available
     final available = await _inAppPurchase.isAvailable();
     setState(() {
       _isAvailable = available;
@@ -52,7 +52,7 @@ class _IAPPageState extends State<IAPPage> {
     if (!available) {
       setState(() {
         _isLoading = false;
-        _purchaseError = '应用商店不可用';
+        _purchaseError = 'App Store is not available';
       });
       return;
     }
@@ -84,21 +84,21 @@ class _IAPPageState extends State<IAPPage> {
 
       if (response.error != null) {
         setState(() {
-          _purchaseError = '连接商店时出错: ${response.error!.message}';
+          _purchaseError = 'Error connecting to store: ${response.error!.message}';
         });
         return;
       }
 
       if (response.notFoundIDs.isNotEmpty) {
         setState(() {
-          _purchaseError = '商品ID不存在: ${response.notFoundIDs.join(", ")}';
+          _purchaseError = 'Product IDs not found: ${response.notFoundIDs.join(", ")}';
         });
         return;
       }
 
       if (response.productDetails.isEmpty) {
         setState(() {
-          _purchaseError = '没有找到产品信息，请确保产品已在App Store配置正确';
+          _purchaseError = 'No product information found, please ensure products are correctly configured in App Store';
         });
         return;
       }
@@ -108,30 +108,30 @@ class _IAPPageState extends State<IAPPage> {
       });
     } catch (e) {
       setState(() {
-        _purchaseError = '加载产品信息时出错: $e';
+        _purchaseError = 'Error loading product information: $e';
       });
     }
   }
 
-  // 处理购买更新
+  // Handle purchase updates
   Future<void> _listenToPurchaseUpdated(
       List<PurchaseDetails> purchaseDetailsList) async {
     for (final PurchaseDetails purchaseDetails in purchaseDetailsList) {
       if (purchaseDetails.status == PurchaseStatus.pending) {
-        // 显示加载指示器
+        // Show loading indicator
         setState(() {
           _isLoading = true;
         });
       } else {
         if (purchaseDetails.status == PurchaseStatus.error) {
-          // 处理错误
+          // Handle error
           setState(() {
-            _purchaseError = purchaseDetails.error?.message ?? '购买时发生未知错误';
+            _purchaseError = purchaseDetails.error?.message ?? 'Unknown error occurred during purchase';
             _isLoading = false;
           });
         } else if (purchaseDetails.status == PurchaseStatus.purchased ||
             purchaseDetails.status == PurchaseStatus.restored) {
-          // 购买或恢复成功
+          // Purchase or restore successful
           await _iapService.refresh();
           setState(() {
             _isLoading = false;
@@ -145,14 +145,14 @@ class _IAPPageState extends State<IAPPage> {
     }
   }
 
-  // 执行购买
+  // Execute purchase
   Future<void> _buy() async {
     if (_isLoading) {
       return;
     }
     if (_products.isEmpty) {
       setState(() {
-        _purchaseError = '没有可购买的商品';
+        _purchaseError = 'No products available for purchase';
       });
       return;
     }
@@ -171,7 +171,7 @@ class _IAPPageState extends State<IAPPage> {
     }
   }
 
-  // 恢复购买
+  // Restore purchases
   Future<void> _restorePurchases() async {
     try {
       await _inAppPurchase.restorePurchases();
@@ -205,11 +205,11 @@ class _IAPPageState extends State<IAPPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // 用户状态卡片
+            // User status card
             _buildStatusCard(),
             const SizedBox(height: 20),
 
-            // 特性介绍
+            // Feature introduction
             Text(
               L10n.of(context).iap_page_why_choose,
               style: const TextStyle(
@@ -266,7 +266,9 @@ class _IAPPageState extends State<IAPPage> {
                         ),
                       )
                     : Text(
-                        L10n.of(context).iap_page_one_time_purchase(_products.first.price),
+                        L10n.of(context).iap_page_one_time_purchase(
+                          _products.first.price,
+                        ),
                         style:
                             const TextStyle(fontSize: 18, color: Colors.white),
                       ),
@@ -281,7 +283,7 @@ class _IAPPageState extends State<IAPPage> {
                 ),
               ),
 
-            // 显示错误信息
+            // Display error message
             if (_purchaseError.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.only(top: 20.0),
@@ -308,40 +310,50 @@ class _IAPPageState extends State<IAPPage> {
         statusIcon = Icons.verified;
         statusDescription = L10n.of(context).iap_page_status_purchased;
         cardColor = Colors.green;
-        // 获取购买时间
+        // Get purchase date
         final purchaseDate = _iapService.purchaseDate;
         if (purchaseDate != null) {
-          timeInfo = L10n.of(context).iap_page_date_purchased (_formatDate(purchaseDate));
+          timeInfo = L10n.of(context).iap_page_date_purchased(
+            _formatDate(purchaseDate),
+          );
         }
         break;
       case IAPStatus.trial:
         statusIcon = Icons.access_time;
-        statusDescription = L10n.of(context).iap_page_status_trial(_iapService.trialDaysLeft.toString());
+        statusDescription = L10n.of(context).iap_page_status_trial(
+          _iapService.trialDaysLeft.toString(),
+        );
         cardColor = Colors.blue;
-        // 获取试用开始时间
+        // Get trial start date
         final originalDate = _iapService.originalDate;
         if (originalDate.millisecondsSinceEpoch > 0) {
-          timeInfo = L10n.of(context).iap_page_date_trial_start(_formatDate(originalDate));
+          timeInfo = L10n.of(context).iap_page_date_trial_start(
+            _formatDate(originalDate),
+          );
         }
         break;
       case IAPStatus.trialExpired:
         statusIcon = Icons.timer_off;
         statusDescription = L10n.of(context).iap_page_status_trial_expired;
         cardColor = Colors.orange;
-        // 获取试用开始时间
+        // Get trial start date
         final originalDate = _iapService.originalDate;
         if (originalDate.millisecondsSinceEpoch > 0) {
-          timeInfo = L10n.of(context).iap_page_date_trial_start(_formatDate(originalDate));
+          timeInfo = L10n.of(context).iap_page_date_trial_start(
+            _formatDate(originalDate),
+          );
         }
         break;
       case IAPStatus.originalUser:
         statusIcon = Icons.stars;
         statusDescription = L10n.of(context).iap_page_status_original;
         cardColor = Colors.purple;
-        // 获取原始用户时间
+        // Get original user date
         final originalDate = _iapService.originalDate;
         if (originalDate.millisecondsSinceEpoch > 0) {
-          timeInfo = L10n.of(context).iap_page_date_original(_formatDate(originalDate));
+          timeInfo = L10n.of(context).iap_page_date_original(
+            _formatDate(originalDate),
+          );
         }
         break;
       case IAPStatus.unknown:
