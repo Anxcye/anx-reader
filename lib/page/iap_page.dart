@@ -186,11 +186,11 @@ class _IAPPageState extends State<IAPPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('激活产品'),
+        title: Text(L10n.of(context).iap_page_title),
         actions: [
           TextButton(
             onPressed: _restorePurchases,
-            child: const Text('恢复购买'),
+            child: Text(L10n.of(context).iap_page_restore),
           ),
         ],
       ),
@@ -210,22 +210,22 @@ class _IAPPageState extends State<IAPPage> {
             const SizedBox(height: 20),
 
             // 特性介绍
-            const Text(
-              '为什么选择 Anx Reader',
-              style: TextStyle(
+            Text(
+              L10n.of(context).iap_page_why_choose,
+              style: const TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 10),
-            _buildFeatureItem(Icons.auto_awesome, 'AI 阅读', 'AI 助力，总结、问答，轻松阅读'),
-            _buildFeatureItem(Icons.sync, '全平台同步', '让进度、数据随时同步'),
-            _buildFeatureItem(Icons.bar_chart, '详细统计', '阅读时长、阅读热力图'),
-            _buildFeatureItem(Icons.color_lens, '自定义任何样式', '字体、颜色、大小、行距、间距...'),
-            _buildFeatureItem(Icons.more_horiz, '丰富功能', '批注、朗读、翻译'),
+            _buildFeatureItem(Icons.auto_awesome, L10n.of(context).iap_page_feature_ai, L10n.of(context).iap_page_feature_ai_desc),
+            _buildFeatureItem(Icons.sync, L10n.of(context).iap_page_feature_sync, L10n.of(context).iap_page_feature_sync_desc),
+            _buildFeatureItem(Icons.bar_chart, L10n.of(context).iap_page_feature_stats, L10n.of(context).iap_page_feature_stats_desc),
+            _buildFeatureItem(Icons.color_lens, L10n.of(context).iap_page_feature_custom, L10n.of(context).iap_page_feature_custom_desc),
+            _buildFeatureItem(Icons.more_horiz, L10n.of(context).iap_page_feature_rich, L10n.of(context).iap_page_feature_rich_desc),
 
             const SizedBox(height: 30),
-            const Text('如更换设备、重新安装，请点击右上角 恢复购买 \n仅针对当前AppleID下的设备生效'),
+            Text(L10n.of(context).iap_page_restore_hint),
          
             Row(
               children: [
@@ -266,17 +266,17 @@ class _IAPPageState extends State<IAPPage> {
                         ),
                       )
                     : Text(
-                        '一次性付费 ${_products.first.price} 永久使用',
+                        L10n.of(context).iap_page_one_time_purchase(_products.first.price),
                         style:
                             const TextStyle(fontSize: 18, color: Colors.white),
                       ),
               ),
 
             if (!_iapService.isPurchased && _isAvailable)
-              const Padding(
-                padding: EdgeInsets.only(top: 10.0),
+              Padding(
+                padding: const EdgeInsets.only(top: 10.0),
                 child: Text(
-                  '* 一次性付费，无订阅，终身使用',
+                  L10n.of(context).iap_page_lifetime_hint,
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -306,47 +306,47 @@ class _IAPPageState extends State<IAPPage> {
     switch (_iapService.iapStatus) {
       case IAPStatus.purchased:
         statusIcon = Icons.verified;
-        statusDescription = '感谢您的支持！您已经成功激活产品';
+        statusDescription = L10n.of(context).iap_page_status_purchased;
         cardColor = Colors.green;
         // 获取购买时间
         final purchaseDate = _iapService.purchaseDate;
         if (purchaseDate != null) {
-          timeInfo = '购买时间：${_formatDate(purchaseDate)}';
+          timeInfo = L10n.of(context).iap_page_date_purchased (_formatDate(purchaseDate));
         }
         break;
       case IAPStatus.trial:
         statusIcon = Icons.access_time;
-        statusDescription = '您还有 ${_iapService.trialDaysLeft} 天试用期';
+        statusDescription = L10n.of(context).iap_page_status_trial(_iapService.trialDaysLeft.toString());
         cardColor = Colors.blue;
         // 获取试用开始时间
         final originalDate = _iapService.originalDate;
         if (originalDate.millisecondsSinceEpoch > 0) {
-          timeInfo = '试用开始：${_formatDate(originalDate)}';
+          timeInfo = L10n.of(context).iap_page_date_trial_start(_formatDate(originalDate));
         }
         break;
       case IAPStatus.trialExpired:
         statusIcon = Icons.timer_off;
-        statusDescription = '购买永久版以继续阅读';
+        statusDescription = L10n.of(context).iap_page_status_trial_expired;
         cardColor = Colors.orange;
         // 获取试用开始时间
         final originalDate = _iapService.originalDate;
         if (originalDate.millisecondsSinceEpoch > 0) {
-          timeInfo = '试用开始：${_formatDate(originalDate)}';
+          timeInfo = L10n.of(context).iap_page_date_trial_start(_formatDate(originalDate));
         }
         break;
       case IAPStatus.originalUser:
         statusIcon = Icons.stars;
-        statusDescription = '您是我们的早期用户，感谢您的支持！';
+        statusDescription = L10n.of(context).iap_page_status_original;
         cardColor = Colors.purple;
         // 获取原始用户时间
         final originalDate = _iapService.originalDate;
         if (originalDate.millisecondsSinceEpoch > 0) {
-          timeInfo = '加入时间：${_formatDate(originalDate)}';
+          timeInfo = L10n.of(context).iap_page_date_original(_formatDate(originalDate));
         }
         break;
       case IAPStatus.unknown:
         statusIcon = Icons.help_outline;
-        statusDescription = '无法确定您的激活状态';
+        statusDescription = L10n.of(context).iap_page_status_unknown;
         cardColor = Colors.grey;
         break;
     }
@@ -366,7 +366,7 @@ class _IAPPageState extends State<IAPPage> {
             ),
             const SizedBox(height: 10),
             Text(
-              _iapService.statusTitle,
+              _iapService.statusTitle(context),
               style: const TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
@@ -406,7 +406,7 @@ class _IAPPageState extends State<IAPPage> {
   }
 
   String _formatDate(DateTime date) {
-    return '${date.year}年${date.month}月${date.day}日';
+    return date.toIso8601String().substring(0, 10);
   }
 
   Widget _buildFeatureItem(IconData icon, String title, String description) {

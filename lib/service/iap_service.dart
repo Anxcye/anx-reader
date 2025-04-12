@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/utils/log/common.dart';
+import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:in_app_purchase_storekit/in_app_purchase_storekit.dart';
@@ -92,18 +94,18 @@ class IAPService {
     }
   }
 
-  String get statusTitle {
+  String statusTitle(BuildContext context) {
     switch (iapStatus) {
       case IAPStatus.purchased:
-        return '永久高级版用户';
+        return L10n.of(context).iap_status_purchased;
       case IAPStatus.trial:
-        return '试用期内';
+        return L10n.of(context).iap_status_trial;
       case IAPStatus.trialExpired:
-        return '试用期已结束';
+        return L10n.of(context).iap_status_trial_expired;
       case IAPStatus.originalUser:
-        return '原始用户';
+        return L10n.of(context).iap_status_original;
       default:
-        return '未知';
+        return L10n.of(context).iap_status_unknown;
     }
   }
 
