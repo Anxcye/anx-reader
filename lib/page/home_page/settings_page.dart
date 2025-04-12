@@ -1,3 +1,4 @@
+import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/page/iap_page.dart';
 import 'package:anx_reader/page/settings_page/more_settings_page.dart';
 import 'package:anx_reader/service/iap_service.dart';
@@ -50,11 +51,11 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           const Divider(),
           const MoreSettings(),
           if (EnvVar.isAppStore)
-          ListTile(
-            title: const Text("激活"),
-            leading: const Icon(Icons.star_outline),
-            subtitle: Text(IAPService().statusTitle),
-            onTap: () {
+            ListTile(
+              title: Text(L10n.of(context).iap_page_title),
+              leading: const Icon(Icons.star_outline),
+              subtitle: Text(IAPService().statusTitle(context)),
+              onTap: () {
               Navigator.push(context,
                   MaterialPageRoute(builder: (context) => const IAPPage()));
             },
