@@ -92,6 +92,21 @@ class IAPService {
     }
   }
 
+  String get statusTitle {
+    switch (iapStatus) {
+      case IAPStatus.purchased:
+        return '永久高级版用户';
+      case IAPStatus.trial:
+        return '试用期内';
+      case IAPStatus.trialExpired:
+        return '试用期已结束';
+      case IAPStatus.originalUser:
+        return '原始用户';
+      default:
+        return '未知';
+    }
+  }
+
   Future<void> refresh() async {
     _parsedReceipt = _parseReceiptLocally(await _getReceiptBase64());
   }
@@ -401,7 +416,6 @@ class IAPService {
       final receipt = _parsedReceipt;
       final originalUserVersion =
           receipt['receipt']['original_application_version'];
-      print('originalUserVersion: $originalUserVersion');
 
       if (originalUserVersion != null &&
           kOriginalUserVersion.contains(originalUserVersion.toString())) {
@@ -421,5 +435,22 @@ class IAPService {
       return DateTime.fromMillisecondsSinceEpoch(0);
     }
     return originalDate;
+  }
+
+  DateTime? get purchaseDate {
+    try {
+      final inApp = _parsedReceipt['receipt']?['in_app'];
+      if (inApp != null && inApp.isNotEmpty) {
+        return inApp.first['purchase_date'];
+      }
+      return null;
+    } catch (e) {
+      AnxLog.severe('IAP: Error getting purchase date: $e');
+      return null;
+    }
+  }
+
+  DateTime get originalDate {
+    return _getOriginalDate();
   }
 }
