@@ -4,23 +4,22 @@ import 'dart:convert';
 import 'package:anx_reader/utils/log/common.dart';
 import 'package:http/http.dart' as http;
 import 'package:in_app_purchase/in_app_purchase.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:in_app_purchase_storekit/in_app_purchase_storekit.dart';
 import 'package:asn1lib/asn1lib.dart';
-import 'package:in_app_purchase_platform_interface/in_app_purchase_platform_interface.dart';
-
+enum IAPStatus {
+  purchased,
+  trial,
+  trialExpired,
+  originalUser
+}
 class IAPService {
-  // 单例模式
   static final IAPService _instance = IAPService._internal();
   factory IAPService() {
-    if (_instance._parsedReceipt == null) {
-      _instance._initialize();
-    }
     return _instance;
   }
   IAPService._internal();
-  final InAppPurchase _inAppPurchase = InAppPurchase.instance;
 
+  final InAppPurchase _inAppPurchase = InAppPurchase.instance;
   static const String kLifetimeProductId = 'anx_reader_lifetime';
 
   static const List<String> kOriginalUserVersion = [
@@ -33,50 +32,50 @@ class IAPService {
     '2092',
   ];
 
-  // 存储购买状态和试用开始时间的键
-  static const String kPurchaseStatusKey = 'purchase_status';
-  static const String kTrialStartDateKey = 'trial_start_date';
-
-  // 试用期天数
   static const int kTrialDays = 7;
+  late Map<String, dynamic> _parsedReceipt;
 
-  // 购买状态
-  bool _isPurchased = false;
-  bool get isPurchased => _isPurchased;
+  bool get isPurchased =>
+      _parsedReceipt['receipt']['in_app'].isNotEmpty || _isOriginalUser();
+  int get trialDaysLeft =>
+      kTrialDays - DateTime.now().difference(_getOriginalDate()).inDays;
+  bool get isFeatureAvailable => isPurchased || trialDaysLeft > 0;
+  IAPStatus get iapStatus{
+    if(_parsedReceipt['receipt']['in_app'].isNotEmpty){
+      return IAPStatus.purchased;
+    }
+    if(_isOriginalUser()){
+      return IAPStatus.originalUser;
+    }
+    if(trialDaysLeft > 0){
+      return IAPStatus.trial;
+    }
+    return IAPStatus.trialExpired;
+  }
 
-  // 试用剩余天数
-  int _trialDaysLeft = 0;
-  int get trialDaysLeft => _trialDaysLeft;
-
-  late Map<String, dynamic> _receipt;
-
-  // 存储解析后的收据数据
-  Map<String, dynamic>? _parsedReceipt;
-  Map<String, dynamic> get receiptData => _parsedReceipt ?? {};
-
-  // 初始化方法
-  Future<void> _initialize() async {
+  Future<void> refresh() async {
     _parsedReceipt = _parseReceiptLocally(await _getReceiptBase64());
   }
 
-  // 加载购买状态
-  Future<void> _loadPurchaseStatus() async {
-    final prefs = await SharedPreferences.getInstance();
-    _isPurchased = false;
+  Future<void> initialize() async {
+    _parsedReceipt = _parseReceiptLocally(await _getReceiptBase64());
+    AnxLog.info('IAP: initialize: ${jsonEncode(_parsedReceipt, toEncodable: (object) {
+      if (object is DateTime) {
+        return object.toIso8601String();
+      }
+      return object;
+    })}');
   }
 
   Future<String> _getReceiptBase64() async {
-    final start = DateTime.now().millisecondsSinceEpoch;
     var iosPlatformAddition = _inAppPurchase
         .getPlatformAddition<InAppPurchaseStoreKitPlatformAddition>();
     var receiptBase64 =
         await iosPlatformAddition.refreshPurchaseVerificationData();
-    final end = DateTime.now().millisecondsSinceEpoch;
-    AnxLog.info('IAP: _getReceiptBase64: ${end - start}@@@');
     return receiptBase64?.localVerificationData ?? '';
   }
 
-  Future<Map<String, dynamic>> _parseReceiptViaServer(
+  Future<Map<String, dynamic>> parseReceiptViaServer(
       String receiptBase64) async {
     Future<Map<String, dynamic>> verifyReceipt(
         String receiptData, bool isSandbox) async {
@@ -130,9 +129,6 @@ class IAPService {
   Map<String, dynamic> _parseReceiptLocally(String receipt) {
     DateTime formatDate(String isoDate) {
       try {
-        isoDate = isoDate
-            .replaceAll(String.fromCharCode(20), '')
-            .replaceAll(String.fromCharCode(22), '');
         return DateTime.parse(isoDate);
       } catch (e) {
         return DateTime.fromMillisecondsSinceEpoch(0);
@@ -153,22 +149,25 @@ class IAPService {
     }
 
     String getFieldValue(ASN1Object obj) {
-      if (obj is ASN1OctetString) {
-        if (obj.tag == 12) {
-          // UTF8String
-          return utf8.decode(obj.octets);
-        } else if (obj.tag == 22) {
-          // IA5String
-          return String.fromCharCodes(obj.octets);
-        } else if (obj.tag == 4) {
-          return obj.stringValue.trim();
-        } else {
-          return obj.valueBytes().toString().trim();
-        }
-      } else if (obj is ASN1Integer) {
-        return obj.intValue.toString();
+      final parser = ASN1Parser(obj.valueBytes());
+      if (!parser.hasNext()) {
+        return '';
+      }
+      dynamic value;
+      try {
+        value = parser.nextObject();
+      } catch (e) {
+        return '';
+      }
+
+      if (value is ASN1UTF8String) {
+        return value.utf8StringValue;
+      } else if (value is ASN1Integer) {
+        return value.intValue.toString();
+      } else if (value is ASN1IA5String) {
+        return value.stringValue;
       } else {
-        return obj.toString();
+        return value.toString();
       }
     }
 
@@ -259,10 +258,10 @@ class IAPService {
             break;
           case 0: // receipt_type
             result["receipt"]["receipt_type"] = value;
-            if (value.contains("Production")) {
-              result["environment"] = "Production";
-            } else {
+            if (value.contains("Sandbox")) {
               result["environment"] = "Sandbox";
+            } else {
+              result["environment"] = "Production";
             }
             break;
           case 12: // receipt_creation_date
@@ -320,8 +319,8 @@ class IAPService {
     return result;
   }
 
-  Future<bool> _isOriginalUser() async {
-    final receipt = _receipt;
+  bool _isOriginalUser() {
+    final receipt = _parsedReceipt;
     final originalUserVersion = receipt['original_user_version'];
     if (originalUserVersion != null &&
         kOriginalUserVersion.contains(originalUserVersion.toString())) {
@@ -330,59 +329,12 @@ class IAPService {
     return false;
   }
 
-  Future<DateTime> _getOriginalDate() async {
-    final receipt = _receipt;
-    final originalDate = receipt['original_purchase_date_ms'];
-    if (originalDate != null && originalDate is String) {
-      return DateTime.fromMillisecondsSinceEpoch(int.parse(originalDate));
+  DateTime _getOriginalDate() {
+    final receipt = _parsedReceipt;
+    final originalDate = receipt['original_purchase_date'];
+    if (originalDate == null || originalDate is! DateTime) {
+      return DateTime.fromMillisecondsSinceEpoch(0);
     }
-    return DateTime.fromMillisecondsSinceEpoch(0);
-  }
-
-  // 检查试用状态
-  Future<void> _checkTrialStatus() async {
-    final prefs = await SharedPreferences.getInstance();
-
-    // 如果已购买，试用天数为0
-    if (_isPurchased) {
-      _trialDaysLeft = 0;
-      return;
-    }
-
-    // 获取试用开始日期
-    final trialStartDateMillis = prefs.getInt(kTrialStartDateKey);
-    if (trialStartDateMillis == null) {
-      // 第一次使用，设置试用开始日期
-      final now = DateTime.now();
-      await prefs.setInt(kTrialStartDateKey, now.millisecondsSinceEpoch);
-      _trialDaysLeft = kTrialDays;
-    } else {
-      // 计算剩余试用天数
-      final trialStartDate =
-          DateTime.fromMillisecondsSinceEpoch(trialStartDateMillis);
-      final now = DateTime.now();
-      final difference = now.difference(trialStartDate).inDays;
-      final daysLeft = kTrialDays - difference;
-      _trialDaysLeft = daysLeft > 0 ? daysLeft : 0;
-    }
-  }
-
-  // 设置购买状态
-  Future<void> setPurchased(bool purchased) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(kPurchaseStatusKey, purchased);
-    _isPurchased = purchased;
-  }
-
-  // 检查功能是否可用（已购买或在试用期内）
-  bool isFeatureAvailable() {
-    return _isPurchased || _trialDaysLeft > 0;
-  }
-
-  // 处理购买完成
-  Future<void> handleSuccessfulPurchase(PurchaseDetails purchaseDetails) async {
-    if (purchaseDetails.productID == kLifetimeProductId) {
-      await setPurchased(true);
-    }
+    return originalDate;
   }
 }

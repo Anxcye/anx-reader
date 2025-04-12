@@ -16,7 +16,7 @@ class _IAPPageState extends State<IAPPage> {
   final InAppPurchase _inAppPurchase = InAppPurchase.instance;
   final IAPService _iapService = IAPService();
 
-  late StreamSubscription<List<PurchaseDetails>> _subscription;
+   StreamSubscription<List<PurchaseDetails>>? _subscription;
   List<ProductDetails> _products = [];
   bool _isAvailable = false;
   bool _isLoading = true;
@@ -37,6 +37,7 @@ class _IAPPageState extends State<IAPPage> {
   // 初始化应用内购买
   Future<void> _initInAppPurchase() async {
     // 初始化IAP服务
+    await _iapService.initialize();
 
     // 如果已购买，不需要继续初始化IAP
     if (_iapService.isPurchased) {
@@ -141,7 +142,7 @@ class _IAPPageState extends State<IAPPage> {
         } else if (purchaseDetails.status == PurchaseStatus.purchased ||
             purchaseDetails.status == PurchaseStatus.restored) {
           // 购买或恢复成功
-          await _iapService.handleSuccessfulPurchase(purchaseDetails);
+          await _iapService.refresh();
           setState(() {
             _isLoading = false;
           });
