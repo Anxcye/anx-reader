@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:anx_reader/service/iap_service.dart';
 
-
 class IAPPage extends StatefulWidget {
   const IAPPage({super.key});
 
@@ -16,7 +15,7 @@ class _IAPPageState extends State<IAPPage> {
   final InAppPurchase _inAppPurchase = InAppPurchase.instance;
   final IAPService _iapService = IAPService();
 
-   StreamSubscription<List<PurchaseDetails>>? _subscription;
+  StreamSubscription<List<PurchaseDetails>>? _subscription;
   List<ProductDetails> _products = [];
   bool _isAvailable = false;
   bool _isLoading = true;
@@ -37,11 +36,9 @@ class _IAPPageState extends State<IAPPage> {
   // 初始化应用内购买
   Future<void> _initInAppPurchase() async {
     // 初始化IAP服务
-     _iapService.initialize().then((value) {
-      setState(() {
-        
-      });
-     });
+    _iapService.initialize().then((value) {
+      setState(() {});
+    });
 
     // 检查商店是否可用
     final available = await _inAppPurchase.isAvailable();
@@ -57,7 +54,6 @@ class _IAPPageState extends State<IAPPage> {
       return;
     }
 
-    // 监听购买更新
     _subscription = _inAppPurchase.purchaseStream.listen(
       _listenToPurchaseUpdated,
       onDone: () => _subscription?.cancel(),
@@ -69,18 +65,15 @@ class _IAPPageState extends State<IAPPage> {
       },
     );
 
-    // 获取商品信息
     await _loadProducts();
-    
+
     setState(() {
       _isLoading = false;
     });
   }
 
-  // 加载产品信息
   Future<void> _loadProducts() async {
     final Set<String> productIds = {IAPService.kLifetimeProductId};
-    print('Querying product IDs: $productIds');
 
     try {
       final ProductDetailsResponse response =
@@ -111,7 +104,6 @@ class _IAPPageState extends State<IAPPage> {
         _products = response.productDetails;
       });
     } catch (e) {
-      print('Error loading products: $e');
       setState(() {
         _purchaseError = '加载产品信息时出错: $e';
       });
@@ -152,6 +144,9 @@ class _IAPPageState extends State<IAPPage> {
 
   // 执行购买
   Future<void> _buy() async {
+    if (_isLoading) {
+      return;
+    }
     if (_products.isEmpty) {
       setState(() {
         _purchaseError = '没有可购买的商品';
@@ -192,13 +187,11 @@ class _IAPPageState extends State<IAPPage> {
         actions: [
           TextButton(
             onPressed: _restorePurchases,
-            child: const Text('恢复购买' ),
+            child: const Text('恢复购买'),
           ),
         ],
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _buildContent(),
+      body: _buildContent(),
     );
   }
 
@@ -212,7 +205,7 @@ class _IAPPageState extends State<IAPPage> {
             // 用户状态卡片
             _buildStatusCard(),
             const SizedBox(height: 20),
-            
+
             // 特性介绍
             const Text(
               'AnxReader 提供功能',
@@ -230,29 +223,33 @@ class _IAPPageState extends State<IAPPage> {
             const SizedBox(height: 30),
 
             // 仅当用户未购买且商店可用时显示购买按钮
-            if (!_iapService.isPurchased && _isAvailable && _products.isNotEmpty)
+            if (!_iapService.isPurchased &&
+                _isAvailable &&
+                _products.isNotEmpty)
               ElevatedButton(
                 onPressed: _buy,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Theme.of(context).primaryColor,
                   padding: const EdgeInsets.symmetric(vertical: 15),
                 ),
-                child: Text(
-                  '一次性付费 ${_products.first.price} 永久使用',
-                  style: const TextStyle(fontSize: 18, color: Colors.white),
-                ),
+                child: _isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : Text(
+                        '一次性付费 ${_products.first.price} 永久使用',
+                        style:
+                            const TextStyle(fontSize: 18, color: Colors.white),
+                      ),
               ),
-            
+
             if (!_iapService.isPurchased && _isAvailable)
               const Padding(
                 padding: EdgeInsets.only(top: 10.0),
                 child: Text(
                   '* 一次性付费，无订阅，终身使用',
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontStyle: FontStyle.italic),
                 ),
               ),
-              
+
             // 显示错误信息
             if (_purchaseError.isNotEmpty)
               Padding(
@@ -270,41 +267,54 @@ class _IAPPageState extends State<IAPPage> {
   }
 
   Widget _buildStatusCard() {
-    Widget statusContent;
     Color cardColor;
     IconData statusIcon;
-    String statusTitle;
     String statusDescription;
+    String? timeInfo;
 
     switch (_iapService.iapStatus) {
       case IAPStatus.purchased:
         statusIcon = Icons.verified;
-        statusTitle = '永久高级版用户';
         statusDescription = '感谢您的支持！您可以使用所有高级功能';
         cardColor = Colors.green.shade50;
+        // 获取购买时间
+        final purchaseDate = _iapService.purchaseDate;
+        if (purchaseDate != null) {
+          timeInfo = '购买时间：${_formatDate(purchaseDate)}';
+        }
         break;
       case IAPStatus.trial:
         statusIcon = Icons.access_time;
-        statusTitle = '试用期内';
         statusDescription = '您还有 ${_iapService.trialDaysLeft} 天试用期';
         cardColor = Colors.blue.shade50;
+        // 获取试用开始时间
+        final originalDate = _iapService.originalDate;
+        if (originalDate.millisecondsSinceEpoch > 0) {
+          timeInfo = '试用开始：${_formatDate(originalDate)}';
+        }
         break;
       case IAPStatus.trialExpired:
         statusIcon = Icons.timer_off;
-        statusTitle = '试用期已结束';
         statusDescription = '购买永久版以继续使用高级功能';
         cardColor = Colors.orange.shade50;
+        // 获取试用开始时间
+        final originalDate = _iapService.originalDate;
+        if (originalDate.millisecondsSinceEpoch > 0) {
+          timeInfo = '试用开始：${_formatDate(originalDate)}';
+        }
         break;
       case IAPStatus.originalUser:
         statusIcon = Icons.stars;
-        statusTitle = '原始用户';
         statusDescription = '您是我们的早期用户，感谢您的支持！';
         cardColor = Colors.purple.shade50;
+        // 获取原始用户时间
+        final originalDate = _iapService.originalDate;
+        if (originalDate.millisecondsSinceEpoch > 0) {
+          timeInfo = '加入时间：${_formatDate(originalDate)}';
+        }
         break;
       case IAPStatus.unknown:
-      default:
         statusIcon = Icons.help_outline;
-        statusTitle = '状态未知';
         statusDescription = '无法确定您的会员状态';
         cardColor = Colors.grey.shade50;
         break;
@@ -324,7 +334,7 @@ class _IAPPageState extends State<IAPPage> {
             ),
             const SizedBox(height: 10),
             Text(
-              statusTitle,
+              _iapService.statusTitle,
               style: const TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
@@ -336,20 +346,35 @@ class _IAPPageState extends State<IAPPage> {
               style: const TextStyle(fontSize: 16),
               textAlign: TextAlign.center,
             ),
-            
+            if (timeInfo != null) ...[
+              const SizedBox(height: 5),
+              Text(
+                timeInfo,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey[600],
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
             if (_iapService.iapStatus == IAPStatus.trial)
               Padding(
                 padding: const EdgeInsets.only(top: 8.0),
                 child: LinearProgressIndicator(
                   value: _iapService.trialDaysLeft / IAPService.kTrialDays,
                   backgroundColor: Colors.grey.shade300,
-                  valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).primaryColor),
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                      Theme.of(context).primaryColor),
                 ),
               ),
           ],
         ),
       ),
     );
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.year}年${date.month}月${date.day}日';
   }
 
   Widget _buildFeatureItem(IconData icon, String title, String description) {
