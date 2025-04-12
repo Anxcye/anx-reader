@@ -41,6 +41,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.6.0"
+  asn1lib:
+    dependency: "direct main"
+    description:
+      name: asn1lib
+      sha256: e02d018628c870ef2d7f03e33f9ad179d89ff6ec52ca6c56bcb80bcef979867f
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.6.2"
   async:
     dependency: transitive
     description:
@@ -918,6 +926,38 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.4.0"
+  in_app_purchase:
+    dependency: "direct main"
+    description:
+      name: in_app_purchase
+      sha256: "11a40f148eeb4f681a0572003e2b33432e110c90c1bbb4f9ef83b81ec0c4f737"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.2.1"
+  in_app_purchase_android:
+    dependency: transitive
+    description:
+      name: in_app_purchase_android
+      sha256: "475b6c6541b54e6878263270d291ca8d5d7ef044263115bdec45e1e59737e3ad"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.4.0+1"
+  in_app_purchase_platform_interface:
+    dependency: transitive
+    description:
+      name: in_app_purchase_platform_interface
+      sha256: "1d353d38251da5b9fea6635c0ebfc6bb17a2d28d0e86ea5e083bf64244f1fb4c"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.4.0"
+  in_app_purchase_storekit:
+    dependency: "direct main"
+    description:
+      name: in_app_purchase_storekit
+      sha256: "276831961023055b55a2156c1fc043f50f6215ff49fb0f5f2273da6eeb510ecf"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.21"
   intl:
     dependency: "direct main"
     description:
@@ -1158,6 +1198,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.3.0"
+  pem:
+    dependency: transitive
+    description:
+      name: pem
+      sha256: "3dfb24524f805ad694ba3cdbb6387ab31ab661fdb8ea873052ed88487fcfef86"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.5"
   permission_handler:
     dependency: "direct main"
     description:
@@ -1222,6 +1270,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.15.0"
+  pkcs7:
+    dependency: "direct main"
+    description:
+      name: pkcs7
+      sha256: d0bc4115ccfd8fb0d41ce2d3955f6688a5c53ecac68441f2614b8ddf22bf90c0
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.5"
   platform:
     dependency: transitive
     description:
@@ -1270,6 +1326,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.10.2+1"
+  pointycastle:
+    dependency: transitive
+    description:
+      name: pointycastle
+      sha256: "4be0097fcf3fd3e8449e53730c631200ebc7b88016acecab2b0da2f0149222fe"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.9.1"
   pool:
     dependency: transitive
     description:

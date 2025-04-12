@@ -5,9 +5,12 @@ import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/main.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/page/home_page.dart';
+import 'package:anx_reader/page/iap_page.dart';
 import 'package:anx_reader/providers/ai_chat.dart';
 import 'package:anx_reader/providers/book_list.dart';
 import 'package:anx_reader/service/convert_to_epub/txt/convert_from_txt.dart';
+import 'package:anx_reader/service/iap_service.dart';
+import 'package:anx_reader/utils/env_var.dart';
 import 'package:anx_reader/utils/get_path/get_base_path.dart';
 import 'package:anx_reader/page/reading_page.dart';
 import 'package:anx_reader/utils/import_book.dart';
@@ -151,6 +154,16 @@ Future<void> pushToReadingPage(
   if (book.isDeleted) {
     AnxToast.show(L10n.of(context).book_deleted);
     return;
+  }
+  if (EnvVar.isAppStore) {
+    if (!IAPService().isFeatureAvailable) {
+      Navigator.of(context).push(
+        CupertinoPageRoute(
+          builder: (context) => const IAPPage(),
+        ),
+      );
+      return;
+    }
   }
   ref.read(aiChatProvider.notifier).clear();
   await Navigator.push(
