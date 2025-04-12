@@ -94,7 +94,7 @@ class _SubMoreSettingsState extends State<SubMoreSettings> {
           },
           {
             "title": L10n.of(context).settings_narrate,
-            "icon": EvaIcons.headphones  ,
+            "icon": EvaIcons.headphones,
             "sections": const NarrateSettings(),
             "subtitles": [
               L10n.of(context).settings_narrate_voice,

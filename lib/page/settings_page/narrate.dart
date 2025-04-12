@@ -1,6 +1,5 @@
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
-import 'package:anx_reader/service/tts.dart';
 import 'package:anx_reader/service/tts/edge_tts_api.dart';
 import 'package:anx_reader/service/tts/tts_handler.dart';
 import 'package:anx_reader/utils/tts_model_list.dart';
