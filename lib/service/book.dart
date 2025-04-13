@@ -26,7 +26,7 @@ HeadlessInAppWebView? headlessInAppWebView;
 
 /// import book list and **delete file**
 void importBookList(List<File> fileList, BuildContext context, WidgetRef ref) {
-  final allowBookExtensions = ["epub", "mobi", "azw3", "fb2", "txt"];
+  final allowBookExtensions = ["epub", "mobi", "azw3", "fb2", "txt", "pdf"];
 
   AnxLog.info('importBook fileList: ${fileList.toString()}');
 

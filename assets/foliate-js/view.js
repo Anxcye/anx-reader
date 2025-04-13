@@ -227,7 +227,8 @@ export class View extends HTMLElement {
     }
 
     #handleClick(doc) {
-        doc.addEventListener('click', e => {
+      doc.addEventListener('click', e => {
+          console.log('doc click', e.screenX, e.screenY, this.renderer.start, this.renderer.size)
             if (window.isFootNoteOpen()){
                 window.closeFootNote()
                 return
@@ -246,7 +247,8 @@ export class View extends HTMLElement {
                 
             this.#emit('click-view', { x: clientX, y: clientY })
         })
-        this.renderer.addEventListener('click', e => {
+      this.renderer.addEventListener('click', e => {
+            console.log('renderer click', e)
             const { clientX, clientY } = e
             while (clientX > window.innerWidth) {
                 clientX -= window.innerWidth

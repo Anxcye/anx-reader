@@ -1,50 +1,4 @@
-// //////// use for test //////////
-// const importing = false
-// const allAnnotations = [
-//   { id: 1, type: 'highlight', value: "epubcfi(/6/12!/4/2[pgepubid00006]/4,/1:1,/1:7)", color: 'blue', note: 'this is' },
-//   // { id: 2, type: 'highlight', value: "epubcfi(/6/6!/4/576,/1:2,/1:3)", color: 'yellow', note: 'this is' },
-//   // { id: 3, type: 'underline', value: "epubcfi(/6/4!/4/4,/1:294,/1:301)", color: 'red', note: 'this is' },
-// ]
-// let url = '../local/shj.epub'
-// let initialCfi = "epubcfi(/6/12!/4,/2[CHP3],/8/1:29)"
-// //  let initialCfi = null
-// let style = {
-//   fontSize: 1.2,
-//   fontName: 'customFont0',
-//   fontPath: 'http://localhost:40443/fonts/Fast_Sans.ttf',
-//   fontWeight: 400,
-//   letterSpacing: 0,
-//   spacing: 1.7,
-//   paragraphSpacing: 1,
-//   textIndent: 5,
-//   fontColor: '#0000ff',
-//   backgroundColor: '#ffffff',
-//   topMargin: 100,
-//   bottomMargin: 100,
-//   sideMargin: 5,
-//   justify: true,
-//   hyphenate: true,
-//   // scroll: false,
-//   // animated: true,
-//   pageTurnStyle: 'scroll',
-//   maxColumnCount: 2,
-// }
-// window.flutter_inappwebview = {}
-// window.flutter_inappwebview.callHandler = (name, data) => {
-//   console.log(name, data)
-// }
-// setTimeout(() => {
-//   reader.renderAnnotation()
-// }, 100)
 
-// let readingRules = {
-//   // 'none', 's2t', 't2s'
-//   convertChineseMode: 's2t',
-//   bionicReadingMode: true,
-// }
-
-
-// ///////////////////////////////
 
 console.log('book.js')
 
@@ -778,7 +732,10 @@ const open = async (file, cfi) => {
 }
 
 
-const callFlutter = (name, data) => window.flutter_inappwebview.callHandler(name, data)
+const callFlutter = (name, data) => {
+  console.log('callFlutter', name, data)
+  window.flutter_inappwebview.callHandler(name, data)
+}
 
 const setStyle = () => {
   const turn = {
@@ -1052,3 +1009,51 @@ window.loadBook = () => {
 console.log('loadBook')
 
 
+//////// use for test //////////
+const importing = false
+const allAnnotations = [
+  { id: 1, type: 'highlight', value: "epubcfi(/6/12!/4/2[pgepubid00006]/4,/1:1,/1:7)", color: 'blue', note: 'this is' },
+  // { id: 2, type: 'highlight', value: "epubcfi(/6/6!/4/576,/1:2,/1:3)", color: 'yellow', note: 'this is' },
+  // { id: 3, type: 'underline', value: "epubcfi(/6/4!/4/4,/1:294,/1:301)", color: 'red', note: 'this is' },
+]
+let url = '../local/lab.pdf'
+let initialCfi = "epubcfi(/6/12!/4,/2[CHP3],/8/1:29)"
+//  let initialCfi = null
+let style = {
+  fontSize: 1.2,
+  fontName: 'customFont0',
+  fontPath: 'http://localhost:40443/fonts/Fast_Sans.ttf',
+  fontWeight: 400,
+  letterSpacing: 0,
+  spacing: 1.7,
+  paragraphSpacing: 1,
+  textIndent: 5,
+  fontColor: '#0000ff',
+  backgroundColor: '#ffffff',
+  topMargin: 100,
+  bottomMargin: 100,
+  sideMargin: 5,
+  justify: true,
+  hyphenate: true,
+  // scroll: false,
+  // animated: true,
+  pageTurnStyle: 'scroll',
+  maxColumnCount: 2,
+}
+window.flutter_inappwebview = {}
+window.flutter_inappwebview.callHandler = (name, data) => {
+  console.log(name, data)
+}
+setTimeout(() => {
+  reader.renderAnnotation()
+}, 100)
+
+let readingRules = {
+  // 'none', 's2t', 't2s'
+  convertChineseMode: 's2t',
+  bionicReadingMode: true,
+}
+
+window.loadBook()
+
+///////////////////////////////
