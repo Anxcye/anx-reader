@@ -22,6 +22,7 @@ import 'package:anx_reader/service/book_player/book_player_server.dart';
 import 'package:anx_reader/utils/coordinates_to_part.dart';
 import 'package:anx_reader/utils/js/convert_dart_color_to_js.dart';
 import 'package:anx_reader/models/book_note.dart';
+import 'package:anx_reader/utils/webView/gererate_url.dart';
 import 'package:anx_reader/utils/webView/webview_console_message.dart';
 import 'package:anx_reader/utils/webView/webview_initial_variable.dart';
 import 'package:anx_reader/widgets/bookshelf/book_cover.dart';
@@ -312,24 +313,10 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
       backgroundColor = Prefs().readTheme.backgroundColor;
       textColor = Prefs().readTheme.textColor;
     }
-    setState(() {});
+    // setState(() {});
   }
 
   Future<void> setHandler(InAppWebViewController controller) async {
-    String uri = Uri.encodeComponent(widget.book.fileFullPath);
-    String url = 'http://localhost:${Server().port}/book/$uri';
-    String initialCfi = widget.cfi ?? widget.book.lastReadPosition;
-
-    await getThemeColor();
-
-    webviewInitialVariable(
-      controller,
-      url,
-      initialCfi,
-      backgroundColor: backgroundColor,
-      textColor: textColor,
-    );
-
     controller.addJavaScriptHandler(
         handlerName: 'onLoadEnd',
         callback: (args) {
@@ -561,9 +548,6 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
     removeOverlay();
   }
 
-  String indexHtmlPath =
-      "http://localhost:${Server().port}/foliate-js/index.html";
-
   InAppWebViewSettings initialSettings = InAppWebViewSettings(
     supportZoom: false,
     transparentBackground: true,
@@ -694,6 +678,10 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
 
   @override
   Widget build(BuildContext context) {
+    String uri = Uri.encodeComponent(widget.book.fileFullPath);
+    String url = 'http://localhost:${Server().port}/book/$uri';
+    String initialCfi = widget.cfi ?? widget.book.lastReadPosition;
+
     return KeyboardListener(
       focusNode: focusNode,
       onKeyEvent: _handleKeyAndMouseEvents,
@@ -708,7 +696,16 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
               SizedBox.expand(
                 child: InAppWebView(
                   webViewEnvironment: webViewEnvironment,
-                  initialUrlRequest: URLRequest(url: WebUri(indexHtmlPath)),
+                  initialUrlRequest: URLRequest(
+                    url: WebUri(
+                      generateUrl(
+                        url,
+                        initialCfi,
+                        backgroundColor: backgroundColor,
+                        textColor: textColor,
+                      ),
+                    ),
+                  ),
                   initialSettings: initialSettings,
                   contextMenu: contextMenu,
                   // onLoadStop: (controller, url) => onWebViewCreated(controller),

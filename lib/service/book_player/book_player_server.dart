@@ -51,7 +51,7 @@ class Server {
 
   Future<shelf.Response> _handleRequests(shelf.Request request) async {
     final uriPath = request.requestedUri.path;
-    // AnxLog.info('Server: Request for $uriPath');
+    AnxLog.info('Server: Request for $uriPath');
 
     if (_tempFileName != null && uriPath == "/${_tempFileName!}") {
       return shelf.Response.ok(
