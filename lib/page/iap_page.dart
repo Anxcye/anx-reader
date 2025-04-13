@@ -203,6 +203,38 @@ class _IAPPageState extends State<IAPPage> {
   }
 
   Widget _buildContent() {
+    List<Map<String, dynamic>> content = [
+      {
+        'icon': Icons.auto_awesome,
+        'title': L10n.of(context).iap_page_feature_ai,
+        'desc': L10n.of(context).iap_page_feature_ai_desc,
+      },
+      {
+        'icon': Icons.sync,
+        'title': L10n.of(context).iap_page_feature_sync,
+        'desc': L10n.of(context).iap_page_feature_sync_desc,
+      },
+      {
+        'icon': Icons.bar_chart,
+        'title': L10n.of(context).iap_page_feature_stats,
+        'desc': L10n.of(context).iap_page_feature_stats_desc,
+      },
+      {
+        'icon': Icons.color_lens,
+        'title': L10n.of(context).iap_page_feature_custom,
+        'desc': L10n.of(context).iap_page_feature_custom_desc,
+      },
+      {
+        'icon': Icons.note,
+        'title': L10n.of(context).iap_page_feature_note,
+        'desc': L10n.of(context).iap_page_feature_note_desc,
+      },
+      {
+        'icon': Icons.more_horiz,
+        'title': L10n.of(context).iap_page_feature_rich,
+        'desc': L10n.of(context).iap_page_feature_rich_desc,
+      },
+    ];
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20.0),
       child: Column(
@@ -226,27 +258,20 @@ class _IAPPageState extends State<IAPPage> {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  _buildFeatureItem(
-                      Icons.auto_awesome,
-                      L10n.of(context).iap_page_feature_ai,
-                      L10n.of(context).iap_page_feature_ai_desc),
-                  _buildFeatureItem(
-                      Icons.sync,
-                      L10n.of(context).iap_page_feature_sync,
-                      L10n.of(context).iap_page_feature_sync_desc),
-                  _buildFeatureItem(
-                      Icons.bar_chart,
-                      L10n.of(context).iap_page_feature_stats,
-                      L10n.of(context).iap_page_feature_stats_desc),
-                  _buildFeatureItem(
-                      Icons.color_lens,
-                      L10n.of(context).iap_page_feature_custom,
-                      L10n.of(context).iap_page_feature_custom_desc),
-                  _buildFeatureItem(
-                      Icons.more_horiz,
-                      L10n.of(context).iap_page_feature_rich,
-                      L10n.of(context).iap_page_feature_rich_desc),
-
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      return Wrap(
+                        children: content.map((item) => SizedBox(
+                          width: constraints.maxWidth / (constraints.maxWidth ~/ 400),
+                          child: _buildFeatureItem(
+                                item['icon'],
+                                item['title'],
+                                item['desc'],
+                              ),
+                        )).toList(),
+                      );
+                    }
+                  ),
                   const SizedBox(height: 30),
                   Text(L10n.of(context).iap_page_restore_hint),
 
@@ -278,56 +303,58 @@ class _IAPPageState extends State<IAPPage> {
             ),
           ),
           SafeArea(
+              minimum: const EdgeInsets.only(bottom: 10.0),
               child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                if (!_iapService.isPurchased && _isAvailable)
-                  Padding(
-                    padding: const EdgeInsets.all(10.0),
-                    child: Text(
-                      L10n.of(context).iap_page_lifetime_hint(
-                          _products.isEmpty ? '' : _products.first.price),
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-
-                if (!_iapService.isPurchased &&
-                    _isAvailable &&
-                    _products.isNotEmpty)
-                  ElevatedButton(
-                    onPressed: _buy,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).primaryColor,
-                      padding: const EdgeInsets.symmetric(vertical: 15),
-                    ),
-                    child: _isLoading
-                        ? Center(
-                            child: CircularProgressIndicator(
-                              color: Theme.of(context).colorScheme.onPrimary,
-                            ),
-                          )
-                        : Text(
-                            L10n.of(context).iap_page_one_time_purchase,
-                            style: const TextStyle(
-                                fontSize: 18, color: Colors.white),
+                    if (!_iapService.isPurchased && _isAvailable)
+                      Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: Text(
+                          L10n.of(context).iap_page_lifetime_hint(
+                              _products.isEmpty ? '' : _products.first.price),
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
                           ),
-                  ),
+                        ),
+                      ),
 
-                // Display error message
-                if (_purchaseError.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 20.0),
-                    child: Text(
-                      _purchaseError,
-                      style: const TextStyle(color: Colors.red),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-              ])),
+                    if (!_iapService.isPurchased &&
+                        _isAvailable &&
+                        _products.isNotEmpty)
+                      ElevatedButton(
+                        onPressed: _buy,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Theme.of(context).primaryColor,
+                          padding: const EdgeInsets.symmetric(vertical: 15),
+                        ),
+                        child: _isLoading
+                            ? Center(
+                                child: CircularProgressIndicator(
+                                  color:
+                                      Theme.of(context).colorScheme.onPrimary,
+                                ),
+                              )
+                            : Text(
+                                L10n.of(context).iap_page_one_time_purchase,
+                                style: const TextStyle(
+                                    fontSize: 18, color: Colors.white),
+                              ),
+                      ),
+
+                    // Display error message
+                    if (_purchaseError.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 20.0),
+                        child: Text(
+                          _purchaseError,
+                          style: const TextStyle(color: Colors.red),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                  ])),
         ],
       ),
     );

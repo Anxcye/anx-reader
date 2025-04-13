@@ -323,6 +323,8 @@
   "iap_page_feature_stats_desc": "Reading time, heatmap and more",
   "iap_page_feature_custom": "Customize Everything",
   "iap_page_feature_custom_desc": "Font, color, size, spacing and more",
+    "iap_page_feature_note": "Powerful Notes",
+    "iap_page_feature_note_desc": "Categorize, filter, sort, export to md, csv, txt and more",
   "iap_page_feature_rich": "Rich Features",
   "iap_page_feature_rich_desc": "Notes, narration, translation",
   "iap_page_restore_hint": "If you change device or reinstall, click 'Restore Purchase' in the top right corner.\nOnly valid for devices under the current Apple ID",
