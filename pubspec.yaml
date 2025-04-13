@@ -88,7 +88,6 @@ dependencies:
   audioplayers: ^6.4.0
   in_app_purchase: ^3.2.1
   asn1lib: ^1.6.2
-  pkcs7: ^1.0.5
   in_app_purchase_storekit: ^0.3.21
 
 
