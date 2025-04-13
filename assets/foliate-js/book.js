@@ -1039,16 +1039,44 @@ window.readingFeatures = (rules) => {
   reader.readingFeatures()
 }
 
-window.loadBook = () => {
-  fetch(url)
-    .then(res => res.blob())
-    .then(blob => open(new File([blob], new URL(url, window.location.origin).pathname), initialCfi))
-    .catch(e => console.error(e))
-}
+  // const importing = $importing
+  // const url = '${replaceSingleQuote(url)}'
+  // let initialCfi = '${replaceSingleQuote(cfi)}'
+  // let style = {
+  //     fontSize: ${bookStyle.fontSize},
+  //     fontName: '${replaceSingleQuote(fontName)}',
+  //     fontPath: '${replaceSingleQuote(fontPath)}',
+  //     fontWeight: ${bookStyle.fontWeight},
+  //     letterSpacing: ${bookStyle.letterSpacing},
+  //     spacing: ${bookStyle.lineHeight},
+  //     paragraphSpacing: ${bookStyle.paragraphSpacing},
+  //     textIndent: ${bookStyle.indent},
+  //     fontColor: '#$textColor',
+  //     backgroundColor: '#$backgroundColor',
+  //     topMargin: ${bookStyle.topMargin},
+  //     bottomMargin: ${bookStyle.bottomMargin},
+  //     sideMargin: ${bookStyle.sideMargin},
+  //     justify: true,
+  //     hyphenate: true,
+  //     pageTurnStyle: '${Prefs().pageTurnStyle.name}',
+  //     maxColumnCount: ${bookStyle.maxColumnCount},
+  // }
 
-// callFlutter('webviewInitialVariable')
+  // let readingRules = {
+  //   convertChineseMode: '${Prefs().readingRules.convertChineseMode.name}',
+  //   bionicReadingMode: ${Prefs().readingRules.bionicReading},
+  // }
 
-// don't remove this
-console.log('loadBook')
 
+// get varible from url
+const urlParams = new URLSearchParams(window.location.search)
+const importing = JSON.parse(urlParams.get('importing'))
+const url = JSON.parse(urlParams.get('url'))
+const initialCfi = JSON.parse(urlParams.get('initialCfi'))
+const style = JSON.parse(urlParams.get('style'))
+const readingRules = JSON.parse(urlParams.get('readingRules'))
 
+fetch(url)
+  .then(res => res.blob())
+  .then(blob => open(new File([blob], new URL(url, window.location.origin).pathname), initialCfi))
+  .catch(e => console.error(e))
