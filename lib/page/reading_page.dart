@@ -278,10 +278,25 @@ class ReadingPageState extends ConsumerState<ReadingPage>
       setState(() {
         _aiChat = SizedBox(
           width: 300,
-          child: AiChatStream(
-            key: aiChatKey,
-            initialMessage: content,
-            sendImmediate: sendImmediate,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              IconButton(
+                onPressed: () {
+                  setState(() {
+                    _aiChat = null;
+                  });
+                },
+                icon: const Icon(Icons.close),
+              ),
+              Expanded(
+                child: AiChatStream(
+                  key: aiChatKey,
+                  initialMessage: content,
+                  sendImmediate: sendImmediate,
+                ),
+              ),
+            ],
           ),
         );
       });
@@ -425,18 +440,19 @@ class ReadingPageState extends ConsumerState<ReadingPage>
             width: MediaQuery.of(context).size.width,
             child: Scaffold(
               resizeToAvoidBottomInset: false,
-              body: MouseRegion(
-                onHover: (PointerHoverEvent detail) {
-                  var y = detail.position.dy;
-                  if (y < 30 || y > MediaQuery.of(context).size.height - 30) {
-                    showOrHideAppBarAndBottomBar(true);
-                  }
-                },
-                child: Stack(
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
+              body: Stack(
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: MouseRegion(
+                          onHover: (PointerHoverEvent detail) {
+                            var y = detail.position.dy;
+                            if (y < 30 ||
+                                y > MediaQuery.of(context).size.height - 30) {
+                              showOrHideAppBarAndBottomBar(true);
+                            }
+                          },
                           child: Focus(
                             focusNode: FocusNode(),
                             onKeyEvent: _handleKeyEvent,
@@ -450,18 +466,18 @@ class ReadingPageState extends ConsumerState<ReadingPage>
                             ),
                           ),
                         ),
-                        _aiChat != null
-                            ? const VerticalDivider(width: 1)
-                            : const SizedBox.shrink(),
-                        AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 200),
-                          child: _aiChat,
-                        ),
-                      ],
-                    ),
-                    controller,
-                  ],
-                ),
+                      ),
+                      _aiChat != null
+                          ? const VerticalDivider(width: 1)
+                          : const SizedBox.shrink(),
+                      AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 200),
+                        child: _aiChat,
+                      ),
+                    ],
+                  ),
+                  controller,
+                ],
               ),
             ),
           ),

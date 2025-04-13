@@ -35,7 +35,9 @@ dependencies:
   fl_chart: ^0.70.2
   flutter_rating_bar: ^4.0.1
   permission_handler: ^11.3.1
-  webdav_client: ^1.2.1
+  webdav_client:
+    git:
+      url: https://github.com/Anxcye/webdav_client.git
   fluttertoast: ^8.2.6
   dio: ^5.4.3+1
   pubspec_parse: ^1.2.3

@@ -1982,10 +1982,11 @@ packages:
   webdav_client:
     dependency: "direct main"
     description:
-      name: webdav_client
-      sha256: "682fffc50b61dc0e8f46717171db03bf9caaa17347be41c0c91e297553bf86b2"
-      url: "https://pub.dev"
-    source: hosted
+      path: "."
+      ref: HEAD
+      resolved-ref: "3c6d0eb21baf593d8a0a10ba039b0b73ce891ad6"
+      url: "https://github.com/Anxcye/webdav_client.git"
+    source: git
     version: "1.2.2"
   webkit_inspection_protocol:
     dependency: transitive
