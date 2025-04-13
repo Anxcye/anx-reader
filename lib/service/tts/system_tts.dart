@@ -4,7 +4,6 @@ import 'dart:io' show Platform;
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/page/reading_page.dart';
 import 'package:anx_reader/service/tts/base_tts.dart';
-import 'package:anx_reader/utils/log/common.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
@@ -137,7 +136,6 @@ class SystemTts extends BaseTts {
 
   @override
   Future<void> speak({String? content}) async {
-    AnxLog.info('speak: $content', StackTrace.current);
     await setAwaitOptions();
     if (content != null) {
       _currentVoiceText = content;
@@ -146,8 +144,6 @@ class SystemTts extends BaseTts {
     await flutterTts.setVolume(volume);
     await flutterTts.setSpeechRate(rate);
     await flutterTts.setPitch(pitch);
-
-    AnxLog.info('speak: $_currentVoiceText');
 
     await flutterTts.speak(_currentVoiceText!);
 
