@@ -29,6 +29,7 @@
 		33CC11132044BFA00003C045 /* MainFlutterWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33CC11122044BFA00003C045 /* MainFlutterWindow.swift */; };
 		5B15FF803BAF8FD57C591112 /* Pods_RunnerTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D7975533CF3B2DFA01B04D9 /* Pods_RunnerTests.framework */; };
 		EBAFDFCD4044F33111126163 /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D1D06B0762725D8A0E8CAABB /* Pods_Runner.framework */; };
+		FC5CEF902DAB6990006AC8BC /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FC5CEF8F2DAB6990006AC8BC /* StoreKit.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -88,6 +89,7 @@
 		BAEBF6EDBDDD78C63DBC281F /* Pods-RunnerTests.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.profile.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.profile.xcconfig"; sourceTree = "<group>"; };
 		D1D06B0762725D8A0E8CAABB /* Pods_Runner.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Runner.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D6DF6C5BF82B5482DD6FD721 /* Pods-Runner.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.profile.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.profile.xcconfig"; sourceTree = "<group>"; };
+		FC5CEF8F2DAB6990006AC8BC /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -104,6 +106,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				EBAFDFCD4044F33111126163 /* Pods_Runner.framework in Frameworks */,
+				FC5CEF902DAB6990006AC8BC /* StoreKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -201,6 +204,7 @@
 		D73912EC22F37F3D000D13A0 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				FC5CEF8F2DAB6990006AC8BC /* StoreKit.framework */,
 				D1D06B0762725D8A0E8CAABB /* Pods_Runner.framework */,
 				3D7975533CF3B2DFA01B04D9 /* Pods_RunnerTests.framework */,
 			);

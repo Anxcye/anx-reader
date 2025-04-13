@@ -329,6 +329,8 @@
   "iap_page_feature_stats_desc": "阅读时长、阅读热力图",
   "iap_page_feature_custom": "自定义任何样式",
   "iap_page_feature_custom_desc": "字体、颜色、大小、行距、间距...",
+  "iap_page_feature_note": "超强大笔记",
+  "iap_page_feature_note_desc": "分类、筛选、排序、导出为md、csv、txt等",
   "iap_page_feature_rich": "丰富功能",
   "iap_page_feature_rich_desc": "批注、朗读、翻译",
   "iap_page_restore_hint": "如更换设备、重新安装，请点击右上角 恢复购买 \n仅针对当前AppleID下的设备生效",
