@@ -453,7 +453,6 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
       await InAppWebViewController.setWebContentsDebuggingEnabled(true);
     }
-    print('@@@ onWebViewCreated');
     webViewController = controller;
     setHandler(controller);
   }
@@ -512,10 +511,10 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
     contextMenu = ContextMenu(
       settings: ContextMenuSettings(hideDefaultSystemContextMenuItems: true),
       onCreateContextMenu: (hitTestResult) async {
-        webViewController.evaluateJavascript(source: "showContextMenu()");
+        // webViewController.evaluateJavascript(source: "showContextMenu()");
       },
       onHideContextMenu: () {
-        removeOverlay();
+        // removeOverlay();
       },
     );
     if (Prefs().openBookAnimation) {

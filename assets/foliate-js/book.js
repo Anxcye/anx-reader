@@ -165,6 +165,9 @@ const setSelectionHandler = (view, doc, index) => {
   ) {
     doc.addEventListener('pointerup', () => handleSelection(view, doc, index));
   }
+  else {
+    doc.addEventListener('contextmenu', () => handleSelection(view, doc, index));
+  }
   // doc.addEventListener('selectionchange', () => handleSelection(view, doc, index));
 
   if (!view.isFixedLayout) {
