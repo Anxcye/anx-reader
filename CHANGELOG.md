@@ -12,6 +12,7 @@
 - Fix: TTS cannot play after resume from background(#196)
 - Fix: TTS cannot play when encountering images or cross-chapter
 - Fix: System TTS continuous backward movement(#197)
+- Fix: Copy translated text instead of original text(#190)
 
 - 新增：按字数对分章失败的txt文件进行处理
 - 新增：支持导入UTF-16、UTF-32编码的txt文件
@@ -19,6 +20,7 @@
 - 修复：TTS 无法在从后台恢复后播放(#196)
 - 修复：集成 TTS 遇到图片或跨章节时无法播放
 - 修复：系统 TTS 连续向后移动
+- 修复：复制翻译内容而不是原文(#190)
 
 ## 1.4.2
 - Feat: add link icon
