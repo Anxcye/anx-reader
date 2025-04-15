@@ -6,14 +6,29 @@
 * 新增：仿生阅读(#49)
 
 ## 1.4.3
+- Feat: Add auto translate selection switch in translate settings(#217)
+- Feat: Handle txt files with failed chapter division by word count
+- Feat: Import txt file with utf-16 or utf-32 encoding
 - Feat: recover system TTS(#197)
 - Fix: TTS cannot play after resume from background(#196)
 - Fix: TTS cannot play when encountering images or cross-chapter
 - Fix: System TTS continuous backward movement(#197)
+- Fix: Copy translated text instead of original text(#190)
+- Fix: Cross-segment highlight cannot be displayed immediately
+- Fix: Highlight only the first word of the selection on Android(#189)
+- Fix: Scroll page turn cannot be used in scroll mode(#201)
+
+- 新增：翻译设置页增加自动翻译开关(#217)
+- 新增：按字数对分章失败的txt文件进行处理
+- 新增：支持导入UTF-16、UTF-32编码的txt文件
 - 新增：重新引入了系统 TTS(#197)
 - 修复：TTS 无法在从后台恢复后播放(#196)
 - 修复：集成 TTS 遇到图片或跨章节时无法播放
 - 修复：系统 TTS 连续向后移动
+- 修复：复制翻译内容而不是原文(#190)
+- 修复：跨段划线无法立即显示
+- 修复：安卓设备有时划线只能显示第一个字词(#189)
+- 修复：滚动翻页模式下，鼠标滚轮翻页一次翻一整页的问题(#201)
 
 ## 1.4.2
 - Feat: add link icon
