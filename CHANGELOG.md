@@ -6,6 +6,7 @@
 * 新增：仿生阅读(#49)
 
 ## 1.4.3
+- Feat: Add auto translate selection switch in translate settings(#217)
 - Feat: Handle txt files with failed chapter division by word count
 - Feat: Import txt file with utf-16 or utf-32 encoding
 - Feat: recover system TTS(#197)
@@ -14,6 +15,7 @@
 - Fix: System TTS continuous backward movement(#197)
 - Fix: Copy translated text instead of original text(#190)
 
+- 新增：翻译设置页增加自动翻译开关(#217)
 - 新增：按字数对分章失败的txt文件进行处理
 - 新增：支持导入UTF-16、UTF-32编码的txt文件
 - 新增：重新引入了系统 TTS(#197)
