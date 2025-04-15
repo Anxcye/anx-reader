@@ -71,6 +71,7 @@ void importBookList(List<File> fileList, BuildContext context, WidgetRef ref) {
       context: context,
       builder: (BuildContext context) {
         String currentHandlingFile = '';
+        List<String> errorFiles = [];
 
         return StatefulBuilder(builder: (context, setState) {
           return AlertDialog(
@@ -99,8 +100,10 @@ void importBookList(List<File> fileList, BuildContext context, WidgetRef ref) {
                               height: 20,
                               child: const CircularProgressIndicator(),
                             ))
-                        : bookItem(file.path, const Icon(Icons.done)),
-                  // bookItem(file.path, const Icon(Icons.done)),
+                        : bookItem(file.path, 
+                            errorFiles.contains(file.path)
+                                ? const Icon(Icons.error)
+                                : const Icon(Icons.done)),
                 ],
               ),
             ),
@@ -122,9 +125,15 @@ void importBookList(List<File> fileList, BuildContext context, WidgetRef ref) {
                         setState(() {
                           currentHandlingFile = file.path;
                         });
-                        await importBook(file, ref);
+                        try {
+                          await importBook(file, ref);
+                        } catch (e) {
+                          setState(() {
+                            errorFiles.add(file.path);
+                          });
+                        }
                       }
-                      Navigator.of(context).pop('dialog');
+                      Navigator.of(navigatorKey.currentContext!).pop('dialog');
                     },
                     child: Text(L10n.of(context)
                         .import_import_n_books(supportedFiles.length))),

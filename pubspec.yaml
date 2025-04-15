@@ -89,6 +89,7 @@ dependencies:
   in_app_purchase: ^3.2.1
   asn1lib: ^1.6.2
   in_app_purchase_storekit: ^0.3.21
+  charset: ^2.0.1
 
 
 dev_dependencies:
