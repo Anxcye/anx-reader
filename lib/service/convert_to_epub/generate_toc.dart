@@ -16,10 +16,6 @@ String generateNestedToc(List<Section> sections) {
     }
   }
 
-  for (int i = 0; i < tocItems.length; i++) {
-    print('${tocItems[i].title} ${tocItems[i].level}');
-  }
-
   String buildNavPoints(
     List<_TocItem> items,
     int currentLevel,

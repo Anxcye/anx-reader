@@ -125,13 +125,13 @@ void importBookList(List<File> fileList, BuildContext context, WidgetRef ref) {
                         setState(() {
                           currentHandlingFile = file.path;
                         });
-                        try {
+                        // try {
                           await importBook(file, ref);
-                        } catch (e) {
-                          setState(() {
-                            errorFiles.add(file.path);
-                          });
-                        }
+                        // } catch (e) {
+                        //   setState(() {
+                        //     errorFiles.add(file.path);
+                        //   });
+                        // }
                       }
                       Navigator.of(navigatorKey.currentContext!).pop('dialog');
                     },
@@ -296,7 +296,7 @@ Future<void> getBookMetadata(
       if (consoleMessage.messageLevel == ConsoleMessageLevel.ERROR) {
         headlessInAppWebView?.dispose();
         headlessInAppWebView = null;
-        throw Exception('Webview: ${consoleMessage.message}');
+        // throw Exception('Webview: ${consoleMessage.message}');
       }
       webviewConsoleMessage(controller, consoleMessage);
     },
