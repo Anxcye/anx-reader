@@ -778,7 +778,10 @@ const open = async (file, cfi) => {
 }
 
 
-const callFlutter = (name, data) => window.flutter_inappwebview.callHandler(name, data)
+const callFlutter = (name, data) => {
+  // console.log('callFlutter', name, data)
+  window.flutter_inappwebview.callHandler(name, data)
+}
 
 const setStyle = () => {
   const turn = {
