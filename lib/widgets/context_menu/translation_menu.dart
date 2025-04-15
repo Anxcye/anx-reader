@@ -151,7 +151,7 @@ class _TranslationMenuState extends State<TranslationMenu> {
                               IconButton(
                                 onPressed: () {
                                   Clipboard.setData(
-                                      ClipboardData(text: widget.content));
+                                      ClipboardData(text: translatedText ?? ''));
                                   AnxToast.show(
                                       L10n.of(context).notes_page_copied);
                                 },
