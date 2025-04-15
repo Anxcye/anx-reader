@@ -493,7 +493,7 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
   }
 
   Future<void> _handlePointerEvents(PointerEvent event) async {
-    if (await isFootNoteOpen()) return;
+    if (await isFootNoteOpen() || Prefs().pageTurnStyle == PageTurn.scroll) return;
     if (event is PointerScrollEvent) {
       if (event.scrollDelta.dy > 0) {
         nextPage();

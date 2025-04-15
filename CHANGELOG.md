@@ -16,6 +16,7 @@
 - Fix: Copy translated text instead of original text(#190)
 - Fix: Cross-segment highlight cannot be displayed immediately
 - Fix: Highlight only the first word of the selection on Android(#189)
+- Fix: Scroll page turn cannot be used in scroll mode(#201)
 
 - 新增：翻译设置页增加自动翻译开关(#217)
 - 新增：按字数对分章失败的txt文件进行处理
@@ -27,6 +28,7 @@
 - 修复：复制翻译内容而不是原文(#190)
 - 修复：跨段划线无法立即显示
 - 修复：安卓设备有时划线只能显示第一个字词(#189)
+- 修复：滚动翻页模式下，鼠标滚轮翻页一次翻一整页的问题(#201)
 
 ## 1.4.2
 - Feat: add link icon
