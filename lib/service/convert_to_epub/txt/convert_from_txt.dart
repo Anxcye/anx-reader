@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:anx_reader/service/convert_to_epub/create_epub.dart';
 import 'package:anx_reader/service/convert_to_epub/section.dart';
 import 'package:anx_reader/utils/log/common.dart';
-import 'package:fast_gbk/fast_gbk.dart';
+import 'package:charset/charset.dart';
 
 String readFileWithEncoding(File file) {
   bool checkGarbled(String content) {
@@ -16,33 +16,30 @@ String readFileWithEncoding(File file) {
     return sampleLines.any((line) => garbledPattern.hasMatch(line));
   }
 
-  final List<Encoding> encodings = [
-    utf8,
-    latin1,
-  ];
+  final decoder = {
+    'utf8': utf8.decode,
+    'gbk': gbk.decode,
+    'latin1': latin1.decode,
+    'utf16': utf16.decode,
+    'utf32': utf32.decode,
+  };
 
-  for (final encoding in encodings) {
+  for (final entry in decoder.entries) {
     try {
-      AnxLog.info('Convert: Reading file with encoding: ${encoding.name}');
-      final content = file.readAsStringSync(encoding: encoding);
-
+      AnxLog.info('Convert: Reading file with encoding: ${entry.key}');
+      final content = entry.value(file.readAsBytesSync());
       if (!checkGarbled(content)) {
         return content;
       }
       AnxLog.info('Convert: Detected garbled text, trying next encoding');
     } catch (e) {
-      continue;
+      AnxLog.severe('Convert: Failed to read file with encoding');
     }
   }
 
-  try {
-    AnxLog.info('Convert: Reading file with encoding: gbk');
-    final content = gbk.decode(file.readAsBytesSync());
-    return content;
-  } catch (e) {
-    AnxLog.severe('Convert: Failed to read file with encoding');
-    return '';
-  }
+  throw Exception('Convert: Failed to read file with any encoding');
+
+
 }
 
 Future<File> convertFromTxt(File file) async {

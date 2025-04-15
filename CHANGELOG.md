@@ -6,10 +6,13 @@
 * 新增：仿生阅读(#49)
 
 ## 1.4.3
+- Feat: Import txt file with utf-16 or utf-32 encoding
 - Feat: recover system TTS(#197)
 - Fix: TTS cannot play after resume from background(#196)
 - Fix: TTS cannot play when encountering images or cross-chapter
 - Fix: System TTS continuous backward movement(#197)
+
+- 新增：支持导入UTF-16、UTF-32编码的txt文件
 - 新增：重新引入了系统 TTS(#197)
 - 修复：TTS 无法在从后台恢复后播放(#196)
 - 修复：集成 TTS 遇到图片或跨章节时无法播放
