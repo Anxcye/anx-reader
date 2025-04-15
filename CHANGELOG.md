@@ -14,6 +14,7 @@
 - Fix: TTS cannot play when encountering images or cross-chapter
 - Fix: System TTS continuous backward movement(#197)
 - Fix: Copy translated text instead of original text(#190)
+- Fix: Cross-segment highlight cannot be displayed immediately
 
 - 新增：翻译设置页增加自动翻译开关(#217)
 - 新增：按字数对分章失败的txt文件进行处理
@@ -23,6 +24,7 @@
 - 修复：集成 TTS 遇到图片或跨章节时无法播放
 - 修复：系统 TTS 连续向后移动
 - 修复：复制翻译内容而不是原文(#190)
+- 修复：跨段划线无法立即显示
 
 ## 1.4.2
 - Feat: add link icon

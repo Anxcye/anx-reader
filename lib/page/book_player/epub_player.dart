@@ -193,7 +193,7 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
         type: '${bookNote.type}',
         value: '${bookNote.cfi}',
         color: '#${bookNote.color}',
-        note: '${bookNote.content}',
+        note: '${bookNote.content.replaceAll('\n', ' ')}',
       })
       ''');
   }
