@@ -15,6 +15,19 @@ class TranslateSetting extends StatefulWidget {
 }
 
 class _TranslateSettingState extends State<TranslateSetting> {
+  Widget autoTranslateSelection() {
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      trailing: Switch(
+        value: Prefs().autoTranslateSelection,
+        onChanged: (bool value) => setState(() {
+          Prefs().autoTranslateSelection = value;
+        }),
+      ),
+      title: Text(L10n.of(context).reading_page_auto_translate_selection),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return settingsSections(
@@ -28,6 +41,12 @@ class _TranslateSettingState extends State<TranslateSetting> {
                   padding: EdgeInsets.all(8.0),
                   child: TranslationConfig(),
                 ),
+              ),
+            ),
+            CustomSettingsTile(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: autoTranslateSelection(),
               ),
             ),
             for (var service in TranslateService.values)
@@ -139,7 +158,8 @@ class TranslateLangPicker extends StatelessWidget {
       itemCount: LangList.values.length,
       itemBuilder: (context, index) => ListTile(
         title: Text(LangList.values[index].getNative(context)),
-        subtitle: Text(LangList.values[index].name[0].toUpperCase() + LangList.values[index].name.substring(1)),
+        subtitle: Text(LangList.values[index].name[0].toUpperCase() +
+            LangList.values[index].name.substring(1)),
         onTap: () {
           if (isFrom) {
             Prefs().translateFrom = LangList.values[index];
@@ -234,11 +254,15 @@ class _TranslateSettingItemState extends State<TranslateSettingItem> {
                                             MainAxisAlignment.center,
                                         children: [
                                           languageText(
-                                            Prefs().translateFrom.getNative(context),
+                                            Prefs()
+                                                .translateFrom
+                                                .getNative(context),
                                           ),
                                           const Icon(Icons.arrow_forward_ios),
                                           languageText(
-                                            Prefs().translateTo.getNative(context),
+                                            Prefs()
+                                                .translateTo
+                                                .getNative(context),
                                           ),
                                         ],
                                       ),

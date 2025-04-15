@@ -2,7 +2,7 @@ name: anx_reader
 description: "An e-book reader."
 publish_to: 'none'
 
-version: 1.4.3+2093
+version: 1.4.3+2094
 
 environment:
   sdk: '>=3.5.2 <4.0.0'
@@ -90,8 +90,8 @@ dependencies:
   audioplayers: ^6.4.0
   in_app_purchase: ^3.2.1
   asn1lib: ^1.6.2
-  pkcs7: ^1.0.5
   in_app_purchase_storekit: ^0.3.21
+  charset: ^2.0.1
 
 
 dev_dependencies:
