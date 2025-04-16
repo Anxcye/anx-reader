@@ -5,6 +5,7 @@ import 'package:anx_reader/page/settings_page/appearance.dart';
 import 'package:anx_reader/page/settings_page/narrate.dart';
 import 'package:anx_reader/page/settings_page/reading.dart';
 import 'package:anx_reader/page/settings_page/settings_page.dart';
+import 'package:anx_reader/page/settings_page/storege.dart';
 import 'package:anx_reader/page/settings_page/sync.dart';
 import 'package:anx_reader/page/settings_page/translate.dart';
 import 'package:anx_reader/widgets/settings/about.dart';
@@ -116,6 +117,14 @@ class _SubMoreSettingsState extends State<SubMoreSettings> {
             "subtitles": [
               L10n.of(context).settings_ai_services,
               L10n.of(context).settings_ai_prompt,
+            ],
+          },
+          {
+            "title": 'Storage',
+            "icon": Icons.storage_outlined,
+            "sections": const StorageSettings(),
+            "subtitles": [
+              'Storage',
             ],
           },
           {
