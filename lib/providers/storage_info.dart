@@ -36,10 +36,12 @@ class StorageInfo extends _$StorageInfo {
 
       final entities = cacheDir.listSync(recursive: true);
       for (var entity in entities) {
-        if (entity is File) {
-          entity.deleteSync();
-        } else if (entity is Directory) {
-          entity.deleteSync(recursive: true);
+        if (entity.existsSync()) {
+          if (entity is File) {
+            entity.deleteSync();
+          } else if (entity is Directory) {
+            entity.deleteSync(recursive: true);
+          }
         }
       }
 
