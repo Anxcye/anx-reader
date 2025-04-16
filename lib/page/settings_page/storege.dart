@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:math';
 
+import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/providers/storage_info.dart';
 import 'package:anx_reader/widgets/settings/settings_section.dart';
 import 'package:anx_reader/widgets/settings/settings_tile.dart';
@@ -50,8 +51,9 @@ class _StorageSettingsState extends ConsumerState<StorageSettings>
         return const CircularProgressIndicator.adaptive();
       }
       return ElevatedButton(
-        onPressed: () {
-          ref.read(storageInfoProvider.notifier).clearCache();
+        onPressed: () async {
+          await ref.read(storageInfoProvider.notifier).clearCache();
+          ref.invalidate(storageInfoProvider);
         },
         child: Text('清空缓存 $size'),
       );
@@ -136,29 +138,46 @@ class _StorageSettingsState extends ConsumerState<StorageSettings>
                     controller: _tabController,
                     children: [
                       // Books tab
-                      DataFilesDetailTab(
-                        title: '书籍文件',
-                        icon: Icons.book,
-                        listFiles: ref
-                            .read(storageInfoProvider.notifier)
-                            .listBookFiles(),
-                        // storageInfoAsync: storageInfoAsync,
+                      storageInfoAsync.when(
+                        data: (_) => DataFilesDetailTab(
+                          title: '书籍文件',
+                          icon: Icons.book,
+                          listFiles: ref
+                              .read(storageInfoProvider.notifier)
+                              .listBookFiles(),
+                        ),
+                        loading: () => const Center(
+                            child: CircularProgressIndicator.adaptive()),
+                        error: (_, __) =>
+                            Center(child: Text(L10n.of(context).common_error)),
                       ),
                       // Covers tab
-                      DataFilesDetailTab(
-                        title: '封面文件',
-                        icon: Icons.image,
-                        listFiles: ref
-                            .read(storageInfoProvider.notifier)
-                            .listCoverFiles(),
+                      storageInfoAsync.when(
+                        data: (_) => DataFilesDetailTab(
+                          title: '封面文件',
+                          icon: Icons.image,
+                          listFiles: ref
+                              .read(storageInfoProvider.notifier)
+                              .listCoverFiles(),
+                        ),
+                        loading: () => const Center(
+                            child: CircularProgressIndicator.adaptive()),
+                        error: (_, __) =>
+                            Center(child: Text(L10n.of(context).common_error)),
                       ),
                       // Fonts tab
-                      DataFilesDetailTab(
-                        title: '字体文件',
-                        icon: Icons.font_download,
-                        listFiles: ref
-                            .read(storageInfoProvider.notifier)
-                            .listFontFiles(),
+                      storageInfoAsync.when(
+                        data: (_) => DataFilesDetailTab(
+                          title: '字体文件',
+                          icon: Icons.font_download,
+                          listFiles: ref
+                              .read(storageInfoProvider.notifier)
+                              .listFontFiles(),
+                        ),
+                        loading: () => const Center(
+                            child: CircularProgressIndicator.adaptive()),
+                        error: (_, __) =>
+                            Center(child: Text(L10n.of(context).common_error)),
                       ),
                     ],
                   ),
