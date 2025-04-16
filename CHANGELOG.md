@@ -1,11 +1,9 @@
 # Changelog
 
 ## Todo
-- 选择时移动
-* Feat: Add bionic reading mode(#49)
-* 新增：仿生阅读(#49)
 
 ## 1.4.3
+- Feat: Storage space management
 - Feat: Add auto translate selection switch in translate settings(#217)
 - Feat: Handle txt files with failed chapter division by word count
 - Feat: Import txt file with utf-16 or utf-32 encoding
@@ -18,6 +16,7 @@
 - Fix: Highlight only the first word of the selection on Android(#189)
 - Fix: Scroll page turn cannot be used in scroll mode(#201)
 
+- 新增：存储空间查看和管理
 - 新增：翻译设置页增加自动翻译开关(#217)
 - 新增：按字数对分章失败的txt文件进行处理
 - 新增：支持导入UTF-16、UTF-32编码的txt文件
