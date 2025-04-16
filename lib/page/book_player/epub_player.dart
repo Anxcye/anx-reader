@@ -220,7 +220,7 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
   }
 
   Future<void> initTts() async =>
-      await webViewController.evaluateJavascript(source: "ttsHere()");
+      await webViewController.evaluateJavascript(source: "window.ttsHere()");
 
   void ttsStop() => webViewController.evaluateJavascript(source: "ttsStop()");
 
