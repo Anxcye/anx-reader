@@ -120,11 +120,12 @@ class _SubMoreSettingsState extends State<SubMoreSettings> {
             ],
           },
           {
-            "title": 'Storage',
+            "title": L10n.of(context).storage,
             "icon": Icons.storage_outlined,
             "sections": const StorageSettings(),
             "subtitles": [
-              'Storage',
+              L10n.of(context).storage_info,
+              L10n.of(context).storage_data_file_details,
             ],
           },
           {

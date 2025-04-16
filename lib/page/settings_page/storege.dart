@@ -55,35 +55,35 @@ class _StorageSettingsState extends ConsumerState<StorageSettings>
           await ref.read(storageInfoProvider.notifier).clearCache();
           ref.invalidate(storageInfoProvider);
         },
-        child: Text('清空缓存 $size'),
+        child: Text('${L10n.of(context).storage_clear_cache} $size'),
       );
     }
 
     return settingsSections(sections: [
       SettingsSection(
-        title: const Text('存储信息'),
+        title: Text(L10n.of(context).storage_info),
         tiles: [
           CustomSettingsTile(
             child: Column(
               children: [
                 ListTile(
-                  title: Text('数据库文件'),
+                  title: Text(L10n.of(context).storage_database_file),
                   trailing:
                       fileSizeTriling(storageInfoAsync.value?.databaseSizeStr),
                 ),
                 ListTile(
-                  title: Text('日志文件'),
+                  title: Text(L10n.of(context).storage_log_file),
                   trailing: fileSizeTriling(storageInfoAsync.value?.logSizeStr),
                 ),
                 ListTile(
-                  title: Text('缓存文件'),
+                  title: Text(L10n.of(context).storage_cache_file),
                   trailing:
                       cacheSizeTriling(storageInfoAsync.value?.cacheSizeStr),
                 ),
                 Column(
                   children: [
                     ListTile(
-                      title: Text('数据文件'),
+                      title: Text(L10n.of(context).storage_data_file),
                       trailing: fileSizeTriling(
                           storageInfoAsync.value?.dataFilesSizeStr),
                     ),
@@ -92,17 +92,17 @@ class _StorageSettingsState extends ConsumerState<StorageSettings>
                       child: Column(
                         children: [
                           ListTile(
-                            title: Text('书籍文件'),
+                            title: Text(L10n.of(context).storage_book_file),
                             trailing: fileSizeTriling(
                                 storageInfoAsync.value?.booksSizeStr),
                           ),
                           ListTile(
-                            title: Text('封面文件'),
+                            title: Text(L10n.of(context).storage_cover_file),
                             trailing: fileSizeTriling(
                                 storageInfoAsync.value?.coverSizeStr),
                           ),
                           ListTile(
-                            title: Text('字体文件'),
+                            title: Text(L10n.of(context).storage_font_file),
                             trailing: fileSizeTriling(
                                 storageInfoAsync.value?.fontSizeStr),
                           ),
@@ -117,8 +117,8 @@ class _StorageSettingsState extends ConsumerState<StorageSettings>
         ],
       ),
 
-      // // Tab view for data files details
-      SettingsSection(title: const Text('数据文件详情'), tiles: [
+      // Tab view for data files details
+      SettingsSection(title: Text(L10n.of(context).storage_data_file_details), tiles: [
         CustomSettingsTile(
           child: Padding(
             padding: const EdgeInsets.all(16.0),
@@ -126,10 +126,10 @@ class _StorageSettingsState extends ConsumerState<StorageSettings>
               children: [
                 TabBar(
                   controller: _tabController,
-                  tabs: const [
-                    Tab(text: '书籍', icon: Icon(Icons.book)),
-                    Tab(text: '封面', icon: Icon(Icons.image)),
-                    Tab(text: '字体', icon: Icon(Icons.font_download)),
+                  tabs: [
+                    Tab(text: L10n.of(context).storage_book_file, icon: const Icon(Icons.book)),
+                    Tab(text: L10n.of(context).storage_cover_file, icon: const Icon(Icons.image)),
+                    Tab(text: L10n.of(context).storage_font_file, icon: const Icon(Icons.font_download)),
                   ],
                 ),
                 SizedBox(
@@ -140,7 +140,7 @@ class _StorageSettingsState extends ConsumerState<StorageSettings>
                       // Books tab
                       storageInfoAsync.when(
                         data: (_) => DataFilesDetailTab(
-                          title: '书籍文件',
+                          title: L10n.of(context).storage_book_file,
                           icon: Icons.book,
                           listFiles: ref
                               .read(storageInfoProvider.notifier)
@@ -154,7 +154,7 @@ class _StorageSettingsState extends ConsumerState<StorageSettings>
                       // Covers tab
                       storageInfoAsync.when(
                         data: (_) => DataFilesDetailTab(
-                          title: '封面文件',
+                          title: L10n.of(context).storage_cover_file,
                           icon: Icons.image,
                           listFiles: ref
                               .read(storageInfoProvider.notifier)
@@ -168,7 +168,7 @@ class _StorageSettingsState extends ConsumerState<StorageSettings>
                       // Fonts tab
                       storageInfoAsync.when(
                         data: (_) => DataFilesDetailTab(
-                          title: '字体文件',
+                          title: L10n.of(context).storage_font_file,
                           icon: Icons.font_download,
                           listFiles: ref
                               .read(storageInfoProvider.notifier)
@@ -188,8 +188,6 @@ class _StorageSettingsState extends ConsumerState<StorageSettings>
         ),
       ])
     ]);
-    //   ],
-    // );
   }
 }
 
@@ -198,14 +196,12 @@ class DataFilesDetailTab extends StatelessWidget {
   final String title;
   final IconData icon;
   final List<File> listFiles;
-  // final AsyncValue<StorageInfo> storageInfoAsync;
 
   const DataFilesDetailTab({
     super.key,
     required this.title,
     required this.icon,
     required this.listFiles,
-    // required this.storageInfoAsync,
   });
 
   @override
