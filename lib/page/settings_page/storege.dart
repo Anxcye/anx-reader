@@ -118,75 +118,86 @@ class _StorageSettingsState extends ConsumerState<StorageSettings>
       ),
 
       // Tab view for data files details
-      SettingsSection(title: Text(L10n.of(context).storage_data_file_details), tiles: [
-        CustomSettingsTile(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                TabBar(
-                  controller: _tabController,
-                  tabs: [
-                    Tab(text: L10n.of(context).storage_book_file, icon: const Icon(Icons.book)),
-                    Tab(text: L10n.of(context).storage_cover_file, icon: const Icon(Icons.image)),
-                    Tab(text: L10n.of(context).storage_font_file, icon: const Icon(Icons.font_download)),
+      SettingsSection(
+          title: Text(L10n.of(context).storage_data_file_details),
+          tiles: [
+            CustomSettingsTile(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    TabBar(
+                      controller: _tabController,
+                      tabs: [
+                        Tab(
+                            text: L10n.of(context).storage_book_file,
+                            icon: const Icon(Icons.book)),
+                        Tab(
+                            text: L10n.of(context).storage_cover_file,
+                            icon: const Icon(Icons.image)),
+                        Tab(
+                            text: L10n.of(context).storage_font_file,
+                            icon: const Icon(Icons.font_download)),
+                      ],
+                    ),
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height -
+                          MediaQuery.of(context).padding.top -
+                          MediaQuery.of(context).padding.bottom -
+                          kToolbarHeight - 200,
+                      child: TabBarView(
+                        controller: _tabController,
+                        children: [
+                          // Books tab
+                          storageInfoAsync.when(
+                            data: (_) => DataFilesDetailTab(
+                              title: L10n.of(context).storage_book_file,
+                              icon: Icons.book,
+                              listFiles: ref
+                                  .read(storageInfoProvider.notifier)
+                                  .listBookFiles(),
+                            ),
+                            loading: () => const Center(
+                                child: CircularProgressIndicator.adaptive()),
+                            error: (_, __) => Center(
+                                child: Text(L10n.of(context).common_error)),
+                          ),
+                          // Covers tab
+                          storageInfoAsync.when(
+                            data: (_) => DataFilesDetailTab(
+                              title: L10n.of(context).storage_cover_file,
+                              icon: Icons.image,
+                              listFiles: ref
+                                  .read(storageInfoProvider.notifier)
+                                  .listCoverFiles(),
+                            ),
+                            loading: () => const Center(
+                                child: CircularProgressIndicator.adaptive()),
+                            error: (_, __) => Center(
+                                child: Text(L10n.of(context).common_error)),
+                          ),
+                          // Fonts tab
+                          storageInfoAsync.when(
+                            data: (_) => DataFilesDetailTab(
+                              title: L10n.of(context).storage_font_file,
+                              icon: Icons.font_download,
+                              listFiles: ref
+                                  .read(storageInfoProvider.notifier)
+                                  .listFontFiles(),
+                            ),
+                            loading: () => const Center(
+                                child: CircularProgressIndicator.adaptive()),
+                            error: (_, __) => Center(
+                                child: Text(L10n.of(context).common_error)),
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
-                SizedBox(
-                  height: 300, // Fixed height for tab view content
-                  child: TabBarView(
-                    controller: _tabController,
-                    children: [
-                      // Books tab
-                      storageInfoAsync.when(
-                        data: (_) => DataFilesDetailTab(
-                          title: L10n.of(context).storage_book_file,
-                          icon: Icons.book,
-                          listFiles: ref
-                              .read(storageInfoProvider.notifier)
-                              .listBookFiles(),
-                        ),
-                        loading: () => const Center(
-                            child: CircularProgressIndicator.adaptive()),
-                        error: (_, __) =>
-                            Center(child: Text(L10n.of(context).common_error)),
-                      ),
-                      // Covers tab
-                      storageInfoAsync.when(
-                        data: (_) => DataFilesDetailTab(
-                          title: L10n.of(context).storage_cover_file,
-                          icon: Icons.image,
-                          listFiles: ref
-                              .read(storageInfoProvider.notifier)
-                              .listCoverFiles(),
-                        ),
-                        loading: () => const Center(
-                            child: CircularProgressIndicator.adaptive()),
-                        error: (_, __) =>
-                            Center(child: Text(L10n.of(context).common_error)),
-                      ),
-                      // Fonts tab
-                      storageInfoAsync.when(
-                        data: (_) => DataFilesDetailTab(
-                          title: L10n.of(context).storage_font_file,
-                          icon: Icons.font_download,
-                          listFiles: ref
-                              .read(storageInfoProvider.notifier)
-                              .listFontFiles(),
-                        ),
-                        loading: () => const Center(
-                            child: CircularProgressIndicator.adaptive()),
-                        error: (_, __) =>
-                            Center(child: Text(L10n.of(context).common_error)),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
-        ),
-      ])
+          ])
     ]);
   }
 }
@@ -195,7 +206,7 @@ class _StorageSettingsState extends ConsumerState<StorageSettings>
 class DataFilesDetailTab extends StatelessWidget {
   final String title;
   final IconData icon;
-  final List<File> listFiles;
+  final Future<List<File>> listFiles;
 
   const DataFilesDetailTab({
     super.key,
@@ -214,18 +225,32 @@ class DataFilesDetailTab extends StatelessWidget {
       return '${(bytes / pow(1024, i)).toStringAsFixed(2)} ${suffixes[i]}';
     }
 
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Expanded(
-          child: ListView.builder(
-        itemCount: listFiles.length,
-        itemBuilder: (context, index) {
-          final file = listFiles[index];
-          return ListTile(
-            title: Text(file.path.split(Platform.pathSeparator).last),
-            subtitle: Text(formatSize(file.lengthSync())),
-          );
-        },
-      ))
-    ]);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: FutureBuilder<List<File>>(
+            future: listFiles,
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                final files = snapshot.data!;
+                files.sort((a, b) => b.lengthSync().compareTo(a.lengthSync()));
+                return ListView.builder(
+                  itemCount: files.length,
+                  itemBuilder: (context, index) {
+                    final file = files[index];
+                    return ListTile(
+                      title: Text(file.path.split(Platform.pathSeparator).last),
+                      trailing: Text(formatSize(file.lengthSync())),
+                    );
+                  },
+                );
+              }
+              return const Center(child: CircularProgressIndicator.adaptive());
+            },
+          ),
+        ),
+      ],
+    );
   }
 }
