@@ -15,15 +15,15 @@ class StorageInfo extends _$StorageInfo {
   @override
   Future<StorageInfoModel> build() async {
     return StorageInfoModel(
-      databaseSize: calculatePathSize(await getAnxDataBasesDir()),
-      booksSize: calculatePathSize(getFileDir()),
-      fontSize: calculatePathSize(getFontDir()),
-      cacheSize: calculatePathSize(
+      databaseSize: await calculatePathSize(await getAnxDataBasesDir()),
+      booksSize: await calculatePathSize(getFileDir()),
+      fontSize: await calculatePathSize(getFontDir()),
+      cacheSize: await calculatePathSize(
         await getAnxCacheDir(),
         recursive: true,
       ),
-      logSize: calsulateFileSize(await getLogFile()),
-      coverSize: calculatePathSize(getCoverDir()),
+      logSize: await calsulateFileSize(await getLogFile()),
+      coverSize: await calculatePathSize(getCoverDir()),
     );
   }
 
@@ -34,7 +34,7 @@ class StorageInfo extends _$StorageInfo {
         return true;
       }
 
-      final entities = cacheDir.listSync(recursive: true);
+      final entities = await cacheDir.list(recursive: true).toList();
       for (var entity in entities) {
         if (entity.existsSync()) {
           if (entity is File) {
@@ -54,34 +54,34 @@ class StorageInfo extends _$StorageInfo {
     }
   }
 
-  int calculatePathSize(Directory dir, {bool recursive = false}) {
+  Future<int> calculatePathSize(Directory dir, {bool recursive = false}) async {
     if (!dir.existsSync()) {
       return 0;
     }
 
     int totalSize = 0;
-    final entities = dir.listSync(recursive: recursive);
+    final entities = await dir.list(recursive: recursive).toList();
     for (var entity in entities) {
       if (entity is File) {
-        totalSize += entity.lengthSync();
+        totalSize += await entity.length();
       }
     }
 
     return totalSize;
   }
 
-  int calsulateFileSize(File file) {
-    return file.lengthSync();
+  Future<int> calsulateFileSize(File file) async {
+    return await file.length();
   }
 
-  List<File> listBookFiles() {
+  Future<List<File>> listBookFiles() async {
     final fileDir = getFileDir();
     if (!fileDir.existsSync()) {
       return [];
     }
 
     final files = <File>[];
-    final entities = fileDir.listSync(recursive: true);
+    final entities = await fileDir.list(recursive: true).toList();
     for (var entity in entities) {
       if (entity is File) {
         files.add(entity);
@@ -91,14 +91,14 @@ class StorageInfo extends _$StorageInfo {
     return files;
   }
 
-  List<File> listFontFiles() {
+  Future<List<File>> listFontFiles() async {
     final fontDir = getFontDir();
     if (!fontDir.existsSync()) {
       return [];
     }
 
     final files = <File>[];
-    final entities = fontDir.listSync();
+    final entities = await fontDir.list(recursive: true).toList();
     for (var entity in entities) {
       if (entity is File) {
         files.add(entity);
@@ -108,14 +108,14 @@ class StorageInfo extends _$StorageInfo {
     return files;
   }
 
-  List<File> listCoverFiles() {
+  Future<List<File>> listCoverFiles() async {
     final coverDir = getCoverDir();
     if (!coverDir.existsSync()) {
       return [];
     }
 
     final files = <File>[];
-    final entities = coverDir.listSync(recursive: true);
+    final entities = await coverDir.list(recursive: true).toList();
     for (var entity in entities) {
       if (entity is File) {
         files.add(entity);
