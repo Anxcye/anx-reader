@@ -182,6 +182,7 @@
   "common_apply": "应用",
   "common_reset": "重置",
   "common_none": "无",
+  "common_error": "错误",
 
   "service_import_success":"导入成功",
   "service_import_n_books": "{count, plural, other{正在导入 {count} 本书}}",
@@ -349,5 +350,17 @@
   "iap_status_trial": "试用期内",
   "iap_status_trial_expired": "试用期已结束",
   "iap_status_original": "早期用户",
-  "iap_status_unknown": "未知"
+  "iap_status_unknown": "未知",
+
+  "storage": "存储",
+  "storage_info": "存储信息",
+  "storage_database_file": "数据库文件",
+  "storage_log_file": "日志文件",
+  "storage_cache_file": "缓存文件",
+  "storage_data_file": "数据文件",
+  "storage_book_file": "书籍文件",
+  "storage_cover_file": "封面文件",
+  "storage_font_file": "字体文件",
+  "storage_data_file_details": "数据文件详情",
+  "storage_clear_cache": "清空缓存"
 }
