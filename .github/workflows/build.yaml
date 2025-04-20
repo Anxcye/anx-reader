@@ -229,7 +229,12 @@ jobs:
         id: extract_release_notes
         run: |
           VERSION=${{ env.VERSION }}
-          CHANGELOG_CONTENT=$(sed -n "/## $VERSION/,/## /p" CHANGELOG.md | sed '$d')
+          if [[ $VERSION == beta-* ]] || [[ $VERSION == alpha-* ]]; then
+            MAIN_VERSION=$(echo $VERSION | cut -d'-' -f2 | cut -d'-' -f1)
+          else
+            MAIN_VERSION=$VERSION
+          fi
+          CHANGELOG_CONTENT=$(sed -n "/## $MAIN_VERSION/,/## /p" CHANGELOG.md | sed '$d')
           echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
           echo "$CHANGELOG_CONTENT" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
