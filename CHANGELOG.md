@@ -2,6 +2,15 @@
 
 ## Todo
 
+## 1.4.4
+- Feat: Add webdav sync direction dialog
+- Fix: Webdav sync aborted dialog content
+- Fix: if webdav is empty, sync will upload
+
+- 新增：添加 WebDAV 同步方向对话框
+- 修复：WebDAV 同步中止对话框内容
+- 修复：如果 WebDAV 为空，则同步时默认上传
+
 ## 1.4.3
 - Feat: Storage space management
 - Feat: Add auto translate selection switch in translate settings(#217)

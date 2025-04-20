@@ -183,6 +183,7 @@
   "common_reset": "重置",
   "common_none": "无",
   "common_error": "错误",
+  "common_attention": "注意",
 
   "service_import_success":"导入成功",
   "service_import_n_books": "{count, plural, other{正在导入 {count} 本书}}",
@@ -199,7 +200,8 @@
   "webdav_upload": "上传到 WebDAV",
   "webdav_only_wifi": "仅在 WiFi 下同步",
   "webdav_sync_aborted": "同步已取消",
-  "webdav_sync_aborted_content": "未能从 WebDAV 获取数据，这可能是由于网络波动，请稍后再试。",
+  "webdav_sync_aborted_content": "未能从 WebDAV 获取数据。请检查以下内容： \n1. 网络连接是否正常 \n2. 确保已经其他设备上上传了有效的阅读数据到 WebDAV",
+  "webdav_sync_direction": "WebDAV 端数据可能被其他设备修改，请选择如何处理数据",
 
   "settings_sync": "同步",
   "settings_sync_webdav": "WebDAV",
