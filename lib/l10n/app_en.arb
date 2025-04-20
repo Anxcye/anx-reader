@@ -183,6 +183,7 @@
   "common_reset": "Reset",
   "common_none": "None",
   "common_error": "Error",
+  "common_attention": "Attention",
 
   "storage": "Storage",
   "storage_info": "Storage Info",
@@ -211,7 +212,8 @@
   "webdav_upload": "Upload to WebDAV",
   "webdav_only_wifi": "Only sync when WiFi is connected",
   "webdav_sync_aborted": "Sync aborted",
-  "webdav_sync_aborted_content": "Failed to get data from WebDAV, this may be due to network fluctuations, please try again later.",
+  "webdav_sync_aborted_content": "Failed to get data from WebDAV. Please check the following: \n1. Network connection \n2. Ensure that valid reading data has been uploaded to WebDAV on other devices",
+  "webdav_sync_direction": "WebDAV data may be modified by other devices, please choose how to handle the data",
 
   "settings_sync": "Sync",
   "settings_sync_webdav": "WebDAV",
