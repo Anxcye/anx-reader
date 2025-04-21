@@ -3,12 +3,14 @@
 ## Todo
 
 ## 1.4.4
+- Feat: More available fonts
 - Feat: Delete reading records of a book
 - Feat: Add webdav sync direction dialog
 - Feat: Add font delete
 - Fix: Webdav sync aborted dialog content
 - Fix: if webdav is empty, sync will upload
 
+- 新增：更多可选字体
 - 新增：删除一本书的阅读记录
 - 新增：添加 WebDAV 同步方向对话框
 - 新增：添加字体删除
