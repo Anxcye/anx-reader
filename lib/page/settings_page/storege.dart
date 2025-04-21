@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/providers/storage_info.dart';
+import 'package:anx_reader/widgets/delete_confirm.dart';
 import 'package:anx_reader/widgets/settings/settings_section.dart';
 import 'package:anx_reader/widgets/settings/settings_tile.dart';
 import 'package:anx_reader/widgets/settings/settings_title.dart';
@@ -67,6 +68,11 @@ class _StorageSettingsState extends ConsumerState<StorageSettings>
             child: Column(
               children: [
                 ListTile(
+                  title: Text(L10n.of(context).storage_total_size),
+                  trailing:
+                      fileSizeTriling(storageInfoAsync.value?.totalSizeStr),
+                ),
+                ListTile(
                   title: Text(L10n.of(context).storage_database_file),
                   trailing:
                       fileSizeTriling(storageInfoAsync.value?.databaseSizeStr),
@@ -88,7 +94,7 @@ class _StorageSettingsState extends ConsumerState<StorageSettings>
                           storageInfoAsync.value?.dataFilesSizeStr),
                     ),
                     Padding(
-                      padding: const EdgeInsets.only(left: 16.0),
+                      padding: const EdgeInsets.only(left: 20.0),
                       child: Column(
                         children: [
                           ListTile(
@@ -144,7 +150,8 @@ class _StorageSettingsState extends ConsumerState<StorageSettings>
                       height: MediaQuery.of(context).size.height -
                           MediaQuery.of(context).padding.top -
                           MediaQuery.of(context).padding.bottom -
-                          kToolbarHeight - 200,
+                          kToolbarHeight -
+                          140,
                       child: TabBarView(
                         controller: _tabController,
                         children: [
@@ -156,6 +163,8 @@ class _StorageSettingsState extends ConsumerState<StorageSettings>
                               listFiles: ref
                                   .read(storageInfoProvider.notifier)
                                   .listBookFiles(),
+                              showDelete: false,
+                              ref: ref,
                             ),
                             loading: () => const Center(
                                 child: CircularProgressIndicator.adaptive()),
@@ -170,6 +179,8 @@ class _StorageSettingsState extends ConsumerState<StorageSettings>
                               listFiles: ref
                                   .read(storageInfoProvider.notifier)
                                   .listCoverFiles(),
+                              showDelete: false,
+                              ref: ref,
                             ),
                             loading: () => const Center(
                                 child: CircularProgressIndicator.adaptive()),
@@ -184,6 +195,8 @@ class _StorageSettingsState extends ConsumerState<StorageSettings>
                               listFiles: ref
                                   .read(storageInfoProvider.notifier)
                                   .listFontFiles(),
+                              showDelete: true,
+                              ref: ref,
                             ),
                             loading: () => const Center(
                                 child: CircularProgressIndicator.adaptive()),
@@ -207,12 +220,16 @@ class DataFilesDetailTab extends StatelessWidget {
   final String title;
   final IconData icon;
   final Future<List<File>> listFiles;
+  final bool showDelete;
+  final WidgetRef ref;
 
   const DataFilesDetailTab({
     super.key,
     required this.title,
     required this.icon,
     required this.listFiles,
+    this.showDelete = false,
+    required this.ref,
   });
 
   @override
@@ -223,6 +240,15 @@ class DataFilesDetailTab extends StatelessWidget {
       const suffixes = ['B', 'KB', 'MB', 'GB', 'TB'];
       var i = (log(bytes) / log(1024)).floor();
       return '${(bytes / pow(1024, i)).toStringAsFixed(2)} ${suffixes[i]}';
+    }
+
+    Widget fileSizeWidget(File file) {
+      return FutureBuilder<int>(
+        future: file.length(),
+        builder: (context, snapshot) {
+          return Text(formatSize(snapshot.data ?? 0));
+        },
+      );
     }
 
     return Column(
@@ -241,7 +267,21 @@ class DataFilesDetailTab extends StatelessWidget {
                     final file = files[index];
                     return ListTile(
                       title: Text(file.path.split(Platform.pathSeparator).last),
-                      trailing: Text(formatSize(file.lengthSync())),
+                      subtitle: showDelete ? fileSizeWidget(file) : null,
+                      trailing: showDelete
+                          ? file.path.endsWith('SourceHanSerifSC-Regular.otf')
+                              ? null
+                              : DeleteConfirm(
+                                  delete: () {
+                                    snapshot.data!.remove(file);
+                                    ref
+                                        .read(storageInfoProvider.notifier)
+                                        .deleteFile(file);
+                                  },
+                                  deleteIcon: const Icon(Icons.delete),
+                                  confirmIcon: const Icon(Icons.check),
+                                )
+                          : fileSizeWidget(file),
                     );
                   },
                 );

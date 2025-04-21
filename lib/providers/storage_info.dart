@@ -124,4 +124,9 @@ class StorageInfo extends _$StorageInfo {
 
     return files;
   }
+
+  Future<void> deleteFile(File file) async {
+    await file.delete();
+    state = AsyncData(await build());
+  }
 }

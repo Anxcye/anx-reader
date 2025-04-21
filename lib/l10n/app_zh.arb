@@ -359,6 +359,7 @@
 
   "storage": "存储",
   "storage_info": "存储信息",
+  "storage_total_size": "总大小",
   "storage_database_file": "数据库文件",
   "storage_log_file": "日志文件",
   "storage_cache_file": "缓存文件",
