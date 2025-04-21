@@ -6,6 +6,7 @@ import 'package:anx_reader/page/settings_page/narrate.dart';
 import 'package:anx_reader/page/settings_page/reading.dart';
 import 'package:anx_reader/page/settings_page/settings_page.dart';
 import 'package:anx_reader/page/settings_page/storege.dart';
+import 'package:anx_reader/page/settings_page/subpage/fonts.dart';
 import 'package:anx_reader/page/settings_page/sync.dart';
 import 'package:anx_reader/page/settings_page/translate.dart';
 import 'package:anx_reader/widgets/settings/about.dart';
@@ -82,6 +83,15 @@ class _SubMoreSettingsState extends State<SubMoreSettings> {
               L10n.of(context).reading_page_reading,
               L10n.of(context).reading_page_style,
               L10n.of(context).reading_page_other,
+            ],
+          },
+          {
+            "title": "字体设置",
+            "icon": Icons.font_download_outlined,
+            "sections": const FontsSettingPage(),
+            "subtitles": [
+              "下载字体",
+              "字体管理",
             ],
           },
           {
