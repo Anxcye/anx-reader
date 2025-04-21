@@ -14,6 +14,7 @@ import 'package:anx_reader/widgets/statistic/statistic_card.dart';
 import 'package:anx_reader/widgets/tips/statistic_tips.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 
 class StatisticPage extends StatefulWidget {
   const StatisticPage({super.key});
@@ -191,9 +192,14 @@ Widget _totalReadTime() {
   );
 }
 
-class DateBooks extends ConsumerWidget {
+class DateBooks extends ConsumerStatefulWidget {
   const DateBooks({super.key});
 
+  @override
+  ConsumerState<DateBooks> createState() => _DateBooksState();
+}
+
+class _DateBooksState extends ConsumerState<DateBooks> {
   final TextStyle titleStyle = const TextStyle(
     fontSize: 30,
     fontFamily: 'SourceHanSerif',
@@ -201,14 +207,105 @@ class DateBooks extends ConsumerWidget {
     overflow: TextOverflow.ellipsis,
   );
 
+  List<int> deleteBookIds = [];
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  void dispose() {
+    super.dispose();
+    deleteReadingTimeByBookId(deleteBookIds);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final statisticData = ref.watch(statisticDataProvider);
+
+    Widget dragToDelete(Widget child, int bookId) {
+      return StatefulBuilder(builder: (context, localSetState) {
+        if (deleteBookIds.contains(bookId)) {
+          return Card(
+            child: SizedBox(
+              height: 146,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.delete,
+                              size: 30,
+                            ),
+                            Text(
+                              L10n.of(context).statistic_deleted_records,
+                              style: TextStyle(
+                                  fontSize: 20, fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
+                        FilledButton(
+                            onPressed: () {
+                              localSetState(() {
+                                deleteBookIds.remove(bookId);
+                              });
+                            },
+                            child: Text(L10n.of(context).common_undo)),
+                      ],
+                    ),
+                    const Spacer(),
+                    const Divider(),
+                    Row(
+                      children: [
+                        Icon(Icons.info_outline, size: 18),
+                        Text(L10n.of(context).statistic_deleted_records_tips),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }
+        ActionPane actionPane = ActionPane(
+          motion: const BehindMotion(),
+          children: [
+            SlidableAction(
+              onPressed: (context) {
+                localSetState(() {
+                  deleteBookIds.add(bookId);
+                });
+              },
+              icon: Icons.delete,
+              label: L10n.of(context).common_delete,
+            ),
+          ],
+        );
+        return Slidable(
+          key: ValueKey(bookId),
+          startActionPane: actionPane,
+          endActionPane: actionPane,
+          child: child,
+        );
+      });
+    }
 
     return statisticData.when(
       data: (data) {
-        final books = data.bookReadingTime;
+        final title = data.isSelectingDay
+            ? data.date.toString().substring(0, 10)
+            : data.mode == ChartMode.week
+                ? weekOfYear(data.date)
+                : data.mode == ChartMode.month
+                    ? '${data.date.year}.${data.date.month}'
+                    : data.mode == ChartMode.year
+                        ? data.date.year.toString()
+                        : L10n.of(context).statistic_all_time;
 
+        final books = data.bookReadingTime;
         return Column(
           children: [
             Padding(
@@ -216,18 +313,7 @@ class DateBooks extends ConsumerWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    data.isSelectingDay
-                        ? data.date.toString().substring(0, 10)
-                        : data.mode == ChartMode.week
-                            ? weekOfYear(data.date)
-                            : data.mode == ChartMode.month
-                                ? '${data.date.year}.${data.date.month}'
-                                : data.mode == ChartMode.year
-                                    ? data.date.year.toString()
-                                    : L10n.of(context).statistic_all_time,
-                    style: titleStyle,
-                  ),
+                  Text(title, style: titleStyle),
                 ],
               ),
             ),
@@ -241,9 +327,12 @@ class DateBooks extends ConsumerWidget {
                 children: books.map((bookMap) {
                   final book = bookMap.keys.first;
                   final readingTime = bookMap.values.first;
-                  return BookStatisticItem(
-                    bookId: book.id,
-                    readingTime: readingTime,
+                  return dragToDelete(
+                    BookStatisticItem(
+                      bookId: book.id,
+                      readingTime: readingTime,
+                    ),
+                    book.id,
                   );
                 }).toList(),
               ),
@@ -259,56 +348,6 @@ class DateBooks extends ConsumerWidget {
     );
   }
 }
-// class DateBooks extends StatelessWidget {
-//   const DateBooks({super.key});
-//
-//   final TextStyle titleStyle = const TextStyle(
-//     fontSize: 30,
-//     fontFamily: 'SourceHanSerif',
-//     fontWeight: FontWeight.bold,
-//     overflow: TextOverflow.ellipsis,
-//   );
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return FutureBuilder<List<Map<int, int>>>(
-//       future: selectThisWeekBooks(),
-//       builder: (context, snapshot) {
-//         if (snapshot.connectionState == ConnectionState.done) {
-//           return Column(
-//             children: [
-//               Padding(
-//                 padding: const EdgeInsets.only(left: 10, top: 10, right: 10),
-//                 child: Row(
-//                   crossAxisAlignment: CrossAxisAlignment.start,
-//                   children: [
-//                     Text(
-//                       L10n.of(context).statistic_this_week,
-//                       style: titleStyle,
-//                     ),
-//                   ],
-//                 ),
-//               ),
-//               snapshot.data!.isEmpty
-//                   ? const Padding(
-//                       padding: EdgeInsets.only(top: 50),
-//                       child: StatisticsTips(),
-//                     )
-//                   : Column(
-//                       children: snapshot.data!.map((e) {
-//                         return BookStatisticItem(
-//                             bookId: e.keys.first, readingTime: e.values.first);
-//                       }).toList(),
-//                     ),
-//             ],
-//           );
-//         } else {
-//           return const CircularProgressIndicator();
-//         }
-//       },
-//     );
-//   }
-// }
 
 class BookStatisticItem extends StatelessWidget {
   const BookStatisticItem(

@@ -88,7 +88,7 @@ class AnxWebdav extends _$AnxWebdav {
     await _client.mkdir('anx/data');
   }
 
-  Future<void> syncData(SyncDirection direction, WidgetRef ref) async {
+  Future<void> syncData(SyncDirection direction, WidgetRef? ref) async {
     if (Prefs().onlySyncWhenWifi &&
         !(await Connectivity().checkConnectivity())
             .contains(ConnectivityResult.wifi)) {
@@ -205,7 +205,7 @@ class AnxWebdav extends _$AnxWebdav {
       imageCache.clearLiveImages();
 
       try {
-        ref.read(bookListProvider.notifier).refresh();
+        ref?.read(bookListProvider.notifier).refresh();
       } catch (e) {
         AnxLog.info('Failed to refresh book list: $e');
       }
