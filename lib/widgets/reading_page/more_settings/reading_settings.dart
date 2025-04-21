@@ -3,6 +3,7 @@ import 'package:anx_reader/enums/convert_chinese_mode.dart';
 import 'package:anx_reader/enums/reading_info.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/page/reading_page.dart';
+import 'package:anx_reader/page/settings_page/subpage/fonts.dart';
 import 'package:flutter/material.dart';
 import 'package:icons_plus/icons_plus.dart';
 
@@ -338,14 +339,33 @@ class _ReadingMoreSettingsState extends State<ReadingMoreSettings> {
       );
     }
 
+    Widget downloadFonts() {
+      return ListTile(
+        contentPadding: EdgeInsets.zero,
+        title: Text(L10n.of(context).download_fonts),
+        leading: const Icon(Icons.font_download_outlined),
+        trailing: const Icon(Icons.arrow_forward_ios),
+        onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const FontsSettingPage(),
+              ),
+            );
+          },
+        
+      );
+    }
+
     return Container(
       padding: const EdgeInsets.all(18.0),
       child: Column(
         children: [
+          downloadFonts(),
+          const Divider(height: 20),
           columnCount(),
-          const Divider(height: 8),
           convertChinese(),
-          const Divider(height: 8),
+          const Divider(height: 15),
           readingInfo(),
           // const Divider(height: 8),
           // bionicReading(),

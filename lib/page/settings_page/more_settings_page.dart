@@ -86,15 +86,6 @@ class _SubMoreSettingsState extends State<SubMoreSettings> {
             ],
           },
           {
-            "title": "字体设置",
-            "icon": Icons.font_download_outlined,
-            "sections": const FontsSettingPage(),
-            "subtitles": [
-              "下载字体",
-              "字体管理",
-            ],
-          },
-          {
             "title": L10n.of(context).settings_sync,
             "icon": Icons.sync_outlined,
             "sections": const SyncSetting(),

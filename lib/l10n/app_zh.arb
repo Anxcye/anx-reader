@@ -183,8 +183,12 @@
   "common_reset": "重置",
   "common_none": "无",
   "common_error": "错误",
-  "common_attention": "注意",
   "common_undo": "撤销",
+  "commom_download": "下载",
+  "common_pause": "暂停",
+  "common_resume": "继续",
+  "common_download_failed": "下载失败",
+  "common_retry": "重试",
 
   "service_import_success":"导入成功",
   "service_import_n_books": "{count, plural, other{正在导入 {count} 本书}}",
@@ -368,5 +372,14 @@
   "storage_cover_file": "封面文件",
   "storage_font_file": "字体文件",
   "storage_data_file_details": "数据文件详情",
-  "storage_clear_cache": "清空缓存"
+  "storage_clear_cache": "清空缓存",
+  
+  "download_fonts": "下载字体",
+  "font_no_available_fonts": "没有可用的字体",
+  "font_official_website": "官方网站",
+  "font_license_agreement": "许可协议",
+  "font_downloaded": "已安装",
+  "font_failed_to_load_fonts": "加载字体失败",
+  "font_downloading": "下载中 {progress}",
+  "font_cancelled": "已取消 {progress}"
 }

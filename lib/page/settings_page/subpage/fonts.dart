@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:anx_reader/providers/fonts.dart';
 import 'package:url_launcher/url_launcher_string.dart';
+import 'package:anx_reader/l10n/generated/L10n.dart';
 
 class FontsSettingPage extends ConsumerWidget {
   const FontsSettingPage({super.key});
@@ -12,6 +13,9 @@ class FontsSettingPage extends ConsumerWidget {
     final fontList = ref.watch(fontsProvider);
 
     return Scaffold(
+      appBar: AppBar(
+        title: Text(L10n.of(context).download_fonts),
+      ),
       body: fontList.when(
         data: (fonts) {
           if (fonts.isEmpty) {
@@ -41,7 +45,7 @@ class FontsSettingPage extends ConsumerWidget {
                         errorWidget: (context, url, error) =>
                             const Icon(Icons.error),
                       ),
-                      Divider(),
+                    const Divider(),
                     Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Column(
@@ -54,17 +58,11 @@ class FontsSettingPage extends ConsumerWidget {
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-
                           const SizedBox(height: 8),
-
                           Text(font.desc),
-
                           const SizedBox(height: 8),
-
-                          // 官方网站链接
                           Row(
                             mainAxisAlignment: MainAxisAlignment.end,
-                            spacing: 5,
                             children: [
                               TextButton.icon(
                                 onPressed: () {
@@ -75,15 +73,13 @@ class FontsSettingPage extends ConsumerWidget {
                                 },
                                 icon: const Icon(Icons.link),
                                 label: Text(
-                                  '官方网站',
+                                  L10n.of(context).font_official_website,
                                   style: TextStyle(
                                     color: Theme.of(context).primaryColor,
                                     decoration: TextDecoration.underline,
                                   ),
                                 ),
-
                               ),
-
                               TextButton.icon(
                                 onPressed: () {
                                   launchUrlString(
@@ -102,11 +98,8 @@ class FontsSettingPage extends ConsumerWidget {
                               ),
                             ],
                           ),
-
                           const SizedBox(height: 16),
-
-                          _buildDownloadButton(
-                              context, ref, font),
+                          _buildDownloadButton(context, ref, font),
                         ],
                       ),
                     ),
@@ -118,7 +111,7 @@ class FontsSettingPage extends ConsumerWidget {
         },
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => Center(
-          child: Text('Error to load fonts: $error'),
+          child: Text(L10n.of(context).font_failed_to_load_fonts),
         ),
       ),
     );
@@ -136,10 +129,9 @@ class FontsSettingPage extends ConsumerWidget {
 
     if (isAllFilesDownloaded) {
       return ElevatedButton.icon(
-        onPressed: null,
-        icon: const Icon(Icons.check),
-        label: const Text('已安装')
-      );
+          onPressed: null,
+          icon: const Icon(Icons.check),
+          label: Text(L10n.of(context).font_downloaded));
     }
 
     if (downloadState != null) {
@@ -153,21 +145,21 @@ class FontsSettingPage extends ConsumerWidget {
               Row(
                 children: [
                   Text(
-                      '下载中 ${(downloadState.progress * 100).toStringAsFixed(1)}%'),
+                      '${L10n.of(context).font_downloading((downloadState.progress * 100).toStringAsFixed(1))}%'),
                   const Spacer(),
                   TextButton.icon(
                     onPressed: () => ref
                         .read(fontDownloadsProvider.notifier)
                         .pauseDownload(font.id),
                     icon: const Icon(Icons.pause),
-                    label: const Text('暂停'),
+                    label: Text(L10n.of(context).common_pause),
                   ),
                   TextButton.icon(
                     onPressed: () => ref
                         .read(fontDownloadsProvider.notifier)
                         .cancelDownload(font.id),
                     icon: const Icon(Icons.cancel),
-                    label: const Text('取消'),
+                    label: Text(L10n.of(context).common_cancel),
                   ),
                 ],
               ),
@@ -177,21 +169,22 @@ class FontsSettingPage extends ConsumerWidget {
         case DownloadStatus.paused:
           return Row(
             children: [
-              Text('已暂停 ${(downloadState.progress * 100).toStringAsFixed(1)}%'),
+              Text(
+                  '${L10n.of(context).font_cancelled((downloadState.progress * 100).toStringAsFixed(1))}%'),
               const Spacer(),
               TextButton.icon(
                 onPressed: () => ref
                     .read(fontDownloadsProvider.notifier)
                     .resumeDownload(font),
                 icon: const Icon(Icons.play_arrow),
-                label: const Text('继续'),
+                label: Text(L10n.of(context).common_resume),
               ),
               TextButton.icon(
                 onPressed: () => ref
                     .read(fontDownloadsProvider.notifier)
                     .cancelDownload(font.id),
                 icon: const Icon(Icons.cancel),
-                label: const Text('取消'),
+                label: Text(L10n.of(context).common_cancel),
               ),
             ],
           );
@@ -200,7 +193,8 @@ class FontsSettingPage extends ConsumerWidget {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('下载失败: ${downloadState.error}',
+              Text(
+                  '${L10n.of(context).common_download_failed}: ${downloadState.error}',
                   style: const TextStyle(color: Colors.red)),
               const SizedBox(height: 8),
               ElevatedButton.icon(
@@ -208,7 +202,7 @@ class FontsSettingPage extends ConsumerWidget {
                     .read(fontDownloadsProvider.notifier)
                     .startDownload(font),
                 icon: const Icon(Icons.refresh),
-                label: const Text('重试'),
+                label: Text(L10n.of(context).common_retry),
               ),
             ],
           );
@@ -222,7 +216,7 @@ class FontsSettingPage extends ConsumerWidget {
       onPressed: () =>
           ref.read(fontDownloadsProvider.notifier).startDownload(font),
       icon: const Icon(Icons.download),
-      label: const Text('下载'),
+      label: Text(L10n.of(context).commom_download),
     );
   }
 }
