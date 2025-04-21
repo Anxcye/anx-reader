@@ -184,6 +184,7 @@
   "common_none": "None",
   "common_error": "Error",
   "common_attention": "Attention",
+  "common_undo": "Undo",
 
   "storage": "Storage",
   "storage_info": "Storage Info",
@@ -319,6 +320,8 @@
   "statistic_days_ago": "{count, plural, =1{1 day ago} other{{count} days ago}}",
   "statistic_months_ago": "{count, plural, =1{1 month ago} other{{count} months ago}}",
   "statistic_years_ago": "{count, plural, =1{1 year ago} other{{count} years ago}}",
+  "statistic_deleted_records": "Records to be deleted",
+  "statistic_deleted_records_tips": "Will be deleted when leaving this page",
 
   "webview_unsupported_version": "Unsupported Webview Version",
   "webview_unsupported_message": "Your Webview version may be not supported. Current version is {version}, required minimum version is {minVersion}, please update your Webview",

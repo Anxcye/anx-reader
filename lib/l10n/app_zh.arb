@@ -184,6 +184,7 @@
   "common_none": "无",
   "common_error": "错误",
   "common_attention": "注意",
+  "common_undo": "撤销",
 
   "service_import_success":"导入成功",
   "service_import_n_books": "{count, plural, other{正在导入 {count} 本书}}",
@@ -312,6 +313,8 @@
   "statistic_days_ago": "{count, plural, =1{1天前} other{{count}天前}}",
   "statistic_months_ago": "{count, plural, =1{1个月前} other{{count}个月前}}",
   "statistic_years_ago": "{count, plural, =1{1年前} other{{count}年前}}",
+  "statistic_deleted_records": "即将删除的记录",
+  "statistic_deleted_records_tips": "将在离开此界面时删除此记录",
 
   "webview_unsupported_version": "不支持的 Webview 版本",
   "webview_unsupported_message": "Webview 版本可能不支持。当前版本为 {version}, 所需的最低版本是 {minVersion}，请更新您的 Webview",
