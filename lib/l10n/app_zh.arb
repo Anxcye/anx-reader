@@ -84,7 +84,7 @@
   "reading_page_screen_timeout": "屏幕超时",
   "reading_page_page_turning_method": "翻页方式",
   "font": "字体",
-  "add_new_font": "添加字体",
+  "add_new_font": "导入本地",
   "follow_book": "跟随书籍",
   "system_font": "系统字体",
 
