@@ -5,6 +5,7 @@ import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/models/book_style.dart';
 import 'package:anx_reader/models/font_model.dart';
 import 'package:anx_reader/page/reading_page.dart';
+import 'package:anx_reader/page/settings_page/subpage/fonts.dart';
 import 'package:anx_reader/service/book_player/book_player_server.dart';
 import 'package:anx_reader/service/font.dart';
 import 'package:anx_reader/utils/font_parser.dart';
@@ -78,6 +79,11 @@ class StyleWidgetState extends State<StyleWidget> {
     Directory fontDir = getFontDir();
     List<FontModel> fontList = [
       FontModel(
+        label: L10n.of(context).download_fonts,
+        name: 'download',
+        path: '',
+      ),
+      FontModel(
         label: L10n.of(context).add_new_font,
         name: 'newFont',
         path: '',
@@ -121,9 +127,16 @@ class StyleWidgetState extends State<StyleWidget> {
     FontModel? font = fonts().firstWhere(
         (element) => element.path == Prefs().font.path,
         orElse: () => FontModel(
-            label: L10n.of(context).follow_book,
-            name: 'book',
-            path: ''));
+            label: L10n.of(context).follow_book, name: 'book', path: ''));
+
+    Widget? leadingIcon(String name) {
+      if (name == 'download') {
+        return const Icon(Icons.download);
+      } else if (name == 'newFont') {
+        return const Icon(Icons.add);
+      }
+      return null;
+    }
 
     return Row(children: [
       Expanded(
@@ -166,6 +179,13 @@ class StyleWidgetState extends State<StyleWidget> {
               await importFont();
               setState(() {});
               return;
+            } else if (font.name == 'download') {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const FontsSettingPage()),
+              );
+              return;
             }
             epubPlayerKey.currentState!.changeFont(font);
             Prefs().font = font;
@@ -174,8 +194,7 @@ class StyleWidgetState extends State<StyleWidget> {
               .map((font) => DropdownMenuEntry(
                     value: font,
                     label: font.label,
-                    leadingIcon:
-                        font.name == 'newFont' ? const Icon(Icons.add) : null,
+                    leadingIcon: leadingIcon(font.name),
                   ))
               .toList(),
         ),
