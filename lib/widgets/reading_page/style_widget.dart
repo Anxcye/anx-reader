@@ -118,6 +118,13 @@ class StyleWidgetState extends State<StyleWidget> {
   }
 
   Widget fontAndPageTurn() {
+    FontModel? font = fonts().firstWhere(
+        (element) => element.path == Prefs().font.path,
+        orElse: () => FontModel(
+            label: L10n.of(context).follow_book,
+            name: 'book',
+            path: ''));
+
     return Row(children: [
       Expanded(
         child: DropdownMenu<PageTurn>(
@@ -147,7 +154,7 @@ class StyleWidgetState extends State<StyleWidget> {
         child: DropdownMenu<FontModel>(
           label: Text(L10n.of(context).font),
           expandedInsets: const EdgeInsets.only(left: 5),
-          initialSelection: Prefs().font,
+          initialSelection: font,
           inputDecorationTheme: InputDecorationTheme(
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(50),
@@ -197,10 +204,10 @@ class StyleWidgetState extends State<StyleWidget> {
         ),
         Expanded(
           child: Slider(
-            padding: EdgeInsets.symmetric(horizontal: 8),
-            value: bookStyle.lineHeight,
-            onChanged: (double value) {
-              setState(() {
+              padding: EdgeInsets.symmetric(horizontal: 8),
+              value: bookStyle.lineHeight,
+              onChanged: (double value) {
+                setState(() {
                   bookStyle.lineHeight = value;
                   widget.epubPlayerKey.currentState!.changeStyle(bookStyle);
                   Prefs().saveBookStyleToPrefs(bookStyle);

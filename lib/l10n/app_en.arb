@@ -188,6 +188,7 @@
 
   "storage": "Storage",
   "storage_info": "Storage Info",
+  "storage_total_size": "Total Size",
   "storage_database_file": "Database File",
   "storage_log_file": "Log File",
   "storage_cache_file": "Cache File",
