@@ -551,11 +551,11 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
   void dispose() {
     super.dispose();
     _animationController?.dispose();
-    if (defaultTargetPlatform == TargetPlatform.android ||
-        defaultTargetPlatform == TargetPlatform.iOS ||
-        defaultTargetPlatform == TargetPlatform.macOS) {
-      InAppWebViewController.clearAllCache();
-    }
+    // if (defaultTargetPlatform == TargetPlatform.android ||
+    //     defaultTargetPlatform == TargetPlatform.iOS ||
+    //     defaultTargetPlatform == TargetPlatform.macOS) {
+    //   InAppWebViewController.clearAllCache();
+    // }
     saveReadingProgress();
     removeOverlay();
   }
