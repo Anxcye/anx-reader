@@ -212,7 +212,9 @@ class _DateBooksState extends ConsumerState<DateBooks> {
   @override
   void dispose() {
     super.dispose();
-    deleteReadingTimeByBookId(deleteBookIds);
+    if (deleteBookIds.isNotEmpty) {
+      deleteReadingTimeByBookId(deleteBookIds);
+    }
   }
 
   @override
@@ -271,7 +273,7 @@ class _DateBooksState extends ConsumerState<DateBooks> {
           );
         }
         ActionPane actionPane = ActionPane(
-          motion: const BehindMotion(),
+          motion: const StretchMotion(),
           children: [
             SlidableAction(
               onPressed: (context) {
@@ -281,6 +283,7 @@ class _DateBooksState extends ConsumerState<DateBooks> {
               },
               icon: Icons.delete,
               label: L10n.of(context).common_delete,
+              backgroundColor: Theme.of(context).colorScheme.surface,
             ),
           ],
         );
