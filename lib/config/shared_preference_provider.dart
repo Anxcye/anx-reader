@@ -572,4 +572,13 @@ class Prefs extends ChangeNotifier {
     }
     notifyListeners();
   }
+
+  int get lastServerPort {
+    return prefs.getInt('lastServerPort') ?? 0;
+  }
+
+  set lastServerPort(int port) {
+    prefs.setInt('lastServerPort', port);
+    notifyListeners();
+  }
 }
