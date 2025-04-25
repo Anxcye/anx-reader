@@ -221,6 +221,7 @@ class ReadingPageState extends ConsumerState<ReadingPage>
             _currentPage = page;
           });
         },
+        hideAppBarAndBottomBar: showOrHideAppBarAndBottomBar,
       );
     });
   }
