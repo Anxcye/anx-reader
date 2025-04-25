@@ -6,6 +6,10 @@ class AiDio {
 
   AiDio._();
 
+  void newDio() {
+    dio = Dio();
+  }
+
   void cancel() {
     dio.close(force: true);
     dio = Dio();
