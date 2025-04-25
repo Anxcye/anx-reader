@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:anx_reader/utils/log/common.dart';
 import 'package:dio/dio.dart';
 import 'package:anx_reader/service/ai/ai_dio.dart';
 import 'dart:convert';
@@ -84,6 +85,7 @@ Stream<String> geminiGenerateStream(
       }
     }
   } catch (e) {
+    AnxLog.severe("geminiGenerateStream error: $e");
     yield* Stream.error('Request failed: $e');
   } finally {
     dio.close();
