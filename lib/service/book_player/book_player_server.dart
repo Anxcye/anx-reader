@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/utils/get_path/get_base_path.dart';
 import 'package:anx_reader/utils/log/common.dart';
 import 'package:flutter/services.dart';
@@ -22,7 +23,15 @@ class Server {
         .addMiddleware(shelf.logRequests())
         .addHandler(_handleRequests);
 
-    _server = await io.serve(handler, 'localhost', 0);
+    int port = Prefs().lastServerPort;
+
+    try {
+      _server = await io.serve(handler, 'localhost', port);
+    } catch (e) {
+      _server = await io.serve(handler, 'localhost', 0);
+    }
+
+    Prefs().lastServerPort = _server!.port;
     AnxLog.info(
         'Server: Serving at http://${_server?.address.host}:${_server?.port}');
   }
