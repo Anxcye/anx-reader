@@ -329,7 +329,7 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
           if (cfi == location['cfi']) return;
           setState(() {
             cfi = location['cfi'] ?? '';
-            percentage = location['percentage'] ?? 0.0;
+            percentage = double.tryParse(location['percentage'].toString()) ?? 0.0;
             chapterTitle = location['chapterTitle'] ?? '';
             chapterHref = location['chapterHref'] ?? '';
             chapterCurrentPage = location['chapterCurrentPage'] ?? 0;
@@ -555,7 +555,7 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
   }
 
   Widget readingInfoWidget() {
-    if (chapterCurrentPage == 0) {
+    if (chapterCurrentPage == 0 && percentage == 0.0) {
       return const SizedBox();
     }
 
