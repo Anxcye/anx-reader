@@ -142,6 +142,12 @@
   "reading_page_reading_info_book_progress": "Book Progress",
 
   "bookshelf_dragging": "Release to import",
+  "bookshelf_sort": "Sort",
+  "bookshelf_title": "Title",
+  "bookshelf_author": "Author",
+  "bookshelf_lastReadTime": "Last Read Time",
+  "bookshelf_progress": "Progress",
+  "bookshelf_importTime": "Import Time",
 
   "notes_page_detail": "Detail",
   "notes_page_export": "Export",
@@ -190,6 +196,8 @@
   "common_resume": "Resume",
   "common_download_failed": "Download Failed",
   "common_retry": "Retry",
+  "common_ascending": "Ascending",
+  "common_descending": "Descending",
 
   "storage": "Storage",
   "storage_info": "Storage Info",

@@ -3,6 +3,8 @@ import 'dart:core';
 
 import 'package:anx_reader/enums/ai_prompts.dart';
 import 'package:anx_reader/enums/convert_chinese_mode.dart';
+import 'package:anx_reader/enums/sort_field.dart';
+import 'package:anx_reader/enums/sort_order.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/main.dart';
 import 'package:anx_reader/models/book_style.dart';
@@ -539,7 +541,6 @@ class Prefs extends ChangeNotifier {
     return ReadingInfoModel.fromJson(jsonDecode(readingInfoJson));
   }
 
-
   bool get isSystemTts {
     return prefs.getBool('isSystemTts') ?? false;
   }
@@ -553,7 +554,7 @@ class Prefs extends ChangeNotifier {
     return prefs.getBool('showTextUnderIconButton') ?? true;
   }
 
-  set showTextUnderIconButton(bool show){
+  set showTextUnderIconButton(bool show) {
     prefs.setBool('showTextUnderIconButton', show);
     notifyListeners();
   }
@@ -579,6 +580,30 @@ class Prefs extends ChangeNotifier {
 
   set lastServerPort(int port) {
     prefs.setInt('lastServerPort', port);
+    notifyListeners();
+  }
+
+  SortFieldEnum get sortField {
+    return SortFieldEnum.values.firstWhere(
+      (element) => element.name == prefs.getString('sortField'),
+      orElse: () => SortFieldEnum.lastReadTime,
+    );
+  }
+
+  set sortField(SortFieldEnum field) {
+    prefs.setString('sortField', field.name);
+    notifyListeners();
+  }
+
+  SortOrderEnum get sortOrder {
+    return SortOrderEnum.values.firstWhere(
+      (element) => element.name == prefs.getString('sortOrder'),
+      orElse: () => SortOrderEnum.descending,
+    );
+  }
+
+  set sortOrder(SortOrderEnum order) {
+    prefs.setString('sortOrder', order.name);
     notifyListeners();
   }
 }

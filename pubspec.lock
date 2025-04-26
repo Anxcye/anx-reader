@@ -1086,6 +1086,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.3.0"
+  lpinyin:
+    dependency: "direct main"
+    description:
+      name: lpinyin
+      sha256: "0bb843363f1f65170efd09fbdfc760c7ec34fc6354f9fcb2f89e74866a0d814a"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.3"
   markdown:
     dependency: transitive
     description:

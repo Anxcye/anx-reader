@@ -3,6 +3,7 @@
 ## Todo
 
 ## 1.4.4
+- Feat: Sort books
 - Feat: More available fonts
 - Feat: Delete reading records of a book
 - Feat: Add webdav sync direction dialog
@@ -12,6 +13,7 @@
 - Fix: avoid image following paragraph indent
 - Fix: optimize book loading speed
 
+- 新增：书架排序功能
 - 新增：更多可选字体
 - 新增：删除一本书的阅读记录
 - 新增：添加 WebDAV 同步方向对话框

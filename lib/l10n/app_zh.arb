@@ -142,6 +142,12 @@
   "book_detail_import_date": "首次导入",
 
   "bookshelf_dragging": "松开以导入",
+  "bookshelf_sort": "排序",
+  "bookshelf_title": "书名",
+  "bookshelf_author": "作者",
+  "bookshelf_lastReadTime": "上次阅读时间",
+  "bookshelf_progress": "阅读进度",
+  "bookshelf_importTime": "导入时间",
 
   "notes_page_detail": "详情",
   "notes_page_export": "导出",
@@ -189,6 +195,9 @@
   "common_resume": "继续",
   "common_download_failed": "下载失败",
   "common_retry": "重试",
+  "common_ascending": "升序",
+  "common_descending": "降序",
+
 
   "service_import_success":"导入成功",
   "service_import_n_books": "{count, plural, other{正在导入 {count} 本书}}",
