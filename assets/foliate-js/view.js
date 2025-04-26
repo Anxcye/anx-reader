@@ -170,14 +170,17 @@ export class View extends HTMLElement {
   }
   #onRelocate({ reason, range, index, fraction, size }) {
     this.#index = index
-    const chapterLocation = {
-      current: this.renderer.page,
-      total: this.renderer.pages - 2
-    }
     const progress = this.#sectionProgress?.getProgress(index, fraction, size) ?? {}
     const tocItem = this.#tocProgress?.getProgress(index, range)
     const pageItem = this.#pageProgress?.getProgress(index, range)
     const cfi = this.getCFI(index, range)
+    const totalPages = this.renderer.pages ? this.renderer.pages - 2 : progress.section.total
+    const currentPage = this.renderer.page ?? progress.section.current
+    const chapterLocation = {
+      current: currentPage,
+      total: totalPages
+    }
+
     this.lastLocation = { ...progress, tocItem, pageItem, cfi, range, chapterLocation }
     if (reason === 'snap' || reason === 'page' || reason === 'scroll')
       this.history.replaceState(cfi)
