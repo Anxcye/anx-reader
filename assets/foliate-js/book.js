@@ -55,6 +55,8 @@ const { configure, ZipReader, BlobReader, TextWriter, BlobWriter } =
   await import('./vendor/zip.js')
 const { EPUB } = await import('./epub.js')
 
+var isPdf = false;
+
 const getPosition = (target) => {
   const pointIsInView = (point) => {
     const { x, y } = point;
@@ -305,6 +307,7 @@ const getView = async file => {
     }
   }
   else if (await isPDF(file)) {
+    isPdf = true;
     const { makePDF } = await import('./pdf.js')
     book = await makePDF(file)
   }
@@ -933,7 +936,7 @@ window.setNoAnimation = () => {
 }
 
 const onSelectionEnd = (selection) => {
-  if (footnoteDialog.open) {
+  if (footnoteDialog.open || isPdf) {
     callFlutter('onSelectionEnd', { ...selection, footnote: true })
   } else {
     callFlutter('onSelectionEnd', { ...selection, footnote: false })
