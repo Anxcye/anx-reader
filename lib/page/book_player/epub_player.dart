@@ -4,7 +4,6 @@ import 'dart:convert';
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/dao/book.dart';
 import 'package:anx_reader/dao/book_note.dart';
-import 'package:anx_reader/dao/theme.dart';
 import 'package:anx_reader/enums/reading_info.dart';
 import 'package:anx_reader/main.dart';
 import 'package:anx_reader/models/book.dart';
@@ -24,7 +23,6 @@ import 'package:anx_reader/utils/js/convert_dart_color_to_js.dart';
 import 'package:anx_reader/models/book_note.dart';
 import 'package:anx_reader/utils/webView/gererate_url.dart';
 import 'package:anx_reader/utils/webView/webview_console_message.dart';
-import 'package:anx_reader/utils/webView/webview_initial_variable.dart';
 import 'package:anx_reader/widgets/bookshelf/book_cover.dart';
 import 'package:anx_reader/widgets/context_menu/context_menu.dart';
 import 'package:anx_reader/widgets/reading_page/more_settings/page_turning/diagram.dart';
@@ -45,13 +43,15 @@ class EpubPlayer extends ConsumerStatefulWidget {
   final String? cfi;
   final Function showOrHideAppBarAndBottomBar;
   final Function onLoadEnd;
+  final List<ReadTheme> initialThemes;
 
   const EpubPlayer(
       {super.key,
       required this.showOrHideAppBarAndBottomBar,
       required this.book,
       this.cfi,
-      required this.onLoadEnd});
+      required this.onLoadEnd,
+      required this.initialThemes});
 
   @override
   ConsumerState<EpubPlayer> createState() => EpubPlayerState();
@@ -301,9 +301,9 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
     ''');
   }
 
-  Future<void> getThemeColor() async {
+  void getThemeColor() {
     if (Prefs().autoAdjustReadingTheme) {
-      List<ReadTheme> themes = await selectThemes();
+      List<ReadTheme> themes = widget.initialThemes;
       final isDayMode =
           Theme.of(navigatorKey.currentContext!).brightness == Brightness.light;
       backgroundColor =
@@ -313,7 +313,6 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
       backgroundColor = Prefs().readTheme.backgroundColor;
       textColor = Prefs().readTheme.textColor;
     }
-    // setState(() {});
   }
 
   Future<void> setHandler(InAppWebViewController controller) async {
@@ -480,7 +479,9 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
   }
 
   Future<void> _handlePointerEvents(PointerEvent event) async {
-    if (await isFootNoteOpen() || Prefs().pageTurnStyle == PageTurn.scroll) return;
+    if (await isFootNoteOpen() || Prefs().pageTurnStyle == PageTurn.scroll) {
+      return;
+    }
     if (event is PointerScrollEvent) {
       if (event.scrollDelta.dy > 0) {
         nextPage();
@@ -494,6 +495,7 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
   void initState() {
     book = widget.book;
     focusNode.requestFocus();
+    getThemeColor();
 
     contextMenu = ContextMenu(
       settings: ContextMenuSettings(hideDefaultSystemContextMenuItems: true),
@@ -538,11 +540,6 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
   void dispose() {
     super.dispose();
     _animationController?.dispose();
-    // if (defaultTargetPlatform == TargetPlatform.android ||
-    //     defaultTargetPlatform == TargetPlatform.iOS ||
-    //     defaultTargetPlatform == TargetPlatform.macOS) {
-    //   InAppWebViewController.clearAllCache();
-    // }
     saveReadingProgress();
     removeOverlay();
   }
@@ -707,13 +704,8 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
                   ),
                   initialSettings: initialSettings,
                   contextMenu: contextMenu,
-                  // onLoadStop: (controller, url) => onWebViewCreated(controller),
-                  onConsoleMessage: (controller, consoleMessage) {
-                    if (consoleMessage.message.contains('loadBook')) {
-                      onWebViewCreated(controller);
-                    }
-                    webviewConsoleMessage(controller, consoleMessage);
-                  },
+                  onLoadStop: (controller, url) => onWebViewCreated(controller),
+                  onConsoleMessage: webviewConsoleMessage,
                 ),
               ),
               readingInfoWidget(),

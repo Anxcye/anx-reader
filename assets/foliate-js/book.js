@@ -1045,42 +1045,13 @@ window.readingFeatures = (rules) => {
   reader.readingFeatures()
 }
 
-  // const importing = $importing
-  // const url = '${replaceSingleQuote(url)}'
-  // let initialCfi = '${replaceSingleQuote(cfi)}'
-  // let style = {
-  //     fontSize: ${bookStyle.fontSize},
-  //     fontName: '${replaceSingleQuote(fontName)}',
-  //     fontPath: '${replaceSingleQuote(fontPath)}',
-  //     fontWeight: ${bookStyle.fontWeight},
-  //     letterSpacing: ${bookStyle.letterSpacing},
-  //     spacing: ${bookStyle.lineHeight},
-  //     paragraphSpacing: ${bookStyle.paragraphSpacing},
-  //     textIndent: ${bookStyle.indent},
-  //     fontColor: '#$textColor',
-  //     backgroundColor: '#$backgroundColor',
-  //     topMargin: ${bookStyle.topMargin},
-  //     bottomMargin: ${bookStyle.bottomMargin},
-  //     sideMargin: ${bookStyle.sideMargin},
-  //     justify: true,
-  //     hyphenate: true,
-  //     pageTurnStyle: '${Prefs().pageTurnStyle.name}',
-  //     maxColumnCount: ${bookStyle.maxColumnCount},
-  // }
-
-  // let readingRules = {
-  //   convertChineseMode: '${Prefs().readingRules.convertChineseMode.name}',
-  //   bionicReadingMode: ${Prefs().readingRules.bionicReading},
-  // }
-
-
 // get varible from url
-const urlParams = new URLSearchParams(window.location.search)
-const importing = JSON.parse(urlParams.get('importing'))
-const url = JSON.parse(urlParams.get('url'))
-const initialCfi = JSON.parse(urlParams.get('initialCfi'))
-const style = JSON.parse(urlParams.get('style'))
-const readingRules = JSON.parse(urlParams.get('readingRules'))
+var urlParams = new URLSearchParams(window.location.search)
+var importing = JSON.parse(urlParams.get('importing'))
+var url = JSON.parse(urlParams.get('url'))
+var initialCfi = JSON.parse(urlParams.get('initialCfi'))
+var style = JSON.parse(urlParams.get('style'))
+var readingRules = JSON.parse(urlParams.get('readingRules'))
 
 fetch(url)
   .then(res => res.blob())

@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:anx_reader/dao/book.dart';
+import 'package:anx_reader/dao/theme.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/main.dart';
 import 'package:anx_reader/models/book.dart';
@@ -16,8 +17,8 @@ import 'package:anx_reader/page/reading_page.dart';
 import 'package:anx_reader/utils/import_book.dart';
 import 'package:anx_reader/utils/log/common.dart';
 import 'package:anx_reader/utils/toast/common.dart';
+import 'package:anx_reader/utils/webView/gererate_url.dart';
 import 'package:anx_reader/utils/webView/webview_console_message.dart';
-import 'package:anx_reader/utils/webView/webview_initial_variable.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
@@ -100,7 +101,8 @@ void importBookList(List<File> fileList, BuildContext context, WidgetRef ref) {
                               height: 20,
                               child: const CircularProgressIndicator(),
                             ))
-                        : bookItem(file.path, 
+                        : bookItem(
+                            file.path,
                             errorFiles.contains(file.path)
                                 ? const Icon(Icons.error)
                                 : const Icon(Icons.done)),
@@ -126,7 +128,7 @@ void importBookList(List<File> fileList, BuildContext context, WidgetRef ref) {
                           currentHandlingFile = file.path;
                         });
                         // try {
-                          await importBook(file, ref);
+                        await importBook(file, ref);
                         // } catch (e) {
                         //   setState(() {
                         //     errorFiles.add(file.path);
@@ -175,13 +177,15 @@ Future<void> pushToReadingPage(
     }
   }
   ref.read(aiChatProvider.notifier).clear();
+  final initialThemes = await selectThemes();
   await Navigator.push(
-      context,
+      navigatorKey.currentContext!,
       CupertinoPageRoute(
         builder: (context) => ReadingPage(
           key: readingPageKey,
           book: book,
           cfi: cfi,
+          initialThemes: initialThemes,
         ),
       ));
 }
@@ -242,8 +246,7 @@ Future<void> saveBook(
       updateTime: DateTime.now());
 
   book.id = await insertBook(book);
-  BuildContext context = navigatorKey.currentContext!;
-  AnxToast.show(L10n.of(context).service_import_success);
+  AnxToast.show(L10n.of(navigatorKey.currentContext!).service_import_success);
   headlessInAppWebView?.dispose();
   headlessInAppWebView = null;
   return;
@@ -258,19 +261,19 @@ Future<void> getBookMetadata(
 
   String cfi = '';
 
-  String indexHtmlPath =
-      "http://localhost:${Server().port}/foliate-js/index.html";
-
   String bookUrl = "http://localhost:${Server().port}/$serverFileName";
   AnxLog.info("import start: book url: $bookUrl");
 
   HeadlessInAppWebView webview = HeadlessInAppWebView(
     webViewEnvironment: webViewEnvironment,
-    initialUrlRequest: URLRequest(url: WebUri(indexHtmlPath)),
-    onLoadStop: (controller, url) async {},
-    onConsoleMessage: (controller, consoleMessage) {
-      if (consoleMessage.message.contains('loadBook')) {
-        controller.addJavaScriptHandler(
+    initialUrlRequest: URLRequest(
+        url: WebUri(generateUrl(
+      bookUrl,
+      cfi,
+      importing: true,
+    ))),
+    onLoadStop: (controller, url) async {
+       controller.addJavaScriptHandler(
             handlerName: 'onMetadata',
             callback: (args) async {
               Map<String, dynamic> metadata = args[0];
@@ -291,12 +294,12 @@ Future<void> getBookMetadata(
               ref?.read(bookListProvider.notifier).refresh();
               // return;
             });
-        webviewInitialVariable(controller, bookUrl, cfi, importing: true);
-      }
+    },
+    onConsoleMessage: (controller, consoleMessage) {
       if (consoleMessage.messageLevel == ConsoleMessageLevel.ERROR) {
         headlessInAppWebView?.dispose();
         headlessInAppWebView = null;
-        // throw Exception('Webview: ${consoleMessage.message}');
+        throw Exception('Webview: ${consoleMessage.message}');
       }
       webviewConsoleMessage(controller, consoleMessage);
     },
