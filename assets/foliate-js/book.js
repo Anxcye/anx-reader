@@ -400,6 +400,9 @@ const getCSS = ({ fontSize,
         text-indent: ${textIndent}em !important;
     }
     
+    p img {
+      margin-left: -${textIndent}em;
+    }
         
     /* prevent the above from overriding the align attribute */
     [align="left"] { text-align: left; }
