@@ -14,6 +14,8 @@ class AiStream extends ConsumerStatefulWidget {
   final String? identifier;
   final Map<String, String>? config;
   final bool canCopy;
+  final bool regenerate;
+
 
   const AiStream({
     super.key,
@@ -21,6 +23,7 @@ class AiStream extends ConsumerStatefulWidget {
     this.identifier,
     this.config,
     this.canCopy = true,
+    this.regenerate = false,
   });
 
   @override
@@ -38,6 +41,7 @@ class AiStreamState extends ConsumerState<AiStream> {
       [AiMessage(content: widget.prompt, role: AiRole.user)],
       identifier: widget.identifier,
       config: widget.config,
+      regenerate: widget.regenerate,
     );
   }
 
@@ -47,9 +51,6 @@ class AiStreamState extends ConsumerState<AiStream> {
       stream: stream,
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          if (kDebugMode) {
-            throw snapshot.error!;
-          }
           return Text(snapshot.error.toString());
         }
 

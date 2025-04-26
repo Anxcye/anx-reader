@@ -3,13 +3,9 @@ import 'package:anx_reader/enums/ai_role.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/main.dart';
 import 'package:anx_reader/models/ai_message.dart';
-import 'package:anx_reader/providers/ai_cache_count.dart';
 import 'package:anx_reader/service/ai/ai_cache.dart';
 import 'package:anx_reader/service/ai/ai_dio.dart';
-import 'package:anx_reader/service/ai/claude.dart';
-import 'package:anx_reader/service/ai/deepseek.dart';
-import 'package:anx_reader/service/ai/gemini.dart';
-import 'package:anx_reader/service/ai/openai.dart';
+import 'package:anx_reader/service/ai/ai_factory.dart';
 import 'package:anx_reader/utils/log/common.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -23,7 +19,6 @@ Stream<String> aiGenerateStream(
   identifier ??= Prefs().selectedAiService;
   config ??= Prefs().getAiConfig(identifier);
   String buffer = '';
-  Stream<String> stream;
 
   final url = config['url'];
   if (url == null || url.isEmpty) {
@@ -31,7 +26,7 @@ Stream<String> aiGenerateStream(
     return;
   }
 
-  AnxLog.info('aiChatGenerateStream: $identifier');
+  AnxLog.info('aiGenerateStream: $identifier');
 
   final messagesStr =
       messages.map((m) => '${m.role.toJson()}: ${m.content}').join('\n');
@@ -39,7 +34,7 @@ Stream<String> aiGenerateStream(
   final aiCache = await AiCache.getAiCache(hash);
 
   if (aiCache != null && aiCache.isNotEmpty && !regenerate) {
-    AnxLog.info('aiChatGenerateStream: cache hit hash: $hash');
+    AnxLog.info('aiGenerateStream: Cache hit hash: $hash');
     yield aiCache;
     return;
   }
@@ -53,28 +48,16 @@ Stream<String> aiGenerateStream(
 
   AiDio.instance.newDio();
 
-  switch (identifier) {
-    case "openai":
-      stream = openAiGenerateStream(formattedMessages, config);
-      break;
-    case "claude":
-      stream = claudeGenerateStream(formattedMessages, config);
-      break;
-    case "gemini":
-      stream = geminiGenerateStream(formattedMessages, config);
-      break;
-    case "deepseek":
-      stream = deepSeekGenerateStream(formattedMessages, config);
-      break;
-    default:
-      throw Exception("Invalid AI identifier");
-  }
+  try {
+    Stream<String> stream =
+        AiFactory.generateStream(identifier, formattedMessages, config);
 
-  await for (final chunk in stream) {
-    buffer += chunk;
-    yield buffer;
+    await for (final chunk in stream) {
+      buffer += chunk;
+      yield buffer;
+    }
+  } finally {
+    AiDio.instance.cancel();
+    await AiCache.setAiCache(hash, buffer, identifier);
   }
-  AiDio.instance.cancel();
-  await AiCache.setAiCache(hash, buffer, identifier);
-  ref.read(aiCacheCountProvider.notifier).refresh();
 }
