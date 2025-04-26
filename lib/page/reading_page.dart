@@ -34,10 +34,16 @@ import 'package:pointer_interceptor/pointer_interceptor.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 class ReadingPage extends ConsumerStatefulWidget {
-  const ReadingPage({super.key, required this.book, this.cfi});
+  const ReadingPage({
+    super.key,
+    required this.book,
+    this.cfi,
+    required this.initialThemes,
+  });
 
   final Book book;
   final String? cfi;
+  final List<ReadTheme> initialThemes;
 
   @override
   ConsumerState<ReadingPage> createState() => ReadingPageState();
@@ -458,13 +464,13 @@ class ReadingPageState extends ConsumerState<ReadingPage>
                             focusNode: FocusNode(),
                             onKeyEvent: _handleKeyEvent,
                             child: EpubPlayer(
-                              key: epubPlayerKey,
-                              book: _book,
-                              cfi: widget.cfi,
-                              showOrHideAppBarAndBottomBar:
-                                  showOrHideAppBarAndBottomBar,
-                              onLoadEnd: onLoadEnd,
-                            ),
+                                key: epubPlayerKey,
+                                book: _book,
+                                cfi: widget.cfi,
+                                showOrHideAppBarAndBottomBar:
+                                    showOrHideAppBarAndBottomBar,
+                                onLoadEnd: onLoadEnd,
+                                initialThemes: widget.initialThemes),
                           ),
                         ),
                       ),
