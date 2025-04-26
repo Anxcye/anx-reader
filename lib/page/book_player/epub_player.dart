@@ -194,7 +194,7 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
         type: '${bookNote.type}',
         value: '${bookNote.cfi}',
         color: '#${bookNote.color}',
-        note: '${bookNote.content}',
+        note: '${bookNote.content.replaceAll('\n', ' ')}',
       })
       ''');
   }
@@ -221,7 +221,7 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
   }
 
   Future<void> initTts() async =>
-      await webViewController.evaluateJavascript(source: "ttsHere()");
+      await webViewController.evaluateJavascript(source: "window.ttsHere()");
 
   void ttsStop() => webViewController.evaluateJavascript(source: "ttsStop()");
 
@@ -440,7 +440,6 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
       await InAppWebViewController.setWebContentsDebuggingEnabled(true);
     }
-    print('@@@ onWebViewCreated');
     webViewController = controller;
     setHandler(controller);
   }
@@ -481,7 +480,7 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
   }
 
   Future<void> _handlePointerEvents(PointerEvent event) async {
-    if (await isFootNoteOpen()) return;
+    if (await isFootNoteOpen() || Prefs().pageTurnStyle == PageTurn.scroll) return;
     if (event is PointerScrollEvent) {
       if (event.scrollDelta.dy > 0) {
         nextPage();
@@ -499,10 +498,10 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
     contextMenu = ContextMenu(
       settings: ContextMenuSettings(hideDefaultSystemContextMenuItems: true),
       onCreateContextMenu: (hitTestResult) async {
-        webViewController.evaluateJavascript(source: "showContextMenu()");
+        // webViewController.evaluateJavascript(source: "showContextMenu()");
       },
       onHideContextMenu: () {
-        removeOverlay();
+        // removeOverlay();
       },
     );
     if (Prefs().openBookAnimation) {
@@ -539,11 +538,11 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
   void dispose() {
     super.dispose();
     _animationController?.dispose();
-    if (defaultTargetPlatform == TargetPlatform.android ||
-        defaultTargetPlatform == TargetPlatform.iOS ||
-        defaultTargetPlatform == TargetPlatform.macOS) {
-      InAppWebViewController.clearAllCache();
-    }
+    // if (defaultTargetPlatform == TargetPlatform.android ||
+    //     defaultTargetPlatform == TargetPlatform.iOS ||
+    //     defaultTargetPlatform == TargetPlatform.macOS) {
+    //   InAppWebViewController.clearAllCache();
+    // }
     saveReadingProgress();
     removeOverlay();
   }

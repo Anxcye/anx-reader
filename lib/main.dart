@@ -226,22 +226,30 @@ class _MyAppState extends ConsumerState<MyApp>
                   title: 'Anx',
                   themeMode: prefsNotifier.themeMode,
                   theme: FlexThemeData.light(
-                    useMaterial3: true,
-                    swapLegacyOnMaterial3: true,
-                    colorScheme: ColorScheme.fromSeed(
-                      seedColor: prefsNotifier.themeColor,
-                      // brightness: Brightness.light,
-                    ),
-                  ).useSystemChineseFont(Brightness.light),
+                          useMaterial3: true,
+                          swapLegacyOnMaterial3: true,
+                          colorScheme: ColorScheme.fromSeed(
+                            seedColor: prefsNotifier.themeColor,
+                            // brightness: Brightness.light,
+                          ))
+                      .copyWith(
+                          sliderTheme: const SliderThemeData(year2023: false),
+                          progressIndicatorTheme:
+                              const ProgressIndicatorThemeData(year2023: false))
+                      .useSystemChineseFont(Brightness.light),
                   darkTheme: FlexThemeData.dark(
-                    useMaterial3: true,
-                    swapLegacyOnMaterial3: true,
-                    darkIsTrueBlack: prefsNotifier.trueDarkMode,
-                    colorScheme: ColorScheme.fromSeed(
-                      seedColor: prefsNotifier.themeColor,
-                      brightness: Brightness.dark,
-                    ),
-                  ).useSystemChineseFont(Brightness.dark),
+                          useMaterial3: true,
+                          swapLegacyOnMaterial3: true,
+                          darkIsTrueBlack: prefsNotifier.trueDarkMode,
+                          colorScheme: ColorScheme.fromSeed(
+                            seedColor: prefsNotifier.themeColor,
+                            brightness: Brightness.dark,
+                          ))
+                      .copyWith(
+                          sliderTheme: const SliderThemeData(year2023: false),
+                          progressIndicatorTheme:
+                              const ProgressIndicatorThemeData(year2023: false))
+                      .useSystemChineseFont(Brightness.dark),
                   home: const HomePage(),
                 ),
               ),

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io' show Platform;
 
 import 'package:anx_reader/config/shared_preference_provider.dart';
+import 'package:anx_reader/page/reading_page.dart';
 import 'package:anx_reader/service/tts/base_tts.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
@@ -19,6 +20,7 @@ class SystemTts extends BaseTts {
   final FlutterTts flutterTts = FlutterTts();
 
   String? _currentVoiceText;
+  static String? _prevVoiceText;
 
   bool restarting = false;
 
@@ -92,10 +94,11 @@ class SystemTts extends BaseTts {
       if (!isAndroid) {
         return;
       }
-      _currentVoiceText = await getCurrentText();
+      _prevVoiceText = _currentVoiceText;
+      _currentVoiceText = await epubPlayerKey.currentState!.ttsPrepare();
 
       if (_currentVoiceText?.isNotEmpty ?? false) {
-        await flutterTts.speak(_currentVoiceText!);
+        flutterTts.speak(_currentVoiceText!);
       }
     });
 
@@ -155,7 +158,7 @@ class SystemTts extends BaseTts {
     updateTtsState(TtsStateEnum.stopped);
     final result = await flutterTts.stop();
     _currentVoiceText = null;
-     return result;
+    return result;
   }
 
   @override
@@ -168,6 +171,10 @@ class SystemTts extends BaseTts {
 
   @override
   Future<void> resume() async {
+    if (isAndroid) {
+      speak(content: _prevVoiceText);
+      return;
+    }
     speak(content: _currentVoiceText);
   }
 

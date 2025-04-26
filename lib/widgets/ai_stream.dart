@@ -3,7 +3,6 @@ import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/models/ai_message.dart';
 import 'package:anx_reader/service/ai/index.dart';
 import 'package:anx_reader/utils/toast/common.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
@@ -14,6 +13,8 @@ class AiStream extends ConsumerStatefulWidget {
   final String? identifier;
   final Map<String, String>? config;
   final bool canCopy;
+  final bool regenerate;
+
 
   const AiStream({
     super.key,
@@ -21,6 +22,7 @@ class AiStream extends ConsumerStatefulWidget {
     this.identifier,
     this.config,
     this.canCopy = true,
+    this.regenerate = false,
   });
 
   @override
@@ -38,6 +40,7 @@ class AiStreamState extends ConsumerState<AiStream> {
       [AiMessage(content: widget.prompt, role: AiRole.user)],
       identifier: widget.identifier,
       config: widget.config,
+      regenerate: widget.regenerate,
     );
   }
 
@@ -47,9 +50,6 @@ class AiStreamState extends ConsumerState<AiStream> {
       stream: stream,
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          if (kDebugMode) {
-            throw snapshot.error!;
-          }
           return Text(snapshot.error.toString());
         }
 

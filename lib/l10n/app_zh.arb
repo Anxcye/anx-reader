@@ -84,7 +84,7 @@
   "reading_page_screen_timeout": "屏幕超时",
   "reading_page_page_turning_method": "翻页方式",
   "font": "字体",
-  "add_new_font": "添加字体",
+  "add_new_font": "导入本地",
   "follow_book": "跟随书籍",
   "system_font": "系统字体",
 
@@ -182,6 +182,13 @@
   "common_apply": "应用",
   "common_reset": "重置",
   "common_none": "无",
+  "common_error": "错误",
+  "common_undo": "撤销",
+  "commom_download": "下载",
+  "common_pause": "暂停",
+  "common_resume": "继续",
+  "common_download_failed": "下载失败",
+  "common_retry": "重试",
 
   "service_import_success":"导入成功",
   "service_import_n_books": "{count, plural, other{正在导入 {count} 本书}}",
@@ -198,7 +205,8 @@
   "webdav_upload": "上传到 WebDAV",
   "webdav_only_wifi": "仅在 WiFi 下同步",
   "webdav_sync_aborted": "同步已取消",
-  "webdav_sync_aborted_content": "未能从 WebDAV 获取数据，这可能是由于网络波动，请稍后再试。",
+  "webdav_sync_aborted_content": "未能从 WebDAV 获取数据。请检查以下内容： \n1. 网络连接是否正常 \n2. 确保已经其他设备上上传了有效的阅读数据到 WebDAV",
+  "webdav_sync_direction": "WebDAV 端数据可能被其他设备修改，请选择如何处理数据",
 
   "settings_sync": "同步",
   "settings_sync_webdav": "WebDAV",
@@ -309,6 +317,8 @@
   "statistic_days_ago": "{count, plural, =1{1天前} other{{count}天前}}",
   "statistic_months_ago": "{count, plural, =1{1个月前} other{{count}个月前}}",
   "statistic_years_ago": "{count, plural, =1{1年前} other{{count}年前}}",
+  "statistic_deleted_records": "即将删除的记录",
+  "statistic_deleted_records_tips": "将在离开此界面时删除此记录",
 
   "webview_unsupported_version": "不支持的 Webview 版本",
   "webview_unsupported_message": "Webview 版本可能不支持。当前版本为 {version}, 所需的最低版本是 {minVersion}，请更新您的 Webview",
@@ -349,5 +359,27 @@
   "iap_status_trial": "试用期内",
   "iap_status_trial_expired": "试用期已结束",
   "iap_status_original": "早期用户",
-  "iap_status_unknown": "未知"
+  "iap_status_unknown": "未知",
+
+  "storage": "存储",
+  "storage_info": "存储信息",
+  "storage_total_size": "总大小",
+  "storage_database_file": "数据库文件",
+  "storage_log_file": "日志文件",
+  "storage_cache_file": "缓存文件",
+  "storage_data_file": "数据文件",
+  "storage_book_file": "书籍文件",
+  "storage_cover_file": "封面文件",
+  "storage_font_file": "字体文件",
+  "storage_data_file_details": "数据文件详情",
+  "storage_clear_cache": "清空缓存",
+  
+  "download_fonts": "下载字体",
+  "font_no_available_fonts": "没有可用的字体",
+  "font_official_website": "官方网站",
+  "font_license_agreement": "许可协议",
+  "font_downloaded": "已安装",
+  "font_failed_to_load_fonts": "加载字体失败",
+  "font_downloading": "下载中 {progress}",
+  "font_cancelled": "已取消 {progress}"
 }

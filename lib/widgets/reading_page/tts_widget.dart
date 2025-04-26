@@ -1,6 +1,7 @@
 import 'package:anx_reader/l10n/generated/L10n.dart';
 // import 'package:anx_reader/main.dart';
 import 'package:anx_reader/config/shared_preference_provider.dart';
+import 'package:anx_reader/main.dart';
 import 'package:anx_reader/service/tts/base_tts.dart';
 import 'package:anx_reader/service/tts/tts_handler.dart';
 import 'package:anx_reader/widgets/reading_page/widget_title.dart';
@@ -35,7 +36,7 @@ class _TtsWidgetState extends State<TtsWidget> {
               widget.epubPlayerKey.currentState!.ttsNext,
               widget.epubPlayerKey.currentState!.ttsPrev)
           .then((value) {
-        TtsHandler().play();
+        audioHandler.play();
       });
     }
 
@@ -165,7 +166,7 @@ class _TtsWidgetState extends State<TtsWidget> {
               children: [
                 IconButton(
                     onPressed: () async {
-                      TtsHandler().stop();
+                      audioHandler.stop();
                       await widget.epubPlayerKey.currentState!.ttsPrevSection();
                       TtsHandler().playPrevious();
                     },
@@ -179,15 +180,15 @@ class _TtsWidgetState extends State<TtsWidget> {
                     onPressed: () async {
                       // Tts.toggle();
                       ttsState == TtsStateEnum.playing
-                          ? TtsHandler().pause()
-                          : TtsHandler().play();
+                          ? audioHandler.pause()
+                          : audioHandler.play();
                     },
                     icon: ttsState == TtsStateEnum.playing
                         ? const Icon(EvaIcons.pause_circle_outline)
                         : const Icon(EvaIcons.play_circle_outline)),
                 IconButton(
                     onPressed: () {
-                      TtsHandler().stop();
+                      audioHandler.stop();
                     },
                     icon: const Icon(EvaIcons.stop_circle_outline)),
                 IconButton(
@@ -197,7 +198,7 @@ class _TtsWidgetState extends State<TtsWidget> {
                     icon: const Icon(EvaIcons.chevron_right)),
                 IconButton(
                     onPressed: () async {
-                      TtsHandler().stop();
+                      audioHandler.stop();
                       await widget.epubPlayerKey.currentState!.ttsNextSection();
                       TtsHandler().playNext();
                     },

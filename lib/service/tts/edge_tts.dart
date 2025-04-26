@@ -80,7 +80,7 @@ class EdgeTts extends BaseTts {
   @override
   Future<void> init(Function getCurrentText, Function getNextText,
       Function getPrevText) async {
-    if (isInit) return;
+    // if (isInit) return;
 
     getHereFunction = getCurrentText;
     getNextTextFunction = getNextText;
