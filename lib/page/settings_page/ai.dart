@@ -26,6 +26,8 @@ class _AISettingsState extends ConsumerState<AISettings> {
   bool showSettings = false;
   int currentIndex = 0;
   late List<Map<String, dynamic>> initialServicesConfig;
+  bool _obscureApiKey = true;
+  
   List<Map<String, dynamic>> services = EnvVar.isBeian
       ? [
           {
@@ -174,6 +176,7 @@ class _AISettingsState extends ConsumerState<AISettings> {
             Padding(
               padding: const EdgeInsets.only(bottom: 10),
               child: TextField(
+                obscureText: key == "api_key" && _obscureApiKey,
                 controller: TextEditingController(
                     text: services[currentIndex]["config"][key] ??
                         initialServicesConfig[currentIndex]["config"][key]),
@@ -181,6 +184,18 @@ class _AISettingsState extends ConsumerState<AISettings> {
                   border: const OutlineInputBorder(),
                   labelText: key,
                   hintText: services[currentIndex]["config"][key],
+                  suffixIcon: key == "api_key"
+                      ? IconButton(
+                          onPressed: () {
+                            setState(() {
+                              _obscureApiKey = !_obscureApiKey;
+                            });
+                          },
+                          icon: _obscureApiKey
+                              ? const Icon(Icons.visibility_off)
+                              : const Icon(Icons.visibility),
+                        )
+                      : null,
                 ),
                 onChanged: (value) {
                   services[currentIndex]["config"][key] = value;
