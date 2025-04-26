@@ -1,5 +1,9 @@
+import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/dao/book.dart' as book_dao;
+import 'package:anx_reader/enums/sort_field.dart';
+import 'package:anx_reader/enums/sort_order.dart';
 import 'package:anx_reader/models/book.dart';
+import 'package:lpinyin/lpinyin.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'book_list.g.dart';
@@ -26,10 +30,57 @@ class BookList extends _$BookList {
     return groupedBooks;
   }
 
+  int getChineseCompareResult(String a, String b) {
+    String pinyina = '';
+    String pinyinb = '';
+    try {
+      pinyina =
+          PinyinHelper.getPinyin(a, format: PinyinFormat.WITHOUT_TONE);
+    } catch (e) {
+      pinyina = a;
+    }
+    try {
+      pinyinb =
+          PinyinHelper.getPinyin(b, format: PinyinFormat.WITHOUT_TONE);
+    } catch (e) {
+      pinyinb = b;
+    }
+
+      return pinyina.compareTo(pinyinb);
+  }
+
+  List<Book> sortBooks(List<Book> books) {
+    books.sort((a, b) {
+      int compareResult;
+      switch (Prefs().sortField) {
+        case SortFieldEnum.title:
+          compareResult = getChineseCompareResult(a.title, b.title);
+          break;
+        case SortFieldEnum.author:
+          compareResult = getChineseCompareResult(a.author, b.author);
+          break;
+        case SortFieldEnum.lastReadTime:
+          compareResult = a.updateTime.compareTo(b.updateTime);
+          break;
+        case SortFieldEnum.progress:
+          compareResult = a.readingPercentage.compareTo(b.readingPercentage);
+          break;
+        case SortFieldEnum.importTime:
+          compareResult = a.createTime.compareTo(b.createTime);
+          break;
+      }
+      return Prefs().sortOrder == SortOrderEnum.ascending
+          ? compareResult
+          : -compareResult;
+    });
+    return books;
+  }
+
   @override
   Future<List<List<Book>>> build() async {
     final books = await book_dao.selectNotDeleteBooks();
-    return groupBooks(books);
+    final sortedBooks = sortBooks(books);
+    return groupBooks(sortedBooks);
   }
 
   Future<void> refresh() async {

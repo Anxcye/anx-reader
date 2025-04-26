@@ -94,6 +94,7 @@ dependencies:
   charset: ^2.0.1
   flutter_slidable: ^4.0.0
   cached_network_image: ^3.4.1
+  lpinyin: ^2.0.3
 
 
 dev_dependencies:
