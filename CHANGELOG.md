@@ -3,6 +3,7 @@
 ## Todo
 
 ## 1.4.4
+- Feat: Import pdf files
 - Feat: Sort books
 - Feat: More available fonts
 - Feat: Delete reading records of a book
@@ -12,16 +13,19 @@
 - Fix: if webdav is empty, sync will upload
 - Fix: avoid image following paragraph indent
 - Fix: optimize book loading speed
+- Fix: sync custom book cover
 
+- 新增：导入 pdf 文件
 - 新增：书架排序功能
 - 新增：更多可选字体
 - 新增：删除一本书的阅读记录
 - 新增：添加 WebDAV 同步方向对话框
-- 新增：添加字体删除
+- 新增：添加字体删除功能
 - 修复：WebDAV 同步中止对话框内容
 - 修复：如果 WebDAV 为空，则同步时默认上传
 - 修复：避免图片跟随段落缩进
 - 修复：提升图书加载速度
+- 修复：同步自定义的书籍封面
 
 ## 1.4.3
 - Feat: Storage space management
