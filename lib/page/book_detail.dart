@@ -161,11 +161,16 @@ class _BookDetailState extends ConsumerState<BookDetail> {
                     await oldCoverImageFile.delete();
                   }
 
+                  String oldName = widget.book.coverPath
+                      .split('-')
+                      .sublist(0, widget.book.coverPath.split('-').length - 1)
+                      .join('');
+                  if (!oldName.startsWith('cover/')) {
+                    oldName = 'cover/$oldName';
+                  }
+
                   String newPath =
-                      '${widget.book.coverPath.split('/').sublist(0, widget.book.coverPath.split('/').length - 1).join('/')}/${widget.book.title.length > 20 ? widget.book.title.substring(0, 20) : widget.book.title}-${DateTime.now().millisecond.toString()}.png'
-                          .replaceAll(RegExp(r'[<>:"/\\|?*]'), '_')
-                          .replaceAll('\n', '')
-                          .replaceAll('\r', '')
+                      '$oldName-${DateTime.now().millisecondsSinceEpoch.toString()}.png'
                           .trim();
 
                   AnxLog.info('BookDetail: New path: $newPath');
