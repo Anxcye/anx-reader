@@ -9,6 +9,8 @@
 - Feat: Add font delete
 - Fix: Webdav sync aborted dialog content
 - Fix: if webdav is empty, sync will upload
+- Fix: avoid image following paragraph indent
+- Fix: optimize book loading speed
 
 - 新增：更多可选字体
 - 新增：删除一本书的阅读记录
@@ -16,6 +18,8 @@
 - 新增：添加字体删除
 - 修复：WebDAV 同步中止对话框内容
 - 修复：如果 WebDAV 为空，则同步时默认上传
+- 修复：避免图片跟随段落缩进
+- 修复：提升图书加载速度
 
 ## 1.4.3
 - Feat: Storage space management
