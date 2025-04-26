@@ -1,11 +1,8 @@
 import 'package:anx_reader/config/shared_preference_provider.dart';
-import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/models/book_style.dart';
 import 'package:anx_reader/models/read_theme.dart';
 import 'package:anx_reader/utils/js/convert_dart_color_to_js.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
-import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 
 Future<void> webviewInitialVariable(
   InAppWebViewController controller,
@@ -30,26 +27,12 @@ Future<void> webviewInitialVariable(
   textColor = convertDartColorToJs(textColor);
   backgroundColor = convertDartColorToJs(backgroundColor);
 
-  const minWebviewVersion = 92;
 
   String replaceSingleQuote(String value) {
     return value.replaceAll("'", "\\'");
   }
 
-  controller.evaluateJavascript(source: '''
-    console.log('navigator.userAgent', navigator.userAgent)
-  ''');
-
   final script = '''
-      const webviewVersion = navigator.userAgent.match(/Chrome\\/(\\d+)/)?.[1]
-      const appleWebkitVersion = navigator.userAgent.match(/AppleWebKit\\/(\\d+)/)?.[1]
-      const isApple = navigator.userAgent.includes('Macintosh') || navigator.userAgent.includes('iPhone') || navigator.userAgent.includes('iPad')
-      if (
-          (!isApple && (webviewVersion && webviewVersion < $minWebviewVersion || !webviewVersion))
-          || (isApple && (appleWebkitVersion && appleWebkitVersion < 605 ))
-      ) {
-        window.flutter_inappwebview.callHandler('webviewVersion', webviewVersion)
-      }
       const importing = $importing
       const url = '${replaceSingleQuote(url)}'
       let initialCfi = '${replaceSingleQuote(cfi)}'
@@ -79,46 +62,6 @@ Future<void> webviewInitialVariable(
 
       window.loadBook()
   ''';
-  // controller.addJavaScriptHandler(
-  //     handlerName: 'webviewInitialVariable',
-  //     callback: (args) async {
-        await controller.evaluateJavascript(source: script);
-      //   return null;
-      // });
-  controller.addJavaScriptHandler(
-      handlerName: 'webviewVersion',
-      callback: (args) async {
-        SmartDialog.show(
-          animationType: SmartAnimationType.fade,
-          builder: (context) {
-            final version = args[0];
-            return AlertDialog(
-              title: const Center(
-                child: Icon(Icons.warning_rounded),
-              ),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(L10n.of(context).webview_unsupported_version,
-                      style: Theme.of(context).textTheme.titleMedium),
-                  Text(L10n.of(context).webview_unsupported_message(
-                      minWebviewVersion, version ?? -1)),
-                ],
-              ),
-              actions: [
-                TextButton(
-                    onPressed: () {
-                      SmartDialog.dismiss();
-                    },
-                    child: Text(L10n.of(context).webview_cancel)),
-                // TextButton(
-                //     onPressed: () {
-                //     },
-                //     child: Text(L10n.of(context).webview_update))
-              ],
-            );
-          },
-        );
-        return null;
-      });
+
+  await controller.evaluateJavascript(source: script);
 }
