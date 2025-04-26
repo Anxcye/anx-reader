@@ -328,12 +328,12 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
           Map<String, dynamic> location = args[0];
           if (cfi == location['cfi']) return;
           setState(() {
-            cfi = location['cfi'];
+            cfi = location['cfi'] ?? '';
             percentage = location['percentage'] ?? 0.0;
             chapterTitle = location['chapterTitle'] ?? '';
             chapterHref = location['chapterHref'] ?? '';
-            chapterCurrentPage = location['chapterCurrentPage'];
-            chapterTotalPages = location['chapterTotalPages'];
+            chapterCurrentPage = location['chapterCurrentPage'] ?? 0;
+            chapterTotalPages = location['chapterTotalPages'] ?? 0;
           });
           saveReadingProgress();
           readingPageKey.currentState?.resetAwakeTimer();
