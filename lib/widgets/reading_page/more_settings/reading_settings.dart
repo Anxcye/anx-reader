@@ -189,6 +189,7 @@ class _ReadingMoreSettingsState extends State<ReadingMoreSettings> {
                 onChanged(value);
               }
             },
+            underline: Container(),
             dropdownColor: Theme.of(context).colorScheme.surfaceContainer,
             borderRadius: BorderRadius.circular(8),
             items: ReadingInfoEnum.values.map((info) {
