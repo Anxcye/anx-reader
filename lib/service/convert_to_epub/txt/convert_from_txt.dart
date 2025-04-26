@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:anx_reader/service/convert_to_epub/create_epub.dart';
 import 'package:anx_reader/service/convert_to_epub/section.dart';
 import 'package:anx_reader/utils/log/common.dart';
-import 'package:fast_gbk/fast_gbk.dart';
+import 'package:charset/charset.dart';
 
 String readFileWithEncoding(File file) {
   bool checkGarbled(String content) {
@@ -16,33 +16,29 @@ String readFileWithEncoding(File file) {
     return sampleLines.any((line) => garbledPattern.hasMatch(line));
   }
 
-  final List<Encoding> encodings = [
-    utf8,
-    latin1,
-  ];
+  final decoder = {
+    'utf8': utf8.decode,
+    'gbk': gbk.decode,
+    'latin1': latin1.decode,
+    'utf16': utf16.decode,
+    'utf32': utf32.decode,
+  };
 
-  for (final encoding in encodings) {
+  for (final entry in decoder.entries) {
     try {
-      AnxLog.info('Convert: Reading file with encoding: ${encoding.name}');
-      final content = file.readAsStringSync(encoding: encoding);
-
+      AnxLog.info('Convert: Reading file with encoding: ${entry.key}');
+      final content = entry.value(file.readAsBytesSync());
       if (!checkGarbled(content)) {
         return content;
       }
-      AnxLog.info('Convert: Detected garbled text, trying next encoding');
+      AnxLog.info('Convert: Detected garbled text ${entry.key}');
     } catch (e) {
-      continue;
+      AnxLog.warning(
+          'Convert: Failed to read file with encoding: ${entry.key}');
     }
   }
 
-  try {
-    AnxLog.info('Convert: Reading file with encoding: gbk');
-    final content = gbk.decode(file.readAsBytesSync());
-    return content;
-  } catch (e) {
-    AnxLog.severe('Convert: Failed to read file with encoding');
-    return '';
-  }
+  throw Exception('Convert: Failed to read file with any encoding');
 }
 
 Future<File> convertFromTxt(File file) async {
@@ -76,7 +72,30 @@ Future<File> convertFromTxt(File file) async {
   AnxLog.info('matches: ${matches.length}');
 
   if (matches.isEmpty) {
-    return createEpub(titleString, authorString, [Section('', content, 0)]);
+    final newSections = <Section>[];
+
+    if (content.length <= 20000) {
+      newSections.add(sections[0]);
+    } else {
+      var startIndex = 0;
+      while (startIndex < content.length) {
+        final endIndex = startIndex + 20000;
+        if (endIndex >= content.length) {
+          newSections.add(Section('No.${newSections.length + 1}',
+              content.substring(startIndex), 2));
+          break;
+        }
+
+        final nextNewline = content.indexOf('\n', endIndex);
+        final chapterEndIndex =
+            nextNewline == -1 ? content.length : nextNewline;
+
+        newSections.add(Section('No.${newSections.length + 1}',
+            content.substring(startIndex, chapterEndIndex), 2));
+        startIndex = chapterEndIndex + 1;
+      }
+      return createEpub(titleString, authorString, newSections);
+    }
   }
 
   if (matches.first.start > 0) {

@@ -5,10 +5,12 @@ import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/models/book_style.dart';
 import 'package:anx_reader/models/font_model.dart';
 import 'package:anx_reader/page/reading_page.dart';
+import 'package:anx_reader/page/settings_page/subpage/fonts.dart';
 import 'package:anx_reader/service/book_player/book_player_server.dart';
 import 'package:anx_reader/service/font.dart';
 import 'package:anx_reader/utils/font_parser.dart';
 import 'package:anx_reader/utils/get_path/get_base_path.dart';
+import 'package:anx_reader/utils/toast/common.dart';
 import 'package:anx_reader/widgets/icon_and_text.dart';
 import 'package:anx_reader/widgets/reading_page/more_settings/more_settings.dart';
 import 'package:anx_reader/widgets/reading_page/widget_title.dart';
@@ -42,11 +44,13 @@ class StyleWidget extends StatefulWidget {
     required this.themes,
     required this.epubPlayerKey,
     required this.setCurrentPage,
+    required this.hideAppBarAndBottomBar,
   });
 
   final List<ReadTheme> themes;
   final GlobalKey<EpubPlayerState> epubPlayerKey;
   final Function setCurrentPage;
+  final Function hideAppBarAndBottomBar;
 
   @override
   StyleWidgetState createState() => StyleWidgetState();
@@ -77,6 +81,11 @@ class StyleWidgetState extends State<StyleWidget> {
   List<FontModel> fonts() {
     Directory fontDir = getFontDir();
     List<FontModel> fontList = [
+      FontModel(
+        label: L10n.of(context).download_fonts,
+        name: 'download',
+        path: '',
+      ),
       FontModel(
         label: L10n.of(context).add_new_font,
         name: 'newFont',
@@ -118,6 +127,20 @@ class StyleWidgetState extends State<StyleWidget> {
   }
 
   Widget fontAndPageTurn() {
+    FontModel? font = fonts().firstWhere(
+        (element) => element.path == Prefs().font.path,
+        orElse: () => FontModel(
+            label: L10n.of(context).follow_book, name: 'book', path: ''));
+
+    Widget? leadingIcon(String name) {
+      if (name == 'download') {
+        return const Icon(Icons.download);
+      } else if (name == 'newFont') {
+        return const Icon(Icons.add);
+      }
+      return null;
+    }
+
     return Row(children: [
       Expanded(
         child: DropdownMenu<PageTurn>(
@@ -147,7 +170,7 @@ class StyleWidgetState extends State<StyleWidget> {
         child: DropdownMenu<FontModel>(
           label: Text(L10n.of(context).font),
           expandedInsets: const EdgeInsets.only(left: 5),
-          initialSelection: Prefs().font,
+          initialSelection: font,
           inputDecorationTheme: InputDecorationTheme(
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(50),
@@ -156,8 +179,18 @@ class StyleWidgetState extends State<StyleWidget> {
           onSelected: (FontModel? font) async {
             if (font == null) return;
             if (font.name == 'newFont') {
+              widget.hideAppBarAndBottomBar(false);
               await importFont();
-              setState(() {});
+              AnxToast.show(
+                  L10n.of(navigatorKey.currentContext!).common_success);
+              return;
+            } else if (font.name == 'download') {
+              widget.hideAppBarAndBottomBar(false);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const FontsSettingPage()),
+              );
               return;
             }
             epubPlayerKey.currentState!.changeFont(font);
@@ -167,8 +200,7 @@ class StyleWidgetState extends State<StyleWidget> {
               .map((font) => DropdownMenuEntry(
                     value: font,
                     label: font.label,
-                    leadingIcon:
-                        font.name == 'newFont' ? const Icon(Icons.add) : null,
+                    leadingIcon: leadingIcon(font.name),
                   ))
               .toList(),
         ),
@@ -197,10 +229,10 @@ class StyleWidgetState extends State<StyleWidget> {
         ),
         Expanded(
           child: Slider(
-            padding: EdgeInsets.symmetric(horizontal: 8),
-            value: bookStyle.lineHeight,
-            onChanged: (double value) {
-              setState(() {
+              padding: EdgeInsets.symmetric(horizontal: 8),
+              value: bookStyle.lineHeight,
+              onChanged: (double value) {
+                setState(() {
                   bookStyle.lineHeight = value;
                   widget.epubPlayerKey.currentState!.changeStyle(bookStyle);
                   Prefs().saveBookStyleToPrefs(bookStyle);

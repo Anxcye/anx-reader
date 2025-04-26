@@ -182,6 +182,27 @@
   "common_apply": "Apply",
   "common_reset": "Reset",
   "common_none": "None",
+  "common_error": "Error",
+  "common_attention": "Attention",
+  "common_undo": "Undo",
+  "commom_download": "Download",
+  "common_pause": "Pause",
+  "common_resume": "Resume",
+  "common_download_failed": "Download Failed",
+  "common_retry": "Retry",
+
+  "storage": "Storage",
+  "storage_info": "Storage Info",
+  "storage_total_size": "Total Size",
+  "storage_database_file": "Database File",
+  "storage_log_file": "Log File",
+  "storage_cache_file": "Cache File",
+  "storage_data_file": "Data File",
+  "storage_book_file": "Book File",
+  "storage_cover_file": "Cover File",
+  "storage_font_file": "Font File",
+  "storage_data_file_details": "Data File Details",
+  "storage_clear_cache": "Clear Cache",
 
   "service_import_success": "Import success",
   "service_import_n_books": "{count, plural, =1{importing 1 book} other{importing {count} books}}",
@@ -198,7 +219,8 @@
   "webdav_upload": "Upload to WebDAV",
   "webdav_only_wifi": "Only sync when WiFi is connected",
   "webdav_sync_aborted": "Sync aborted",
-  "webdav_sync_aborted_content": "Failed to get data from WebDAV, this may be due to network fluctuations, please try again later.",
+  "webdav_sync_aborted_content": "Failed to get data from WebDAV. Please check the following: \n1. Network connection \n2. Ensure that valid reading data has been uploaded to WebDAV on other devices",
+  "webdav_sync_direction": "WebDAV data may be modified by other devices, please choose how to handle the data",
 
   "settings_sync": "Sync",
   "settings_sync_webdav": "WebDAV",
@@ -275,7 +297,6 @@
   "gallery_permission_denied": "Gallery permission denied",
   "goto_authorize": "Go to authorize",
 
-
   "settings_advanced": "Advanced",
   "settings_advanced_log": "Log",
   "settings_advanced_log_clear_log": "Clear Log",
@@ -304,6 +325,8 @@
   "statistic_days_ago": "{count, plural, =1{1 day ago} other{{count} days ago}}",
   "statistic_months_ago": "{count, plural, =1{1 month ago} other{{count} months ago}}",
   "statistic_years_ago": "{count, plural, =1{1 year ago} other{{count} years ago}}",
+  "statistic_deleted_records": "Records to be deleted",
+  "statistic_deleted_records_tips": "Will be deleted when leaving this page",
 
   "webview_unsupported_version": "Unsupported Webview Version",
   "webview_unsupported_message": "Your Webview version may be not supported. Current version is {version}, required minimum version is {minVersion}, please update your Webview",
@@ -323,8 +346,8 @@
   "iap_page_feature_stats_desc": "Reading time, heatmap and more",
   "iap_page_feature_custom": "Customize Everything",
   "iap_page_feature_custom_desc": "Font, color, size, spacing and more",
-    "iap_page_feature_note": "Powerful Notes",
-    "iap_page_feature_note_desc": "Categorize, filter, sort, export to md, csv, txt and more",
+  "iap_page_feature_note": "Powerful Notes",
+  "iap_page_feature_note_desc": "Categorize, filter, sort, export to md, csv, txt and more",
   "iap_page_feature_rich": "Rich Features",
   "iap_page_feature_rich_desc": "Notes, narration, translation",
   "iap_page_restore_hint": "If you change device or reinstall, click 'Restore Purchase' in the top right corner.\nOnly valid for devices under the current Apple ID",
@@ -343,5 +366,14 @@
   "iap_status_trial": "Trial Period",
   "iap_status_trial_expired": "Trial Expired",
   "iap_status_original": "Early User",
-  "iap_status_unknown": "Unknown"
+  "iap_status_unknown": "Unknown",
+
+  "download_fonts": "Download Fonts",
+  "font_no_available_fonts": "No available fonts",
+  "font_official_website": "Official Website",
+  "font_license_agreement": "License Agreement",
+  "font_downloaded": "Downloaded",
+  "font_failed_to_load_fonts": "Failed to load fonts",
+  "font_downloading": "Downloading {progress}",
+  "font_cancelled": "Cancelled {progress}"
 }

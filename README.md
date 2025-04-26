@@ -33,9 +33,47 @@ Anx Reader, a thoughtfully crafted e-book reader for book lovers. Featuring powe
 **Practical Features** Translation/Search/Quick Ask AI/Write Ideas/Text-to-Speech
 
 
-| iOS | macOS | Windows | Android |
-|---|---|---|---|
-| [![Download on the App Store](https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg)](https://apps.apple.com/app/anx-reader/id6743196413) | [![Download on the App Store](https://developer.apple.com/app-store/marketing/guidelines/images/badge-download-on-the-mac-app-store.svg)](https://apps.apple.com/app/anx-reader/id6743196413) | [![Download on GitHub](https://img.shields.io/badge/Download_on-GitHub-181717?style=for-the-badge&logo=github&logoColor=ffffff)](https://github.com/Anxcye/anx-reader/releases/latest) | [![Download on GitHub](https://img.shields.io/badge/Download_on-GitHub-181717?style=for-the-badge&logo=github&logoColor=ffffff)](https://github.com/Anxcye/anx-reader/releases/latest) |
+<table border="1">
+  <tr>
+    <th>OS</th>
+    <th>Source</th>
+  </tr>
+  <tr>
+    <td>iOS</td>
+    <td>
+      <a href="https://apps.apple.com/app/anx-reader/id6743196413" target="_blank">
+        <img src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg" alt="App Store" height="45"/>
+      </a>
+    </td>
+  </tr>
+  <tr>
+    <td>macOS</td>
+    <td>
+      <a href="https://apps.apple.com/app/anx-reader/id6743196413" target="_blank">
+        <img src="https://developer.apple.com/app-store/marketing/guidelines/images/badge-download-on-the-mac-app-store.svg" alt="Mac App Store" height="45"/>
+      </a>
+      <a href="https://github.com/Anxcye/anx-reader/releases/latest" target="_blank">
+        <img src="https://github.com/user-attachments/assets/cf61e197-d756-4606-a8ad-fb591f79fdfc" alt="GitHub" height="45"/>
+      </a>
+    </td>
+  </tr>
+  <tr>
+    <td>Windows</td>
+    <td>
+      <a href="https://github.com/Anxcye/anx-reader/releases/latest" target="_blank">
+        <img src="https://github.com/user-attachments/assets/cf61e197-d756-4606-a8ad-fb591f79fdfc" alt="GitHub" height="45"/>
+      </a>
+    </td>
+  </tr>
+  <tr>
+    <td>Android</td>
+    <td>
+      <a href="https://github.com/Anxcye/anx-reader/releases/latest" target="_blank">
+        <img src="https://github.com/user-attachments/assets/cf61e197-d756-4606-a8ad-fb591f79fdfc" alt="GitHub" height="45"/>
+      </a>
+    </td>
+  </tr>
+</table>
 
 📚 **Rich Format Support**
 - Support for major e-book formats: EPUB, MOBI, AZW3, FB2, TXT

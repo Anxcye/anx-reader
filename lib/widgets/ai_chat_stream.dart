@@ -94,7 +94,7 @@ class AiChatStreamState extends ConsumerState<AiChatStream> {
   }
 
   void _useQuickPrompt(String prompt) {
-    inputController.text = '$prompt "${inputController.text}"';
+    inputController.text = '$prompt ${inputController.text}';
     _sendMessage();
   }
 
@@ -157,7 +157,7 @@ class AiChatStreamState extends ConsumerState<AiChatStream> {
                       builder: (context, snapshot) {
                         if (!snapshot.hasData) {
                           return const Center(
-                              child: CircularProgressIndicator());
+                              child: CircularProgressIndicator(color: Colors.red,));
                         }
 
                         final messages = snapshot.data!;

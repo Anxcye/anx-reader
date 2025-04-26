@@ -88,7 +88,7 @@ class AnxWebdav extends _$AnxWebdav {
     await _client.mkdir('anx/data');
   }
 
-  Future<void> syncData(SyncDirection direction, WidgetRef ref) async {
+  Future<void> syncData(SyncDirection direction, WidgetRef? ref) async {
     if (Prefs().onlySyncWhenWifi &&
         !(await Connectivity().checkConnectivity())
             .contains(ConnectivityResult.wifi)) {
@@ -127,6 +127,50 @@ class AnxWebdav extends _$AnxWebdav {
       return;
     }
 
+    if (remoteDb == null) {
+      direction = SyncDirection.upload;
+    }
+
+    if (direction == SyncDirection.both) {
+      if (Prefs().lastUploadBookDate == null ||
+          Prefs()
+                  .lastUploadBookDate!
+                  .difference(remoteDb!.mTime!)
+                  .inSeconds
+                  .abs() >
+              5) {
+        SyncDirection? newDirection = await showDialog<SyncDirection>(
+          context: navigatorKey.currentContext!,
+          builder: (context) => AlertDialog(
+            title: Text(L10n.of(context).common_attention),
+            content: Text(L10n.of(context).webdav_sync_direction),
+            actionsOverflowDirection: VerticalDirection.up,
+            actionsOverflowAlignment: OverflowBarAlignment.center,
+            actionsOverflowButtonSpacing: 10,
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(SyncDirection.upload);
+                },
+                child: Text(L10n.of(context).webdav_upload),
+              ),
+              FilledButton(
+                onPressed: () {
+                  Navigator.of(context).pop(SyncDirection.download);
+                },
+                child: Text(L10n.of(context).webdav_download),
+              ),
+            ],
+          ),
+        );
+        if (newDirection != null) {
+          direction = newDirection;
+        } else {
+          return;
+        }
+      }
+    }
+
     changeState(state.copyWith(isSyncing: true));
 
     if (Prefs().syncCompletedToast) {
@@ -139,6 +183,10 @@ class AnxWebdav extends _$AnxWebdav {
       await createAnxDir();
 
       await syncDatabase(direction);
+
+      File? newRemoteDb = await safeReadProps('anx/app_database.db', _client);
+
+      Prefs().lastUploadBookDate = newRemoteDb!.mTime;
 
       if (await isCurrentEmpty()) {
         await recoverDb();
@@ -157,7 +205,7 @@ class AnxWebdav extends _$AnxWebdav {
       imageCache.clearLiveImages();
 
       try {
-        ref.read(bookListProvider.notifier).refresh();
+        ref?.read(bookListProvider.notifier).refresh();
       } catch (e) {
         AnxLog.info('Failed to refresh book list: $e');
       }
