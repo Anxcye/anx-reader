@@ -75,31 +75,30 @@ void main() async {
   int suggestedTagBuild = 1;
 
   // For stable version, check if we need to increment the version
-    final stableTags = await _getTagsByPattern('stable');
-    final lastStableVersion = _extractLatestVersionFromTags(stableTags);
+  final stableTags = await _getTagsByPattern('stable');
+  final lastStableVersion = _extractLatestVersionFromTags(stableTags);
 
-    // If current version matches last stable version, suggest a new version
-    if (lastStableVersion == currentVersion) {
-      final parts = currentVersion.split('.');
-      if (parts.length == 3) {
-        final major = int.parse(parts[0]);
-        final minor = int.parse(parts[1]);
-        final patch = int.parse(parts[2]);
+  // If current version matches last stable version, suggest a new version
+  if (lastStableVersion == currentVersion) {
+    final parts = currentVersion.split('.');
+    if (parts.length == 3) {
+      final major = int.parse(parts[0]);
+      final minor = int.parse(parts[1]);
+      final patch = int.parse(parts[2]);
 
-        // Suggest incrementing the patch version
-        suggestedVersion = '$major.$minor.${patch + 1}';
-        print('\nCurrent version matches the latest stable release.');
-        print('Suggesting a new version: $suggestedVersion');
-      }
+      // Suggest incrementing the patch version
+      suggestedVersion = '$major.$minor.${patch + 1}';
+      print('\nCurrent version matches the latest stable release.');
+      print('Suggesting a new version: $suggestedVersion');
     }
-    // For beta/alpha, check for existing builds of the current version in tags
-    final versionTags =
-        tags.where((tag) => tag.contains(suggestedVersion)).toList();
-    if (versionTags.isNotEmpty) {
-      suggestedTagBuild =
-          _findHighestBuildNumber(versionTags, suggestedVersion) + 1;
-    }
-  
+  }
+  // For beta/alpha, check for existing builds of the current version in tags
+  final versionTags =
+      tags.where((tag) => tag.contains(suggestedVersion)).toList();
+  if (versionTags.isNotEmpty) {
+    suggestedTagBuild =
+        _findHighestBuildNumber(versionTags, suggestedVersion) + 1;
+  }
 
   if (allTags.isNotEmpty) {
     print('\nRecent tags:');
@@ -146,14 +145,16 @@ void main() async {
   final version =
       newVersion?.isNotEmpty == true ? newVersion! : suggestedVersion;
 
-  print('Enter new pubspec build number (or press Enter to use $suggestedPubspecBuild):');
+  print(
+      'Enter new pubspec build number (or press Enter to use $suggestedPubspecBuild):');
   final newPubspecBuildStr = stdin.readLineSync()?.trim();
   final pubspecBuild = newPubspecBuildStr?.isNotEmpty == true
       ? int.parse(newPubspecBuildStr!)
       : suggestedPubspecBuild;
 
   if (releaseType != 'stable') {
-    print('Enter new tag build number (or press Enter to use $suggestedTagBuild):');
+    print(
+        'Enter new tag build number (or press Enter to use $suggestedTagBuild):');
     final newTagBuildStr = stdin.readLineSync()?.trim();
     suggestedTagBuild = newTagBuildStr?.isNotEmpty == true
         ? int.parse(newTagBuildStr!)
@@ -170,8 +171,8 @@ void main() async {
   }
 
   // Update pubspec.yaml
-  final updatedPubspec =
-      pubspecContent.replaceFirst(versionRegExp, 'version: $version+$pubspecBuild');
+  final updatedPubspec = pubspecContent.replaceFirst(
+      versionRegExp, 'version: $version+$pubspecBuild');
 
   pubspecFile.writeAsStringSync(updatedPubspec);
   print('Updated pubspec.yaml version to $version+$pubspecBuild');
@@ -250,7 +251,7 @@ void main() async {
 // Helper method to capitalize first letter
 extension StringExtension on String {
   String capitalize() {
-    return "${this[0].toUpperCase()}${this.substring(1)}";
+    return "${this[0].toUpperCase()}${substring(1)}";
   }
 }
 
