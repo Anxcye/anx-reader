@@ -232,18 +232,39 @@ export class View extends HTMLElement {
   #handleClick(doc) {
 
     doc.addEventListener('click', e => {
-      if (window.isFootNoteOpen()) {
-        window.closeFootNote()
+      if (window.isFootNoteOpen()){
+          window.closeFootNote()
+          return
+      }
+
+      if (doc.getSelection().type === "Range")
+          return
+
+      const position = doc.position
+      const scale = doc.scale
+      let { clientX, clientY } = e
+      // add top margin to y, y is relative to the iframe
+      const topMargin = this.renderer.getAttribute('top-margin').match(/\d+/)[0]
+      clientY += parseInt(topMargin)
+      // if the position is not null, it is fixed layout
+      if (position ){
+        clientX *= scale
+        clientY *= scale
+
+        const docWidth = doc.documentElement.getBoundingClientRect().width * scale
+        if (position === 'right' && docWidth < window.innerWidth * 2.2){
+          clientX += window.innerWidth * 0.5
+        }
+        this.#emit('click-view', { x: clientX, y: clientY })
         return
       }
-      if (doc.getSelection().type === "Range")
-        return
-
-      const x = e.screenX - window.screenX
-      const y = e.screenY - window.screenY
-
-      this.#emit('click-view', { x, y })
-    })
+      
+      this.renderer.scrollProp == 'scrollLeft'
+          ? clientX -= (this.renderer.start - this.renderer.size) 
+          : clientY -= (this.renderer.start)
+          
+      this.#emit('click-view', { x: clientX, y: clientY })
+  })
     this.renderer.addEventListener('click', e => {
       const { clientX, clientY } = e
       while (clientX > window.innerWidth) {
