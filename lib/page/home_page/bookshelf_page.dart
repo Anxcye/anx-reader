@@ -4,6 +4,7 @@ import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/enums/sort_field.dart';
 import 'package:anx_reader/enums/sort_order.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
+import 'package:anx_reader/main.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/providers/book_list.dart';
 import 'package:anx_reader/service/book.dart';
@@ -244,42 +245,46 @@ class BookshelfPageState extends ConsumerState<BookshelfPage> {
         ),
       ),
       actions: [
+        const SyncButton(),
+        IconButton(
+          icon: const Icon(Icons.add),
+          onPressed: _importBook,
+        ),
         PopupMenuButton(
           icon: const Icon(Icons.sort),
-          itemBuilder: (context) {
+          itemBuilder: (_) {
             return [
               for (var sortField in SortFieldEnum.values)
                 PopupMenuItem(
-                    child: Text(sortField.getL10n(context),
-                        style: TextStyle(
-                            color: sortField == Prefs().sortField
-                                ? Theme.of(context).colorScheme.primary
-                                : Theme.of(context).colorScheme.onSurface,
-                          ),
+                    child: Text(
+                      sortField.getL10n(context),
+                      style: TextStyle(
+                        color: sortField == Prefs().sortField
+                            ? Theme.of(context).colorScheme.primary
+                            : Theme.of(context).colorScheme.onSurface,
+                      ),
                     ),
                     onTap: () {
                       Prefs().sortField = sortField;
-                      ref
-                          .read(bookListProvider.notifier)
-                          .refresh();
+                      ref.read(bookListProvider.notifier).refresh();
                     }),
               PopupMenuItem(
                 enabled: false,
-                child: StatefulBuilder(builder: (context, setState) {
+                child: StatefulBuilder(builder: (_, setState) {
                   return Row(
                     children: [
                       Expanded(
                         child: SegmentedButton(
                           onSelectionChanged: (value) {
                             Prefs().sortOrder = value.first;
-                            ref
-                                .read(bookListProvider.notifier)
-                                .refresh();
+                            ref.read(bookListProvider.notifier).refresh();
                             setState(() {});
                           },
                           segments: SortOrderEnum.values
                               .map((e) => ButtonSegment(
-                                  value: e, label: Text(e.getL10n(context))))
+                                    value: e,
+                                    label: Text(e.getL10n(navigatorKey.currentContext!)),
+                                  ))
                               .toList(),
                           selected: {Prefs().sortOrder},
                         ),
@@ -290,11 +295,6 @@ class BookshelfPageState extends ConsumerState<BookshelfPage> {
               )
             ];
           },
-        ),
-        const SyncButton(),
-        IconButton(
-          icon: const Icon(Icons.add),
-          onPressed: _importBook,
         ),
       ],
     );
