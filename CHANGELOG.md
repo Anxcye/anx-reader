@@ -2,6 +2,13 @@
 
 ## Todo
 
+## 1.4.5
+- Fix: Incorrect click position detection on macOS
+- Fix: Sort menu sometimes fails to open
+
+- 修复：macOS 端无法正确判断点击位置的问题
+- 修复：排序菜单有时无法打开的问题
+
 ## 1.4.4
 - Feat: Import pdf files
 - Feat: Sort books
