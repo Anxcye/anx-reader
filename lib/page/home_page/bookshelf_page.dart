@@ -250,12 +250,20 @@ class BookshelfPageState extends ConsumerState<BookshelfPage> {
           icon: const Icon(Icons.add),
           onPressed: _importBook,
         ),
-        PopupMenuButton(
+        IconButton(
           icon: const Icon(Icons.sort),
-          itemBuilder: (_) {
-            return [
-              for (var sortField in SortFieldEnum.values)
-                PopupMenuItem(
+          onPressed: () {
+            showMenu(
+              context: context,
+              position: RelativeRect.fromLTRB(
+                MediaQuery.of(context).size.width,
+                MediaQuery.of(context).padding.top + kToolbarHeight,
+                0.0,
+                0.0,
+              ),
+              items: [
+                for (var sortField in SortFieldEnum.values)
+                  PopupMenuItem(
                     child: Text(
                       sortField.getL10n(context),
                       style: TextStyle(
@@ -293,8 +301,8 @@ class BookshelfPageState extends ConsumerState<BookshelfPage> {
                   );
                 }),
               )
-            ];
-          },
+            ],
+          );}
         ),
       ],
     );
