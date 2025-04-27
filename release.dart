@@ -75,7 +75,6 @@ void main() async {
   int suggestedTagBuild = 1;
 
   // For stable version, check if we need to increment the version
-  if (releaseType == 'stable') {
     final stableTags = await _getTagsByPattern('stable');
     final lastStableVersion = _extractLatestVersionFromTags(stableTags);
 
@@ -93,15 +92,14 @@ void main() async {
         print('Suggesting a new version: $suggestedVersion');
       }
     }
-  } else {
     // For beta/alpha, check for existing builds of the current version in tags
     final versionTags =
-        tags.where((tag) => tag.contains(currentVersion)).toList();
+        tags.where((tag) => tag.contains(suggestedVersion)).toList();
     if (versionTags.isNotEmpty) {
       suggestedTagBuild =
-          _findHighestBuildNumber(versionTags, currentVersion) + 1;
+          _findHighestBuildNumber(versionTags, suggestedVersion) + 1;
     }
-  }
+  
 
   if (allTags.isNotEmpty) {
     print('\nRecent tags:');
