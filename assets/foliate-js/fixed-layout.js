@@ -56,7 +56,7 @@ export class FixedLayout extends HTMLElement {
 
         this.#observer.observe(this)
     }
-    async #createFrame({ index, src }) {
+    async #createFrame(position, { index, src }) {
         const element = document.createElement('div')
         const iframe = document.createElement('iframe')
         element.append(iframe)
@@ -76,6 +76,7 @@ export class FixedLayout extends HTMLElement {
             const onload = () => {
                 iframe.removeEventListener('load', onload)
                 const doc = iframe.contentDocument
+                doc.position = position
                 this.dispatchEvent(new CustomEvent('load', { detail: { doc, index } }))
                 const { width, height } = getViewport(doc, this.defaultViewport)
                 resolve({
@@ -112,6 +113,7 @@ export class FixedLayout extends HTMLElement {
 
         const transform = frame => {
             const { element, iframe, width, height, blank } = frame
+            iframe.contentDocument.scale = scale
             Object.assign(iframe.style, {
                 width: `${width}px`,
                 height: `${height}px`,
@@ -142,12 +144,12 @@ export class FixedLayout extends HTMLElement {
         this.#right = null
         this.#center = null
         if (center) {
-            this.#center = await this.#createFrame(center)
+            this.#center = await this.#createFrame('center', center)
             this.#side = 'center'
             this.#render()
         } else {
-            this.#left = await this.#createFrame(left)
-            this.#right = await this.#createFrame(right)
+            this.#left = await this.#createFrame('left', left)
+            this.#right = await this.#createFrame('right', right)
             this.#side = this.#left.blank ? 'right'
                 : this.#right.blank ? 'left' : side
             this.#render()
