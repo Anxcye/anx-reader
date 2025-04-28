@@ -141,16 +141,17 @@ Telegram Group: [https://t.me/AnxReader](https://t.me/AnxReader)
 QQ Group：1042905699
 
 ### Screenshots
-| ![](./docs/images/wide_main.png) | ![](./docs/images/wide_ai.png) |
+| ![](./docs/images/wide1.png) | ![](./docs/images/wide2.png) |
 | :------------------------------: | :----------------------------: |
-|   ![](./docs/images/wide1.png)   |  ![](./docs/images/wide2.png)  |
 |   ![](./docs/images/wide3.png)   |  ![](./docs/images/wide4.png)  |
 |   ![](./docs/images/wide5.png)   |  ![](./docs/images/wide6.png)  |
+|   ![](./docs/images/wide7.png)   |  ![](./docs/images/wide8.png)  |
 
 
 | ![](./docs/images/mobile1.png) | ![](./docs/images/mobile2.png) | ![](./docs/images/mobile3.png) |
 | :----------------------------: | :----------------------------: | :----------------------------: |
 | ![](./docs/images/mobile4.png) | ![](./docs/images/mobile5.png) | ![](./docs/images/mobile6.png) |
+| ![](./docs/images/mobile7.png) | ![](./docs/images/mobile8.png) | ![](./docs/images/mobile9.png) |
 
 ## Donations
 If you like Anx Reader, please consider supporting the project by donating. Your donation will help me maintain and improve the project.

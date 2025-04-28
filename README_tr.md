@@ -54,16 +54,17 @@ Android ve Windows için kullanılabilir.
 **Telegram Grubu:** [https://t.me/AnxReader](https://t.me/AnxReader)
 
 ## Ekran Görüntüleri
-| ![](./docs/images/wide_main.png) | ![](./docs/images/wide_ai.png) |
-| :------------------------------: | :----------------------------: |
-|   ![](./docs/images/wide1.png)   |  ![](./docs/images/wide2.png)  |
-|   ![](./docs/images/wide3.png)   |  ![](./docs/images/wide4.png)  |
-|   ![](./docs/images/wide5.png)   |  ![](./docs/images/wide6.png)  |
+| ![](./docs/images/wide1.png) | ![](./docs/images/wide2.png) |
+| :--------------------------: | :--------------------------: |
+| ![](./docs/images/wide3.png) | ![](./docs/images/wide4.png) |
+| ![](./docs/images/wide5.png) | ![](./docs/images/wide6.png) |
+| ![](./docs/images/wide7.png) | ![](./docs/images/wide8.png) |
 
 
 | ![](./docs/images/mobile1.png) | ![](./docs/images/mobile2.png) | ![](./docs/images/mobile3.png) |
 | :----------------------------: | :----------------------------: | :----------------------------: |
 | ![](./docs/images/mobile4.png) | ![](./docs/images/mobile5.png) | ![](./docs/images/mobile6.png) |
+| ![](./docs/images/mobile7.png) | ![](./docs/images/mobile8.png) | ![](./docs/images/mobile9.png) |
 
 ## Bağış Yapın
 Eğer Anx Reader’ı beğendiyseniz, projeyi desteklemek için bağış yapmayı düşünebilirsiniz. Bağışlarınız, projenin bakımını ve geliştirilmesini sürdürebilmemize yardımcı olur.

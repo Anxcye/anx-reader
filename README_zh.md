@@ -123,17 +123,17 @@ QQ群：1042905699
 
 
 ### 截图
-| ![](./docs/images/wide_main.png) | ![](./docs/images/wide_ai.png) |
-| :------------------------------: | :----------------------------: |
-|   ![](./docs/images/wide1.png)   |  ![](./docs/images/wide2.png)  |
-|   ![](./docs/images/wide3.png)   |  ![](./docs/images/wide4.png)  |
-|   ![](./docs/images/wide5.png)   |  ![](./docs/images/wide6.png)  |
+| ![](./docs/images/zh/wide1.png) | ![](./docs/images/zh/wide2.png) |
+| :--------------------------: | :--------------------------: |
+| ![](./docs/images/zh/wide3.png) | ![](./docs/images/zh/wide4.png) |
+| ![](./docs/images/zh/wide5.png) | ![](./docs/images/zh/wide6.png) |
+| ![](./docs/images/zh/wide7.png) | ![](./docs/images/zh/wide8.png) |
 
 
-| ![](./docs/images/mobile1.png) | ![](./docs/images/mobile2.png) | ![](./docs/images/mobile3.png) |
+| ![](./docs/images/zh/mobile1.png) | ![](./docs/images/zh/mobile2.png) | ![](./docs/images/zh/mobile3.png) |
 | :----------------------------: | :----------------------------: | :----------------------------: |
-| ![](./docs/images/mobile4.png) | ![](./docs/images/mobile5.png) | ![](./docs/images/mobile6.png) |
-
+| ![](./docs/images/zh/mobile4.png) | ![](./docs/images/zh/mobile5.png) | ![](./docs/images/zh/mobile6.png) |
+| ![](./docs/images/zh/mobile7.png) | ![](./docs/images/zh/mobile8.png) | ![](./docs/images/zh/mobile9.png) |
 
 ## 捐赠
 如果你喜欢安读，请考虑捐赠支持项目。您的支持将帮助我优化功能、修复问题，并为您带来更好的阅读体验！感谢您的慷慨支持！
