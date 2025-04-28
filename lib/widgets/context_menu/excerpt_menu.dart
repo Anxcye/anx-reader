@@ -254,7 +254,7 @@ class ExcerptMenuState extends State<ExcerptMenu> {
             },
             child: IconAndText(
               icon: const Icon(EvaIcons.share_outline),
-              text: 'Share Excerpt',
+              text: L10n.of(context).context_menu_share,
             ),
           ),
         ],
