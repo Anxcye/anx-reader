@@ -50,7 +50,7 @@ class _ExcerptShareBottomSheetState extends State<ExcerptShareBottomSheet> {
   // 配色方案列表
   final List<Map<String, Color>> _colorSchemes = [
     {'text': Colors.black, 'background': Colors.white},
-    {'text': Colors.white, 'background': Colors.black},
+    {'text': const ui.Color.fromARGB(255, 246, 217, 149), 'background': const ui.Color.fromARGB(255, 48, 44, 28)},
     {'text': Colors.black, 'background': Colors.amber.shade100},
     {'text': Colors.white, 'background': Colors.blueGrey.shade800},
     {'text': Colors.black, 'background': Colors.pink.shade50},
@@ -60,9 +60,11 @@ class _ExcerptShareBottomSheetState extends State<ExcerptShareBottomSheet> {
   // 背景图片列表 - 这里可以添加项目中的背景图片或者使用网络图片
   final List<String?> _backgroundImages = [
     null, // 无背景图片选项
-    'assets/images/xiaohongshu.png',
-    'assets/images/qq.png',
-    'assets/images/claude.png',
+    'assets/images/book_share/bg1.jpg',
+    'assets/images/book_share/bg2.jpg',
+    'assets/images/book_share/bg3.jpg',
+    'assets/images/book_share/bg4.jpg',
+    'assets/images/book_share/bg5.jpg',
   ];
 
   Future<Uint8List?> _captureCard() async {
@@ -141,19 +143,22 @@ class _ExcerptShareBottomSheetState extends State<ExcerptShareBottomSheet> {
           // 预览卡片
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: AspectRatio(
-              aspectRatio: 3 / 4,
-              child: ExcerptShareCard(
-                key: _cardKey,
-                bookTitle: widget.bookTitle,
-                author: widget.author,
-                excerpt: widget.excerpt,
-                chapter: widget.chapter,
-                template: _template,
-                font: _font,
-                textColor: _textColor,
-                backgroundColor: _backgroundColor,
-                backgroundImage: _backgroundImage,
+            child: SizedBox(
+              height: 300,
+              child: FittedBox(
+                fit: BoxFit.contain,
+                child: ExcerptShareCard(
+                  key: _cardKey,
+                  bookTitle: widget.bookTitle,
+                  author: widget.author,
+                  excerpt: widget.excerpt,
+                  chapter: widget.chapter,
+                  template: _template,
+                  font: _font,
+                  textColor: _textColor,
+                  backgroundColor: _backgroundColor,
+                  backgroundImage: _backgroundImage,
+                ),
               ),
             ),
           ),

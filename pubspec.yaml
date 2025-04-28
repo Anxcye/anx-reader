@@ -127,6 +127,7 @@ flutter:
     - assets/images/commonAi.png
     - assets/images/qq.png
     - assets/images/xiaohongshu.png
+    - assets/images/book_share/
 
 
   fonts:
