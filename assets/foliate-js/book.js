@@ -47,6 +47,7 @@
 // ///////////////////////////////
 
 console.log('book.js')
+console.log('AnxUA', navigator.userAgent)
 
 import './view.js'
 import { FootnoteHandler } from './footnotes.js'
