@@ -95,6 +95,7 @@ dependencies:
   flutter_slidable: ^4.0.0
   cached_network_image: ^3.4.1
   lpinyin: ^2.0.3
+  mongol: ^9.0.0
 
 
 dev_dependencies:
@@ -134,4 +135,8 @@ flutter:
     - family: SourceHanSerif
       fonts:
         - asset: assets/fonts/SourceHanSerifSC-Regular.otf
+          weight: 400
+        - asset: assets/fonts/SourceHanSerifSC-Bold.otf
+          weight: 700
+
 

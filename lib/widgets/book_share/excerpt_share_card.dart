@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mongol/mongol.dart';
 
 class ExcerptShareCard extends StatelessWidget {
   final String bookTitle;
@@ -37,9 +38,9 @@ class ExcerptShareCard extends StatelessWidget {
       child: Container(
         width: 500,
         decoration: BoxDecoration(
-        color: backgroundColor,
+          color: backgroundColor,
           borderRadius: BorderRadius.circular(8),
-            boxShadow: [
+          boxShadow: [
             BoxShadow(
               color: Colors.black45,
               blurRadius: 10,
@@ -85,8 +86,113 @@ class ExcerptShareCard extends StatelessWidget {
     }
   }
 
+  Widget _getAnxReaderLogo() {
+    return Text(
+      'Anx Reader',
+      style: TextStyle(
+        fontSize: 12,
+        fontWeight: FontWeight.w100,
+      ),
+    );
+  }
+
+  Text _getContent() {
+    return Text(
+      excerpt,
+      style: _getTextStyle().copyWith(
+        fontSize: 18,
+        height: 2,
+      ),
+    );
+  }
+
+  Widget _getTitleText({
+    TextAlign textAlign = TextAlign.start,
+    TextDirection textDirection = TextDirection.ltr,
+    bool verticle = false,
+    double fontSize = 20,
+  }) {
+    if (verticle) {
+      return ConstrainedBox(
+        constraints: const BoxConstraints(maxHeight: 350),
+        child: MongolText(
+          bookTitle,
+          style: _getTextStyle().copyWith(
+            fontSize: fontSize,
+            fontWeight: FontWeight.bold,
+            height: 1.3,
+          ),
+        ),
+      );
+    } else {
+      return Text(
+        bookTitle,
+        textAlign: textAlign,
+        textDirection: textDirection,
+        style: _getTextStyle().copyWith(
+          fontSize: fontSize,
+          fontWeight: FontWeight.bold,
+        ),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      );
+    }
+  }
+
+  Widget _getChapterText({
+    String leading = '—— ',
+    bool verticle = false,
+    double textSize = 14,
+  }) {
+    if (chapter == null || chapter!.isEmpty) {
+      return const SizedBox.shrink();
+    }
+    if (verticle) {
+      return ConstrainedBox(
+        constraints: const BoxConstraints(maxHeight: 350),
+        child: MongolText(
+          '$leading$chapter',
+          style: _getTextStyle().copyWith(
+            fontSize: textSize,
+          ),
+        ),
+      );
+    } else {
+      return Text(
+        '$leading$chapter',
+        style: _getTextStyle().copyWith(
+          fontSize: textSize,
+        ),
+      );
+    }
+  }
+
+  Widget _getAuthorText({bool verticle = false, double textSize = 14}) {
+    if (verticle) {
+      return ConstrainedBox(
+        constraints: const BoxConstraints(maxHeight: 350),
+        child: MongolText(
+          author,
+          style: _getTextStyle().copyWith(
+            fontSize: textSize,
+          ),
+        ),
+      );
+    } else {
+      return Text(
+        author,
+        style: _getTextStyle().copyWith(
+          fontSize: textSize,
+        ),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      );
+    }
+  }
+
   Widget _buildDefaultTemplate() {
     return Container(
+      padding: const EdgeInsets.all(24.0),
       decoration: BoxDecoration(
         image: backgroundImage != null
             ? DecorationImage(
@@ -99,35 +205,19 @@ class ExcerptShareCard extends StatelessWidget {
               )
             : null,
       ),
-      padding: const EdgeInsets.all(24.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Center(
-              child: SingleChildScrollView(
-                child: Text(
-                  excerpt,
-                  style: _getTextStyle().copyWith(
-                    fontSize: 18,
-                    height: 1.5,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            
+          _getContent(),
+          Row(
+            children: [
+              const Spacer(),
+              _getChapterText(),
+            ],
           ),
-          if (chapter != null && chapter!.isNotEmpty)
-            Text(
-              '—— $chapter',
-              style: _getTextStyle().copyWith(
-                fontSize: 14,
-                fontStyle: FontStyle.italic,
-              ),
-              textAlign: TextAlign.end,
-            ),
           const SizedBox(height: 16),
-          Divider(thickness: 1),
+          Divider(thickness: 1, color: textColor.withAlpha(80)),
           const SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -136,36 +226,13 @@ class ExcerptShareCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      bookTitle,
-                      style: _getTextStyle().copyWith(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                    _getTitleText(),
                     const SizedBox(height: 4),
-                    Text(
-                      author,
-                      style: _getTextStyle().copyWith(
-                        fontSize: 14,
-                        fontStyle: FontStyle.italic,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                    _getAuthorText(),
                   ],
                 ),
               ),
-                Text(
-                  'Anx Reader',
-                  style: _getTextStyle().copyWith(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w100,
-                  ),
-                ),
-              
+              _getAnxReaderLogo(),
             ],
           ),
         ],
@@ -174,6 +241,115 @@ class ExcerptShareCard extends StatelessWidget {
   }
 
   Widget _buildSimpleTemplate() {
+    return Container(
+      padding: const EdgeInsets.all(24.0),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        image: backgroundImage != null
+            ? DecorationImage(
+                image: AssetImage(backgroundImage!),
+                fit: BoxFit.cover,
+                colorFilter: ColorFilter.mode(
+                  backgroundColor.withAlpha(100),
+                  BlendMode.dstATop,
+                ),
+              )
+            : null,
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Expanded(child: _getTitleText()),
+              const SizedBox(width: 16),
+              _getChapterText(),
+              const SizedBox(width: 16),
+              _getAuthorText(),
+            ],
+          ),
+          const SizedBox(height: 20),
+          Stack(
+            children: [
+              Positioned(
+                top: -15,
+                left: 0,
+                child: Icon(
+                  Icons.format_quote,
+                  size: 64,
+                  color: textColor.withAlpha(40),
+                ),
+              ),
+              _getContent(),
+              Positioned(
+                bottom: 0,
+                right: 0,
+                child: Transform.rotate(
+                  angle: 3.14,
+                  child: Icon(
+                    Icons.format_quote,
+                    size: 64,
+                    color: textColor.withAlpha(40),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          Column(
+            children: [
+              Row(
+                children: [
+                  Spacer(),
+                  _getAnxReaderLogo(),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildElegantTemplate() {
+    return Column(
+      children: [
+        Container(
+            padding: const EdgeInsets.all(24.0),
+            decoration: BoxDecoration(
+              color: backgroundColor,
+              image: backgroundImage != null
+                  ? DecorationImage(
+                      image: AssetImage(backgroundImage!),
+                      fit: BoxFit.cover,
+                      colorFilter: ColorFilter.mode(
+                        backgroundColor.withAlpha(200),
+                        BlendMode.dstATop,
+                      ),
+                    )
+                  : null,
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _getTitleText(verticle: true, fontSize: 30),
+                const SizedBox(width: 16),
+                _getAuthorText(verticle: true, textSize: 20),
+              ],
+            )),
+        Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(children: [
+          _getChapterText( leading: '/ ', textSize: 20),
+          const SizedBox(height: 16),
+          _getContent(),
+               
+          ]),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildModernTemplate() {
     return Container(
       decoration: BoxDecoration(
         color: backgroundColor,
@@ -197,133 +373,21 @@ class ExcerptShareCard extends StatelessWidget {
         ],
       ),
       padding: const EdgeInsets.all(24.0),
-      child: Column(
+      child: Stack(
         children: [
-          Center(
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      '❝',
-                      style: _getTextStyle().copyWith(
-                        fontSize: 48,
-                        height: 1,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      excerpt,
-                      style: _getTextStyle().copyWith(
-                        fontSize: 18,
-                        height: 1.6,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      '❞',
-                      style: _getTextStyle().copyWith(
-                        fontSize: 48,
-                        height: 1,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
-              ),
+          Positioned(
+            top: 0,
+            left: 0,
+            child: Icon(
+              Icons.format_quote,
+              size: 36,
+              color: textColor.withOpacity(0.2),
             ),
-          
-          const SizedBox(height: 24),
+          ),
           Column(
             children: [
-              Text(
-                bookTitle,
-                style: _getTextStyle().copyWith(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 4),
-              if (chapter != null && chapter!.isNotEmpty)
-                Text(
-                  chapter!,
-                  style: _getTextStyle().copyWith(
-                    fontSize: 14,
-                    fontStyle: FontStyle.italic,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              const SizedBox(height: 4),
-              Text(
-                author,
-                style: _getTextStyle().copyWith(fontSize: 14),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildElegantTemplate() {
-    return Container(
-      decoration: BoxDecoration(
-        color: backgroundColor,
-          image: backgroundImage != null
-              ? DecorationImage(
-                  image: AssetImage(backgroundImage!),
-                  fit: BoxFit.cover,
-                  colorFilter: ColorFilter.mode(
-                    backgroundColor.withOpacity(0.6),
-                    BlendMode.dstATop,
-                  ),
-                )
-              : null,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: textColor.withOpacity(0.3),
-            width: 1,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 10,
-              offset: const Offset(0, 5),
-            ),
-          ],
-        ),
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          children: [
-            Text(
-              bookTitle,
-              style: _getTextStyle().copyWith(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 1.2,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            Text(
-              author,
-              style: _getTextStyle().copyWith(
-                fontSize: 14,
-                fontStyle: FontStyle.italic,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            Container(
-              height: 1,
-              width: 100,
-              color: textColor.withOpacity(0.5),
-            ),
-            const SizedBox(height: 24),
-               Center(
+              const SizedBox(height: 24),
+              Center(
                 child: SingleChildScrollView(
                   child: Text(
                     excerpt,
@@ -335,141 +399,61 @@ class ExcerptShareCard extends StatelessWidget {
                     textAlign: TextAlign.center,
                   ),
                 ),
-              
-            ),
-            const SizedBox(height: 24),
-            if (chapter != null && chapter!.isNotEmpty)
-              Column(
-                children: [
-                  Container(
-                    height: 1,
-                    width: 100,
-                    color: textColor.withOpacity(0.5),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    chapter!,
-                    style: _getTextStyle().copyWith(
-                      fontSize: 14,
-                      fontStyle: FontStyle.italic,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
               ),
-          ],
-        ),
-      
-    );
-  }
-
-  Widget _buildModernTemplate() {
-    return Container(
-      decoration: BoxDecoration(
-          color: backgroundColor,
-          image: backgroundImage != null
-              ? DecorationImage(
-                  image: AssetImage(backgroundImage!),
-                  fit: BoxFit.cover,
-                  colorFilter: ColorFilter.mode(
-                    backgroundColor.withOpacity(0.7),
-                    BlendMode.dstATop,
-                  ),
-                )
-              : null,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 10,
-              offset: const Offset(0, 5),
-            ),
-          ],
-        ),
-        padding: const EdgeInsets.all(24.0),
-        child: Stack(
-          children: [
-            Positioned(
-              top: 0,
-              left: 0,
+              const SizedBox(height: 24),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: textColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      bookTitle,
+                      style: _getTextStyle().copyWith(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 4),
+                    if (chapter != null && chapter!.isNotEmpty)
+                      Text(
+                        chapter!,
+                        style: _getTextStyle().copyWith(
+                          fontSize: 14,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    const SizedBox(height: 4),
+                    Text(
+                      author,
+                      style: _getTextStyle().copyWith(
+                        fontSize: 14,
+                        fontStyle: FontStyle.italic,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          Positioned(
+            bottom: 0,
+            right: 0,
+            child: Transform.rotate(
+              angle: 3.14,
               child: Icon(
                 Icons.format_quote,
                 size: 36,
                 color: textColor.withOpacity(0.2),
               ),
             ),
-            Column(
-              children: [
-                const SizedBox(height: 24),
-                 Center(
-                    child: SingleChildScrollView(
-                      child: Text(
-                        excerpt,
-                        style: _getTextStyle().copyWith(
-                          fontSize: 18,
-                          height: 1.6,
-                          letterSpacing: 0.5,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  
-                ),
-                const SizedBox(height: 24),
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: textColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Column(
-                    children: [
-                      Text(
-                        bookTitle,
-                        style: _getTextStyle().copyWith(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 4),
-                      if (chapter != null && chapter!.isNotEmpty)
-                        Text(
-                          chapter!,
-                          style: _getTextStyle().copyWith(
-                            fontSize: 14,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      const SizedBox(height: 4),
-                      Text(
-                        author,
-                        style: _getTextStyle().copyWith(
-                          fontSize: 14,
-                          fontStyle: FontStyle.italic,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            Positioned(
-              bottom: 0,
-              right: 0,
-              child: Transform.rotate(
-                angle: 3.14,
-                child: Icon(
-                  Icons.format_quote,
-                  size: 36,
-                  color: textColor.withOpacity(0.2),
-                ),
-              ),
-            ),
-          ],
-        ),
-      
+          ),
+        ],
+      ),
     );
   }
 }
