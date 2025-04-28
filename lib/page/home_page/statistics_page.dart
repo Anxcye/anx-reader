@@ -283,7 +283,7 @@ class _DateBooksState extends ConsumerState<DateBooks> {
               },
               icon: Icons.delete,
               label: L10n.of(context).common_delete,
-              backgroundColor: Theme.of(context).colorScheme.surface,
+              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             ),
           ],
         );

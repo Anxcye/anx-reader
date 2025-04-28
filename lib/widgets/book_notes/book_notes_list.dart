@@ -7,11 +7,13 @@ import 'package:anx_reader/page/reading_page.dart';
 import 'package:anx_reader/providers/anx_webdav.dart';
 import 'package:anx_reader/service/book.dart';
 import 'package:anx_reader/utils/time_to_human.dart';
+import 'package:anx_reader/widgets/book_share/excerpt_share_service.dart';
 import 'package:anx_reader/widgets/delete_confirm.dart';
 import 'package:anx_reader/widgets/context_menu/excerpt_menu.dart';
 import 'package:anx_reader/widgets/tips/notes_tips.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:sticky_headers/sticky_headers.dart';
 
@@ -497,6 +499,34 @@ class _BookNotesListState extends ConsumerState<BookNotesList> {
     );
   }
 
+  Widget slidbleNotes(Widget child, BookNote bookNote) {
+    ActionPane actionPane = ActionPane(
+      motion: const StretchMotion(),
+      children: [
+        SlidableAction(
+          onPressed: (context) {
+            ExcerptShareService.showShareExcerpt(
+                context: context,
+                bookTitle: widget.book.title,
+                author: widget.book.author,
+                excerpt: bookNote.content,
+                chapter: bookNote.chapter,
+              );
+          },
+          icon: Icons.share,
+          label: L10n.of(context).reading_page_share_share,
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        ),
+      ],
+    );
+    return Slidable(
+      key: ValueKey(bookNote.id),
+      startActionPane: actionPane,
+      endActionPane: actionPane,
+      child: child,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -512,7 +542,10 @@ class _BookNotesListState extends ConsumerState<BookNotesList> {
                 )
               : Column(
                   children: showNotes.map((bookNote) {
-                    return bookNoteItem(context, bookNote, false);
+                    return slidbleNotes(
+                      bookNoteItem(context, bookNote, false),
+                      bookNote,
+                    );
                   }).toList(),
                 ),
         ),
