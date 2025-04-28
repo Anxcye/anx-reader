@@ -246,15 +246,10 @@ class ExcerptMenuState extends State<ExcerptMenu> {
               widget.onClose();
               ExcerptShareService.showShareExcerpt(
                 context: context,
-                bookTitle: '人间失格',
-                author: '太宰治',
-                excerpt:
-                    '生而为人，我很抱歉。我一直都觉得自己是个坏孩子，对这个事实，我深深感到恐惧。没有人会真正明了他人的痛苦，没有人会真正理解他人的悲伤。人是无法被他人理解的。' +
-                    '生而为人，我很抱歉。我一直都觉得自己是个坏孩子，对这个事实，我深深感到恐惧。没\n有人会真正明了他人的痛苦，没有人会真正理解他人的悲伤。人是无法被他人理解的。' +
-                    '生而为人，我很抱歉。我一直都觉得自己是个坏孩子，对这个事实，我深深感到恐惧。没有人会真正明了他人的痛苦，没有人会真正理解他人\n的悲伤。人是无法被他人理解的。' +
-                    '生而为人，我很抱歉。我一直都觉得自己是个坏孩子，对这个事实，我深深感到恐惧。没有人会真正明了他人的痛苦，没有人会真正理解他人的悲伤。人是无法被他人理解的。'+ 
-                    '生而为人，我很抱歉。我一直都觉得自己是个坏孩子，对这个事实，我深深感到恐惧。没有人\n会真正明了他人的痛苦，没有人会真正理解他人的悲伤。人是无法被他人理解的。',
-                chapter: '第三章',
+                bookTitle: epubPlayerKey.currentState!.book.title,
+                author: epubPlayerKey.currentState!.book.author,
+                excerpt: widget.annoContent,
+                chapter: epubPlayerKey.currentState!.chapterTitle,
               );
             },
             child: IconAndText(
