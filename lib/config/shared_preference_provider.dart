@@ -633,5 +633,26 @@ class Prefs extends ChangeNotifier {
 
   set excerptShareFont(FontModel font) {
     prefs.setString('excerptShareFont', font.toJson());
+    notifyListeners();
   }
+
+  int get excerptShareColorIndex {
+    return prefs.getInt('excerptShareColorIndex') ?? 0;
+  }
+
+  set excerptShareColorIndex(int index) {
+    prefs.setInt('excerptShareColorIndex', index);
+    notifyListeners();
+  }
+
+  int get excerptShareBgimgIndex {
+    return prefs.getInt('excerptShareBgimgIndex') ?? 1;
+  }
+
+  set excerptShareBgimgIndex(int index) {
+    prefs.setInt('excerptShareBgimgIndex', index);
+    notifyListeners();
+  }
+  
+  
 }

@@ -42,9 +42,9 @@ class _ExcerptShareBottomSheetState
     extends ConsumerState<ExcerptShareBottomSheet> {
   final GlobalKey _cardKey = GlobalKey();
 
-  Color _textColor = Colors.black;
-  Color _backgroundColor = Colors.white;
-  String? _backgroundImage;
+  // Color _textColor = Colors.black;
+  // Color _backgroundColor = Colors.white;
+  // String? _backgroundImage;
 
   set _template(ExcerptShareTemplateEnum template) {
     Prefs().excerptShareTemplate = template;
@@ -57,6 +57,23 @@ class _ExcerptShareBottomSheetState
   ExcerptShareTemplateEnum get _template => Prefs().excerptShareTemplate;
 
   FontModel get _font => Prefs().excerptShareFont;
+
+  set _colorIndex(int index) {
+    Prefs().excerptShareColorIndex = index;
+  }
+
+  set _bgimgIndex(int index) {
+    Prefs().excerptShareBgimgIndex = index;
+  }
+
+
+
+
+  Color get _textColor => _colorSchemes[Prefs().excerptShareColorIndex]['text']!;
+
+  Color get _backgroundColor => _colorSchemes[Prefs().excerptShareColorIndex]['background']!;
+
+  String? get _backgroundImage => _backgroundImages[Prefs().excerptShareBgimgIndex];
 
   // final List<String> _fonts = ['default', 'serif', 'sans-serif', 'monospace'];
 
@@ -259,8 +276,7 @@ class _ExcerptShareBottomSheetState
                             child: GestureDetector(
                               onTap: () {
                                 setState(() {
-                                  _textColor = scheme['text']!;
-                                  _backgroundColor = scheme['background']!;
+                                  _colorIndex = index;
                                 });
                               },
                               child: Container(
@@ -316,7 +332,7 @@ class _ExcerptShareBottomSheetState
                             child: GestureDetector(
                               onTap: () {
                                 setState(() {
-                                  _backgroundImage = bgImage;
+                                  _bgimgIndex = index;
                                 });
                               },
                               child: Container(
