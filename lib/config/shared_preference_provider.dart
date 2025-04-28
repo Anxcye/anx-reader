@@ -619,4 +619,19 @@ class Prefs extends ChangeNotifier {
     prefs.setString('excerptShareTemplate', template.name);
     notifyListeners();
   }
+
+  FontModel get excerptShareFont {
+    String? fontJson = prefs.getString('excerptShareFont');
+    if (fontJson == null) {
+      return FontModel(
+          label: L10n.of(navigatorKey.currentContext!).system_font,
+          name: 'customFont0',
+          path: 'SourceHanSerifSC-Regular.otf');
+    }
+    return FontModel.fromJson(fontJson);
+  }
+
+  set excerptShareFont(FontModel font) {
+    prefs.setString('excerptShareFont', font.toJson());
+  }
 }

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:anx_reader/providers/font_list.dart';
 import 'package:anx_reader/utils/get_path/get_base_path.dart';
 import 'package:anx_reader/utils/get_path/get_temp_dir.dart';
 import 'package:dio/dio.dart';
@@ -8,7 +9,6 @@ import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:http/http.dart' as http;
-
 
 part 'fonts.g.dart';
 part 'fonts.freezed.dart';
@@ -172,6 +172,9 @@ class FontDownloads extends _$FontDownloads {
             error: e.toString(),
           )
         };
+      } finally {
+        // refresh font list
+        ref.watch(fontListProvider.notifier).refresh();
       }
     }
   }

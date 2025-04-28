@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:anx_reader/models/storege_info_model.dart';
+import 'package:anx_reader/providers/font_list.dart';
 import 'package:anx_reader/utils/get_path/databases_path.dart';
 import 'package:anx_reader/utils/get_path/get_base_path.dart';
 import 'package:anx_reader/utils/get_path/get_cache_dir.dart';
@@ -128,5 +129,6 @@ class StorageInfo extends _$StorageInfo {
   Future<void> deleteFile(File file) async {
     await file.delete();
     state = AsyncData(await build());
+    ref.watch(fontListProvider.notifier).refresh();
   }
 }
