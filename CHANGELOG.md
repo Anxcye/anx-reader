@@ -3,9 +3,11 @@
 ## Todo
 
 ## 1.4.5
+- Feat: Add share excerpt card(#263)
 - Fix: Incorrect click position detection on macOS
 - Fix: Sort menu sometimes fails to open
 
+- 新增：通过卡片的方式分享划线笔记(#263)
 - 修复：macOS 端无法正确判断点击位置的问题
 - 修复：排序菜单有时无法打开的问题
 
