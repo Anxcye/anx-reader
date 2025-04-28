@@ -1,16 +1,19 @@
 import 'dart:io';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import 'package:anx_reader/config/shared_preference_provider.dart';
+import 'package:anx_reader/enums/excerpt_share_template.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
-import 'package:anx_reader/main.dart';
+import 'package:anx_reader/utils/get_path/get_temp_dir.dart';
+import 'package:anx_reader/utils/log/common.dart';
 import 'package:anx_reader/utils/save_img.dart';
+import 'package:anx_reader/utils/toast/common.dart';
 import 'package:anx_reader/widgets/book_share/excerpt_share_card.dart';
+import 'package:anx_reader/widgets/icon_and_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
 class ExcerptShareBottomSheet extends StatefulWidget {
@@ -35,19 +38,19 @@ class ExcerptShareBottomSheet extends StatefulWidget {
 class _ExcerptShareBottomSheetState extends State<ExcerptShareBottomSheet> {
   final GlobalKey _cardKey = GlobalKey();
 
-  String _template = 'default';
   String _font = 'default';
   Color _textColor = Colors.black;
   Color _backgroundColor = Colors.white;
   String? _backgroundImage;
 
-  // 模板列表
-  final List<String> _templates = ['default', 'simple', 'elegant', 'modern'];
+  set _template(ExcerptShareTemplateEnum template) {
+    Prefs().excerptShareTemplate = template;
+  }
 
-  // 字体列表
+  ExcerptShareTemplateEnum get _template => Prefs().excerptShareTemplate;
+
   final List<String> _fonts = ['default', 'serif', 'sans-serif', 'monospace'];
 
-  // 配色方案列表
   final List<Map<String, Color>> _colorSchemes = [
     {'text': Colors.black, 'background': Colors.white},
     {
@@ -60,9 +63,8 @@ class _ExcerptShareBottomSheetState extends State<ExcerptShareBottomSheet> {
     {'text': Colors.white, 'background': Colors.indigo.shade900},
   ];
 
-  // 背景图片列表 - 这里可以添加项目中的背景图片或者使用网络图片
   final List<String?> _backgroundImages = [
-    null, // 无背景图片选项
+    null,
     'assets/images/book_share/bg1.jpg',
     'assets/images/book_share/bg2.jpg',
     'assets/images/book_share/bg3.jpg',
@@ -79,13 +81,14 @@ class _ExcerptShareBottomSheetState extends State<ExcerptShareBottomSheet> {
           await image.toByteData(format: ui.ImageByteFormat.png);
       return byteData?.buffer.asUint8List();
     } catch (e) {
-      debugPrint('截图错误: $e');
+      AnxToast.show('Capture card error');
+      AnxLog.severe('Capture card error: $e');
       return null;
     }
   }
 
   Future<void> _shareAsImage() async {
-    SmartDialog.showLoading(msg: '加载中...');
+    SmartDialog.showLoading();
 
     final imageData = await _captureCard();
     if (imageData == null) {
@@ -93,8 +96,8 @@ class _ExcerptShareBottomSheetState extends State<ExcerptShareBottomSheet> {
       return;
     }
 
-    final tempDir = await getApplicationDocumentsDirectory();
-    final file = File('${tempDir.path}/anx_excerpt_share.png');
+    final tempDir = (await getAnxTempDir()).path;
+    final file = File('$tempDir/anx_excerpt_share.png');
     await file.writeAsBytes(imageData);
 
     SmartDialog.dismiss();
@@ -109,89 +112,71 @@ class _ExcerptShareBottomSheetState extends State<ExcerptShareBottomSheet> {
     await SaveImg.downloadImg(imageData, 'png', fileName);
   }
 
+  TextStyle _getTitleStyle(BuildContext context) {
+    return TextStyle(
+      fontSize: 13,
+      color: Theme.of(context).colorScheme.primary,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       height: MediaQuery.of(context).size.height * 0.85,
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: Theme.of(context).scaffoldBackgroundColor,
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(16),
-          topRight: Radius.circular(16),
-        ),
-      ),
       child: Column(
         children: [
-          // 顶部拖动条
-          Container(
-            margin: const EdgeInsets.only(top: 8),
-            width: 40,
-            height: 4,
-            decoration: BoxDecoration(
-              color: Colors.grey.withOpacity(0.5),
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-
-          // 标题
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              '分享',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-          ),
-
-          SizedBox(
-            height: MediaQuery.of(context).size.height * 0.3,
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: FittedBox(
-                fit: BoxFit.contain,
-                child: ExcerptShareCard(
-                  key: _cardKey,
-                  bookTitle: widget.bookTitle,
-                  author: widget.author,
-                  excerpt: widget.excerpt,
-                  chapter: widget.chapter,
-                  template: _template,
-                  font: _font,
-                  textColor: _textColor,
-                  backgroundColor: _backgroundColor,
-                  backgroundImage: _backgroundImage,
+          Expanded(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: MediaQuery.of(context).size.height * 0.3,
+              ),
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16.0),
+                child: FittedBox(
+                  fit: BoxFit.contain,
+                  child: ExcerptShareCard(
+                    key: _cardKey,
+                    bookTitle: widget.bookTitle,
+                    author: widget.author,
+                    excerpt: widget.excerpt,
+                    chapter: widget.chapter,
+                    template: _template,
+                    font: _font,
+                    textColor: _textColor,
+                    backgroundColor: _backgroundColor,
+                    backgroundImage: _backgroundImage,
+                  ),
                 ),
               ),
             ),
           ),
-
           const SizedBox(height: 16),
-
-          // 设置选项
-          Expanded(
+          ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.4,
+            ),
             child: SingleChildScrollView(
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // 模板选择
                     Text(
                       '模板',
-                      style: Theme.of(context).textTheme.titleMedium,
+                      style: _getTitleStyle(context),
                     ),
-                    const SizedBox(height: 8),
                     SizedBox(
                       height: 50,
                       child: ListView.builder(
                         scrollDirection: Axis.horizontal,
-                        itemCount: _templates.length,
+                        itemCount: ExcerptShareTemplateEnum.values.length,
                         itemBuilder: (context, index) {
-                          final template = _templates[index];
+                          final template =
+                              ExcerptShareTemplateEnum.values[index];
                           return Padding(
                             padding: const EdgeInsets.only(right: 8.0),
                             child: ChoiceChip(
-                              label: Text(template),
+                              label: Text(template.getL10n(context)),
                               selected: _template == template,
                               onSelected: (selected) {
                                 if (selected) {
@@ -211,9 +196,8 @@ class _ExcerptShareBottomSheetState extends State<ExcerptShareBottomSheet> {
                     // 字体选择
                     Text(
                       '字体',
-                      style: Theme.of(context).textTheme.titleMedium,
+                      style: _getTitleStyle(context),
                     ),
-                    const SizedBox(height: 8),
                     SizedBox(
                       height: 50,
                       child: ListView.builder(
@@ -244,9 +228,8 @@ class _ExcerptShareBottomSheetState extends State<ExcerptShareBottomSheet> {
                     // 配色选择
                     Text(
                       '配色方案',
-                      style: Theme.of(context).textTheme.titleMedium,
+                      style: _getTitleStyle(context),
                     ),
-                    const SizedBox(height: 8),
                     SizedBox(
                       height: 50,
                       child: ListView.builder(
@@ -300,12 +283,10 @@ class _ExcerptShareBottomSheetState extends State<ExcerptShareBottomSheet> {
 
                     const SizedBox(height: 16),
 
-                    // 背景图片选择
                     Text(
                       '背景图片',
-                      style: Theme.of(context).textTheme.titleMedium,
+                      style: _getTitleStyle(context),
                     ),
-                    const SizedBox(height: 8),
                     SizedBox(
                       height: 60,
                       child: ListView.builder(
@@ -326,7 +307,7 @@ class _ExcerptShareBottomSheetState extends State<ExcerptShareBottomSheet> {
                                 height: 60,
                                 decoration: BoxDecoration(
                                   color: bgImage == null
-                                      ? Colors.grey.withOpacity(0.2)
+                                      ? Colors.grey.withAlpha(100)
                                       : null,
                                   image: bgImage != null
                                       ? DecorationImage(
@@ -356,67 +337,30 @@ class _ExcerptShareBottomSheetState extends State<ExcerptShareBottomSheet> {
               ),
             ),
           ),
-
-          // 底部按钮
-          Container(
-            padding: const EdgeInsets.all(16.0),
-            decoration: BoxDecoration(
-              color: Theme.of(context).scaffoldBackgroundColor,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 4,
-                  offset: const Offset(0, -2),
-                ),
-              ],
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _actionButton(
-                  icon: const Icon(Icons.save_alt),
-                  label: '保存图片',
-                  onTap: _saveAsImage,
-                ),
-                _actionButton(
-                  icon: const Icon(Icons.share),
-                  label: '分享',
-                  onTap: _shareAsImage,
-                ),
-                _actionButton(
-                  icon: const Icon(Icons.copy),
-                  label: '复制',
-                  onTap: () {
-                    Clipboard.setData(ClipboardData(text: widget.excerpt));
-                    SmartDialog.showToast('复制成功');
-                  },
-                ),
-              ],
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              IconAndText(
+                icon: const Icon(Icons.save_alt),
+                text: '保存图片',
+                onTap: _saveAsImage,
+              ),
+              IconAndText(
+                icon: const Icon(Icons.share),
+                text: '分享',
+                onTap: _shareAsImage,
+              ),
+              IconAndText(
+                icon: const Icon(Icons.copy),
+                text: '复制',
+                onTap: () {
+                  Clipboard.setData(ClipboardData(text: widget.excerpt));
+                  AnxToast.show(L10n.of(context).notes_page_copied);
+                },
+              ),
+            ],
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _actionButton({
-    required Widget icon,
-    required String label,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            icon,
-            const SizedBox(height: 4),
-            Text(label),
-          ],
-        ),
       ),
     );
   }
@@ -431,8 +375,8 @@ Future<void> showExcerptShareBottomSheet({
 }) async {
   await showModalBottomSheet(
     context: context,
+    showDragHandle: true,
     isScrollControlled: true,
-    backgroundColor: Colors.transparent,
     builder: (context) => ExcerptShareBottomSheet(
       bookTitle: bookTitle,
       author: author,
