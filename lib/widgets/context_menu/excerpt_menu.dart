@@ -4,6 +4,7 @@ import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/models/book_note.dart';
 import 'package:anx_reader/page/reading_page.dart';
 import 'package:anx_reader/utils/toast/common.dart';
+import 'package:anx_reader/widgets/book_share/excerpt_share_service.dart';
 import 'package:anx_reader/widgets/context_menu/reader_note_menu.dart';
 import 'package:anx_reader/widgets/icon_and_text.dart';
 import 'package:flutter/material.dart';
@@ -237,6 +238,24 @@ class ExcerptMenuState extends State<ExcerptMenu> {
             child: IconAndText(
               icon: const Icon(EvaIcons.message_circle_outline),
               text: L10n.of(context).ai_chat,
+            ),
+          ),
+          // share
+          InkWell(
+            onTap: () {
+              widget.onClose();
+              ExcerptShareService.showShareExcerpt(
+                context: context,
+                bookTitle: '人间失格',
+                author: '太宰治',
+                excerpt:
+                    '生而为人，我很抱歉。我一直都觉得自己是个坏孩子，对这个事实，我深深感到恐惧。没有人会真正明了他人的痛苦，没有人会真正理解他人的悲伤。人是无法被他人理解的。',
+                chapter: '第三章',
+              );
+            },
+            child: IconAndText(
+              icon: const Icon(EvaIcons.share_outline),
+              text: 'Share Excerpt',
             ),
           ),
         ],
