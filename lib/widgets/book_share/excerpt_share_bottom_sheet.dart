@@ -4,6 +4,8 @@ import 'dart:ui' as ui;
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/enums/excerpt_share_template.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
+import 'package:anx_reader/models/font_model.dart';
+import 'package:anx_reader/providers/font_list.dart';
 import 'package:anx_reader/utils/get_path/get_temp_dir.dart';
 import 'package:anx_reader/utils/log/common.dart';
 import 'package:anx_reader/utils/save_img.dart';
@@ -13,10 +15,11 @@ import 'package:anx_reader/widgets/icon_and_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:share_plus/share_plus.dart';
 
-class ExcerptShareBottomSheet extends StatefulWidget {
+class ExcerptShareBottomSheet extends ConsumerStatefulWidget {
   final String bookTitle;
   final String author;
   final String excerpt;
@@ -31,14 +34,14 @@ class ExcerptShareBottomSheet extends StatefulWidget {
   });
 
   @override
-  State<ExcerptShareBottomSheet> createState() =>
+  ConsumerState<ExcerptShareBottomSheet> createState() =>
       _ExcerptShareBottomSheetState();
 }
 
-class _ExcerptShareBottomSheetState extends State<ExcerptShareBottomSheet> {
+class _ExcerptShareBottomSheetState
+    extends ConsumerState<ExcerptShareBottomSheet> {
   final GlobalKey _cardKey = GlobalKey();
 
-  String _font = 'default';
   Color _textColor = Colors.black;
   Color _backgroundColor = Colors.white;
   String? _backgroundImage;
@@ -47,9 +50,15 @@ class _ExcerptShareBottomSheetState extends State<ExcerptShareBottomSheet> {
     Prefs().excerptShareTemplate = template;
   }
 
+  set _font(FontModel font) {
+    Prefs().excerptShareFont = font;
+  }
+
   ExcerptShareTemplateEnum get _template => Prefs().excerptShareTemplate;
 
-  final List<String> _fonts = ['default', 'serif', 'sans-serif', 'monospace'];
+  FontModel get _font => Prefs().excerptShareFont;
+
+  // final List<String> _fonts = ['default', 'serif', 'sans-serif', 'monospace'];
 
   final List<Map<String, Color>> _colorSchemes = [
     {'text': Colors.black, 'background': Colors.white},
@@ -200,27 +209,35 @@ class _ExcerptShareBottomSheetState extends State<ExcerptShareBottomSheet> {
                     ),
                     SizedBox(
                       height: 50,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: _fonts.length,
-                        itemBuilder: (context, index) {
-                          final font = _fonts[index];
-                          return Padding(
-                            padding: const EdgeInsets.only(right: 8.0),
-                            child: ChoiceChip(
-                              label: Text(font),
-                              selected: _font == font,
-                              onSelected: (selected) {
-                                if (selected) {
-                                  setState(() {
-                                    _font = font;
-                                  });
-                                }
+                      child: ref.watch(fontListProvider).when(
+                            data: (data) => ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: data.length,
+                              itemBuilder: (context, index) {
+                                final font = data[index];
+                                return Padding(
+                                  padding: const EdgeInsets.only(right: 8.0),
+                                  child: ChoiceChip(
+                                    label: Text(font.label),
+                                    selected: _font == font,
+                                    onSelected: (selected) {
+                                      if (selected) {
+                                        setState(() {
+                                          _font = font;
+                                        });
+                                      }
+                                    },
+                                  ),
+                                );
                               },
                             ),
-                          );
-                        },
-                      ),
+                            loading: () => const Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                            error: (error, stack) => Center(
+                              child: Text(error.toString()),
+                            ),
+                          ),
                     ),
 
                     const SizedBox(height: 16),

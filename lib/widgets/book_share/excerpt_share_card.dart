@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:anx_reader/enums/excerpt_share_template.dart';
+import 'package:anx_reader/models/font_model.dart';
 import 'package:flutter/material.dart';
 import 'package:mongol/mongol.dart';
 
@@ -10,7 +11,7 @@ class ExcerptShareCard extends StatelessWidget {
   final String excerpt;
   final String? chapter;
   final ExcerptShareTemplateEnum template;
-  final String font;
+  final FontModel font;
   final Color textColor;
   final Color backgroundColor;
   final String? backgroundImage;
@@ -61,31 +62,27 @@ class ExcerptShareCard extends StatelessWidget {
 
   TextStyle _getTextStyle() {
     FontWeight weight = FontWeight.normal;
-    switch (font) {
-      case 'serif':
+    final path = font.path.split('/').last;
+    switch (font.name) {
+      case 'system':
         return TextStyle(
-          fontFamily: 'SourceHanSerif',
           color: textColor,
           fontWeight: weight,
         );
-      case 'sans-serif':
-        return TextStyle(
-          fontFamily: 'sans-serif',
-          color: textColor,
-          fontWeight: weight,
-        );
-      case 'monospace':
-        return TextStyle(
-          fontFamily: 'monospace',
-          color: textColor,
-          fontWeight: weight,
-        );
-      case 'default':
       default:
-        return TextStyle(
-          color: textColor,
-          fontWeight: weight,
-        );
+        if (path.contains('SourceHanSerifSC')) {
+          return TextStyle(
+            color: textColor,
+            fontWeight: weight,
+            fontFamily: 'SourceHanSerif',
+          );
+        } else {
+          return TextStyle(
+            color: textColor,
+            fontWeight: weight,
+            fontFamily: path,
+          );
+        }
     }
   }
 
