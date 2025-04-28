@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:anx_reader/enums/excerpt_share_template.dart';
 import 'package:flutter/material.dart';
 import 'package:mongol/mongol.dart';
 
@@ -8,7 +9,7 @@ class ExcerptShareCard extends StatelessWidget {
   final String author;
   final String excerpt;
   final String? chapter;
-  final String template;
+  final ExcerptShareTemplateEnum template;
   final String font;
   final Color textColor;
   final Color backgroundColor;
@@ -30,10 +31,10 @@ class ExcerptShareCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget child = switch (template) {
-      'simple' => _buildSimpleTemplate(),
-      'elegant' => _buildElegantTemplate(),
-      'modern' => _buildModernTemplate(),
-      _ => _buildDefaultTemplate(),
+      ExcerptShareTemplateEnum.simpleTemplate => _buildSimpleTemplate(),
+      ExcerptShareTemplateEnum.elegantTemplate => _buildElegantTemplate(),
+      ExcerptShareTemplateEnum.verticalTemplate => _buildModernTemplate(),
+      ExcerptShareTemplateEnum.defaultTemplate => _buildDefaultTemplate(),
     };
 
     return RepaintBoundary(
