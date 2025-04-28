@@ -188,7 +188,7 @@ class _ExcerptShareBottomSheetState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '模板',
+                      L10n.of(context).reading_page_share_template,
                       style: _getTitleStyle(context),
                     ),
                     SizedBox(
@@ -221,7 +221,7 @@ class _ExcerptShareBottomSheetState
 
                     // 字体选择
                     Text(
-                      '字体',
+                      L10n.of(context).reading_page_share_font,
                       style: _getTitleStyle(context),
                     ),
                     SizedBox(
@@ -261,7 +261,7 @@ class _ExcerptShareBottomSheetState
 
                     // 配色选择
                     Text(
-                      '配色方案',
+                      L10n.of(context).reading_page_share_color,
                       style: _getTitleStyle(context),
                     ),
                     SizedBox(
@@ -317,7 +317,7 @@ class _ExcerptShareBottomSheetState
                     const SizedBox(height: 16),
 
                     Text(
-                      '背景图片',
+                      L10n.of(context).reading_page_share_background,
                       style: _getTitleStyle(context),
                     ),
                     SizedBox(
@@ -375,17 +375,17 @@ class _ExcerptShareBottomSheetState
             children: [
               IconAndText(
                 icon: const Icon(Icons.save_alt),
-                text: '保存图片',
+                text: L10n.of(context).reading_page_share_save,
                 onTap: _saveAsImage,
               ),
               IconAndText(
                 icon: const Icon(Icons.share),
-                text: '分享',
+                text: L10n.of(context).reading_page_share_share,
                 onTap: _shareAsImage,
               ),
               IconAndText(
                 icon: const Icon(Icons.copy),
-                text: '复制',
+                text: L10n.of(context).common_copy,
                 onTap: () {
                   Clipboard.setData(ClipboardData(text: widget.excerpt));
                   AnxToast.show(L10n.of(context).notes_page_copied);

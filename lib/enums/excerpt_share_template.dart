@@ -1,3 +1,4 @@
+import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:flutter/material.dart';
 
 enum ExcerptShareTemplateEnum {
@@ -11,13 +12,13 @@ extension ExcerptShareTemplateEnumExtension on ExcerptShareTemplateEnum {
   String getL10n(BuildContext context) {
     switch (this) {
       case ExcerptShareTemplateEnum.defaultTemplate:
-        return '默认模板';
+        return L10n.of(context).reading_page_share_template_classic;
       case ExcerptShareTemplateEnum.simpleTemplate:
-        return '简约模板';
+        return L10n.of(context).reading_page_share_template_simple;
       case ExcerptShareTemplateEnum.elegantTemplate:
-        return '优雅模板';
+        return L10n.of(context).reading_page_share_template_elegant;
       case ExcerptShareTemplateEnum.verticalTemplate:
-        return '垂直模板';
+        return L10n.of(context).reading_page_share_template_modern;
     }
   }
 }
