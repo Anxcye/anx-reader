@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:mongol/mongol.dart';
 
@@ -86,24 +88,57 @@ class ExcerptShareCard extends StatelessWidget {
     }
   }
 
-  Widget _getAnxReaderLogo() {
+  Widget _getAnxReaderLogo({double fontSize = 12, Color? color}) {
+    color ??= textColor;
     return Text(
       'Anx Reader',
       style: TextStyle(
-        fontSize: 12,
+        fontSize: fontSize,
         fontWeight: FontWeight.w100,
+        color: color,
       ),
     );
   }
 
-  Text _getContent() {
-    return Text(
-      excerpt,
-      style: _getTextStyle().copyWith(
-        fontSize: 18,
-        height: 2,
-      ),
-    );
+  Widget _getContent({bool verticle = false}) {
+    if (verticle) {
+      return LayoutBuilder(builder: (context, constraints) {
+        final textPainter = TextPainter(
+          text: TextSpan(
+              text: excerpt,
+              style: _getTextStyle().copyWith(
+                fontSize: 18,
+                height: 1.1,
+                letterSpacing: 5,
+              )),
+          textDirection: TextDirection.ltr,
+          textAlign: TextAlign.start,
+        );
+        textPainter.layout(maxWidth: 300);
+        final square = textPainter.size.width * textPainter.size.height * 2;
+        final maxHeight = sqrt(square);
+
+        return SizedBox(
+          height: maxHeight,
+          child: MongolText(
+            excerpt,
+            style: _getTextStyle().copyWith(
+              fontSize: 18,
+              height: 1.1,
+              letterSpacing: 5,
+            ),
+          ),
+        );
+      });
+    } else {
+      return Text(
+        excerpt,
+        style: _getTextStyle().copyWith(
+          fontSize: 18,
+          height: 2,
+        ),
+      );
+    }
   }
 
   Widget _getTitleText({
@@ -111,16 +146,22 @@ class ExcerptShareCard extends StatelessWidget {
     TextDirection textDirection = TextDirection.ltr,
     bool verticle = false,
     double fontSize = 20,
+    Color? color,
   }) {
+    color ??= textColor;
     if (verticle) {
       return ConstrainedBox(
-        constraints: const BoxConstraints(maxHeight: 350),
+        constraints: BoxConstraints(
+          maxHeight: 350,
+        ),
         child: MongolText(
           bookTitle,
           style: _getTextStyle().copyWith(
             fontSize: fontSize,
             fontWeight: FontWeight.bold,
+            color: color,
             height: 1.3,
+            letterSpacing: 5,
           ),
         ),
       );
@@ -132,6 +173,7 @@ class ExcerptShareCard extends StatelessWidget {
         style: _getTextStyle().copyWith(
           fontSize: fontSize,
           fontWeight: FontWeight.bold,
+          color: color,
         ),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
@@ -167,7 +209,12 @@ class ExcerptShareCard extends StatelessWidget {
     }
   }
 
-  Widget _getAuthorText({bool verticle = false, double textSize = 14}) {
+  Widget _getAuthorText({
+    bool verticle = false,
+    double textSize = 14,
+    Color? color,
+  }) {
+    color ??= textColor;
     if (verticle) {
       return ConstrainedBox(
         constraints: const BoxConstraints(maxHeight: 350),
@@ -175,6 +222,7 @@ class ExcerptShareCard extends StatelessWidget {
           author,
           style: _getTextStyle().copyWith(
             fontSize: textSize,
+            color: color,
           ),
         ),
       );
@@ -183,6 +231,7 @@ class ExcerptShareCard extends StatelessWidget {
         author,
         style: _getTextStyle().copyWith(
           fontSize: textSize,
+          color: color,
         ),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
@@ -328,21 +377,45 @@ class ExcerptShareCard extends StatelessWidget {
                     )
                   : null,
             ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Column(
               children: [
-                _getTitleText(verticle: true, fontSize: 30),
-                const SizedBox(width: 16),
-                _getAuthorText(verticle: true, textSize: 20),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _getTitleText(
+                      verticle: true,
+                      fontSize: 38,
+                      color: backgroundImage != null ? Colors.white : null,
+                    ),
+                    const SizedBox(width: 16),
+                    _getAuthorText(
+                      verticle: true,
+                      textSize: 25,
+                      color: backgroundImage != null ? Colors.white : null,
+                    ),
+                  ],
+                ),
+                Row(
+                  children: [
+                    const Spacer(),
+                    _getAnxReaderLogo(
+                      fontSize: 16,
+                      color: backgroundImage != null ? Colors.white : null,
+                    ),
+                  ],
+                ),
               ],
             )),
+        Divider(
+          color: textColor.withAlpha(40),
+          height: 1,
+        ),
         Padding(
           padding: const EdgeInsets.all(24.0),
           child: Column(children: [
-          _getChapterText( leading: '/ ', textSize: 20),
-          const SizedBox(height: 16),
-          _getContent(),
-               
+            _getContent(),
+            const SizedBox(height: 16),
+            _getChapterText(textSize: 20),
           ]),
         ),
       ],
@@ -352,105 +425,40 @@ class ExcerptShareCard extends StatelessWidget {
   Widget _buildModernTemplate() {
     return Container(
       decoration: BoxDecoration(
-        color: backgroundColor,
         image: backgroundImage != null
             ? DecorationImage(
                 image: AssetImage(backgroundImage!),
                 fit: BoxFit.cover,
                 colorFilter: ColorFilter.mode(
-                  backgroundColor.withOpacity(0.7),
+                  backgroundColor.withAlpha(100),
                   BlendMode.dstATop,
                 ),
               )
             : null,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 5),
-          ),
-        ],
       ),
       padding: const EdgeInsets.all(24.0),
-      child: Stack(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          Positioned(
-            top: 0,
-            left: 0,
-            child: Icon(
-              Icons.format_quote,
-              size: 36,
-              color: textColor.withOpacity(0.2),
-            ),
-          ),
+          _getContent(verticle: true),
+          const SizedBox(height: 24),
+          _getChapterText(verticle: true, leading: ''),
+          Spacer(),
           Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisSize: MainAxisSize.max,
             children: [
-              const SizedBox(height: 24),
-              Center(
-                child: SingleChildScrollView(
-                  child: Text(
-                    excerpt,
-                    style: _getTextStyle().copyWith(
-                      fontSize: 18,
-                      height: 1.6,
-                      letterSpacing: 0.5,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  _getAuthorText(verticle: true),
+                  const SizedBox(width: 16),
+                  _getTitleText(verticle: true),
+                ],
               ),
-              const SizedBox(height: 24),
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: textColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Column(
-                  children: [
-                    Text(
-                      bookTitle,
-                      style: _getTextStyle().copyWith(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 4),
-                    if (chapter != null && chapter!.isNotEmpty)
-                      Text(
-                        chapter!,
-                        style: _getTextStyle().copyWith(
-                          fontSize: 14,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    const SizedBox(height: 4),
-                    Text(
-                      author,
-                      style: _getTextStyle().copyWith(
-                        fontSize: 14,
-                        fontStyle: FontStyle.italic,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
-              ),
+              const SizedBox(height: 16),
+              _getAnxReaderLogo(),
             ],
-          ),
-          Positioned(
-            bottom: 0,
-            right: 0,
-            child: Transform.rotate(
-              angle: 3.14,
-              child: Icon(
-                Icons.format_quote,
-                size: 36,
-                color: textColor.withOpacity(0.2),
-              ),
-            ),
           ),
         ],
       ),
