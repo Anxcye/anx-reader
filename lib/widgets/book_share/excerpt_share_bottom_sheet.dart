@@ -50,7 +50,10 @@ class _ExcerptShareBottomSheetState extends State<ExcerptShareBottomSheet> {
   // 配色方案列表
   final List<Map<String, Color>> _colorSchemes = [
     {'text': Colors.black, 'background': Colors.white},
-    {'text': const ui.Color.fromARGB(255, 246, 217, 149), 'background': const ui.Color.fromARGB(255, 48, 44, 28)},
+    {
+      'text': const ui.Color.fromARGB(255, 246, 217, 149),
+      'background': const ui.Color.fromARGB(255, 48, 44, 28)
+    },
     {'text': Colors.black, 'background': Colors.amber.shade100},
     {'text': Colors.white, 'background': Colors.blueGrey.shade800},
     {'text': Colors.black, 'background': Colors.pink.shade50},
@@ -140,11 +143,10 @@ class _ExcerptShareBottomSheetState extends State<ExcerptShareBottomSheet> {
             ),
           ),
 
-          // 预览卡片
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: SizedBox(
-              height: 300,
+          SizedBox(
+            height: MediaQuery.of(context).size.height * 0.3,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0),
               child: FittedBox(
                 fit: BoxFit.contain,
                 child: ExcerptShareCard(

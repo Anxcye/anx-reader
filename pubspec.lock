@@ -1134,6 +1134,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.0"
+  mongol:
+    dependency: "direct main"
+    description:
+      name: mongol
+      sha256: b5c98b3081965ebc1ac4fb26af4aad4875e21e496e52d58d7a48a74d8e8440b9
+      url: "https://pub.dev"
+    source: hosted
+    version: "9.0.0"
   nested:
     dependency: transitive
     description:
