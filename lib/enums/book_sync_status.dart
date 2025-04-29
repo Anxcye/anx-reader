@@ -1,4 +1,4 @@
-enum BookSyncStatus {
+enum BookSyncStatusEnum {
   localOnly,
   remoteOnly,
   both,
