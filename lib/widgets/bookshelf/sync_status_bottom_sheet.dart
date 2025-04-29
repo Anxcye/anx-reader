@@ -9,9 +9,7 @@ import 'package:intl/intl.dart';
 void showSyncStatusBottomSheet(BuildContext context) {
   showModalBottomSheet(
     context: context,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-    ),
+    showDragHandle: true,
     isScrollControlled: true,
     builder: (context) => const SyncStatusBottomSheet(),
   );
@@ -25,74 +23,53 @@ class SyncStatusBottomSheet extends ConsumerWidget {
     final syncState = ref.watch(anxWebdavProvider);
     final theme = Theme.of(context);
 
-    // 模拟数据（占位符）
     final int localOnlyBooks = 15;
     final int remoteOnlyBooks = 8;
     final int bothBooks = 25;
-    final int nonExistentBooks = 5; // 添加两端都不存在的书籍数量
+    final int nonExistentBooks = 5;
     final DateTime localUpdateTime =
         DateTime.now().subtract(const Duration(hours: 2));
-    final DateTime remoteUpdateTime =
+    final DateTime lastUploadTime =
         DateTime.now().subtract(const Duration(days: 1));
 
-    return DraggableScrollableSheet(
-      initialChildSize: 0.7,
-      minChildSize: 0.5,
-      maxChildSize: 0.9,
-      expand: false,
-      builder: (context, scrollController) {
-        return Container(
-          padding: const EdgeInsets.all(16.0),
-          child: SingleChildScrollView(
-            controller: scrollController,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Container(
-                    height: 5,
-                    width: 40,
-                    margin: const EdgeInsets.only(bottom: 20),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.outline,
-                      borderRadius: BorderRadius.circular(2.5),
-                    ),
-                  ),
-                ),
+    return Container(
+      padding: const EdgeInsets.all(16.0),
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 同步状态指示器
+            _buildSyncingIndicator(syncState, theme),
 
-                // 标题
-                Text('同步状态', style: theme.textTheme.headlineSmall),
-                const SizedBox(height: 20),
+            // 数据更新时间
+            _buildUpdateTimeInfo(localUpdateTime, lastUploadTime, theme),
+            const SizedBox(height: 30),
 
-                // 同步状态指示器
-                if (syncState.isSyncing)
-                  _buildSyncingIndicator(syncState, theme),
+            // 书籍分布图表
+            _buildBookDistributionChart(localOnlyBooks, remoteOnlyBooks,
+                bothBooks, nonExistentBooks, theme),
+            const SizedBox(height: 30),
 
-                // 数据更新时间
-                _buildUpdateTimeInfo(localUpdateTime, remoteUpdateTime, theme),
-                const SizedBox(height: 30),
+            // 书籍统计
+            _buildBookStats(localOnlyBooks, remoteOnlyBooks, bothBooks,
+                nonExistentBooks, theme),
+            const SizedBox(height: 30),
 
-                // 书籍分布图表
-                _buildBookDistributionChart(localOnlyBooks, remoteOnlyBooks,
-                    bothBooks, nonExistentBooks, theme),
-                const SizedBox(height: 30),
-
-                // 书籍统计
-                _buildBookStats(localOnlyBooks, remoteOnlyBooks, bothBooks,
-                    nonExistentBooks, theme),
-                const SizedBox(height: 30),
-
-                // 操作按钮
-                _buildActionButtons(context, ref),
-              ],
-            ),
-          ),
-        );
-      },
+            // 操作按钮
+            _buildActionButtons(context, ref),
+          ],
+        ),
+      ),
     );
   }
 
-  Widget _buildSyncingIndicator(SyncStateModel syncState, ThemeData theme) {
+  Widget _buildSyncingIndicator(
+    SyncStateModel syncState,
+    ThemeData theme,
+  ) {
+    if (!syncState.isSyncing) {
+      return Text('未在同步', style: theme.textTheme.titleMedium);
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -111,7 +88,10 @@ class SyncStatusBottomSheet extends ConsumerWidget {
   }
 
   Widget _buildUpdateTimeInfo(
-      DateTime localTime, DateTime remoteTime, ThemeData theme) {
+    DateTime localTime,
+    DateTime lastUploadTime,
+    ThemeData theme,
+  ) {
     final dateFormatter = DateFormat('yyyy-MM-dd HH:mm:ss');
 
     return Column(
@@ -121,12 +101,16 @@ class SyncStatusBottomSheet extends ConsumerWidget {
         const SizedBox(height: 10),
         _buildTimeRow('本地数据更新时间:', dateFormatter.format(localTime), theme),
         const SizedBox(height: 5),
-        _buildTimeRow('远程数据更新时间:', dateFormatter.format(remoteTime), theme),
+        _buildTimeRow('上次上传时间:', dateFormatter.format(lastUploadTime), theme),
       ],
     );
   }
 
-  Widget _buildTimeRow(String label, String time, ThemeData theme) {
+  Widget _buildTimeRow(
+    String label,
+    String time,
+    ThemeData theme,
+  ) {
     return Row(
       children: [
         Expanded(
@@ -143,8 +127,13 @@ class SyncStatusBottomSheet extends ConsumerWidget {
     );
   }
 
-  Widget _buildBookDistributionChart(int localOnly, int remoteOnly, int both,
-      int nonExistent, ThemeData theme) {
+  Widget _buildBookDistributionChart(
+    int localOnly,
+    int remoteOnly,
+    int both,
+    int nonExistent,
+    ThemeData theme,
+  ) {
     final total = localOnly + remoteOnly + both + nonExistent;
 
     return LinearProportionBar(segments: [
@@ -171,8 +160,13 @@ class SyncStatusBottomSheet extends ConsumerWidget {
     ]);
   }
 
-  Widget _buildBookStats(int localOnly, int remoteOnly, int both,
-      int nonExistent, ThemeData theme) {
+  Widget _buildBookStats(
+    int localOnly,
+    int remoteOnly,
+    int both,
+    int nonExistent,
+    ThemeData theme,
+  ) {
     final total = localOnly + remoteOnly + both + nonExistent;
 
     return Column(
@@ -194,7 +188,11 @@ class SyncStatusBottomSheet extends ConsumerWidget {
   }
 
   Widget _buildStatRow(
-      String label, String value, Color color, ThemeData theme) {
+    String label,
+    String value,
+    Color color,
+    ThemeData theme,
+  ) {
     return Row(
       children: [
         Container(
@@ -220,7 +218,10 @@ class SyncStatusBottomSheet extends ConsumerWidget {
     );
   }
 
-  Widget _buildActionButtons(BuildContext context, WidgetRef ref) {
+  Widget _buildActionButtons(
+    BuildContext context,
+    WidgetRef ref,
+  ) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
@@ -229,8 +230,6 @@ class SyncStatusBottomSheet extends ConsumerWidget {
             icon: const Icon(Icons.cloud_upload),
             label: const Text('上传'),
             onPressed: () {
-              // 这里实现上传逻辑
-              Navigator.pop(context);
               ref
                   .read(anxWebdavProvider.notifier)
                   .syncData(SyncDirection.upload, ref);
@@ -243,8 +242,6 @@ class SyncStatusBottomSheet extends ConsumerWidget {
             icon: const Icon(Icons.cloud_download),
             label: const Text('下载'),
             onPressed: () {
-              // 这里实现下载逻辑
-              Navigator.pop(context);
               ref
                   .read(anxWebdavProvider.notifier)
                   .syncData(SyncDirection.download, ref);
