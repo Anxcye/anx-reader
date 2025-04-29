@@ -5,6 +5,7 @@ import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/models/sync_status.dart';
 import 'package:anx_reader/providers/anx_webdav.dart';
 import 'package:anx_reader/utils/get_path/get_base_path.dart';
+import 'package:anx_reader/utils/log/common.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'sync_status.g.dart';
@@ -45,9 +46,10 @@ class SyncStatus extends _$SyncStatus {
   }
 
   Future<List<int>> _listRemoteFiles(List<Book> books) async {
-    final remoteFiles =
-        await ref.read(anxWebdavProvider.notifier).listRemoteBookFiles();
-    final remoteFilesIds = books
+    try {
+      final remoteFiles =
+          await ref.read(anxWebdavProvider.notifier).listRemoteBookFiles();
+      final remoteFilesIds = books
         .map((e) {
           final filePath = e.filePath.split('/').last;
           final isExist = remoteFiles.contains(filePath);
@@ -55,7 +57,11 @@ class SyncStatus extends _$SyncStatus {
         })
         .whereType<int>()
         .toList();
-    return remoteFilesIds;
+      return remoteFilesIds;
+    } catch (e) {
+      AnxLog.info('Failed to list remote files: $e');
+      return [];
+    }
   }
 
   Future<List<int>> _listLocalFiles(List<Book> books) async {
