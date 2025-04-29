@@ -131,7 +131,7 @@ class AnxWebdav extends _$AnxWebdav {
             5) {
       return;
     }
-    
+
     if (remoteDb == null) {
       direction = SyncDirection.upload;
     }
@@ -423,6 +423,7 @@ class AnxWebdav extends _$AnxWebdav {
   }
 
   Future<void> recoverDb() async {
+    AnxLog.info('WebDAV: recoverDb');
     final databasePath = await getAnxDataBasesPath();
     final path = join(databasePath, 'app_database.db');
     String cachePath = (await getAnxTempDir()).path;
