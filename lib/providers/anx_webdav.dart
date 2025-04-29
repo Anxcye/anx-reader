@@ -217,7 +217,11 @@ class AnxWebdav extends _$AnxWebdav {
 
       await deleteBackUpDb();
 
-      ref?.read(syncStatusProvider.notifier).refresh();
+      try {
+        ref?.read(syncStatusProvider.notifier).refresh();
+      } catch (e) {
+        AnxLog.info('Failed to refresh sync status: $e');
+      }
 
       if (Prefs().syncCompletedToast) {
         AnxToast.show(
@@ -290,15 +294,38 @@ class AnxWebdav extends _$AnxWebdav {
     }
 
     // sync files
-    for (var file in totalCurrentFiles) {
-      if (!totalRemoteFiles.contains(file) && totalLocalFiles.contains(file)) {
+    // for (var file in totalCurrentFiles) {
+    //   if (!totalRemoteFiles.contains(file) && totalLocalFiles.contains(file)) {
+    //     await uploadFile(getBasePath(file), 'anx/data/$file');
+    //   }
+    //   if (!io.File(getBasePath(file)).existsSync() &&
+    //       totalRemoteFiles.contains(file)) {
+    //     await downloadFile('anx/data/$file', getBasePath(file));
+    //   }
+    // }
+
+    // cover files
+    for (var file in currentCover) {
+      if (!remoteCoversName.contains(file) && localCovers.contains(file)) {
         await uploadFile(getBasePath(file), 'anx/data/$file');
       }
       if (!io.File(getBasePath(file)).existsSync() &&
-          totalRemoteFiles.contains(file)) {
+          remoteCoversName.contains(file)) {
         await downloadFile('anx/data/$file', getBasePath(file));
       }
     }
+
+    // book files
+    for (var file in currentBooks) {
+      if (!remoteBooksName.contains(file) && localBooks.contains(file)) {
+        await uploadFile(getBasePath(file), 'anx/data/$file');
+      }
+      // if (!io.File(getBasePath(file)).existsSync() &&
+      //     remoteBooksName.contains(file)) {
+      //   await downloadFile('anx/data/$file', getBasePath(file));
+      // }
+    }
+
     // remove remote files not in database
     for (var file in totalRemoteFiles) {
       if (!totalCurrentFiles.contains(file)) {
