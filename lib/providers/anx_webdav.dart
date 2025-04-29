@@ -400,8 +400,10 @@ class AnxWebdav extends _$AnxWebdav {
     bool replace = false,
   ]) async {
     CancelToken c = CancelToken();
-    changeState(state.copyWith(direction: SyncDirection.upload));
-    changeState(state.copyWith(fileName: localPath.split('/').last));
+    changeState(state.copyWith(
+      direction: SyncDirection.upload,
+      fileName: localPath.split('/').last,
+    ));
     if (replace) {
       try {
         await _client.remove(remotePath);
@@ -410,9 +412,11 @@ class AnxWebdav extends _$AnxWebdav {
       }
     }
     await _client.writeFromFile(localPath, remotePath, onProgress: (c, t) {
-      changeState(state.copyWith(isSyncing: true));
-      changeState(state.copyWith(count: c));
-      changeState(state.copyWith(total: t));
+      changeState(state.copyWith(
+        isSyncing: true,
+        count: c,
+        total: t,
+      ));
     }, cancelToken: c);
 
     // for (int i = 0; i <= 100; i++) {
@@ -424,12 +428,16 @@ class AnxWebdav extends _$AnxWebdav {
   }
 
   Future<void> downloadFile(String remotePath, String localPath) async {
-    changeState(state.copyWith(direction: SyncDirection.download));
-    changeState(state.copyWith(fileName: localPath.split('/').last));
+    changeState(state.copyWith(
+      direction: SyncDirection.download,
+      fileName: remotePath.split('/').last,
+    ));
     await _client.read2File(remotePath, localPath, onProgress: (c, t) {
-      changeState(state.copyWith(isSyncing: true));
-      changeState(state.copyWith(count: c));
-      changeState(state.copyWith(total: t));
+      changeState(state.copyWith(
+        isSyncing: true,
+        count: c,
+        total: t,
+      ));
     });
 
     // for (int i = 0; i <= 100; i++) {
@@ -477,5 +485,11 @@ class AnxWebdav extends _$AnxWebdav {
   Future<List<String>> listRemoteBookFiles() async {
     final remoteFiles = await _client.readDir('/anx/data/file');
     return remoteFiles.map((e) => e.name!).toList();
+  }
+
+  void downloadBook(String filePath) {
+    final remotePath = 'anx/data/file/$filePath';
+    final localPath = getBasePath(filePath);
+    downloadFile(remotePath, localPath);
   }
 }
