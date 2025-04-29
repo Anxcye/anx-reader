@@ -3,15 +3,21 @@
 ## Todo
 
 ## 1.4.5
+- Feat: Download remote files on demand
+- Feat: Release local space(#269)
 - Feat: Add share excerpt card(#263)
 - Feat: Notes in list can be shared as cards
 - Fix: Incorrect click position detection on macOS
 - Fix: Sort menu sometimes fails to open
+- Fix: WebDAV Unauthorized(#273)
 
+- 新增：按需下载远程的文件
+- 新增：释放本地空间功能(#269)
 - 新增：通过卡片的方式分享划线笔记(#263)
 - 新增：笔记列表的笔记可以以卡片的形式分享
 - 修复：macOS 端无法正确判断点击位置的问题
 - 修复：排序菜单有时无法打开的问题
+- 修复：WebDAV提示未授权(#273)
 
 ## 1.4.4
 - Feat: Import pdf files
