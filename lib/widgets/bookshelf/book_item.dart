@@ -4,9 +4,9 @@ import 'package:anx_reader/providers/sync_status.dart';
 import 'package:anx_reader/service/book.dart';
 import 'package:anx_reader/widgets/bookshelf/book_bottom_sheet.dart';
 import 'package:anx_reader/widgets/bookshelf/book_cover.dart';
+import 'package:anx_reader/widgets/bookshelf/book_sync_status_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:icons_plus/icons_plus.dart';
 
 class BookItem extends ConsumerWidget {
   const BookItem({
@@ -26,58 +26,25 @@ class BookItem extends ConsumerWidget {
           });
     }
 
-    double iconSize = 16;
-    Widget bookSyncStatusIcon =
+    BookSyncStatusEnum bookSyncStatus =
         ref.watch(syncStatusProvider).whenOrNull(data: (data) {
               if (data.localOnly.contains(book.id)) {
-                return Icon(
-                  Icons.check_circle_outline,
-                  color: Colors.orangeAccent,
-                  size: iconSize,
-                );
+                return BookSyncStatusEnum.localOnly;
               } else if (data.remoteOnly.contains(book.id)) {
-                return Icon(
-                  Icons.check_circle_outline,
-                  color: Colors.grey,
-                  size: iconSize,
-                );
+                return BookSyncStatusEnum.remoteOnly;
               } else if (data.both.contains(book.id)) {
-                return Icon(
-                  Bootstrap.cloud_check,
-                  color: Colors.green,
-                  size: iconSize,
-                );
+                return BookSyncStatusEnum.both;
               } else if (data.nonExistent.contains(book.id)) {
-                return Icon(
-                  Icons.check_circle_outline,
-                  color: Colors.red,
-                  size: iconSize,
-                );
+                return BookSyncStatusEnum.nonExistent;
               } else if (data.downloading.contains(book.id)) {
-                return Icon(
-                  Icons.download,
-                  color: Colors.blue,
-                  size: iconSize,
-                );
+                return BookSyncStatusEnum.downloading;
               } else if (data.uploading.contains(book.id)) {
-                return Icon(
-                  Icons.upload,
-                  color: Colors.blue,
-                  size: iconSize,
-                );
+                return BookSyncStatusEnum.uploading;
               } else {
-                return Icon(
-                  Icons.check_circle_outline,
-                  color: Colors.grey,
-                  size: iconSize,
-                );
+                return BookSyncStatusEnum.checking;
               }
             }) ??
-             Icon(
-              Icons.check_circle_outline,
-              color: Colors.grey,
-              size: iconSize,
-            );
+            BookSyncStatusEnum.checking;
 
     return GestureDetector(
       onTap: () {
@@ -125,7 +92,13 @@ class BookItem extends ConsumerWidget {
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
               ),
-              bookSyncStatusIcon,
+              SizedBox(
+                height: 20,
+                width: 20,
+                child: BookSyncStatusIcon(
+                  syncStatus: bookSyncStatus,
+                ),
+              ),
             ],
           ),
           Row(
