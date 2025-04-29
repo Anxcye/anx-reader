@@ -15,7 +15,6 @@ part 'sync_status.g.dart';
 class SyncStatus extends _$SyncStatus {
   @override
   Future<SyncStatusModel> build() async {
-    print('build');
     final allBooksInBookShelf = await _listAllBooksInBookShelf();
     final allBooksInBookShelfIds =
         allBooksInBookShelf.map((e) => e.id).toList();

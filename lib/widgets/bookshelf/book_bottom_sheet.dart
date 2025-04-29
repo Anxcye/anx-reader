@@ -66,11 +66,13 @@ class BookBottomSheet extends ConsumerWidget {
       } else {
         SmartDialog.show(
           builder: (context) => AlertDialog(
-            title: Text('释放空间'),
+            title: Text(
+                L10n.of(context).book_sync_status_release_space_dialog_title),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text('将把本书上传到云端，并删除本地文件，这有助于节省本地存储空间，在需要时可以随时下载。'),
+                Text(L10n.of(context)
+                    .book_sync_status_release_space_dialog_content),
                 Row(
                   children: [
                     StatefulBuilder(builder: (context, setState) {
@@ -82,7 +84,7 @@ class BookBottomSheet extends ConsumerWidget {
                             setState(() {});
                           });
                     }),
-                    Text('不再提示'),
+                    Text(L10n.of(context).book_sync_status_do_not_show_again),
                   ],
                 )
               ],
@@ -92,14 +94,14 @@ class BookBottomSheet extends ConsumerWidget {
                 onPressed: () {
                   SmartDialog.dismiss();
                 },
-                child: Text('取消'),
+                child: Text(L10n.of(context).common_cancel),
               ),
               TextButton(
                 onPressed: () {
                   SmartDialog.dismiss();
                   core();
                 },
-                child: Text('确认'),
+                child: Text(L10n.of(context).common_confirm),
               ),
             ],
           ),
@@ -124,7 +126,7 @@ class BookBottomSheet extends ConsumerWidget {
           ),
           IconAndText(
               icon: const Icon(EvaIcons.cloud_upload),
-              text: '释放空间',
+              text: L10n.of(context).book_sync_status_release_space,
               onTap: () {
                 handleUpload(context);
               }),

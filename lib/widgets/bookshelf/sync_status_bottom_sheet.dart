@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/enums/book_sync_status.dart';
 import 'package:anx_reader/enums/sync_direction.dart';
+import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/main.dart';
 import 'package:anx_reader/models/sync_state_model.dart';
 import 'package:anx_reader/providers/anx_webdav.dart';
@@ -34,6 +35,7 @@ class SyncStatusBottomSheet extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final syncState = ref.watch(anxWebdavProvider);
     final theme = Theme.of(context);
+    final l10n = L10n.of(context);
 
     final int localOnlyBooks = ref.watch(syncStatusProvider).whenOrNull(
               data: (data) => data.localOnly.length,
@@ -62,31 +64,31 @@ class SyncStatusBottomSheet extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildSyncingIndicator(syncState, theme),
+            _buildSyncingIndicator(syncState, theme, l10n),
             const SizedBox(height: 10),
-            _buildUpdateTimeInfo(localUpdateTime, lastUploadTime, theme),
+            _buildUpdateTimeInfo(localUpdateTime, lastUploadTime, theme, l10n),
             const SizedBox(height: 30),
             _buildBookDistributionChart(localOnlyBooks, remoteOnlyBooks,
                 bothBooks, nonExistentBooks, theme),
             _buildBookStats(localOnlyBooks, remoteOnlyBooks, bothBooks,
-                nonExistentBooks, theme),
+                nonExistentBooks, theme, l10n),
             const SizedBox(height: 10),
-            _buildNonExistentTip(theme),
+            _buildNonExistentTip(theme, l10n),
             const SizedBox(height: 30),
-            _buildActionButtons(context, ref),
+            _buildActionButtons(context, ref, l10n),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildNonExistentTip(ThemeData theme) {
+  Widget _buildNonExistentTip(ThemeData theme, L10n l10n) {
     return Row(
       children: [
         Icon(Icons.info_outline, size: 16),
         Expanded(
           child: Text(
-            '本地和远程均不存在: 指书架上有这本书，但是这台设备和远程文件中没有这本书籍的文件，需要从有这个文件的设备上进行一次同步',
+            l10n.book_sync_status_non_existent_tip,
             style: TextStyle(fontSize: 12),
           ),
         ),
@@ -97,6 +99,7 @@ class SyncStatusBottomSheet extends ConsumerWidget {
   Widget _buildSyncingIndicator(
     SyncStateModel syncState,
     ThemeData theme,
+    L10n l10n,
   ) {
     String byteToHuman(int byte) {
       if (byte < 1024) {
@@ -112,15 +115,16 @@ class SyncStatusBottomSheet extends ConsumerWidget {
 
     if (!syncState.isSyncing) {
       return Text(
-        '未在同步',
+        l10n.book_sync_status_not_syncing,
         style: theme.textTheme.titleMedium?.copyWith(
           fontWeight: FontWeight.bold,
         ),
       );
     }
 
-    final syncDirection =
-        syncState.direction == SyncDirection.upload ? '上传' : '下载';
+    final syncDirection = syncState.direction == SyncDirection.upload
+        ? l10n.book_sync_status_uploading_title
+        : l10n.book_sync_status_downloading_title;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -143,6 +147,7 @@ class SyncStatusBottomSheet extends ConsumerWidget {
     DateTime localTime,
     DateTime? lastUploadTime,
     ThemeData theme,
+    L10n l10n,
   ) {
     Widget buildTimeRow(
       String label,
@@ -155,9 +160,7 @@ class SyncStatusBottomSheet extends ConsumerWidget {
             flex: 2,
             child: Text(label, style: theme.textTheme.bodyMedium),
           ),
-          Text(time,
-              style: theme.textTheme.bodyMedium
-                  ),
+          Text(time, style: theme.textTheme.bodyMedium),
         ],
       );
     }
@@ -167,13 +170,14 @@ class SyncStatusBottomSheet extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        buildTimeRow('本地数据更新时间:', dateFormatter.format(localTime), theme),
+        buildTimeRow(l10n.book_sync_status_local_update_time,
+            dateFormatter.format(localTime), theme),
         const SizedBox(height: 5),
         buildTimeRow(
-            '上次同步时间:',
+            l10n.book_sync_status_last_sync_time,
             lastUploadTime != null
                 ? dateFormatter.format(lastUploadTime)
-                : '此设备还没有同步过数据',
+                : l10n.book_sync_status_no_sync_yet,
             theme),
       ],
     );
@@ -238,21 +242,35 @@ class SyncStatusBottomSheet extends ConsumerWidget {
     int both,
     int nonExistent,
     ThemeData theme,
+    L10n l10n,
   ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 10),
         _buildStatRow(
-            '仅本地书籍:', '$localOnly 本', BookSyncStatusEnum.localOnly, theme),
+            l10n.book_sync_status_local_only_books,
+            l10n.book_sync_status_books_count(localOnly),
+            BookSyncStatusEnum.localOnly,
+            theme),
         const SizedBox(height: 5),
         _buildStatRow(
-            '仅远程书籍:', '$remoteOnly 本', BookSyncStatusEnum.remoteOnly, theme),
+            l10n.book_sync_status_remote_only_books,
+            l10n.book_sync_status_books_count(remoteOnly),
+            BookSyncStatusEnum.remoteOnly,
+            theme),
         const SizedBox(height: 5),
-        _buildStatRow('两端共有书籍:', '$both 本', BookSyncStatusEnum.both, theme),
+        _buildStatRow(
+            l10n.book_sync_status_both_books,
+            l10n.book_sync_status_books_count(both),
+            BookSyncStatusEnum.both,
+            theme),
         const SizedBox(height: 5),
-        _buildStatRow('本地和远程均不存在:', '$nonExistent 本',
-            BookSyncStatusEnum.nonExistent, theme),
+        _buildStatRow(
+            l10n.book_sync_status_non_existent_books,
+            l10n.book_sync_status_books_count(nonExistent),
+            BookSyncStatusEnum.nonExistent,
+            theme),
       ],
     );
   }
@@ -281,6 +299,7 @@ class SyncStatusBottomSheet extends ConsumerWidget {
   Widget _buildActionButtons(
     BuildContext context,
     WidgetRef ref,
+    L10n l10n,
   ) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -288,7 +307,7 @@ class SyncStatusBottomSheet extends ConsumerWidget {
         Expanded(
           child: ElevatedButton.icon(
             icon: const Icon(Icons.cloud_upload),
-            label: const Text('上传'),
+            label: Text(l10n.book_sync_status_upload_button),
             onPressed: () {
               ref
                   .read(anxWebdavProvider.notifier)
@@ -300,7 +319,7 @@ class SyncStatusBottomSheet extends ConsumerWidget {
         Expanded(
           child: ElevatedButton.icon(
             icon: const Icon(Icons.cloud_download),
-            label: const Text('下载'),
+            label: Text(l10n.book_sync_status_download_button),
             onPressed: () {
               ref
                   .read(anxWebdavProvider.notifier)
