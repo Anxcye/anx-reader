@@ -6,6 +6,7 @@ import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/main.dart';
 import 'package:anx_reader/models/sync_state_model.dart';
 import 'package:anx_reader/providers/book_list.dart';
+import 'package:anx_reader/providers/sync_status.dart';
 import 'package:anx_reader/utils/get_path/get_temp_dir.dart';
 import 'package:anx_reader/utils/get_path/get_base_path.dart';
 import 'package:anx_reader/utils/get_path/databases_path.dart';
@@ -71,6 +72,7 @@ class AnxWebdav extends _$AnxWebdav {
       AnxToast.show('WebDAV connection failed\n${e.toString()}',
           duration: 5000);
       AnxLog.severe('WebDAV connection failed, ping failed\n${e.toString()}');
+      return;
     }
 
     await createAnxDir();
@@ -109,7 +111,7 @@ class AnxWebdav extends _$AnxWebdav {
       return;
     }
 
-    AnxLog.info('WebDAV connection success');
+    AnxLog.info('WebDAV ping success');
     // if is syncing
     if (state.isSyncing) {
       return;
@@ -119,13 +121,17 @@ class AnxWebdav extends _$AnxWebdav {
     final databasePath = await getAnxDataBasesPath();
     final path = join(databasePath, 'app_database.db');
     io.File localDb = io.File(path);
+
+    AnxLog.info(
+        'localDbTime: ${localDb.lastModifiedSync()}, remoteDbTime: ${remoteDb?.mTime}');
+
     // less than 5s return
     if (remoteDb != null &&
         localDb.lastModifiedSync().difference(remoteDb.mTime!).inSeconds.abs() <
             5) {
       return;
     }
-
+    
     if (remoteDb == null) {
       direction = SyncDirection.upload;
     }
@@ -210,6 +216,8 @@ class AnxWebdav extends _$AnxWebdav {
       }
 
       await deleteBackUpDb();
+
+      ref?.read(syncStatusProvider.notifier).refresh();
 
       if (Prefs().syncCompletedToast) {
         AnxToast.show(

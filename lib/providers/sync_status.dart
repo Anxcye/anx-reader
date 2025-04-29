@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:anx_reader/dao/book.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/models/sync_status.dart';
@@ -12,13 +14,19 @@ class SyncStatus extends _$SyncStatus {
   @override
   Future<SyncStatusModel> build() async {
     final allBooksInBookShelf = await _listAllBooksInBookShelf();
+    final allBooksInBookShelfIds =
+        allBooksInBookShelf.map((e) => e.id).toList();
     final remoteFiles = await _listRemoteFiles(allBooksInBookShelf);
     final localFiles = await _listLocalFiles(allBooksInBookShelf);
 
-    final localOnly = localFiles.where((e) => !remoteFiles.contains(e)).toList();
-    final remoteOnly = remoteFiles.where((e) => !localFiles.contains(e)).toList();
+    final localOnly =
+        localFiles.where((e) => !remoteFiles.contains(e)).toList();
+    final remoteOnly =
+        remoteFiles.where((e) => !localFiles.contains(e)).toList();
     final both = localFiles.where((e) => remoteFiles.contains(e)).toList();
-    final nonExistent = remoteFiles.where((e) => !localFiles.contains(e)).toList();
+    final nonExistent = allBooksInBookShelfIds
+        .where((e) => !localFiles.contains(e) && !remoteFiles.contains(e))
+        .toList();
     List<int> downloading = [];
     List<int> uploading = [];
 
@@ -30,6 +38,10 @@ class SyncStatus extends _$SyncStatus {
       downloading: downloading,
       uploading: uploading,
     );
+  }
+
+  Future<void> refresh() async {
+    state = AsyncData(await build());
   }
 
   Future<List<int>> _listRemoteFiles(List<Book> books) async {
@@ -47,8 +59,9 @@ class SyncStatus extends _$SyncStatus {
   }
 
   Future<List<int>> _listLocalFiles(List<Book> books) async {
-    final localFiles =
-        (await getFileDir().list().toList()).map((e) => e.path).toList();
+    final localFiles = (await getFileDir().list().toList())
+        .map((e) => e.path.split(Platform.pathSeparator).last)
+        .toList();
 
     final localFilesIds = books
         .map((e) {
@@ -58,7 +71,6 @@ class SyncStatus extends _$SyncStatus {
         })
         .whereType<int>()
         .toList();
-
     return localFilesIds;
   }
 
