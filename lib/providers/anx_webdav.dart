@@ -4,6 +4,7 @@ import 'package:anx_reader/dao/database.dart';
 import 'package:anx_reader/enums/sync_direction.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/main.dart';
+import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/models/sync_state_model.dart';
 import 'package:anx_reader/providers/book_list.dart';
 import 'package:anx_reader/providers/sync_status.dart';
@@ -59,7 +60,7 @@ class AnxWebdav extends _$AnxWebdav {
       Prefs().webdavInfo['url'],
       user: Prefs().webdavInfo['username'],
       password: Prefs().webdavInfo['password'],
-      debug: true,
+      debug: false,
     );
     _client.setHeaders({
       'accept-charset': 'utf-8',
@@ -419,6 +420,8 @@ class AnxWebdav extends _$AnxWebdav {
       ));
     }, cancelToken: c);
 
+    changeState(state.copyWith(isSyncing: false));
+
     // for (int i = 0; i <= 100; i++) {
     //   changeState(state.copyWith(isSyncing: true));
     //   changeState(state.copyWith(total: 100));
@@ -439,6 +442,8 @@ class AnxWebdav extends _$AnxWebdav {
         total: t,
       ));
     });
+
+    changeState(state.copyWith(isSyncing: false));
 
     // for (int i = 0; i <= 100; i++) {
     //   changeState(state.copyWith(isSyncing: true));
@@ -487,9 +492,16 @@ class AnxWebdav extends _$AnxWebdav {
     return remoteFiles.map((e) => e.name!).toList();
   }
 
-  void downloadBook(String filePath) {
-    final remotePath = 'anx/data/file/$filePath';
-    final localPath = getBasePath(filePath);
+  Future<void> downloadBook(Book book) async {
+    final syncStatus = await ref.read(syncStatusProvider.future);
+
+    if (!syncStatus.remoteOnly.contains(book.id)) {
+      AnxToast.show('Book Not Found');
+      return;
+    }
+    AnxToast.show('Downloading ${book.filePath}');
+    final remotePath = 'anx/data/${book.filePath}';
+    final localPath = getBasePath(book.filePath);
     downloadFile(remotePath, localPath);
   }
 }

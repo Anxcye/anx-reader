@@ -8,7 +8,9 @@ import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/page/home_page.dart';
 import 'package:anx_reader/page/iap_page.dart';
 import 'package:anx_reader/providers/ai_chat.dart';
+import 'package:anx_reader/providers/anx_webdav.dart';
 import 'package:anx_reader/providers/book_list.dart';
+import 'package:anx_reader/providers/sync_status.dart';
 import 'package:anx_reader/service/convert_to_epub/txt/convert_from_txt.dart';
 import 'package:anx_reader/service/iap_service.dart';
 import 'package:anx_reader/utils/env_var.dart';
@@ -166,6 +168,12 @@ Future<void> pushToReadingPage(
     AnxToast.show(L10n.of(context).book_deleted);
     return;
   }
+
+  if (!File(book.fileFullPath).existsSync()) {
+    ref.read(anxWebdavProvider.notifier).downloadBook(book);
+    return;
+  }
+
   if (EnvVar.isAppStore) {
     if (!IAPService().isFeatureAvailable) {
       Navigator.of(context).push(
@@ -273,27 +281,27 @@ Future<void> getBookMetadata(
       importing: true,
     ))),
     onLoadStop: (controller, url) async {
-       controller.addJavaScriptHandler(
-            handlerName: 'onMetadata',
-            callback: (args) async {
-              Map<String, dynamic> metadata = args[0];
-              String title = metadata['title'] ?? 'Unknown';
-              dynamic authorData = metadata['author'];
-              String author = authorData is String
-                  ? authorData
-                  : authorData
-                          ?.map((author) =>
-                              author is String ? author : author['name'])
-                          ?.join(', ') ??
-                      'Unknown';
+      controller.addJavaScriptHandler(
+          handlerName: 'onMetadata',
+          callback: (args) async {
+            Map<String, dynamic> metadata = args[0];
+            String title = metadata['title'] ?? 'Unknown';
+            dynamic authorData = metadata['author'];
+            String author = authorData is String
+                ? authorData
+                : authorData
+                        ?.map((author) =>
+                            author is String ? author : author['name'])
+                        ?.join(', ') ??
+                    'Unknown';
 
-              // base64 cover
-              String cover = metadata['cover'] ?? '';
-              String description = metadata['description'] ?? '';
-              saveBook(file, title, author, description, cover);
-              ref?.read(bookListProvider.notifier).refresh();
-              // return;
-            });
+            // base64 cover
+            String cover = metadata['cover'] ?? '';
+            String description = metadata['description'] ?? '';
+            saveBook(file, title, author, description, cover);
+            ref?.read(bookListProvider.notifier).refresh();
+            // return;
+          });
     },
     onConsoleMessage: (controller, consoleMessage) {
       if (consoleMessage.messageLevel == ConsoleMessageLevel.ERROR) {
