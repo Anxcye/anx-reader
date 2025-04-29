@@ -429,5 +429,6 @@
   "book_sync_status_downloading_book": "正在下载 {fileName}",
   "book_sync_status_space_released": "已释放空间",
   "book_sync_status_upload_failed": "上传失败",
-  "book_sync_status_books_count": "{count} 本"
+  "book_sync_status_books_count": "{count} 本",
+  "book_sync_status_download_failed": "下载失败"
 }

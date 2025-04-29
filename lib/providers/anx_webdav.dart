@@ -191,6 +191,7 @@ class AnxWebdav extends _$AnxWebdav {
     await backUpDb();
 
     try {
+      buildClient();
       await createAnxDir();
 
       await syncDatabase(direction);
@@ -258,23 +259,24 @@ class AnxWebdav extends _$AnxWebdav {
   }
 
   Future<void> syncFiles() async {
+    buildClient();
     List<String> currentBooks = await getCurrentBooks();
     List<String> currentCover = await getCurrentCover();
-    List<File> remoteFiles = await _client.readDir('/anx/data');
+    // List<File> remoteFiles = await _client.readDir('/anx/data');
     List<String> remoteBooksName = [];
     List<String> remoteCoversName = [];
 
-    for (var file in remoteFiles) {
-      if (file.name == 'file') {
+    // for (var file in remoteFiles) {
+    //   if (file.name == 'file') {
         final remoteBooks = await _client.readDir('/anx/data/file');
         remoteBooksName = List.generate(
             remoteBooks.length, (index) => 'file/${remoteBooks[index].name!}');
-      } else if (file.name == 'cover') {
+      // } else if (file.name == 'cover') {
         final remoteCovers = await _client.readDir('/anx/data/cover');
         remoteCoversName = List.generate(remoteCovers.length,
             (index) => 'cover/${remoteCovers[index].name!}');
-      }
-    }
+      // }
+    // }
     List<String> totalCurrentFiles = [...currentCover, ...currentBooks];
     List<String> totalRemoteFiles = [...remoteBooksName, ...remoteCoversName];
     List<String> localBooks =
@@ -494,11 +496,17 @@ class AnxWebdav extends _$AnxWebdav {
           .book_sync_status_book_not_found_remote);
       return;
     }
-    AnxToast.show(L10n.of(navigatorKey.currentContext!)
-        .book_sync_status_downloading_book(book.filePath));
-    final remotePath = 'anx/data/${book.filePath}';
-    final localPath = getBasePath(book.filePath);
-    downloadFile(remotePath, localPath);
+    try {
+      AnxToast.show(L10n.of(navigatorKey.currentContext!)
+          .book_sync_status_downloading_book(book.filePath));
+      final remotePath = 'anx/data/${book.filePath}';
+      final localPath = getBasePath(book.filePath);
+      downloadFile(remotePath, localPath);
+    } catch (e) {
+      AnxToast.show(L10n.of(navigatorKey.currentContext!)
+          .book_sync_status_download_failed);
+      AnxLog.severe('Failed to download book\n$e');
+    }
   }
 
   Future<void> uploadBook(Book book) async {
