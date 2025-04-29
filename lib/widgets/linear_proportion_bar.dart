@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:math' as math;
 
 class LinearProportionBar extends StatelessWidget {
   final List<SegmentData> segments;
@@ -14,6 +15,9 @@ class LinearProportionBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool allZero = segments.every((segment) => segment.proportion <= 0);
+    final int defaultFlex = allZero ? 1 : 0;
+
     return Container(
       height: height,
       decoration: BoxDecoration(
@@ -24,13 +28,17 @@ class LinearProportionBar extends StatelessWidget {
         child: Row(
           children: segments.map((segment) {
             return Expanded(
-              flex: (segment.proportion * 100).round(),
+              flex: allZero
+                  ? defaultFlex
+                  : math.max(0, (segment.proportion * 100).round()),
               child: Container(
                 color: segment.color,
                 child: Center(
                   child: segment.showLabel
                       ? Text(
-                          '${(segment.proportion * 100).round()}%',
+                          allZero
+                              ? '0%'
+                              : '${(segment.proportion * 100).round()}%',
                           style: TextStyle(
                             color: segment.labelColor,
                             fontWeight: FontWeight.bold,
