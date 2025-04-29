@@ -238,7 +238,7 @@
   "webdav_upload": "Upload to WebDAV",
   "webdav_only_wifi": "Only sync when WiFi is connected",
   "webdav_sync_aborted": "Sync aborted",
-  "webdav_sync_aborted_content": "Failed to get data from WebDAV. Please check the following: \n1. Network connection \n2. Ensure that valid reading data has been uploaded to WebDAV on other devices",
+  "webdav_sync_aborted_content": "Failed to get data from WebDAV, remote data is empty. Please check the following: \n1. Network connection \n2. Ensure that valid reading data has been uploaded to WebDAV on other devices\n\nNext, please try to upload data to WebDAV",
   "webdav_sync_direction": "WebDAV data may be modified by other devices, please choose how to handle the data",
 
   "settings_sync": "Sync",
