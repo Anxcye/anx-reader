@@ -1,25 +1,33 @@
+import 'dart:io';
+
+import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/enums/book_sync_status.dart';
 import 'package:anx_reader/enums/sync_direction.dart';
 import 'package:anx_reader/models/sync_state_model.dart';
 import 'package:anx_reader/providers/anx_webdav.dart';
 import 'package:anx_reader/providers/sync_status.dart';
+import 'package:anx_reader/utils/get_path/databases_path.dart';
 import 'package:anx_reader/widgets/bookshelf/book_sync_status_icon.dart';
 import 'package:anx_reader/widgets/linear_proportion_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:path/path.dart';
 
-void showSyncStatusBottomSheet(BuildContext context) {
+Future<void> showSyncStatusBottomSheet(BuildContext context) async {
+  final dbPath = await getAnxDataBasesPath();
   showModalBottomSheet(
     context: context,
     showDragHandle: true,
     isScrollControlled: true,
-    builder: (context) => const SyncStatusBottomSheet(),
+    builder: (context) => SyncStatusBottomSheet(dbPath: dbPath),
   );
 }
 
 class SyncStatusBottomSheet extends ConsumerWidget {
-  const SyncStatusBottomSheet({super.key});
+  const SyncStatusBottomSheet({super.key, required this.dbPath});
+
+  final String dbPath;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -42,11 +50,10 @@ class SyncStatusBottomSheet extends ConsumerWidget {
               data: (data) => data.nonExistent.length,
             ) ??
         0;
+    File localDb = File(join((dbPath), 'app_database.db'));
+    final DateTime localUpdateTime = localDb.lastModifiedSync();
 
-    final DateTime localUpdateTime =
-        DateTime.now().subtract(const Duration(hours: 2));
-    final DateTime lastUploadTime =
-        DateTime.now().subtract(const Duration(days: 1));
+    final DateTime? lastUploadTime = Prefs().lastUploadBookDate;
 
     return Container(
       padding: const EdgeInsets.all(16.0),
@@ -54,24 +61,17 @@ class SyncStatusBottomSheet extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 同步状态指示器
             _buildSyncingIndicator(syncState, theme),
-
-            // 数据更新时间
             _buildUpdateTimeInfo(localUpdateTime, lastUploadTime, theme),
             const SizedBox(height: 30),
-
-            // 书籍分布图表
             _buildBookDistributionChart(localOnlyBooks, remoteOnlyBooks,
                 bothBooks, nonExistentBooks, theme),
             const SizedBox(height: 30),
-
-            // 书籍统计
             _buildBookStats(localOnlyBooks, remoteOnlyBooks, bothBooks,
                 nonExistentBooks, theme),
+            const SizedBox(height: 10),
+            _buildNonExistentTip(theme),
             const SizedBox(height: 30),
-
-            // 操作按钮
             _buildActionButtons(context, ref),
           ],
         ),
@@ -79,24 +79,54 @@ class SyncStatusBottomSheet extends ConsumerWidget {
     );
   }
 
+  Widget _buildNonExistentTip(ThemeData theme) {
+    return Row(
+      children: [
+        Icon(Icons.info_outline, size: 16),
+        Expanded(
+          child: Text(
+            '本地和远程均不存在: 指书架上有这本书，但是这台设备和远程文件中没有这本书籍的文件，需要从有这个文件的设备上进行一次同步',
+            style: TextStyle(fontSize: 12),
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildSyncingIndicator(
     SyncStateModel syncState,
     ThemeData theme,
   ) {
+    String byteToHuman(int byte) {
+      if (byte < 1024) {
+        return '$byte B';
+      } else if (byte < 1024 * 1024) {
+        return '${(byte / 1024).toStringAsFixed(2)} KB';
+      } else if (byte < 1024 * 1024 * 1024) {
+        return '${(byte / 1024 / 1024).toStringAsFixed(2)} MB';
+      } else {
+        return '${(byte / 1024 / 1024 / 1024).toStringAsFixed(2)} GB';
+      }
+    }
+
     if (!syncState.isSyncing) {
       return Text('未在同步', style: theme.textTheme.titleMedium);
     }
+
+    final syncDirection =
+        syncState.direction == SyncDirection.upload ? '上传' : '下载';
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('正在同步: ${syncState.fileName}', style: theme.textTheme.titleMedium),
+        Text(syncDirection, style: theme.textTheme.titleMedium),
+        Text(syncState.fileName, style: theme.textTheme.bodyMedium),
         const SizedBox(height: 10),
         LinearProgressIndicator(
           value: syncState.total > 0 ? syncState.count / syncState.total : 0,
         ),
         const SizedBox(height: 5),
-        Text('${syncState.count}/${syncState.total}',
-            style: theme.textTheme.bodySmall),
+        Text(
+            '${byteToHuman(syncState.count)} / ${byteToHuman(syncState.total)}'),
         const SizedBox(height: 20),
         const Divider(),
       ],
@@ -105,7 +135,7 @@ class SyncStatusBottomSheet extends ConsumerWidget {
 
   Widget _buildUpdateTimeInfo(
     DateTime localTime,
-    DateTime lastUploadTime,
+    DateTime? lastUploadTime,
     ThemeData theme,
   ) {
     final dateFormatter = DateFormat('yyyy-MM-dd HH:mm:ss');
@@ -117,7 +147,12 @@ class SyncStatusBottomSheet extends ConsumerWidget {
         const SizedBox(height: 10),
         _buildTimeRow('本地数据更新时间:', dateFormatter.format(localTime), theme),
         const SizedBox(height: 5),
-        _buildTimeRow('上次上传时间:', dateFormatter.format(lastUploadTime), theme),
+        _buildTimeRow(
+            '上次同步时间:',
+            lastUploadTime != null
+                ? dateFormatter.format(lastUploadTime)
+                : '此设备还没有同步过数据',
+            theme),
       ],
     );
   }
@@ -208,14 +243,13 @@ class SyncStatusBottomSheet extends ConsumerWidget {
       children: [
         Text('书籍统计', style: theme.textTheme.titleMedium),
         const SizedBox(height: 10),
-        _buildStatRow('仅本地书籍:', '$localOnly 本',
-            BookSyncStatusEnum.localOnly, theme),
+        _buildStatRow(
+            '仅本地书籍:', '$localOnly 本', BookSyncStatusEnum.localOnly, theme),
         const SizedBox(height: 5),
-        _buildStatRow('仅远程书籍:', '$remoteOnly 本',
-            BookSyncStatusEnum.remoteOnly, theme),
+        _buildStatRow(
+            '仅远程书籍:', '$remoteOnly 本', BookSyncStatusEnum.remoteOnly, theme),
         const SizedBox(height: 5),
-        _buildStatRow('两端共有书籍:', '$both 本',
-            BookSyncStatusEnum.both, theme),
+        _buildStatRow('两端共有书籍:', '$both 本', BookSyncStatusEnum.both, theme),
         const SizedBox(height: 5),
         _buildStatRow('本地和远程均不存在:', '$nonExistent 本',
             BookSyncStatusEnum.nonExistent, theme),
@@ -238,8 +272,8 @@ class SyncStatusBottomSheet extends ConsumerWidget {
           child: Text(label, style: theme.textTheme.bodyMedium),
         ),
         Text(value,
-              style: theme.textTheme.bodyMedium
-                  ?.copyWith(fontWeight: FontWeight.bold)),
+            style: theme.textTheme.bodyMedium
+                ?.copyWith(fontWeight: FontWeight.bold)),
       ],
     );
   }
