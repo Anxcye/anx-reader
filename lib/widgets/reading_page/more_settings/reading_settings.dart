@@ -275,11 +275,9 @@ class _ReadingMoreSettingsState extends State<ReadingMoreSettings> {
               ),
               const SizedBox(height: 16),
 
-              // 页脚设置标题
               Text(L10n.of(context).reading_page_footer_settings,
                   style: Theme.of(context).textTheme.titleMedium),
               const SizedBox(height: 8),
-              // 页脚设置（左中右）
               Row(
                 children: [
                   Expanded(
