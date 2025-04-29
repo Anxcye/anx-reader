@@ -55,8 +55,7 @@ class SyncStatusDialogState extends ConsumerState<SyncStatusDialog> {
           LinearProgressIndicator(
             value: syncState.count / syncState.total,
           ),
-          Text('${byteToHuman(syncState.count)} / ${byteToHuman(
-              syncState.total)}'),
+
         ],
       ),
       actions: [
@@ -72,15 +71,5 @@ class SyncStatusDialogState extends ConsumerState<SyncStatusDialog> {
     );
   }
 
-  String byteToHuman(int byte) {
-    if (byte < 1024) {
-      return '$byte B';
-    } else if (byte < 1024 * 1024) {
-      return '${(byte / 1024).toStringAsFixed(2)} KB';
-    } else if (byte < 1024 * 1024 * 1024) {
-      return '${(byte / 1024 / 1024).toStringAsFixed(2)} MB';
-    } else {
-      return '${(byte / 1024 / 1024 / 1024).toStringAsFixed(2)} GB';
-    }
-  }
+
 }
