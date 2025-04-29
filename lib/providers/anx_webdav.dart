@@ -61,17 +61,18 @@ class AnxWebdav extends _$AnxWebdav {
       user: Prefs().webdavInfo['username'],
       password: Prefs().webdavInfo['password'],
       debug: false,
-    );
-    _client.setHeaders({
-      'accept-charset': 'utf-8',
-      'Content-Type': 'application/octet-stream'
-    });
-    _client.setConnectTimeout(8000);
+    )
+      ..setHeaders({
+        'accept-charset': 'utf-8',
+        'Content-Type': 'application/octet-stream'
+      })
+      ..setConnectTimeout(
+        8000,
+      );
   }
 
   Future<void> init() async {
     buildClient();
-
     try {
       await _client.ping();
     } catch (e) {
@@ -80,8 +81,6 @@ class AnxWebdav extends _$AnxWebdav {
       AnxLog.severe('WebDAV connection failed, ping failed\n${e.toString()}');
       return;
     }
-
-    await createAnxDir();
     AnxLog.info('WebDAV: init');
   }
 
@@ -223,12 +222,6 @@ class AnxWebdav extends _$AnxWebdav {
       }
 
       await deleteBackUpDb();
-
-      try {
-        ref?.read(syncStatusProvider.notifier).refresh();
-      } catch (e) {
-        AnxLog.info('Failed to refresh sync status: $e');
-      }
 
       if (Prefs().syncCompletedToast) {
         AnxToast.show(
@@ -488,6 +481,7 @@ class AnxWebdav extends _$AnxWebdav {
   }
 
   Future<List<String>> listRemoteBookFiles() async {
+    buildClient();
     final remoteFiles = await _client.readDir('/anx/data/file');
     return remoteFiles.map((e) => e.name!).toList();
   }

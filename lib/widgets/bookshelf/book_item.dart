@@ -28,7 +28,11 @@ class BookItem extends ConsumerWidget {
 
     BookSyncStatusEnum bookSyncStatus =
         ref.watch(syncStatusProvider).whenOrNull(data: (data) {
-              if (data.localOnly.contains(book.id)) {
+              if (data.downloading.contains(book.id)) {
+                return BookSyncStatusEnum.downloading;
+              } else if (data.uploading.contains(book.id)) {
+                return BookSyncStatusEnum.uploading;
+              } else if (data.localOnly.contains(book.id)) {
                 return BookSyncStatusEnum.localOnly;
               } else if (data.remoteOnly.contains(book.id)) {
                 return BookSyncStatusEnum.remoteOnly;
@@ -36,10 +40,6 @@ class BookItem extends ConsumerWidget {
                 return BookSyncStatusEnum.both;
               } else if (data.nonExistent.contains(book.id)) {
                 return BookSyncStatusEnum.nonExistent;
-              } else if (data.downloading.contains(book.id)) {
-                return BookSyncStatusEnum.downloading;
-              } else if (data.uploading.contains(book.id)) {
-                return BookSyncStatusEnum.uploading;
               } else {
                 return BookSyncStatusEnum.checking;
               }

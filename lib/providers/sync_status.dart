@@ -15,6 +15,7 @@ part 'sync_status.g.dart';
 class SyncStatus extends _$SyncStatus {
   @override
   Future<SyncStatusModel> build() async {
+    print('build');
     final allBooksInBookShelf = await _listAllBooksInBookShelf();
     final allBooksInBookShelfIds =
         allBooksInBookShelf.map((e) => e.id).toList();
@@ -29,24 +30,27 @@ class SyncStatus extends _$SyncStatus {
     final nonExistent = allBooksInBookShelfIds
         .where((e) => !localFiles.contains(e) && !remoteFiles.contains(e))
         .toList();
+    final webdavInfo = ref.read(anxWebdavProvider);
 
-    final webdavInfo = ref.watch(anxWebdavProvider);
+    final isSyncing =
+        ref.watch(anxWebdavProvider.select((value) => value.isSyncing));
 
-    List<int> downloading = webdavInfo.direction == SyncDirection.download
-        ? [
-            allBooksInBookShelf
-                .firstWhere((e) => e.filePath.contains(webdavInfo.fileName))
-                .id
-          ]
-        : [];
-    List<int> uploading = webdavInfo.direction == SyncDirection.upload
-        ? [
-            allBooksInBookShelf
-                .firstWhere((e) => e.filePath.contains(webdavInfo.fileName))
-                .id
-          ]
-        : [];
-
+    List<int> downloading =
+        isSyncing && webdavInfo.direction == SyncDirection.download
+            ? [
+                allBooksInBookShelf
+                    .firstWhere((e) => e.filePath.contains(webdavInfo.fileName))
+                    .id
+              ]
+            : [];
+    List<int> uploading =
+        isSyncing && webdavInfo.direction == SyncDirection.upload
+            ? [
+                allBooksInBookShelf
+                    .firstWhere((e) => e.filePath.contains(webdavInfo.fileName))
+                    .id
+              ]
+            : [];
     return SyncStatusModel(
       localOnly: localOnly,
       remoteOnly: remoteOnly,
@@ -62,7 +66,7 @@ class SyncStatus extends _$SyncStatus {
   }
 
   Future<List<int>> _listRemoteFiles(List<Book> books) async {
-    try {
+    Future<List<int>> core() async {
       final remoteFiles =
           await ref.read(anxWebdavProvider.notifier).listRemoteBookFiles();
       final remoteFilesIds = books
@@ -74,9 +78,22 @@ class SyncStatus extends _$SyncStatus {
           .whereType<int>()
           .toList();
       return remoteFilesIds;
-    } catch (e) {
-      AnxLog.info('Failed to list remote files: $e');
-      return [];
+    }
+
+    int count = 0;
+    const maxCount = 2;
+    while (true) {
+      try {
+        return await core();
+      } catch (e) {
+        AnxLog.info(
+            'Webdav: Failed to list remote files: $e try again $count/$maxCount');
+        count++;
+        if (count >= maxCount) {
+          AnxLog.info('Webdav: Failed to list remote files: $e');
+          return [];
+        }
+      }
     }
   }
 
