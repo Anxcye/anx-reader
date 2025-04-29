@@ -34,18 +34,16 @@ class LinearProportionBar extends StatelessWidget {
               child: Container(
                 color: segment.color,
                 child: Center(
-                  child: segment.proportion > 0
-                      ? segment.showLabel
-                          ? Text(
-                              allZero
-                                  ? '0%'
-                                  : '${(segment.proportion * 100).round()}%',
-                              style: TextStyle(
-                                color: segment.labelColor,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            )
-                          : null
+                  child: segment.showLabel
+                      ? Text(
+                          allZero
+                              ? '0%'
+                              : ' ${(segment.proportion * 100).round()}% ',
+                          style: TextStyle(
+                            color: segment.labelColor,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        )
                       : null,
                 ),
               ),

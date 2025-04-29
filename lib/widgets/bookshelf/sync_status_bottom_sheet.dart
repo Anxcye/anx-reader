@@ -1,7 +1,9 @@
+import 'package:anx_reader/enums/book_sync_status.dart';
 import 'package:anx_reader/enums/sync_direction.dart';
 import 'package:anx_reader/models/sync_state_model.dart';
 import 'package:anx_reader/providers/anx_webdav.dart';
 import 'package:anx_reader/providers/sync_status.dart';
+import 'package:anx_reader/widgets/bookshelf/book_sync_status_icon.dart';
 import 'package:anx_reader/widgets/linear_proportion_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -141,6 +143,26 @@ class SyncStatusBottomSheet extends ConsumerWidget {
     );
   }
 
+  List<BookSyncStatusEnum> _getBookDistributionStatus(
+    bool showUploading,
+    bool showChecking,
+  ) {
+    return [
+      BookSyncStatusEnum.localOnly,
+      BookSyncStatusEnum.remoteOnly,
+      BookSyncStatusEnum.both,
+      BookSyncStatusEnum.nonExistent,
+      if (showUploading) BookSyncStatusEnum.uploading,
+      if (showChecking) BookSyncStatusEnum.checking,
+    ];
+  }
+
+  List<Color> _getBookDistributionColors() {
+    return _getBookDistributionStatus(false, false)
+        .map((e) => BookSyncStatusIcon(syncStatus: e).color)
+        .toList();
+  }
+
   Widget _buildBookDistributionChart(
     int localOnly,
     int remoteOnly,
@@ -153,22 +175,22 @@ class SyncStatusBottomSheet extends ConsumerWidget {
     return LinearProportionBar(segments: [
       SegmentData(
         proportion: total > 0 ? localOnly / total : 0,
-        color: Colors.green,
+        color: _getBookDistributionColors()[0],
         showLabel: true,
       ),
       SegmentData(
         proportion: total > 0 ? remoteOnly / total : 0,
-        color: Colors.blue,
+        color: _getBookDistributionColors()[1],
         showLabel: true,
       ),
       SegmentData(
         proportion: total > 0 ? both / total : 0,
-        color: Colors.purple,
+        color: _getBookDistributionColors()[2],
         showLabel: true,
       ),
       SegmentData(
         proportion: total > 0 ? nonExistent / total : 0,
-        color: Colors.grey,
+        color: _getBookDistributionColors()[3],
         showLabel: true,
       ),
     ]);
@@ -181,22 +203,22 @@ class SyncStatusBottomSheet extends ConsumerWidget {
     int nonExistent,
     ThemeData theme,
   ) {
-    final total = localOnly + remoteOnly + both + nonExistent;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text('书籍统计', style: theme.textTheme.titleMedium),
         const SizedBox(height: 10),
-        _buildStatRow('仅本地书籍:', '$localOnly 本', Colors.green, theme),
+        _buildStatRow('仅本地书籍:', '$localOnly 本',
+            BookSyncStatusEnum.localOnly, theme),
         const SizedBox(height: 5),
-        _buildStatRow('仅远程书籍:', '$remoteOnly 本', Colors.blue, theme),
+        _buildStatRow('仅远程书籍:', '$remoteOnly 本',
+            BookSyncStatusEnum.remoteOnly, theme),
         const SizedBox(height: 5),
-        _buildStatRow('两端共有书籍:', '$both 本', Colors.purple, theme),
+        _buildStatRow('两端共有书籍:', '$both 本',
+            BookSyncStatusEnum.both, theme),
         const SizedBox(height: 5),
-        _buildStatRow('待同步书籍:', '$nonExistent 本', Colors.grey, theme),
-        const SizedBox(height: 5),
-        _buildStatRow('书籍总数:', '$total 本', theme.colorScheme.primary, theme),
+        _buildStatRow('本地和远程均不存在:', '$nonExistent 本',
+            BookSyncStatusEnum.nonExistent, theme),
       ],
     );
   }
@@ -204,30 +226,20 @@ class SyncStatusBottomSheet extends ConsumerWidget {
   Widget _buildStatRow(
     String label,
     String value,
-    Color color,
+    BookSyncStatusEnum syncStatus,
     ThemeData theme,
   ) {
     return Row(
       children: [
-        Container(
-          width: 12,
-          height: 12,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-          ),
-        ),
+        BookSyncStatusIcon(syncStatus: syncStatus),
         const SizedBox(width: 8),
         Expanded(
           flex: 2,
           child: Text(label, style: theme.textTheme.bodyMedium),
         ),
-        Expanded(
-          flex: 1,
-          child: Text(value,
+        Text(value,
               style: theme.textTheme.bodyMedium
                   ?.copyWith(fontWeight: FontWeight.bold)),
-        ),
       ],
     );
   }
