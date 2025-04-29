@@ -422,5 +422,6 @@
   "book_sync_status_downloading_book": "Downloading {fileName}",
   "book_sync_status_space_released": "Space released",
   "book_sync_status_upload_failed": "Upload failed",
-  "book_sync_status_books_count": "{count} books"
+  "book_sync_status_books_count": "{count} books",
+  "book_sync_status_download_failed": "Download failed"
 }
