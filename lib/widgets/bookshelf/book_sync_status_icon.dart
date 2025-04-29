@@ -13,99 +13,116 @@ class BookSyncStatusIcon extends StatelessWidget {
   final BookSyncStatusEnum syncStatus;
   final double iconSize;
 
-  @override
-  Widget build(BuildContext context) {
+  Color get color {
     switch (syncStatus) {
       case BookSyncStatusEnum.localOnly:
-        return Stack(
+        return Colors.orangeAccent;
+      case BookSyncStatusEnum.remoteOnly:
+        return Colors.grey;
+      case BookSyncStatusEnum.both:
+        return Colors.green;
+      case BookSyncStatusEnum.nonExistent:
+        return Colors.red;
+      case BookSyncStatusEnum.downloading:
+        return Colors.blue;
+      case BookSyncStatusEnum.uploading:
+        return Colors.blue;
+      case BookSyncStatusEnum.checking:
+        return Colors.grey;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    Widget child = switch (syncStatus) {
+      BookSyncStatusEnum.localOnly => Stack(
           children: [
             Center(
               child: Icon(
                 Bootstrap.cloud,
-                color: Colors.orangeAccent,
+                color: color,
                 size: iconSize,
               ),
             ),
             Center(
               child: Icon(
                 Bootstrap.x,
-                color: Colors.orangeAccent,
+                color: color,
                 size: iconSize * 0.7,
               ),
             ),
           ],
-        );
-      case BookSyncStatusEnum.remoteOnly:
-        return Stack(
+        ),
+      BookSyncStatusEnum.remoteOnly => Stack(
           children: [
             Center(
               child: Icon(
                 Bootstrap.cloud,
-                color: Colors.grey,
+                color: color,
                 size: iconSize,
               ),
             ),
             Center(
               child: Icon(
                 Icons.sync,
-                color: Colors.grey,
+                color: color,
                 size: iconSize * 0.5,
               ),
             ),
           ],
-        );
-      case BookSyncStatusEnum.both:
-        return Icon(
+        ),
+      BookSyncStatusEnum.both => Icon(
           Bootstrap.cloud_check,
-          color: Colors.green,
+          color: color,
           size: iconSize,
-        );
-      case BookSyncStatusEnum.nonExistent:
-        return Icon(
+        ),
+      BookSyncStatusEnum.nonExistent => Icon(
           OctIcons.x_circle,
-          color: Colors.red,
+          color: color,
           size: iconSize * 0.8,
-        );
-      case BookSyncStatusEnum.downloading:
-        return Stack(
+        ),
+      BookSyncStatusEnum.downloading => Stack(
           children: [
             Center(
               child: SpiningSyncIcon(
                 size: iconSize,
-                color: Colors.blue,
+                color: color,
               ),
             ),
             Center(
               child: Icon(
                 Bootstrap.arrow_down_short,
-                color: Colors.blue,
+                color: color,
                 size: iconSize * 0.7,
               ),
             ),
           ],
-        );
-      case BookSyncStatusEnum.uploading:
-        return Stack(
+        ),
+      BookSyncStatusEnum.uploading => Stack(
           children: [
             Center(
               child: SpiningSyncIcon(
                 size: iconSize,
-                color: Colors.blue,
+                color: color,
               ),
             ),
             Center(
               child: Icon(
                 Bootstrap.arrow_up_short,
-                color: Colors.blue,
+                color: color,
                 size: iconSize * 0.7,
               ),
             ),
           ],
-        );
-      case BookSyncStatusEnum.checking:
-        return CircularProgressIndicator.adaptive(
+        ),
+      BookSyncStatusEnum.checking => CircularProgressIndicator.adaptive(
           strokeWidth: 2,
-        );
-    }
+        ),
+    };
+    return SizedBox(
+      width: iconSize,
+      height: iconSize,
+      child: child,
+    );
   }
 }
