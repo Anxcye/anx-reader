@@ -31,7 +31,9 @@ late AudioHandler audioHandler;
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Prefs().initPrefs();
-
+  if (Prefs().webdavStatus) {
+    AnxWebdav().buildClient();
+  }
   if (Platform.isWindows) {
     await windowManager.ensureInitialized();
     final size = Size(

@@ -10,7 +10,6 @@ import 'package:anx_reader/page/iap_page.dart';
 import 'package:anx_reader/providers/ai_chat.dart';
 import 'package:anx_reader/providers/anx_webdav.dart';
 import 'package:anx_reader/providers/book_list.dart';
-import 'package:anx_reader/providers/sync_status.dart';
 import 'package:anx_reader/service/convert_to_epub/txt/convert_from_txt.dart';
 import 'package:anx_reader/service/iap_service.dart';
 import 'package:anx_reader/utils/env_var.dart';
