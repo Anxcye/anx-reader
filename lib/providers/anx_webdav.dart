@@ -232,7 +232,7 @@ class AnxWebdav extends _$AnxWebdav {
         AnxToast.show('WebDAV connection failed, check your network');
         AnxLog.severe('WebDAV connection failed, connection error\n$e');
       } else {
-        AnxToast.show('Sync failed');
+        AnxToast.show('Sync failed\n$e');
         AnxLog.severe('Sync failed\n$e');
       }
     } finally {
@@ -490,10 +490,12 @@ class AnxWebdav extends _$AnxWebdav {
     final syncStatus = await ref.read(syncStatusProvider.future);
 
     if (!syncStatus.remoteOnly.contains(book.id)) {
-      AnxToast.show('没有在云端找到这本书');
+      AnxToast.show(L10n.of(navigatorKey.currentContext!)
+          .book_sync_status_book_not_found_remote);
       return;
     }
-    AnxToast.show('正在下载 ${book.filePath}');
+    AnxToast.show(L10n.of(navigatorKey.currentContext!)
+        .book_sync_status_downloading_book(book.filePath));
     final remotePath = 'anx/data/${book.filePath}';
     final localPath = getBasePath(book.filePath);
     downloadFile(remotePath, localPath);
@@ -513,7 +515,8 @@ class AnxWebdav extends _$AnxWebdav {
     }
 
     if (syncStatus.remoteOnly.contains(book.id)) {
-      AnxToast.show('已释放空间');
+      AnxToast.show(L10n.of(navigatorKey.currentContext!)
+          .book_sync_status_space_released);
       return;
     } else if (!syncStatus.both.contains(book.id)) {
       deleteLocalBook();
@@ -522,9 +525,9 @@ class AnxWebdav extends _$AnxWebdav {
         await uploadBook();
         await deleteLocalBook();
       } catch (e) {
-        AnxToast.show('上传失败');
+        AnxToast.show(L10n.of(navigatorKey.currentContext!)
+            .book_sync_status_upload_failed);
       }
     }
-   
   }
 }
