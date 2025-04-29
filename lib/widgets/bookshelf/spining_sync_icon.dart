@@ -1,4 +1,3 @@
-// 不断旋转的同步按钮
 import 'package:flutter/material.dart';
 
 class SpiningSyncIcon extends StatefulWidget {

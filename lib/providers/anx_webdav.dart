@@ -490,10 +490,10 @@ class AnxWebdav extends _$AnxWebdav {
     final syncStatus = await ref.read(syncStatusProvider.future);
 
     if (!syncStatus.remoteOnly.contains(book.id)) {
-      AnxToast.show('Book Not Found');
+      AnxToast.show('没有在云端找到这本书');
       return;
     }
-    AnxToast.show('Downloading ${book.filePath}');
+    AnxToast.show('正在下载 ${book.filePath}');
     final remotePath = 'anx/data/${book.filePath}';
     final localPath = getBasePath(book.filePath);
     downloadFile(remotePath, localPath);
@@ -513,7 +513,7 @@ class AnxWebdav extends _$AnxWebdav {
     }
 
     if (syncStatus.remoteOnly.contains(book.id)) {
-      AnxToast.show('Released');
+      AnxToast.show('已释放空间');
       return;
     } else if (!syncStatus.both.contains(book.id)) {
       deleteLocalBook();
@@ -522,7 +522,7 @@ class AnxWebdav extends _$AnxWebdav {
         await uploadBook();
         await deleteLocalBook();
       } catch (e) {
-        AnxToast.show('Failed to upload book');
+        AnxToast.show('上传失败');
       }
     }
    

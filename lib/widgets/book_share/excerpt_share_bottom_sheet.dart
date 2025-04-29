@@ -219,7 +219,6 @@ class _ExcerptShareBottomSheetState
 
                     const SizedBox(height: 16),
 
-                    // 字体选择
                     Text(
                       L10n.of(context).reading_page_share_font,
                       style: _getTitleStyle(context),
@@ -259,7 +258,6 @@ class _ExcerptShareBottomSheetState
 
                     const SizedBox(height: 16),
 
-                    // 配色选择
                     Text(
                       L10n.of(context).reading_page_share_color,
                       style: _getTitleStyle(context),
