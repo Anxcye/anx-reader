@@ -38,6 +38,7 @@ class AnxWebdav extends _$AnxWebdav {
 
   @override
   SyncStateModel build() {
+    buildClient();
     return const SyncStateModel(
       direction: SyncDirection.both,
       isSyncing: false,
@@ -53,18 +54,22 @@ class AnxWebdav extends _$AnxWebdav {
 
   static late Client _client;
 
-  Future<void> init() async {
+  void buildClient() {
     _client = newClient(
       Prefs().webdavInfo['url'],
       user: Prefs().webdavInfo['username'],
       password: Prefs().webdavInfo['password'],
-      debug: false,
+      debug: true,
     );
     _client.setHeaders({
       'accept-charset': 'utf-8',
       'Content-Type': 'application/octet-stream'
     });
     _client.setConnectTimeout(8000);
+  }
+
+  Future<void> init() async {
+    buildClient();
 
     try {
       await _client.ping();
@@ -76,6 +81,7 @@ class AnxWebdav extends _$AnxWebdav {
     }
 
     await createAnxDir();
+    AnxLog.info('WebDAV: init');
   }
 
   Future<void> createAnxDir() async {
