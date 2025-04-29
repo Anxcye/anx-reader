@@ -1,15 +1,18 @@
 import 'dart:io';
 
+import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/dao/book.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/page/book_detail.dart';
+import 'package:anx_reader/providers/anx_webdav.dart';
 import 'package:anx_reader/providers/book_list.dart';
 import 'package:anx_reader/widgets/bookshelf/book_cover.dart';
 import 'package:anx_reader/widgets/delete_confirm.dart';
 import 'package:anx_reader/widgets/icon_and_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:icons_plus/icons_plus.dart';
 
 class BookBottomSheet extends ConsumerWidget {
@@ -53,6 +56,57 @@ class BookBottomSheet extends ConsumerWidget {
       );
     }
 
+    void handleUpload(BuildContext context) {
+      void core() {
+        ref.read(anxWebdavProvider.notifier).uploadBook(book);
+      }
+
+      if (Prefs().notShowReleaseLocalSpaceDialog) {
+        ref.read(anxWebdavProvider.notifier).uploadBook(book);
+      } else {
+        SmartDialog.show(
+          builder: (context) => AlertDialog(
+            title: Text('释放空间'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('将把本书上传到云端，并删除本地文件，这有助于节省本地存储空间，在需要时可以随时下载。'),
+                Row(
+                  children: [
+                    StatefulBuilder(builder: (context, setState) {
+                      return Checkbox(
+                          value: Prefs().notShowReleaseLocalSpaceDialog,
+                          onChanged: (value) {
+                            Prefs().notShowReleaseLocalSpaceDialog =
+                                value ?? false;
+                            setState(() {});
+                          });
+                    }),
+                    Text('不再提示'),
+                  ],
+                )
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  SmartDialog.dismiss();
+                },
+                child: Text('取消'),
+              ),
+              TextButton(
+                onPressed: () {
+                  SmartDialog.dismiss();
+                  core();
+                },
+                child: Text('确认'),
+              ),
+            ],
+          ),
+        );
+      }
+    }
+
     return Container(
       padding: const EdgeInsets.all(20),
       height: 100,
@@ -68,6 +122,12 @@ class BookBottomSheet extends ConsumerWidget {
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis),
           ),
+          IconAndText(
+              icon: const Icon(EvaIcons.cloud_upload),
+              text: '释放空间',
+              onTap: () {
+                handleUpload(context);
+              }),
           IconAndText(
             icon: const Icon(EvaIcons.more_vertical),
             text: L10n.of(context).notes_page_detail,

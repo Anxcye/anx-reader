@@ -653,6 +653,13 @@ class Prefs extends ChangeNotifier {
     prefs.setInt('excerptShareBgimgIndex', index);
     notifyListeners();
   }
-  
-  
+
+  bool get notShowReleaseLocalSpaceDialog {
+    return prefs.getBool('notShowReleaseLocalSpaceDialog') ?? false;
+  }
+
+  set notShowReleaseLocalSpaceDialog(bool status) {
+    prefs.setBool('notShowReleaseLocalSpaceDialog', status);
+    notifyListeners();
+  }
 }
