@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:anx_reader/dao/book.dart';
+import 'package:anx_reader/enums/sync_direction.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/models/sync_status.dart';
 import 'package:anx_reader/providers/anx_webdav.dart';
@@ -28,8 +29,23 @@ class SyncStatus extends _$SyncStatus {
     final nonExistent = allBooksInBookShelfIds
         .where((e) => !localFiles.contains(e) && !remoteFiles.contains(e))
         .toList();
-    List<int> downloading = [];
-    List<int> uploading = [];
+
+    final webdavInfo = ref.watch(anxWebdavProvider);
+
+    List<int> downloading = webdavInfo.direction == SyncDirection.download
+        ? [
+            allBooksInBookShelf
+                .firstWhere((e) => e.filePath.contains(webdavInfo.fileName))
+                .id
+          ]
+        : [];
+    List<int> uploading = webdavInfo.direction == SyncDirection.upload
+        ? [
+            allBooksInBookShelf
+                .firstWhere((e) => e.filePath.contains(webdavInfo.fileName))
+                .id
+          ]
+        : [];
 
     return SyncStatusModel(
       localOnly: localOnly,
@@ -50,13 +66,13 @@ class SyncStatus extends _$SyncStatus {
       final remoteFiles =
           await ref.read(anxWebdavProvider.notifier).listRemoteBookFiles();
       final remoteFilesIds = books
-        .map((e) {
-          final filePath = e.filePath.split('/').last;
-          final isExist = remoteFiles.contains(filePath);
-          return isExist ? e.id : null;
-        })
-        .whereType<int>()
-        .toList();
+          .map((e) {
+            final filePath = e.filePath.split('/').last;
+            final isExist = remoteFiles.contains(filePath);
+            return isExist ? e.id : null;
+          })
+          .whereType<int>()
+          .toList();
       return remoteFilesIds;
     } catch (e) {
       AnxLog.info('Failed to list remote files: $e');
