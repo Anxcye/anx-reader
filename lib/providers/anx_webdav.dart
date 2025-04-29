@@ -498,4 +498,33 @@ class AnxWebdav extends _$AnxWebdav {
     final localPath = getBasePath(book.filePath);
     downloadFile(remotePath, localPath);
   }
+
+  Future<void> uploadBook(Book book) async {
+    final syncStatus = await ref.read(syncStatusProvider.future);
+
+    Future<void> deleteLocalBook() async {
+      await io.File(getBasePath(book.filePath)).delete();
+    }
+
+    Future<void> uploadBook() async {
+      final remotePath = 'anx/data/${book.filePath}';
+      final localPath = getBasePath(book.filePath);
+      await uploadFile(localPath, remotePath);
+    }
+
+    if (syncStatus.remoteOnly.contains(book.id)) {
+      AnxToast.show('Released');
+      return;
+    } else if (!syncStatus.both.contains(book.id)) {
+      deleteLocalBook();
+    } else {
+      try {
+        await uploadBook();
+        await deleteLocalBook();
+      } catch (e) {
+        AnxToast.show('Failed to upload book');
+      }
+    }
+   
+  }
 }

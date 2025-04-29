@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/enums/book_sync_status.dart';
 import 'package:anx_reader/enums/sync_direction.dart';
+import 'package:anx_reader/main.dart';
 import 'package:anx_reader/models/sync_state_model.dart';
 import 'package:anx_reader/providers/anx_webdav.dart';
 import 'package:anx_reader/providers/sync_status.dart';
@@ -17,7 +18,7 @@ import 'package:path/path.dart';
 Future<void> showSyncStatusBottomSheet(BuildContext context) async {
   final dbPath = await getAnxDataBasesPath();
   showModalBottomSheet(
-    context: context,
+    context: navigatorKey.currentContext!,
     showDragHandle: true,
     isScrollControlled: true,
     builder: (context) => SyncStatusBottomSheet(dbPath: dbPath),
@@ -62,11 +63,11 @@ class SyncStatusBottomSheet extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildSyncingIndicator(syncState, theme),
+            const SizedBox(height: 10),
             _buildUpdateTimeInfo(localUpdateTime, lastUploadTime, theme),
             const SizedBox(height: 30),
             _buildBookDistributionChart(localOnlyBooks, remoteOnlyBooks,
                 bothBooks, nonExistentBooks, theme),
-            const SizedBox(height: 30),
             _buildBookStats(localOnlyBooks, remoteOnlyBooks, bothBooks,
                 nonExistentBooks, theme),
             const SizedBox(height: 10),
@@ -110,7 +111,12 @@ class SyncStatusBottomSheet extends ConsumerWidget {
     }
 
     if (!syncState.isSyncing) {
-      return Text('未在同步', style: theme.textTheme.titleMedium);
+      return Text(
+        '未在同步',
+        style: theme.textTheme.titleMedium?.copyWith(
+          fontWeight: FontWeight.bold,
+        ),
+      );
     }
 
     final syncDirection =
@@ -138,42 +144,37 @@ class SyncStatusBottomSheet extends ConsumerWidget {
     DateTime? lastUploadTime,
     ThemeData theme,
   ) {
+    Widget buildTimeRow(
+      String label,
+      String time,
+      ThemeData theme,
+    ) {
+      return Row(
+        children: [
+          Expanded(
+            flex: 2,
+            child: Text(label, style: theme.textTheme.bodyMedium),
+          ),
+          Text(time,
+              style: theme.textTheme.bodyMedium
+                  ),
+        ],
+      );
+    }
+
     final dateFormatter = DateFormat('yyyy-MM-dd HH:mm:ss');
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('数据更新时间', style: theme.textTheme.titleMedium),
-        const SizedBox(height: 10),
-        _buildTimeRow('本地数据更新时间:', dateFormatter.format(localTime), theme),
+        buildTimeRow('本地数据更新时间:', dateFormatter.format(localTime), theme),
         const SizedBox(height: 5),
-        _buildTimeRow(
+        buildTimeRow(
             '上次同步时间:',
             lastUploadTime != null
                 ? dateFormatter.format(lastUploadTime)
                 : '此设备还没有同步过数据',
             theme),
-      ],
-    );
-  }
-
-  Widget _buildTimeRow(
-    String label,
-    String time,
-    ThemeData theme,
-  ) {
-    return Row(
-      children: [
-        Expanded(
-          flex: 2,
-          child: Text(label, style: theme.textTheme.bodyMedium),
-        ),
-        Expanded(
-          flex: 3,
-          child: Text(time,
-              style: theme.textTheme.bodyMedium
-                  ?.copyWith(fontWeight: FontWeight.bold)),
-        ),
       ],
     );
   }
@@ -241,7 +242,6 @@ class SyncStatusBottomSheet extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('书籍统计', style: theme.textTheme.titleMedium),
         const SizedBox(height: 10),
         _buildStatRow(
             '仅本地书籍:', '$localOnly 本', BookSyncStatusEnum.localOnly, theme),

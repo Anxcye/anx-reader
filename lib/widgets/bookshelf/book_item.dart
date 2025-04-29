@@ -1,3 +1,4 @@
+import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/enums/book_sync_status.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/providers/sync_status.dart';
@@ -92,13 +93,14 @@ class BookItem extends ConsumerWidget {
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
               ),
-              SizedBox(
-                height: 20,
-                width: 20,
-                child: BookSyncStatusIcon(
-                  syncStatus: bookSyncStatus,
+              if (Prefs().webdavStatus)
+                SizedBox(
+                  height: 20,
+                  width: 20,
+                  child: BookSyncStatusIcon(
+                    syncStatus: bookSyncStatus,
+                  ),
                 ),
-              ),
             ],
           ),
           Row(
