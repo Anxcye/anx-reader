@@ -58,7 +58,7 @@ class AnxWebdav extends _$AnxWebdav {
       Prefs().webdavInfo['url'],
       user: Prefs().webdavInfo['username'],
       password: Prefs().webdavInfo['password'],
-      debug: kDebugMode,
+      debug: false,
     );
     _client.setHeaders({
       'accept-charset': 'utf-8',
@@ -431,5 +431,10 @@ class AnxWebdav extends _$AnxWebdav {
     if (io.File('$cachePath/app_database.db').existsSync()) {
       io.File('$cachePath/app_database.db').deleteSync();
     }
+  }
+
+  Future<List<String>> listRemoteBookFiles() async {
+    final remoteFiles = await _client.readDir('/anx/data/file');
+    return remoteFiles.map((e) => e.name!).toList();
   }
 }
