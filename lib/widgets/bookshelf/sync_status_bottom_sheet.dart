@@ -1,6 +1,7 @@
 import 'package:anx_reader/enums/sync_direction.dart';
 import 'package:anx_reader/models/sync_state_model.dart';
 import 'package:anx_reader/providers/anx_webdav.dart';
+import 'package:anx_reader/providers/sync_status.dart';
 import 'package:anx_reader/widgets/linear_proportion_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -23,10 +24,23 @@ class SyncStatusBottomSheet extends ConsumerWidget {
     final syncState = ref.watch(anxWebdavProvider);
     final theme = Theme.of(context);
 
-    final int localOnlyBooks = 15;
-    final int remoteOnlyBooks = 8;
-    final int bothBooks = 25;
-    final int nonExistentBooks = 5;
+    final int localOnlyBooks = ref.watch(syncStatusProvider).whenOrNull(
+              data: (data) => data.localOnly.length,
+            ) ??
+        0;
+    final int remoteOnlyBooks = ref.watch(syncStatusProvider).whenOrNull(
+              data: (data) => data.remoteOnly.length,
+            ) ??
+        0;
+    final int bothBooks = ref.watch(syncStatusProvider).whenOrNull(
+              data: (data) => data.both.length,
+            ) ??
+        0;
+    final int nonExistentBooks = ref.watch(syncStatusProvider).whenOrNull(
+              data: (data) => data.nonExistent.length,
+            ) ??
+        0;
+
     final DateTime localUpdateTime =
         DateTime.now().subtract(const Duration(hours: 2));
     final DateTime lastUploadTime =
@@ -138,22 +152,22 @@ class SyncStatusBottomSheet extends ConsumerWidget {
 
     return LinearProportionBar(segments: [
       SegmentData(
-        proportion: localOnly / total,
+        proportion: total > 0 ? localOnly / total : 0,
         color: Colors.green,
         showLabel: true,
       ),
       SegmentData(
-        proportion: remoteOnly / total,
+        proportion: total > 0 ? remoteOnly / total : 0,
         color: Colors.blue,
         showLabel: true,
       ),
       SegmentData(
-        proportion: both / total,
+        proportion: total > 0 ? both / total : 0,
         color: Colors.purple,
         showLabel: true,
       ),
       SegmentData(
-        proportion: nonExistent / total,
+        proportion: total > 0 ? nonExistent / total : 0,
         color: Colors.grey,
         showLabel: true,
       ),
