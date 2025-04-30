@@ -216,7 +216,7 @@ class FontsSettingPage extends ConsumerWidget {
       onPressed: () =>
           ref.read(fontDownloadsProvider.notifier).startDownload(font),
       icon: const Icon(Icons.download),
-      label: Text(L10n.of(context).commom_download),
+      label: Text(L10n.of(context).common_download),
     );
   }
 }
