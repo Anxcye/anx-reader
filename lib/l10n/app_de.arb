@@ -7,7 +7,6 @@
   "app_author": "Autor",
   "app_donate": "Spenden",
   "app_donate_tips": "Anx Reader ist eine Open-Source-Software, die kostenlos genutzt werden kann. Wenn Sie sie hilfreich finden, spenden Sie bitte, um uns bei der Weiterentwicklung zu unterstützen.",
-
   "navBar_bookshelf": "Bücherregal",
   "navBar_statistics": "Statistiken",
   "navBar_notes": "Notizen",
@@ -23,9 +22,7 @@
   "settings_appearance_language": "Sprache",
   "settings_appearance_open_book_animation": "Buchöffnungsanimation",
   "settings_appearance_bottom_navigator_show": "Untere Navigationsleiste",
-
   "reading_contents": "Inhalt",
-
   "statistic_to_present": "Bis heute",
   "statistic_books_read": "{count, plural, =0{Keine Bücher gelesen} =1{1 Buch gelesen} other{{count} Bücher gelesen}}",
   "statistic_days_of_reading": "{count, plural, =0{Keine Lesetage} =1{1 Lesetag} other{{count} Lesetage}}",
@@ -43,7 +40,6 @@
   "statistic_friday": "Fr",
   "statistic_saturday": "Sa",
   "statistic_sunday": "So",
-
   "notes_notes_across": "{count, plural, =0{Keine Notizen} =1{1 Notiz} other{{count} Notizen}} in",
   "notes_books": "{count, plural, =0{Keinen Büchern} =1{1 Buch} other{{count} Büchern}}",
   "notes_notes": "{count, plural, =0{Keine Notizen} =1{1 Notiz} other{{count} Notizen}}",
@@ -80,7 +76,6 @@
   "reading_page_share_template_simple": "Einfach",
   "reading_page_share_template_elegant": "Elegant",
   "reading_page_share_template_modern": "Modern",
-
   "context_menu_add_note_tips": "Notiz hinzufügen",
   "context_menu_copy": "Kopieren",
   "context_menu_search": "Suchen",
@@ -91,7 +86,6 @@
   "context_menu_highlight": "Hervorheben",
   "context_menu_underline": "Unterstreichen",
   "context_menu_share": "Teilen",
-
   "reading_page_full_screen": "Vollbild",
   "reading_page_screen_timeout": "Bildschirm-Timeout",
   "reading_page_page_turning_method": "Umblätter-Methode",
@@ -99,26 +93,21 @@
   "add_new_font": "Neue Schriftart hinzufügen",
   "follow_book": "Buch folgen",
   "system_font": "Systemschriftart",
-
   "page_turning_style": "Umblätterstil",
   "no_animation": "Keine Animation",
   "slide": "Schieben",
   "scroll": "Scrollen",
-
   "book_deleted": "Buch gelöscht",
-
   "import_n_books_selected": "{count, plural, =1{1 Buch ausgewählt} other{{count} Bücher ausgewählt}}",
   "import_support_types": "Unterstützte Typen: {types}",
   "import_n_books_not_support": "{count, plural, =1{1 Buch wird noch nicht unterstützt} other{{count} Bücher werden noch nicht unterstützt}}",
   "import_import_n_books": "{count, plural, =1{1 Buch importieren} other{{count} Bücher importieren}}",
-
   "bookshelf_tips_1": "Es gibt keine Bücher.",
   "bookshelf_tips_2": "Klicken Sie auf die Schaltfläche \"Hinzufügen\", um ein Buch hinzuzufügen!",
   "statistics_tips_1": "Im ausgewählten Zeitraum wurde nicht gelesen.",
   "statistics_tips_2": "Ein Buch ist ein Traum, den man in den Händen hält.",
   "notes_tips_1": "Es gibt keine Notizen.",
   "notes_tips_2": "Fügen Sie beim Lesen eine Notiz hinzu!",
-
   "reading_page_chapter_pages": "Kapitelseiten",
   "reading_page_current_page": "Aktuelle Seite",
   "reading_page_auto_translate_selection": "Auswahl automatisch übersetzen",
@@ -139,7 +128,6 @@
   "reading_page_bottom_margin": "Unterer Rand",
   "reading_page_font_weight": "Schriftstärke",
   "reading_page_letter_spacing": "Zeichenabstand",
-
   "book_detail_save": "Speichern",
   "book_detail_edit": "Bearbeiten",
   "book_detail_nth_book": "{count, plural, =1{1. Buch, das Sie gelesen haben} =2{2. Buch, das Sie gelesen haben} few{3. Buch, das Sie gelesen haben} other{{count}. Buch, das Sie gelesen haben}}",
@@ -152,7 +140,6 @@
   "reading_page_reading_info_battery_and_time": "Akku und Zeit",
   "reading_page_reading_info_chapter_progress": "Kapitelfortschritt",
   "reading_page_reading_info_book_progress": "Buchfortschritt",
-
   "bookshelf_dragging": "Loslassen zum Importieren",
   "bookshelf_sort": "Sortieren",
   "bookshelf_title": "Titel",
@@ -160,7 +147,6 @@
   "bookshelf_lastReadTime": "Zuletzt gelesen",
   "bookshelf_progress": "Fortschritt",
   "bookshelf_importTime": "Importzeit",
-
   "notes_page_detail": "Detail",
   "notes_page_export": "Exportieren",
   "notes_page_copied": "Kopiert",
@@ -169,7 +155,6 @@
   "notes_page_sort_chapter": "Nach Kapitel",
   "notes_page_filter_reset": "Zurücksetzen",
   "notes_page_view_all_n_notes": "{count, plural, =0{Keine qualifizierten Notizen} =1{1 Notiz anzeigen} other{Alle {count} Notizen anzeigen}}",
-
   "common_delete": "Löschen",
   "common_hours_full": "{count, plural, =1{1 Stunde} other{{count} Stunden}}",
   "common_hours": "{count, plural, other{{count} Std.}}",
@@ -209,7 +194,6 @@
   "common_retry": "Wiederholen",
   "common_ascending": "Aufsteigend",
   "common_descending": "Absteigend",
-
   "storage": "Speicher",
   "storage_info": "Speicherinfo",
   "storage_total_size": "Gesamtgröße",
@@ -222,10 +206,8 @@
   "storage_font_file": "Schriftartdatei",
   "storage_data_file_details": "Details zur Datendatei",
   "storage_clear_cache": "Cache leeren",
-
   "service_import_success": "Import erfolgreich",
   "service_import_n_books": "{count, plural, =1{Importiere 1 Buch} other{Importiere {count} Bücher}}",
-
   "webdav_webdav_not_enabled": "WebDAV ist nicht aktiviert",
   "webdav_syncing": "Synchronisieren",
   "webdav_syncing_files": "Dateien synchronisieren",
@@ -240,7 +222,6 @@
   "webdav_sync_aborted": "Synchronisierung abgebrochen",
   "webdav_sync_aborted_content": "Daten konnten nicht von WebDAV abgerufen werden, Remotedaten sind leer. Bitte überprüfen Sie Folgendes: \n1. Netzwerkverbindung \n2. Stellen Sie sicher, dass gültige Lesedaten auf anderen Geräten zu WebDAV hochgeladen wurden\nAls Nächstes versuchen Sie bitte, Daten zu WebDAV hochzuladen",
   "webdav_sync_direction": "WebDAV-Daten können von anderen Geräten geändert worden sein. Bitte wählen Sie, wie die Daten behandelt werden sollen",
-
   "settings_sync": "Synchronisieren",
   "settings_sync_webdav": "WebDAV",
   "settings_sync_enable_webdav": "WebDAV aktivieren",
@@ -259,13 +240,11 @@
   "import_success_restart_app": "Import erfolgreich, bitte starten Sie die App neu",
   "import_failed": "Import fehlgeschlagen: {error}",
   "settings_sync_completed_toast": "Toast anzeigen, wenn Synchronisierung abgeschlossen ist",
-
   "settings_translate": "Übersetzen",
   "settings_translate_current_service": "Aktueller Dienst",
   "settings_translate_auto": "Auto",
   "settings_translate_from": "Von",
   "settings_translate_to": "Nach",
-
   "settings_narrate": "Vorlesen",
   "settings_narrate_voice": "Stimme",
   "settings_narrate_voice_model": "Sprachmodell",
@@ -274,7 +253,6 @@
   "settings_narrate_voice_model_click_to_view": "Zum Anzeigen klicken",
   "settings_narrate_voice_model_male": "Männlich",
   "settings_narrate_voice_model_female": "Weiblich",
-
   "settings_ai": "KI",
   "settings_ai_services": "Dienste",
   "settings_ai_prompt": "Prompt",
@@ -302,32 +280,25 @@
   "ai_quick_prompt_analyze_text": "Bitte analysieren",
   "ai_quick_prompt_suggest": "Vorschlagen",
   "ai_quick_prompt_suggest_text": "Irgendwelche Vorschläge?",
-
   "settings_reading": "Lesen",
-
   "settings_bookshelf": "Bücherregal",
   "settings_bookshelf_cover": "Buchcover",
   "settings_bookshelf_cover_width": "Buchcover-Breite",
-
   "ai_cached_by": "Gecached von {service}",
   "ai_regenerate": "Neu generieren",
-
   "storage_permission_denied": "Speicherberechtigung verweigert",
   "gallery_permission_denied": "Galerieberechtigung verweigert",
   "goto_authorize": "Zur Autorisierung gehen",
-
   "settings_advanced": "Erweitert",
   "settings_advanced_log": "Protokoll",
   "settings_advanced_log_clear_log": "Protokoll löschen",
   "settings_advanced_log_export_log": "Protokoll exportieren",
   "settings_advanced_clear_log_when_start": "Protokoll beim Start löschen",
-
   "about_check_for_updates": "Nach Updates suchen",
   "update_new_version": "Neue Version: ",
   "update_current_version": "Aktuelle Version: ",
   "about_privacy_policy": "Datenschutzrichtlinie",
   "about_terms_of_use": "Nutzungsbedingungen",
-
   "tts_volume": "Lautstärke",
   "tts_rate": "Geschwindigkeit",
   "tts_pitch": "Tonhöhe",
@@ -336,24 +307,21 @@
   "tts_type": "TTS-Typ",
   "tts_type_internal": "Internes TTS",
   "tts_type_system": "System-TTS",
-
   "statistic_just_now": "gerade eben",
   "statistic_minutes_ago": "{count, plural, =1{vor 1 Minute} other{vor {count} Minuten}}",
   "statistic_hours_ago": "{count, plural, =1{vor 1 Stunde} other{vor {count} Stunden}}",
-  "statistic_yesterday": "{count, plural, =1{gestern} other{gestern}}",  
+  "statistic_yesterday": "{count, plural, =1{gestern} other{gestern}}",
   "statistic_days_ago": "{count, plural, =1{vor 1 Tag} other{vor {count} Tagen}}",
   "statistic_months_ago": "{count, plural, =1{vor 1 Monat} other{vor {count} Monaten}}",
   "statistic_years_ago": "{count, plural, =1{vor 1 Jahr} other{vor {count} Jahren}}",
   "statistic_deleted_records": "Zu löschende Datensätze",
   "statistic_deleted_records_tips": "Wird gelöscht, wenn diese Seite verlassen wird",
-
   "webview_unsupported_version": "Nicht unterstützte Webview-Version",
   "webview_unsupported_message": "Ihre Webview-Version wird möglicherweise nicht unterstützt. Aktuelle Version ist {version}, erforderliche Mindestversion ist {minVersion}, bitte aktualisieren Sie Ihre Webview",
   "webview_update": "Wie aktualisieren",
   "webview_cancel": "Ich weiß",
   "webview2_not_installed": "Eine installierte WebView2-Laufzeitumgebung oder eine nicht stabile Microsoft Edge-Installation konnte nicht gefunden werden.",
   "webview2_install": "Zum Download gehen",
-
   "iap_page_title": "Produkt aktivieren",
   "iap_page_restore": "Kauf wiederherstellen",
   "iap_page_why_choose": "Warum Anx Reader wählen",
@@ -380,13 +348,11 @@
   "iap_page_date_purchased": "Kaufdatum: {date}",
   "iap_page_date_trial_start": "Test gestartet: {date}",
   "iap_page_date_original": "Beitrittsdatum: {date}",
-
   "iap_status_purchased": "Lebenslanger Premium-Benutzer",
   "iap_status_trial": "Testzeitraum",
   "iap_status_trial_expired": "Testzeitraum abgelaufen",
   "iap_status_original": "Früher Benutzer",
   "iap_status_unknown": "Unbekannt",
-
   "download_fonts": "Schriftarten herunterladen",
   "font_no_available_fonts": "Keine verfügbaren Schriftarten",
   "font_official_website": "Offizielle Website",
@@ -395,7 +361,6 @@
   "font_failed_to_load_fonts": "Schriftarten konnten nicht geladen werden",
   "font_downloading": "Herunterladen {progress}",
   "font_cancelled": "Abgebrochen {progress}",
-
   "book_sync_status_not_syncing": "Synchronisiert nicht",
   "book_sync_status_uploading_title": "Hochladen",
   "book_sync_status_downloading_title": "Herunterladen",
@@ -423,5 +388,8 @@
   "book_sync_status_space_released": "Speicherplatz freigegeben",
   "book_sync_status_upload_failed": "Upload fehlgeschlagen",
   "book_sync_status_books_count": "{count} Bücher",
-  "book_sync_status_download_failed": "Download fehlgeschlagen"
-} 
+  "book_sync_status_download_failed": "Download fehlgeschlagen",
+  "webdavBatchDownloadFinishedReport": "Bücher heruntergeladen, {success} erfolgreich, {failed} fehlgeschlagen",
+  "downloadAllBooks": "Alle Bücher herunterladen",
+  "allBooksAreDownloaded": "Alle Bücher wurden heruntergeladen"
+}

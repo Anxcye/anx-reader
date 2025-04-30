@@ -7,7 +7,6 @@
   "app_author": "開發者",
   "app_donate": "贊助",
   "app_donate_tips": "Anx Reader 是一款開放原始碼的軟體，能够免費使用。如果 Anx Reader 對您有幫助，請贊助支持我們以持續改進。",
-
   "navBar_bookshelf": "書架",
   "navBar_statistics": "統計",
   "navBar_notes": "筆記",
@@ -23,9 +22,7 @@
   "settings_appearance_language": "語言",
   "settings_appearance_open_book_animation": "開啟書本的動畫",
   "settings_appearance_bottom_navigator_show": "底部導覽列",
-
   "reading_contents": "目錄",
-
   "statistic_to_present": "至今",
   "statistic_books_read": "{count, plural, other{{count}本書}}",
   "statistic_days_of_reading": "{count, plural, other{{count}天閱讀}}",
@@ -43,7 +40,6 @@
   "statistic_friday": "五",
   "statistic_saturday": "六",
   "statistic_sunday": "日",
-
   "notes_notes_across": "{count, plural, =0{沒有筆記} other{{count} 條筆記劃在}}",
   "notes_books": "{count, plural, =0{沒有書} other{{count} 本書上}}",
   "notes_notes": "{count, plural, =0{沒有筆記} other{{count} 條筆記}}",
@@ -80,7 +76,6 @@
   "reading_page_share_template_simple": "文心雕玉",
   "reading_page_share_template_elegant": "青簡素箋",
   "reading_page_share_template_modern": "翰墨長卷",
-
   "context_menu_add_note_tips": "寫下你的想法！",
   "context_menu_copy": "複製",
   "context_menu_search": "搜尋",
@@ -91,7 +86,6 @@
   "context_menu_highlight": "螢光標示",
   "context_menu_underline": "底線",
   "context_menu_share": "分享",
-
   "reading_page_full_screen": "全螢幕",
   "reading_page_screen_timeout": "螢幕逾時",
   "reading_page_page_turning_method": "翻頁方式",
@@ -99,26 +93,21 @@
   "add_new_font": "新增字型",
   "follow_book": "跟隨書籍",
   "system_font": "系統字型",
-
   "page_turning_style": "翻頁樣式",
   "no_animation": "無動畫",
   "slide": "滑動翻頁",
   "scroll": "捲動翻頁",
-
   "book_deleted": "書籍已刪除",
-
   "import_n_books_selected": "{count, plural, other{選擇了 {count} 本書}}",
   "import_support_types": "支援 {types}",
   "import_n_books_not_support": "{count, plural, other{{count} 本書暫不支援}}",
   "import_import_n_books": "{count, plural, other{匯入 {count} 本書}}",
-
   "bookshelf_tips_1": "書架上目前沒有書",
   "bookshelf_tips_2": "點選新增按鈕，新增一本 epub！",
   "statistics_tips_1": "選定的時間段裡沒有閱讀過呢",
   "statistics_tips_2": "問渠哪得清如許，為有源頭活水來",
   "notes_tips_1": "還沒有筆記",
   "notes_tips_2": "在書中劃線，記錄你的思緒！",
-
   "reading_page_chapter_pages": "本章頁數",
   "reading_page_current_page": "目前頁面",
   "reading_page_auto_translate_selection": "自動翻譯選取的內容",
@@ -139,7 +128,6 @@
   "reading_page_bottom_margin": "下邊距",
   "reading_page_font_weight": "字重",
   "reading_page_letter_spacing": "字元間距",
-
   "book_detail_save": "儲存",
   "book_detail_edit": "編輯",
   "book_detail_nth_book": "{count, plural, other{第{count}本讀的書}}",
@@ -152,7 +140,6 @@
   "reading_page_reading_info_battery_and_time": "電量與時間",
   "reading_page_reading_info_chapter_progress": "章節進度",
   "reading_page_reading_info_book_progress": "書籍進度",
-
   "bookshelf_dragging": "放開以匯入",
   "bookshelf_sort": "排序",
   "bookshelf_title": "書名",
@@ -160,7 +147,6 @@
   "bookshelf_lastReadTime": "上次閱讀時間",
   "bookshelf_progress": "進度",
   "bookshelf_importTime": "匯入時間",
-
   "notes_page_detail": "詳細資料",
   "notes_page_export": "匯出",
   "notes_page_copied": "已複製",
@@ -169,7 +155,6 @@
   "notes_page_sort_chapter": "按章節",
   "notes_page_filter_reset": "重設",
   "notes_page_view_all_n_notes": "{count, plural, =0{沒有符合條件的筆記} other{檢視所有 {count} 條筆記}}",
-
   "common_delete": "刪除",
   "common_hours_full": "{count, plural, other{{count} 小時} }",
   "common_hours": "{count, plural, other{{count} 時} }",
@@ -209,7 +194,6 @@
   "common_retry": "重試",
   "common_ascending": "升序",
   "common_descending": "降序",
-
   "storage": "儲存空間",
   "storage_info": "儲存空間資訊",
   "storage_total_size": "總大小",
@@ -222,10 +206,8 @@
   "storage_font_file": "字型檔案",
   "storage_data_file_details": "資料檔案詳情",
   "storage_clear_cache": "清除快取",
-
   "service_import_success": "匯入成功",
   "service_import_n_books": "{count, plural, other{正在匯入 {count} 本書}}",
-
   "webdav_webdav_not_enabled": "WebDAV 未啟用",
   "webdav_syncing": "同步中",
   "webdav_syncing_files": "同步檔案",
@@ -240,7 +222,6 @@
   "webdav_sync_aborted": "同步已取消",
   "webdav_sync_aborted_content": "未能從 WebDAV 取得資料，遠端資料為空。請檢查以下內容： \n1. 網路連線是否正常 \n2. 確保已在其他裝置上傳有效的閱讀資料到 WebDAV\n\n接下來，請試試上傳資料到 WebDAV",
   "webdav_sync_direction": "WebDAV 端資料可能已被其他裝置修改，請選擇如何處理資料",
-
   "settings_sync": "同步",
   "settings_sync_webdav": "WebDAV",
   "settings_sync_enable_webdav": "啟用 WebDAV",
@@ -259,13 +240,11 @@
   "import_success_restart_app": "匯入成功，請重新啟動應用程式",
   "import_failed": "匯入失敗: {error}",
   "settings_sync_completed_toast": "同步完成時顯示提示",
-
   "settings_translate": "翻譯",
   "settings_translate_current_service": "目前服務",
   "settings_translate_auto": "自動",
   "settings_translate_from": "原文",
   "settings_translate_to": "譯文",
-
   "settings_ai": "AI",
   "settings_ai_services": "供應商",
   "settings_ai_prompt": "提示詞",
@@ -277,24 +256,19 @@
   "settings_ai_cache_size": "快取大小",
   "settings_ai_cache_current_size": "目前共 {count, plural, other{{count} 條快取}}",
   "settings_ai_cache_clear": "清空快取",
-
   "ai_cached_by": "快取來自 {service}",
   "ai_regenerate": "重新產生",
-
   "storage_permission_denied": "儲存空間權限未授權",
   "gallery_permission_denied": "相簿權限未授權",
   "goto_authorize": "前往授權",
-
   "settings_advanced": "進階",
   "settings_advanced_log": "記錄檔",
   "settings_advanced_log_clear_log": "清空記錄檔",
   "settings_advanced_log_export_log": "匯出記錄檔",
   "settings_advanced_clear_log_when_start": "啟動時清空記錄檔",
-
   "about_check_for_updates": "檢查更新",
   "update_new_version": "新版本：",
   "update_current_version": "目前版本：",
-
   "tts_volume": "音量",
   "tts_rate": "語速",
   "tts_pitch": "音調",
@@ -303,7 +277,6 @@
   "tts_type": "朗讀引擎類型",
   "tts_type_internal": "內建朗讀",
   "tts_type_system": "系統朗讀",
-
   "statistic_just_now": "剛剛",
   "statistic_minutes_ago": "{count, plural, =1{1分鐘前} other{{count}分鐘前}}",
   "statistic_hours_ago": "{count, plural, =1{1小時前} other{{count}小時前}}",
@@ -313,14 +286,12 @@
   "statistic_years_ago": "{count, plural, =1{1年前} other{{count}年前}}",
   "statistic_deleted_records": "即將刪除的記錄",
   "statistic_deleted_records_tips": "將在離開此介面時刪除此記錄",
-
   "webview_unsupported_version": "不支援的 Webview 版本",
   "webview_unsupported_message": "Webview 版本可能不支援。目前版本為 {version}，所需的最低版本是 {minVersion}，請更新您的 Webview",
   "webview_update": "如何更新",
   "webview_cancel": "我知道了",
   "webview2_not_installed": "沒有能找到已安裝的 WebView2 執行階段或非穩定版的 Microsoft Edge 安裝。",
   "webview2_install": "前往下載",
-
   "iap_page_title": "啟用產品",
   "iap_page_restore": "回復購買",
   "iap_page_why_choose": "為什麼選擇 Anx Reader",
@@ -347,13 +318,11 @@
   "iap_page_date_purchased": "購買時間：{date}",
   "iap_page_date_trial_start": "試用開始：{date}",
   "iap_page_date_original": "加入時間：{date}",
-
   "iap_status_purchased": "永久進階版使用者",
   "iap_status_trial": "試用期內",
   "iap_status_trial_expired": "試用期已結束",
   "iap_status_original": "早期使用者",
   "iap_status_unknown": "未知",
-
   "download_fonts": "下載字型",
   "font_no_available_fonts": "沒有可用的字型",
   "font_official_website": "官方網站",
@@ -362,7 +331,6 @@
   "font_failed_to_load_fonts": "載入字型失敗",
   "font_downloading": "下載中 {progress}",
   "font_cancelled": "已取消 {progress}",
-
   "book_sync_status_not_syncing": "未在同步",
   "book_sync_status_uploading_title": "上傳",
   "book_sync_status_downloading_title": "下載",
@@ -391,7 +359,6 @@
   "book_sync_status_upload_failed": "上傳失敗",
   "book_sync_status_books_count": "{count} 本",
   "book_sync_status_download_failed": "下載失敗",
-
   "settings_narrate": "朗讀",
   "settings_narrate_voice": "語音",
   "settings_narrate_voice_model": "語音模型",
@@ -400,11 +367,9 @@
   "settings_narrate_voice_model_click_to_view": "點擊檢視",
   "settings_narrate_voice_model_male": "男性",
   "settings_narrate_voice_model_female": "女性",
-
   "settings_bookshelf": "書架",
   "settings_bookshelf_cover": "封面",
   "settings_bookshelf_cover_width": "封面寬度",
-
   "ai_service_not_configured": "需要先完成設定中的 AI 配置",
   "ai_chat": "AI 對話",
   "ai_hint_text": "開始對話吧",
@@ -421,9 +386,10 @@
   "ai_quick_prompt_analyze_text": "請分析一下",
   "ai_quick_prompt_suggest": "建議",
   "ai_quick_prompt_suggest_text": "有什麼建議嗎？",
-
   "settings_reading": "閱讀",
-
   "about_privacy_policy": "隱私權政策",
-  "about_terms_of_use": "使用者服務條款"
+  "about_terms_of_use": "使用者服務條款",
+  "webdavBatchDownloadFinishedReport": "書籍文件下載完成，{success}成功，{failed}失敗",
+  "downloadAllBooks": "下載所有書籍",
+  "allBooksAreDownloaded": "所有書籍已下載"
 }

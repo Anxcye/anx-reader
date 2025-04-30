@@ -7,7 +7,6 @@
   "app_author": "المؤلف",
   "app_donate": "تبرع",
   "app_donate_tips": "Anx Reader هو برنامج مفتوح المصدر يمكن استخدامه مجانًا. إذا وجدته مفيدًا ، فيرجى التبرع لدعمنا لمواصلة تحسينه.",
-
   "navBar_bookshelf": "رف الكتب",
   "navBar_statistics": "الإحصائيات",
   "navBar_notes": "الملاحظات",
@@ -23,9 +22,7 @@
   "settings_appearance_language": "اللغة",
   "settings_appearance_open_book_animation": "رسوم متحركة لفتح الكتاب",
   "settings_appearance_bottom_navigator_show": "شريط التنقل السفلي",
-
   "reading_contents": "المحتويات",
-
   "statistic_to_present": "حتى الآن",
   "statistic_books_read": "{count, plural, zero{لم تتم قراءة أي كتب} =1{تمت قراءة كتاب واحد} two{تمت قراءة كتابين} few{تمت قراءة {count} كتب} many{تمت قراءة {count} كتابًا} other{تمت قراءة {count} كتاب}}",
   "statistic_days_of_reading": "{count, plural, zero{لم تتم القراءة في أي أيام} =1{يوم قراءة واحد} two{يومين قراءة} few{{count} أيام قراءة} many{{count} يوم قراءة} other{{count} يوم قراءة}}",
@@ -43,7 +40,6 @@
   "statistic_friday": "جم",
   "statistic_saturday": "سب",
   "statistic_sunday": "أح",
-
   "notes_notes_across": "{count, plural, zero{لا توجد ملاحظات} =1{ملاحظة واحدة} two{ملاحظتان} few{{count} ملاحظات} many{{count} ملاحظة} other{{count} ملاحظات}} عبر",
   "notes_books": "{count, plural, zero{لا توجد كتب} =1{كتاب واحد} two{كتابان} few{{count} كتب} many{{count} كتابًا} other{{count} كتاب}}",
   "notes_notes": "{count, plural, zero{لا توجد ملاحظات} =1{ملاحظة واحدة} two{ملاحظتان} few{{count} ملاحظات} many{{count} ملاحظة} other{{count} ملاحظة}}",
@@ -80,7 +76,6 @@
   "reading_page_share_template_simple": "بسيط",
   "reading_page_share_template_elegant": "أنيق",
   "reading_page_share_template_modern": "حديث",
-
   "context_menu_add_note_tips": "أضف ملاحظتك",
   "context_menu_copy": "نسخ",
   "context_menu_search": "بحث",
@@ -91,7 +86,6 @@
   "context_menu_highlight": "تمييز",
   "context_menu_underline": "تسطير",
   "context_menu_share": "مشاركة",
-
   "reading_page_full_screen": "ملء الشاشة",
   "reading_page_screen_timeout": "مهلة الشاشة",
   "reading_page_page_turning_method": "طريقة قلب الصفحة",
@@ -99,26 +93,21 @@
   "add_new_font": "إضافة خط جديد",
   "follow_book": "متابعة الكتاب",
   "system_font": "خط النظام",
-
   "page_turning_style": "نمط قلب الصفحة",
   "no_animation": "بدون رسوم متحركة",
   "slide": "شريحة",
   "scroll": "تمرير",
-
   "book_deleted": "تم حذف الكتاب",
-
   "import_n_books_selected": "{count, plural, =1{تم تحديد كتاب واحد} two{تم تحديد كتابين} few{تم تحديد {count} كتب} many{تم تحديد {count} كتابًا} other{تم تحديد {count} كتاب}}",
   "import_support_types": "أنواع الدعم: {types}",
   "import_n_books_not_support": "{count, plural, =1{كتاب واحد غير مدعوم بعد} two{كتابان غير مدعومين بعد} few{{count} كتب غير مدعومة بعد} many{{count} كتابًا غير مدعوم بعد} other{{count} كتاب غير مدعوم بعد}}",
   "import_import_n_books": "{count, plural, =1{استيراد كتاب واحد} two{استيراد كتابين} few{استيراد {count} كتب} many{استيراد {count} كتابًا} other{استيراد {count} كتاب}}",
-
   "bookshelf_tips_1": "لا توجد كتب.",
   "bookshelf_tips_2": "انقر على زر الإضافة لإضافة كتاب!",
   "statistics_tips_1": "لا قراءة في الفترة الزمنية المحددة.",
   "statistics_tips_2": "الكتاب حلم تحمله بين يديك.",
   "notes_tips_1": "لا توجد ملاحظات.",
   "notes_tips_2": "أضف ملاحظة أثناء القراءة!",
-
   "reading_page_chapter_pages": "صفحات الفصل",
   "reading_page_current_page": "الصفحة الحالية",
   "reading_page_auto_translate_selection": "ترجمة التحديد تلقائيًا",
@@ -139,7 +128,6 @@
   "reading_page_bottom_margin": "هامش سفلي",
   "reading_page_font_weight": "وزن الخط",
   "reading_page_letter_spacing": "تباعد الأحرف",
-
   "book_detail_save": "حفظ",
   "book_detail_edit": "تعديل",
   "book_detail_nth_book": "{count, plural, =1{أول كتاب قرأته} =2{الكتاب الثاني الذي قرأته} few{الكتاب الثالث الذي قرأته} other{الكتاب رقم {count} الذي قرأته}}",
@@ -152,7 +140,6 @@
   "reading_page_reading_info_battery_and_time": "البطارية والوقت",
   "reading_page_reading_info_chapter_progress": "تقدم الفصل",
   "reading_page_reading_info_book_progress": "تقدم الكتاب",
-
   "bookshelf_dragging": "حرر للاستيراد",
   "bookshelf_sort": "فرز",
   "bookshelf_title": "العنوان",
@@ -160,7 +147,6 @@
   "bookshelf_lastReadTime": "آخر وقت قراءة",
   "bookshelf_progress": "التقدم",
   "bookshelf_importTime": "وقت الاستيراد",
-
   "notes_page_detail": "التفاصيل",
   "notes_page_export": "تصدير",
   "notes_page_copied": "تم النسخ",
@@ -169,7 +155,6 @@
   "notes_page_sort_chapter": "حسب الفصل",
   "notes_page_filter_reset": "إعادة تعيين",
   "notes_page_view_all_n_notes": "{count, plural, zero{لا توجد ملاحظات مؤهلة} =1{عرض ملاحظة واحدة} two{عرض ملاحظتين} few{عرض كل الملاحظات ({count})} many{عرض كل الملاحظات ({count})} other{عرض كل الملاحظات ({count})}}",
-
   "common_delete": "حذف",
   "common_hours_full": "{count, plural, =1{ساعة واحدة} two{ساعتان} few{{count} ساعات} many{{count} ساعة} other{{count} ساعة}}",
   "common_hours": "{count, plural, other{{count} س}}",
@@ -209,7 +194,6 @@
   "common_retry": "إعادة المحاولة",
   "common_ascending": "تصاعدي",
   "common_descending": "تنازلي",
-
   "storage": "التخزين",
   "storage_info": "معلومات التخزين",
   "storage_total_size": "الحجم الإجمالي",
@@ -222,10 +206,8 @@
   "storage_font_file": "ملف الخط",
   "storage_data_file_details": "تفاصيل ملف البيانات",
   "storage_clear_cache": "مسح ذاكرة التخزين المؤقت",
-
   "service_import_success": "نجح الاستيراد",
   "service_import_n_books": "{count, plural, =1{استيراد كتاب واحد} two{استيراد كتابين} few{استيراد {count} كتب} many{استيراد {count} كتابًا} other{استيراد {count} كتاب}}",
-
   "webdav_webdav_not_enabled": "لم يتم تمكين WebDAV",
   "webdav_syncing": "جارٍ المزامنة",
   "webdav_syncing_files": "جارٍ مزامنة الملفات",
@@ -240,7 +222,6 @@
   "webdav_sync_aborted": "تم إحباط المزامنة",
   "webdav_sync_aborted_content": "فشل في الحصول على البيانات من WebDAV ، البيانات عن بُعد فارغة. يرجى التحقق مما يلي: \n1. اتصال الشبكة \n2. تأكد من تحميل بيانات القراءة الصالحة إلى WebDAV على الأجهزة الأخرى\n\nبعد ذلك ، يرجى محاولة تحميل البيانات إلى WebDAV",
   "webdav_sync_direction": "قد يتم تعديل بيانات WebDAV بواسطة أجهزة أخرى ، يرجى اختيار كيفية التعامل مع البيانات",
-
   "settings_sync": "المزامنة",
   "settings_sync_webdav": "WebDAV",
   "settings_sync_enable_webdav": "تمكين WebDAV",
@@ -259,13 +240,11 @@
   "import_success_restart_app": "نجح الاستيراد ، يرجى إعادة تشغيل التطبيق",
   "import_failed": "فشل الاستيراد: {error}",
   "settings_sync_completed_toast": "إظهار إشعار عند اكتمال المزامنة",
-
   "settings_translate": "ترجمة",
   "settings_translate_current_service": "الخدمة الحالية",
   "settings_translate_auto": "تلقائي",
   "settings_translate_from": "من",
   "settings_translate_to": "إلى",
-
   "settings_narrate": "السرد",
   "settings_narrate_voice": "الصوت",
   "settings_narrate_voice_model": "نموذج الصوت",
@@ -274,7 +253,6 @@
   "settings_narrate_voice_model_click_to_view": "انقر للعرض",
   "settings_narrate_voice_model_male": "ذكر",
   "settings_narrate_voice_model_female": "أنثى",
-
   "settings_ai": "الذكاء الاصطناعي",
   "settings_ai_services": "الخدمات",
   "settings_ai_prompt": "موجه",
@@ -302,32 +280,25 @@
   "ai_quick_prompt_analyze_text": "من فضلك حلل",
   "ai_quick_prompt_suggest": "اقترح",
   "ai_quick_prompt_suggest_text": "أي اقتراحات؟",
-
   "settings_reading": "القراءة",
-
   "settings_bookshelf": "رف الكتب",
   "settings_bookshelf_cover": "غلاف الكتاب",
   "settings_bookshelf_cover_width": "عرض غلاف الكتاب",
-
   "ai_cached_by": "تم التخزين المؤقت بواسطة {service}",
   "ai_regenerate": "إعادة إنشاء",
-
   "storage_permission_denied": "تم رفض إذن التخزين",
   "gallery_permission_denied": "تم رفض إذن المعرض",
   "goto_authorize": "اذهب للتفويض",
-
   "settings_advanced": "متقدم",
   "settings_advanced_log": "السجل",
   "settings_advanced_log_clear_log": "مسح السجل",
   "settings_advanced_log_export_log": "تصدير السجل",
   "settings_advanced_clear_log_when_start": "مسح السجل عند البدء",
-
   "about_check_for_updates": "التحقق من وجود تحديثات",
   "update_new_version": "الإصدار الجديد: ",
   "update_current_version": "الإصدار الحالي: ",
   "about_privacy_policy": "سياسة الخصوصية",
   "about_terms_of_use": "شروط الاستخدام",
-
   "tts_volume": "الصوت",
   "tts_rate": "المعدل",
   "tts_pitch": "درجة الصوت",
@@ -336,7 +307,6 @@
   "tts_type": "نوع TTS",
   "tts_type_internal": "TTS داخلي",
   "tts_type_system": "TTS النظام",
-
   "statistic_just_now": "الآن",
   "statistic_minutes_ago": "{count, plural, =1{قبل دقيقة واحدة} two{قبل دقيقتين} few{قبل {count} دقائق} many{قبل {count} دقيقة} other{قبل {count} دقيقة}}",
   "statistic_hours_ago": "{count, plural, =1{قبل ساعة واحدة} two{قبل ساعتين} few{قبل {count} ساعات} many{قبل {count} ساعة} other{قبل {count} ساعة}}",
@@ -346,14 +316,12 @@
   "statistic_years_ago": "{count, plural, =1{قبل عام واحد} two{قبل عامين} few{قبل {count} أعوام} many{قبل {count} عامًا} other{قبل {count} عام}}",
   "statistic_deleted_records": "السجلات التي سيتم حذفها",
   "statistic_deleted_records_tips": "سيتم الحذف عند مغادرة هذه الصفحة",
-
   "webview_unsupported_version": "إصدار Webview غير مدعوم",
   "webview_unsupported_message": "قد لا يكون إصدار Webview الخاص بك مدعومًا. الإصدار الحالي هو {version} ، والحد الأدنى للإصدار المطلوب هو {minVersion} ، يرجى تحديث Webview الخاص بك",
   "webview_update": "كيفية التحديث",
   "webview_cancel": "أعلم",
   "webview2_not_installed": "فشل في العثور على وقت تشغيل WebView2 مثبت أو تثبيت Microsoft Edge غير مستقر.",
   "webview2_install": "اذهب للتنزيل",
-
   "iap_page_title": "تفعيل المنتج",
   "iap_page_restore": "استعادة الشراء",
   "iap_page_why_choose": "لماذا تختار Anx Reader",
@@ -380,13 +348,11 @@
   "iap_page_date_purchased": "تاريخ الشراء: {date}",
   "iap_page_date_trial_start": "بدأت الفترة التجريبية: {date}",
   "iap_page_date_original": "تاريخ الانضمام: {date}",
-
   "iap_status_purchased": "مستخدم بريميوم مدى الحياة",
   "iap_status_trial": "فترة تجريبية",
   "iap_status_trial_expired": "انتهت الفترة التجريبية",
   "iap_status_original": "مستخدم مبكر",
   "iap_status_unknown": "غير معروف",
-
   "download_fonts": "تنزيل الخطوط",
   "font_no_available_fonts": "لا توجد خطوط متاحة",
   "font_official_website": "الموقع الرسمي",
@@ -395,7 +361,6 @@
   "font_failed_to_load_fonts": "فشل في تحميل الخطوط",
   "font_downloading": "جارٍ التنزيل {progress}",
   "font_cancelled": "تم الإلغاء {progress}",
-
   "book_sync_status_not_syncing": "لا تتم المزامنة",
   "book_sync_status_uploading_title": "جارٍ التحميل",
   "book_sync_status_downloading_title": "جارٍ التنزيل",
@@ -423,5 +388,8 @@
   "book_sync_status_space_released": "تم تحرير المساحة",
   "book_sync_status_upload_failed": "فشل التحميل",
   "book_sync_status_books_count": "{count} كتب",
-  "book_sync_status_download_failed": "فشل التنزيل"
-} 
+  "book_sync_status_download_failed": "فشل التنزيل",
+  "webdavBatchDownloadFinishedReport": "تم تحميل {success} كتاب منجز، {failed} كتاب معيب",
+  "downloadAllBooks": "تحميل كل الكتب",
+  "allBooksAreDownloaded": "تم تحميل كل الكتب"
+}

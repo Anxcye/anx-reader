@@ -7,7 +7,6 @@
   "app_author": "开发者",
   "app_donate": "捐赠",
   "app_donate_tips": "Anx Reader 是一款开源软件，能够免费使用。如果安读对你有帮助，请捐赠支持我们以继续完善。",
-
   "navBar_bookshelf": "书架",
   "navBar_statistics": "统计",
   "navBar_notes": "笔记",
@@ -23,9 +22,7 @@
   "settings_appearance_language": "语言",
   "settings_appearance_open_book_animation": "打开书的动画",
   "settings_appearance_bottom_navigator_show": "底部导航栏",
-
   "reading_contents": "目录",
-
   "statistic_to_present": "至今",
   "statistic_books_read": "{count, plural, other{{count}本书}}",
   "statistic_days_of_reading": "{count, plural, other{{count}天阅读}}",
@@ -43,7 +40,6 @@
   "statistic_friday": "五",
   "statistic_saturday": "六",
   "statistic_sunday": "日",
-
   "notes_notes_across": "{count, plural, =0{没有笔记} other{{count} 条笔记划在}}",
   "notes_books": "{count, plural, =0{没有书} other{{count} 本书上}}",
   "notes_notes": "{count, plural, =0{没有笔记} other{{count} 条笔记}}",
@@ -80,7 +76,6 @@
   "reading_page_share_template_simple": "文心雕玉",
   "reading_page_share_template_elegant": "青简素笺",
   "reading_page_share_template_modern": "翰墨长卷",
-
   "context_menu_add_note_tips": "写下你的想法！",
   "context_menu_copy": "复制",
   "context_menu_search": "搜索",
@@ -91,7 +86,6 @@
   "context_menu_highlight": "高亮",
   "context_menu_underline": "下划线",
   "context_menu_share": "分享划线",
-
   "reading_page_full_screen": "全屏",
   "reading_page_screen_timeout": "屏幕超时",
   "reading_page_page_turning_method": "翻页方式",
@@ -99,26 +93,21 @@
   "add_new_font": "导入本地",
   "follow_book": "跟随书籍",
   "system_font": "系统字体",
-
   "page_turning_style": "翻页样式",
   "no_animation": "无动画",
   "slide": "滑动翻页",
   "scroll": "滚动翻页",
-
   "book_deleted": "书籍已删除",
-
   "import_n_books_selected": "{count, plural, other{选择了 {count} 本书}}",
   "import_support_types": "支持 {types}",
   "import_n_books_not_support": "{count, plural, other{{count} 本书暂不支持}}",
   "import_import_n_books": "{count, plural, other{导入 {count} 本书}}",
-
   "bookshelf_tips_1": "书架上没有书",
   "bookshelf_tips_2": "点击添加按钮，添加一本 epub ！",
   "statistics_tips_1": "选定的时间段里没有阅读过呢",
   "statistics_tips_2": "问渠哪得清如许，为有源头活水来",
   "notes_tips_1": "还没有笔记",
   "notes_tips_2": "在书中划线，记录你的思绪！",
-
   "reading_page_chapter_pages": "本章页数",
   "reading_page_current_page": "当前页",
   "reading_page_auto_translate_selection": "自动翻译选中的内容",
@@ -146,13 +135,11 @@
   "reading_page_reading_info_battery_and_time": "电量和时间",
   "reading_page_reading_info_chapter_progress": "本章进度",
   "reading_page_reading_info_book_progress": "全书进度",
-
   "book_detail_save": "保存",
   "book_detail_edit": "编辑",
   "book_detail_nth_book": "{count, plural, other{第{count}本读的书}}",
   "book_detail_last_read_date": "上次阅读",
   "book_detail_import_date": "首次导入",
-
   "bookshelf_dragging": "松开以导入",
   "bookshelf_sort": "排序",
   "bookshelf_title": "书名",
@@ -160,7 +147,6 @@
   "bookshelf_lastReadTime": "上次阅读时间",
   "bookshelf_progress": "阅读进度",
   "bookshelf_importTime": "导入时间",
-
   "notes_page_detail": "详情",
   "notes_page_export": "导出",
   "notes_page_copied": "已复制",
@@ -169,7 +155,6 @@
   "notes_page_sort_chapter": "按章节",
   "notes_page_filter_reset": "重置",
   "notes_page_view_all_n_notes": "{count, plural, =0{没有符合条件的笔记} other{查看所有 {count} 条笔记}}",
-
   "common_delete": "删除",
   "common_hours_full": "{count, plural, other{{count} 小时}}",
   "common_hours": "{count, plural, other{{count} 时}}",
@@ -209,7 +194,6 @@
   "common_retry": "重试",
   "common_ascending": "升序",
   "common_descending": "降序",
-
   "storage": "存储",
   "storage_info": "存储信息",
   "storage_total_size": "总大小",
@@ -222,10 +206,8 @@
   "storage_font_file": "字体文件",
   "storage_data_file_details": "数据文件详情",
   "storage_clear_cache": "清空缓存",
-
-  "service_import_success":"导入成功",
+  "service_import_success": "导入成功",
   "service_import_n_books": "{count, plural, other{正在导入 {count} 本书}}",
-
   "webdav_webdav_not_enabled": "WebDav 未启用",
   "webdav_syncing": "同步中",
   "webdav_syncing_files": "同步文件",
@@ -240,7 +222,6 @@
   "webdav_sync_aborted": "同步已取消",
   "webdav_sync_aborted_content": "未能从 WebDAV 获取数据, 远程数据为空。请检查以下内容：\n1. 网络连接是否正常 \n2. 确保已经其他设备上上传了有效的阅读数据到 WebDAV\n\n接下来，请试试上传数据到 WebDAV",
   "webdav_sync_direction": "WebDAV 端数据可能被其他设备修改，请选择如何处理数据",
-
   "settings_sync": "同步",
   "settings_sync_webdav": "WebDAV",
   "settings_sync_enable_webdav": "启用 WebDAV",
@@ -259,13 +240,11 @@
   "import_success_restart_app": "导入成功，请重启应用",
   "import_failed": "导入失败: {error}",
   "settings_sync_completed_toast": "同步完成显示提示",
-
   "settings_translate": "翻译",
   "settings_translate_current_service": "当前服务",
   "settings_translate_auto": "自动",
   "settings_translate_from": "原文",
   "settings_translate_to": "译文",
-
   "settings_narrate": "朗读",
   "settings_narrate_voice": "语音",
   "settings_narrate_voice_model": "语音模型",
@@ -274,7 +253,6 @@
   "settings_narrate_voice_model_click_to_view": "点击查看",
   "settings_narrate_voice_model_male": "男性",
   "settings_narrate_voice_model_female": "女性",
-
   "settings_ai": "AI 设置",
   "settings_ai_services": "AI 服务",
   "settings_ai_prompt": "AI 提示词",
@@ -302,32 +280,25 @@
   "ai_quick_prompt_analyze_text": "请分析一下",
   "ai_quick_prompt_suggest": "建议",
   "ai_quick_prompt_suggest_text": "有什么建议？",
-
   "settings_reading": "阅读",
-
   "settings_bookshelf": "书架",
   "settings_bookshelf_cover": "封面",
   "settings_bookshelf_cover_width": "封面宽度",
-
   "ai_cached_by": "缓存来自 {service}",
   "ai_regenerate": "重新生成",
-
   "storage_permission_denied": "存储权限未授权",
   "gallery_permission_denied": "相册权限未授权",
   "goto_authorize": "去授权",
-
   "settings_advanced": "高级",
   "settings_advanced_log": "日志",
   "settings_advanced_log_clear_log": "清空日志",
   "settings_advanced_log_export_log": "导出日志",
   "settings_advanced_clear_log_when_start": "启动时清空日志",
-
   "about_check_for_updates": "检查更新",
   "update_new_version": "新版本：",
   "update_current_version": "当前版本：",
   "about_privacy_policy": "隐私政策",
   "about_terms_of_use": "用户服务条款",
-
   "tts_volume": "音量",
   "tts_rate": "语速",
   "tts_pitch": "音调",
@@ -336,7 +307,6 @@
   "tts_type": "朗读引擎类型",
   "tts_type_internal": "内置朗读",
   "tts_type_system": "系统朗读",
-
   "statistic_just_now": "刚刚",
   "statistic_minutes_ago": "{count, plural, =1{1分钟前} other{{count}分钟前}}",
   "statistic_hours_ago": "{count, plural, =1{1小时前} other{{count}小时前}}",
@@ -346,14 +316,12 @@
   "statistic_years_ago": "{count, plural, =1{1年前} other{{count}年前}}",
   "statistic_deleted_records": "即将删除的记录",
   "statistic_deleted_records_tips": "将在离开此界面时删除此记录",
-
   "webview_unsupported_version": "不支持的 Webview 版本",
   "webview_unsupported_message": "Webview 版本可能不支持。当前版本为 {version}, 所需的最低版本是 {minVersion}，请更新您的 Webview",
   "webview_update": "如何更新",
   "webview_cancel": "我知道了",
   "webview2_not_installed": "未能找到已安装的WebView2运行时或非稳定版的Microsoft Edge安装。",
   "webview2_install": "去安装",
-
   "iap_page_title": "激活产品",
   "iap_page_restore": "恢复购买",
   "iap_page_why_choose": "为什么选择 Anx Reader",
@@ -380,13 +348,11 @@
   "iap_page_date_purchased": "购买时间：{date}",
   "iap_page_date_trial_start": "试用开始：{date}",
   "iap_page_date_original": "加入时间：{date}",
-
   "iap_status_purchased": "永久高级版用户",
   "iap_status_trial": "试用期内",
   "iap_status_trial_expired": "试用期已结束",
   "iap_status_original": "早期用户",
   "iap_status_unknown": "未知",
-
   "download_fonts": "下载字体",
   "font_no_available_fonts": "没有可用的字体",
   "font_official_website": "官方网站",
@@ -395,7 +361,6 @@
   "font_failed_to_load_fonts": "加载字体失败",
   "font_downloading": "下载中 {progress}",
   "font_cancelled": "已取消 {progress}",
-
   "book_sync_status_not_syncing": "未在同步",
   "book_sync_status_uploading_title": "上传",
   "book_sync_status_downloading_title": "下载",
@@ -423,5 +388,8 @@
   "book_sync_status_space_released": "已释放空间",
   "book_sync_status_upload_failed": "上传失败",
   "book_sync_status_books_count": "{count} 本",
-  "book_sync_status_download_failed": "下载失败"
+  "book_sync_status_download_failed": "下载失败",
+  "webdavBatchDownloadFinishedReport": "书籍文件下载完成，{success}成功，{failed}失败",
+  "downloadAllBooks": "下载所有书籍",
+  "allBooksAreDownloaded": "所有书籍已下载"
 }
