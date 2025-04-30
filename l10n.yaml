@@ -7,3 +7,13 @@ synthetic-package: false
 use-deferred-loading: true
 nullable-getter: false
 untranslated-messages-file: docs/untranslated_messages.txt
+
+# Flutter Extract Art Extension 
+translate: true              
+generate : true       
+key-prefix: L10n.of(context).  
+# Generate key name 
+# "ask" : prompt with pre-filled text | true : infer from text | false : prompt  
+auto-name-key: ask
+key-name-language: en
+import-line: "import 'package:anx_reader/l10n/generated/L10n.dart';"
