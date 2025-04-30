@@ -6,3 +6,4 @@ output-class: L10n
 synthetic-package: false
 use-deferred-loading: true
 nullable-getter: false
+untranslated-messages-file: docs/untranslated_messages.txt
