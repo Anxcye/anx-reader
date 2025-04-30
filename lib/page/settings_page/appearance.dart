@@ -14,7 +14,9 @@ const List<Map<String, String>> languageOptions = [
   {'English': 'en'},
   {'简体中文': 'zh-CN'},
   {'繁體中文': 'zh-TW'},
-  {'Türkçe': 'tr'}
+  {'Türkçe': 'tr'},
+  {'Deutsch': 'de'},
+  {'العربية': 'ar'},
 ];
 
 class AppearanceSetting extends StatefulWidget {
