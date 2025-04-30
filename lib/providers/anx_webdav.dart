@@ -526,7 +526,7 @@ class AnxWebdav extends _$AnxWebdav {
       AnxToast.show(L10n.of(navigatorKey.currentContext!)
           .book_sync_status_space_released);
       return;
-    } else if (!syncStatus.both.contains(book.id)) {
+    } else if (syncStatus.both.contains(book.id)) {
       deleteLocalBook();
     } else {
       try {
