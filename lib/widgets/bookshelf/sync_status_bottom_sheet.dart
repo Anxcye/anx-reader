@@ -9,6 +9,7 @@ import 'package:anx_reader/models/sync_state_model.dart';
 import 'package:anx_reader/providers/anx_webdav.dart';
 import 'package:anx_reader/providers/sync_status.dart';
 import 'package:anx_reader/utils/get_path/databases_path.dart';
+import 'package:anx_reader/utils/toast/common.dart';
 import 'package:anx_reader/widgets/bookshelf/book_sync_status_icon.dart';
 import 'package:anx_reader/widgets/linear_proportion_bar.dart';
 import 'package:flutter/material.dart';
@@ -301,31 +302,63 @@ class SyncStatusBottomSheet extends ConsumerWidget {
     WidgetRef ref,
     L10n l10n,
   ) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+    return Column(
       children: [
-        Expanded(
-          child: ElevatedButton.icon(
-            icon: const Icon(Icons.cloud_upload),
-            label: Text(l10n.book_sync_status_upload_button),
-            onPressed: () {
-              ref
-                  .read(anxWebdavProvider.notifier)
-                  .syncData(SyncDirection.upload, ref);
-            },
-          ),
+        Row(
+          children: [
+            Expanded(
+              child: ElevatedButton.icon(
+                icon: const Icon(Icons.download_for_offline),
+                label: Text(l10n.downloadAllBooks),
+                onPressed: () {
+                  final remoteOnlyIds = ref
+                          .read(syncStatusProvider)
+                          .whenData((data) => data.remoteOnly)
+                          .valueOrNull ??
+                      [];
+                  if (remoteOnlyIds.isNotEmpty) {
+                    ref
+                        .read(anxWebdavProvider.notifier)
+                        .downloadMultipleBooks(remoteOnlyIds);
+                    AnxToast.show('');
+                  } else {
+                    AnxToast.show(l10n.allBooksAreDownloaded);
+                  }
+                },
+              ),
+            ),
+          ],
         ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: ElevatedButton.icon(
-            icon: const Icon(Icons.cloud_download),
-            label: Text(l10n.book_sync_status_download_button),
-            onPressed: () {
-              ref
-                  .read(anxWebdavProvider.notifier)
-                  .syncData(SyncDirection.download, ref);
-            },
-          ),
+        const SizedBox(height: 10), // Spacing
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Expanded(
+              child: ElevatedButton.icon(
+                icon: const Icon(Icons.cloud_upload),
+                label: Text(l10n.book_sync_status_upload_button),
+                onPressed: () {
+                  ref
+                      .read(anxWebdavProvider.notifier)
+                      .syncData(SyncDirection.upload, ref);
+                  Navigator.pop(context); // Close sheet after action
+                },
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: ElevatedButton.icon(
+                icon: const Icon(Icons.cloud_download),
+                label: Text(l10n.book_sync_status_download_button),
+                onPressed: () {
+                  ref
+                      .read(anxWebdavProvider.notifier)
+                      .syncData(SyncDirection.download, ref);
+                  Navigator.pop(context); // Close sheet after action
+                },
+              ),
+            ),
+          ],
         ),
       ],
     );

@@ -96,6 +96,7 @@ class AnxWebdav extends _$AnxWebdav {
   }
 
   Future<void> syncData(SyncDirection direction, WidgetRef? ref) async {
+    buildClient();
     if (Prefs().onlySyncWhenWifi &&
         !(await Connectivity().checkConnectivity())
             .contains(ConnectivityResult.wifi)) {
@@ -191,7 +192,6 @@ class AnxWebdav extends _$AnxWebdav {
     await backUpDb();
 
     try {
-      buildClient();
       await createAnxDir();
 
       await syncDatabase(direction);
@@ -268,14 +268,14 @@ class AnxWebdav extends _$AnxWebdav {
 
     // for (var file in remoteFiles) {
     //   if (file.name == 'file') {
-        final remoteBooks = await _client.readDir('/anx/data/file');
-        remoteBooksName = List.generate(
-            remoteBooks.length, (index) => 'file/${remoteBooks[index].name!}');
-      // } else if (file.name == 'cover') {
-        final remoteCovers = await _client.readDir('/anx/data/cover');
-        remoteCoversName = List.generate(remoteCovers.length,
-            (index) => 'cover/${remoteCovers[index].name!}');
-      // }
+    final remoteBooks = await _client.readDir('/anx/data/file');
+    remoteBooksName = List.generate(
+        remoteBooks.length, (index) => 'file/${remoteBooks[index].name!}');
+    // } else if (file.name == 'cover') {
+    final remoteCovers = await _client.readDir('/anx/data/cover');
+    remoteCoversName = List.generate(
+        remoteCovers.length, (index) => 'cover/${remoteCovers[index].name!}');
+    // }
     // }
     List<String> totalCurrentFiles = [...currentCover, ...currentBooks];
     List<String> totalRemoteFiles = [...remoteBooksName, ...remoteCoversName];
@@ -537,5 +537,37 @@ class AnxWebdav extends _$AnxWebdav {
             .book_sync_status_upload_failed);
       }
     }
+  }
+
+  Future<void> downloadMultipleBooks(List<int> bookIds) async {
+    AnxLog.info(
+        'WebDAV: Starting download for ${bookIds.length} remote books.');
+    int successCount = 0;
+    int failCount = 0;
+
+    try {
+      await _client.ping();
+    } catch (e) {
+      AnxLog.severe(
+          'WebDAV connection failed before batch download, ping failed\n${e.toString()}');
+      return;
+    }
+
+    for (final bookId in bookIds) {
+      try {
+        final book = await selectBookById(bookId);
+        AnxLog.info('WebDAV: Downloading book ID $bookId: ${book.title}');
+        await downloadBook(book);
+        successCount++;
+      } catch (e) {
+        AnxLog.severe('WebDAV: Failed to download book ID $bookId: $e');
+        failCount++;
+      }
+    }
+
+    AnxLog.info(L10n.of(navigatorKey.currentContext!)
+        .webdavBatchDownloadFinishedReport(successCount, failCount));
+    AnxToast.show(L10n.of(navigatorKey.currentContext!)
+        .webdavBatchDownloadFinishedReport(successCount, failCount));
   }
 }

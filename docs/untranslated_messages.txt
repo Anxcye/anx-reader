@@ -388,6 +388,9 @@
     "book_sync_status_space_released",
     "book_sync_status_upload_failed",
     "book_sync_status_books_count",
-    "book_sync_status_download_failed"
+    "book_sync_status_download_failed",
+    "webdavBatchDownloadFinishedReport",
+    "downloadAllBooks",
+    "allBooksAreDownloaded"
   ]
 }

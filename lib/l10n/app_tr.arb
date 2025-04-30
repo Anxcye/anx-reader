@@ -7,7 +7,6 @@
   "app_author": "Geliştirici",
   "app_donate": "Bağış Yap",
   "app_donate_tips": "Anx Reader açık kaynaklı ve ücretsiz kullanılabilen bir yazılımdır. Eğer faydalı bulursanız, geliştirmeye devam etmemiz için lütfen bağış yaparak bize destek olun.",
-
   "navBar_bookshelf": "Kitaplık",
   "navBar_statistics": "İstatistikler",
   "navBar_notes": "Notlar",
@@ -23,9 +22,7 @@
   "settings_appearance_language": "Dil",
   "settings_appearance_open_book_animation": "Kitap Açma Animasyonu",
   "settings_appearance_bottom_navigator_show": "Alt Gezinti Çubuğu",
-
   "reading_contents": "İçindekiler",
-
   "statistic_to_present": "Şu Ana Kadar",
   "statistic_books_read": "{count, plural, =0{Hiç kitap okunmadı} =1{1 kitap okundu} other{{count} kitap okundu} }",
   "statistic_days_of_reading": "{count, plural, =0{Hiç gün okunmadı} =1{1 gün okundu} other{{count} gün okundu} }",
@@ -43,7 +40,6 @@
   "statistic_friday": "Cu",
   "statistic_saturday": "Ct",
   "statistic_sunday": "Pz",
-
   "notes_notes_across": "{count, plural, =0{Hiç not yok} =1{1 not} other{{count} not} } arasında",
   "notes_books": "{count, plural, =0{Hiç kitap yok} =1{1 kitap} other{{count} kitap} }",
   "notes_notes": "{count, plural, =0{Hiç not yok} =1{1 not} other{{count} not} }",
@@ -80,7 +76,6 @@
   "reading_page_share_template_simple": "Basit",
   "reading_page_share_template_elegant": "Zarif",
   "reading_page_share_template_modern": "Modern",
-
   "context_menu_add_note_tips": "Notunuzu ekleyin",
   "context_menu_copy": "Kopyala",
   "context_menu_search": "Ara",
@@ -91,7 +86,6 @@
   "context_menu_highlight": "Vurgula",
   "context_menu_underline": "Altını Çiz",
   "context_menu_share": "Paylaş",
-
   "reading_page_full_screen": "Tam Ekran",
   "reading_page_screen_timeout": "Ekran Zaman Aşımı",
   "reading_page_page_turning_method": "Sayfa Çevirme Yöntemi",
@@ -99,26 +93,21 @@
   "add_new_font": "Yeni Yazı Tipi Ekle",
   "follow_book": "Kitabı Takip Et",
   "system_font": "Sistem Yazı Tipi",
-
   "page_turning_style": "Sayfa Çevirme Stili",
   "no_animation": "Animasyon Yok",
   "slide": "Kaydır",
   "scroll": "Kaydırma",
-
   "book_deleted": "Kitap silindi",
-
   "import_n_books_selected": "{count, plural, =1{1 kitap seçildi} other{{count} kitap seçildi}}",
   "import_support_types": "Desteklenen türler: {types}",
   "import_n_books_not_support": "{count, plural, =1{1 kitap henüz desteklenmiyor} other{{count} kitap henüz desteklenmiyor}}",
   "import_import_n_books": "{count, plural, =1{1 kitabı içe aktar} other{{count} kitabı içe aktar}}",
-
   "bookshelf_tips_1": "Kitap yok.",
   "bookshelf_tips_2": "Kitap eklemek için ekle butonuna tıklayın!",
   "statistics_tips_1": "Seçili zaman diliminde okuma yok.",
   "statistics_tips_2": "Bir kitap, ellerinizde tuttuğunuz bir rüyadır.",
   "notes_tips_1": "Hiç not yok.",
   "notes_tips_2": "Okurken bir not ekleyin!",
-
   "reading_page_chapter_pages": "Bölüm Sayfaları",
   "reading_page_current_page": "Geçerli Sayfa",
   "reading_page_auto_translate_selection": "Otomatik Çeviri Seçimi",
@@ -139,7 +128,6 @@
   "reading_page_bottom_margin": "Alt Kenar Boşluğu",
   "reading_page_font_weight": "Yazı Tipi Kalınlığı",
   "reading_page_letter_spacing": "Harf Aralığı",
-
   "book_detail_save": "Kaydet",
   "book_detail_edit": "Düzenle",
   "book_detail_nth_book": "{count, plural, =1{Okuduğunuz 1. kitap} =2{Okuduğunuz 2. kitap} few{Okuduğunuz 3. kitap} other{Okuduğunuz {count}. kitap}}",
@@ -152,7 +140,6 @@
   "reading_page_reading_info_battery_and_time": "Pil ve Zaman",
   "reading_page_reading_info_chapter_progress": "Bölüm İlerlemesi",
   "reading_page_reading_info_book_progress": "Kitap İlerlemesi",
-
   "bookshelf_dragging": "İçe aktarmak için bırakın",
   "bookshelf_sort": "Sırala",
   "bookshelf_title": "Başlık",
@@ -160,7 +147,6 @@
   "bookshelf_lastReadTime": "Son Okuma Zamanı",
   "bookshelf_progress": "İlerleme",
   "bookshelf_importTime": "İçe Aktarma Zamanı",
-
   "notes_page_detail": "Detay",
   "notes_page_export": "Dışa Aktar",
   "notes_page_copied": "Kopyalandı",
@@ -169,7 +155,6 @@
   "notes_page_sort_chapter": "Bölüme Göre",
   "notes_page_filter_reset": "Sıfırla",
   "notes_page_view_all_n_notes": "{count, plural, =0{Hiç not bulunamadı} =1{1 notu görüntüle} other{Tüm {count} notları görüntüle}}",
-
   "common_delete": "Sil",
   "common_hours_full": "{count, plural, =1{1 saat} other{{count} saat} }",
   "common_hours": "{count, plural, other{{count} sa} }",
@@ -209,7 +194,6 @@
   "common_retry": "Tekrar Dene",
   "common_ascending": "Artan",
   "common_descending": "Azalan",
-
   "storage": "Depolama",
   "storage_info": "Depolama Bilgisi",
   "storage_total_size": "Toplam Boyut",
@@ -222,10 +206,8 @@
   "storage_font_file": "Yazı Tipi Dosyası",
   "storage_data_file_details": "Veri Dosyası Detayları",
   "storage_clear_cache": "Önbelleği Temizle",
-
   "service_import_success": "İçe aktarma başarılı",
   "service_import_n_books": "{count, plural, =1{1 kitap içe aktarılıyor} other{{count} kitap içe aktarılıyor}}",
-
   "webdav_webdav_not_enabled": "WebDAV etkin değil",
   "webdav_syncing": "Senkronize ediliyor",
   "webdav_syncing_files": "Dosyalar senkronize ediliyor",
@@ -240,7 +222,6 @@
   "webdav_sync_aborted": "Senkronizasyon iptal edildi",
   "webdav_sync_aborted_content": "WebDAV'dan veri alınamadı, uzak veri boş. Lütfen aşağıdakileri kontrol edin: \n1. Ağ bağlantısı \n2. Diğer cihazlarda geçerli okuma verilerinin WebDAV'a yüklendiğinden emin olun\n\nArdından, lütfen verileri WebDAV'a yüklemeyi deneyin",
   "webdav_sync_direction": "WebDAV verileri diğer cihazlar tarafından değiştirilmiş olabilir, lütfen verilerin nasıl işleneceğini seçin",
-
   "settings_sync": "Senkronizasyon",
   "settings_sync_webdav": "WebDAV",
   "settings_sync_enable_webdav": "WebDAV'ı Etkinleştir",
@@ -259,13 +240,11 @@
   "import_success_restart_app": "İçe aktarma başarılı, lütfen uygulamayı yeniden başlatın",
   "import_failed": "İçe aktarma başarısız: {error}",
   "settings_sync_completed_toast": "Senkronizasyon tamamlandığında bildirim göster",
-
   "settings_translate": "Çeviri",
   "settings_translate_current_service": "Mevcut Hizmet",
   "settings_translate_auto": "Otomatik",
   "settings_translate_from": "Kaynak Dil",
   "settings_translate_to": "Hedef Dil",
-
   "settings_narrate": "Seslendir",
   "settings_narrate_voice": "Ses",
   "settings_narrate_voice_model": "Ses Modeli",
@@ -274,7 +253,6 @@
   "settings_narrate_voice_model_click_to_view": "Görüntülemek için Tıkla",
   "settings_narrate_voice_model_male": "Erkek",
   "settings_narrate_voice_model_female": "Kadın",
-
   "settings_ai": "Yapay Zeka",
   "settings_ai_services": "Servisler",
   "settings_ai_prompt": "İstem",
@@ -302,32 +280,25 @@
   "ai_quick_prompt_analyze_text": "Lütfen analiz et",
   "ai_quick_prompt_suggest": "Öner",
   "ai_quick_prompt_suggest_text": "Önerin var mı?",
-
   "settings_reading": "Okuma",
-
   "settings_bookshelf": "Kitaplık",
   "settings_bookshelf_cover": "Kitap kapağı",
   "settings_bookshelf_cover_width": "Kitap kapağı genişliği",
-
   "ai_cached_by": "{service} tarafından önbelleklendi",
   "ai_regenerate": "Yeniden Oluştur",
-
   "storage_permission_denied": "Depolama izni reddedildi",
   "gallery_permission_denied": "Galeri izni reddedildi",
   "goto_authorize": "Yetkilendirmeye git",
-
   "settings_advanced": "Gelişmiş",
   "settings_advanced_log": "Günlük",
   "settings_advanced_log_clear_log": "Günlüğü Temizle",
   "settings_advanced_log_export_log": "Günlüğü Dışa Aktar",
   "settings_advanced_clear_log_when_start": "Başlangıçta günlüğü temizle",
-
   "about_check_for_updates": "Güncellemeleri kontrol et",
   "update_new_version": "Yeni sürüm: ",
   "update_current_version": "Mevcut sürüm: ",
   "about_privacy_policy": "Gizlilik Politikası",
   "about_terms_of_use": "Kullanım Şartları",
-
   "tts_volume": "Ses Seviyesi",
   "tts_rate": "Hız",
   "tts_pitch": "Perde",
@@ -336,7 +307,6 @@
   "tts_type": "TTS Türü",
   "tts_type_internal": "Dahili TTS",
   "tts_type_system": "Sistem TTS",
-
   "statistic_just_now": "az önce",
   "statistic_minutes_ago": "{count, plural, =1{1 dakika önce} other{{count} dakika önce}}",
   "statistic_hours_ago": "{count, plural, =1{1 saat önce} other{{count} saat önce}}",
@@ -346,14 +316,12 @@
   "statistic_years_ago": "{count, plural, =1{1 yıl önce} other{{count} yıl önce}}",
   "statistic_deleted_records": "Silinecek Kayıtlar",
   "statistic_deleted_records_tips": "Bu sayfadan ayrılırken silinecek",
-
   "webview_unsupported_version": "Desteklenmeyen Webview Sürümü",
   "webview_unsupported_message": "Webview sürümünüz desteklenmiyor olabilir. Mevcut sürüm: {version}, gerekli minimum sürüm: {minVersion}. Lütfen Webview'i güncelleyin.",
   "webview_update": "Nasıl güncellenir",
   "webview_cancel": "Biliyorum",
   "webview2_not_installed": "Yüklü bir WebView2 Runtime veya kararlı bir Microsoft Edge sürümü bulunamadı.",
   "webview2_install": "İndirmeye git",
-
   "iap_page_title": "Ürünü Etkinleştir",
   "iap_page_restore": "Satın Almayı Geri Yükle",
   "iap_page_why_choose": "Neden Anx Reader'ı Seçmelisiniz?",
@@ -380,13 +348,11 @@
   "iap_page_date_purchased": "Satın alma tarihi: {date}",
   "iap_page_date_trial_start": "Deneme başlangıcı: {date}",
   "iap_page_date_original": "Katılma tarihi: {date}",
-
   "iap_status_purchased": "Ömür Boyu Premium Kullanıcı",
   "iap_status_trial": "Deneme Süresi",
   "iap_status_trial_expired": "Deneme Süresi Doldu",
   "iap_status_original": "Erken Kullanıcı",
   "iap_status_unknown": "Bilinmiyor",
-
   "download_fonts": "Yazı Tiplerini İndir",
   "font_no_available_fonts": "Kullanılabilir yazı tipi yok",
   "font_official_website": "Resmi Web Sitesi",
@@ -395,7 +361,6 @@
   "font_failed_to_load_fonts": "Yazı tipleri yüklenemedi",
   "font_downloading": "İndiriliyor {progress}",
   "font_cancelled": "İptal edildi {progress}",
-
   "book_sync_status_not_syncing": "Senkronize edilmiyor",
   "book_sync_status_uploading_title": "Yükleniyor",
   "book_sync_status_downloading_title": "İndiriliyor",
@@ -423,5 +388,8 @@
   "book_sync_status_space_released": "Alan açıldı",
   "book_sync_status_upload_failed": "Yükleme başarısız",
   "book_sync_status_books_count": "{count} kitap",
-  "book_sync_status_download_failed": "İndirme başarısız"
+  "book_sync_status_download_failed": "İndirme başarısız",
+  "webdavBatchDownloadFinishedReport": "{success} başarılı, {failed} başarısız",
+  "downloadAllBooks": "tüm kitapları indir",
+  "allBooksAreDownloaded": "Tüm kitaplar indirildi"
 }

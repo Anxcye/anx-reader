@@ -7,7 +7,6 @@
   "app_author": "Author",
   "app_donate": "Donate",
   "app_donate_tips": "Anx Reader is an open-source software that could free to use. If you find it helpful, please donate to support us to continue improving it.",
-
   "navBar_bookshelf": "Bookshelf",
   "navBar_statistics": "Statistics",
   "navBar_notes": "Notes",
@@ -23,9 +22,7 @@
   "settings_appearance_language": "Language",
   "settings_appearance_open_book_animation": "Open Book Animation",
   "settings_appearance_bottom_navigator_show": "Bottom Navigator",
-
   "reading_contents": "Contents",
-
   "statistic_to_present": "To Present",
   "statistic_books_read": "{count, plural, =0{No books read} =1{1 book read} other{{count} books read} }",
   "statistic_days_of_reading": "{count, plural, =0{No days read} =1{1 day read} other{{count} days read} }",
@@ -43,7 +40,6 @@
   "statistic_friday": "Fr",
   "statistic_saturday": "Sa",
   "statistic_sunday": "Su",
-
   "notes_notes_across": "{count, plural, =0{No notes} =1{1 note} other{{count} notes} } across",
   "notes_books": "{count, plural, =0{No books} =1{1 book} other{{count} books} }",
   "notes_notes": "{count, plural, =0{No notes} =1{1 note} other{{count} notes} }",
@@ -80,7 +76,6 @@
   "reading_page_share_template_simple": "Simple",
   "reading_page_share_template_elegant": "Elegant",
   "reading_page_share_template_modern": "Modern",
-
   "context_menu_add_note_tips": "Add your note",
   "context_menu_copy": "Copy",
   "context_menu_search": "Search",
@@ -91,7 +86,6 @@
   "context_menu_highlight": "Highlight",
   "context_menu_underline": "Underline",
   "context_menu_share": "Share",
-
   "reading_page_full_screen": "Full Screen",
   "reading_page_screen_timeout": "Screen Timeout",
   "reading_page_page_turning_method": "Page Turning Method",
@@ -99,26 +93,21 @@
   "add_new_font": "Add New Font",
   "follow_book": "Follow Book",
   "system_font": "System Font",
-
   "page_turning_style": "Page Turning Style",
   "no_animation": "No Animation",
   "slide": "Slide",
   "scroll": "Scroll",
-
   "book_deleted": "Book deleted",
-
   "import_n_books_selected": "{count, plural, =1{1 book selected} other{{count} books selected}}",
   "import_support_types": "Support types: {types}",
   "import_n_books_not_support": "{count, plural, =1{1 book not support yet} other{{count} books not support yet}}",
   "import_import_n_books": "{count, plural, =1{Import 1 book} other{Import {count} books}}",
-
   "bookshelf_tips_1": "There are no books.",
   "bookshelf_tips_2": "Click the add button to add a book!",
   "statistics_tips_1": "No reading in the selected time period.",
   "statistics_tips_2": "A book is a dream that you hold in your hands.",
   "notes_tips_1": "There are no notes.",
   "notes_tips_2": "Add a note while reading!",
-
   "reading_page_chapter_pages": "Chapter Pages",
   "reading_page_current_page": "Current Page",
   "reading_page_auto_translate_selection": "Auto Translate Selection",
@@ -139,7 +128,6 @@
   "reading_page_bottom_margin": "Bottom Margin",
   "reading_page_font_weight": "Font Weight",
   "reading_page_letter_spacing": "Letter Spacing",
-
   "book_detail_save": "Save",
   "book_detail_edit": "Edit",
   "book_detail_nth_book": "{count, plural, =1{1st book you've read} =2{2nd book you've read} few{3rd book you've read} other{{count}th book you've read}}",
@@ -152,7 +140,6 @@
   "reading_page_reading_info_battery_and_time": "Battery and Time",
   "reading_page_reading_info_chapter_progress": "Chapter Progress",
   "reading_page_reading_info_book_progress": "Book Progress",
-
   "bookshelf_dragging": "Release to import",
   "bookshelf_sort": "Sort",
   "bookshelf_title": "Title",
@@ -160,7 +147,6 @@
   "bookshelf_lastReadTime": "Last Read Time",
   "bookshelf_progress": "Progress",
   "bookshelf_importTime": "Import Time",
-
   "notes_page_detail": "Detail",
   "notes_page_export": "Export",
   "notes_page_copied": "Copied",
@@ -169,7 +155,6 @@
   "notes_page_sort_chapter": "By chapter",
   "notes_page_filter_reset": "Reset",
   "notes_page_view_all_n_notes": "{count, plural, =0{No notes qualified} =1{View 1 note} other{View all {count} notes}}",
-
   "common_delete": "Delete",
   "common_hours_full": "{count, plural, =1{1 hour} other{{count} hours} }",
   "common_hours": "{count, plural, other{{count} h} }",
@@ -209,7 +194,6 @@
   "common_retry": "Retry",
   "common_ascending": "Ascending",
   "common_descending": "Descending",
-
   "storage": "Storage",
   "storage_info": "Storage Info",
   "storage_total_size": "Total Size",
@@ -222,10 +206,8 @@
   "storage_font_file": "Font File",
   "storage_data_file_details": "Data File Details",
   "storage_clear_cache": "Clear Cache",
-
   "service_import_success": "Import success",
   "service_import_n_books": "{count, plural, =1{importing 1 book} other{importing {count} books}}",
-
   "webdav_webdav_not_enabled": "WebDAV is not enabled",
   "webdav_syncing": "Syncing",
   "webdav_syncing_files": "Syncing files",
@@ -240,7 +222,6 @@
   "webdav_sync_aborted": "Sync aborted",
   "webdav_sync_aborted_content": "Failed to get data from WebDAV, remote data is empty. Please check the following: \n1. Network connection \n2. Ensure that valid reading data has been uploaded to WebDAV on other devices\n\nNext, please try to upload data to WebDAV",
   "webdav_sync_direction": "WebDAV data may be modified by other devices, please choose how to handle the data",
-
   "settings_sync": "Sync",
   "settings_sync_webdav": "WebDAV",
   "settings_sync_enable_webdav": "Enable WebDAV",
@@ -259,13 +240,11 @@
   "import_success_restart_app": "Import success, please restart the app",
   "import_failed": "Import failed: {error}",
   "settings_sync_completed_toast": "Show toast when sync completed",
-
   "settings_translate": "Translate",
   "settings_translate_current_service": "Current Service",
   "settings_translate_auto": "Auto",
   "settings_translate_from": "From",
   "settings_translate_to": "To",
-
   "settings_narrate": "Narrate",
   "settings_narrate_voice": "Voice",
   "settings_narrate_voice_model": "Voice Model",
@@ -274,7 +253,6 @@
   "settings_narrate_voice_model_click_to_view": "Click to View",
   "settings_narrate_voice_model_male": "Male",
   "settings_narrate_voice_model_female": "Female",
-
   "settings_ai": "AI",
   "settings_ai_services": "Services",
   "settings_ai_prompt": "Prompt",
@@ -302,32 +280,25 @@
   "ai_quick_prompt_analyze_text": "Please analyze",
   "ai_quick_prompt_suggest": "Suggest",
   "ai_quick_prompt_suggest_text": "Any suggestions?",
-
   "settings_reading": "Reading",
-
   "settings_bookshelf": "Bookshelf",
   "settings_bookshelf_cover": "Book cover",
   "settings_bookshelf_cover_width": "Book cover width",
-
   "ai_cached_by": "Cached by {service}",
   "ai_regenerate": "Regenerate",
-
   "storage_permission_denied": "Storage permission denied",
   "gallery_permission_denied": "Gallery permission denied",
   "goto_authorize": "Go to authorize",
-
   "settings_advanced": "Advanced",
   "settings_advanced_log": "Log",
   "settings_advanced_log_clear_log": "Clear Log",
   "settings_advanced_log_export_log": "Export Log",
   "settings_advanced_clear_log_when_start": "Clear log when start",
-
   "about_check_for_updates": "Check for updates",
   "update_new_version": "New version: ",
   "update_current_version": "Current version: ",
   "about_privacy_policy": "Privacy Policy",
   "about_terms_of_use": "Terms of Use",
-
   "tts_volume": "Volume",
   "tts_rate": "Rate",
   "tts_pitch": "Pitch",
@@ -336,7 +307,6 @@
   "tts_type": "TTS Type",
   "tts_type_internal": "Internal TTS",
   "tts_type_system": "System TTS",
-
   "statistic_just_now": "just now",
   "statistic_minutes_ago": "{count, plural, =1{1 minute ago} other{{count} minutes ago}}",
   "statistic_hours_ago": "{count, plural, =1{1 hour ago} other{{count} hours ago}}",
@@ -346,14 +316,12 @@
   "statistic_years_ago": "{count, plural, =1{1 year ago} other{{count} years ago}}",
   "statistic_deleted_records": "Records to be deleted",
   "statistic_deleted_records_tips": "Will be deleted when leaving this page",
-
   "webview_unsupported_version": "Unsupported Webview Version",
   "webview_unsupported_message": "Your Webview version may be not supported. Current version is {version}, required minimum version is {minVersion}, please update your Webview",
   "webview_update": "How to update",
   "webview_cancel": "I know",
   "webview2_not_installed": "Failed to find an installed WebView2 Runtime or non-stable Microsoft Edge installation.",
   "webview2_install": "Go to diownload",
-
   "iap_page_title": "Activate Product",
   "iap_page_restore": "Restore Purchase",
   "iap_page_why_choose": "Why Choose Anx Reader",
@@ -380,13 +348,11 @@
   "iap_page_date_purchased": "Purchase date: {date}",
   "iap_page_date_trial_start": "Trial started: {date}",
   "iap_page_date_original": "Join date: {date}",
-
   "iap_status_purchased": "Lifetime Premium User",
   "iap_status_trial": "Trial Period",
   "iap_status_trial_expired": "Trial Expired",
   "iap_status_original": "Early User",
   "iap_status_unknown": "Unknown",
-
   "download_fonts": "Download Fonts",
   "font_no_available_fonts": "No available fonts",
   "font_official_website": "Official Website",
@@ -395,7 +361,6 @@
   "font_failed_to_load_fonts": "Failed to load fonts",
   "font_downloading": "Downloading {progress}",
   "font_cancelled": "Cancelled {progress}",
-
   "book_sync_status_not_syncing": "Not syncing",
   "book_sync_status_uploading_title": "Uploading",
   "book_sync_status_downloading_title": "Downloading",
@@ -423,5 +388,8 @@
   "book_sync_status_space_released": "Space released",
   "book_sync_status_upload_failed": "Upload failed",
   "book_sync_status_books_count": "{count} books",
-  "book_sync_status_download_failed": "Download failed"
+  "book_sync_status_download_failed": "Download failed",
+  "webdavBatchDownloadFinishedReport": "Books downloaded, {success} success, {failed} failed",
+  "downloadAllBooks": "Download All Books",
+  "allBooksAreDownloaded": "All books are downloaded"
 }
