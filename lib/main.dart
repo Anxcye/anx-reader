@@ -211,10 +211,10 @@ class _MyAppState extends ConsumerState<MyApp>
                   debugShowCheckedModeBanner: false,
                   scrollBehavior: ScrollConfiguration.of(context).copyWith(
                     physics: const BouncingScrollPhysics(),
-                    dragDevices: {
-                      PointerDeviceKind.touch,
-                      PointerDeviceKind.mouse,
-                    },
+                    // dragDevices: {
+                    //   PointerDeviceKind.touch,
+                    //   PointerDeviceKind.mouse,
+                    // },
                   ),
                   navigatorObservers: [FlutterSmartDialog.observer],
                   builder: FlutterSmartDialog.init(),

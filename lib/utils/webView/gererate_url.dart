@@ -31,35 +31,6 @@ String generateUrl(
   textColor = convertDartColorToJs(textColor);
   backgroundColor = convertDartColorToJs(backgroundColor);
 
-  // const importing = $importing
-  // const url = '${replaceSingleQuote(url)}'
-  // let initialCfi = '${replaceSingleQuote(cfi)}'
-  // let style = {
-  //     fontSize: ${bookStyle.fontSize},
-  //     fontName: '${replaceSingleQuote(fontName)}',
-  //     fontPath: '${replaceSingleQuote(fontPath)}',
-  //     fontWeight: ${bookStyle.fontWeight},
-  //     letterSpacing: ${bookStyle.letterSpacing},
-  //     spacing: ${bookStyle.lineHeight},
-  //     paragraphSpacing: ${bookStyle.paragraphSpacing},
-  //     textIndent: ${bookStyle.indent},
-  //     fontColor: '#$textColor',
-  //     backgroundColor: '#$backgroundColor',
-  //     topMargin: ${bookStyle.topMargin},
-  //     bottomMargin: ${bookStyle.bottomMargin},
-  //     sideMargin: ${bookStyle.sideMargin},
-  //     justify: true,
-  //     hyphenate: true,
-  //     pageTurnStyle: '${Prefs().pageTurnStyle.name}',
-  //     maxColumnCount: ${bookStyle.maxColumnCount},
-  // }
-
-  // let readingRules = {
-  //   convertChineseMode: '${Prefs().readingRules.convertChineseMode.name}',
-  //   bionicReadingMode: ${Prefs().readingRules.bionicReading},
-  // }
-
-
   Map<String, dynamic> style = {
     'fontSize': bookStyle.fontSize,
     'fontName': fontName,
@@ -67,13 +38,13 @@ String generateUrl(
     'fontWeight': bookStyle.fontWeight,
     'letterSpacing': bookStyle.letterSpacing,
     'spacing': bookStyle.lineHeight,
-    'paragraphSpacing': bookStyle.paragraphSpacing, 
+    'paragraphSpacing': bookStyle.paragraphSpacing,
     'textIndent': bookStyle.indent,
     'fontColor': '#$textColor',
     'backgroundColor': '#$backgroundColor',
     'topMargin': bookStyle.topMargin,
     'bottomMargin': bookStyle.bottomMargin,
-    'sideMargin': bookStyle.sideMargin, 
+    'sideMargin': bookStyle.sideMargin,
     'justify': true,
     'hyphenate': true,
     'pageTurnStyle': Prefs().pageTurnStyle.name,
@@ -101,20 +72,7 @@ String generateUrl(
   //remove last &
   query = query.substring(0, query.length - 1);
 
-  // query += 'importing=$importing';
-  // query += '&url=$url';
-  // query += '&initialCfi=$cfi';
-  // query += '&style=$style';
-  // query += '&readingRules=$readingRules';
-  // query += '&style=$style';
-  // query += '&readingRules=$readingRules';
-
-
-
-
-  final uri =  '$indexHtmlPath?$query';
-
-  print(uri);
+  final uri = '$indexHtmlPath?$query';
 
   return uri;
 }

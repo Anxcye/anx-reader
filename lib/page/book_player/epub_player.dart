@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:ui' as ui;
 
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/dao/book.dart';
@@ -32,6 +33,7 @@ import 'package:battery_plus/battery_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -329,7 +331,8 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
           if (cfi == location['cfi']) return;
           setState(() {
             cfi = location['cfi'] ?? '';
-            percentage = double.tryParse(location['percentage'].toString()) ?? 0.0;
+            percentage =
+                double.tryParse(location['percentage'].toString()) ?? 0.0;
             chapterTitle = location['chapterTitle'] ?? '';
             chapterHref = location['chapterHref'] ?? '';
             chapterCurrentPage = location['chapterCurrentPage'] ?? 0;
@@ -672,6 +675,21 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
     );
   }
 
+  final GlobalKey _webviewKey = GlobalKey();
+  Uint8List? _img;
+  double position = 0;
+  double initialPosition = 0;
+
+  Future<void> _captureScreen() async {
+    RenderRepaintBoundary boundary =
+        _webviewKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+    ui.Image image = await boundary.toImage(pixelRatio: 3.0);
+    ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+    setState(() {
+      _img = byteData?.buffer.asUint8List();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     String uri = Uri.encodeComponent(widget.book.fileFullPath);
@@ -690,25 +708,70 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
           body: Stack(
             children: [
               SizedBox.expand(
-                child: InAppWebView(
-                  webViewEnvironment: webViewEnvironment,
-                  initialUrlRequest: URLRequest(
-                    url: WebUri(
-                      generateUrl(
-                        url,
-                        initialCfi,
-                        backgroundColor: backgroundColor,
-                        textColor: textColor,
+                child: RepaintBoundary(
+                  key: _webviewKey,
+                  child: Stack(
+                    children: [
+                      InAppWebView(
+                        webViewEnvironment: webViewEnvironment,
+                        initialUrlRequest: URLRequest(
+                          url: WebUri(
+                            generateUrl(
+                              url,
+                              initialCfi,
+                              backgroundColor: backgroundColor,
+                              textColor: textColor,
+                            ),
+                          ),
+                        ),
+                        initialSettings: initialSettings,
+                        contextMenu: contextMenu,
+                        onLoadStop: (controller, url) =>
+                            onWebViewCreated(controller),
+                        onConsoleMessage: webviewConsoleMessage,
                       ),
-                    ),
+                      readingInfoWidget(),
+                    ],
                   ),
-                  initialSettings: initialSettings,
-                  contextMenu: contextMenu,
-                  onLoadStop: (controller, url) => onWebViewCreated(controller),
-                  onConsoleMessage: webviewConsoleMessage,
                 ),
               ),
-              readingInfoWidget(),
+              _img == null
+                  ? const SizedBox()
+                  : Positioned(
+                      left: position,
+                      child: SizedBox(
+                        width: MediaQuery.of(context).size.width,
+                        height: MediaQuery.of(context).size.height,
+                        child: Image.memory(_img!),
+                      ),
+                    ),
+              SizedBox.expand(
+                child: GestureDetector(
+                  onHorizontalDragStart: (details) async {
+                    position = 0;
+                    initialPosition = details.localPosition.dx;
+                    await _captureScreen();
+                    nextPage();
+                  },
+                  onHorizontalDragUpdate: (details) {
+                    position = details.localPosition.dx - initialPosition;
+                    setState(() {});
+                  },
+                  onHorizontalDragEnd: (details) async {
+                    print('end');
+                    double time = 0.2;
+                    while (position > -MediaQuery.of(context).size.width) {
+                      // 0.2s ease in out animation
+                      time += 0.01;
+                      position -= time * time;
+                      await Future.delayed(const Duration(milliseconds: 1));
+                      setState(() {});
+                    }
+
+                    _img = null;
+                  },
+                ),
+              ),
               if (showHistory)
                 Positioned(
                   bottom: 30,
