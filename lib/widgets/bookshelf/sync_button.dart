@@ -1,4 +1,3 @@
-import 'package:anx_reader/enums/sync_direction.dart';
 import 'package:anx_reader/providers/anx_webdav.dart';
 import 'package:anx_reader/widgets/bookshelf/sync_status_bottom_sheet.dart';
 import 'package:flutter/material.dart';
@@ -50,9 +49,6 @@ class _SyncButtonState extends ConsumerState<SyncButton>
         icon: const Icon(Icons.sync),
         onPressed: () {
           showSyncStatusBottomSheet(context);
-          ref
-              .read(anxWebdavProvider.notifier)
-              .syncData(SyncDirection.both, ref);
         },
       );
     }

@@ -391,5 +391,6 @@
   "book_sync_status_download_failed": "فشل التنزيل",
   "webdavBatchDownloadFinishedReport": "تم تحميل {success} كتاب منجز، {failed} كتاب معيب",
   "downloadAllBooks": "تحميل كل الكتب",
-  "allBooksAreDownloaded": "تم تحميل كل الكتب"
+  "allBooksAreDownloaded": "تم تحميل كل الكتب",
+  "sync_now": "المزامنة الآن"
 }
