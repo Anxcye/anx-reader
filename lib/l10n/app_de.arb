@@ -391,5 +391,6 @@
   "book_sync_status_download_failed": "Download fehlgeschlagen",
   "webdavBatchDownloadFinishedReport": "Bücher heruntergeladen, {success} erfolgreich, {failed} fehlgeschlagen",
   "downloadAllBooks": "Alle Bücher herunterladen",
-  "allBooksAreDownloaded": "Alle Bücher wurden heruntergeladen"
+  "allBooksAreDownloaded": "Alle Bücher wurden heruntergeladen",
+  "sync_now": "Jetzt synchronisieren"
 }

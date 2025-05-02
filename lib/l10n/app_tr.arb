@@ -391,5 +391,6 @@
   "book_sync_status_download_failed": "İndirme başarısız",
   "webdavBatchDownloadFinishedReport": "{success} başarılı, {failed} başarısız",
   "downloadAllBooks": "tüm kitapları indir",
-  "allBooksAreDownloaded": "Tüm kitaplar indirildi"
+  "allBooksAreDownloaded": "Tüm kitaplar indirildi",
+  "sync_now": "Şimdi senkronize"
 }

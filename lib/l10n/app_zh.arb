@@ -391,5 +391,6 @@
   "book_sync_status_download_failed": "下载失败",
   "webdavBatchDownloadFinishedReport": "书籍文件下载完成，{success}成功，{failed}失败",
   "downloadAllBooks": "下载所有书籍",
-  "allBooksAreDownloaded": "所有书籍已下载"
+  "allBooksAreDownloaded": "所有书籍已下载",
+  "sync_now": "立即同步"
 }

@@ -20,6 +20,7 @@ import 'package:path/path.dart';
 Future<void> showSyncStatusBottomSheet(BuildContext context) async {
   final dbPath = await getAnxDataBasesPath();
   showModalBottomSheet(
+    useSafeArea: true,
     context: navigatorKey.currentContext!,
     showDragHandle: true,
     isScrollControlled: true,
@@ -306,55 +307,39 @@ class SyncStatusBottomSheet extends ConsumerWidget {
       children: [
         Row(
           children: [
-            Expanded(
-              child: ElevatedButton.icon(
-                icon: const Icon(Icons.download_for_offline),
-                label: Text(l10n.downloadAllBooks),
-                onPressed: () {
-                  final remoteOnlyIds = ref
-                          .read(syncStatusProvider)
-                          .whenData((data) => data.remoteOnly)
-                          .valueOrNull ??
-                      [];
-                  if (remoteOnlyIds.isNotEmpty) {
-                    ref
-                        .read(anxWebdavProvider.notifier)
-                        .downloadMultipleBooks(remoteOnlyIds);
-                    AnxToast.show('');
-                  } else {
-                    AnxToast.show(l10n.allBooksAreDownloaded);
-                  }
-                },
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 10), // Spacing
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            Expanded(
-              child: ElevatedButton.icon(
-                icon: const Icon(Icons.cloud_upload),
-                label: Text(l10n.book_sync_status_upload_button),
-                onPressed: () {
+            OutlinedButton.icon(
+              icon: const Icon(Icons.download_for_offline),
+              label: Text(l10n.downloadAllBooks),
+              onPressed: () {
+                final remoteOnlyIds = ref
+                        .read(syncStatusProvider)
+                        .whenData((data) => data.remoteOnly)
+                        .valueOrNull ??
+                    [];
+                if (remoteOnlyIds.isNotEmpty) {
                   ref
                       .read(anxWebdavProvider.notifier)
-                      .syncData(SyncDirection.upload, ref);
-                  Navigator.pop(context); // Close sheet after action
-                },
-              ),
+                      .downloadMultipleBooks(remoteOnlyIds);
+                  AnxToast.show('');
+                } else {
+                  AnxToast.show(l10n.allBooksAreDownloaded);
+                }
+              },
             ),
             const SizedBox(width: 16),
             Expanded(
-              child: ElevatedButton.icon(
-                icon: const Icon(Icons.cloud_download),
-                label: Text(l10n.book_sync_status_download_button),
+              child: FilledButton.icon(
+                icon: const Icon(Icons.sync),
+                label: Text(L10n.of(context).sync_now),
                 onPressed: () {
-                  ref
-                      .read(anxWebdavProvider.notifier)
-                      .syncData(SyncDirection.download, ref);
-                  Navigator.pop(context); // Close sheet after action
+                  final isSyncing = ref.watch(anxWebdavProvider).isSyncing;
+                  if (isSyncing) {
+                    AnxToast.show(l10n.webdav_syncing);
+                  } else {
+                    ref
+                        .read(anxWebdavProvider.notifier)
+                        .syncData(SyncDirection.both, ref);
+                  }
                 },
               ),
             ),
