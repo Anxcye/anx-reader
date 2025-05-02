@@ -39,7 +39,6 @@ class AnxWebdav extends _$AnxWebdav {
 
   @override
   SyncStateModel build() {
-    buildClient();
     return const SyncStateModel(
       direction: SyncDirection.both,
       isSyncing: false,
@@ -53,26 +52,27 @@ class AnxWebdav extends _$AnxWebdav {
     state = s;
   }
 
-  static late Client _client;
+  static Client? clientInstance;
 
-  void buildClient() {
-    _client = newClient(
-      Prefs().webdavInfo['url'],
-      user: Prefs().webdavInfo['username'],
-      password: Prefs().webdavInfo['password'],
-      debug: false,
-    )
-      ..setHeaders({
-        'accept-charset': 'utf-8',
-        'Content-Type': 'application/octet-stream'
-      })
-      ..setConnectTimeout(
-        8000,
-      );
+
+ Client get _client  {
+      return clientInstance ??= newClient(
+        Prefs().webdavInfo['url'],
+        user: Prefs().webdavInfo['username'],
+        password: Prefs().webdavInfo['password'],
+        debug: false,
+      )
+        ..setHeaders({
+          'accept-charset': 'utf-8',
+          'Content-Type': 'application/octet-stream'
+        })
+        ..setConnectTimeout(
+          8000,
+        );
+    
   }
 
   Future<void> init() async {
-    buildClient();
     try {
       await _client.ping();
     } catch (e) {
@@ -96,7 +96,6 @@ class AnxWebdav extends _$AnxWebdav {
   }
 
   Future<void> syncData(SyncDirection direction, WidgetRef? ref) async {
-    buildClient();
     if (Prefs().onlySyncWhenWifi &&
         !(await Connectivity().checkConnectivity())
             .contains(ConnectivityResult.wifi)) {
@@ -259,7 +258,6 @@ class AnxWebdav extends _$AnxWebdav {
   }
 
   Future<void> syncFiles() async {
-    buildClient();
     List<String> currentBooks = await getCurrentBooks();
     List<String> currentCover = await getCurrentCover();
     // List<File> remoteFiles = await _client.readDir('/anx/data');
@@ -483,7 +481,6 @@ class AnxWebdav extends _$AnxWebdav {
   }
 
   Future<List<String>> listRemoteBookFiles() async {
-    buildClient();
     final remoteFiles = await _client.readDir('/anx/data/file');
     return remoteFiles.map((e) => e.name!).toList();
   }
