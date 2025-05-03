@@ -322,6 +322,7 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
         handlerName: 'onLoadEnd',
         callback: (args) {
           widget.onLoadEnd();
+          _captureScreen();
         });
 
     controller.addJavaScriptHandler(
@@ -340,6 +341,7 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
           });
           saveReadingProgress();
           readingPageKey.currentState?.resetAwakeTimer();
+          _captureScreen();
         });
     controller.addJavaScriptHandler(
         handlerName: 'onClick',
@@ -675,19 +677,27 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
     );
   }
 
-  final GlobalKey _webviewKey = GlobalKey();
-  Uint8List? _img;
+  final GlobalKey _infoKey = GlobalKey();
+  Widget? _img;
+  Widget? _prepareImg;
   double position = 0;
   double initialPosition = 0;
+  bool showCaptureScreen = false;
 
   Future<void> _captureScreen() async {
+    Uint8List? webviewImg = await webViewController.takeScreenshot();
+
     RenderRepaintBoundary boundary =
-        _webviewKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+        _infoKey.currentContext!.findRenderObject()! as RenderRepaintBoundary;
     ui.Image image = await boundary.toImage(pixelRatio: 3.0);
-    ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-    setState(() {
-      _img = byteData?.buffer.asUint8List();
-    });
+    ByteData? infoImg = await image.toByteData(format: ui.ImageByteFormat.png);
+
+    _prepareImg = Stack(
+      children: [
+        Image.memory(webviewImg!),
+        Image.memory(Uint8List.fromList(infoImg!.buffer.asUint8List())),
+      ],
+    );
   }
 
   @override
@@ -708,49 +718,53 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
           body: Stack(
             children: [
               SizedBox.expand(
-                child: RepaintBoundary(
-                  key: _webviewKey,
-                  child: Stack(
-                    children: [
-                      InAppWebView(
-                        webViewEnvironment: webViewEnvironment,
-                        initialUrlRequest: URLRequest(
-                          url: WebUri(
-                            generateUrl(
-                              url,
-                              initialCfi,
-                              backgroundColor: backgroundColor,
-                              textColor: textColor,
-                            ),
+                child: Stack(
+                  children: [
+                    InAppWebView(
+                      webViewEnvironment: webViewEnvironment,
+                      initialUrlRequest: URLRequest(
+                        url: WebUri(
+                          generateUrl(
+                            url,
+                            initialCfi,
+                            backgroundColor: backgroundColor,
+                            textColor: textColor,
                           ),
                         ),
-                        initialSettings: initialSettings,
-                        contextMenu: contextMenu,
-                        onLoadStop: (controller, url) =>
-                            onWebViewCreated(controller),
-                        onConsoleMessage: webviewConsoleMessage,
                       ),
-                      readingInfoWidget(),
-                    ],
-                  ),
+                      initialSettings: initialSettings,
+                      contextMenu: contextMenu,
+                      onLoadStop: (controller, url) =>
+                          onWebViewCreated(controller),
+                      onConsoleMessage: webviewConsoleMessage,
+                    ),
+                    RepaintBoundary(
+                      key: _infoKey,
+                      child: readingInfoWidget(),
+                    ),
+                  ],
                 ),
               ),
-              _img == null
-                  ? const SizedBox()
-                  : Positioned(
+              showCaptureScreen
+                  ? Positioned(
                       left: position,
                       child: SizedBox(
                         width: MediaQuery.of(context).size.width,
                         height: MediaQuery.of(context).size.height,
-                        child: Image.memory(_img!),
+                        child: _img!,
                       ),
-                    ),
+                    )
+                  : const SizedBox(),
               SizedBox.expand(
                 child: GestureDetector(
                   onHorizontalDragStart: (details) async {
                     position = 0;
                     initialPosition = details.localPosition.dx;
-                    await _captureScreen();
+                    setState(() {
+                      _img = _prepareImg;
+                      showCaptureScreen = true;
+                    });
+                    await Future.delayed(const Duration(milliseconds: 60));
                     nextPage();
                   },
                   onHorizontalDragUpdate: (details) {
@@ -758,17 +772,19 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
                     setState(() {});
                   },
                   onHorizontalDragEnd: (details) async {
-                    print('end');
                     double time = 0.2;
-                    while (position > -MediaQuery.of(context).size.width) {
+                    while (position >
+                        -MediaQuery.of(navigatorKey.currentContext!)
+                            .size
+                            .width) {
                       // 0.2s ease in out animation
                       time += 0.01;
-                      position -= time * time;
+                      position -= (time * time) + 5;
                       await Future.delayed(const Duration(milliseconds: 1));
                       setState(() {});
                     }
 
-                    _img = null;
+                    showCaptureScreen = false;
                   },
                 ),
               ),
