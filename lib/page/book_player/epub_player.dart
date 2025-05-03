@@ -686,6 +686,7 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
   bool showCaptureScreen = false;
   bool turnedPage = false;
   PageDirection? pageDirection;
+  bool isPageTurning = false;
 
   Future<void> _captureScreen() async {
     Uint8List? webviewImg = await webViewController.takeScreenshot();
@@ -695,12 +696,14 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
     ui.Image image = await boundary.toImage(pixelRatio: 3.0);
     ByteData? infoImg = await image.toByteData(format: ui.ImageByteFormat.png);
 
-    _prepareImg = Stack(
-      children: [
-        Image.memory(webviewImg!),
-        Image.memory(Uint8List.fromList(infoImg!.buffer.asUint8List())),
-      ],
-    );
+    setState(() {
+      _prepareImg = Stack(
+        children: [
+          Image.memory(webviewImg!),
+          Image.memory(Uint8List.fromList(infoImg!.buffer.asUint8List())),
+        ],
+      );
+    });
   }
 
   @override
@@ -720,6 +723,8 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
           resizeToAvoidBottomInset: false,
           body: Stack(
             children: [
+              // load screenshot under all other widgets, to optmize screenshot loading
+              _prepareImg ?? const SizedBox(),
               SizedBox.expand(
                 child: Stack(
                   children: [
@@ -748,14 +753,14 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
                   ],
                 ),
               ),
-              if (_img != null)
+              if (showCaptureScreen)
                 Positioned(
                   left: position,
                   child: Container(
                     decoration: BoxDecoration(
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.5),
+                          color: Colors.black.withAlpha(180),
                           blurRadius: 10,
                         ),
                       ],
@@ -768,6 +773,8 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
               SizedBox.expand(
                 child: GestureDetector(
                   onHorizontalDragStart: (details) async {
+                    if (isPageTurning) return;
+                    isPageTurning = true;
                     turnedPage = false;
                     pageDirection = null;
                     position = 0;
@@ -818,6 +825,7 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
                       pageDirection = null;
                       showCaptureScreen = false;
                     });
+                    isPageTurning = false;
                   },
                 ),
               ),
