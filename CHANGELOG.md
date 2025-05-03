@@ -3,6 +3,7 @@
 ## Todo
 
 ## 1.4.5
+- Feat: Download all books
 - L10n: Add Arabic and German language
 - Feat: Download remote files on demand
 - Feat: Release local space(#269)
@@ -12,6 +13,7 @@
 - Fix: Sort menu sometimes fails to open
 - Fix: WebDAV Unauthorized(#273)
 
+- 新增：下载所有书籍文件
 - L10n: 新增阿拉伯语和德语
 - 新增：按需下载远程的文件
 - 新增：释放本地空间功能(#269)
