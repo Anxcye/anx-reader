@@ -40,7 +40,8 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:intl/intl.dart';
-import 'package:pointer_interceptor/pointer_interceptor.dart';
+import 'package:anx_reader/page/book_player/page_turn/page_turn_animation.dart';
+import 'package:anx_reader/page/book_player/page_turn/slide_animation.dart';
 
 class EpubPlayer extends ConsumerStatefulWidget {
   final Book book;
@@ -97,6 +98,8 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
       _searchResultController.stream;
 
   FocusNode focusNode = FocusNode();
+
+  late PageTurnAnimation pageTurnAnimation;
 
   void prevPage() {
     webViewController.evaluateJavascript(source: 'prevPage()');
@@ -504,6 +507,11 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
     focusNode.requestFocus();
     getThemeColor();
 
+    pageTurnAnimation = SlideAnimation(
+      onNextPage: nextPage,
+      onPrevPage: prevPage,
+    );
+
     contextMenu = ContextMenu(
       settings: ContextMenuSettings(hideDefaultSystemContextMenuItems: true),
       onCreateContextMenu: (hitTestResult) async {
@@ -680,8 +688,6 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
   }
 
   final GlobalKey _infoKey = GlobalKey();
-  Widget? _img;
-  Widget? _prepareImg;
   double position = 0;
   bool showCaptureScreen = false;
   bool turnedPage = false;
@@ -697,12 +703,13 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
     ByteData? infoImg = await image.toByteData(format: ui.ImageByteFormat.png);
 
     setState(() {
-      _prepareImg = Stack(
+      Widget newImage = Stack(
         children: [
           Image.memory(webviewImg!),
           Image.memory(Uint8List.fromList(infoImg!.buffer.asUint8List())),
         ],
       );
+      pageTurnAnimation.updatePreparedImage(newImage);
     });
   }
 
@@ -723,8 +730,7 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
           resizeToAvoidBottomInset: false,
           body: Stack(
             children: [
-              // load screenshot under all other widgets, to optmize screenshot loading
-              _prepareImg ?? const SizedBox(),
+              pageTurnAnimation.preparedImage ?? const SizedBox(),
               SizedBox.expand(
                 child: Stack(
                   children: [
@@ -753,100 +759,23 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
                   ],
                 ),
               ),
-              if (showCaptureScreen)
-                Positioned(
-                  left: position,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withAlpha(180),
-                          blurRadius: 10,
-                        ),
-                      ],
-                    ),
-                    width: MediaQuery.of(context).size.width,
-                    height: MediaQuery.of(context).size.height,
-                    child: _img!,
-                  ),
-                ),
+              pageTurnAnimation.buildAnimationWidget(context),
               SizedBox.expand(
                 child: GestureDetector(
-                  onHorizontalDragStart: (details) async {
-                    if (isPageTurning) return;
-                    isPageTurning = true;
-                    turnedPage = false;
-                    pageDirection = null;
-                    position = 0;
+                  onHorizontalDragStart: (details) {
                     setState(() {
-                      _img = _prepareImg;
-                      showCaptureScreen = true;
+                      pageTurnAnimation.onDragStart(details);
                     });
                   },
-                  onHorizontalDragUpdate: (details) async {
-                    if (!turnedPage) {
-                      turnedPage = true;
-                      if (details.delta.dx < 0) {
-                        pageDirection = PageDirection.next;
-                        nextPage();
-                      } else {
-                        pageDirection = PageDirection.prev;
-                        prevPage();
-                      }
-                    }
-                    if (pageDirection == PageDirection.next &&
-                            position + details.delta.dx > 0 ||
-                        pageDirection == PageDirection.prev &&
-                            position + details.delta.dx < 0) {
-                      return;
-                    }
-                    position += details.delta.dx;
-                    setState(() {});
+                  onHorizontalDragUpdate: (details) {
+                    setState(() {
+                      pageTurnAnimation.onDragUpdate(details, context);
+                    });
                   },
                   onHorizontalDragEnd: (details) async {
-                    turnedPage = false;
-                    double time = 0.0;
-
-                    final screenWidth =
-                        MediaQuery.of(navigatorKey.currentContext!).size.width;
-                    final shouldTurnPage = position.abs() > screenWidth / 10;
-
-                    if (!shouldTurnPage) {
-                      if (pageDirection == PageDirection.next) {
-                        prevPage();
-                      } else if (pageDirection == PageDirection.prev) {
-                        nextPage();
-                      }
-                      while (position.abs() > 0) {
-                        time += 0.01;
-                        if (pageDirection == PageDirection.next) {
-                          position += (time * time) + 5;
-                          if (position > 0) position = 0;
-                        } else {
-                          position -= (time * time) + 5;
-                          if (position < 0) position = 0;
-                        }
-                        await Future.delayed(const Duration(milliseconds: 1));
-                        setState(() {});
-                      }
-                    } else {
-                      _captureScreen();
-                      while (position.abs() < screenWidth) {
-                        time += 0.01;
-                        if (pageDirection == PageDirection.next) {
-                          position -= (time * time) + 5;
-                        } else {
-                          position += (time * time) + 5;
-                        }
-                        await Future.delayed(const Duration(milliseconds: 1));
-                        setState(() {});
-                      }
-                    }
-                    setState(() {
-                      pageDirection = null;
-                      showCaptureScreen = false;
-                    });
-                    isPageTurning = false;
+                    await pageTurnAnimation.onDragEnd(details, context, setState);
+                    _captureScreen();
+                    setState(() {});
                   },
                 ),
               ),
