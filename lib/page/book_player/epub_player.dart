@@ -5,6 +5,7 @@ import 'dart:ui' as ui;
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/dao/book.dart';
 import 'package:anx_reader/dao/book_note.dart';
+import 'package:anx_reader/enums/page_direction.dart';
 import 'package:anx_reader/enums/reading_info.dart';
 import 'package:anx_reader/main.dart';
 import 'package:anx_reader/models/book.dart';
@@ -342,7 +343,7 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
           });
           saveReadingProgress();
           readingPageKey.currentState?.resetAwakeTimer();
-          _captureScreen();
+          // _captureScreen();
         });
     controller.addJavaScriptHandler(
         handlerName: 'onClick',
@@ -682,8 +683,9 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
   Widget? _img;
   Widget? _prepareImg;
   double position = 0;
-  double initialPosition = 0;
   bool showCaptureScreen = false;
+  bool turnedPage = false;
+  PageDirection? pageDirection;
 
   Future<void> _captureScreen() async {
     Uint8List? webviewImg = await webViewController.takeScreenshot();
@@ -746,45 +748,74 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
                   ],
                 ),
               ),
-              showCaptureScreen
-                  ? Positioned(
-                      left: position,
-                      child: SizedBox(
-                        width: MediaQuery.of(context).size.width,
-                        height: MediaQuery.of(context).size.height,
-                        child: _img!,
-                      ),
-                    )
-                  : const SizedBox(),
+              if (_img != null)
+                Positioned(
+                  left: position,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.5),
+                          blurRadius: 10,
+                        ),
+                      ],
+                    ),
+                    width: MediaQuery.of(context).size.width,
+                    height: MediaQuery.of(context).size.height,
+                    child: _img!,
+                  ),
+                ),
               SizedBox.expand(
                 child: GestureDetector(
                   onHorizontalDragStart: (details) async {
+                    turnedPage = false;
+                    pageDirection = null;
                     position = 0;
-                    initialPosition = details.localPosition.dx;
                     setState(() {
                       _img = _prepareImg;
                       showCaptureScreen = true;
                     });
-                    await Future.delayed(const Duration(milliseconds: 60));
-                    nextPage();
                   },
-                  onHorizontalDragUpdate: (details) {
-                    position = details.localPosition.dx - initialPosition;
+                  onHorizontalDragUpdate: (details) async {
+                    if (!turnedPage) {
+                      turnedPage = true;
+                      if (details.delta.dx < 0) {
+                        pageDirection = PageDirection.next;
+                        nextPage();
+                      } else {
+                        pageDirection = PageDirection.prev;
+                        prevPage();
+                      }
+                    }
+                    if (pageDirection == PageDirection.next &&
+                            position + details.delta.dx > 0 ||
+                        pageDirection == PageDirection.prev &&
+                            position + details.delta.dx < 0) {
+                      return;
+                    }
+                    position += details.delta.dx;
                     setState(() {});
                   },
                   onHorizontalDragEnd: (details) async {
-                    double time = 0.2;
-                    while (position >
-                        -MediaQuery.of(navigatorKey.currentContext!)
+                    _captureScreen();
+                    turnedPage = false;
+                    double time = 0.0;
+                    while (position.abs() <
+                        MediaQuery.of(navigatorKey.currentContext!)
                             .size
                             .width) {
                       // 0.2s ease in out animation
                       time += 0.01;
-                      position -= (time * time) + 5;
+                      if (pageDirection == PageDirection.next) {
+                        position -= (time * time) + 5;
+                      } else {
+                        position += (time * time) + 5;
+                      }
                       await Future.delayed(const Duration(milliseconds: 1));
                       setState(() {});
                     }
                     setState(() {
+                      pageDirection = null;
                       showCaptureScreen = false;
                     });
                   },

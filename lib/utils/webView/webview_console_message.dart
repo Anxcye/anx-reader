@@ -54,8 +54,12 @@ void webviewConsoleMessage(
   InAppWebViewController controller,
   ConsoleMessage consoleMessage,
 ) {
-  if (consoleMessage.message.contains(
-      "An iframe which has both allow-scripts and allow-same-origin for its sandbox attribute can escape its sandboxing")) {
+  const ignoreMessages = [
+    "An iframe which has both allow-scripts and allow-same-origin for its sandbox attribute can escape its sandboxing",
+    "JavaScript execution returned a result of an unsupported type",
+  ];
+
+  if (ignoreMessages.contains(consoleMessage.message)) {
     return;
   }
 

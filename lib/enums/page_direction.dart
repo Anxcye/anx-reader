@@ -1,0 +1,4 @@
+enum PageDirection {
+  next,
+  prev,
+}
