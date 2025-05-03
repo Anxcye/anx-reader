@@ -731,32 +731,45 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
           body: Stack(
             children: [
               pageTurnAnimation.preparedImage ?? const SizedBox(),
-              SizedBox.expand(
-                child: Stack(
-                  children: [
-                    InAppWebView(
-                      webViewEnvironment: webViewEnvironment,
-                      initialUrlRequest: URLRequest(
-                        url: WebUri(
-                          generateUrl(
-                            url,
-                            initialCfi,
-                            backgroundColor: backgroundColor,
-                            textColor: textColor,
-                          ),
+              Transform.translate(
+                offset: Offset(pageTurnAnimation.getWebViewPosition(), 0),
+                child: SizedBox.expand(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withAlpha(180),
+                          blurRadius: 10,
                         ),
-                      ),
-                      initialSettings: initialSettings,
-                      contextMenu: contextMenu,
-                      onLoadStop: (controller, url) =>
-                          onWebViewCreated(controller),
-                      onConsoleMessage: webviewConsoleMessage,
+                      ],
                     ),
-                    RepaintBoundary(
-                      key: _infoKey,
-                      child: readingInfoWidget(),
+                    child: Stack(
+                      children: [
+                        InAppWebView(
+                          webViewEnvironment: webViewEnvironment,
+                          initialUrlRequest: URLRequest(
+                            url: WebUri(
+                              generateUrl(
+                                url,
+                                initialCfi,
+                                backgroundColor: backgroundColor,
+                                textColor: textColor,
+                              ),
+                            ),
+                          ),
+                          initialSettings: initialSettings,
+                          contextMenu: contextMenu,
+                          onLoadStop: (controller, url) =>
+                              onWebViewCreated(controller),
+                          onConsoleMessage: webviewConsoleMessage,
+                        ),
+                        RepaintBoundary(
+                          key: _infoKey,
+                          child: readingInfoWidget(),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
               pageTurnAnimation.buildAnimationWidget(context),
