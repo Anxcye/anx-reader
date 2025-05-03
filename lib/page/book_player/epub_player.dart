@@ -804,22 +804,43 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
                     setState(() {});
                   },
                   onHorizontalDragEnd: (details) async {
-                    _captureScreen();
                     turnedPage = false;
                     double time = 0.0;
-                    while (position.abs() <
-                        MediaQuery.of(navigatorKey.currentContext!)
-                            .size
-                            .width) {
-                      // 0.2s ease in out animation
-                      time += 0.01;
+
+                    final screenWidth =
+                        MediaQuery.of(navigatorKey.currentContext!).size.width;
+                    final shouldTurnPage = position.abs() > screenWidth / 10;
+
+                    if (!shouldTurnPage) {
                       if (pageDirection == PageDirection.next) {
-                        position -= (time * time) + 5;
-                      } else {
-                        position += (time * time) + 5;
+                        prevPage();
+                      } else if (pageDirection == PageDirection.prev) {
+                        nextPage();
                       }
-                      await Future.delayed(const Duration(milliseconds: 1));
-                      setState(() {});
+                      while (position.abs() > 0) {
+                        time += 0.01;
+                        if (pageDirection == PageDirection.next) {
+                          position += (time * time) + 5;
+                          if (position > 0) position = 0;
+                        } else {
+                          position -= (time * time) + 5;
+                          if (position < 0) position = 0;
+                        }
+                        await Future.delayed(const Duration(milliseconds: 1));
+                        setState(() {});
+                      }
+                    } else {
+                      _captureScreen();
+                      while (position.abs() < screenWidth) {
+                        time += 0.01;
+                        if (pageDirection == PageDirection.next) {
+                          position -= (time * time) + 5;
+                        } else {
+                          position += (time * time) + 5;
+                        }
+                        await Future.delayed(const Duration(milliseconds: 1));
+                        setState(() {});
+                      }
                     }
                     setState(() {
                       pageDirection = null;
