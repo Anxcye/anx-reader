@@ -713,67 +713,67 @@ export class Paginator extends HTMLElement {
     })
   }
   #onTouchStart(e) {
-    const touch = e.changedTouches[0]
-    this.#touchState = {
-      x: touch?.screenX, y: touch?.screenY,
-      t: e.timeStamp,
-      vx: 0, xy: 0,
-    }
+    // const touch = e.changedTouches[0]
+    // this.#touchState = {
+    //   x: touch?.screenX, y: touch?.screenY,
+    //   t: e.timeStamp,
+    //   vx: 0, xy: 0,
+    // }
   }
   #onTouchMove(e) {
-    if (window.getSelection()?.toString()) return
+    // if (window.getSelection()?.toString()) return
 
-    const state = this.#touchState
-    if (!state) return
+    // const state = this.#touchState
+    // if (!state) return
 
-    if (state.pinched) return
-    state.pinched = globalThis.visualViewport.scale > 1
+    // if (state.pinched) return
+    // state.pinched = globalThis.visualViewport.scale > 1
 
-    if (this.scrolled || state.pinched) return
+    // if (this.scrolled || state.pinched) return
 
-    if (e.touches.length > 1) {
-      if (this.#touchScrolled) e.preventDefault()
-      return
-    }
+    // if (e.touches.length > 1) {
+    //   if (this.#touchScrolled) e.preventDefault()
+    //   return
+    // }
 
-    e.preventDefault()
+    // e.preventDefault()
 
-    if (!state.animationFrameId) {
-      state.animationFrameId = requestAnimationFrame(() => {
-        const touch = e.changedTouches[0]
-        const x = touch.screenX, y = touch.screenY
+    // if (!state.animationFrameId) {
+    //   state.animationFrameId = requestAnimationFrame(() => {
+    //     const touch = e.changedTouches[0]
+    //     const x = touch.screenX, y = touch.screenY
 
-        const dx = state.x - x, dy = state.y - y
-        const dt = e.timeStamp - state.t || 16.7
+    //     const dx = state.x - x, dy = state.y - y
+    //     const dt = e.timeStamp - state.t || 16.7
 
-        const damping = 0.85
-        const smoothDx = dx * damping
-        const smoothDy = dy * damping
+    //     const damping = 0.85
+    //     const smoothDx = dx * damping
+    //     const smoothDy = dy * damping
 
-        state.x = x
-        state.y = y
-        state.t = e.timeStamp
-        state.vx = dx / dt
-        state.vy = dy / dt
+    //     state.x = x
+    //     state.y = y
+    //     state.t = e.timeStamp
+    //     state.vx = dx / dt
+    //     state.vy = dy / dt
 
-        this.#touchScrolled = true
-        this.scrollBy(smoothDx, smoothDy)
+    //     this.#touchScrolled = true
+    //     this.scrollBy(smoothDx, smoothDy)
 
-        state.animationFrameId = null
-      })
-    }
+    //     state.animationFrameId = null
+    //   })
+    // }
   }
   #onTouchEnd() {
-    this.#touchScrolled = false
-    if (this.scrolled) return
+    // this.#touchScrolled = false
+    // if (this.scrolled) return
 
-    // XXX: Firefox seems to report scale as 1... sometimes...?
-    // at this point I'm basically throwing `requestAnimationFrame` at
-    // anything that doesn't work
-    requestAnimationFrame(() => {
-      if (globalThis.visualViewport.scale === 1)
-        this.snap(this.#touchState.vx, this.#touchState.vy)
-    })
+    // // XXX: Firefox seems to report scale as 1... sometimes...?
+    // // at this point I'm basically throwing `requestAnimationFrame` at
+    // // anything that doesn't work
+    // requestAnimationFrame(() => {
+    //   if (globalThis.visualViewport.scale === 1)
+    //     this.snap(this.#touchState.vx, this.#touchState.vy)
+    // })
   }
   // allows one to process rects as if they were LTR and horizontal
   #getRectMapper() {

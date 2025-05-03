@@ -39,6 +39,7 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:intl/intl.dart';
+import 'package:pointer_interceptor/pointer_interceptor.dart';
 
 class EpubPlayer extends ConsumerStatefulWidget {
   final Book book;
@@ -783,8 +784,9 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
                       await Future.delayed(const Duration(milliseconds: 1));
                       setState(() {});
                     }
-
-                    showCaptureScreen = false;
+                    setState(() {
+                      showCaptureScreen = false;
+                    });
                   },
                 ),
               ),
