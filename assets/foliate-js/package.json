@@ -1,0 +1,17 @@
+{
+  "name": "foliate",
+  "version": "1.0.0",
+  "description": "This folder forked from [Foliate-js](https://github.com/johnfactotum/foliate-js) which is MIT licensed.",
+  "main": "book.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "rm -rf dist && webpack"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "webpack": "^5.99.7",
+    "webpack-cli": "^6.0.1"
+  }
+}
