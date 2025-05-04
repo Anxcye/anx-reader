@@ -114,7 +114,6 @@ String generateUrl(
 
   final uri =  '$indexHtmlPath?$query';
 
-  print(uri);
 
   return uri;
 }
