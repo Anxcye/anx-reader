@@ -11,7 +11,7 @@ import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
-const CREATE_BOOK_SQL = '''
+const createBookSQL = '''
 CREATE TABLE tb_books (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   title TEXT,
@@ -27,7 +27,7 @@ CREATE TABLE tb_books (
 )
 ''';
 
-const CREATE_THEME_SQL = '''
+const createThemeSQL = '''
 CREATE TABLE tb_themes (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   background_color TEXT,
@@ -36,7 +36,7 @@ CREATE TABLE tb_themes (
 )
 ''';
 
-const CREATE_STYLE_SQL = '''
+const createStyleSQL = '''
 CREATE TABLE tb_styles (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   font_size REAL,
@@ -51,14 +51,14 @@ CREATE TABLE tb_styles (
 )
 ''';
 
-const PRIMARY_THEME_1 = '''
+const primaryTheme1 = '''
 INSERT INTO tb_themes (background_color, text_color, background_image_path) VALUES ('fffbfbf3', 'ff343434', '')
 ''';
-const PRIMARY_THEME_2 = '''
+const primaryTheme2 = '''
 INSERT INTO tb_themes (background_color, text_color, background_image_path) VALUES ('ff040404', 'fffeffeb', '')
 ''';
 
-const CREATE_NOTE_SQL = '''
+const createNoteSQL = '''
 CREATE TABLE tb_notes (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   book_id INTEGER,
@@ -72,7 +72,7 @@ CREATE TABLE tb_notes (
 )
 ''';
 
-const CREATE_READING_TIME_SQL = '''
+const createReadingTimeSQL = '''
 CREATE TABLE tb_reading_time (
   id INTEGER PRIMARY KEY,
   book_id INTEGER,
@@ -148,13 +148,13 @@ class DBHelper {
     switch (oldVersion) {
       case 0:
         AnxLog.info('Database: create database version $newVersion');
-        await db.execute(CREATE_BOOK_SQL);
-        await db.execute(CREATE_NOTE_SQL);
-        await db.execute(CREATE_THEME_SQL);
-        await db.execute(CREATE_STYLE_SQL);
-        await db.execute(CREATE_READING_TIME_SQL);
-        await db.execute(PRIMARY_THEME_1);
-        await db.execute(PRIMARY_THEME_2);
+        await db.execute(createBookSQL);
+        await db.execute(createNoteSQL);
+        await db.execute(createThemeSQL);
+        await db.execute(createStyleSQL);
+        await db.execute(createReadingTimeSQL);
+        await db.execute(primaryTheme1);
+        await db.execute(primaryTheme2);
         continue case1;
       case1:
       case 1:
