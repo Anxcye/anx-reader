@@ -3,6 +3,7 @@
 ## Todo
 
 ## 1.4.5
+- Fix: Touchpad cannot scroll(#271, #261)
 - Feat: Download all books
 - L10n: Add Arabic and German language
 - Feat: Download remote files on demand
@@ -13,6 +14,7 @@
 - Fix: Sort menu sometimes fails to open
 - Fix: WebDAV Unauthorized(#273)
 
+- 修复：触摸板无法滚动(#271, #261)
 - 新增：下载所有书籍文件
 - L10n: 新增阿拉伯语和德语
 - 新增：按需下载远程的文件
