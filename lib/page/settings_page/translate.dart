@@ -155,16 +155,16 @@ class TranslateLangPicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-      itemCount: LangList.values.length,
+      itemCount: LangListEnum.values.length,
       itemBuilder: (context, index) => ListTile(
-        title: Text(LangList.values[index].getNative(context)),
-        subtitle: Text(LangList.values[index].name[0].toUpperCase() +
-            LangList.values[index].name.substring(1)),
+        title: Text(LangListEnum.values[index].getNative(context)),
+        subtitle: Text(LangListEnum.values[index].name[0].toUpperCase() +
+            LangListEnum.values[index].name.substring(1)),
         onTap: () {
           if (isFrom) {
-            Prefs().translateFrom = LangList.values[index];
+            Prefs().translateFrom = LangListEnum.values[index];
           } else {
-            Prefs().translateTo = LangList.values[index];
+            Prefs().translateTo = LangListEnum.values[index];
           }
           Navigator.pop(context);
         },

@@ -66,7 +66,7 @@ class _TranslationMenuState extends State<TranslationMenu> {
         ),
         controller: menuController,
         menuChildren: [
-          for (var lang in LangList.values)
+          for (var lang in LangListEnum.values)
             PointerInterceptor(
               child: MenuItemButton(
                 onPressed: () {
@@ -150,8 +150,8 @@ class _TranslationMenuState extends State<TranslationMenu> {
                               const Spacer(),
                               IconButton(
                                 onPressed: () {
-                                  Clipboard.setData(
-                                      ClipboardData(text: translatedText ?? ''));
+                                  Clipboard.setData(ClipboardData(
+                                      text: translatedText ?? ''));
                                   AnxToast.show(
                                       L10n.of(context).notes_page_copied);
                                 },
