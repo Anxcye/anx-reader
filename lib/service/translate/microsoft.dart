@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:anx_reader/service/translate/index.dart';
+import 'package:anx_reader/enums/lang_list.dart';
 import 'package:anx_reader/utils/log/common.dart';
 import 'package:dio/dio.dart';
 
@@ -8,14 +8,12 @@ const urlMicrosoft =
     'https://api-edge.cognitive.microsofttranslator.com/translate';
 const urlMicrosoftAuth = 'https://edge.microsoft.com/translate/auth';
 
-
-
 Future<String> microsoftTranslateService(
-    String text, LangList from, LangList to) async {
+    String text, LangListEnum from, LangListEnum to) async {
   final token = await getMicrosoftKey();
   final params = {
     'api-version': '3.0',
-    'from': from == LangList.auto ? '' : from.code,
+    'from': from == LangListEnum.auto ? '' : from.code,
     'to': to.code,
   };
   final body = [

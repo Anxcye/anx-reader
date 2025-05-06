@@ -327,21 +327,21 @@ class Prefs extends ChangeNotifier {
         prefs.getString('translateService') ?? 'microsoft');
   }
 
-  set translateFrom(LangList from) {
+  set translateFrom(LangListEnum from) {
     prefs.setString('translateFrom', from.code);
     notifyListeners();
   }
 
-  LangList get translateFrom {
+  LangListEnum get translateFrom {
     return getLang(prefs.getString('translateFrom') ?? 'auto');
   }
 
-  set translateTo(LangList to) {
+  set translateTo(LangListEnum to) {
     prefs.setString('translateTo', to.code);
     notifyListeners();
   }
 
-  LangList get translateTo {
+  LangListEnum get translateTo {
     return getLang(prefs.getString('translateTo') ?? 'en');
   }
 
