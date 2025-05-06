@@ -19,16 +19,13 @@ class TranslationMenu extends StatefulWidget {
 }
 
 class _TranslationMenuState extends State<TranslationMenu> {
-  String? translatedText;
-  bool isLoading = true;
+  late Stream<String> _translationStream;
   bool _mounted = true;
 
   @override
   void initState() {
     super.initState();
-    if (_mounted) {
-      _translate();
-    }
+    _translationStream = _getTranslationStream();
   }
 
   @override
@@ -37,19 +34,14 @@ class _TranslationMenuState extends State<TranslationMenu> {
     super.dispose();
   }
 
-  Future<void> _translate() async {
-    try {
-      final result = await translateText(widget.content);
-      if (!_mounted) return;
+  Stream<String> _getTranslationStream() {
+    return translateText(widget.content);
+  }
+
+  void _retranslate() {
+    if (_mounted) {
       setState(() {
-        // translatedText = result;
-        isLoading = false;
-      });
-    } catch (e) {
-      if (!_mounted) return;
-      setState(() {
-        translatedText = L10n.of(context).translate_error;
-        isLoading = false;
+        _translationStream = _getTranslationStream();
       });
     }
   }
@@ -76,7 +68,7 @@ class _TranslationMenuState extends State<TranslationMenu> {
                   } else {
                     Prefs().translateTo = lang;
                   }
-                  setState(() {});
+                  _retranslate();
                 },
                 child: Text(lang.getNative(context)),
               ),
@@ -126,43 +118,60 @@ class _TranslationMenuState extends State<TranslationMenu> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  if (isLoading)
-                    const Center(
-                      child: CircularProgressIndicator(),
-                    )
-                  else
-                    AnimatedOpacity(
-                      duration: const Duration(milliseconds: 200),
-                      opacity: translatedText != null ? 1.0 : 0.0,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            translatedText ?? '',
-                            style: const TextStyle(fontSize: 14),
+                  StreamBuilder<String>(
+                    stream: _translationStream,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      } else if (snapshot.hasError) {
+                        return Text(
+                          L10n.of(context).translate_error,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.error,
+                            fontSize: 14,
                           ),
-                          const Divider(),
-                          Row(
+                        );
+                      } else if (snapshot.hasData) {
+                        final translatedText = snapshot.data!;
+                        return AnimatedOpacity(
+                          duration: const Duration(milliseconds: 200),
+                          opacity: 1.0,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _langPicker(true),
-                              const Icon(Icons.arrow_forward_ios, size: 16),
-                              _langPicker(false),
-                              const Spacer(),
-                              IconButton(
-                                onPressed: () {
-                                  Clipboard.setData(ClipboardData(
-                                      text: translatedText ?? ''));
-                                  AnxToast.show(
-                                      L10n.of(context).notes_page_copied);
-                                },
-                                icon: const Icon(EvaIcons.copy),
+                              Text(
+                                translatedText,
+                                style: const TextStyle(fontSize: 14),
+                              ),
+                              const Divider(),
+                              Row(
+                                children: [
+                                  _langPicker(true),
+                                  const Icon(Icons.arrow_forward_ios, size: 16),
+                                  _langPicker(false),
+                                  const Spacer(),
+                                  IconButton(
+                                    onPressed: () {
+                                      Clipboard.setData(
+                                          ClipboardData(text: translatedText));
+                                      AnxToast.show(
+                                          L10n.of(context).notes_page_copied);
+                                    },
+                                    icon: const Icon(EvaIcons.copy),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
-                        ],
-                      ),
-                    ),
+                        );
+                      } else {
+                        return const SizedBox.shrink();
+                      }
+                    },
+                  ),
                 ],
               ),
             ),
