@@ -3,6 +3,7 @@
 ## Todo
 
 ## 1.4.5
+- Feat: Edit notes in list
 - Fix: Touchpad cannot scroll(#271, #261)
 - Feat: Download all books
 - L10n: Add Arabic and German language
@@ -13,7 +14,10 @@
 - Fix: Incorrect click position detection on macOS
 - Fix: Sort menu sometimes fails to open
 - Fix: WebDAV Unauthorized(#273)
+- Fix: Optimize book opening speed
 
+
+- 新增：笔记列表可以编辑笔记
 - 修复：触摸板无法滚动(#271, #261)
 - 新增：下载所有书籍文件
 - L10n: 新增阿拉伯语和德语
@@ -24,6 +28,7 @@
 - 修复：macOS 端无法正确判断点击位置的问题
 - 修复：排序菜单有时无法打开的问题
 - 修复：WebDAV提示未授权(#273)
+- 修复：优化打开书籍速度
 
 ## 1.4.4
 - Feat: Import pdf files
