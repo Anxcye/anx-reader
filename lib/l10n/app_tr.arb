@@ -393,5 +393,6 @@
   "downloadAllBooks": "tüm kitapları indir",
   "allBooksAreDownloaded": "Tüm kitaplar indirildi",
   "sync_now": "Şimdi senkronize",
-  "deepl_key_tip": "Lütfen DeepL API anahtarınızı girin, DeepL geliştirici sayfasından alın"
+  "deepl_key_tip": "Lütfen DeepL API anahtarınızı girin, DeepL geliştirici sayfasından alın",
+  "sync_mismatch_tip": "Veritabanı sürümü eşleşmiyor. Uzak veritabanı (sürüm {remoteVersion}) size uygulamanızın desteklediği sürümden (sürüm {currentDbVersion}) daha yeni. Lütfen uygulamanızı en son sürüme güncelleyin."
 }

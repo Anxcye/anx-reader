@@ -54,22 +54,20 @@ class AnxWebdav extends _$AnxWebdav {
 
   static Client? clientInstance;
 
-
- Client get _client  {
-      return clientInstance ??= newClient(
-        Prefs().webdavInfo['url'],
-        user: Prefs().webdavInfo['username'],
-        password: Prefs().webdavInfo['password'],
-        debug: false,
-      )
-        ..setHeaders({
-          'accept-charset': 'utf-8',
-          'Content-Type': 'application/octet-stream'
-        })
-        ..setConnectTimeout(
-          8000,
-        );
-    
+  Client get _client {
+    return clientInstance ??= newClient(
+      Prefs().webdavInfo['url'],
+      user: Prefs().webdavInfo['username'],
+      password: Prefs().webdavInfo['password'],
+      debug: false,
+    )
+      ..setHeaders({
+        'accept-charset': 'utf-8',
+        'Content-Type': 'application/octet-stream'
+      })
+      ..setConnectTimeout(
+        8000,
+      );
   }
 
   Future<void> init() async {
@@ -123,7 +121,30 @@ class AnxWebdav extends _$AnxWebdav {
       return;
     }
 
-    File? remoteDb = await safeReadProps('anx/app_database.db', _client);
+    // Check for remote database files with version info
+    String remoteDbFileName = 'database$currentDbVersion.db';
+
+    try {
+      List<File> remoteFiles = await _client.readDir('/anx');
+      for (var file in remoteFiles) {
+        if (file.name != null &&
+            file.name!.startsWith('database') &&
+            file.name!.endsWith('.db')) {
+          // Extract version number
+          String versionStr =
+              file.name!.replaceAll('database', '').replaceAll('.db', '');
+            int version = int.tryParse(versionStr) ?? 0;
+            if (version > currentDbVersion) {
+              await _showDatabaseVersionMismatchDialog(version);
+              return;
+            }
+          }
+        }
+      } catch (e) {
+        AnxLog.severe('WebDAV: Error checking database versions: $e');
+      }
+
+    File? remoteDb = await safeReadProps('anx/$remoteDbFileName', _client);
     final databasePath = await getAnxDataBasesPath();
     final path = join(databasePath, 'app_database.db');
     io.File localDb = io.File(path);
@@ -341,7 +362,8 @@ class AnxWebdav extends _$AnxWebdav {
   }
 
   Future<void> syncDatabase(SyncDirection direction) async {
-    File? remoteDb = await safeReadProps('anx/app_database.db', _client);
+    String remoteDbFileName = 'database$currentDbVersion.db';
+    File? remoteDb = await safeReadProps('anx/$remoteDbFileName', _client);
 
     final databasePath = await getAnxDataBasesPath();
     final path = join(databasePath, 'app_database.db');
@@ -355,13 +377,13 @@ class AnxWebdav extends _$AnxWebdav {
       switch (direction) {
         case SyncDirection.upload:
           DBHelper.close();
-          await uploadFile(path, 'anx/app_database.db');
+          await uploadFile(path, 'anx/$remoteDbFileName');
           await DBHelper().initDB();
           break;
         case SyncDirection.download:
           if (remoteDb != null) {
             DBHelper.close();
-            await downloadFile('anx/app_database.db', path);
+            await downloadFile('anx/$remoteDbFileName', path);
             await DBHelper().initDB();
           } else {
             await _showSyncAbortedDialog();
@@ -372,11 +394,11 @@ class AnxWebdav extends _$AnxWebdav {
           if (remoteDb == null ||
               remoteDb.mTime!.isBefore(localDb.lastModifiedSync())) {
             DBHelper.close();
-            await uploadFile(path, 'anx/app_database.db');
+            await uploadFile(path, 'anx/$remoteDbFileName');
             await DBHelper().initDB();
           } else if (remoteDb.mTime!.isAfter(localDb.lastModifiedSync())) {
             DBHelper.close();
-            await downloadFile('anx/app_database.db', path);
+            await downloadFile('anx/$remoteDbFileName', path);
             await DBHelper().initDB();
           }
           break;
@@ -566,5 +588,24 @@ class AnxWebdav extends _$AnxWebdav {
         .webdavBatchDownloadFinishedReport(successCount, failCount));
     AnxToast.show(L10n.of(navigatorKey.currentContext!)
         .webdavBatchDownloadFinishedReport(successCount, failCount));
+  }
+
+  Future<void> _showDatabaseVersionMismatchDialog(int remoteVersion) async {
+    await SmartDialog.show(
+      clickMaskDismiss: false,
+      builder: (context) => AlertDialog(
+        title: Text(L10n.of(context).webdav_sync_aborted),
+        content: Text(L10n.of(context)
+            .sync_mismatch_tip(currentDbVersion, remoteVersion)),
+        actions: [
+          TextButton(
+            onPressed: () {
+              SmartDialog.dismiss();
+            },
+            child: Text(L10n.of(context).common_ok),
+          ),
+        ],
+      ),
+    );
   }
 }

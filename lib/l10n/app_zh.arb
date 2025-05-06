@@ -393,5 +393,6 @@
   "downloadAllBooks": "下载所有书籍",
   "allBooksAreDownloaded": "所有书籍已下载",
   "sync_now": "立即同步",
-  "deepl_key_tip": "请输入您的 DeepL API 密钥，可以在 DeepL 开发者页面获取"
+  "deepl_key_tip": "请输入您的 DeepL API 密钥，可以在 DeepL 开发者页面获取",
+  "sync_mismatch_tip": "数据库版本不匹配。远程数据库（版本 {remoteVersion}）比您的应用支持的版本（版本 {currentDbVersion}）更新。请更新您的应用到最新版本。"
 }

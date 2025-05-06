@@ -393,5 +393,6 @@
   "downloadAllBooks": "Download All Books",
   "allBooksAreDownloaded": "All books are downloaded",
   "sync_now": "Sync Now",
-  "deepl_key_tip": "Please enter your DeepL API key, which can be obtained from the DeepL developer page"
+  "deepl_key_tip": "Please enter your DeepL API key, which can be obtained from the DeepL developer page",
+  "sync_mismatch_tip": "Database version mismatch. The remote database (version {remoteVersion}) is newer than what your app supports (version {currentDbVersion}). Please update your app to the latest version."
 }
