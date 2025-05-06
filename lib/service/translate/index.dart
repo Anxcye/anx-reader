@@ -8,10 +8,6 @@ import 'package:anx_reader/service/translate/microsoft.dart';
 enum TranslateService {
   google('Google'),
   microsoft('Microsoft');
-  // baidu('Baidu'),
-  // tencent('Tencent'),
-  // deepl('Deepl'),
-  // openai('OpenAI');
 
   const TranslateService(this.label);
 
@@ -22,25 +18,25 @@ TranslateService getTranslateService(String name) {
   return TranslateService.values.firstWhere((e) => e.name == name);
 }
 
+abstract class TranslateServiceProvider {
+  Stream<String> translate(String text, LangListEnum from, LangListEnum to);
+}
 
-
-Future<String> translateText(String text, {TranslateService? service}) async {
-  service ??= Prefs().translateService;
-  LangListEnum from = Prefs().translateFrom;
-  LangListEnum to = Prefs().translateTo;
-
-  switch (service) {
-    case TranslateService.google:
-      return await googleTranslateService(text, from, to);
-    case TranslateService.microsoft:
-      return await microsoftTranslateService(text, from, to);
-    // case TranslateService.baidu:
-    // return TranslateApi().baidu(text);
-    // case TranslateService.tencent:
-    // return TranslateApi().tencent(text);
-    // case TranslateService.deepl:
-    // return TranslateApi().deepl(text);
-    // case TranslateService.openai:
-    // return TranslateApi().openai(text);
+class TranslateFactory {
+  static TranslateServiceProvider getProvider(TranslateService service) {
+    switch (service) {
+      case TranslateService.google:
+        return GoogleTranslateProvider();
+      case TranslateService.microsoft:
+        return MicrosoftTranslateProvider();
+    }
   }
+}
+
+Stream<String> translateText(String text, {TranslateService? service}) {
+  service ??= Prefs().translateService;
+  final from = Prefs().translateFrom;
+  final to = Prefs().translateTo;
+
+  return TranslateFactory.getProvider(service).translate(text, from, to);
 }
