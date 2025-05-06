@@ -393,6 +393,7 @@
     "downloadAllBooks",
     "allBooksAreDownloaded",
     "sync_now",
-    "deepl_key_tip"
+    "deepl_key_tip",
+    "sync_mismatch_tip"
   ]
 }

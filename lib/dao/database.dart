@@ -11,6 +11,9 @@ import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
+// Current app database version
+const int currentDbVersion = 6;
+
 const createBookSQL = '''
 CREATE TABLE tb_books (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -98,7 +101,7 @@ class DBHelper {
   }
 
   Future<Database> initDB() async {
-    int dbVersion = 6;
+    int dbVersion = currentDbVersion;
     switch (defaultTargetPlatform) {
       case TargetPlatform.macOS:
       case TargetPlatform.android:
