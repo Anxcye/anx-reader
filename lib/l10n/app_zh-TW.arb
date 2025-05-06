@@ -392,5 +392,6 @@
   "webdavBatchDownloadFinishedReport": "書籍文件下載完成，{success}成功，{failed}失敗",
   "downloadAllBooks": "下載所有書籍",
   "allBooksAreDownloaded": "所有書籍已下載",
-  "sync_now": "立即同步"
+  "sync_now": "立即同步",
+  "deepl_key_tip": "請輸入您的 DeepL API 密鑰，可以在 DeepL 開發者頁面獲取"
 }

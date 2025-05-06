@@ -1,5 +1,7 @@
+import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/enums/lang_list.dart';
+import 'package:anx_reader/main.dart';
 import 'package:anx_reader/service/translate/index.dart';
 import 'package:anx_reader/utils/log/common.dart';
 import 'package:dio/dio.dart';
@@ -86,7 +88,7 @@ class DeepLTranslateProvider implements TranslateServiceProvider {
       ConfigItem(
         key: 'api_key',
         label: 'DeepL API Key',
-        description: 'Please enter your DeepL API key, which can be obtained from the DeepL developer page',
+        description: L10n.of(navigatorKey.currentContext!).deepl_key_tip,
         type: ConfigItemType.password,
         defaultValue: '',
       ),
