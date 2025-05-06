@@ -36,12 +36,14 @@ class _TranslateSettingState extends State<TranslateSetting> {
       sections: [
         SettingsSection(
           tiles: [
-            const CustomSettingsTile(
+            CustomSettingsTile(
               child: Card(
                 shadowColor: Colors.transparent,
                 child: Padding(
                   padding: EdgeInsets.all(8.0),
-                  child: TranslationConfig(),
+                  child: TranslationConfig(
+                    setState: () => setState(() {}),
+                  ),
                 ),
               ),
             ),
@@ -63,7 +65,9 @@ class _TranslateSettingState extends State<TranslateSetting> {
 }
 
 class TranslationConfig extends StatelessWidget {
-  const TranslationConfig({super.key});
+  const TranslationConfig({super.key, required this.setState});
+
+  final VoidCallback setState;
 
   static const currentServiceTextStyle = TextStyle(
     fontSize: 18,
@@ -82,7 +86,9 @@ class TranslationConfig extends StatelessWidget {
                 showModalBottomSheet(
                   context: context,
                   builder: (context) => const TranslateServicePicker(),
-                );
+                ).then((value) {
+                  setState();
+                });
               },
               child: Text(
                 Prefs().translateService.label,
@@ -103,7 +109,9 @@ class TranslationConfig extends StatelessWidget {
                     context: context,
                     builder: (context) =>
                         const TranslateLangPicker(isFrom: true),
-                  );
+                  ).then((value) {
+                    setState();
+                  });
                 },
                 child: Text(Prefs().translateFrom.getNative(context)),
               ),
@@ -116,7 +124,9 @@ class TranslationConfig extends StatelessWidget {
                     context: context,
                     builder: (context) =>
                         const TranslateLangPicker(isFrom: false),
-                  );
+                  ).then((value) {
+                    setState();
+                  });
                 },
                 child: Text(
                   Prefs().translateTo.getNative(context),
