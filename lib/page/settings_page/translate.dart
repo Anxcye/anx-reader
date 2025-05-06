@@ -1,4 +1,5 @@
 import 'package:anx_reader/config/shared_preference_provider.dart';
+import 'package:anx_reader/enums/lang_list.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/service/translate/index.dart';
 import 'package:anx_reader/widgets/settings/settings_tile.dart';
@@ -204,7 +205,7 @@ class _TranslateSettingItemState extends State<TranslateSettingItem> {
   Widget build(BuildContext context) {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
-      curve: Curves.easeInOut,
+      curve: Curves.bounceInOut,
       child: Card(
         margin: const EdgeInsets.all(10),
         color: isExpanded
@@ -234,66 +235,53 @@ class _TranslateSettingItemState extends State<TranslateSettingItem> {
                       children: [
                         TextButton(
                           onPressed: () {
-                            translateText(
-                              testText,
-                              service: widget.service,
-                            ).then((value) {
-                              SmartDialog.show(
-                                useSystem: true,
-                                animationType:
-                                    SmartAnimationType.centerFade_otherSlide,
-                                builder: (context) => AlertDialog(
-                                  title: const Center(
-                                    child: Icon(Icons.check_circle),
-                                  ),
-                                  content: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          languageText(
-                                            Prefs()
-                                                .translateFrom
-                                                .getNative(context),
-                                          ),
-                                          const Icon(Icons.arrow_forward_ios),
-                                          languageText(
-                                            Prefs()
-                                                .translateTo
-                                                .getNative(context),
-                                          ),
-                                        ],
-                                      ),
-                                      const Divider(),
-                                      const Text(testText),
-                                      const Icon(Icons.arrow_downward),
-                                      Text(value),
-                                    ],
-                                  ),
+                            SmartDialog.show(
+                              useSystem: true,
+                              animationType:
+                                  SmartAnimationType.centerFade_otherSlide,
+                              builder: (context) => AlertDialog(
+                                title: const Center(
+                                  child: Icon(Icons.check_circle),
                                 ),
-                              );
-                            }).catchError((error) {
-                              SmartDialog.show(
-                                useSystem: true,
-                                animationType:
-                                    SmartAnimationType.centerFade_otherSlide,
-                                builder: (context) => AlertDialog(
-                                  title: Center(
-                                    child: Row(
+                                content: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Row(
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
                                       children: [
-                                        const Icon(Icons.error),
-                                        Text(L10n.of(context).common_failed),
+                                        languageText(
+                                          Prefs()
+                                              .translateFrom
+                                              .getNative(context),
+                                        ),
+                                        const Icon(Icons.arrow_forward_ios),
+                                        languageText(
+                                          Prefs()
+                                              .translateTo
+                                              .getNative(context),
+                                        ),
                                       ],
                                     ),
-                                  ),
-                                  content: Text(error.toString()),
+                                    const Divider(),
+                                    const Text(testText),
+                                    const Icon(Icons.arrow_downward),
+                                    // Text(value),
+                                    StreamBuilder<String>(
+                                      stream: translateText(testText,
+                                          service: widget.service),
+                                      builder: (context, snapshot) {
+                                        return snapshot.data != null
+                                            ? Text(snapshot.data ?? '...')
+                                            : Text(
+                                                snapshot.error.toString(),
+                                              );
+                                      },
+                                    ),
+                                  ],
                                 ),
-                              );
-                            });
+                              ),
+                            );
                           },
                           child: Text(L10n.of(context).common_test),
                         ),

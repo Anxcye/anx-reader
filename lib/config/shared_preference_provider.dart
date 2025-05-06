@@ -4,6 +4,7 @@ import 'dart:core';
 import 'package:anx_reader/enums/ai_prompts.dart';
 import 'package:anx_reader/enums/convert_chinese_mode.dart';
 import 'package:anx_reader/enums/excerpt_share_template.dart';
+import 'package:anx_reader/enums/lang_list.dart';
 import 'package:anx_reader/enums/sort_field.dart';
 import 'package:anx_reader/enums/sort_order.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';

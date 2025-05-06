@@ -1,4 +1,5 @@
 import 'package:anx_reader/config/shared_preference_provider.dart';
+import 'package:anx_reader/enums/lang_list.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/service/translate/index.dart';
 import 'package:anx_reader/utils/toast/common.dart';
@@ -41,7 +42,7 @@ class _TranslationMenuState extends State<TranslationMenu> {
       final result = await translateText(widget.content);
       if (!_mounted) return;
       setState(() {
-        translatedText = result;
+        // translatedText = result;
         isLoading = false;
       });
     } catch (e) {
