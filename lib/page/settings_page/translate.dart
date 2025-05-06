@@ -403,12 +403,12 @@ class _TranslateSettingItemState extends State<TranslateSettingItem> {
 
                     const Divider(),
 
-                    // 操作按钮
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         TextButton(
                           onPressed: () {
+                            _saveConfig();
                             SmartDialog.show(
                               useSystem: true,
                               animationType:

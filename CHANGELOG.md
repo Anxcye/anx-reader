@@ -3,6 +3,7 @@
 ## Todo
 
 ## 1.4.5
+- Feat: Add DeepL translation service(#223, #145)
 - Feat: Edit notes in list
 - Fix: Touchpad cannot scroll(#271, #261)
 - Feat: Download all books
@@ -17,6 +18,7 @@
 - Fix: Optimize book opening speed
 
 
+- 新增：DeepL 翻译服务(#223, #145)
 - 新增：笔记列表可以编辑笔记
 - 修复：触摸板无法滚动(#271, #261)
 - 新增：下载所有书籍文件
