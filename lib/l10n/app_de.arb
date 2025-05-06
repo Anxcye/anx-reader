@@ -392,5 +392,6 @@
   "webdavBatchDownloadFinishedReport": "Bücher heruntergeladen, {success} erfolgreich, {failed} fehlgeschlagen",
   "downloadAllBooks": "Alle Bücher herunterladen",
   "allBooksAreDownloaded": "Alle Bücher wurden heruntergeladen",
-  "sync_now": "Jetzt synchronisieren"
+  "sync_now": "Jetzt synchronisieren",
+  "deepl_key_tip": "Bitte geben Sie Ihren DeepL API-Schlüssel ein, den Sie von der DeepL-Entwicklerseite erhalten können"
 }

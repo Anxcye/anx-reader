@@ -392,5 +392,6 @@
   "webdavBatchDownloadFinishedReport": "تم تحميل {success} كتاب منجز، {failed} كتاب معيب",
   "downloadAllBooks": "تحميل كل الكتب",
   "allBooksAreDownloaded": "تم تحميل كل الكتب",
-  "sync_now": "المزامنة الآن"
+  "sync_now": "المزامنة الآن",
+  "deepl_key_tip": "يرجى إدخال مفتاح DeepL API الخاص بك ، والذي يمكن الحصول عليه من صفحة DeepL المبدع"
 }

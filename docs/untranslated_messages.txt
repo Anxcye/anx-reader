@@ -391,6 +391,8 @@
     "book_sync_status_download_failed",
     "webdavBatchDownloadFinishedReport",
     "downloadAllBooks",
-    "allBooksAreDownloaded"
+    "allBooksAreDownloaded",
+    "sync_now",
+    "deepl_key_tip"
   ]
 }
