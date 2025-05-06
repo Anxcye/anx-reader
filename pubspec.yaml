@@ -121,7 +121,7 @@ flutter:
     - assets/foliate-js/index.html
     - assets/foliate-js/dist/bundle.js
     # - assets/foliate-js/vendor/
-    # - assets/foliate-js/vendor/pdfjs/
+    - assets/foliate-js/src/vendor/pdfjs/
     - assets/images/openai.png
     - assets/images/claude.png
     - assets/images/deepseek.png
