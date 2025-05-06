@@ -211,7 +211,6 @@ class _TranslateSettingItemState extends State<TranslateSettingItem> {
   }
 
   void _loadConfig() {
-    // 获取当前服务的配置
     _currentConfig = getTranslateServiceConfig(widget.service);
     setState(() {});
   }
@@ -277,7 +276,7 @@ class _TranslateSettingItemState extends State<TranslateSettingItem> {
 
       case ConfigItemType.select:
         if (item.options == null || item.options!.isEmpty) {
-          return const Text('无选项可用');
+          return const Text('None options');
         }
 
         final String currentValue = _currentConfig[item.key]?.toString() ??
@@ -360,7 +359,6 @@ class _TranslateSettingItemState extends State<TranslateSettingItem> {
     }
   }
 
-  // 保存配置到服务
   void _saveConfig() {
     try {
       saveTranslateServiceConfig(widget.service, _currentConfig);
@@ -372,13 +370,9 @@ class _TranslateSettingItemState extends State<TranslateSettingItem> {
 
   @override
   Widget build(BuildContext context) {
-    // 获取配置项列表
     final configItems = getTranslateServiceConfigItems(widget.service);
 
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      curve: Curves.bounceInOut,
-      child: Card(
+    return  Card(
         margin: const EdgeInsets.all(10),
         color: isExpanded
             ? Theme.of(context).colorScheme.secondaryContainer
@@ -396,14 +390,16 @@ class _TranslateSettingItemState extends State<TranslateSettingItem> {
                 });
               },
             ),
-            AnimatedCrossFade(
-              firstChild: const SizedBox.shrink(),
-              secondChild: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
+            AnimatedSize(
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.bounceInOut,
+              alignment: Alignment.topCenter,
+              child: isExpanded
+                  ? Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // 配置项列表
                     ...configItems.map((item) {
                       return Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -459,7 +455,7 @@ class _TranslateSettingItemState extends State<TranslateSettingItem> {
                                           return const CircularProgressIndicator();
                                         } else if (snapshot.hasError) {
                                           return Text(
-                                            '错误: ${snapshot.error}',
+                                            'Error: ${snapshot.error}',
                                             style: TextStyle(
                                                 color: Theme.of(context)
                                                     .colorScheme
@@ -468,7 +464,7 @@ class _TranslateSettingItemState extends State<TranslateSettingItem> {
                                         } else if (snapshot.hasData) {
                                           return Text(snapshot.data!);
                                         } else {
-                                          return const Text('等待翻译...');
+                                          return const Text('...');
                                         }
                                       },
                                     ),
@@ -492,15 +488,12 @@ class _TranslateSettingItemState extends State<TranslateSettingItem> {
                     ),
                   ],
                 ),
-              ),
-              crossFadeState: isExpanded
-                  ? CrossFadeState.showSecond
-                  : CrossFadeState.showFirst,
-              duration: const Duration(milliseconds: 200),
+              ): const SizedBox.shrink(),
+             
             ),
           ],
         ),
-      ),
+      
     );
   }
 }
