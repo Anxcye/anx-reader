@@ -65,6 +65,121 @@ class _BookNotesListState extends ConsumerState<BookNotesList> {
     });
   }
 
+  void _editBookNote(BuildContext context, BookNote bookNote) {
+    String currentType = bookNote.type;
+    String currentColor = bookNote.color;
+    String? currentNote = bookNote.readerNote;
+
+    TextEditingController noteController =
+        TextEditingController(text: currentNote);
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8, bottom: 16),
+                      child: Text(bookNote.content),
+                    ),
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: notesType.map((type) {
+                              return IconButton(
+                                icon: Icon(
+                                  type['icon'],
+                                  color: currentType == type['type']
+                                      ? Theme.of(context).colorScheme.primary
+                                      : Colors.grey,
+                                ),
+                                onPressed: () {
+                                  setState(() {
+                                    currentType = type['type'];
+                                  });
+                                },
+                              );
+                            }).toList(),
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: notesColors.map((color) {
+                              return IconButton(
+                                icon: Icon(
+                                  currentColor == color
+                                      ? EvaIcons.checkmark_circle_2
+                                      : Icons.circle,
+                                  color: Color(int.parse('0x99$color')),
+                                  size: 30,
+                                ),
+                                onPressed: () {
+                                  setState(() {
+                                    currentColor = color;
+                                  });
+                                },
+                              );
+                            }).toList(),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: TextField(
+                        controller: noteController,
+                        decoration: InputDecoration(
+                          border: const OutlineInputBorder(),
+                          hintText: L10n.of(context).context_menu_add_note_tips,
+                        ),
+                        maxLines: 3,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text(L10n.of(context).common_cancel),
+                ),
+                TextButton(
+                  onPressed: () {
+                    BookNote updatedNote = BookNote(
+                      id: bookNote.id,
+                      bookId: bookNote.bookId,
+                      content: bookNote.content,
+                      cfi: bookNote.cfi,
+                      chapter: bookNote.chapter,
+                      type: currentType,
+                      color: currentColor,
+                      readerNote: noteController.text.trim(),
+                      createTime: bookNote.createTime,
+                      updateTime: DateTime.now(),
+                    );
+                    updateBookNoteById(updatedNote);
+                    AnxWebdav().syncData(SyncDirection.upload, ref);
+                    _loadBookNotes();
+                    Navigator.pop(context);
+                  },
+                  child: Text(L10n.of(context).common_save),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
   Widget bookNoteItem(BuildContext context, BookNote bookNote, bool selected) {
     Color iconColor = Color(int.parse('0xaa${bookNote.color}'));
     TextStyle infoStyle = const TextStyle(
@@ -506,15 +621,23 @@ class _BookNotesListState extends ConsumerState<BookNotesList> {
         SlidableAction(
           onPressed: (context) {
             ExcerptShareService.showShareExcerpt(
-                context: context,
-                bookTitle: widget.book.title,
-                author: widget.book.author,
-                excerpt: bookNote.content,
-                chapter: bookNote.chapter,
-              );
+              context: context,
+              bookTitle: widget.book.title,
+              author: widget.book.author,
+              excerpt: bookNote.content,
+              chapter: bookNote.chapter,
+            );
           },
           icon: Icons.share,
           label: L10n.of(context).reading_page_share_share,
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        ),
+        SlidableAction(
+          onPressed: (context) {
+            _editBookNote(context, bookNote);
+          },
+          icon: Icons.edit,
+          label: L10n.of(context).common_edit,
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         ),
       ],
