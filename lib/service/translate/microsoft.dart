@@ -40,10 +40,24 @@ class MicrosoftTranslateProvider implements TranslateServiceProvider {
     }
   }
 
+  @override
+  List<ConfigItem> getConfigItems() {
+    return [];
+  }
+
+  @override
+  Map<String, dynamic> getConfig() {
+    return {};
+  }
+
+  @override
+  Future<void> saveConfig(Map<String, dynamic> config) async {
+    return;
+  }
+
   Future<String> getMicrosoftKey() async {
     String microsoftKey = '';
     num microsoftKeyExpired = 0;
-
     if (microsoftKey.isNotEmpty &&
         microsoftKeyExpired > DateTime.now().millisecondsSinceEpoch ~/ 1000) {
       return microsoftKey;

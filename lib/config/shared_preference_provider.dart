@@ -663,4 +663,18 @@ class Prefs extends ChangeNotifier {
     prefs.setBool('notShowReleaseLocalSpaceDialog', status);
     notifyListeners();
   }
+
+  void saveTranslateServiceConfig(TranslateService service, Map<String, dynamic> config) {
+    prefs.setString('translateServiceConfig_${service.name}', jsonEncode(config));
+    notifyListeners();
+  }
+
+  Map<String, dynamic>? getTranslateServiceConfig(TranslateService service) {
+    String? configJson =
+        prefs.getString('translateServiceConfig_${service.name}');
+    if (configJson == null) {
+      return null;
+    }
+    return jsonDecode(configJson) as Map<String, dynamic>;
+  }
 }

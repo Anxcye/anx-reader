@@ -34,4 +34,19 @@ class GoogleTranslateProvider implements TranslateServiceProvider {
       yield* Stream.error(Exception(e));
     }
   }
+
+  @override
+  List<ConfigItem> getConfigItems() {
+    return [];
+  }
+
+  @override
+  Map<String, dynamic> getConfig() {
+    return {};
+  }
+
+  @override
+  Future<void> saveConfig(Map<String, dynamic> config) async {
+    return;
+  }
 }

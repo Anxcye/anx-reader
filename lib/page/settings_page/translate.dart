@@ -2,6 +2,7 @@ import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/enums/lang_list.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/service/translate/index.dart';
+import 'package:anx_reader/utils/toast/common.dart';
 import 'package:anx_reader/widgets/settings/settings_tile.dart';
 import 'package:anx_reader/widgets/settings/settings_title.dart';
 import 'package:flutter/material.dart';
@@ -191,6 +192,20 @@ class _TranslateSettingItemState extends State<TranslateSettingItem> {
     fontWeight: FontWeight.bold,
   );
 
+  Map<String, dynamic> _currentConfig = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _loadConfig();
+  }
+
+  void _loadConfig() {
+    // 获取当前服务的配置
+    _currentConfig = getTranslateServiceConfig(widget.service);
+    setState(() {});
+  }
+
   Widget languageText(String text) {
     return Expanded(
       child: Text(
@@ -201,8 +216,155 @@ class _TranslateSettingItemState extends State<TranslateSettingItem> {
     );
   }
 
+  Widget _buildConfigItem(ConfigItem item) {
+    switch (item.type) {
+      case ConfigItemType.text:
+      case ConfigItemType.password:
+        return TextField(
+          obscureText: item.type == ConfigItemType.password,
+          decoration: InputDecoration(
+            labelText: item.label,
+            helperText: item.description,
+            border: const OutlineInputBorder(),
+          ),
+          controller: TextEditingController(
+              text: _currentConfig[item.key]?.toString() ??
+                  item.defaultValue?.toString() ??
+                  ''),
+          onChanged: (value) {
+            _currentConfig[item.key] = value;
+          },
+        );
+
+      case ConfigItemType.number:
+        return TextField(
+          decoration: InputDecoration(
+            labelText: item.label,
+            helperText: item.description,
+            border: const OutlineInputBorder(),
+          ),
+          keyboardType: TextInputType.number,
+          controller: TextEditingController(
+              text: _currentConfig[item.key]?.toString() ??
+                  item.defaultValue?.toString() ??
+                  ''),
+          onChanged: (value) {
+            _currentConfig[item.key] = int.tryParse(value) ?? 0;
+          },
+        );
+
+      case ConfigItemType.toggle:
+        return SwitchListTile(
+          title: Text(item.label),
+          subtitle: item.description != null ? Text(item.description!) : null,
+          value: _currentConfig[item.key] ?? item.defaultValue ?? false,
+          onChanged: (value) {
+            setState(() {
+              _currentConfig[item.key] = value;
+            });
+          },
+        );
+
+      case ConfigItemType.select:
+        if (item.options == null || item.options!.isEmpty) {
+          return const Text('无选项可用');
+        }
+
+        final String currentValue = _currentConfig[item.key]?.toString() ??
+            item.defaultValue?.toString() ??
+            item.options!.first['value']?.toString() ??
+            '';
+
+        return DropdownButtonFormField<String>(
+          decoration: InputDecoration(
+            labelText: item.label,
+            helperText: item.description,
+            border: const OutlineInputBorder(),
+          ),
+          value: currentValue,
+          items: item.options!.map((option) {
+            return DropdownMenuItem<String>(
+              value: option['value'].toString(),
+              child: Text(option['label'].toString()),
+            );
+          }).toList(),
+          onChanged: (value) {
+            if (value != null) {
+              setState(() {
+                _currentConfig[item.key] = value;
+              });
+            }
+          },
+        );
+
+      case ConfigItemType.radio:
+        if (item.options == null || item.options!.isEmpty) {
+          return const Text('None options');
+        }
+
+        final currentValue = _currentConfig[item.key] ?? item.defaultValue;
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8.0),
+              child: Text(
+                item.label,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+            if (item.description != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8.0),
+                child: Text(item.description!),
+              ),
+            ...item.options!.map((option) {
+              return RadioListTile<dynamic>(
+                title: Text(option['label'].toString()),
+                value: option['value'],
+                groupValue: currentValue,
+                onChanged: (value) {
+                  setState(() {
+                    _currentConfig[item.key] = value;
+                  });
+                },
+              );
+            }),
+          ],
+        );
+
+      case ConfigItemType.checkbox:
+        return CheckboxListTile(
+          title: Text(item.label),
+          subtitle: item.description != null ? Text(item.description!) : null,
+          value: _currentConfig[item.key] ?? item.defaultValue ?? false,
+          onChanged: (value) {
+            if (value != null) {
+              setState(() {
+                _currentConfig[item.key] = value;
+              });
+            }
+          },
+        );
+    }
+  }
+
+  // 保存配置到服务
+  void _saveConfig() {
+    try {
+      saveTranslateServiceConfig(widget.service, _currentConfig);
+      AnxToast.show(L10n.of(context).common_saved);
+    } catch (e) {
+      AnxToast.show(L10n.of(context).common_failed);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    // 获取配置项列表
+    final configItems = getTranslateServiceConfigItems(widget.service);
+
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
       curve: Curves.bounceInOut,
@@ -229,7 +391,19 @@ class _TranslateSettingItemState extends State<TranslateSettingItem> {
               secondChild: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // 配置项列表
+                    ...configItems.map((item) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        child: _buildConfigItem(item),
+                      );
+                    }),
+
+                    const Divider(),
+
+                    // 操作按钮
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
@@ -266,16 +440,26 @@ class _TranslateSettingItemState extends State<TranslateSettingItem> {
                                     const Divider(),
                                     const Text(testText),
                                     const Icon(Icons.arrow_downward),
-                                    // Text(value),
                                     StreamBuilder<String>(
                                       stream: translateText(testText,
                                           service: widget.service),
                                       builder: (context, snapshot) {
-                                        return snapshot.data != null
-                                            ? Text(snapshot.data ?? '...')
-                                            : Text(
-                                                snapshot.error.toString(),
-                                              );
+                                        if (snapshot.connectionState ==
+                                            ConnectionState.waiting) {
+                                          return const CircularProgressIndicator();
+                                        } else if (snapshot.hasError) {
+                                          return Text(
+                                            '错误: ${snapshot.error}',
+                                            style: TextStyle(
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .error),
+                                          );
+                                        } else if (snapshot.hasData) {
+                                          return Text(snapshot.data!);
+                                        } else {
+                                          return const Text('等待翻译...');
+                                        }
                                       },
                                     ),
                                   ],
@@ -287,6 +471,7 @@ class _TranslateSettingItemState extends State<TranslateSettingItem> {
                         ),
                         TextButton(
                           onPressed: () {
+                            _saveConfig();
                             setState(() {
                               isExpanded = !isExpanded;
                             });
