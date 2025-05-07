@@ -8,6 +8,7 @@ import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/models/sync_state_model.dart';
 import 'package:anx_reader/providers/book_list.dart';
 import 'package:anx_reader/providers/sync_status.dart';
+import 'package:anx_reader/providers/tb_groups.dart';
 import 'package:anx_reader/utils/get_path/get_temp_dir.dart';
 import 'package:anx_reader/utils/get_path/get_base_path.dart';
 import 'package:anx_reader/utils/get_path/databases_path.dart';
@@ -238,6 +239,7 @@ class AnxWebdav extends _$AnxWebdav {
 
       try {
         ref?.read(bookListProvider.notifier).refresh();
+        ref?.read(groupDaoProvider.notifier).refresh();
       } catch (e) {
         AnxLog.info('Failed to refresh book list: $e');
       }

@@ -121,6 +121,14 @@ class _HomePageState extends ConsumerState<HomePage> {
           builder: (context) => AlertDialog(
             title: Text(L10n.of(context).common_attention),
             content: Text(L10n.of(context).db_updated_tip),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  SmartDialog.dismiss();
+                },
+                child: Text(L10n.of(context).common_ok),
+              ),
+            ],
           ),
         );
       }
