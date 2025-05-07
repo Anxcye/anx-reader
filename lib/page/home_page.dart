@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:anx_reader/dao/database.dart';
 import 'package:anx_reader/enums/sync_direction.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/page/home_page/bookshelf_page.dart';
@@ -113,6 +114,16 @@ class _HomePageState extends ConsumerState<HomePage> {
       }, onError: (err) {
         AnxLog.severe('share: Receive share intent');
       });
+
+      if (DBHelper.updatedDB) {
+        SmartDialog.show(
+          clickMaskDismiss: false,
+          builder: (context) => AlertDialog(
+            title: Text(L10n.of(context).common_attention),
+            content: Text(L10n.of(context).db_updated_tip),
+          ),
+        );
+      }
     }
   }
 
