@@ -1,4 +1,5 @@
 import 'package:anx_reader/models/book.dart';
+import 'package:anx_reader/models/tb_group.dart';
 import 'package:anx_reader/providers/book_list.dart';
 import 'package:anx_reader/providers/tb_groups.dart';
 import 'package:anx_reader/widgets/bookshelf/book_cover.dart';
@@ -73,7 +74,8 @@ class _BookFolderState extends ConsumerState<BookFolder> {
 
     String groupName = ref.watch(groupDaoProvider).whenOrNull(
               data: (groups) => groups
-                  .firstWhere((group) => group.id == widget.books.first.groupId)
+                  .firstWhere((group) => group.id == widget.books.first.groupId,
+                      orElse: () => TbGroup(id: -1, name: "..."))
                   .name,
             ) ??
         '???';

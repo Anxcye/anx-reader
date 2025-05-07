@@ -31,7 +31,7 @@ class GroupDao extends _$GroupDao {
     });
   }
 
-  Future<TbGroup> getGroup(int id) async {
+  Future<TbGroup?> getGroup(int id) async {
     final db = await DBHelper().database;
     final List<Map<String, dynamic>> maps = await db.query(
       'tb_groups',
@@ -39,7 +39,7 @@ class GroupDao extends _$GroupDao {
       whereArgs: [id],
     );
     if (maps.isEmpty) {
-      throw Exception('Group not found: $id');
+      return null;
     }
     return TbGroup(
       id: maps[0]['id'],
@@ -70,21 +70,26 @@ class GroupDao extends _$GroupDao {
     });
   }
 
-  Future<int> insertGroup(TbGroup group) async {
+  Future<int> insertGroup(int groupId) async {
     final db = await DBHelper().database;
     final now = DateTime.now().toIso8601String();
-    final id = await db.insert(
-      'tb_groups',
-      {
-        'name': group.name,
-        'parent_id': group.parentId,
-        'is_deleted': group.isDeleted,
+    // if not exists, insert a new group
+    if (await getGroup(groupId) == null) {
+      final id = await db.insert(
+        'tb_groups',
+        {
+        'id': groupId,
+        'name': "...",
+        'parent_id': 0,
+        'is_deleted': 0,
         'create_time': now,
         'update_time': now,
       },
-    );
-    ref.invalidateSelf();
-    return id;
+      );
+      ref.invalidateSelf();
+      return id;
+    }
+    return 0;
   }
 
   Future<int> updateGroup(TbGroup group) async {

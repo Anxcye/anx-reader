@@ -50,6 +50,7 @@ class _BookOpenedFolderState extends ConsumerState<BookOpenedFolder> {
 
     try {
       final group = await ref.read(groupDaoProvider.notifier).getGroup(groupId);
+      if (group == null) return;
       final updatedGroup = group.copyWith(name: _nameController.text);
       await ref.read(groupDaoProvider.notifier).updateGroup(updatedGroup);
 
