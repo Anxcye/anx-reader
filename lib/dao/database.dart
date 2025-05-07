@@ -3,19 +3,16 @@ import 'dart:io';
 
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/dao/book.dart';
-import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/service/book.dart';
 import 'package:anx_reader/utils/get_path/get_base_path.dart';
 import 'package:anx_reader/utils/get_path/databases_path.dart';
 import 'package:anx_reader/utils/log/common.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:path/path.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 // Current app database version
-const int currentDbVersion = 6;
+const int currentDbVersion = 7;
 
 const createBookSQL = '''
 CREATE TABLE tb_books (
@@ -87,9 +84,22 @@ CREATE TABLE tb_reading_time (
 )
 ''';
 
+const createGroupSQL = '''
+CREATE TABLE tb_groups (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT,
+  parent_id INTEGER,
+  is_deleted INTEGER DEFAULT 0,
+  create_time TEXT,
+  update_time TEXT,
+  FOREIGN KEY (parent_id) REFERENCES tb_groups(id)
+)
+''';
+
 class DBHelper {
   static final DBHelper _instance = DBHelper._internal();
   static Database? _database;
+  static bool updatedDB = false;
 
   factory DBHelper() {
     return _instance;
@@ -234,21 +244,37 @@ class DBHelper {
       case 5:
         // add a column (reader_note) to tb_notes, null default
         await db.execute("ALTER TABLE tb_notes ADD COLUMN reader_note TEXT");
+        continue case6;
+      case6:
+      case 6:
+        // create groups table and migrate existing data
+        await db.execute(createGroupSQL);
+        // add a column (file_md5) to tb_books
+        await db.execute("ALTER TABLE tb_books ADD COLUMN file_md5 TEXT");
+
+        // Insert root group
+        await db.execute(
+            "INSERT INTO tb_groups (id, name, parent_id, create_time, update_time) VALUES (0, 'Root', NULL, datetime('now'), datetime('now'))");
+
+        // Get all unique group_ids from books
+        final List<Map<String, dynamic>> uniqueGroups = await db.rawQuery('''
+          SELECT DISTINCT group_id 
+          FROM tb_books 
+          WHERE group_id IS NOT NULL AND group_id != 0
+        ''');
+
+        // Create groups for existing group_ids
+        for (var i = 0; i < uniqueGroups.length; i++) {
+          final groupId = uniqueGroups[i]['group_id'];
+          await db.execute('''
+            INSERT INTO tb_groups (id, name, parent_id, create_time, update_time)
+            VALUES (?, '...', 0, datetime('now'), datetime('now'))
+          ''', [groupId]);
+        }
     }
-    // if (oldVersion != 0 && Prefs().webdavStatus) {
-    //   SmartDialog.show(
-    //     clickMaskDismiss: false,
-    //     builder: (context) => AlertDialog(
-    //       title: Text(L10n.of(context).common_attention),
-    //       content: Text(L10n.of(context).db_updated_tip),
-    //       actions: [
-    //         TextButton(
-    //           onPressed: () => SmartDialog.dismiss(),
-    //           child: Text(L10n.of(context).common_ok),
-    //         ),
-    //       ],
-    //     ),
-    //   );
-    // }
+    
+    if (oldVersion != 0 && Prefs().webdavStatus) {
+      updatedDB = true;
+    }
   }
 }

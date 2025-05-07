@@ -146,8 +146,8 @@ class AnxWebdav extends _$AnxWebdav {
 
     File? remoteDb = await safeReadProps('anx/$remoteDbFileName', _client);
     final databasePath = await getAnxDataBasesPath();
-    final path = join(databasePath, 'app_database.db');
-    io.File localDb = io.File(path);
+    final localDbPath = join(databasePath, 'app_database.db');
+    io.File localDb = io.File(localDbPath);
 
     AnxLog.info(
         'localDbTime: ${localDb.lastModifiedSync()}, remoteDbTime: ${remoteDb?.mTime}');
@@ -216,7 +216,7 @@ class AnxWebdav extends _$AnxWebdav {
 
       await syncDatabase(direction);
 
-      File? newRemoteDb = await safeReadProps('anx/app_database.db', _client);
+      File? newRemoteDb = await safeReadProps('anx/$remoteDbFileName', _client);
 
       Prefs().lastUploadBookDate = newRemoteDb!.mTime;
 
@@ -366,24 +366,24 @@ class AnxWebdav extends _$AnxWebdav {
     File? remoteDb = await safeReadProps('anx/$remoteDbFileName', _client);
 
     final databasePath = await getAnxDataBasesPath();
-    final path = join(databasePath, 'app_database.db');
+    final localDbPath = join(databasePath, 'app_database.db');
 
     // backup local database
     await backUpDb();
 
-    io.File localDb = io.File(path);
+    io.File localDb = io.File(localDbPath);
 
     try {
       switch (direction) {
         case SyncDirection.upload:
           DBHelper.close();
-          await uploadFile(path, 'anx/$remoteDbFileName');
+          await uploadFile(localDbPath, 'anx/$remoteDbFileName');
           await DBHelper().initDB();
           break;
         case SyncDirection.download:
           if (remoteDb != null) {
             DBHelper.close();
-            await downloadFile('anx/$remoteDbFileName', path);
+            await downloadFile('anx/$remoteDbFileName', localDbPath);
             await DBHelper().initDB();
           } else {
             await _showSyncAbortedDialog();
@@ -394,11 +394,11 @@ class AnxWebdav extends _$AnxWebdav {
           if (remoteDb == null ||
               remoteDb.mTime!.isBefore(localDb.lastModifiedSync())) {
             DBHelper.close();
-            await uploadFile(path, 'anx/$remoteDbFileName');
+            await uploadFile(localDbPath, 'anx/$remoteDbFileName');
             await DBHelper().initDB();
           } else if (remoteDb.mTime!.isAfter(localDb.lastModifiedSync())) {
             DBHelper.close();
-            await downloadFile('anx/$remoteDbFileName', path);
+            await downloadFile('anx/$remoteDbFileName', localDbPath);
             await DBHelper().initDB();
           }
           break;
