@@ -32,12 +32,14 @@ class _AppearanceSettingState extends State<AppearanceSetting> {
     final languageSubtitle = Prefs().locale == null
         ? languageOptions[0].values.first
         : languageOptions
-            .firstWhere((element) =>
-                element.values.first ==
-                Prefs().locale!.languageCode +
-                    (Prefs().locale!.countryCode != null
-                        ? "-${Prefs().locale!.countryCode}"
-                        : ""), orElse: () => languageOptions[0])
+            .firstWhere(
+                (element) =>
+                    element.values.first ==
+                    Prefs().locale!.languageCode +
+                        (Prefs().locale!.countryCode != null
+                            ? "-${Prefs().locale!.countryCode}"
+                            : ""),
+                orElse: () => languageOptions[0])
             .keys
             .first;
 
@@ -64,6 +66,16 @@ class _AppearanceSettingState extends State<AppearanceSetting> {
               onToggle: (bool value) {
                 setState(() {
                   Prefs().trueDarkMode = value;
+                });
+              },
+            ),
+            SettingsTile.switchTile(
+              title: Text(L10n.of(context).e_ink_mode),
+              leading: const Icon(Icons.contrast),
+              initialValue: Prefs().eInkMode,
+              onToggle: (bool value) {
+                setState(() {
+                  Prefs().eInkMode = value;
                 });
               },
             ),
@@ -118,28 +130,29 @@ class _AppearanceSettingState extends State<AppearanceSetting> {
               )),
             ]),
         SettingsSection(
-            title: Text(L10n.of(context).settings_appearance_bottom_navigator_show),
-            tiles: [
-              SettingsTile.switchTile(
-                title: Text(L10n.of(context).navBar_statistics),
-                initialValue: Prefs().bottomNavigatorShowStatistics,
-                onToggle: (bool value) {
-                  setState(() {
-                    Prefs().bottomNavigatorShowStatistics = value;
-                  });
-                },
-              ),
-              SettingsTile.switchTile(
-                title: Text(L10n.of(context).navBar_notes),
-                initialValue: Prefs().bottomNavigatorShowNote,
-                onToggle: (bool value) {
-                  setState(() {
-                    Prefs().bottomNavigatorShowNote = value;
-                  });
-                },
-              ),
-            ],
-          ),
+          title:
+              Text(L10n.of(context).settings_appearance_bottom_navigator_show),
+          tiles: [
+            SettingsTile.switchTile(
+              title: Text(L10n.of(context).navBar_statistics),
+              initialValue: Prefs().bottomNavigatorShowStatistics,
+              onToggle: (bool value) {
+                setState(() {
+                  Prefs().bottomNavigatorShowStatistics = value;
+                });
+              },
+            ),
+            SettingsTile.switchTile(
+              title: Text(L10n.of(context).navBar_notes),
+              initialValue: Prefs().bottomNavigatorShowNote,
+              onToggle: (bool value) {
+                setState(() {
+                  Prefs().bottomNavigatorShowNote = value;
+                });
+              },
+            ),
+          ],
+        ),
       ],
     );
   }

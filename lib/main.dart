@@ -170,6 +170,25 @@ class _MyAppState extends ConsumerState<MyApp>
           //           : MediaQuery.platformBrightnessOf(context),
           // ).surface;
 
+          final isEInkMode = prefsNotifier.eInkMode;
+          final colorScheme = isEInkMode
+              ? const ColorScheme.light(
+                  primary: Colors.black,
+                  onPrimary: Colors.white,
+                  secondary: Colors.black,
+                  onSecondary: Colors.white,
+                  surface: Colors.white,
+                  onSurface: Colors.black,
+                )
+              : ColorScheme.fromSeed(
+                  seedColor: prefsNotifier.themeColor,
+                  brightness: prefsNotifier.themeMode == ThemeMode.light
+                      ? Brightness.light
+                      : prefsNotifier.themeMode == ThemeMode.dark
+                          ? Brightness.dark
+                          : MediaQuery.platformBrightnessOf(context),
+                );
+
           // Widget dragToMoveArea = DragToMoveArea(
           //   child: MaterialApp(
           //     debugShowCheckedModeBanner: false,
@@ -227,10 +246,7 @@ class _MyAppState extends ConsumerState<MyApp>
                   theme: FlexThemeData.light(
                           useMaterial3: true,
                           swapLegacyOnMaterial3: true,
-                          colorScheme: ColorScheme.fromSeed(
-                            seedColor: prefsNotifier.themeColor,
-                            // brightness: Brightness.light,
-                          ))
+                          colorScheme: colorScheme)
                       .copyWith(
                           sliderTheme: const SliderThemeData(year2023: false),
                           progressIndicatorTheme:
@@ -240,10 +256,7 @@ class _MyAppState extends ConsumerState<MyApp>
                           useMaterial3: true,
                           swapLegacyOnMaterial3: true,
                           darkIsTrueBlack: prefsNotifier.trueDarkMode,
-                          colorScheme: ColorScheme.fromSeed(
-                            seedColor: prefsNotifier.themeColor,
-                            brightness: Brightness.dark,
-                          ))
+                          colorScheme: colorScheme)
                       .copyWith(
                           sliderTheme: const SliderThemeData(year2023: false),
                           progressIndicatorTheme:

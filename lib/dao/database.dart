@@ -235,20 +235,20 @@ class DBHelper {
         // add a column (reader_note) to tb_notes, null default
         await db.execute("ALTER TABLE tb_notes ADD COLUMN reader_note TEXT");
     }
-    if (oldVersion != 0 && Prefs().webdavStatus) {
-      SmartDialog.show(
-        clickMaskDismiss: false,
-        builder: (context) => AlertDialog(
-          title: Text(L10n.of(context).common_attention),
-          content: Text(L10n.of(context).db_updated_tip),
-          actions: [
-            TextButton(
-              onPressed: () => SmartDialog.dismiss(),
-              child: Text(L10n.of(context).common_ok),
-            ),
-          ],
-        ),
-      );
-    }
+    // if (oldVersion != 0 && Prefs().webdavStatus) {
+    //   SmartDialog.show(
+    //     clickMaskDismiss: false,
+    //     builder: (context) => AlertDialog(
+    //       title: Text(L10n.of(context).common_attention),
+    //       content: Text(L10n.of(context).db_updated_tip),
+    //       actions: [
+    //         TextButton(
+    //           onPressed: () => SmartDialog.dismiss(),
+    //           child: Text(L10n.of(context).common_ok),
+    //         ),
+    //       ],
+    //     ),
+    //   );
+    // }
   }
 }
