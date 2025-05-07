@@ -3,16 +3,19 @@ import 'dart:io';
 
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/dao/book.dart';
+import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/service/book.dart';
 import 'package:anx_reader/utils/get_path/get_base_path.dart';
 import 'package:anx_reader/utils/get_path/databases_path.dart';
 import 'package:anx_reader/utils/log/common.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:path/path.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 // Current app database version
-const int currentDbVersion = 6;
+const int currentDbVersion = 7;
 
 const createBookSQL = '''
 CREATE TABLE tb_books (
@@ -231,6 +234,21 @@ class DBHelper {
       case 5:
         // add a column (reader_note) to tb_notes, null default
         await db.execute("ALTER TABLE tb_notes ADD COLUMN reader_note TEXT");
+    }
+    if (oldVersion != 0 && Prefs().webdavStatus) {
+      SmartDialog.show(
+        clickMaskDismiss: false,
+        builder: (context) => AlertDialog(
+          title: Text(L10n.of(context).common_attention),
+          content: Text(L10n.of(context).db_updated_tip),
+          actions: [
+            TextButton(
+              onPressed: () => SmartDialog.dismiss(),
+              child: Text(L10n.of(context).common_ok),
+            ),
+          ],
+        ),
+      );
     }
   }
 }
