@@ -1,5 +1,6 @@
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/providers/book_list.dart';
+import 'package:anx_reader/providers/tb_groups.dart';
 import 'package:anx_reader/widgets/bookshelf/book_cover.dart';
 import 'package:anx_reader/widgets/bookshelf/book_item.dart';
 import 'package:anx_reader/widgets/bookshelf/book_opened_folder.dart';
@@ -60,12 +61,22 @@ class _BookFolderState extends ConsumerState<BookFolder> {
       willAcceptBook = false;
     }
 
-    void openFolder() {
+    void openFolder(String groupName) {
       showDialog(
         context: context,
-        builder: (context) => BookOpenedFolder(books: widget.books),
+        builder: (context) => BookOpenedFolder(
+          books: widget.books,
+          groupName: groupName,
+        ),
       );
     }
+
+    String groupName = ref.watch(groupDaoProvider).whenOrNull(
+              data: (groups) => groups
+                  .firstWhere((group) => group.id == widget.books.first.groupId)
+                  .name,
+            ) ??
+        '???';
 
     return widget.books.length == 1
         ? DragTarget<Book>(
@@ -83,11 +94,11 @@ class _BookFolderState extends ConsumerState<BookFolder> {
             builder: (context, candidateData, rejectedData) {
               double topPosition = -10;
               return scaleTransition(
-                InkWell(
-                  onTap: openFolder,
-                  child: Column(
-                    children: [
-                      Expanded(
+                Column(
+                  children: [
+                    Expanded(
+                      child: InkWell(
+                        onTap: () => openFolder(groupName),
                         child: Stack(
                           children: [
                             ...(widget.books.length >= 4
@@ -116,8 +127,16 @@ class _BookFolderState extends ConsumerState<BookFolder> {
                           ],
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                    Text(
+                      groupName,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ),
               );
             },
