@@ -691,7 +691,7 @@ class Prefs extends ChangeNotifier {
 
   set iapPurchaseStatus(bool isPurchased) {
     prefs.setBool('iapPurchaseStatus', isPurchased);
-    notifyListeners();
+    // notifyListeners();
   }
 
   bool get iapPurchaseStatus {
@@ -700,7 +700,7 @@ class Prefs extends ChangeNotifier {
 
   set iapLastCheckTime(DateTime checkTime) {
     prefs.setString('iapLastCheckTime', checkTime.toIso8601String());
-    notifyListeners();
+    // notifyListeners();
   }
 
   DateTime get iapLastCheckTime {

@@ -36,17 +36,21 @@ void showUnsupportedWebviewDialog(int version) {
 }
 
 void handleWebviewVersion(String message) {
-  int webviewVersion =
-      int.tryParse(message.split('Chrome/')[1].split('.')[0]) ?? -1;
-  int appleWebkitVersion =
-      int.tryParse(message.split('AppleWebKit/')[1].split('.')[0]) ?? -1;
+  try {
+    int webviewVersion =
+        int.tryParse(message.split('Chrome/')[1].split('.')[0]) ?? -1;
+    int appleWebkitVersion =
+        int.tryParse(message.split('AppleWebKit/')[1].split('.')[0]) ?? -1;
 
-  bool isApple = defaultTargetPlatform == TargetPlatform.iOS ||
-      defaultTargetPlatform == TargetPlatform.macOS;
+    bool isApple = defaultTargetPlatform == TargetPlatform.iOS ||
+        defaultTargetPlatform == TargetPlatform.macOS;
 
-  if ((!isApple && (webviewVersion < minWebviewVersion)) ||
-      (isApple && (appleWebkitVersion < 605))) {
-    showUnsupportedWebviewDialog(webviewVersion);
+    if ((!isApple && (webviewVersion < minWebviewVersion)) ||
+        (isApple && (appleWebkitVersion < 605))) {
+      showUnsupportedWebviewDialog(webviewVersion);
+    }
+  } catch (e) {
+    AnxLog.severe('Webview: $e');
   }
 }
 
@@ -60,10 +64,10 @@ void webviewConsoleMessage(
   }
 
   if (consoleMessage.messageLevel == ConsoleMessageLevel.LOG) {
+    AnxLog.info('Webview: ${consoleMessage.message}');
     if (consoleMessage.message.contains("AnxUA")) {
       handleWebviewVersion(consoleMessage.message);
     }
-    AnxLog.info('Webview: ${consoleMessage.message}');
   } else if (consoleMessage.messageLevel == ConsoleMessageLevel.WARNING) {
     AnxLog.warning('Webview: ${consoleMessage.message}');
   } else if (consoleMessage.messageLevel == ConsoleMessageLevel.ERROR) {
