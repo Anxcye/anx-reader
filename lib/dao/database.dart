@@ -15,7 +15,7 @@ import 'package:path/path.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 // Current app database version
-const int currentDbVersion = 7;
+const int currentDbVersion = 6;
 
 const createBookSQL = '''
 CREATE TABLE tb_books (
