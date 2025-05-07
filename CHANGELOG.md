@@ -3,6 +3,7 @@
 ## Todo
 
 ## 1.4.5
+- Feat: E-ink mode(#264)
 - Feat: Add DeepL translation service(#223, #145)
 - Feat: Edit notes in list
 - Fix: Touchpad cannot scroll(#271, #261)
@@ -17,7 +18,7 @@
 - Fix: WebDAV Unauthorized(#273)
 - Fix: Optimize book opening speed
 
-
+- 新增：E-ink 模式(#264)
 - 新增：DeepL 翻译服务(#223, #145)
 - 新增：笔记列表可以编辑笔记
 - 修复：触摸板无法滚动(#271, #261)
