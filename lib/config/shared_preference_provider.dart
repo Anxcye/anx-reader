@@ -318,6 +318,15 @@ class Prefs extends ChangeNotifier {
     return prefs.getBool('trueDarkMode') ?? false;
   }
 
+  set eInkMode(bool status) {
+    prefs.setBool('eInkMode', status);
+    notifyListeners();
+  }
+
+  bool get eInkMode {
+    return prefs.getBool('eInkMode') ?? false;
+  }
+
   set translateService(TranslateService service) {
     prefs.setString('translateService', service.name);
     notifyListeners();
@@ -664,8 +673,10 @@ class Prefs extends ChangeNotifier {
     notifyListeners();
   }
 
-  void saveTranslateServiceConfig(TranslateService service, Map<String, dynamic> config) {
-    prefs.setString('translateServiceConfig_${service.name}', jsonEncode(config));
+  void saveTranslateServiceConfig(
+      TranslateService service, Map<String, dynamic> config) {
+    prefs.setString(
+        'translateServiceConfig_${service.name}', jsonEncode(config));
     notifyListeners();
   }
 
