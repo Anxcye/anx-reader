@@ -66,6 +66,7 @@ class BookItem extends ConsumerWidget {
               child: Container(
                 decoration: BoxDecoration(
                   boxShadow: [
+                    if (!Prefs().eInkMode)
                     BoxShadow(
                       color: Colors.grey.withAlpha(100),
                       spreadRadius: 5,

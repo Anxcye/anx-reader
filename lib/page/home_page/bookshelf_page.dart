@@ -251,74 +251,77 @@ class BookshelfPageState extends ConsumerState<BookshelfPage> {
           onPressed: _importBook,
         ),
         IconButton(
-          icon: const Icon(Icons.sort),
-          onPressed: () {
-            showMenu(
-              context: context,
-              position: RelativeRect.fromLTRB(
-                MediaQuery.of(context).size.width,
-                MediaQuery.of(context).padding.top + kToolbarHeight,
-                0.0,
-                0.0,
-              ),
-              items: [
-                for (var sortField in SortFieldEnum.values)
-                  PopupMenuItem(
-                    child: Text(
-                      sortField.getL10n(context),
-                      style: TextStyle(
-                        color: sortField == Prefs().sortField
-                            ? Theme.of(context).colorScheme.primary
-                            : Theme.of(context).colorScheme.onSurface,
-                      ),
-                    ),
-                    onTap: () {
-                      Prefs().sortField = sortField;
-                      ref.read(bookListProvider.notifier).refresh();
-                    }),
-              PopupMenuItem(
-                enabled: false,
-                child: StatefulBuilder(builder: (_, setState) {
-                  return Row(
-                    children: [
-                      Expanded(
-                        child: SegmentedButton(
-                          onSelectionChanged: (value) {
-                            Prefs().sortOrder = value.first;
-                            ref.read(bookListProvider.notifier).refresh();
-                            setState(() {});
-                          },
-                          segments: SortOrderEnum.values
-                              .map((e) => ButtonSegment(
-                                    value: e,
-                                    label: Text(e.getL10n(navigatorKey.currentContext!)),
-                                  ))
-                              .toList(),
-                          selected: {Prefs().sortOrder},
+            icon: const Icon(Icons.sort),
+            onPressed: () {
+              showMenu(
+                context: context,
+                position: RelativeRect.fromLTRB(
+                  MediaQuery.of(context).size.width,
+                  MediaQuery.of(context).padding.top + kToolbarHeight,
+                  0.0,
+                  0.0,
+                ),
+                items: [
+                  for (var sortField in SortFieldEnum.values)
+                    PopupMenuItem(
+                        child: Text(
+                          sortField.getL10n(context),
+                          style: TextStyle(
+                            color: sortField == Prefs().sortField
+                                ? Theme.of(context).colorScheme.primary
+                                : Theme.of(context).colorScheme.onSurface,
+                          ),
                         ),
-                      ),
-                    ],
-                  );
-                }),
-              )
-            ],
-          );}
-        ),
+                        onTap: () {
+                          Prefs().sortField = sortField;
+                          ref.read(bookListProvider.notifier).refresh();
+                        }),
+                  PopupMenuItem(
+                    enabled: false,
+                    child: StatefulBuilder(builder: (_, setState) {
+                      return Row(
+                        children: [
+                          Expanded(
+                            child: SegmentedButton(
+                              onSelectionChanged: (value) {
+                                Prefs().sortOrder = value.first;
+                                ref.read(bookListProvider.notifier).refresh();
+                                setState(() {});
+                              },
+                              segments: SortOrderEnum.values
+                                  .map((e) => ButtonSegment(
+                                        value: e,
+                                        label: Text(e.getL10n(
+                                            navigatorKey.currentContext!)),
+                                      ))
+                                  .toList(),
+                              selected: {Prefs().sortOrder},
+                            ),
+                          ),
+                        ],
+                      );
+                    }),
+                  )
+                ],
+              );
+            }),
       ],
     );
 
     return Container(
-        decoration: BoxDecoration(
-          gradient: RadialGradient(
-            tileMode: TileMode.clamp,
-            center: Alignment.topRight,
-            radius: 1,
-            colors: [
-              Theme.of(context).colorScheme.primary.withAlpha(5),
-              Theme.of(context).scaffoldBackgroundColor,
-            ],
-          ),
-        ),
+        decoration: Prefs().eInkMode
+            ? null
+            : BoxDecoration(
+                gradient: RadialGradient(
+                  tileMode: TileMode.clamp,
+                  center: Alignment.topRight,
+                  radius: 1,
+                  colors: [
+                    Theme.of(context).colorScheme.primary.withAlpha(5),
+                    Theme.of(context).scaffoldBackgroundColor,
+                  ],
+                ),
+              ),
         child: Scaffold(
           backgroundColor: Colors.transparent,
           appBar: appBar,
