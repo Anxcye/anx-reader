@@ -104,7 +104,7 @@ class _BookFolderState extends ConsumerState<BookFolder> {
                         child: Stack(
                           children: [
                             ...(widget.books.length >= 4
-                                    ? widget.books.sublist(0, 4)
+                                    ? widget.books.sublist(0, 3)
                                     : widget.books)
                                 .reversed
                                 .map((book) {
