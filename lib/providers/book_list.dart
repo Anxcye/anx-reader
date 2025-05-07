@@ -3,6 +3,7 @@ import 'package:anx_reader/dao/book.dart' as book_dao;
 import 'package:anx_reader/enums/sort_field.dart';
 import 'package:anx_reader/enums/sort_order.dart';
 import 'package:anx_reader/models/book.dart';
+import 'package:anx_reader/providers/tb_groups.dart';
 import 'package:lpinyin/lpinyin.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -89,6 +90,8 @@ class BookList extends _$BookList {
 
   void moveBook(Book data, int groupId) {
     updateBook(data.copyWith(groupId: groupId));
+    // insert a new group if not exists
+    ref.read(groupDaoProvider.notifier).insertGroup(groupId);
     refresh();
   }
 
@@ -101,6 +104,8 @@ class BookList extends _$BookList {
     for (var book in books) {
       updateBook(book.copyWith(groupId: 0));
     }
+    // delete the group
+    ref.read(groupDaoProvider.notifier).hardDeleteGroup(books.first.groupId);
     refresh();
   }
 
