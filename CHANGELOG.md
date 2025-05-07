@@ -3,6 +3,7 @@
 ## Todo
 
 ## 1.4.5
+- Feat: Name a group
 - Feat: E-ink mode(#264)
 - Feat: Add DeepL translation service(#223, #145)
 - Feat: Edit notes in list
@@ -18,6 +19,7 @@
 - Fix: WebDAV Unauthorized(#273)
 - Fix: Optimize book opening speed
 
+- 新增：书籍分组支持命名
 - 新增：E-ink 模式(#264)
 - 新增：DeepL 翻译服务(#223, #145)
 - 新增：笔记列表可以编辑笔记
