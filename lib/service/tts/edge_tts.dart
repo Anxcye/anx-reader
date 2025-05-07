@@ -114,6 +114,9 @@ class EdgeTts extends BaseTts {
         while (_nextVoiceText != null && _nextAudio == null) {
           await Future.delayed(const Duration(milliseconds: 100));
         }
+        while (_nextVoiceText != null && _nextAudio!.isEmpty) {
+          await _preloadNextAudio();
+        }
         if (_nextVoiceText != null && _nextAudio != null) {
           if (_nextAudio!.isEmpty) {
             await stop();
