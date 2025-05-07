@@ -219,15 +219,30 @@ $ssml
     EdgeTTSApi.voice = Prefs().ttsVoiceModel;
     EdgeTTSApi.text = text;
     List<int> audioData = [];
-    try {
-      await for (final chunk in stream()) {
-        if (chunk['type'] == 'audio') {
-          audioData.addAll(chunk['data'] as List<int>);
+    
+    int maxRetries = 3;
+    int currentRetry = 0;
+    
+    while (currentRetry < maxRetries) {
+      try {
+        await for (final chunk in stream()) {
+          if (chunk['type'] == 'audio') {
+            audioData.addAll(chunk['data'] as List<int>);
+          }
         }
+        // If we get here, the request was successful
+        return Uint8List.fromList(audioData);
+      } catch (e) {
+        currentRetry++;
+        AnxLog.severe('Error on attempt $currentRetry: $e');
+        if (currentRetry >= maxRetries) {
+          rethrow;
+        }
+        // Wait before retrying, with exponential backoff
+        await Future.delayed(Duration(seconds: currentRetry));
       }
-    } catch (e) {
-      AnxLog.severe('Error: $e');
     }
+    
     return Uint8List.fromList(audioData);
   }
 }
