@@ -394,6 +394,7 @@
     "allBooksAreDownloaded",
     "sync_now",
     "deepl_key_tip",
-    "sync_mismatch_tip"
+    "sync_mismatch_tip",
+    "db_updated_tip"
   ]
 }
