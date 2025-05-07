@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/utils/log/common.dart';
 import 'package:flutter/widgets.dart';
@@ -50,11 +51,27 @@ class IAPService {
   late Map<String, dynamic> _parsedReceipt;
   bool _isInitialized = false;
 
+  static const int kMaxValidationInterval = 7 * 24 * 60 * 60 * 1000;
+
   bool get isPurchased {
     try {
+      // Try to use cached value if available and still valid
+      DateTime lastCheckTime = Prefs().iapLastCheckTime;
+      bool cachedStatus = Prefs().iapPurchaseStatus;
+
+      int timeSinceLastCheck =
+          DateTime.now().difference(lastCheckTime).inMilliseconds.abs();
+      if (timeSinceLastCheck < kMaxValidationInterval && cachedStatus) {
+        return true;
+      }
+
+      // Otherwise use the receipt validation result
       if (!_isInitialized) return false;
       final inApp = _parsedReceipt['receipt']?['in_app'];
-      return (inApp != null && inApp.isNotEmpty) || _isOriginalUser();
+      final status = (inApp != null && inApp.isNotEmpty) || _isOriginalUser();
+      Prefs().iapPurchaseStatus = status;
+      Prefs().iapLastCheckTime = DateTime.now();
+      return status;
     } catch (e) {
       AnxLog.severe('IAP: Error checking isPurchased: $e');
       return false;

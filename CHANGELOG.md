@@ -3,6 +3,7 @@
 ## Todo
 
 ## 1.4.5
+- Feat: Cache in-app purchase status(#281, #242)
 - Feat: Name a group
 - Feat: E-ink mode(#264)
 - Feat: Add DeepL translation service(#223, #145)
@@ -19,6 +20,7 @@
 - Fix: Optimize book opening speed
 - Fix: Touchpad cannot scroll(#271, #261)
 
+- 新增：缓存内购状态(#281, #242)
 - 新增：书籍分组支持命名
 - 新增：E-ink 模式(#264)
 - 新增：DeepL 翻译服务(#223, #145)
