@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:anx_reader/dao/database.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/main.dart';
+import 'package:anx_reader/service/iap_service.dart';
+import 'package:anx_reader/utils/env_var.dart';
 import 'package:anx_reader/utils/save_file_to_download.dart';
 import 'package:anx_reader/utils/get_path/get_temp_dir.dart';
 import 'package:anx_reader/utils/get_path/databases_path.dart';
@@ -207,6 +209,12 @@ class _AppearanceSettingState extends ConsumerState<SyncSetting> {
 
       _copyFileSync(File('$extractPath/${getSharedPrefsFileName()}'),
           await getAnxShredPrefsFile());
+
+      if (EnvVar.isAppStore) {
+        Prefs().iapPurchaseStatus = false;
+        IAPService().refresh();
+        final _ = IAPService().isPurchased;
+      }
 
       AnxLog.info('importData: import success');
       AnxToast.show(L10n.of(navigatorKey.currentContext!).import_success_restart_app);

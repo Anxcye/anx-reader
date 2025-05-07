@@ -688,4 +688,26 @@ class Prefs extends ChangeNotifier {
     }
     return jsonDecode(configJson) as Map<String, dynamic>;
   }
+
+  set iapPurchaseStatus(bool isPurchased) {
+    prefs.setBool('iapPurchaseStatus', isPurchased);
+    notifyListeners();
+  }
+
+  bool get iapPurchaseStatus {
+    return prefs.getBool('iapPurchaseStatus') ?? false;
+  }
+
+  set iapLastCheckTime(DateTime checkTime) {
+    prefs.setString('iapLastCheckTime', checkTime.toIso8601String());
+    notifyListeners();
+  }
+
+  DateTime get iapLastCheckTime {
+    String? lastCheckTimeStr = prefs.getString('iapLastCheckTime');
+    if (lastCheckTimeStr == null) {
+      return DateTime(1970, 1, 1);
+    }
+    return DateTime.parse(lastCheckTimeStr);
+  }
 }
