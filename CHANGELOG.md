@@ -19,6 +19,7 @@
 - Fix: WebDAV Unauthorized(#273)
 - Fix: Optimize book opening speed
 - Fix: Touchpad cannot scroll(#271, #261)
+- Fix: Edge TTS when network exception, it will stop reading
 
 - 新增：缓存内购状态(#281, #242)
 - 新增：书籍分组支持命名
@@ -36,6 +37,7 @@
 - 修复：WebDAV提示未授权(#273)
 - 修复：优化打开书籍速度
 - 修复：触摸板无法滚动(#271, #261)
+- 修复：Edge TTS 朗读时，网络异常时会停止朗读的问题
 
 ## 1.4.4
 - Feat: Import pdf files
