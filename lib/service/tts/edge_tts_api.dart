@@ -219,10 +219,10 @@ $ssml
     EdgeTTSApi.voice = Prefs().ttsVoiceModel;
     EdgeTTSApi.text = text;
     List<int> audioData = [];
-    
-    int maxRetries = 3;
-    int currentRetry = 0;
-    
+
+    int maxRetries = 6;
+    int currentRetry = 1;
+
     while (currentRetry < maxRetries) {
       try {
         await for (final chunk in stream()) {
@@ -239,10 +239,11 @@ $ssml
           rethrow;
         }
         // Wait before retrying, with exponential backoff
-        await Future.delayed(Duration(seconds: currentRetry));
+        await Future.delayed(
+            Duration(milliseconds: currentRetry * currentRetry * 200));
       }
     }
-    
+
     return Uint8List.fromList(audioData);
   }
 }
