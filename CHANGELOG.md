@@ -2,7 +2,7 @@
 
 ## Todo
 
-## 1.4.5
+## 1.5.0
 - Feat: Cache in-app purchase status(#281, #242)
 - Feat: Name a group
 - Feat: E-ink mode(#264)
