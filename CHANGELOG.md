@@ -2,6 +2,10 @@
 
 ## Todo
 
+## 1.5.1
+- Fix: Can't open book note list in some cases
+- 修复：某些特殊情况下笔记列表无法显示
+
 ## 1.5.0
 - Feat: Cache in-app purchase status(#281, #242)
 - Feat: Name a group

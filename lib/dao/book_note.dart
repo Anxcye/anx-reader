@@ -92,11 +92,11 @@ Future<List<Map<String, int>>> selectAllBookIdAndNotes() async {
   final List<Map<String, dynamic>> maps = await db.rawQuery(
       'SELECT book_id, COUNT(id) AS number_of_notes FROM tb_notes GROUP BY book_id ORDER BY number_of_notes DESC');
   return List.generate(maps.length, (i) {
-    return {
-      'bookId': maps[i]['book_id'],
-      'numberOfNotes': maps[i]['number_of_notes'],
+    return <String, int>{
+      'bookId': maps[i]['book_id'] ?? 0,
+      'numberOfNotes': maps[i]['number_of_notes'] ?? 0,
     };
-  });
+  }).where((element) => element['bookId'] != 0).toList();
 }
 
 Future<Map<String, int>> selectNumberOfNotesAndBooks() async {
