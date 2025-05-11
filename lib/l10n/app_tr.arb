@@ -396,5 +396,9 @@
   "deepl_key_tip": "Lütfen DeepL API anahtarınızı girin, DeepL geliştirici sayfasından alın",
   "sync_mismatch_tip": "Veritabanı sürümü eşleşmiyor. Uzak veritabanı (sürüm {remoteVersion}) size uygulamanızın desteklediği sürümden (sürüm {currentDbVersion}) daha yeni. Lütfen uygulamanızı en son sürüme güncelleyin.",
   "db_updated_tip": "Veritabanı yapısı güncellendi. Lütfen diğer cihazlarda Anx Reader uygulamasını güncelleyin, yeni veritabanıyla uyumlu olması için verilerin eşitlemesini sağlayın.",
-  "e_ink_mode": "E-mürekkep modu"
+  "e_ink_mode": "E-mürekkep modu",
+  "reading_page_writing_direction": "Yazma yönü",
+  "reading_page_writing_direction_auto": "Otomatik",
+  "reading_page_writing_direction_vertical": "Dikey",
+  "reading_page_writing_direction_horizontal": "Yatay"
 }

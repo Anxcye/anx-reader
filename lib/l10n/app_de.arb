@@ -396,5 +396,9 @@
   "deepl_key_tip": "Bitte geben Sie Ihren DeepL API-Schlüssel ein, den Sie von der DeepL-Entwicklerseite erhalten können",
   "sync_mismatch_tip": "Datenbankversion stimmt nicht überein. Die Remote-Datenbank (Version {remoteVersion}) ist neuer als die von Ihrer App unterstützte Version (Version {currentDbVersion}). Bitte aktualisieren Sie Ihre App auf die neueste Version.",
   "db_updated_tip": "Die Datenbankstruktur wurde aktualisiert. Bitte aktualisieren Sie Anx Reader App auf Ihren anderen Geräten, um die Kompatibilität mit der neuen Datenbank für reibungslose Datensynchronisation zu gewährleisten.",
-  "e_ink_mode": "E-Ink-Modus"
+  "e_ink_mode": "E-Ink-Modus",
+  "reading_page_writing_direction": "Schreibrichtung",
+  "reading_page_writing_direction_auto": "Automatisch",
+  "reading_page_writing_direction_vertical": "Vertikal",
+  "reading_page_writing_direction_horizontal": "Horizontal"
 }

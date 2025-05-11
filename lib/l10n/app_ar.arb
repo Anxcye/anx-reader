@@ -396,5 +396,9 @@
   "deepl_key_tip": "يرجى إدخال مفتاح DeepL API الخاص بك ، والذي يمكن الحصول عليه من صفحة DeepL المبدع",
   "sync_mismatch_tip": "إصدار قاعدة البيانات غير متطابق. القاعدة البعيدة (الإصدار {remoteVersion}) أحدث من ما يدعمه تطبيقك (الإصدار {currentDbVersion}). يرجى تحديث تطبيقك إلى الإصدار الأحدث.",
   "db_updated_tip": "تم تحديث بنية قاعدة البيانات. يرجى تحديث تطبيق Anx Reader على أجهزتك الأخرى لضمان التوافق مع قاعدة البيانات الجديدة لتدفق البيانات بسلاسة.",
-  "e_ink_mode": "وضع e-ink"
+  "e_ink_mode": "وضع e-ink",
+  "reading_page_writing_direction": "اتجاه الكتابة",
+  "reading_page_writing_direction_auto": "آلي",
+  "reading_page_writing_direction_vertical": "عمودي",
+  "reading_page_writing_direction_horizontal": "أفقي"
 }
