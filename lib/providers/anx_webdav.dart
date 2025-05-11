@@ -92,6 +92,8 @@ class AnxWebdav extends _$AnxWebdav {
     }
     await _client.mkdir('anx');
     await _client.mkdir('anx/data');
+    await _client.mkdir('anx/data/file');
+    await _client.mkdir('anx/data/cover');
   }
 
   Future<void> syncData(SyncDirection direction, WidgetRef? ref) async {
@@ -126,7 +128,12 @@ class AnxWebdav extends _$AnxWebdav {
     String remoteDbFileName = 'database$currentDbVersion.db';
 
     try {
-      List<File> remoteFiles = await _client.readDir('/anx');
+      List<File> remoteFiles = [];
+      try {
+        remoteFiles = await _client.readDir('/anx');
+      } catch (e) {
+        await createAnxDir();
+      }
       for (var file in remoteFiles) {
         if (file.name != null &&
             file.name!.startsWith('database') &&
@@ -134,16 +141,16 @@ class AnxWebdav extends _$AnxWebdav {
           // Extract version number
           String versionStr =
               file.name!.replaceAll('database', '').replaceAll('.db', '');
-            int version = int.tryParse(versionStr) ?? 0;
-            if (version > currentDbVersion) {
-              await _showDatabaseVersionMismatchDialog(version);
-              return;
-            }
+          int version = int.tryParse(versionStr) ?? 0;
+          if (version > currentDbVersion) {
+            await _showDatabaseVersionMismatchDialog(version);
+            return;
           }
         }
-      } catch (e) {
-        AnxLog.severe('WebDAV: Error checking database versions: $e');
       }
+    } catch (e) {
+      AnxLog.severe('WebDAV: Error checking database versions: $e');
+    }
 
     File? remoteDb = await safeReadProps('anx/$remoteDbFileName', _client);
     final databasePath = await getAnxDataBasesPath();
@@ -250,7 +257,7 @@ class AnxWebdav extends _$AnxWebdav {
         AnxToast.show(
             L10n.of(navigatorKey.currentContext!).webdav_sync_complete);
       }
-    } catch (e) {
+      } catch (e) {
       if (e is DioException && e.type == DioExceptionType.connectionError) {
         AnxToast.show('WebDAV connection failed, check your network');
         AnxLog.severe('WebDAV connection failed, connection error\n$e');
@@ -287,17 +294,24 @@ class AnxWebdav extends _$AnxWebdav {
     List<String> remoteBooksName = [];
     List<String> remoteCoversName = [];
 
-    // for (var file in remoteFiles) {
-    //   if (file.name == 'file') {
-    final remoteBooks = await _client.readDir('/anx/data/file');
+    List<File> remoteBooks = [];
+    List<File> remoteCovers = [];
+
+    try {
+      remoteBooks = await _client.readDir('/anx/data/file');
+    } catch (e) {
+      await _client.mkdir('anx/data/file');
+    }
     remoteBooksName = List.generate(
         remoteBooks.length, (index) => 'file/${remoteBooks[index].name!}');
-    // } else if (file.name == 'cover') {
-    final remoteCovers = await _client.readDir('/anx/data/cover');
+
+    try {
+      remoteCovers = await _client.readDir('/anx/data/cover');
+    } catch (e) {
+      await _client.mkdir('anx/data/cover');
+    }
     remoteCoversName = List.generate(
         remoteCovers.length, (index) => 'cover/${remoteCovers[index].name!}');
-    // }
-    // }
     List<String> totalCurrentFiles = [...currentCover, ...currentBooks];
     List<String> totalRemoteFiles = [...remoteBooksName, ...remoteCoversName];
     List<String> localBooks =
@@ -315,18 +329,6 @@ class AnxWebdav extends _$AnxWebdav {
       await _showSyncAbortedDialog();
       return;
     }
-
-    // sync files
-    // for (var file in totalCurrentFiles) {
-    //   if (!totalRemoteFiles.contains(file) && totalLocalFiles.contains(file)) {
-    //     await uploadFile(getBasePath(file), 'anx/data/$file');
-    //   }
-    //   if (!io.File(getBasePath(file)).existsSync() &&
-    //       totalRemoteFiles.contains(file)) {
-    //     await downloadFile('anx/data/$file', getBasePath(file));
-    //   }
-    // }
-
     // cover files
     for (var file in currentCover) {
       if (!remoteCoversName.contains(file) && localCovers.contains(file)) {
@@ -343,10 +345,6 @@ class AnxWebdav extends _$AnxWebdav {
       if (!remoteBooksName.contains(file) && localBooks.contains(file)) {
         await uploadFile(getBasePath(file), 'anx/data/$file');
       }
-      // if (!io.File(getBasePath(file)).existsSync() &&
-      //     remoteBooksName.contains(file)) {
-      //   await downloadFile('anx/data/$file', getBasePath(file));
-      // }
     }
 
     // remove remote files not in database
