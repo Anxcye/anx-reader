@@ -78,6 +78,7 @@ String generateUrl(
     'hyphenate': true,
     'pageTurnStyle': Prefs().pageTurnStyle.name,
     'maxColumnCount': bookStyle.maxColumnCount,
+    'writingMode': Prefs().writingMode.code,
   };
 
   Map<String, dynamic> readingRules = {

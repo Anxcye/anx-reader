@@ -1,6 +1,7 @@
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/enums/convert_chinese_mode.dart';
 import 'package:anx_reader/enums/reading_info.dart';
+import 'package:anx_reader/enums/writing_mode.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/page/reading_page.dart';
 import 'package:anx_reader/page/settings_page/subpage/fonts.dart';
@@ -169,6 +170,53 @@ class _ReadingMoreSettingsState extends State<ReadingMoreSettings> {
       );
     }
 
+    Widget writingMode() {
+      return StatefulBuilder(
+        builder: (context, setState) => Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('排版方向', style: Theme.of(context).textTheme.titleMedium),
+            Row(
+              children: [
+                Expanded(
+                  child: SegmentedButton(
+                    segments: [
+                      ButtonSegment<WritingModeEnum>(
+                        label: Text('自动'),
+                        value: WritingModeEnum.auto,
+                        icon: const Icon(EvaIcons.activity_outline),
+                      ),
+                      ButtonSegment<WritingModeEnum>(
+                        label: Text('竖排'),
+                        value: WritingModeEnum.vertical,
+                        icon: const Icon(EvaIcons.book),
+                      ),
+                      ButtonSegment<WritingModeEnum>(
+                        label: Text('横排'),
+                        value: WritingModeEnum.horizontal,
+                        icon: const Icon(EvaIcons.book_open),
+                      ),
+                    ],
+                    selected: {Prefs().writingMode},
+                    onSelectionChanged: (value) {
+                      setState(() {
+                        final newBookStyle =
+                            Prefs().bookStyle.copyWith(maxColumnCount: 1);
+                        Prefs().saveBookStyleToPrefs(newBookStyle);
+                        Prefs().writingMode = value.first;
+                        epubPlayerKey.currentState?.changeStyle(newBookStyle);
+                      });
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+    }
+
     Widget buildInfoDropdown(
       BuildContext context,
       String label,
@@ -274,7 +322,6 @@ class _ReadingMoreSettingsState extends State<ReadingMoreSettings> {
                 ],
               ),
               const SizedBox(height: 16),
-
               Text(L10n.of(context).reading_page_footer_settings,
                   style: Theme.of(context).textTheme.titleMedium),
               const SizedBox(height: 8),
@@ -345,14 +392,13 @@ class _ReadingMoreSettingsState extends State<ReadingMoreSettings> {
         leading: const Icon(Icons.font_download_outlined),
         trailing: const Icon(Icons.arrow_forward_ios),
         onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const FontsSettingPage(),
-              ),
-            );
-          },
-        
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const FontsSettingPage(),
+            ),
+          );
+        },
       );
     }
 
@@ -362,6 +408,7 @@ class _ReadingMoreSettingsState extends State<ReadingMoreSettings> {
         children: [
           downloadFonts(),
           const Divider(height: 20),
+          writingMode(),
           columnCount(),
           convertChinese(),
           const Divider(height: 15),
