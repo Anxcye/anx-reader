@@ -133,6 +133,7 @@ class AnxWebdav extends _$AnxWebdav {
         remoteFiles = await _client.readDir('/anx');
       } catch (e) {
         await createAnxDir();
+        remoteFiles = await _client.readDir('/anx');
       }
       for (var file in remoteFiles) {
         if (file.name != null &&
