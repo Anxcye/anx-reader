@@ -150,6 +150,7 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
         letterSpacing: ${bookStyle.letterSpacing},
         textIndent: ${bookStyle.indent},
         maxColumnCount: ${bookStyle.maxColumnCount},
+        writingMode: '${Prefs().writingMode.code}',
       })
       ''');
     });

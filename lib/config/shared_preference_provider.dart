@@ -7,6 +7,7 @@ import 'package:anx_reader/enums/excerpt_share_template.dart';
 import 'package:anx_reader/enums/lang_list.dart';
 import 'package:anx_reader/enums/sort_field.dart';
 import 'package:anx_reader/enums/sort_order.dart';
+import 'package:anx_reader/enums/writing_mode.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/main.dart';
 import 'package:anx_reader/models/book_style.dart';
@@ -709,5 +710,14 @@ class Prefs extends ChangeNotifier {
       return DateTime(1970, 1, 1);
     }
     return DateTime.parse(lastCheckTimeStr);
+  }
+
+  WritingModeEnum get writingMode {
+    return WritingModeEnum.fromCode(prefs.getString('writingMode') ?? 'auto');
+  }
+
+  set writingMode(WritingModeEnum mode) {
+    prefs.setString('writingMode', mode.code);
+    notifyListeners();
   }
 }
