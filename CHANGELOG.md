@@ -6,9 +6,11 @@
 - Fix: Can't open book note list in some cases
 - Fix: WebDAV sync show Not Found
 - Fix: Context menu is difficult to distinguish in e-ink mode
+- L10n: Optimized Arabic translation
 - 修复：某些特殊情况下笔记列表无法显示
 - 修复：某些情况下 WebDAV 同步时显示 Not Found 的问题
 - 修复：E-ink 模式下上下文菜单难以辨认
+- L10n: 优化阿拉伯语部分翻译
 
 ## 1.5.0
 - Feat: Cache in-app purchase status(#281, #242)
