@@ -395,6 +395,11 @@
     "sync_now",
     "deepl_key_tip",
     "sync_mismatch_tip",
-    "db_updated_tip"
+    "db_updated_tip",
+    "e_ink_mode",
+    "reading_page_writing_direction",
+    "reading_page_writing_direction_auto",
+    "reading_page_writing_direction_vertical",
+    "reading_page_writing_direction_horizontal"
   ]
 }

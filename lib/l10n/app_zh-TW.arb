@@ -396,5 +396,9 @@
   "deepl_key_tip": "請輸入您的 DeepL API 密鑰，可以在 DeepL 開發者頁面獲取",
   "sync_mismatch_tip": "資料庫版本不匹配。遠端資料庫（版本 {remoteVersion}）比您的應用程式支持的版本（版本 {currentDbVersion}）更新。請更新您的應用程式到最新版本。",
   "db_updated_tip": "資料庫結構已更新。請更新其他設備上的Anx Reader應用程序，以確保與新數據庫的兼容性，以平滑數據同步。",
-  "e_ink_mode": "E-INK模式"
+  "e_ink_mode": "E-INK模式",
+  "reading_page_writing_direction": "寫作方向",
+  "reading_page_writing_direction_auto": "自動",
+  "reading_page_writing_direction_vertical": "豎排",
+  "reading_page_writing_direction_horizontal": "橫排"
 }

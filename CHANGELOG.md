@@ -3,6 +3,8 @@
 ## Todo
 
 ## 1.5.2
+- Feat: Custom writing direction(Horizontal, Vertical)
+- 新增：可以选择文字方向（横排、竖排）
 
 
 ## 1.5.1

@@ -176,26 +176,26 @@ class _ReadingMoreSettingsState extends State<ReadingMoreSettings> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('排版方向', style: Theme.of(context).textTheme.titleMedium),
+            Text(L10n.of(context).reading_page_writing_direction, style: Theme.of(context).textTheme.titleMedium),
             Row(
               children: [
                 Expanded(
                   child: SegmentedButton(
                     segments: [
                       ButtonSegment<WritingModeEnum>(
-                        label: Text('自动'),
+                        label: Text(L10n.of(context).reading_page_writing_direction_auto),
                         value: WritingModeEnum.auto,
                         icon: const Icon(EvaIcons.activity_outline),
                       ),
                       ButtonSegment<WritingModeEnum>(
-                        label: Text('竖排'),
+                        label: Text(L10n.of(context).reading_page_writing_direction_vertical),
                         value: WritingModeEnum.vertical,
-                        icon: const Icon(EvaIcons.book),
+                        icon: const Icon(Bootstrap.arrows_vertical),
                       ),
                       ButtonSegment<WritingModeEnum>(
-                        label: Text('横排'),
+                        label: Text(L10n.of(context).reading_page_writing_direction_horizontal),
                         value: WritingModeEnum.horizontal,
-                        icon: const Icon(EvaIcons.book_open),
+                        icon: const Icon(Bootstrap.arrows),
                       ),
                     ],
                     selected: {Prefs().writingMode},
