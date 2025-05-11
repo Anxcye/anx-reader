@@ -2,6 +2,9 @@
 
 ## Todo
 
+## 1.5.2
+
+
 ## 1.5.1
 - Fix: Can't open book note list in some cases
 - Fix: WebDAV sync show Not Found
