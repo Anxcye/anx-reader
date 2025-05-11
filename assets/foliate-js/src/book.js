@@ -340,11 +340,15 @@ const getCSS = ({ fontSize,
   fontColor,
   backgroundColor,
   justify,
-  hyphenate }) => {
+  hyphenate,
+  writingMode
+}) => {
 
   const fontFamily = fontName === 'book' ? '' :
     fontName === 'system' ? 'font-family: system-ui !important;' :
       `font-family: ${fontName} !important;`
+  
+  const writingModeCSS = writingMode === 'auto' ? '' : `writing-mode: ${writingMode} !important;`
 
 
   return `
@@ -356,6 +360,7 @@ const getCSS = ({ fontSize,
     }
 
     html {
+        ${writingModeCSS}
         color: ${fontColor} !important;
         background: none !important;
         // background-color: ${backgroundColor} !important;
@@ -836,7 +841,8 @@ const setStyle = () => {
     fontColor: style.fontColor,
     backgroundColor: style.backgroundColor,
     justify: style.justify,
-    hyphenate: style.hyphenate
+    hyphenate: style.hyphenate,
+    writingMode: style.writingMode
   }
   reader.view.renderer.setStyles?.(getCSS(newStyle))
 }
