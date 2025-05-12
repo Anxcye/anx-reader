@@ -265,8 +265,6 @@ class View {
     const verticlePadding = `${gap / 2}px ${topMargin}px ${gap / 2}px ${bottomMargin}px`
     const horizontalPadding = `${topMargin}px ${gap / 2}px ${bottomMargin}px ${gap / 2}px`
 
-    console.log(verticlePadding, horizontalPadding)
-
     setStylesImportant(doc.documentElement, {
       'box-sizing': 'border-box',
       'column-width': `${Math.trunc(columnWidth)}px`,
