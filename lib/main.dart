@@ -139,7 +139,7 @@ class _MyAppState extends ConsumerState<MyApp>
       if (Prefs().webdavStatus) {
         ref
             .read(anxWebdavProvider.notifier)
-            .syncData(SyncDirection.upload, ref);
+            .syncData(SyncDirection.both, ref);
       }
     } else if (state == AppLifecycleState.resumed) {
       if (Platform.isIOS) {
