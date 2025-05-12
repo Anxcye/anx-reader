@@ -401,5 +401,7 @@
   "reading_page_writing_direction_auto": "آلي",
   "reading_page_writing_direction_vertical": "عمودي",
   "reading_page_writing_direction_horizontal": "أفقي",
-  "reading_page_style_background": "خلفية"
+  "reading_page_style_background": "خلفية",
+  "reading_page_style_no_background_image": "لا توجد صورة خلفية",
+  "reading_page_style_import_background_image": "استيراد صورة الخلفية"
 }

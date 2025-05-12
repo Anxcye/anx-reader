@@ -401,5 +401,7 @@
   "reading_page_writing_direction_auto": "自動",
   "reading_page_writing_direction_vertical": "豎排",
   "reading_page_writing_direction_horizontal": "橫排",
-  "reading_page_style_background": "背景"
+  "reading_page_style_background": "背景",
+  "reading_page_style_no_background_image": "沒有背景圖像",
+  "reading_page_style_import_background_image": "導入背景圖像"
 }

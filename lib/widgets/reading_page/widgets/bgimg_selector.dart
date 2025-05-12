@@ -1,3 +1,7 @@
+import 'package:anx_reader/enums/bgimg_type.dart';
+import 'package:anx_reader/l10n/generated/L10n.dart';
+import 'package:anx_reader/models/bgimg.dart';
+import 'package:anx_reader/providers/bgimg.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -9,9 +13,94 @@ class BgimgSelector extends ConsumerStatefulWidget {
 }
 
 class _BgimgSelectorState extends ConsumerState<BgimgSelector> {
+  Widget buildItemContainer({
+    required Widget child,
+    required Function() onTap,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 8.0),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: GestureDetector(
+          onTap: onTap,
+          child: Container(
+            height: 120,
+            color: Theme.of(context).colorScheme.secondaryContainer,
+            child: child,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget buildImportBgimgItem() {
+    return buildItemContainer(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.add),
+          SizedBox(height: 10),
+          Text(L10n.of(context).reading_page_style_import_background_image),
+        ],
+      ),
+      onTap: () {},
+    );
+  }
+
+  Widget buildNoneBgimgItem(BgimgModel bgimgModel) {
+    return buildItemContainer(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.not_interested),
+          SizedBox(height: 10),
+          Text(L10n.of(context).reading_page_style_no_background_image),
+        ],
+      ),
+      onTap: () {},
+    );
+  }
+
+  Widget buildAssetBgimgItem(BgimgModel bgimgModel) {
+    return buildItemContainer(
+      child: Image.asset(
+        bgimgModel.path,
+        fit: BoxFit.cover,
+        alignment: bgimgModel.alignment.alignment,
+      ),
+      onTap: () {},
+    );
+  }
+
+  Widget buildLocalFileBgimgItem(BgimgModel bgimgModel) {
+    return buildItemContainer(
+      child: Text(bgimgModel.path),
+      onTap: () {},
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Text('bgimg selector');
+    final bgimgList = ref.watch(bgimgProvider);
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10.0),
+      child: SizedBox(
+        height: MediaQuery.of(context).size.height * 0.5,
+        child: ListView.builder(
+          itemCount: bgimgList.length + 1,
+          itemBuilder: (context, index) {
+            if (index == 0) {
+              return buildImportBgimgItem();
+            }
+            return switch (bgimgList[index - 1].type) {
+              BgimgType.none => buildNoneBgimgItem(bgimgList[index - 1]),
+              BgimgType.assets => buildAssetBgimgItem(bgimgList[index - 1]),
+              BgimgType.localFile =>
+                buildLocalFileBgimgItem(bgimgList[index - 1]),
+            };
+          },
+        ),
+      ),
+    );
   }
 }
