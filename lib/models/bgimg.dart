@@ -19,7 +19,9 @@ abstract class BgimgModel with _$BgimgModel {
 
   const BgimgModel._();
 
-  String get url => type == BgimgType.assets
-      ? 'http://localhost:${Server().port}/bgimg/assets/$path'
-      : 'http://localhost:${Server().port}/bgimg/local/$path';
+  String get url => switch (type) {
+        BgimgType.none => 'none',
+        BgimgType.assets => 'http://localhost:${Server().port}/bgimg/assets/$path',
+        BgimgType.localFile => 'http://localhost:${Server().port}/bgimg/local/$path',
+      };
 }

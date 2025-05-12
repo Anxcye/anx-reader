@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'dart:core';
 
 import 'package:anx_reader/enums/ai_prompts.dart';
+import 'package:anx_reader/enums/bgimg_alignment.dart';
+import 'package:anx_reader/enums/bgimg_type.dart';
 import 'package:anx_reader/enums/convert_chinese_mode.dart';
 import 'package:anx_reader/enums/excerpt_share_template.dart';
 import 'package:anx_reader/enums/lang_list.dart';
@@ -10,6 +12,7 @@ import 'package:anx_reader/enums/sort_order.dart';
 import 'package:anx_reader/enums/writing_mode.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/main.dart';
+import 'package:anx_reader/models/bgimg.dart';
 import 'package:anx_reader/models/book_style.dart';
 import 'package:anx_reader/models/font_model.dart';
 import 'package:anx_reader/models/read_theme.dart';
@@ -718,6 +721,22 @@ class Prefs extends ChangeNotifier {
 
   set writingMode(WritingModeEnum mode) {
     prefs.setString('writingMode', mode.code);
+    notifyListeners();
+  }
+
+  BgimgModel get bgimg {
+    String? bgimgJson = prefs.getString('bgimg');
+    if (bgimgJson == null) {
+      return BgimgModel(
+          type: BgimgType.none,
+          path: 'none',
+          alignment: BgimgAlignment.center);
+    }
+    return BgimgModel.fromJson(jsonDecode(bgimgJson));
+  }
+
+  set bgimg(BgimgModel bgimg) {
+    prefs.setString('bgimg', jsonEncode(bgimg.toJson()));
     notifyListeners();
   }
 }

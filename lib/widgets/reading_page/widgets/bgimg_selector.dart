@@ -1,8 +1,10 @@
 import 'dart:io';
 
+import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/enums/bgimg_type.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/models/bgimg.dart';
+import 'package:anx_reader/page/reading_page.dart';
 import 'package:anx_reader/providers/bgimg.dart';
 import 'package:anx_reader/utils/get_path/get_base_path.dart';
 import 'package:flutter/material.dart';
@@ -43,6 +45,11 @@ class _BgimgSelectorState extends ConsumerState<BgimgSelector> {
     );
   }
 
+  void applyBgimg(BgimgModel bgimgModel) {
+    Prefs().bgimg = bgimgModel;
+    epubPlayerKey.currentState?.changeStyle(null);
+  }
+
   Widget buildImportBgimgItem() {
     return buildItemContainer(
       child: Column(
@@ -69,7 +76,9 @@ class _BgimgSelectorState extends ConsumerState<BgimgSelector> {
           Text(L10n.of(context).reading_page_style_no_background_image),
         ],
       ),
-      onTap: () {},
+      onTap: () {
+        applyBgimg(bgimgModel);
+      },
     );
   }
 
@@ -80,7 +89,9 @@ class _BgimgSelectorState extends ConsumerState<BgimgSelector> {
         fit: BoxFit.cover,
         alignment: bgimgModel.alignment.alignment,
       ),
-      onTap: () {},
+      onTap: () {
+        applyBgimg(bgimgModel);
+      },
     );
   }
 
@@ -109,7 +120,9 @@ class _BgimgSelectorState extends ConsumerState<BgimgSelector> {
           fit: BoxFit.cover,
           alignment: bgimgModel.alignment.alignment,
         ),
-        onTap: () {},
+        onTap: () {
+          applyBgimg(bgimgModel);
+        },
       ),
     );
   }

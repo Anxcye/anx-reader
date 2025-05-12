@@ -135,22 +135,24 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
       ''');
   }
 
-  void changeStyle(BookStyle bookStyle) {
+  void changeStyle(BookStyle? bookStyle) {
     styleTimer?.cancel();
     styleTimer = Timer(const Duration(milliseconds: 300), () {
+      BookStyle style = bookStyle ?? Prefs().bookStyle;
       webViewController.evaluateJavascript(source: '''
       changeStyle({
-        fontSize: ${bookStyle.fontSize},
-        spacing: ${bookStyle.lineHeight},
-        fontWeight: ${bookStyle.fontWeight},
-        paragraphSpacing: ${bookStyle.paragraphSpacing},
-        topMargin: ${bookStyle.topMargin},
-        bottomMargin: ${bookStyle.bottomMargin},
-        sideMargin: ${bookStyle.sideMargin},
-        letterSpacing: ${bookStyle.letterSpacing},
-        textIndent: ${bookStyle.indent},
-        maxColumnCount: ${bookStyle.maxColumnCount},
+        fontSize: ${style.fontSize},
+        spacing: ${style.lineHeight},
+        fontWeight: ${style.fontWeight},
+        paragraphSpacing: ${style.paragraphSpacing},
+        topMargin: ${style.topMargin},
+        bottomMargin: ${style.bottomMargin},
+        sideMargin: ${style.sideMargin},
+        letterSpacing: ${style.letterSpacing},
+        textIndent: ${style.indent},
+        maxColumnCount: ${style.maxColumnCount},
         writingMode: '${Prefs().writingMode.code}',
+        backgroundImage: '${Prefs().bgimg.url}',
       })
       ''');
     });
@@ -330,7 +332,8 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
           if (cfi == location['cfi']) return;
           setState(() {
             cfi = location['cfi'] ?? '';
-            percentage = double.tryParse(location['percentage'].toString()) ?? 0.0;
+            percentage =
+                double.tryParse(location['percentage'].toString()) ?? 0.0;
             chapterTitle = location['chapterTitle'] ?? '';
             chapterHref = location['chapterHref'] ?? '';
             chapterCurrentPage = location['chapterCurrentPage'] ?? 0;

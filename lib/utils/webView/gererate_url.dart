@@ -79,6 +79,7 @@ String generateUrl(
     'pageTurnStyle': Prefs().pageTurnStyle.name,
     'maxColumnCount': bookStyle.maxColumnCount,
     'writingMode': Prefs().writingMode.code,
+    'backgroundImage': Prefs().bgimg.url,
   };
 
   Map<String, dynamic> readingRules = {
