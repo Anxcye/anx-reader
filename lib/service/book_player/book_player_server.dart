@@ -116,6 +116,8 @@ class Server {
           'Content-Type': contentType,
         },
       );
+    } else if (uriPath.startsWith('/bgimg/')) {
+      return _handleBgimgRequest(request);
     } else {
       return shelf.Response.ok(
         'Request for "${request.url}"',
@@ -139,4 +141,17 @@ class Server {
     };
     return shelf.Response.ok(file.openRead(), headers: headers);
   }
-}
+
+  shelf.Response _handleBgimgRequest(shelf.Request request) {
+    print(request.url.path);
+    final bgimgPath = Uri.decodeComponent(request.url.path.substring(6));
+    final file = File(bgimgPath);
+    AnxLog.info('Server: Request for bgimg: $bgimgPath');
+
+    final headers = {
+      'Content-Type': 'image/png',
+      'Access-Control-Allow-Origin': '*',
+    };
+    return shelf.Response.ok(file.openRead(), headers: headers);
+  }
+} 
