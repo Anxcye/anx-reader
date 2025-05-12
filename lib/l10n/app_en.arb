@@ -401,5 +401,7 @@
   "reading_page_writing_direction_auto": "Auto",
   "reading_page_writing_direction_vertical": "Vertical",
   "reading_page_writing_direction_horizontal": "Horizontal",
-  "reading_page_style_background": "Background"
+  "reading_page_style_background": "Background",
+  "reading_page_style_no_background_image": "No Background Image",
+  "reading_page_style_import_background_image": "Import Background Image"
 }
