@@ -3,7 +3,10 @@
 ## Todo
 
 ## 1.5.2
+- Fix: WebDAV sync may override cloud data(#274)
 - Feat: Custom writing direction(Horizontal, Vertical)
+
+- 修复：WebDAV 同步时可能会覆盖云端数据(#274)
 - 新增：可以选择文字方向（横排、竖排）
 
 
