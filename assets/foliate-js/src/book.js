@@ -341,15 +341,18 @@ const getCSS = ({ fontSize,
   backgroundColor,
   justify,
   hyphenate,
-  writingMode
+  writingMode,
+  backgroundImage
 }) => {
 
   const fontFamily = fontName === 'book' ? '' :
     fontName === 'system' ? 'font-family: system-ui !important;' :
       `font-family: ${fontName} !important;`
-  
+
   const writingModeCSS = writingMode === 'auto' ? '' : `writing-mode: ${writingMode} !important;`
 
+  const backgroundImageCSS = !backgroundImage || backgroundImage === 'none' ? 'background: none !important;' :
+    `background-image: url('${backgroundImage}') !important; background-size: cover; background-position: center; background-repeat: no-repeat;`
 
   return `
     @namespace epub "http://www.idpf.org/2007/ops";
@@ -362,8 +365,7 @@ const getCSS = ({ fontSize,
     html {
         ${writingModeCSS}
         color: ${fontColor} !important;
-        background: none !important;
-        // background-color: ${backgroundColor} !important;
+        ${backgroundImageCSS}
         background-color: transparent !important;
         letter-spacing: ${letterSpacing}px;
         font-size: ${fontSize}em;
@@ -842,7 +844,8 @@ const setStyle = () => {
     backgroundColor: style.backgroundColor,
     justify: style.justify,
     hyphenate: style.hyphenate,
-    writingMode: style.writingMode
+    writingMode: style.writingMode,
+    backgroundImage: style.backgroundImage
   }
   reader.view.renderer.setStyles?.(getCSS(newStyle))
 }
