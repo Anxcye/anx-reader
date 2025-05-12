@@ -296,7 +296,7 @@ class StyleWidgetState extends State<StyleWidget> {
   }
 
   SizedBox themeSelector() {
-    const size = 50.0;
+    const size = 40.0;
     const paddingSize = 5.0;
     EdgeInsetsGeometry padding = const EdgeInsets.all(paddingSize);
     return SizedBox(
@@ -365,6 +365,14 @@ class StyleWidgetState extends State<StyleWidget> {
                       .changeTheme(widget.themes[index]);
                   setState(() {
                     currentThemeId = widget.themes[index].id;
+                  });
+                },
+                onSecondaryTap: () {
+                  setState(() {
+                    widget.setCurrentPage(ThemeChangeWidget(
+                      readTheme: widget.themes[index],
+                      setCurrentPage: widget.setCurrentPage,
+                    ));
                   });
                 },
                 onLongPress: () {

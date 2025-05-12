@@ -19,3 +19,21 @@ We would like to express our gratitude to Pixabay (https://pixabay.com), a free 
   https://pixabay.com/photos/sea-sky-sunset-seascape-ocean-7598498/
 
 All images are licensed under the Pixabay License which allows free commercial and non-commercial use without attribution.
+
+bg1
+https://pixabay.com/photos/beach-blue-water-paradise-turquoise-2991021/
+
+bg2
+https://pixabay.com/photos/paper-texture-scrapbooking-753508/
+
+bg3
+https://pixabay.com/photos/paper-old-texture-parchment-1074131/
+
+bg4
+https://pixabay.com/photos/paper-scrapbook-texture-decorative-1914901/
+
+bg5
+https://pixabay.com/photos/paper-certificate-grunge-antique-1217311/
+
+bg6
+https://pixabay.com/photos/night-moon-mountains-alps-4702174/
