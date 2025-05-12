@@ -256,11 +256,17 @@ class View {
     this.setImageSize()
     this.expand()
   }
-  columnize({ width, height, gap, columnWidth }) {
+  columnize({ width, height, gap, columnWidth, topMargin, bottomMargin }) {
     const vertical = this.#vertical
     this.#size = vertical ? height : width
 
     const doc = this.document
+
+    const verticlePadding = `${gap / 2}px ${topMargin}px ${gap / 2}px ${bottomMargin}px`
+    const horizontalPadding = `${topMargin}px ${gap / 2}px ${bottomMargin}px ${gap / 2}px`
+
+    console.log(verticlePadding, horizontalPadding)
+
     setStylesImportant(doc.documentElement, {
       'box-sizing': 'border-box',
       'column-width': `${Math.trunc(columnWidth)}px`,
@@ -269,7 +275,7 @@ class View {
       ...(vertical
         ? { 'width': `${width}px` }
         : { 'height': `${height}px` }),
-      'padding': vertical ? `${gap / 2}px 0` : `0 ${gap / 2}px`,
+      'padding': vertical ? verticlePadding : horizontalPadding,
       'overflow': 'hidden',
       // force wrap long words
       'overflow-wrap': 'break-word',
@@ -456,7 +462,7 @@ export class Paginator extends HTMLElement {
         }
         #container {
             grid-column: 1 / -1;
-            grid-row: 2;
+            grid-row: 1 / -1;
             overflow: hidden;
         }
         :host([flow="scrolled"]) #container {
@@ -602,6 +608,9 @@ export class Paginator extends HTMLElement {
     // So we apply the inverse, f⁻¹ = -x / (x - 1) to the column gap.
     const gap = -g / (g - 1) * size
 
+    const topMargin = parseFloat(style.getPropertyValue('--_top-margin'))
+    const bottomMargin = parseFloat(style.getPropertyValue('--_bottom-margin'))
+
     const flow = this.getAttribute('flow')
     if (flow === 'scrolled') {
       // FIXME: vertical-rl only, not -lr
@@ -614,7 +623,7 @@ export class Paginator extends HTMLElement {
       // this.#header.replaceChildren()
       // this.#footer.replaceChildren()
 
-      return { flow, margin, gap, columnWidth }
+      return { flow, margin, gap, columnWidth, topMargin, bottomMargin }
     }
 
     const divisor = maxColumnCount == 0
@@ -641,7 +650,7 @@ export class Paginator extends HTMLElement {
     // this.#header.replaceChildren(...heads)
     // this.#footer.replaceChildren(...feet)
 
-    return { height, width, margin, gap, columnWidth }
+    return { height, width, margin, gap, columnWidth, topMargin, bottomMargin }
   }
   render() {
     if (!this.#view) return
