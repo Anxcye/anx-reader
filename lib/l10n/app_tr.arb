@@ -400,5 +400,6 @@
   "reading_page_writing_direction": "Yazma yönü",
   "reading_page_writing_direction_auto": "Otomatik",
   "reading_page_writing_direction_vertical": "Dikey",
-  "reading_page_writing_direction_horizontal": "Yatay"
+  "reading_page_writing_direction_horizontal": "Yatay",
+  "reading_page_style_background": "Arka plan"
 }

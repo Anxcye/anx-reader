@@ -18,6 +18,7 @@ import 'package:anx_reader/dao/theme.dart';
 import 'package:anx_reader/main.dart';
 import 'package:anx_reader/models/read_theme.dart';
 import 'package:anx_reader/page/book_player/epub_player.dart';
+import 'package:anx_reader/widgets/reading_page/widgets/bgimg_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
@@ -72,7 +73,22 @@ class StyleWidgetState extends State<StyleWidget> {
           const SizedBox(height: 10),
           fontAndPageTurn(),
           const Divider(),
-          themeSelector(),
+          Row(
+            children: [
+              Expanded(child: themeSelector()),
+              OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                ),
+                onPressed: () {
+                  widget.setCurrentPage(const BgimgSelector());
+                },
+                icon: const Icon(Icons.arrow_forward_ios),
+                iconAlignment: IconAlignment.end,
+                label: Text(L10n.of(context).reading_page_style_background),
+              )
+            ],
+          ),
         ],
       ),
     );
