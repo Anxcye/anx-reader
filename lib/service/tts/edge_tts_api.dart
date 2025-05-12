@@ -240,11 +240,11 @@ $ssml
         currentRetry++;
         AnxLog.warning('Error on attempt $currentRetry/$maxRetries: $e');
         if (currentRetry >= maxRetries) {
-          rethrow;
+          return Uint8List.fromList([]);
         }
         // Wait before retrying, with exponential backoff
         await Future.delayed(
-            Duration(milliseconds: currentRetry * currentRetry * 50));
+            Duration(milliseconds: currentRetry * currentRetry * 30));
       }
     }
 

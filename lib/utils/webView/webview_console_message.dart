@@ -50,6 +50,9 @@ void handleWebviewVersion(String message) {
       showUnsupportedWebviewDialog(webviewVersion);
     }
   } catch (e) {
+    if (e.toString().contains("Invalid value: Only validvalue is 0: 1")) {
+      return;
+    }
     AnxLog.severe('Webview: $e');
   }
 }
