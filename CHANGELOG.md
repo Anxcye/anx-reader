@@ -3,12 +3,14 @@
 ## Todo
 
 ## 1.5.2
+- Feat: iOS dark and tinted icons
 - Feat: Custom reading background image
 - Feat: Import any custom reading background
 - Feat: Custom writing direction(Horizontal, Vertical)
 - Fix: WebDAV sync may override cloud data(#274)
 - Fix: TTS may stop when encountering some punctuation(#291)
 
+- 新增：iOS 深色、着色图标
 - 新增：设置阅读背景图片
 - 新增：导入任意自定义阅读背景
 - 新增：可以选择文字方向（横排、竖排）
