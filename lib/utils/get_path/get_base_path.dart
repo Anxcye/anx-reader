@@ -36,6 +36,7 @@ void initBasePath() async {
   final fileDir = getFileDir();
   final coverDir = getCoverDir();
   final fontDir = getFontDir();
+  final bgimgDir = getBgimgDir();
   if (!fileDir.existsSync()) {
     fileDir.createSync( recursive: true);
   }
@@ -44,6 +45,9 @@ void initBasePath() async {
   }
   if (!fontDir.existsSync()) {
     fontDir.createSync(recursive: true);
+  }
+  if (!bgimgDir.existsSync()) {
+    bgimgDir.createSync(recursive: true);
   }
 }
 
@@ -66,4 +70,9 @@ Directory getCoverDir({String? path}) {
 Directory getFileDir({String? path}) {
   path ??= documentPath;
   return Directory('$path${Platform.pathSeparator}file');
+}
+
+Directory getBgimgDir({String? path}) {
+  path ??= documentPath;
+  return Directory('$path${Platform.pathSeparator}bgimg');
 }

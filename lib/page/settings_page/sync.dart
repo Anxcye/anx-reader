@@ -201,6 +201,9 @@ class _AppearanceSettingState extends ConsumerState<SyncSetting> {
           getCoverDir(path: docPath));
       _copyDirectorySync(Directory('$extractPath${pathSeparator}font'),
           getFontDir(path: docPath));
+      _copyDirectorySync(Directory('$extractPath${pathSeparator}bgimg'),
+          getBgimgDir(path: docPath));
+
 
       DBHelper.close();
       _copyDirectorySync(Directory('$extractPath${pathSeparator}databases'),
@@ -237,6 +240,9 @@ class _AppearanceSettingState extends ConsumerState<SyncSetting> {
   }
 
   void _copyDirectorySync(Directory source, Directory destination) {
+    if (!source.existsSync()) {
+      return;
+    }
     if (destination.existsSync()) {
       destination.deleteSync(recursive: true);
     }
@@ -264,6 +270,7 @@ Future<String> createZipFile(RootIsolateToken token) async {
     getFileDir(path: docPath),
     getCoverDir(path: docPath),
     getFontDir(path: docPath),
+    getBgimgDir(path: docPath),
     await getAnxDataBasesDir(),
     // await getAnxSharedPrefsDir(),
     await getAnxShredPrefsFile(),
