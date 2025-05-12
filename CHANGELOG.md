@@ -7,11 +7,13 @@
 - Feat: Import any custom reading background
 - Feat: Custom writing direction(Horizontal, Vertical)
 - Fix: WebDAV sync may override cloud data(#274)
+- Fix: TTS may stop when encountering some punctuation(#291)
 
 - 新增：设置阅读背景图片
 - 新增：导入任意自定义阅读背景
 - 新增：可以选择文字方向（横排、竖排）
 - 修复：WebDAV 同步时可能会覆盖云端数据(#274)
+- 修复：遇到部分标点时朗读停止(#291)
 
 
 ## 1.5.1
