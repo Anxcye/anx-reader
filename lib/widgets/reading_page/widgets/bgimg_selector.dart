@@ -1,9 +1,13 @@
+import 'dart:io';
+
 import 'package:anx_reader/enums/bgimg_type.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/models/bgimg.dart';
 import 'package:anx_reader/providers/bgimg.dart';
+import 'package:anx_reader/utils/get_path/get_base_path.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 
 class BgimgSelector extends ConsumerStatefulWidget {
   const BgimgSelector({super.key});
@@ -23,10 +27,16 @@ class _BgimgSelectorState extends ConsumerState<BgimgSelector> {
         borderRadius: BorderRadius.circular(20),
         child: GestureDetector(
           onTap: onTap,
-          child: Container(
-            height: 120,
-            color: Theme.of(context).colorScheme.secondaryContainer,
-            child: child,
+          child: Row(
+            children: [
+              Expanded(
+                child: Container(
+                  height: 120,
+                  color: Theme.of(context).colorScheme.secondaryContainer,
+                  child: child,
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -43,7 +53,9 @@ class _BgimgSelectorState extends ConsumerState<BgimgSelector> {
           Text(L10n.of(context).reading_page_style_import_background_image),
         ],
       ),
-      onTap: () {},
+      onTap: () {
+        ref.read(bgimgProvider.notifier).importImg();
+      },
     );
   }
 
@@ -73,9 +85,32 @@ class _BgimgSelectorState extends ConsumerState<BgimgSelector> {
   }
 
   Widget buildLocalFileBgimgItem(BgimgModel bgimgModel) {
-    return buildItemContainer(
-      child: Text(bgimgModel.path),
-      onTap: () {},
+    final path = getBgimgDir().path + Platform.pathSeparator + bgimgModel.path;
+    final actionPane = ActionPane(
+      motion: const StretchMotion(),
+      children: [
+        SlidableAction(
+          onPressed: (context) {
+            ref.read(bgimgProvider.notifier).deleteBgimg(bgimgModel);
+          },
+          icon: Icons.delete,
+          label: L10n.of(context).common_delete,
+          backgroundColor: Theme.of(context).colorScheme.surface,
+        ),
+      ],
+    );
+    return Slidable(
+      key: ValueKey(bgimgModel.path),
+      startActionPane: actionPane,
+      endActionPane: actionPane,
+      child: buildItemContainer(
+        child: Image.file(
+          File(path),
+          fit: BoxFit.cover,
+          alignment: bgimgModel.alignment.alignment,
+        ),
+        onTap: () {},
+      ),
     );
   }
 
