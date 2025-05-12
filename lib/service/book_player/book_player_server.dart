@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/utils/get_path/get_base_path.dart';
 import 'package:anx_reader/utils/log/common.dart';
@@ -82,7 +83,8 @@ class Server {
       );
     } else if (uriPath.startsWith('/fonts/')) {
       Directory fontDir = getFontDir();
-      final file = File('${fontDir.path}/${path.basename(Uri.decodeComponent(uriPath))}');
+      final file = File(
+          '${fontDir.path}/${path.basename(Uri.decodeComponent(uriPath))}');
       if (!file.existsSync()) {
         return shelf.Response.notFound('Font not found');
       }
@@ -117,7 +119,7 @@ class Server {
         },
       );
     } else if (uriPath.startsWith('/bgimg/')) {
-      return _handleBgimgRequest(request);
+      return await _handleBgimgRequest(request);
     } else {
       return shelf.Response.ok(
         'Request for "${request.url}"',
@@ -142,16 +144,22 @@ class Server {
     return shelf.Response.ok(file.openRead(), headers: headers);
   }
 
-  shelf.Response _handleBgimgRequest(shelf.Request request) {
-    print(request.url.path);
+  Future<shelf.Response> _handleBgimgRequest(shelf.Request request) async {
     final bgimgPath = Uri.decodeComponent(request.url.path.substring(6));
-    final file = File(bgimgPath);
-    AnxLog.info('Server: Request for bgimg: $bgimgPath');
-
+    ByteBuffer? file;
+    if (bgimgPath.startsWith('assets/')) {
+      file = (await rootBundle.load(bgimgPath.substring(7))).buffer;
+    } else if (bgimgPath.startsWith('local/')) {
+      final path =
+          getBgimgDir().path + Platform.pathSeparator + bgimgPath.substring(6);
+      file = (await File(path).readAsBytes()).buffer;
+    } else {
+      return shelf.Response.notFound('Bgimg not found');
+    }
     final headers = {
       'Content-Type': 'image/png',
       'Access-Control-Allow-Origin': '*',
     };
-    return shelf.Response.ok(file.openRead(), headers: headers);
+    return shelf.Response.ok(file.asUint8List(), headers: headers);
   }
-} 
+}
