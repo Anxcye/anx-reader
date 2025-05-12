@@ -400,5 +400,6 @@
   "reading_page_writing_direction": "寫作方向",
   "reading_page_writing_direction_auto": "自動",
   "reading_page_writing_direction_vertical": "豎排",
-  "reading_page_writing_direction_horizontal": "橫排"
+  "reading_page_writing_direction_horizontal": "橫排",
+  "reading_page_style_background": "背景"
 }

@@ -124,15 +124,9 @@ flutter:
     - assets/foliate-js/src/vendor/pdfjs/
     - assets/foliate-js/src/
     - assets/foliate-js/src/vendor/
-    - assets/images/openai.png
-    - assets/images/claude.png
-    - assets/images/deepseek.png
-    - assets/images/gemini.png
-    - assets/images/commonAi.png
-    - assets/images/qq.png
-    - assets/images/xiaohongshu.png
+    - assets/images/
     - assets/images/book_share/
-
+    - assets/images/bgimg/
 
   fonts:
     - family: SourceHanSerif

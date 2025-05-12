@@ -400,5 +400,6 @@
   "reading_page_writing_direction": "Schreibrichtung",
   "reading_page_writing_direction_auto": "Automatisch",
   "reading_page_writing_direction_vertical": "Vertikal",
-  "reading_page_writing_direction_horizontal": "Horizontal"
+  "reading_page_writing_direction_horizontal": "Horizontal",
+  "reading_page_style_background": "Hintergrund"
 }
