@@ -220,7 +220,7 @@ $ssml
     EdgeTTSApi.text = text;
     List<int> audioData = [];
 
-    int maxRetries = 6;
+    int maxRetries = 10;
     int currentRetry = 1;
 
     while (currentRetry < maxRetries) {
@@ -233,14 +233,18 @@ $ssml
         // If we get here, the request was successful
         return Uint8List.fromList(audioData);
       } catch (e) {
+        if (e.toString().contains(
+            "No audio received. Please check your parameters.")) {
+          return Uint8List.fromList([]);
+        }
         currentRetry++;
-        AnxLog.severe('Error on attempt $currentRetry: $e');
+        AnxLog.warning('Error on attempt $currentRetry/$maxRetries: $e');
         if (currentRetry >= maxRetries) {
           rethrow;
         }
         // Wait before retrying, with exponential backoff
         await Future.delayed(
-            Duration(milliseconds: currentRetry * currentRetry * 200));
+            Duration(milliseconds: currentRetry * currentRetry * 50));
       }
     }
 
