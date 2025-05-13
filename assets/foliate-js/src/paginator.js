@@ -684,6 +684,9 @@ export class Paginator extends HTMLElement {
     return this.#vertical ? (scrolled ? 'width' : 'height')
       : scrolled ? 'height' : 'width'
   }
+  get vertical() {
+    return this.#vertical
+  }
   get size() {
     return this.#container.getBoundingClientRect()[this.sideProp]
   }

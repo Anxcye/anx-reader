@@ -50,7 +50,7 @@ void handleWebviewVersion(String message) {
       showUnsupportedWebviewDialog(webviewVersion);
     }
   } catch (e) {
-    if (e.toString().contains("Invalid value: Only validvalue is 0: 1")) {
+    if (e.toString().contains("Invalid value: Only valid value is 0: 1")) {
       return;
     }
     AnxLog.severe('Webview: $e');
@@ -61,8 +61,12 @@ void webviewConsoleMessage(
   InAppWebViewController controller,
   ConsoleMessage consoleMessage,
 ) {
-  if (consoleMessage.message.contains(
-      "An iframe which has both allow-scripts and allow-same-origin for its sandbox attribute can escape its sandboxing")) {
+
+  const ignoreMsg = [
+    'An iframe which has both allow-scripts and allow-same-origin for its sandbox attribute can escape its sandboxing',
+    'JavaScript execution returned a result of an unsupported type'
+  ];
+  if (ignoreMsg.contains(consoleMessage.message)) {
     return;
   }
 
