@@ -1,9 +1,11 @@
 import 'package:anx_reader/config/shared_preference_provider.dart';
+import 'package:anx_reader/enums/writing_mode.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/models/book_style.dart';
 import 'package:anx_reader/page/reading_page.dart';
 import 'package:anx_reader/widgets/icon_and_text.dart';
 import 'package:flutter/material.dart';
+import 'package:icons_plus/icons_plus.dart';
 
 class StyleSettings extends StatefulWidget {
   const StyleSettings({super.key});
@@ -43,9 +45,14 @@ class _StyleSettingsState extends State<StyleSettings> {
 
     Widget sideMarginSlider(BookStyle bookStyle, StateSetter setState) {
       return Row(children: [
+      Prefs().writingMode == WritingModeEnum.horizontal?
         IconAndText(
-          icon: const Icon(Icons.margin_rounded),
+          icon: const Icon(Bootstrap.arrows),
           text: L10n.of(context).reading_page_side_margin,
+        ) : 
+        IconAndText(
+          icon: const Icon(Bootstrap.arrows_vertical),
+          text: L10n.of(context).reading_page_verticle_margin,
         ),
         Expanded(
           child: Slider(
@@ -95,9 +102,14 @@ class _StyleSettingsState extends State<StyleSettings> {
 
     Row topBottomMarginSlider(BookStyle bookStyle, StateSetter setState) {
       return Row(children: [
+        Prefs().writingMode == WritingModeEnum.horizontal?
         IconAndText(
-          icon: const Icon(Icons.vertical_align_top_outlined),
+          icon: const Icon(Bootstrap.arrow_bar_up),
           text: L10n.of(context).reading_page_top_margin,
+        ) : 
+        IconAndText(
+          icon: const Icon(Bootstrap.arrow_bar_right),
+          text: L10n.of(context).reading_page_right_margin,
         ),
         Expanded(
           child: Slider(
@@ -116,9 +128,14 @@ class _StyleSettingsState extends State<StyleSettings> {
             label: (bookStyle.topMargin / 20).toStringAsFixed(0),
           ),
         ),
+        Prefs().writingMode == WritingModeEnum.horizontal?
         IconAndText(
-          icon: const Icon(Icons.vertical_align_bottom_outlined),
+          icon: const Icon(Bootstrap.arrow_bar_down),
           text: L10n.of(context).reading_page_bottom_margin,
+        ) : 
+        IconAndText(
+          icon: const Icon(Bootstrap.arrow_bar_left),
+          text: L10n.of(context).reading_page_left_margin,
         ),
         Expanded(
           child: Slider(

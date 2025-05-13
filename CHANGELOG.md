@@ -11,6 +11,7 @@
 - Fix: TTS may stop when encountering some punctuation(#291)
 - Fix: Background image stretched in scroll mode
 - Fix: Hide scrollbar in scroll mode
+- Fix: Vertical margin prompt is not clear in vertical mode
 
 - 新增：iOS 深色、着色图标
 - 新增：设置阅读背景图片
@@ -20,7 +21,7 @@
 - 修复：遇到部分标点时朗读停止(#291)
 - 修复：滚动模式下，背景图片被拉伸
 - 修复：在滚动模式下隐藏滚动条
-
+- 修复：竖排模式下，边距调节提示不够明确
 
 ## 1.5.1
 - Fix: Can't open book note list in some cases

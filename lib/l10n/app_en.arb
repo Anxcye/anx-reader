@@ -403,5 +403,8 @@
   "reading_page_writing_direction_horizontal": "Horizontal",
   "reading_page_style_background": "Background",
   "reading_page_style_no_background_image": "No Background Image",
-  "reading_page_style_import_background_image": "Import Background Image"
+  "reading_page_style_import_background_image": "Import Background Image",
+  "reading_page_verticle_margin": "Vertical Margin",
+  "reading_page_right_margin": "Right Margin",
+  "reading_page_left_margin": "Left Margin"
 }
