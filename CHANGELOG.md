@@ -14,6 +14,7 @@
 - Fix: Vertical margin prompt is not clear in vertical mode
 - Fix: Click position cannot be recognized in vertical mode
 - Fix: WebDAV sync may override cloud data with special characters
+- Fix: Reduce TTS reading interval time
 
 - 新增：iOS 深色、着色图标
 - 新增：设置阅读背景图片
@@ -26,6 +27,7 @@
 - 修复：竖排模式下，边距调节提示不够明确
 - 修复：竖排模式下，点击位置无法正确识别
 - 修复：包含特殊字符的文件名无法通过 WebDAV 同步
+- 修复：减小 TTS 朗读间隔时间
 
 ## 1.5.1
 - Fix: Can't open book note list in some cases
