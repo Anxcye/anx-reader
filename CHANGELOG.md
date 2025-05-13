@@ -9,6 +9,8 @@
 - Feat: Custom writing direction(Horizontal, Vertical)
 - Fix: WebDAV sync may override cloud data(#274)
 - Fix: TTS may stop when encountering some punctuation(#291)
+- Fix: Background image stretched in scroll mode
+- Fix: Hide scrollbar in scroll mode
 
 - 新增：iOS 深色、着色图标
 - 新增：设置阅读背景图片
@@ -16,6 +18,8 @@
 - 新增：可以选择文字方向（横排、竖排）
 - 修复：WebDAV 同步时可能会覆盖云端数据(#274)
 - 修复：遇到部分标点时朗读停止(#291)
+- 修复：滚动模式下，背景图片被拉伸
+- 修复：在滚动模式下隐藏滚动条
 
 
 ## 1.5.1
