@@ -588,7 +588,6 @@ export class Paginator extends HTMLElement {
 
     // set background to `doc` background
     // this is needed because the iframe does not fill the whole element
-    console.log(getBackground(this.getAttribute('bgimg-url')))
     this.#background.style.background = getBackground(this.getAttribute('bgimg-url'))
 
     const { width, height } = this.#container.getBoundingClientRect()
