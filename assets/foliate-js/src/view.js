@@ -247,7 +247,7 @@ export class View extends HTMLElement {
       const topMargin = this.renderer.getAttribute('top-margin').match(/\d+/)[0]
       clientY += parseInt(topMargin)
       // if the position is not null, it is fixed layout
-      if (position ){
+      if (position){
         clientX *= scale
         clientY *= scale
 
@@ -258,6 +258,10 @@ export class View extends HTMLElement {
         this.#emit('click-view', { x: clientX, y: clientY })
         return
       }
+
+      if (this.renderer.vertical) {
+        clientY +=  this.renderer.size
+      } 
       
       this.renderer.scrollProp == 'scrollLeft'
           ? clientX -= (this.renderer.start - this.renderer.size) 
