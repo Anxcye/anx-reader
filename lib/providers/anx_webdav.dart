@@ -84,7 +84,7 @@ class AnxWebdav extends _$AnxWebdav {
   }
 
   Future<void> createAnxDir() async {
-    List<File> files = await _client.readDir('/');
+    List<File> files = await safeReadDir('/');
     for (var element in files) {
       if (element.name == 'anx') {
         return;
@@ -130,10 +130,10 @@ class AnxWebdav extends _$AnxWebdav {
     try {
       List<File> remoteFiles = [];
       try {
-        remoteFiles = await _client.readDir('/anx');
+        remoteFiles = await safeReadDir('/anx');
       } catch (e) {
         await createAnxDir();
-        remoteFiles = await _client.readDir('/anx');
+        remoteFiles = await safeReadDir('/anx');
       }
       for (var file in remoteFiles) {
         if (file.name != null &&
@@ -258,7 +258,7 @@ class AnxWebdav extends _$AnxWebdav {
         AnxToast.show(
             L10n.of(navigatorKey.currentContext!).webdav_sync_complete);
       }
-      } catch (e) {
+    } catch (e) {
       if (e is DioException && e.type == DioExceptionType.connectionError) {
         AnxToast.show('WebDAV connection failed, check your network');
         AnxLog.severe('WebDAV connection failed, connection error\n$e');
@@ -298,19 +298,13 @@ class AnxWebdav extends _$AnxWebdav {
     List<File> remoteBooks = [];
     List<File> remoteCovers = [];
 
-    try {
-      remoteBooks = await _client.readDir('/anx/data/file');
-    } catch (e) {
-      await _client.mkdir('anx/data/file');
-    }
+    remoteBooks = await safeReadDir('/anx/data/file');
+
     remoteBooksName = List.generate(
         remoteBooks.length, (index) => 'file/${remoteBooks[index].name!}');
 
-    try {
-      remoteCovers = await _client.readDir('/anx/data/cover');
-    } catch (e) {
-      await _client.mkdir('anx/data/cover');
-    }
+    remoteCovers = await safeReadDir('/anx/data/cover');
+
     remoteCoversName = List.generate(
         remoteCovers.length, (index) => 'cover/${remoteCovers[index].name!}');
     List<String> totalCurrentFiles = [...currentCover, ...currentBooks];
@@ -469,6 +463,15 @@ class AnxWebdav extends _$AnxWebdav {
     // }
   }
 
+  Future<List<File>> safeReadDir(String path) async {
+    try {
+      return await _client.readDir(path);
+    } catch (e) {
+      await _client.mkdir(path);
+      return await _client.readDir(path);
+    }
+  }
+
   Future<bool> isCurrentEmpty() async {
     List<String> currentBooks = await getCurrentBooks();
     List<String> currentCover = await getCurrentCover();
@@ -504,7 +507,7 @@ class AnxWebdav extends _$AnxWebdav {
   }
 
   Future<List<String>> listRemoteBookFiles() async {
-    final remoteFiles = await _client.readDir('/anx/data/file');
+    final remoteFiles = await safeReadDir('/anx/data/file');
     return remoteFiles.map((e) => e.name!).toList();
   }
 
