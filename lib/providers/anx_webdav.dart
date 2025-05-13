@@ -75,8 +75,6 @@ class AnxWebdav extends _$AnxWebdav {
     try {
       await _client.ping();
     } catch (e) {
-      AnxToast.show('WebDAV connection failed\n${e.toString()}',
-          duration: 5000);
       AnxLog.severe('WebDAV connection failed, ping failed\n${e.toString()}');
       return;
     }
@@ -405,10 +403,14 @@ class AnxWebdav extends _$AnxWebdav {
     }
   }
 
+  String safeEncodePath(String path) {
+    return Uri.encodeComponent(path).replaceAll('%2F', '/');
+  }
+
   Future<void> uploadFile(
     String localPath,
     String remotePath, [
-    bool replace = false,
+    bool replace = true,
   ]) async {
     CancelToken c = CancelToken();
     changeState(state.copyWith(
@@ -417,12 +419,13 @@ class AnxWebdav extends _$AnxWebdav {
     ));
     if (replace) {
       try {
-        await _client.remove(remotePath);
+        await _client.remove(safeEncodePath(remotePath));
       } catch (e) {
         AnxLog.severe('Failed to remove file\n$e');
       }
     }
-    await _client.writeFromFile(localPath, remotePath, onProgress: (c, t) {
+    await _client.writeFromFile(localPath, safeEncodePath(remotePath),
+        onProgress: (c, t) {
       changeState(state.copyWith(
         isSyncing: true,
         count: c,
@@ -445,7 +448,8 @@ class AnxWebdav extends _$AnxWebdav {
       direction: SyncDirection.download,
       fileName: remotePath.split('/').last,
     ));
-    await _client.read2File(remotePath, localPath, onProgress: (c, t) {
+    await _client.read2File(safeEncodePath(remotePath), localPath,
+        onProgress: (c, t) {
       changeState(state.copyWith(
         isSyncing: true,
         count: c,
