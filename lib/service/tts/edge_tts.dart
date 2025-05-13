@@ -108,8 +108,7 @@ class EdgeTts extends BaseTts {
   Future<void> speak({String? content}) async {
     player ??= AudioPlayer();
     player!.onPlayerComplete.listen((_) async {
-      String temp = await getNextTextFunction();
-
+      String? temp;
       if (ttsStateNotifier.value == TtsStateEnum.playing) {
         while (_nextVoiceText != null && _nextAudio == null) {
           await Future.delayed(const Duration(milliseconds: 100));
@@ -117,21 +116,21 @@ class EdgeTts extends BaseTts {
         if (_nextVoiceText != null && _nextAudio != null) {
           if (_nextAudio!.isEmpty) {
             await stop();
+            temp = await getNextTextFunction();
             _currentVoiceText = await getNextTextFunction();
             speak();
           } else {
+            await player!.play(BytesSource(_nextAudio!, mimeType: 'audio/mp3'));
+            temp = await getNextTextFunction();
             _currentVoiceText = _nextVoiceText;
             _nextVoiceText = null;
             audioToPlay = _nextAudio;
             _nextAudio = null;
-
-            await player!
-                .play(BytesSource(audioToPlay!, mimeType: 'audio/mp3'));
             _preloadNextAudio();
           }
         } else {
           await stop();
-          _currentVoiceText = temp;
+          _currentVoiceText = temp!;
           speak();
         }
       }
@@ -149,6 +148,8 @@ class EdgeTts extends BaseTts {
     await player!.setVolume(volume);
 
     audioToPlay = await EdgeTTSApi.getAudio(_currentVoiceText!);
+
+    print('play${DateTime.now().millisecondsSinceEpoch}');
 
     player!.play(BytesSource(audioToPlay!, mimeType: 'audio/mp3'));
 
