@@ -403,5 +403,8 @@
   "reading_page_writing_direction_horizontal": "Yatay",
   "reading_page_style_background": "Arka plan",
   "reading_page_style_no_background_image": "Arka plan görüntüsü yok",
-  "reading_page_style_import_background_image": "Arka plan görüntüsü içe aktarın"
+  "reading_page_style_import_background_image": "Arka plan görüntüsü içe aktarın",
+  "reading_page_verticle_margin": "Dikey marj",
+  "reading_page_right_margin": "Sağ marj",
+  "reading_page_left_margin": "Sol marj"
 }

@@ -403,5 +403,8 @@
   "reading_page_writing_direction_horizontal": "أفقي",
   "reading_page_style_background": "خلفية",
   "reading_page_style_no_background_image": "لا توجد صورة خلفية",
-  "reading_page_style_import_background_image": "استيراد صورة الخلفية"
+  "reading_page_style_import_background_image": "استيراد صورة الخلفية",
+  "reading_page_verticle_margin": "الهامش الرأسي",
+  "reading_page_right_margin": "الهامش الصحيح",
+  "reading_page_left_margin": "الهامش الأيسر"
 }
