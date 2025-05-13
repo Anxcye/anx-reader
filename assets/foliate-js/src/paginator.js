@@ -135,12 +135,21 @@ const getDirection = doc => {
   return { vertical, rtl }
 }
 
-const getBackground = doc => {
-  const bodyStyle = doc.defaultView.getComputedStyle(doc.body)
-  return bodyStyle.backgroundColor === 'rgba(0, 0, 0, 0)'
-    && bodyStyle.backgroundImage === 'none'
-    ? doc.defaultView.getComputedStyle(doc.documentElement).background
-    : bodyStyle.background
+// const getBackground = doc => {
+//   const bodyStyle = doc.defaultView.getComputedStyle(doc.body)
+//   return bodyStyle.backgroundColor === 'rgba(0, 0, 0, 0)'
+//     && bodyStyle.backgroundImage === 'none'
+//     ? doc.defaultView.getComputedStyle(doc.documentElement).background
+//     : bodyStyle.background
+// }
+const getBackground = (bgimgUrl) => {
+  let bg
+  if (bgimgUrl === 'none') {
+    bg = `none`
+  } else {
+    bg = `url(${bgimgUrl}) repeat scroll 50% 50% / 100% 100%`
+  }
+  return bg
 }
 
 const makeMarginals = (length, part) => Array.from({ length }, () => {
@@ -209,14 +218,13 @@ class View {
         // it needs to be visible for Firefox to get computed style
         this.#iframe.style.display = 'block'
         const { vertical, rtl } = getDirection(doc)
-        const background = getBackground(doc)
         this.#iframe.style.display = 'none'
 
         this.#vertical = vertical
         this.#rtl = rtl
 
         this.#contentRange.selectNodeContents(doc.body)
-        const layout = beforeRender?.({ vertical, rtl, background })
+        const layout = beforeRender?.({ vertical, rtl})
         this.#iframe.style.display = 'block'
         this.render(layout)
         this.#observer.observe(doc.body)
@@ -462,6 +470,11 @@ export class Paginator extends HTMLElement {
             grid-column: 1 / -1;
             grid-row: 1 / -1;
             overflow: hidden;
+            -ms-overflow-style: none;  /* Internet Explorer 10+ */
+            scrollbar-width: none;  /* Firefox */
+        }
+        #container::-webkit-scrollbar { 
+            display: none;  /* Safari and Chrome */
         }
         :host([flow="scrolled"]) #container {
             grid-column: 1 / -1;
@@ -528,7 +541,7 @@ export class Paginator extends HTMLElement {
 
     this.#mediaQueryListener = () => {
       if (!this.#view) return
-      this.#background.style.background = getBackground(this.#view.document)
+      this.#background.style.background = getBackground(this.getAttribute('bgimg-url'))
     }
     this.#mediaQuery.addEventListener('change', this.#mediaQueryListener)
   }
@@ -568,14 +581,15 @@ export class Paginator extends HTMLElement {
     this.#container.append(this.#view.element)
     return this.#view
   }
-  #beforeRender({ vertical, rtl, background }) {
+  #beforeRender({ vertical, rtl}) {
     this.#vertical = vertical
     this.#rtl = rtl
     this.#top.classList.toggle('vertical', vertical)
 
     // set background to `doc` background
     // this is needed because the iframe does not fill the whole element
-    this.#background.style.background = background
+    console.log(getBackground(this.getAttribute('bgimg-url')))
+    this.#background.style.background = getBackground(this.getAttribute('bgimg-url'))
 
     const { width, height } = this.#container.getBoundingClientRect()
     const size = vertical ? height : width
@@ -1059,7 +1073,7 @@ export class Paginator extends HTMLElement {
       $style.textContent = style
     } else $style.textContent = styles
 
-    this.#background.style.background = getBackground(this.#view.document)
+    this.#background.style.background = getBackground(this.getAttribute('bgimg-url'))
 
     // needed because the resize observer doesn't work in Firefox
     this.#view?.document?.fonts?.ready?.then(() => this.#view.expand())
