@@ -55,9 +55,12 @@ class _BgimgSelectorState extends ConsumerState<BgimgSelector> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.add),
+          Icon(Icons.add, color: Theme.of(context).colorScheme.onSecondary),
           SizedBox(height: 10),
-          Text(L10n.of(context).reading_page_style_import_background_image),
+          Text(L10n.of(context).reading_page_style_import_background_image,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSecondary,
+              )),
         ],
       ),
       onTap: () {
@@ -71,9 +74,13 @@ class _BgimgSelectorState extends ConsumerState<BgimgSelector> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.not_interested),
+          Icon(Icons.not_interested,
+              color: Theme.of(context).colorScheme.onSecondary),
           SizedBox(height: 10),
-          Text(L10n.of(context).reading_page_style_no_background_image),
+          Text(L10n.of(context).reading_page_style_no_background_image,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSecondary,
+              )),
         ],
       ),
       onTap: () {

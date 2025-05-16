@@ -175,7 +175,7 @@ class _MyAppState extends ConsumerState<MyApp>
               ? const ColorScheme.light(
                   primary: Colors.black,
                   onPrimary: Colors.white,
-                  secondary: Colors.black,
+                  secondary: Colors.grey,
                   onSecondary: Colors.white,
                   surface: Colors.white,
                   onSurface: Colors.black,
