@@ -7,6 +7,7 @@ import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/page/book_detail.dart';
 import 'package:anx_reader/providers/anx_webdav.dart';
 import 'package:anx_reader/providers/book_list.dart';
+import 'package:anx_reader/providers/sync_status.dart';
 import 'package:anx_reader/widgets/bookshelf/book_cover.dart';
 import 'package:anx_reader/widgets/delete_confirm.dart';
 import 'package:anx_reader/widgets/icon_and_text.dart';
@@ -57,8 +58,9 @@ class BookBottomSheet extends ConsumerWidget {
     }
 
     void handleUpload(BuildContext context) {
-      void core() {
-        ref.read(anxWebdavProvider.notifier).uploadBook(book);
+      Future<void> core() async {
+        await ref.read(anxWebdavProvider.notifier).uploadBook(book);
+        ref.read(syncStatusProvider.notifier).refresh();
       }
 
       if (Prefs().notShowReleaseLocalSpaceDialog) {
