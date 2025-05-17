@@ -82,16 +82,14 @@ class AnxWebdav extends _$AnxWebdav {
   }
 
   Future<void> createAnxDir() async {
-    List<File> files = await safeReadDir('/');
-    for (var element in files) {
-      if (element.name == 'anx') {
-        return;
-      }
+    try {
+      await _client.read('/anx/data/file');
+    } catch (e) {
+      await _client.mkdir('anx');
+      await _client.mkdir('anx/data');
+      await _client.mkdir('anx/data/file');
+      await _client.mkdir('anx/data/cover');
     }
-    await _client.mkdir('anx');
-    await _client.mkdir('anx/data');
-    await _client.mkdir('anx/data/file');
-    await _client.mkdir('anx/data/cover');
   }
 
   Future<void> syncData(SyncDirection direction, WidgetRef? ref) async {
@@ -121,6 +119,8 @@ class AnxWebdav extends _$AnxWebdav {
     if (state.isSyncing) {
       return;
     }
+
+    await createAnxDir();
 
     // Check for remote database files with version info
     String remoteDbFileName = 'database$currentDbVersion.db';
@@ -219,8 +219,6 @@ class AnxWebdav extends _$AnxWebdav {
     await backUpDb();
 
     try {
-      await createAnxDir();
-
       await syncDatabase(direction);
 
       File? newRemoteDb = await safeReadProps('anx/$remoteDbFileName', _client);
