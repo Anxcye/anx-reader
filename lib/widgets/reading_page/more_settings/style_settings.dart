@@ -45,15 +45,15 @@ class _StyleSettingsState extends State<StyleSettings> {
 
     Widget sideMarginSlider(BookStyle bookStyle, StateSetter setState) {
       return Row(children: [
-      Prefs().writingMode == WritingModeEnum.horizontal?
-        IconAndText(
-          icon: const Icon(Bootstrap.arrows),
-          text: L10n.of(context).reading_page_side_margin,
-        ) : 
-        IconAndText(
-          icon: const Icon(Bootstrap.arrows_vertical),
-          text: L10n.of(context).reading_page_verticle_margin,
-        ),
+        Prefs().writingMode == WritingModeEnum.vertical
+            ? IconAndText(
+                icon: const Icon(Bootstrap.arrows_vertical),
+                text: L10n.of(context).reading_page_verticle_margin,
+              )
+            : IconAndText(
+                icon: const Icon(Bootstrap.arrows),
+                text: L10n.of(context).reading_page_side_margin,
+              ),
         Expanded(
           child: Slider(
             padding: EdgeInsets.symmetric(horizontal: 8),
@@ -102,15 +102,15 @@ class _StyleSettingsState extends State<StyleSettings> {
 
     Row topBottomMarginSlider(BookStyle bookStyle, StateSetter setState) {
       return Row(children: [
-        Prefs().writingMode == WritingModeEnum.horizontal?
-        IconAndText(
-          icon: const Icon(Bootstrap.arrow_bar_up),
-          text: L10n.of(context).reading_page_top_margin,
-        ) : 
-        IconAndText(
-          icon: const Icon(Bootstrap.arrow_bar_right),
-          text: L10n.of(context).reading_page_right_margin,
-        ),
+        Prefs().writingMode == WritingModeEnum.vertical
+            ? IconAndText(
+                icon: const Icon(Bootstrap.chevron_bar_right),
+                text: L10n.of(context).reading_page_right_margin,
+              )
+            : IconAndText(
+                icon: const Icon(Bootstrap.chevron_bar_up),
+                text: L10n.of(context).reading_page_top_margin,
+              ),
         Expanded(
           child: Slider(
             padding: EdgeInsets.symmetric(horizontal: 8),
@@ -128,15 +128,15 @@ class _StyleSettingsState extends State<StyleSettings> {
             label: (bookStyle.topMargin / 20).toStringAsFixed(0),
           ),
         ),
-        Prefs().writingMode == WritingModeEnum.horizontal?
-        IconAndText(
-          icon: const Icon(Bootstrap.arrow_bar_down),
-          text: L10n.of(context).reading_page_bottom_margin,
-        ) : 
-        IconAndText(
-          icon: const Icon(Bootstrap.arrow_bar_left),
-          text: L10n.of(context).reading_page_left_margin,
-        ),
+        Prefs().writingMode == WritingModeEnum.vertical
+            ? IconAndText(
+                icon: const Icon(Bootstrap.chevron_bar_left),
+                text: L10n.of(context).reading_page_left_margin,
+              )
+            : IconAndText(
+                icon: const Icon(Bootstrap.chevron_bar_down),
+                text: L10n.of(context).reading_page_bottom_margin,
+              ),
         Expanded(
           child: Slider(
             padding: EdgeInsets.symmetric(horizontal: 8),

@@ -2,6 +2,11 @@
 
 ## Todo
 
+## 1.5.3
+- Fix: adjust margin icons in style settings
+
+- 修复：修改样式设置中的边距图标
+
 ## 1.5.2
 - Feat: iOS dark and tinted icons
 - Feat: Custom reading background image
