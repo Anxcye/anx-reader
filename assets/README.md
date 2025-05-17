@@ -1,4 +1,4 @@
-# Image Credits for images/book_share
+# Image Credits for images/book_share and background images
 
 ## Pixabay
 We would like to express our gratitude to Pixabay (https://pixabay.com), a free image repository that provides royalty-free images for commercial use. The following background images are sourced from Pixabay:
