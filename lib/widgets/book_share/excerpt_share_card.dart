@@ -113,7 +113,7 @@ class ExcerptShareCard extends StatelessWidget {
           textAlign: TextAlign.start,
         );
         textPainter.layout(maxWidth: 300);
-        final square = textPainter.size.width * textPainter.size.height * 2;
+        final square = textPainter.size.width * textPainter.size.height * 5;
         final maxHeight = sqrt(square);
 
         return SizedBox(
