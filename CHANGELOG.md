@@ -4,8 +4,10 @@
 
 ## 1.5.3
 - Fix: adjust margin icons in style settings
+- Fix: TTS may get stuck on punctuation
 
 - 修复：修改样式设置中的边距图标
+- 修复：TTS 有时会被标点符号卡住
 
 ## 1.5.2
 - Feat: iOS dark and tinted icons
