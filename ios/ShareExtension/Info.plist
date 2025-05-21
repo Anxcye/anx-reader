@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>AppGroupId</key>
+    <string>$(CUSTOM_GROUP_ID)</string>
+	<key>CFBundleVersion</key>
+	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<key>NSExtension</key>
+	<dict>
+		<key>NSExtensionAttributes</key>
+        <dict>
+            <key>NSExtensionActivationRule</key>
+            <dict>
+              <key>NSExtensionActivationSupportsFileWithMaxCount</key>
+			<integer>10</integer>
+			 <key>NSExtensionActivationDictionaryVersion</key>
+			<integer>2</integer>
+			<key>NSExtensionActivationSupportsFileWithType</key>
+			<array>
+				<!-- PDF -->
+				<string>com.adobe.pdf</string>
+				<!-- EPUB -->
+				<string>org.idpf.epub-container</string>
+				<!-- MOBI -->
+				<string>com.amazon.mobi-ebook</string>
+				<!-- AZW3 -->
+				<string>com.amazon.azw3-ebook</string>
+				<!-- FB2 -->
+				<string>org.fictionbook.fb2</string>
+				<!-- TXT -->
+				<string>public.plain-text</string>
+				<!-- common e-book -->
+				<string>public.ebook</string>
+				<!-- All Files as a backup -->
+				<string>public.data</string>
+			</array>
+            </dict>
+        </dict>
+		<key>NSExtensionMainStoryboard</key>
+		<string>MainInterface</string>
+		<key>NSExtensionPointIdentifier</key>
+		<string>com.apple.share-services</string>
+	</dict>
+  </dict>
+</plist>
