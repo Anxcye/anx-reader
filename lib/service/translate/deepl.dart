@@ -59,7 +59,7 @@ class DeepLTranslateProvider implements TranslateServiceProvider {
         yield* Stream.error(Exception('DeepL返回结果格式错误'));
       }
     } catch (e) {
-      AnxLog.severe("DeepL翻译错误: $e");
+      AnxLog.severe("Deepl ${L10n.of(navigatorKey.currentContext!).translate_error}: $e");
       yield* Stream.error(Exception(e));
     }
   }
