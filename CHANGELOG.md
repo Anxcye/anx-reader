@@ -1,6 +1,8 @@
 # Changelog
 
 ## Todo
+- Feat: Add Crimean Tatar translation support
+- 新增：添加克里米亚鞑靼语翻译支持
 
 ## 1.5.3
 - Fix: adjust margin icons in style settings
