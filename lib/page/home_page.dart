@@ -7,7 +7,7 @@ import 'package:anx_reader/page/home_page/bookshelf_page.dart';
 import 'package:anx_reader/page/home_page/notes_page.dart';
 import 'package:anx_reader/page/home_page/settings_page.dart';
 import 'package:anx_reader/page/home_page/statistics_page.dart';
-import 'package:anx_reader/service/book.dart';
+import 'package:anx_reader/service/receive_file/receive_share.dart';
 import 'package:anx_reader/utils/check_update.dart';
 import 'package:anx_reader/utils/get_path/get_temp_dir.dart';
 import 'package:anx_reader/utils/load_default_font.dart';
@@ -21,7 +21,6 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:icons_plus/icons_plus.dart';
-import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 WebViewEnvironment? webViewEnvironment;
@@ -44,6 +43,54 @@ class _HomePageState extends ConsumerState<HomePage> {
     initAnx();
   }
 
+  Future<void> _checkWindowsWebview() async {
+    final availableVersion = await WebViewEnvironment.getAvailableVersion();
+    AnxLog.info('WebView2 version: $availableVersion');
+
+    if (availableVersion == null) {
+      SmartDialog.show(
+        builder: (context) => AlertDialog(
+          title: const Icon(Icons.error),
+          content: Text(L10n.of(context).webview2_not_installed),
+          actions: [
+            TextButton(
+              onPressed: () => {
+                launchUrl(
+                    Uri.parse(
+                        'https://developer.microsoft.com/en-us/microsoft-edge/webview2'),
+                    mode: LaunchMode.externalApplication)
+              },
+              child: Text(L10n.of(context).webview2_install),
+            ),
+          ],
+        ),
+      );
+    } else {
+      webViewEnvironment = await WebViewEnvironment.create(
+        settings: WebViewEnvironmentSettings(
+            userDataFolder: (await getAnxTempDir()).path),
+      );
+    }
+  }
+
+  void _showDbUpdatedDialog() {
+    SmartDialog.show(
+      clickMaskDismiss: false,
+      builder: (context) => AlertDialog(
+        title: Text(L10n.of(context).common_attention),
+        content: Text(L10n.of(context).db_updated_tip),
+        actions: [
+          TextButton(
+            onPressed: () {
+              SmartDialog.dismiss();
+            },
+            child: Text(L10n.of(context).common_ok),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> initAnx() async {
     AnxToast.init(context);
     checkUpdate(false);
@@ -54,84 +101,15 @@ class _HomePageState extends ConsumerState<HomePage> {
     loadDefaultFont();
 
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.windows) {
-      final availableVersion = await WebViewEnvironment.getAvailableVersion();
-      AnxLog.info('WebView2 version: $availableVersion');
-
-      if (availableVersion == null) {
-        SmartDialog.show(
-          builder: (context) => AlertDialog(
-            title: const Icon(Icons.error),
-            content: Text(L10n.of(context).webview2_not_installed),
-            actions: [
-              TextButton(
-                onPressed: () => {
-                  launchUrl(
-                      Uri.parse(
-                          'https://developer.microsoft.com/en-us/microsoft-edge/webview2'),
-                      mode: LaunchMode.externalApplication)
-                },
-                child: Text(L10n.of(context).webview2_install),
-              ),
-            ],
-          ),
-        );
-      } else {
-        webViewEnvironment = await WebViewEnvironment.create(
-          settings: WebViewEnvironmentSettings(
-              userDataFolder: (await getAnxTempDir()).path),
-        );
-      }
+      await _checkWindowsWebview();
     }
 
     if (Platform.isAndroid || Platform.isIOS) {
-      // receive sharing intent
-      Future<void> handleShare(List<SharedMediaFile> value) async {
-        List<File> files = [];
-        for (var item in value) {
-          final sourceFile = File(item.path);
-          files.add(sourceFile);
-        }
-        importBookList(files, context, ref);
-        ReceiveSharingIntent.instance.reset();
-      }
+      receiveShareIntent(ref);
+    }
 
-      ReceiveSharingIntent.instance.getMediaStream().listen((value) {
-        AnxLog.info(
-            'share: Receive share intent: ${value.map((e) => e.toMap())}');
-        if (value.isNotEmpty) {
-          handleShare(value);
-        }
-      }, onError: (err) {
-        AnxLog.severe('share: Receive share intent');
-      });
-
-      ReceiveSharingIntent.instance.getInitialMedia().then((value) {
-        AnxLog.info(
-            'share: Receive share intent: ${value.map((e) => e.toMap())}');
-        if (value.isNotEmpty) {
-          handleShare(value);
-        }
-      }, onError: (err) {
-        AnxLog.severe('share: Receive share intent');
-      });
-
-      if (DBHelper.updatedDB) {
-        SmartDialog.show(
-          clickMaskDismiss: false,
-          builder: (context) => AlertDialog(
-            title: Text(L10n.of(context).common_attention),
-            content: Text(L10n.of(context).db_updated_tip),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  SmartDialog.dismiss();
-                },
-                child: Text(L10n.of(context).common_ok),
-              ),
-            ],
-          ),
-        );
-      }
+    if (DBHelper.updatedDB) {
+      _showDbUpdatedDialog();
     }
   }
 
@@ -144,22 +122,13 @@ class _HomePageState extends ConsumerState<HomePage> {
       const SettingsPage(),
     ];
     List<Map<String, dynamic>> navBarItems = [
-      {
-        'icon': EvaIcons.book_open,
-          'label': L10n.of(context).navBar_bookshelf
-        },
-        if (Prefs().bottomNavigatorShowStatistics)
-          {
-            'icon': Icons.show_chart,
-            'label': L10n.of(context).navBar_statistics
-          },
-        if (Prefs().bottomNavigatorShowNote)
-          {'icon': Icons.note, 'label': L10n.of(context).navBar_notes},
-        {
-          'icon': EvaIcons.settings_2,
-          'label': L10n.of(context).navBar_settings
-        },
-    ];  
+      {'icon': EvaIcons.book_open, 'label': L10n.of(context).navBar_bookshelf},
+      if (Prefs().bottomNavigatorShowStatistics)
+        {'icon': Icons.show_chart, 'label': L10n.of(context).navBar_statistics},
+      if (Prefs().bottomNavigatorShowNote)
+        {'icon': Icons.note, 'label': L10n.of(context).navBar_notes},
+      {'icon': EvaIcons.settings_2, 'label': L10n.of(context).navBar_settings},
+    ];
 
     List<NavigationRailDestination> railBarItems = navBarItems.map((item) {
       return NavigationRailDestination(
@@ -170,9 +139,9 @@ class _HomePageState extends ConsumerState<HomePage> {
 
     List<NavigationDestination> bottomBarItems = navBarItems.map((item) {
       return NavigationDestination(
-          icon: Icon(item['icon'] as IconData),
-          label: item['label'] as String,
-        );
+        icon: Icon(item['icon'] as IconData),
+        label: item['label'] as String,
+      );
     }).toList();
 
     return LayoutBuilder(
