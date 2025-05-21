@@ -7,9 +7,11 @@
 ## 1.5.3
 - Fix: adjust margin icons in style settings
 - Fix: TTS may get stuck on punctuation
+- Fix: Fix garbled text when importing some TXT files
 
 - 修复：修改样式设置中的边距图标
 - 修复：TTS 有时会被标点符号卡住
+- 修复：部分 TXT 文件导入乱码的问题
 
 ## 1.5.2
 - Feat: iOS dark and tinted icons
