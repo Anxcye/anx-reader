@@ -9,6 +9,8 @@ enum LangListEnum {
   arabic('ar', 'العربية'),
   bulgarian('bg', 'Български'),
   catalan('ca', 'Català'),
+  crimeanTatarLatin('crh-Latn', 'Qırımtatarca'),
+  crimeanTatarCyrillic('crh', 'Къырымтатарджа'),
   croatian('hr', 'Hrvatski'),
   czech('cs', 'Čeština'),
   danish('da', 'Dansk'),
