@@ -5,12 +5,14 @@
 - 新增：添加克里米亚鞑靼语翻译支持
 
 ## 1.5.3
+- Feat: Support modifying the original text content in the note editing diaglog
 - Feat: Support import books via share
 - Feat: Add this app to open with
 - Fix: adjust margin icons in style settings
 - Fix: TTS may get stuck on punctuation
 - Fix: Fix garbled text when importing some TXT files
 
+- 新增：支持在笔记编辑界面中修改笔记的原文内容
 - 新增：iOS 支持通过分享的方式导入图书
 - 新增：支持 打开方式 中选择本App
 - 修复：修改样式设置中的边距图标

@@ -15,6 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:icons_plus/icons_plus.dart';
+import 'package:path/path.dart';
 import 'package:sticky_headers/sticky_headers.dart';
 
 class BookNotesList extends ConsumerStatefulWidget {
@@ -69,9 +70,13 @@ class _BookNotesListState extends ConsumerState<BookNotesList> {
     String currentType = bookNote.type;
     String currentColor = bookNote.color;
     String? currentNote = bookNote.readerNote;
+    String currentContent = bookNote.content;
+    bool isEditingContent = false;
 
     TextEditingController noteController =
         TextEditingController(text: currentNote);
+    TextEditingController contentController =
+        TextEditingController(text: currentContent);
 
     showDialog(
       context: context,
@@ -86,7 +91,29 @@ class _BookNotesListState extends ConsumerState<BookNotesList> {
                   children: [
                     Padding(
                       padding: const EdgeInsets.only(top: 8, bottom: 16),
-                      child: Text(bookNote.content),
+                      child: 
+                      isEditingContent?
+                      TextField(
+                        controller: contentController,
+                        decoration: InputDecoration(
+                          border: const OutlineInputBorder(),
+                          hintText:
+                              L10n.of(context).context_menu_add_note_tips,
+                        ),
+                        maxLines: 3,
+                      ):
+                      GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            isEditingContent = true;
+                          });
+                        },
+                        child: Text(bookNote.content,
+                          style: const TextStyle(
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
                     ),
                     SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
@@ -156,7 +183,7 @@ class _BookNotesListState extends ConsumerState<BookNotesList> {
                     BookNote updatedNote = BookNote(
                       id: bookNote.id,
                       bookId: bookNote.bookId,
-                      content: bookNote.content,
+                      content: contentController.text.trim(),
                       cfi: bookNote.cfi,
                       chapter: bookNote.chapter,
                       type: currentType,
@@ -615,6 +642,7 @@ class _BookNotesListState extends ConsumerState<BookNotesList> {
   }
 
   Widget slidbleNotes(Widget child, BookNote bookNote) {
+    BuildContext context = this.context;
     ActionPane actionPane = ActionPane(
       motion: const StretchMotion(),
       children: [
