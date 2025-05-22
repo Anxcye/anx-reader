@@ -410,6 +410,8 @@ const getCSS = ({ fontSize,
         -webkit-hyphenate-limit-after: 2;
         -webkit-hyphenate-limit-lines: 2;
         hanging-punctuation: allow-end last;
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
         widows: 2;
     }
 
