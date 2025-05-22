@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:convert';
 
 import 'package:anx_reader/dao/book.dart';
 import 'package:anx_reader/dao/theme.dart';
@@ -24,6 +25,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:archive/archive.dart';
+import 'package:xml/xml.dart';
+import 'package:flutter/foundation.dart';
 
 import 'book_player/book_player_server.dart';
 
@@ -264,6 +268,12 @@ Future<void> getBookMetadata(
   Book? book,
   WidgetRef? ref,
 }) async {
+  // Check if running on Linux
+  if (defaultTargetPlatform == TargetPlatform.linux) {
+    await _getBookMetadataLinux(file, ref);
+    return;
+  }
+
   String serverFileName = Server().setTempFile(file);
 
   String cfi = '';
@@ -327,4 +337,54 @@ Future<void> getBookMetadata(
   headlessInAppWebView?.dispose();
   headlessInAppWebView = null;
   throw Exception('Import: Get book metadata timeout');
+}
+
+Future<void> _getBookMetadataLinux(File file, WidgetRef? ref) async {
+  String title = 'Unknown';
+  String author = 'Unknown';
+  String description = '';
+  String cover = '';
+  
+  String extension = file.path.split('.').last.toLowerCase();
+  
+  if (extension == 'epub') {
+    try {
+      final bytes = await file.readAsBytes();
+      final archive = ZipDecoder().decodeBytes(bytes);
+      
+      // Find OPF file and extract metadata
+      for (final archiveFile in archive) {
+        if (archiveFile.name.endsWith('.opf')) {
+          final opfContent = utf8.decode(archiveFile.content as List<int>);
+          final document = XmlDocument.parse(opfContent);
+          final metadata = document.findAllElements('metadata').first;
+          
+          title = metadata.findElements('title').firstOrNull?.innerText ?? title;
+          author = metadata.findElements('creator').firstOrNull?.innerText ?? author;
+          description = metadata.findElements('description').firstOrNull?.innerText ?? description;
+          break;
+        }
+      }
+      
+      // Extract cover image
+      for (final archiveFile in archive) {
+        final fileName = archiveFile.name.toLowerCase();
+        if (fileName.contains('cover') && 
+            (fileName.endsWith('.jpg') || fileName.endsWith('.jpeg') || fileName.endsWith('.png'))) {
+          cover = base64Encode(archiveFile.content as List<int>);
+          break;
+        }
+      }
+    } catch (e) {
+      AnxLog.severe('EPUB parsing failed: $e');
+    }
+  }
+  
+  // Fallback to filename if no metadata found
+  if (title == 'Unknown') {
+    title = file.path.split('/').last.split('.').first;
+  }
+  
+  await saveBook(file, title, author, description, cover);
+  ref?.read(bookListProvider.notifier).refresh();
 }
