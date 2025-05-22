@@ -15,7 +15,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:icons_plus/icons_plus.dart';
-import 'package:path/path.dart';
 import 'package:sticky_headers/sticky_headers.dart';
 
 class BookNotesList extends ConsumerStatefulWidget {
