@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:anx_reader/dao/book.dart';
 import 'package:anx_reader/dao/reading_time.dart';
@@ -44,29 +45,41 @@ class _BookDetailState extends ConsumerState<BookDetail> {
   @override
   Widget build(BuildContext context) {
     Widget buildBackground() {
-      return Container(
-        color: Theme.of(context).colorScheme.surface,
-        child: ShaderMask(
+      var bg = Scaffold(
+        body: ShaderMask(
           shaderCallback: (rect) {
             return LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                Theme.of(context).colorScheme.surface.withOpacity(0.20),
-                Colors.transparent,
+                Theme.of(context).colorScheme.surface.withAlpha(200),
+                Theme.of(context).colorScheme.surface.withAlpha(10),
+                Theme.of(context).colorScheme.surface.withAlpha(10),
+                // Colors.transparent,
               ],
             ).createShader(
               Rect.fromLTRB(0, 0, rect.width, rect.height),
             );
           },
-          blendMode: BlendMode.dstIn,
+          blendMode: BlendMode.dstATop,
           child: bookCover(
             context,
             _book,
-            height: 600,
+            height: MediaQuery.of(context).size.height * 0.8,
             width: MediaQuery.of(context).size.width,
           ),
         ),
+      );
+      return Stack(
+        children: [
+          bg,
+          BackdropFilter(
+            filter: ImageFilter.blur(sigmaY: 40, sigmaX: 40),
+            child: Container(
+              color: Colors.black12,
+            ),
+          )
+        ],
       );
     }
 
@@ -119,7 +132,7 @@ class _BookDetailState extends ConsumerState<BookDetail> {
                                 child: Text(
                                   "${(widget.book.readingPercentage * 100).toStringAsFixed(0)}%",
                                   style: const TextStyle(
-                                    fontSize: 20,
+                                    fontSize: 15,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -194,7 +207,7 @@ class _BookDetailState extends ConsumerState<BookDetail> {
                     boxShadow: [
                       // Set the shadow
                       BoxShadow(
-                        color: Colors.grey.withOpacity(0.5),
+                        color: Colors.grey.withAlpha(128),
                         spreadRadius: 6,
                         blurRadius: 30,
                         offset: const Offset(0, 3),
@@ -286,7 +299,7 @@ class _BookDetailState extends ConsumerState<BookDetail> {
         children: [
           const Spacer(),
           isEditing
-              ? ElevatedButton(
+              ? OutlinedButton(
                   child: Row(
                     children: [
                       const Icon(Icons.save),
@@ -303,7 +316,7 @@ class _BookDetailState extends ConsumerState<BookDetail> {
                     });
                   },
                 )
-              : ElevatedButton(
+              : OutlinedButton(
                   child: Row(
                     children: [
                       const Icon(Icons.edit),
@@ -536,7 +549,7 @@ class _BookDetailState extends ConsumerState<BookDetail> {
                   pinned: true,
                   stretch: true,
                   backgroundColor: _isCollapsed
-                      ? Theme.of(context).colorScheme.surface.withOpacity(0.8)
+                      ? Theme.of(context).colorScheme.surface.withAlpha(80)
                       : Colors.transparent,
                   flexibleSpace: FlexibleSpaceBar(
                     title: AnimatedOpacity(
