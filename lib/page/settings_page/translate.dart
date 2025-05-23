@@ -356,6 +356,22 @@ class _TranslateSettingItemState extends State<TranslateSettingItem> {
             }
           },
         );
+      case ConfigItemType.tip:
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 8.0),
+          child: Row(
+            children: [
+              Icon(
+                Icons.info_outline,
+              ),
+              Expanded(
+                child: Text(
+                  item.defaultValue.toString(),
+                ),
+              ),
+            ],
+          ),
+        );
     }
   }
 
@@ -372,128 +388,125 @@ class _TranslateSettingItemState extends State<TranslateSettingItem> {
   Widget build(BuildContext context) {
     final configItems = getTranslateServiceConfigItems(widget.service);
 
-    return  Card(
-        margin: const EdgeInsets.all(10),
-        color: isExpanded
-            ? Theme.of(context).colorScheme.secondaryContainer
-            : Colors.transparent,
-        shadowColor: Colors.transparent,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.translate_outlined),
-              title: Text(widget.service.label),
-              onTap: () {
-                setState(() {
-                  isExpanded = !isExpanded;
-                });
-              },
-            ),
-            AnimatedSize(
-              duration: const Duration(milliseconds: 200),
-              curve: Curves.bounceInOut,
-              alignment: Alignment.topCenter,
-              child: isExpanded
-                  ? Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    ...configItems.map((item) {
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8.0),
-                        child: _buildConfigItem(item),
-                      );
-                    }),
-
-                    const Divider(),
-
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
+    return Card(
+      margin: const EdgeInsets.all(10),
+      color: isExpanded
+          ? Theme.of(context).colorScheme.secondaryContainer
+          : Colors.transparent,
+      shadowColor: Colors.transparent,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            leading: const Icon(Icons.translate_outlined),
+            title: Text(widget.service.label),
+            onTap: () {
+              setState(() {
+                isExpanded = !isExpanded;
+              });
+            },
+          ),
+          AnimatedSize(
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.bounceInOut,
+            alignment: Alignment.topCenter,
+            child: isExpanded
+                ? Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        TextButton(
-                          onPressed: () {
-                            _saveConfig();
-                            SmartDialog.show(
-                              useSystem: true,
-                              animationType:
-                                  SmartAnimationType.centerFade_otherSlide,
-                              builder: (context) => AlertDialog(
-                                title: const Center(
-                                  child: Icon(Icons.check_circle),
-                                ),
-                                content: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
+                        ...configItems.map((item) {
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8.0),
+                            child: _buildConfigItem(item),
+                          );
+                        }),
+                        const Divider(),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            TextButton(
+                              onPressed: () {
+                                _saveConfig();
+                                SmartDialog.show(
+                                  useSystem: true,
+                                  animationType:
+                                      SmartAnimationType.centerFade_otherSlide,
+                                  builder: (context) => AlertDialog(
+                                    title: const Center(
+                                      child: Icon(Icons.check_circle),
+                                    ),
+                                    content: Column(
+                                      mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        languageText(
-                                          Prefs()
-                                              .translateFrom
-                                              .getNative(context),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            languageText(
+                                              Prefs()
+                                                  .translateFrom
+                                                  .getNative(context),
+                                            ),
+                                            const Icon(Icons.arrow_forward_ios),
+                                            languageText(
+                                              Prefs()
+                                                  .translateTo
+                                                  .getNative(context),
+                                            ),
+                                          ],
                                         ),
-                                        const Icon(Icons.arrow_forward_ios),
-                                        languageText(
-                                          Prefs()
-                                              .translateTo
-                                              .getNative(context),
+                                        const Divider(),
+                                        const Text(testText),
+                                        const Icon(Icons.arrow_downward),
+                                        StreamBuilder<String>(
+                                          stream: translateText(testText,
+                                              service: widget.service),
+                                          builder: (context, snapshot) {
+                                            if (snapshot.connectionState ==
+                                                ConnectionState.waiting) {
+                                              return const CircularProgressIndicator();
+                                            } else if (snapshot.hasError) {
+                                              return Text(
+                                                'Error: ${snapshot.error}',
+                                                style: TextStyle(
+                                                    color: Theme.of(context)
+                                                        .colorScheme
+                                                        .error),
+                                              );
+                                            } else if (snapshot.hasData) {
+                                              return Text(snapshot.data!);
+                                            } else {
+                                              return const Text('...');
+                                            }
+                                          },
                                         ),
                                       ],
                                     ),
-                                    const Divider(),
-                                    const Text(testText),
-                                    const Icon(Icons.arrow_downward),
-                                    StreamBuilder<String>(
-                                      stream: translateText(testText,
-                                          service: widget.service),
-                                      builder: (context, snapshot) {
-                                        if (snapshot.connectionState ==
-                                            ConnectionState.waiting) {
-                                          return const CircularProgressIndicator();
-                                        } else if (snapshot.hasError) {
-                                          return Text(
-                                            'Error: ${snapshot.error}',
-                                            style: TextStyle(
-                                                color: Theme.of(context)
-                                                    .colorScheme
-                                                    .error),
-                                          );
-                                        } else if (snapshot.hasData) {
-                                          return Text(snapshot.data!);
-                                        } else {
-                                          return const Text('...');
-                                        }
-                                      },
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          },
-                          child: Text(L10n.of(context).common_test),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            _saveConfig();
-                            setState(() {
-                              isExpanded = !isExpanded;
-                            });
-                          },
-                          child: Text(L10n.of(context).common_save),
+                                  ),
+                                );
+                              },
+                              child: Text(L10n.of(context).common_test),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                _saveConfig();
+                                setState(() {
+                                  isExpanded = !isExpanded;
+                                });
+                              },
+                              child: Text(L10n.of(context).common_save),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                  ],
-                ),
-              ): const SizedBox.shrink(),
-             
-            ),
-          ],
-        ),
-      
+                  )
+                : const SizedBox.shrink(),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -407,5 +407,6 @@
   "reading_page_verticle_margin": "垂直边距",
   "reading_page_right_margin": "右边距",
   "reading_page_left_margin": "左边距",
-  "sync_remote_data_update_time": "远程数据更新时间："
+  "sync_remote_data_update_time": "远程数据更新时间：",
+  "settings_translate_ai_tip": "转到AI设置页面以配置AI服务。"
 }

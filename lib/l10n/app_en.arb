@@ -407,5 +407,6 @@
   "reading_page_verticle_margin": "Vertical Margin",
   "reading_page_right_margin": "Right Margin",
   "reading_page_left_margin": "Left Margin",
-  "sync_remote_data_update_time": "Remote data update time: "
+  "sync_remote_data_update_time": "Remote data update time: ",
+  "settings_translate_ai_tip": "Go to the AI settings page to configure the AI service."
 }
