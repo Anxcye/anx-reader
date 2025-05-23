@@ -96,6 +96,7 @@ dependencies:
   cached_network_image: ^3.4.1
   lpinyin: ^2.0.3
   mongol: ^9.0.0
+  xml: ^6.4.2
 
 
 dev_dependencies:
