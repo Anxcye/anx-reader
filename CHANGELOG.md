@@ -14,6 +14,7 @@
 - Fix: Fix garbled text when importing some TXT files
 - Fix: Fix excessive spacing between some file segments(#325)
 - UI: Update background and button styles in BookDetail
+- Fix: Fix inaccurate click position in pdf files
 
 - 新增：在选择同步方向时提示两端的数据更新时间
 - 新增：添加克里米亚鞑靼语翻译支持
@@ -24,7 +25,8 @@
 - 修复：TTS 有时会被标点符号卡住
 - 修复：部分 TXT 文件导入乱码的问题
 - 修复：部分文件段间距过大(#325)
-- UI: 修改书籍详情页背景和按钮样式，提升UI响应速度
+- UI: 修改书籍详情页背景和按钮样式
+- 修复：pdf 文件点击位置不准确的问题
 
 ## 1.5.2
 - Feat: iOS dark and tinted icons
