@@ -2,6 +2,7 @@ import 'dart:core';
 
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/enums/lang_list.dart';
+import 'package:anx_reader/service/translate/ai.dart';
 import 'package:anx_reader/service/translate/deepl.dart';
 import 'package:anx_reader/service/translate/google.dart';
 import 'package:anx_reader/service/translate/microsoft.dart';
@@ -9,7 +10,8 @@ import 'package:anx_reader/service/translate/microsoft.dart';
 enum TranslateService {
   google('Google'),
   microsoft('Microsoft'),
-  deepl('DeepL');
+  deepl('DeepL'),
+  ai('AI');
 
   const TranslateService(this.label);
 
@@ -27,7 +29,8 @@ enum ConfigItemType {
   select('select'),
   radio('radio'),
   checkbox('checkbox'),
-  toggle('toggle');
+  toggle('toggle'),
+  tip('tip');
 
   const ConfigItemType(this.label);
   final String label;
@@ -81,6 +84,8 @@ class TranslateFactory {
         return MicrosoftTranslateProvider();
       case TranslateService.deepl:
         return DeepLTranslateProvider();
+      case TranslateService.ai:
+        return AiTranslateProvider();
     }
   }
 }

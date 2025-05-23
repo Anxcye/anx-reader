@@ -407,5 +407,6 @@
   "reading_page_verticle_margin": "الهامش الرأسي",
   "reading_page_right_margin": "الهامش الصحيح",
   "reading_page_left_margin": "الهامش الأيسر",
-  "sync_remote_data_update_time": "وقت تحديث البيانات عن بُعد:"
+  "sync_remote_data_update_time": "وقت تحديث البيانات عن بُعد:",
+  "settings_translate_ai_tip": "انتقل إلى صفحة إعدادات AI لتكوين خدمة الذكاء الاصطناعي."
 }
