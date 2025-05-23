@@ -4,6 +4,7 @@
 
 
 ## 1.5.3
+- Feat: Support setting DeepL URL
 - Feat: Show data update time while choosing sync direction
 - Feat: Add Crimean Tatar translation support
 - Feat: Support modifying the original text content in the note editing diaglog
@@ -17,7 +18,9 @@
 - Fix: Fix inaccurate click position in pdf files
 - Fix: macOS Launchpad icon edge anomaly(#331)
 - Fix: Fix issue where short TXT files cannot be imported(#329)
+- Fix: Fix DeepL translation error(#327)
 
+- 新增：支持设置 DeepL URL
 - 新增：在选择同步方向时提示两端的数据更新时间
 - 新增：添加克里米亚鞑靼语翻译支持
 - 新增：支持在笔记编辑界面中修改笔记的原文内容
@@ -31,6 +34,7 @@
 - 修复：pdf 文件点击位置不准确的问题
 - 修复：macOS 启动台中图标边缘异常(#331)
 - 修复：内容较短的 TXT 文件无法导入的问题(#329)
+- 修复：DeepL 翻译出错(#327)
 
 ## 1.5.2
 - Feat: iOS dark and tinted icons
