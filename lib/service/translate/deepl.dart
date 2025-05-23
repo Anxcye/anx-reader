@@ -5,7 +5,7 @@ import 'package:anx_reader/main.dart';
 import 'package:anx_reader/service/translate/index.dart';
 import 'package:anx_reader/utils/log/common.dart';
 import 'package:dio/dio.dart';
-
+import 'package:flutter/material.dart';
 
 String deeplUrl = 'https://api-free.deepl.com/v2/translate';
 
@@ -13,9 +13,13 @@ String getDeepLUrl(Map<String, dynamic> config) {
   return config['api_url'] ?? deeplUrl;
 }
 
-class DeepLTranslateProvider implements TranslateServiceProvider {
+class DeepLTranslateProvider extends TranslateServiceProvider {
   @override
-  Stream<String> translate(
+  Widget translate(String text, LangListEnum from, LangListEnum to) {
+    return convertStreamToWidget(translateStream(text, from, to));
+  }
+
+  Stream<String> translateStream(
       String text, LangListEnum from, LangListEnum to) async* {
     try {
       final config = getConfig();
@@ -61,10 +65,12 @@ class DeepLTranslateProvider implements TranslateServiceProvider {
           responseData['translations'].isNotEmpty) {
         yield responseData['translations'][0]['text'];
       } else {
-        yield* Stream.error(Exception('Deepl returned unexpected data: ${response.data}'));
+        yield* Stream.error(
+            Exception('Deepl returned unexpected data: ${response.data}'));
       }
     } catch (e) {
-      AnxLog.severe("Deepl ${L10n.of(navigatorKey.currentContext!).translate_error}: $e");
+      AnxLog.severe(
+          "Deepl ${L10n.of(navigatorKey.currentContext!).translate_error}: $e");
       yield* Stream.error(Exception(e));
     }
   }

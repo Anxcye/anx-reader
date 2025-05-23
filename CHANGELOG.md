@@ -4,6 +4,7 @@
 
 
 ## 1.5.3
+- Feat: Support AI translation and dictionary(#145, #249)
 - Feat: Support setting DeepL URL
 - Feat: Show data update time while choosing sync direction
 - Feat: Add Crimean Tatar translation support
@@ -20,6 +21,7 @@
 - Fix: Fix issue where short TXT files cannot be imported(#329)
 - Fix: Fix DeepL translation error(#327)
 
+- 新增：支持 AI 翻译和词典(#145, #249)
 - 新增：支持设置 DeepL URL
 - 新增：在选择同步方向时提示两端的数据更新时间
 - 新增：添加克里米亚鞑靼语翻译支持
