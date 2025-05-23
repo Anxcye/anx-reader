@@ -250,7 +250,7 @@ export class View extends HTMLElement {
         clientY *= scale
 
         const docWidth = doc.documentElement.getBoundingClientRect().width * scale
-        if (position === 'right' && docWidth < window.innerWidth * 2.2){
+        if (position === 'right' && docWidth * 2.2 < window.innerWidth){
           clientX += window.innerWidth * 0.5
         }
         this.#emit('click-view', { x: clientX, y: clientY })
