@@ -158,6 +158,11 @@ class _AISettingsState extends ConsumerState<AISettings> {
         "title":
             L10n.of(context).settings_ai_prompt_summary_the_previous_content,
         "variables": ["previous_content"],
+      },
+      {
+        "identifier": AiPrompts.translate,
+        "title": L10n.of(context).settings_ai_prompt_translate_and_dictionary,
+        "variables": ["text", "to_locale", "from_locale"],
       }
     ];
 
@@ -372,7 +377,7 @@ class _AISettingsState extends ConsumerState<AISettings> {
                           border: OutlineInputBorder(),
                         ),
                       ),
-                      Row(
+                      Wrap(
                         children: [
                           for (var variable in prompts[index]["variables"])
                             TextButton(

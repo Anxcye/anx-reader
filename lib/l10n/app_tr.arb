@@ -408,5 +408,6 @@
   "reading_page_right_margin": "Sağ marj",
   "reading_page_left_margin": "Sol marj",
   "sync_remote_data_update_time": "Uzak Veri Güncelleme Süresi:",
-  "settings_translate_ai_tip": "AI hizmetini yapılandırmak için AI Ayarları sayfasına gidin."
+  "settings_translate_ai_tip": "AI hizmetini yapılandırmak için AI Ayarları sayfasına gidin.",
+  "settings_ai_prompt_translate_and_dictionary": "Çevir ve Sözlük"
 }

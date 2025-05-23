@@ -408,5 +408,6 @@
   "reading_page_right_margin": "Right Margin",
   "reading_page_left_margin": "Left Margin",
   "sync_remote_data_update_time": "Remote data update time: ",
-  "settings_translate_ai_tip": "Go to the AI settings page to configure the AI service."
+  "settings_translate_ai_tip": "Go to the AI settings page to configure the AI service.",
+  "settings_ai_prompt_translate_and_dictionary": "Translate And Dictionary"
 }

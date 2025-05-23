@@ -3,6 +3,7 @@ enum AiPrompts {
   summaryTheChapter,
   summaryTheBook,
   summaryThePreviousContent,
+  translate,
 }
 
 extension AiPromptsJson on AiPrompts {
@@ -10,7 +11,7 @@ extension AiPromptsJson on AiPrompts {
     switch (this) {
       case AiPrompts.test:
         return '''
-        Write a concise and friendly self-introduction. Use the language code: {{language_locale}}
+Write a concise and friendly self-introduction. Use the language code: {{language_locale}}
         ''';
 
       case AiPrompts.summaryTheChapter:
@@ -45,6 +46,16 @@ Avoid verbatim repetition; preserve core information
 
 [Previous Content]
 {{previous_content}}
+        ''';
+
+        case AiPrompts.translate:
+        // TODO
+        return '''
+Translate the following text to {{to_locale}}.
+Please ensure that the translation is accurate and maintains the original meaning of the text. 
+The translation should be fluent and natural, as if it were originally written in {{to_locale}}
+content: 
+{{text}}
         ''';
     }
   }
