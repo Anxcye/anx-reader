@@ -75,7 +75,8 @@ Future<File> convertFromTxt(File file) async {
     final newSections = <Section>[];
 
     if (content.length <= 20000) {
-      newSections.add(sections[0]);
+      newSections.add(Section(filename, content, 2));
+      return createEpub(titleString, authorString, newSections);
     } else {
       var startIndex = 0;
       while (startIndex < content.length) {
