@@ -6,7 +6,12 @@ import 'package:anx_reader/service/translate/index.dart';
 import 'package:anx_reader/utils/log/common.dart';
 import 'package:dio/dio.dart';
 
-const urlDeepL = 'https://api-free.deepl.com/v2/translate';
+
+String deeplUrl = 'https://api-free.deepl.com/v2/translate';
+
+String getDeepLUrl(Map<String, dynamic> config) {
+  return config['api_url'] ?? deeplUrl;
+}
 
 class DeepLTranslateProvider implements TranslateServiceProvider {
   @override
@@ -38,7 +43,7 @@ class DeepLTranslateProvider implements TranslateServiceProvider {
       };
 
       final response = await dio.post(
-        urlDeepL,
+        getDeepLUrl(config),
         data: params,
         options: Options(
           headers: headers,
@@ -87,6 +92,12 @@ class DeepLTranslateProvider implements TranslateServiceProvider {
   List<ConfigItem> getConfigItems() {
     return [
       ConfigItem(
+        key: 'api_url',
+        label: 'DeepL API URL',
+        type: ConfigItemType.text,
+        defaultValue: deeplUrl,
+      ),
+      ConfigItem(
         key: 'api_key',
         label: 'DeepL API Key',
         description: L10n.of(navigatorKey.currentContext!).deepl_key_tip,
@@ -103,10 +114,7 @@ class DeepLTranslateProvider implements TranslateServiceProvider {
     return config ??
         {
           'api_key': '',
-          'use_free_api': true,
-          'formality': 'default',
-          'use_proxy': false,
-          'proxy_url': '',
+          'api_url': deeplUrl,
         };
   }
 
