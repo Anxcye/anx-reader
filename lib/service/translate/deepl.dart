@@ -23,7 +23,7 @@ class DeepLTranslateProvider implements TranslateServiceProvider {
       yield "...";
 
       final Map<String, dynamic> params = {
-        'text': text,
+        'text': [text],
         'target_lang': _mapLanguageCode(to.code),
       };
 
@@ -47,7 +47,7 @@ class DeepLTranslateProvider implements TranslateServiceProvider {
       );
 
       if (response.statusCode != 200) {
-        yield* Stream.error(Exception('DeepL API错误: ${response.data}'));
+        yield* Stream.error(Exception('DeepL API error: ${response.data}'));
         return;
       }
 
@@ -56,7 +56,7 @@ class DeepLTranslateProvider implements TranslateServiceProvider {
           responseData['translations'].isNotEmpty) {
         yield responseData['translations'][0]['text'];
       } else {
-        yield* Stream.error(Exception('DeepL返回结果格式错误'));
+        yield* Stream.error(Exception('Deepl returned unexpected data: ${response.data}'));
       }
     } catch (e) {
       AnxLog.severe("Deepl ${L10n.of(navigatorKey.currentContext!).translate_error}: $e");
@@ -66,7 +66,8 @@ class DeepLTranslateProvider implements TranslateServiceProvider {
 
   String _mapLanguageCode(String isoCode) {
     final Map<String, String> codeMap = {
-      'zh': 'ZH',
+      'zh-CN': 'ZH',
+      'zh-TW': 'ZH',
       'en': 'EN',
       'ja': 'JA',
       'de': 'DE',
@@ -79,7 +80,7 @@ class DeepLTranslateProvider implements TranslateServiceProvider {
       'ru': 'RU',
     };
 
-    return codeMap[isoCode.toLowerCase()] ?? isoCode.toUpperCase();
+    return codeMap[isoCode] ?? isoCode.toUpperCase();
   }
 
   @override
