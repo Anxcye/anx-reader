@@ -406,5 +406,6 @@
   "reading_page_style_import_background_image": "Arka plan görüntüsü içe aktarın",
   "reading_page_verticle_margin": "Dikey marj",
   "reading_page_right_margin": "Sağ marj",
-  "reading_page_left_margin": "Sol marj"
+  "reading_page_left_margin": "Sol marj",
+  "sync_remote_data_update_time": "Uzak Veri Güncelleme Süresi:"
 }

@@ -406,5 +406,6 @@
   "reading_page_style_import_background_image": "استيراد صورة الخلفية",
   "reading_page_verticle_margin": "الهامش الرأسي",
   "reading_page_right_margin": "الهامش الصحيح",
-  "reading_page_left_margin": "الهامش الأيسر"
+  "reading_page_left_margin": "الهامش الأيسر",
+  "sync_remote_data_update_time": "وقت تحديث البيانات عن بُعد:"
 }

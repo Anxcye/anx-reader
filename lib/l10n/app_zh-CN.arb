@@ -1,4 +1,3 @@
-
 {
   "@@locale": "zh_CN",
   "appName": "Anx Reader",
@@ -407,5 +406,6 @@
   "reading_page_style_import_background_image": "导入背景图像",
   "reading_page_verticle_margin": "垂直边距",
   "reading_page_right_margin": "右边距",
-  "reading_page_left_margin": "左边距"
+  "reading_page_left_margin": "左边距",
+  "sync_remote_data_update_time": "远程数据更新时间："
 }

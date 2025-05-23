@@ -188,9 +188,8 @@ class AnxWebdav extends _$AnxWebdav {
               children: [
                 Text(L10n.of(context).webdav_sync_direction),
                 SizedBox(height: 10),
-                Text(L10n.of(context).book_sync_status_local_update_time + ' ' +
-                    localDb.lastModifiedSync().toString()),
-                Text('Remote data update time: ' + remoteDb!.mTime.toString()),
+                Text('${L10n.of(context).book_sync_status_local_update_time} ${localDb.lastModifiedSync()}'),
+                Text('${L10n.of(context).sync_remote_data_update_time} ${remoteDb!.mTime}'),
               ],
             ),
             actionsOverflowDirection: VerticalDirection.up,
