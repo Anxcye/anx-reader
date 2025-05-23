@@ -2,12 +2,17 @@ import 'package:anx_reader/enums/lang_list.dart';
 import 'package:anx_reader/service/translate/index.dart';
 import 'package:anx_reader/utils/log/common.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 
 const urlGoogle = 'https://translate.google.com/translate_a/single';
 
-class GoogleTranslateProvider implements TranslateServiceProvider {
+class GoogleTranslateProvider extends TranslateServiceProvider {
   @override
-  Stream<String> translate(
+  Widget translate(String text, LangListEnum from, LangListEnum to) {
+    return convertStreamToWidget(translateStream(text, from, to));
+  }
+
+  Stream<String> translateStream(
       String text, LangListEnum from, LangListEnum to) async* {
     final params = {
       'client': 'gtx',

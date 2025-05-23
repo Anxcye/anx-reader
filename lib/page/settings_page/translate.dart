@@ -460,28 +460,8 @@ class _TranslateSettingItemState extends State<TranslateSettingItem> {
                                         const Divider(),
                                         const Text(testText),
                                         const Icon(Icons.arrow_downward),
-                                        StreamBuilder<String>(
-                                          stream: translateText(testText,
-                                              service: widget.service),
-                                          builder: (context, snapshot) {
-                                            if (snapshot.connectionState ==
-                                                ConnectionState.waiting) {
-                                              return const CircularProgressIndicator();
-                                            } else if (snapshot.hasError) {
-                                              return Text(
-                                                'Error: ${snapshot.error}',
-                                                style: TextStyle(
-                                                    color: Theme.of(context)
-                                                        .colorScheme
-                                                        .error),
-                                              );
-                                            } else if (snapshot.hasData) {
-                                              return Text(snapshot.data!);
-                                            } else {
-                                              return const Text('...');
-                                            }
-                                          },
-                                        ),
+                                        translateText(testText,
+                                            service: widget.service),
                                       ],
                                     ),
                                   ),

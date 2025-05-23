@@ -2,10 +2,13 @@ import 'dart:core';
 
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/enums/lang_list.dart';
+import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/service/translate/ai.dart';
 import 'package:anx_reader/service/translate/deepl.dart';
 import 'package:anx_reader/service/translate/google.dart';
 import 'package:anx_reader/service/translate/microsoft.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 enum TranslateService {
   google('Google'),
@@ -66,13 +69,44 @@ class ConfigItem {
 }
 
 abstract class TranslateServiceProvider {
-  Stream<String> translate(String text, LangListEnum from, LangListEnum to);
+  Widget translate(String text, LangListEnum from, LangListEnum to);
 
   List<ConfigItem> getConfigItems();
 
   Map<String, dynamic> getConfig();
 
   void saveConfig(Map<String, dynamic> config);
+
+  Widget convertStreamToWidget(Stream<String> stream) {
+    return StreamBuilder<String>(
+      stream: stream,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Text('...');
+        } else if (snapshot.hasError) {
+          return Text('Error: ${snapshot.error}');
+        } else if (snapshot.hasData) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(snapshot.data!),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                      onPressed: () => Clipboard.setData(
+                          ClipboardData(text: snapshot.data!)),
+                      child: Text(L10n.of(context).common_copy))
+                ],
+              )
+            ],
+          );
+        } else {
+          return const Text('No data');
+        }
+      },
+    );
+  }
 }
 
 class TranslateFactory {
@@ -90,7 +124,7 @@ class TranslateFactory {
   }
 }
 
-Stream<String> translateText(String text, {TranslateService? service}) {
+Widget translateText(String text, {TranslateService? service}) {
   service ??= Prefs().translateService;
   final from = Prefs().translateFrom;
   final to = Prefs().translateTo;

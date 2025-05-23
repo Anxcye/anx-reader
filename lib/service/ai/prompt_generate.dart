@@ -28,3 +28,11 @@ String generatePromptSummaryThePreviousContent(String previousContent) {
   prompt = prompt.replaceAll('{{previous_content}}', previousContent.trim());
   return prompt;
 }
+
+String generatePromptTranslate(String text, String toLocale, String fromLocale) {
+  String prompt = Prefs().getAiPrompt(AiPrompts.translate);
+  prompt = prompt.replaceAll('{{text}}', text.trim());
+  prompt = prompt.replaceAll('{{to_locale}}', toLocale);
+  prompt = prompt.replaceAll('{{from_locale}}', fromLocale);
+  return prompt;
+}
