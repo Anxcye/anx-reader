@@ -93,16 +93,16 @@ class AnxWebdav extends _$AnxWebdav {
   }
 
   Future<void> syncData(SyncDirection direction, WidgetRef? ref) async {
+    if (!Prefs().webdavStatus) {
+      return;
+    }
+
     if (Prefs().onlySyncWhenWifi &&
         !(await Connectivity().checkConnectivity())
             .contains(ConnectivityResult.wifi)) {
       if (Prefs().syncCompletedToast) {
         AnxToast.show(L10n.of(navigatorKey.currentContext!).webdav_only_wifi);
       }
-      return;
-    }
-
-    if (!Prefs().webdavStatus) {
       return;
     }
 
@@ -182,7 +182,17 @@ class AnxWebdav extends _$AnxWebdav {
           context: navigatorKey.currentContext!,
           builder: (context) => AlertDialog(
             title: Text(L10n.of(context).common_attention),
-            content: Text(L10n.of(context).webdav_sync_direction),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(L10n.of(context).webdav_sync_direction),
+                SizedBox(height: 10),
+                Text(L10n.of(context).book_sync_status_local_update_time + ' ' +
+                    localDb.lastModifiedSync().toString()),
+                Text('Remote data update time: ' + remoteDb!.mTime.toString()),
+              ],
+            ),
             actionsOverflowDirection: VerticalDirection.up,
             actionsOverflowAlignment: OverflowBarAlignment.center,
             actionsOverflowButtonSpacing: 10,
