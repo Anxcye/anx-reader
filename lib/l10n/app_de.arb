@@ -406,5 +406,6 @@
   "reading_page_style_import_background_image": "Hintergrundbild importieren",
   "reading_page_verticle_margin": "Vertikaler Rand",
   "reading_page_right_margin": "Rechter Rand",
-  "reading_page_left_margin": "Linker Rand"
+  "reading_page_left_margin": "Linker Rand",
+  "sync_remote_data_update_time": "Remotedaten -Aktualisierungszeit:"
 }

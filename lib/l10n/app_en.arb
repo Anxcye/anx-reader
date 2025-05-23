@@ -406,5 +406,6 @@
   "reading_page_style_import_background_image": "Import Background Image",
   "reading_page_verticle_margin": "Vertical Margin",
   "reading_page_right_margin": "Right Margin",
-  "reading_page_left_margin": "Left Margin"
+  "reading_page_left_margin": "Left Margin",
+  "sync_remote_data_update_time": "Remote data update time: "
 }
