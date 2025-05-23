@@ -4,6 +4,7 @@
 
 
 ## 1.5.3
+- Feat: Show data update time while choosing sync direction
 - Feat: Add Crimean Tatar translation support
 - Feat: Support modifying the original text content in the note editing diaglog
 - Feat: Support import books via share
@@ -14,6 +15,7 @@
 - Fix: Fix excessive spacing between some file segments(#325)
 - UI: Update background and button styles in BookDetail
 
+- 新增：在选择同步方向时提示两端的数据更新时间
 - 新增：添加克里米亚鞑靼语翻译支持
 - 新增：支持在笔记编辑界面中修改笔记的原文内容
 - 新增：iOS 支持通过分享的方式导入图书
