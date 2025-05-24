@@ -1,18 +1,19 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:anx_reader/providers/font_list.dart';
 import 'package:anx_reader/utils/get_path/get_base_path.dart';
 import 'package:anx_reader/utils/get_path/get_temp_dir.dart';
-import 'package:anx_reader/utils/log/common.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:http/http.dart' as http;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'fonts.g.dart';
 part 'fonts.freezed.dart';
 
-const String fontBaseUrl = 'https://fonts2.anxcye.com/';
+const String fontBaseUrl = 'https://fonts.anxcye.com/';
 const String fontManifestUrl = '${fontBaseUrl}fonts-manifest.json';
 
 @freezed
@@ -68,33 +69,13 @@ class Fonts extends _$Fonts {
   final Dio dio = Dio();
 
   @override
-  Future<List<RemoteFontModel>> build() async {
-    try {
-      final response = await dio.get(
-        fontManifestUrl,
-        options: Options(
-          responseType: ResponseType.json,
-          headers: {
-            'Accept': 'application/json',
-            'Accept-Charset': 'utf-8',
-          },
-        ),
-      );
-
-      if (response.statusCode == 200 && response.data is List) {
-        final List<dynamic> jsonList = response.data;
-        return jsonList.map((json) => RemoteFontModel.fromJson(json)).toList();
-      } else {
-        throw Exception(
-            'Invalid font manifest format: ${response.data.runtimeType}');
-      }
-    } catch (e) {
-      AnxLog.severe('Failed to load fonts manifest: $e');
-      if (e is DioException) {
-        AnxLog.severe('Response: ${e.response?.data}');
-        AnxLog.severe('Headers: ${e.response?.headers}');
-      }
-      rethrow;
+   Future<List<RemoteFontModel>> build() async {
+    final response = await http.get(Uri.parse(fontManifestUrl));
+    if (response.statusCode == 200) {
+      final List<dynamic> jsonList = jsonDecode(response.body);
+      return jsonList.map((json) => RemoteFontModel.fromJson(json)).toList();
+    } else {
+      throw Exception('Failed to load fonts manifest');
     }
   }
 }
