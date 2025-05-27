@@ -748,7 +748,7 @@ export class Paginator extends HTMLElement {
       },
       delta: { x: 0, deltaY: 0, }
     }
-    this.dispatchEvent(new CustomEvent('doctouchmove', {
+    this.dispatchEvent(new CustomEvent('doctouchstart', {
       detail: {
         touch: e.changedTouches[0],
         touchState: this.#touchState,
@@ -841,11 +841,7 @@ export class Paginator extends HTMLElement {
     }
   }
   #onTouchEnd(e) {
-    this.#touchScrolled = false
-    this.#touchState.direction = 'none'
-    if (this.scrolled) return
-
-    this.dispatchEvent(new CustomEvent('doctouchmove', {
+    this.dispatchEvent(new CustomEvent('doctouchend', {
       detail: {
         touch: e.changedTouches[0],
         touchState: this.#touchState,
@@ -853,6 +849,10 @@ export class Paginator extends HTMLElement {
       bubbles: true,
       composed: true
     }))
+
+    this.#touchScrolled = false
+    if (this.scrolled) return
+
 
     // XXX: Firefox seems to report scale as 1... sometimes...?
     // at this point I'm basically throwing `requestAnimationFrame` at
