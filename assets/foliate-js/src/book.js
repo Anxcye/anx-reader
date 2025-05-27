@@ -540,6 +540,8 @@ class Reader {
     this.view.addEventListener('doctouchmove', this.#onTouchMove.bind(this))
     this.view.addEventListener('doctouchend', this.#onTouchEnd.bind(this))
 
+    // set html bg color t grey 
+    document.documentElement.style.backgroundColor = 'grey'
 
     setStyle()
     if (!cfi)
@@ -748,16 +750,14 @@ class Reader {
   #onTouchStart = ({ detail: e }) => { }
 
   #onTouchMove = ({ detail: e }) => {
-    const mainView = this.view
+    const mainView = this.view.shadowRoot.children[0]
     if (e.touchState.direction === 'vertical') {
       mainView.style.transform = `translateY(${e.touchState.delta.y * 0.6}px)`;
     }
   }
 
-
-
   #onTouchEnd = ({ detail: e }) => {
-    const mainView = this.view
+    const mainView = this.view.shadowRoot.children[0]
     if (e.touchState.direction === 'vertical') {
       const deltaY = e.touchState.delta.y;
 
