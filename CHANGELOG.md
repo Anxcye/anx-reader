@@ -2,6 +2,10 @@
 
 ## Todo
 
+## 1.6.0
+- Dx: Improve js debugging process for easier debugging
+
+- Dx: 修改js的调试流程，更方便调试
 
 ## 1.5.3
 - Feat: Support AI translation and dictionary(#145, #249)

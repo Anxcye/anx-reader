@@ -5,13 +5,16 @@
   "main": "book.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "rm -rf dist && webpack"
+    "build": "rm -rf dist && webpack",
+    "debug": "http-server . -p 3000 -c-1 --cors -o debug.html",
+    "dev": "http-server . -p 3000 -c-1 --cors"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "webpack": "^5.99.7",
-    "webpack-cli": "^6.0.1"
+    "webpack-cli": "^6.0.1",
+    "http-server": "^14.1.1"
   }
 }
