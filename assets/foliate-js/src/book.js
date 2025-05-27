@@ -1,51 +1,3 @@
-// //////// use for test //////////
-// const importing = false
-// const allAnnotations = [
-//   { id: 1, type: 'highlight', value: "epubcfi(/6/12!/4/2[pgepubid00006]/4,/1:1,/1:7)", color: 'blue', note: 'this is' },
-//   // { id: 2, type: 'highlight', value: "epubcfi(/6/6!/4/576,/1:2,/1:3)", color: 'yellow', note: 'this is' },
-//   // { id: 3, type: 'underline', value: "epubcfi(/6/4!/4/4,/1:294,/1:301)", color: 'red', note: 'this is' },
-// ]
-// let url = '../local/shj.epub'
-// let initialCfi = "epubcfi(/6/12!/4,/2[CHP3],/8/1:29)"
-// //  let initialCfi = null
-// let style = {
-//   fontSize: 1.2,
-//   fontName: 'customFont0',
-//   fontPath: 'http://localhost:40443/fonts/Fast_Sans.ttf',
-//   fontWeight: 400,
-//   letterSpacing: 0,
-//   spacing: 1.7,
-//   paragraphSpacing: 1,
-//   textIndent: 5,
-//   fontColor: '#0000ff',
-//   backgroundColor: '#ffffff',
-//   topMargin: 100,
-//   bottomMargin: 100,
-//   sideMargin: 5,
-//   justify: true,
-//   hyphenate: true,
-//   // scroll: false,
-//   // animated: true,
-//   pageTurnStyle: 'scroll',
-//   maxColumnCount: 2,
-// }
-// window.flutter_inappwebview = {}
-// window.flutter_inappwebview.callHandler = (name, data) => {
-//   console.log(name, data)
-// }
-// setTimeout(() => {
-//   reader.renderAnnotation()
-// }, 100)
-
-// let readingRules = {
-//   // 'none', 's2t', 't2s'
-//   convertChineseMode: 's2t',
-//   bionicReadingMode: true,
-// }
-
-
-// ///////////////////////////////
-
 console.log('book.js')
 console.log('AnxUA', navigator.userAgent)
 
@@ -1062,6 +1014,33 @@ window.readingFeatures = (rules) => {
   readingRules = { ...readingRules, ...rules }
   reader.readingFeatures()
 }
+  let startY = 0;
+  let isPulled = false;
+  const mainView = document.body; // 或者你可以更精确地选到 foliate-view
+
+  mainView.addEventListener('touchstart', function(e) {
+    if (e.touches.length === 1) {
+      startY = e.touches[0].clientY;
+    }
+  });
+
+  mainView.addEventListener('touchend', function(e) {
+    if (e.changedTouches.length === 1) {
+      const endY = e.changedTouches[0].clientY;
+      const deltaY = endY - startY;
+      if (deltaY > 60 && !isPulled) { // 下拉
+        mainView.style.transition = 'transform 0.2s';
+        mainView.style.transform = 'translateY(100px)';
+        isPulled = true;
+        console.log('下拉触发，显示添加书签区域');
+      } else if (deltaY < -60 && isPulled) { // 上拉
+        mainView.style.transition = 'transform 0.2s';
+        mainView.style.transform = 'translateY(0)';
+        isPulled = false;
+        console.log('上拉触发，隐藏添加书签区域');
+      }
+    }
+  });
 
 // get varible from url
 var urlParams = new URLSearchParams(window.location.search)
