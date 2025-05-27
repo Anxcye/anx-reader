@@ -516,6 +516,8 @@ class Reader {
   #doc
   #index
   #originalContent
+  #bookMarkExists = false
+  #upTriggered = false
   constructor() {
     this.#footnoteHandler.addEventListener('before-render', e => {
       const { view } = e.detail
@@ -747,12 +749,25 @@ class Reader {
   }
 
 
-  #onTouchStart = ({ detail: e }) => { }
+  #onTouchStart = ({ detail: e }) => {
+    this.#bookMarkExists = !!document.getElementById('bookmark-icon');
+    this.#upTriggered = false;
+  }
 
   #onTouchMove = ({ detail: e }) => {
     const mainView = this.view.shadowRoot.children[0]
     if (e.touchState.direction === 'vertical') {
-      mainView.style.transform = `translateY(${e.touchState.delta.y * 0.6}px)`;
+      const deltaY = e.touchState.delta.y;
+
+      if (deltaY > 0) {
+        mainView.style.transform = `translateY(${deltaY * 0.6}px)`;
+        this.#showBookmarkIcon(deltaY);
+      } else if (deltaY < -60) {
+        if (!this.#upTriggered) {
+          this.#upTriggered = true;
+          window.pullUp()
+        }
+      }
     }
   }
 
@@ -762,9 +777,17 @@ class Reader {
       const deltaY = e.touchState.delta.y;
 
       if (deltaY < -60) {
-        console.log('UP');
+        // console.log('UP');
       } else if (deltaY > 60) {
-        console.log('DOWN');
+        if (this.#bookMarkExists) {
+          this.#hideBookmarkIcon();
+          this.#handleBookmark(true, this.view.lastLocation?.cfi);
+        } else {
+          this.#showBookmarkIcon(deltaY);
+          this.#handleBookmark(false, this.view.lastLocation?.cfi);
+        }
+      } else {
+        this.#hideBookmarkIcon();
       }
 
       mainView.style.transition = 'transform 0.3s ease-out';
@@ -774,6 +797,52 @@ class Reader {
         mainView.style.transition = '';
       }, 300);
     }
+  }
+
+  #showBookmarkIcon = (deltaY) => {
+    let bookmarkIcon = document.getElementById('bookmark-icon');
+
+    const bookMarkSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 24"><g data-name="Layer 2"><g data-name="bookmark"><rect width="8" height="24" opacity="0"/><path d="M2 21a1 1 0 0 1-.49-.13A1 1 0 0 1 1 20V5.33A2.28 2.28 0 0 1 3.2 3h1.6A2.28 2.28 0 0 1 7 5.33V20a1 1 0 0 1-.5.86 1 1 0 0 1-1 0L4 19.07l-1.5 1.79A1 1 0 0 1 2 21z" fill="#215a8f"/></g></g></svg>`
+
+    if (!bookmarkIcon) {
+      bookmarkIcon = document.createElement('div');
+      bookmarkIcon.id = 'bookmark-icon';
+      bookmarkIcon.innerHTML = bookMarkSvg;
+      bookmarkIcon.style.cssText = `
+        height: 60px;
+        width: 20px;
+        position: fixed;
+        top: -14px;
+        right: 0px;
+        font-size: 24px;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+        z-index: 1000;
+        pointer-events: none;
+      `;
+      document.body.appendChild(bookmarkIcon);
+    }
+
+    const opacity = Math.min(deltaY / 60, 1);
+    bookmarkIcon.style.opacity = opacity;
+  }
+
+  #hideBookmarkIcon = () => {
+    const bookmarkIcon = document.getElementById('bookmark-icon');
+    if (bookmarkIcon) {
+      bookmarkIcon.style.transition = 'opacity 0.3s ease-out';
+      bookmarkIcon.style.opacity = '0';
+
+      setTimeout(() => {
+        if (bookmarkIcon && bookmarkIcon.parentNode) {
+          bookmarkIcon.parentNode.removeChild(bookmarkIcon);
+        }
+      }, 300);
+    }
+  }
+
+  #handleBookmark = (remove, cfi) => {
+    callFlutter('addBookmark', { remove, cfi })
   }
 }
 
@@ -1049,6 +1118,10 @@ window.closeFootNote = () => {
 window.readingFeatures = (rules) => {
   readingRules = { ...readingRules, ...rules }
   reader.readingFeatures()
+}
+
+window.pullUp = () => {
+  callFlutter('onPullUp')
 }
 
 
