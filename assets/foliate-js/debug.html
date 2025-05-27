@@ -54,10 +54,10 @@
 </style>
 
 <div id="debug-controls">
-  <button onclick="window.nextPage()">下一页</button>
-  <button onclick="window.prevPage()">上一页</button>
-  <button onclick="window.goToPercent(0.5)">跳转50%</button>
-  <input type="file" id="bookFile" accept=".epub,.mobi,.azw3,.fb2,.txt,.pdf">
+  <button onclick="window.prevPage()">Prev</button>
+  <button onclick="window.nextPage()">Next</button>
+  <button onclick="window.goToPercent(0.5)">50%</button>
+  <!-- <input type="file" id="bookFile" accept=".epub,.mobi,.azw3,.fb2,.txt,.pdf"> -->
 </div>
 
 <div id="footnote-dialog">
@@ -72,7 +72,7 @@
     const mockParams = {
       importing: false,
       url: '../local/alice.epub',
-      initialCfi: null,
+      initialCfi: 'epubcfi(/6/6!/4/2[pgepubid00003]/8,/5:236,/5:239)',
       style: {
         fontSize: 1.4,
         fontName: "book",
@@ -82,9 +82,9 @@
         spacing: 1.5,
         paragraphSpacing: 0.0,
         textIndent: 0.0,
-        fontColor: "#feffebff",
-        backgroundColor: "#040404ff",
-        topMargin: 200.0,
+        fontColor: "#111111ff",
+        backgroundColor: "#fefefeff",
+        topMargin: 20.0,
         bottomMargin: 50.0,
         sideMargin: 15.0,
         justify: true,
