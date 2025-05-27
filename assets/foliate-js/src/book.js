@@ -1014,33 +1014,47 @@ window.readingFeatures = (rules) => {
   readingRules = { ...readingRules, ...rules }
   reader.readingFeatures()
 }
-  let startY = 0;
-  let isPulled = false;
-  const mainView = document.body; // 或者你可以更精确地选到 foliate-view
 
-  mainView.addEventListener('touchstart', function(e) {
-    if (e.touches.length === 1) {
-      startY = e.touches[0].clientY;
-    }
-  });
+const mainView = document.body;
 
-  mainView.addEventListener('touchend', function(e) {
-    if (e.changedTouches.length === 1) {
-      const endY = e.changedTouches[0].clientY;
-      const deltaY = endY - startY;
-      if (deltaY > 60 && !isPulled) { // 下拉
-        mainView.style.transition = 'transform 0.2s';
-        mainView.style.transform = 'translateY(100px)';
-        isPulled = true;
-        console.log('下拉触发，显示添加书签区域');
-      } else if (deltaY < -60 && isPulled) { // 上拉
-        mainView.style.transition = 'transform 0.2s';
-        mainView.style.transform = 'translateY(0)';
-        isPulled = false;
-        console.log('上拉触发，隐藏添加书签区域');
-      }
-    }
-  });
+mainView.addEventListener('doctouchstart', function ({ detail: e }) {
+  console.log('touchstart', e);
+});
+
+mainView.addEventListener('doctouchmove', function ({ detail: e }) {
+  console.log('touchmove', e);
+  if (e.touchState.direction === 'vertical') {
+    e.preventDefault();
+    e.stopPropagation();
+    mainView.style.transform = `translateY(${deltaY}px)`;
+  }
+});
+
+
+
+mainView.addEventListener('doctouchend', function ({ detail: e }) {
+  console.log('touchend', e);
+
+  touchState.directon = 'none';
+
+  // if (e.changedTouches.length === 1) {
+  //   const endY = e.changedTouches[0].clientY;
+  //   const deltaY = endY - startY;
+  //   if (deltaY > 60) { // 下拉
+  //     // mainView.style.transition = 'transform 0.2s';
+  //     // mainView.style.transform = 'translateY(100px)';
+  //     isPulled = true;
+  //     console.log('下拉触发，显示添加书签区域');
+  //   } else if (deltaY < -60) { // 上拉
+  //     // mainView.style.transition = 'transform 0.2s';
+  //     // mainView.style.transform = 'translateY(0)';
+  //     isPulled = false;
+  //     console.log('上拉触发，隐藏添加书签区域');
+  //   }
+  // }
+
+  // e.stopPropagation();
+});
 
 // get varible from url
 var urlParams = new URLSearchParams(window.location.search)
