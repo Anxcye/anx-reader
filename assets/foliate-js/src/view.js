@@ -73,6 +73,7 @@ export class View extends HTMLElement {
   isFixedLayout = false
   lastLocation
   history = new History()
+  #lastCfi = null
   constructor() {
     super()
     this.history.addEventListener('popstate', ({ detail }) => {
@@ -184,7 +185,11 @@ export class View extends HTMLElement {
     this.lastLocation = { ...progress, tocItem, pageItem, cfi, range, chapterLocation }
     if (reason === 'snap' || reason === 'page' || reason === 'scroll')
       this.history.replaceState(cfi)
-    this.#emit('relocate', this.lastLocation)
+
+    if (cfi && (!this.#lastCfi || cfi !== this.#lastCfi)) {
+      this.#lastCfi = cfi
+      this.#emit('relocate', this.lastLocation)
+    }
   }
 
   #onLoad({ doc, index }) {
@@ -230,7 +235,6 @@ export class View extends HTMLElement {
   }
 
   #handleClick(doc) {
-
     doc.addEventListener('click', e => {
       if (window.isFootNoteOpen()){
           window.closeFootNote()
