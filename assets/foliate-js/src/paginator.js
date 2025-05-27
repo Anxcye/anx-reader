@@ -743,9 +743,10 @@ export class Paginator extends HTMLElement {
       vx: 0, xy: 0,
       direction: 'none',
       startTouch: {
-        x: e.touches[0].clientX,
-        y: e.touches[0].clientY
-      }
+        x: e.touches[0].screenX,
+        y: e.touches[0].screenY,
+      },
+      delta: { x: 0, deltaY: 0, }
     }
     this.dispatchEvent(new CustomEvent('doctouchmove', {
       detail: {
@@ -759,6 +760,15 @@ export class Paginator extends HTMLElement {
   #onTouchMove(e) {
     if (window.getSelection()?.toString()) return
 
+    const deltaX = e.changedTouches[0].screenX - this.#touchState.startTouch.x;
+    const deltaY = e.changedTouches[0].screenY - this.#touchState.startTouch.y;
+    
+    const absDeltaX = Math.abs(deltaX);
+    const absDeltaY = Math.abs(deltaY);
+    
+    this.#touchState.delta.x = deltaX
+    this.#touchState.delta.y = deltaY
+
     this.dispatchEvent(new CustomEvent('doctouchmove', {
       detail: {
         touch: e.changedTouches[0],
@@ -767,12 +777,6 @@ export class Paginator extends HTMLElement {
       bubbles: true,
       composed: true
     }))
-
-    const deltaX = e.changedTouches[0].screenX - this.#touchState.startTouch.x;
-    const deltaY = e.changedTouches[0].screenY - this.#touchState.startTouch.y;
-
-    const absDeltaX = Math.abs(deltaX);
-    const absDeltaY = Math.abs(deltaY);
 
     const threshold = 5
 
