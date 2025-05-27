@@ -1022,11 +1022,8 @@ mainView.addEventListener('doctouchstart', function ({ detail: e }) {
 });
 
 mainView.addEventListener('doctouchmove', function ({ detail: e }) {
-  console.log('touchmove', e);
   if (e.touchState.direction === 'vertical') {
-    e.preventDefault();
-    e.stopPropagation();
-    mainView.style.transform = `translateY(${deltaY}px)`;
+    mainView.style.transform = `translateY(${e.touchState.delta.y}px)`;
   }
 });
 
