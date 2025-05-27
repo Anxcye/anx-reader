@@ -224,7 +224,7 @@ class View {
         this.#rtl = rtl
 
         this.#contentRange.selectNodeContents(doc.body)
-        const layout = beforeRender?.({ vertical, rtl})
+        const layout = beforeRender?.({ vertical, rtl })
         this.#iframe.style.display = 'block'
         this.render(layout)
         this.#observer.observe(doc.body)
@@ -536,7 +536,7 @@ export class Paginator extends HTMLElement {
     this.addEventListener('load', ({ detail: { doc } }) => {
       doc.addEventListener('touchstart', this.#onTouchStart.bind(this), opts)
       doc.addEventListener('touchmove', this.#onTouchMove.bind(this), opts)
-      doc.addEventListener('touchend', this.#onTouchEnd.bind(this))
+      doc.addEventListener('touchend', this.#onTouchEnd.bind(this), opts)
     })
 
     this.#mediaQueryListener = () => {
@@ -581,7 +581,7 @@ export class Paginator extends HTMLElement {
     this.#container.append(this.#view.element)
     return this.#view
   }
-  #beforeRender({ vertical, rtl}) {
+  #beforeRender({ vertical, rtl }) {
     this.#vertical = vertical
     this.#rtl = rtl
     this.#top.classList.toggle('vertical', vertical)
@@ -741,10 +741,60 @@ export class Paginator extends HTMLElement {
       x: touch?.screenX, y: touch?.screenY,
       t: e.timeStamp,
       vx: 0, xy: 0,
+      direction: 'none',
+      startTouch: {
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY
+      }
     }
+    this.dispatchEvent(new CustomEvent('doctouchmove', {
+      detail: {
+        touch: e.changedTouches[0],
+        touchState: this.#touchState,
+      },
+      bubbles: true,
+      composed: true
+    }))
   }
   #onTouchMove(e) {
     if (window.getSelection()?.toString()) return
+
+    this.dispatchEvent(new CustomEvent('doctouchmove', {
+      detail: {
+        touch: e.changedTouches[0],
+        touchState: this.#touchState,
+      },
+      bubbles: true,
+      composed: true
+    }))
+
+    const deltaX = e.changedTouches[0].screenX - this.#touchState.startTouch.x;
+    const deltaY = e.changedTouches[0].screenY - this.#touchState.startTouch.y;
+
+    const absDeltaX = Math.abs(deltaX);
+    const absDeltaY = Math.abs(deltaY);
+
+    const threshold = 5
+
+    const notHorizontal = this.#touchState.direction === 'horizontal' && absDeltaY > absDeltaX;
+    const notVertical = this.#touchState.direction === 'vertical' && absDeltaX > absDeltaY;
+
+    if (this.#touchState.direction !== 'none' || (notHorizontal && notVertical)) {
+      e.preventDefault();
+      if (absDeltaX < threshold && absDeltaY < threshold) return;
+    }
+
+    if ((absDeltaX > threshold || absDeltaY > threshold) && this.#touchState.direction === 'none') {
+      if (absDeltaX > absDeltaY) {
+        this.#touchState.direction = 'horizontal'
+      } else {
+        this.#touchState.direction = 'vertical'
+      }
+    }
+
+    if (this.#touchState.direction !== 'horizontal') {
+      return
+    }
 
     const state = this.#touchState
     if (!state) return
@@ -786,9 +836,19 @@ export class Paginator extends HTMLElement {
       })
     }
   }
-  #onTouchEnd() {
+  #onTouchEnd(e) {
     this.#touchScrolled = false
+    this.#touchState.direction = 'none'
     if (this.scrolled) return
+
+    this.dispatchEvent(new CustomEvent('doctouchmove', {
+      detail: {
+        touch: e.changedTouches[0],
+        touchState: this.#touchState,
+      },
+      bubbles: true,
+      composed: true
+    }))
 
     // XXX: Firefox seems to report scale as 1... sometimes...?
     // at this point I'm basically throwing `requestAnimationFrame` at
