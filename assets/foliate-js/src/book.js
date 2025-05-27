@@ -784,7 +784,7 @@ class Reader {
           this.#handleBookmark(true, this.view.lastLocation?.cfi);
         } else {
           this.#showBookmarkIcon(deltaY);
-          this.#handleBookmark(false, this.view.lastLocation?.cfi);
+          this.#handleBookmark(false);
         }
       } else {
         this.#hideBookmarkIcon();
@@ -842,7 +842,18 @@ class Reader {
   }
 
   #handleBookmark = (remove, cfi) => {
-    callFlutter('addBookmark', { remove, cfi })
+    if (remove === false) (cfi = this.view.lastLocation?.cfi)
+    const content = this.view.lastLocation.range.startContainer.data
+    const percentage = this.view.lastLocation.fraction
+
+    callFlutter('addBookmark', {
+      remove,
+      detail: {
+        cfi,
+        content,
+        percentage
+      }
+    })
   }
 }
 
