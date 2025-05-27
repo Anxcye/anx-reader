@@ -536,6 +536,10 @@ class Reader {
     this.view.addEventListener('load', this.#onLoad.bind(this))
     this.view.addEventListener('relocate', this.#onRelocate.bind(this))
     this.view.addEventListener('click-view', this.#onClickView.bind(this))
+    this.view.addEventListener('doctouchstart', this.#onTouchStart.bind(this))
+    this.view.addEventListener('doctouchmove', this.#onTouchMove.bind(this))
+    this.view.addEventListener('doctouchend', this.#onTouchEnd.bind(this))
+
 
     setStyle()
     if (!cfi)
@@ -738,6 +742,38 @@ class Reader {
     const selection = this.#doc.getSelection();
     const range = getSelectionRange(selection);
     return range;
+  }
+
+
+  #onTouchStart = ({ detail: e }) => { }
+
+  #onTouchMove = ({ detail: e }) => {
+    const mainView = this.view
+    if (e.touchState.direction === 'vertical') {
+      mainView.style.transform = `translateY(${e.touchState.delta.y * 0.6}px)`;
+    }
+  }
+
+
+
+  #onTouchEnd = ({ detail: e }) => {
+    const mainView = this.view
+    if (e.touchState.direction === 'vertical') {
+      const deltaY = e.touchState.delta.y;
+
+      if (deltaY < -60) {
+        console.log('UP');
+      } else if (deltaY > 60) {
+        console.log('DOWN');
+      }
+
+      mainView.style.transition = 'transform 0.3s ease-out';
+      mainView.style.transform = 'translateY(0px)';
+
+      setTimeout(() => {
+        mainView.style.transition = '';
+      }, 300);
+    }
   }
 }
 
@@ -1015,43 +1051,7 @@ window.readingFeatures = (rules) => {
   reader.readingFeatures()
 }
 
-const mainView = document.body;
 
-mainView.addEventListener('doctouchstart', function ({ detail: e }) {
-  console.log('touchstart', e);
-});
-
-mainView.addEventListener('doctouchmove', function ({ detail: e }) {
-  if (e.touchState.direction === 'vertical') {
-    mainView.style.transform = `translateY(${e.touchState.delta.y}px)`;
-  }
-});
-
-
-
-mainView.addEventListener('doctouchend', function ({ detail: e }) {
-  console.log('touchend', e);
-
-  touchState.directon = 'none';
-
-  // if (e.changedTouches.length === 1) {
-  //   const endY = e.changedTouches[0].clientY;
-  //   const deltaY = endY - startY;
-  //   if (deltaY > 60) { // 下拉
-  //     // mainView.style.transition = 'transform 0.2s';
-  //     // mainView.style.transform = 'translateY(100px)';
-  //     isPulled = true;
-  //     console.log('下拉触发，显示添加书签区域');
-  //   } else if (deltaY < -60) { // 上拉
-  //     // mainView.style.transition = 'transform 0.2s';
-  //     // mainView.style.transform = 'translateY(0)';
-  //     isPulled = false;
-  //     console.log('上拉触发，隐藏添加书签区域');
-  //   }
-  // }
-
-  // e.stopPropagation();
-});
 
 // get varible from url
 var urlParams = new URLSearchParams(window.location.search)
