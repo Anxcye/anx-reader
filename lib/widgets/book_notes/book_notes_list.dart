@@ -42,6 +42,7 @@ class _BookNotesListState extends ConsumerState<BookNotesList> {
   bool asc = true;
   List<bool> typeColorSelected =
       List.filled(notesType.length * notesColors.length, true);
+  bool showBookMarks = true;
 
   @override
   void initState() {
@@ -389,15 +390,24 @@ class _BookNotesListState extends ConsumerState<BookNotesList> {
       List<BookNote> filterNotes = [];
 
       for (int i = 0; i < bookNotes.length; i++) {
-        Map<String, dynamic> typeMap = notesType
-            .firstWhere((element) => element['type'] == bookNotes[i].type);
-        String color = bookNotes[i].color.toUpperCase();
-        int index = notesType.indexOf(typeMap) * notesColors.length +
-            notesColors.indexOf(color);
+        try {
+          Map<String, dynamic>? typeMap = notesType
+              .firstWhere((element) => element['type'] == bookNotes[i].type);
+          String color = bookNotes[i].color.toUpperCase();
+          int index = notesType.indexOf(typeMap) * notesColors.length +
+              notesColors.indexOf(color);
 
-        if (typeColorSelected[index]) {
-          filterNotes.add(bookNotes[i]);
+          if (typeColorSelected[index]) {
+            filterNotes.add(bookNotes[i]);
+          }
+        } catch (e) {
+          continue;
         }
+      }
+      if (showBookMarks) {
+        bookNotes.where((note) => note.type == 'bookmark').forEach((note) {
+          filterNotes.add(note);
+        });
       }
 
       if (sortType == 'time') {
@@ -541,8 +551,32 @@ class _BookNotesListState extends ConsumerState<BookNotesList> {
                       const Spacer(),
                     ],
                   ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: () {
+                            setState(() {
+                              sheetState(() {
+                                showBookMarks = !showBookMarks;
+                                sortAndFilter();
+                              });
+                            });
+                          },
+                          icon: Icon(
+                            showBookMarks
+                                ? EvaIcons.bookmark
+                                : EvaIcons.bookmark_outline,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                          label: Text(L10n.of(context).note_list_show_bookmark),
+                        ),
+                      ),
+                    ],
+                  ),
                   for (int i = 0; i < notesType.length; i++)
                     filterButton(context, sheetState, notesType[i]['icon'], i),
+                  const Divider(),
                   Row(
                     children: [
                       ElevatedButton(
