@@ -519,6 +519,11 @@ class Reader {
   #originalContent
   #bookMarkExists = false
   #upTriggered = false
+  #bookmarkInfo = {
+    exists: false,
+    cfi: null,
+    id: null,
+  }
   constructor() {
     this.#footnoteHandler.addEventListener('before-render', e => {
       const { view } = e.detail
@@ -651,8 +656,14 @@ class Reader {
       for (const bookmark of list) {
         if (bookmark.type === 'bookmark') {
           found = this.#checkBookmark(bookmark) ? true : found
+
         }
       }
+    }
+    this.#bookmarkInfo = {
+      exists: found,
+      cfi: found ? bookmark.value : null,
+      id: found ? bookmark.id : null,
     }
     if (!found) {
       this.#hideBookmarkIcon()
@@ -711,7 +722,7 @@ class Reader {
     const loc = pageItem
       ? `Page ${pageItem.label}`
       : `Loc ${location.current}`
-      this.#checkCurrentPageBookmark()
+    this.#checkCurrentPageBookmark()
     onRelocated({ cfi, fraction, loc, tocItem, pageItem, location, chapterLocation })
   }
 
@@ -831,7 +842,7 @@ class Reader {
       } else if (deltaY > 60) {
         if (this.#bookMarkExists) {
           this.#hideBookmarkIcon();
-          this.#handleBookmark(true, this.view.lastLocation?.cfi);
+          this.#handleBookmark(true);
         } else {
           this.#showBookmarkIcon(deltaY);
           this.#handleBookmark(false);
@@ -891,8 +902,9 @@ class Reader {
     }
   }
 
-  #handleBookmark = (remove, cfi) => {
-    if (remove === false) (cfi = this.view.lastLocation?.cfi)
+  #handleBookmark = (remove) => {
+    const cfi = remove ? this.#bookmarkInfo.cfi : this.view.lastLocation?.cfi
+    
     let content = this.view.lastLocation.range.startContainer.data ?? this.view.lastLocation.range.startContainer.innerText
     content = content.trim()
     if (content.length > 200) {
