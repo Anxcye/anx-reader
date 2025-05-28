@@ -410,5 +410,6 @@
   "sync_remote_data_update_time": "Uzak Veri Güncelleme Süresi:",
   "settings_translate_ai_tip": "AI hizmetini yapılandırmak için AI Ayarları sayfasına gidin.",
   "settings_ai_prompt_translate_and_dictionary": "Çevir ve Sözlük",
-  "note_list_show_bookmark": "Yer işareti göster"
+  "note_list_show_bookmark": "Yer işareti göster",
+  "reading_bookmark": "Yer işareti"
 }

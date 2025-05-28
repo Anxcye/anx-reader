@@ -410,5 +410,6 @@
   "sync_remote_data_update_time": "وقت تحديث البيانات عن بُعد:",
   "settings_translate_ai_tip": "انتقل إلى صفحة إعدادات AI لتكوين خدمة الذكاء الاصطناعي.",
   "settings_ai_prompt_translate_and_dictionary": "ترجمة وقاموس",
-  "note_list_show_bookmark": "إظهار المرجعية"
+  "note_list_show_bookmark": "إظهار المرجعية",
+  "reading_bookmark": "إشارة مرجعية"
 }
