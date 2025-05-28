@@ -82,6 +82,8 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
   String? backgroundColor;
   String? textColor;
   Timer? styleTimer;
+  String bookmarkCfi = '';
+  bool bookmarkExists = false;
 
   final StreamController<double> _searchProgressController =
       StreamController<double>.broadcast();
@@ -352,6 +354,8 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
             chapterHref = location['chapterHref'] ?? '';
             chapterCurrentPage = location['chapterCurrentPage'] ?? 0;
             chapterTotalPages = location['chapterTotalPages'] ?? 0;
+            bookmarkExists = location['bookmark']['exists'] ?? false;
+            bookmarkCfi = location['bookmark']['cfi'] ?? '';
           });
           saveReadingProgress();
           readingPageKey.currentState?.resetAwakeTimer();
