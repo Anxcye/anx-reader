@@ -117,14 +117,15 @@
     }
   };
 
-  document.getElementById('bookFile').addEventListener('change', function (e) {
-    const file = e.target.files[0];
-    if (file) {
-      const params = new URLSearchParams(window.location.search);
-      params.set('url', JSON.stringify(URL.createObjectURL(file)));
-      window.location.href = window.location.pathname + '?' + params.toString();
-    }
-  });
+    const anno = [
+    { id: 1, type: 'highlight', value: "epubcfi(/6/6!/4/2[pgepubid00003]/40,/1:2,/1:6)", color: 'blue', note: 'this is' },
+    { id: 2, type: 'bookmark', value: "epubcfi(/6/6!/4/2[pgepubid00003],/38/9:0,/42/1:408)", color: '0.02', note: 'this is' },
+    // { id: 3, type: 'underline', value: "epubcfi(/6/4!/4/4,/1:294,/1:301)", color: 'red', note: 'this is' },
+  ]
+
+  setTimeout(() => {
+    reader.renderAnnotation(anno)
+  }, 100)
 </script>
 
 <script src="./src/vendor/pdfjs/pdf.js"></script>
