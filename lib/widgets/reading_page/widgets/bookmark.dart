@@ -57,7 +57,7 @@ class _BookmarkWidgetState extends ConsumerState<BookmarkWidget> {
                 },
                 onDelete: (id) {
                   ref.read(BookmarkProvider(bookId).notifier).removeBookmark(
-                        id,
+                        id: id,
                       );
                 },
               ),
