@@ -31,7 +31,7 @@ class Bookmark extends _$Bookmark {
     ref.invalidateSelf();
   }
 
-  Future<void> addBookmark(BookmarkModel bookmark) async {
+  Future<BookmarkModel> addBookmark(BookmarkModel bookmark) async {
     final db = await DBHelper().database;
 
     final List<Map<String, dynamic>> maps = await db.query('tb_notes',
@@ -52,9 +52,21 @@ class Bookmark extends _$Bookmark {
       newState.sort((a, b) => a.percentage.compareTo(b.percentage));
       state = AsyncData(newState);
     }
+
+    return bookmark;
   }
 
-  void removeBookmark(int id) {
+  void removeBookmark({int? id, String? cfi}) {
+    assert(id != null || cfi != null, 'Either id or cfi must be provided');
+
+    if (cfi != null) {
+      final bookmark = state.valueOrNull?.firstWhere(
+        (b) => b.cfi == cfi,
+        orElse: () => throw Exception('Bookmark not found'),
+      );
+      id = bookmark?.id;
+    }
+
     final db = DBHelper().database;
     db.then((database) {
       database.delete(
@@ -64,8 +76,7 @@ class Bookmark extends _$Bookmark {
       );
     });
 
-    var newState =
-        state.valueOrNull?.where((b) => b.id != id).toList() ?? [];
+    var newState = state.valueOrNull?.where((b) => b.id != id).toList() ?? [];
     state = AsyncData(newState);
   }
 }

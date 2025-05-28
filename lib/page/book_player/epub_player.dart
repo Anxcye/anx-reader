@@ -204,6 +204,18 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
       ''');
   }
 
+  void addBookmark(BookmarkModel bookmark) {
+    webViewController.evaluateJavascript(source: '''
+      addAnnotation({
+        id: ${bookmark.id},
+        type: 'bookmark',
+        value: '${bookmark.cfi}',
+        color: '#000000',
+        note: 'None',
+      })
+      ''');
+  }
+
   void removeAnnotation(String cfi) =>
       webViewController.evaluateJavascript(source: "removeAnnotation('$cfi')");
 
@@ -447,29 +459,22 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
     );
     controller.addJavaScriptHandler(
       handlerName: 'handleBookmark',
-      callback: (args) {
-        // [{remove: false, detail: {cfi: epubcfi(/6/28!/4,/196,/206/1:32), percentage: 0
-// .06627971462514808}}]
-
+      callback: (args) async {
         Map<String, dynamic> detail = args[0]['detail'];
         bool remove = args[0]['remove'];
-
-        print('Bookmark detail: $detail, remove: $remove');
 
         String cfi = detail['cfi'];
         double percentage = detail['percentage'];
         String content = detail['content'];
 
         if (remove) {
-          // ref.read(bookmarkProvider(widget.book.id).notifier).removeBookmark(
-          //       BookmarkModel(
-          //         bookId: widget.book.id,
-          //         cfi: cfi,
-          //         percentage: percentage,
-          //       ),
-          //     );
+          ref.read(bookmarkProvider(widget.book.id).notifier).removeBookmark(
+                cfi: cfi,
+              );
         } else {
-          ref.read(BookmarkProvider(widget.book.id).notifier).addBookmark(
+          BookmarkModel bookmark = await ref
+              .read(BookmarkProvider(widget.book.id).notifier)
+              .addBookmark(
                 BookmarkModel(
                   bookId: widget.book.id,
                   cfi: cfi,
@@ -480,6 +485,7 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
                   createTime: DateTime.now(),
                 ),
               );
+          addBookmark(bookmark);
         }
       },
     );
