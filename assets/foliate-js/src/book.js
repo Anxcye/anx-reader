@@ -652,14 +652,19 @@ class Reader {
     const spineCode = this.#index
     const list = this.annotations.get(spineCode)
     let found = false
+    let bookmark = null
     if (list) {
-      for (const bookmark of list) {
-        if (bookmark.type === 'bookmark') {
-          found = this.#checkBookmark(bookmark) ? true : found
-
+      for (const bm of list) {
+        if (bm.type === 'bookmark') {
+          found = this.#checkBookmark(bm) ? true : found
+          if (found) {
+            bookmark = bm
+            break
+          }
         }
       }
     }
+
     this.#bookmarkInfo = {
       exists: found,
       cfi: found ? bookmark.value : null,
@@ -904,7 +909,7 @@ class Reader {
 
   #handleBookmark = (remove) => {
     const cfi = remove ? this.#bookmarkInfo.cfi : this.view.lastLocation?.cfi
-    
+
     let content = this.view.lastLocation.range.startContainer.data ?? this.view.lastLocation.range.startContainer.innerText
     content = content.trim()
     if (content.length > 200) {
