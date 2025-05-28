@@ -409,5 +409,6 @@
   "reading_page_left_margin": "左邊緣",
   "sync_remote_data_update_time": "遠程數據更新時間：",
   "settings_translate_ai_tip": "轉到AI設置頁面以配置AI服務。",
-  "settings_ai_prompt_translate_and_dictionary": "翻譯和詞典"
+  "settings_ai_prompt_translate_and_dictionary": "翻譯和詞典",
+  "note_list_show_bookmark": "顯示書籤"
 }

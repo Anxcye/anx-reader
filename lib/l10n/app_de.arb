@@ -409,5 +409,6 @@
   "reading_page_left_margin": "Linker Rand",
   "sync_remote_data_update_time": "Remotedaten -Aktualisierungszeit:",
   "settings_translate_ai_tip": "Gehen Sie zur AI -Einstellungsseite, um den KI -Dienst zu konfigurieren.",
-  "settings_ai_prompt_translate_and_dictionary": "Übersetzen und Wörterbuch"
+  "settings_ai_prompt_translate_and_dictionary": "Übersetzen und Wörterbuch",
+  "note_list_show_bookmark": "Showmarke Show"
 }
