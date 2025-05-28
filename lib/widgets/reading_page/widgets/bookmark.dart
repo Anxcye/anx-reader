@@ -94,14 +94,33 @@ class BookmarkItem extends StatelessWidget {
       onTap: () => onTap(bookmark.cfi),
       child: FilledContainer(
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('${bookmark.percentage.toStringAsFixed(2)}%'),
-            Text(bookmark.content),
-            const Divider(),
+            Text(
+              bookmark.content,
+              style: TextStyle(
+                fontSize: 16,
+              ),
+            ),
+            const Divider(height: 2),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(bookmark.chapter),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(bookmark.chapter,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        )),
+                    Text('${bookmark.percentage.toStringAsFixed(2)}%',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        )),
+                  ],
+                ),
                 DeleteConfirm(
                   delete: () {
                     onDelete(bookmark.id!);
