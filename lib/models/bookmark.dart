@@ -30,7 +30,7 @@ extension BookmarkModelExtension on BookmarkModel {
       'chapter': chapter,
       'type': 'bookmark',
       'color': percentage,
-      'reader_note': 'None',
+      'reader_note': '',
       'create_time': createTime?.toIso8601String(),
       'update_time': updateTime.toIso8601String(),
     };

@@ -90,29 +90,29 @@ class _BookNotesListState extends ConsumerState<BookNotesList> {
                   children: [
                     Padding(
                       padding: const EdgeInsets.only(top: 8, bottom: 16),
-                      child: 
-                      isEditingContent?
-                      TextField(
-                        controller: contentController,
-                        decoration: InputDecoration(
-                          border: const OutlineInputBorder(),
-                          hintText:
-                              L10n.of(context).context_menu_add_note_tips,
-                        ),
-                        maxLines: 3,
-                      ):
-                      GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            isEditingContent = true;
-                          });
-                        },
-                        child: Text(bookNote.content,
-                          style: const TextStyle(
-                            fontSize: 16,
-                          ),
-                        ),
-                      ),
+                      child: isEditingContent
+                          ? TextField(
+                              controller: contentController,
+                              decoration: InputDecoration(
+                                border: const OutlineInputBorder(),
+                                hintText:
+                                    L10n.of(context).context_menu_add_note_tips,
+                              ),
+                              maxLines: 3,
+                            )
+                          : GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  isEditingContent = true;
+                                });
+                              },
+                              child: Text(
+                                bookNote.content,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ),
                     ),
                     SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
@@ -207,11 +207,24 @@ class _BookNotesListState extends ConsumerState<BookNotesList> {
   }
 
   Widget bookNoteItem(BuildContext context, BookNote bookNote, bool selected) {
-    Color iconColor = Color(int.parse('0xaa${bookNote.color}'));
+    Color iconColor =
+        Color(int.tryParse('0xaa${bookNote.color}') ?? 0xaa555555);
     TextStyle infoStyle = const TextStyle(
       fontSize: 14,
       color: Colors.grey,
     );
+    Widget icon() {
+      try {
+        return Icon(
+          notesType.firstWhere(
+              (element) => element['type'] == bookNote.type)['icon'],
+          color: iconColor,
+        );
+      } catch (e) {
+        return const Icon(Icons.bookmark, color: Colors.grey);
+      }
+    }
+
     return GestureDetector(
       onTap: () {
         if (selectedNotes.isNotEmpty) {
@@ -248,11 +261,7 @@ class _BookNotesListState extends ConsumerState<BookNotesList> {
             children: [
               Padding(
                   padding: const EdgeInsets.only(left: 10, right: 10, top: 10),
-                  child: Icon(
-                    notesType.firstWhere(
-                        (element) => element['type'] == bookNote.type)['icon'],
-                    color: iconColor,
-                  )),
+                  child: icon()),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
