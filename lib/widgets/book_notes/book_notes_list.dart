@@ -5,6 +5,7 @@ import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/models/book_note.dart';
 import 'package:anx_reader/page/reading_page.dart';
 import 'package:anx_reader/providers/anx_webdav.dart';
+import 'package:anx_reader/providers/bookmark.dart';
 import 'package:anx_reader/service/book.dart';
 import 'package:anx_reader/utils/time_to_human.dart';
 import 'package:anx_reader/widgets/book_share/excerpt_share_service.dart';
@@ -656,6 +657,7 @@ class _BookNotesListState extends ConsumerState<BookNotesList> {
             selectedNotes.clear();
             _loadBookNotes();
           });
+          ref.read(BookmarkProvider(widget.book.id).notifier).refreshBookmarks();
         },
         deleteIcon: Icon(
           EvaIcons.trash_2,
