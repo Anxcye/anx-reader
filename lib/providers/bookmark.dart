@@ -1,5 +1,6 @@
 import 'package:anx_reader/dao/database.dart';
 import 'package:anx_reader/models/bookmark.dart';
+import 'package:anx_reader/page/reading_page.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
@@ -58,13 +59,23 @@ class Bookmark extends _$Bookmark {
 
   void removeBookmark({int? id, String? cfi}) {
     assert(id != null || cfi != null, 'Either id or cfi must be provided');
+    assert(!(id != null && cfi != null),
+        'Only one of id or cfi should be provided');
 
-    if (cfi != null) {
+    if (id == null) {
       final bookmark = state.valueOrNull?.firstWhere(
         (b) => b.cfi == cfi,
         orElse: () => throw Exception('Bookmark not found'),
       );
       id = bookmark?.id;
+    }
+
+    if (cfi == null) {
+      final bookmark = state.valueOrNull?.firstWhere(
+        (b) => b.id == id,
+        orElse: () => throw Exception('Bookmark not found'),
+      );
+      cfi = bookmark?.cfi;
     }
 
     final db = DBHelper().database;
@@ -78,5 +89,7 @@ class Bookmark extends _$Bookmark {
 
     var newState = state.valueOrNull?.where((b) => b.id != id).toList() ?? [];
     state = AsyncData(newState);
+    final key = epubPlayerKey.currentState;
+    key?.removeAnnotation(cfi!);
   }
 }
