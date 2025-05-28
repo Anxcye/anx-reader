@@ -760,7 +760,6 @@ class Reader {
     // ignore if flow pagination
     if (this.view.renderer.getAttribute('flow') === 'scrolled') return;
 
-
     const mainView = this.view.shadowRoot.children[0]
     if (e.touchState.direction === 'vertical') {
       const deltaY = e.touchState.delta.y;
@@ -855,8 +854,13 @@ class Reader {
   }
 
   #handleBookmark = (remove, cfi) => {
+    console.dir(this.view)
     if (remove === false) (cfi = this.view.lastLocation?.cfi)
-    const content = this.view.lastLocation.range.startContainer.data
+    let content = this.view.lastLocation.range.startContainer.data ?? this.view.lastLocation.range.startContainer.innerText
+    content = content.trim()
+    if (content.length > 200) {
+      content = content.slice(0, 200) + '...'
+    }
     const percentage = this.view.lastLocation.fraction
 
     callFlutter('handleBookmark', {

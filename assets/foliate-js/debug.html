@@ -72,7 +72,7 @@
     const mockParams = {
       importing: false,
       url: '../local/alice.epub',
-      initialCfi: 'epubcfi(/6/6!/4/2[pgepubid00003]/8,/5:236,/5:239)',
+      initialCfi: 'epubcfi(/6/6!/4/2[pgepubid00003],/40,/42/1:380)',
       style: {
         fontSize: 1.4,
         fontName: "book",
@@ -80,7 +80,7 @@
         fontWeight: 400.0,
         letterSpacing: 0.0,
         spacing: 1.5,
-        paragraphSpacing: 0.0,
+        paragraphSpacing: 5.0,
         textIndent: 0.0,
         fontColor: "#111111ff",
         backgroundColor: "#fefefeff",
@@ -89,8 +89,8 @@
         sideMargin: 15.0,
         justify: true,
         hyphenate: true,
-        // 'side' 'scroll' 'noAnimation'
-        pageTurnStyle: "scroll",
+        // 'slide' 'scroll' 'noAnimation'
+        pageTurnStyle: "slide",
         maxColumnCount: 0,
         writingMode: "auto",
         backgroundImage: "none"
