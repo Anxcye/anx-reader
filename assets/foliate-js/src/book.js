@@ -854,7 +854,6 @@ class Reader {
   }
 
   #handleBookmark = (remove, cfi) => {
-    console.dir(this.view)
     if (remove === false) (cfi = this.view.lastLocation?.cfi)
     let content = this.view.lastLocation.range.startContainer.data ?? this.view.lastLocation.range.startContainer.innerText
     content = content.trim()

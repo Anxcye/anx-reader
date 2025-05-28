@@ -8,6 +8,7 @@ import 'package:anx_reader/enums/reading_info.dart';
 import 'package:anx_reader/main.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/models/book_style.dart';
+import 'package:anx_reader/models/bookmark.dart';
 import 'package:anx_reader/models/font_model.dart';
 import 'package:anx_reader/models/read_theme.dart';
 import 'package:anx_reader/models/reading_rules.dart';
@@ -17,6 +18,7 @@ import 'package:anx_reader/page/book_player/image_viewer.dart';
 import 'package:anx_reader/page/home_page.dart';
 import 'package:anx_reader/page/reading_page.dart';
 import 'package:anx_reader/providers/book_list.dart';
+import 'package:anx_reader/providers/bookmark.dart';
 import 'package:anx_reader/service/book_player/book_player_server.dart';
 import 'package:anx_reader/utils/coordinates_to_part.dart';
 import 'package:anx_reader/utils/js/convert_dart_color_to_js.dart';
@@ -446,7 +448,39 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
     controller.addJavaScriptHandler(
       handlerName: 'handleBookmark',
       callback: (args) {
-        print(args);
+        // [{remove: false, detail: {cfi: epubcfi(/6/28!/4,/196,/206/1:32), percentage: 0
+// .06627971462514808}}]
+
+        Map<String, dynamic> detail = args[0]['detail'];
+        bool remove = args[0]['remove'];
+
+        print('Bookmark detail: $detail, remove: $remove');
+
+        String cfi = detail['cfi'];
+        double percentage = detail['percentage'];
+        String content = detail['content'];
+
+        if (remove) {
+          // ref.read(bookmarkProvider(widget.book.id).notifier).removeBookmark(
+          //       BookmarkModel(
+          //         bookId: widget.book.id,
+          //         cfi: cfi,
+          //         percentage: percentage,
+          //       ),
+          //     );
+        } else {
+          ref.read(BookmarkProvider(widget.book.id).notifier).addBookmark(
+                BookmarkModel(
+                  bookId: widget.book.id,
+                  cfi: cfi,
+                  percentage: percentage,
+                  content: content,
+                  chapter: chapterTitle,
+                  updateTime: DateTime.now(),
+                  createTime: DateTime.now(),
+                ),
+              );
+        }
       },
     );
   }
