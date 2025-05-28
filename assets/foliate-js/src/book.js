@@ -750,17 +750,28 @@ class Reader {
 
 
   #onTouchStart = ({ detail: e }) => {
+    if (this.view.renderer.getAttribute('flow') === 'scrolled') return;
+
     this.#bookMarkExists = !!document.getElementById('bookmark-icon');
     this.#upTriggered = false;
   }
 
   #onTouchMove = ({ detail: e }) => {
+    // ignore if flow pagination
+    if (this.view.renderer.getAttribute('flow') === 'scrolled') return;
+
+
     const mainView = this.view.shadowRoot.children[0]
     if (e.touchState.direction === 'vertical') {
       const deltaY = e.touchState.delta.y;
 
       if (deltaY > 0) {
-        mainView.style.transform = `translateY(${deltaY * 0.6}px)`;
+        if (deltaY < 20) {
+          mainView.style.transition = 'transform 0.05s ease-out';
+        } else {
+          mainView.style.transition = '';
+        }
+        mainView.style.transform = `translateY(${Math.sqrt(deltaY * 50)}px)`;
         this.#showBookmarkIcon(deltaY);
       } else if (deltaY < -60) {
         if (!this.#upTriggered) {
@@ -772,6 +783,8 @@ class Reader {
   }
 
   #onTouchEnd = ({ detail: e }) => {
+    if (this.view.renderer.getAttribute('flow') === 'scrolled') return;
+
     const mainView = this.view.shadowRoot.children[0]
     if (e.touchState.direction === 'vertical') {
       const deltaY = e.touchState.delta.y;
@@ -846,7 +859,7 @@ class Reader {
     const content = this.view.lastLocation.range.startContainer.data
     const percentage = this.view.lastLocation.fraction
 
-    callFlutter('addBookmark', {
+    callFlutter('handleBookmark', {
       remove,
       detail: {
         cfi,
