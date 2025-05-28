@@ -411,5 +411,7 @@
   "settings_translate_ai_tip": "Go to the AI settings page to configure the AI service.",
   "settings_ai_prompt_translate_and_dictionary": "Translate And Dictionary",
   "note_list_show_bookmark": "Show Bookmark",
-  "reading_bookmark": "Bookmark"
+  "reading_bookmark": "Bookmark",
+  "no_bookmarks": "No Bookmarks",
+  "no_bookmarks_tip": "Pull down or click the bookmark icon in the top-right corner to add a bookmark."
 }

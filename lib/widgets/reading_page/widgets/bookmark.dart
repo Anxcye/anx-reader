@@ -1,7 +1,10 @@
+import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/models/bookmark.dart';
 import 'package:anx_reader/page/book_player/epub_player.dart';
 import 'package:anx_reader/providers/bookmark.dart';
 import 'package:anx_reader/utils/error_handler.dart';
+import 'package:anx_reader/widgets/container/filled_container.dart';
+import 'package:anx_reader/widgets/delete_confirm.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -29,9 +32,14 @@ class _BookmarkWidgetState extends ConsumerState<BookmarkWidget> {
           return Center(
             child: Column(
               children: [
-                Text('No Bookmarks'),
                 Text(
-                    'Pull down or click the bookmark icon in the top-right corner to add a bookmark.'),
+                  L10n.of(context).no_bookmarks,
+                  style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+                SizedBox(height: 16.0),
+                Text(L10n.of(context).no_bookmarks_tip),
               ],
             ),
           );
@@ -40,16 +48,19 @@ class _BookmarkWidgetState extends ConsumerState<BookmarkWidget> {
           itemCount: bookmarks.length,
           itemBuilder: (context, index) {
             final bookmark = bookmarks[index];
-            return BookmarkItem(
-              bookmark: bookmark,
-              onTap: (cfi) {
-                widget.epubPlayerKey.currentState?.goToCfi(cfi);
-              },
-              onDelete: (id) {
-                ref.read(BookmarkProvider(bookId).notifier).removeBookmark(
-                      id,
-                    );
-              },
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 8.0),
+              child: BookmarkItem(
+                bookmark: bookmark,
+                onTap: (cfi) {
+                  widget.epubPlayerKey.currentState?.goToCfi(cfi);
+                },
+                onDelete: (id) {
+                  ref.read(BookmarkProvider(bookId).notifier).removeBookmark(
+                        id,
+                      );
+                },
+              ),
             );
           },
         );
@@ -79,11 +90,28 @@ class BookmarkItem extends StatelessWidget {
   final Function(int) onDelete;
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      title: Text(bookmark.content),
-      subtitle: Text(bookmark.chapter),
-      trailing: Text('${bookmark.percentage.toStringAsFixed(2)}%'),
+    return GestureDetector(
       onTap: () => onTap(bookmark.cfi),
+      child: FilledContainer(
+        child: Column(
+          children: [
+            Text('${bookmark.percentage.toStringAsFixed(2)}%'),
+            Text(bookmark.content),
+            const Divider(),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(bookmark.chapter),
+                DeleteConfirm(
+                  delete: () {
+                    onDelete(bookmark.id!);
+                  },
+                )
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
