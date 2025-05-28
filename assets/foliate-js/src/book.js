@@ -728,7 +728,16 @@ class Reader {
       ? `Page ${pageItem.label}`
       : `Loc ${location.current}`
     this.#checkCurrentPageBookmark()
-    onRelocated({ cfi, fraction, loc, tocItem, pageItem, location, chapterLocation })
+    onRelocated({
+      cfi,
+      fraction,
+      loc,
+      tocItem,
+      pageItem,
+      location,
+      chapterLocation,
+      bookmark: this.#bookmarkInfo,
+    })
   }
 
   #onClickView({ detail: { x, y } }) {
@@ -1017,7 +1026,8 @@ const onRelocated = (currentInfo) => {
     bookTotalPages,
     bookCurrentPage,
     cfi,
-    percentage
+    percentage,
+    bookmark: currentInfo.bookmark,
   })
 }
 
