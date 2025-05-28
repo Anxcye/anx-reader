@@ -27,6 +27,10 @@ class Bookmark extends _$Bookmark {
     });
   }
 
+  void refreshBookmarks() {
+    ref.invalidateSelf();
+  }
+
   Future<void> addBookmark(BookmarkModel bookmark) async {
     final db = await DBHelper().database;
 
