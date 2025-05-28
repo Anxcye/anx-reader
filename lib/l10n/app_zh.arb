@@ -410,5 +410,6 @@
   "sync_remote_data_update_time": "远程数据更新时间：",
   "settings_translate_ai_tip": "转到AI设置页面以配置AI服务。",
   "settings_ai_prompt_translate_and_dictionary": "翻译和词典",
-  "note_list_show_bookmark": "显示书签"
+  "note_list_show_bookmark": "显示书签",
+  "reading_bookmark": "书签"
 }
