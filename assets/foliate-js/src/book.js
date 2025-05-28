@@ -4,6 +4,7 @@ console.log('AnxUA', navigator.userAgent)
 import './view.js'
 import { FootnoteHandler } from './footnotes.js'
 import { Overlayer } from './overlayer.js'
+import { collapse, compare, fromRange, toRange } from './epubcfi.js'
 const { configure, ZipReader, BlobReader, TextWriter, BlobWriter } =
   await import('./vendor/zip.js')
 const { EPUB } = await import('./epub.js')
@@ -604,11 +605,11 @@ class Reader {
   }
 
   renderAnnotation(annotations) {
-    const bookmarks = annotations ?? allAnnotations ?? []
-    for (const bookmark of bookmarks) {
-      const { value, type, color, note } = bookmark
+    const annos = annotations ?? allAnnotations ?? []
+    for (const anno of annos) {
+      const { value, type, color, note } = anno
       const annotation = {
-        id: bookmark.id,
+        id: anno.id,
         value,
         type,
         color,
@@ -634,7 +635,43 @@ class Reader {
 
     this.annotationsByValue.set(value, annotation)
 
-    this.view.addAnnotation(annotation)
+    if (annotation.type === 'bookmark') {
+      this.#checkBookmark(annotation)
+    } else {
+      this.view.addAnnotation(annotation)
+    }
+
+  }
+
+  #checkCurrentPageBookmark() {
+    const spineCode = this.#index
+    const list = this.annotations.get(spineCode)
+    let found = false
+    if (list) {
+      for (const bookmark of list) {
+        if (bookmark.type === 'bookmark') {
+          found = this.#checkBookmark(bookmark) ? true : found
+        }
+      }
+    }
+    if (!found) {
+      this.#hideBookmarkIcon()
+    }
+  }
+
+  #checkBookmark(bookmark) {
+    const currCfi = this.view.lastLocation?.cfi
+    const currStart = collapse(currCfi)
+    const currEnd = collapse(currCfi, true)
+
+    const bookmarkCfi = bookmark.value
+    const bookmarkStart = collapse(bookmarkCfi)
+
+    if (compare(currStart, bookmarkStart) <= 0 &&
+      compare(currEnd, bookmarkStart) > 0) {
+      this.#showBookmarkIcon(60)
+      return true
+    }
   }
 
   removeAnnotation(cfi) {
@@ -674,6 +711,7 @@ class Reader {
     const loc = pageItem
       ? `Page ${pageItem.label}`
       : `Loc ${location.current}`
+      this.#checkCurrentPageBookmark()
     onRelocated({ cfi, fraction, loc, tocItem, pageItem, location, chapterLocation })
   }
 
