@@ -19,7 +19,7 @@ class Bookmark extends _$Bookmark {
         bookId: maps[i]['book_id'],
         content: maps[i]['content'],
         cfi: maps[i]['cfi'],
-        percentage: maps[i]['color']?.toDouble() ?? 0.0,
+        percentage: double.tryParse(maps[i]['color']) ?? 0.0,
         chapter: maps[i]['chapter'],
         createTime: DateTime.parse(maps[i]['create_time']),
         updateTime: DateTime.parse(maps[i]['update_time']),
@@ -54,18 +54,18 @@ class Bookmark extends _$Bookmark {
     }
   }
 
-  void removeBookmark(BookmarkModel bookmark) {
+  void removeBookmark(int id) {
     final db = DBHelper().database;
     db.then((database) {
       database.delete(
         'tb_notes',
         where: 'id = ?',
-        whereArgs: [bookmark.id],
+        whereArgs: [id],
       );
     });
 
     var newState =
-        state.valueOrNull?.where((b) => b.id != bookmark.id).toList() ?? [];
+        state.valueOrNull?.where((b) => b.id != id).toList() ?? [];
     state = AsyncData(newState);
   }
 }
