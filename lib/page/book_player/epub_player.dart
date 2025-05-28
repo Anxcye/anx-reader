@@ -46,6 +46,7 @@ class EpubPlayer extends ConsumerStatefulWidget {
   final Function showOrHideAppBarAndBottomBar;
   final Function onLoadEnd;
   final List<ReadTheme> initialThemes;
+  final Function updateParent;
 
   const EpubPlayer(
       {super.key,
@@ -53,7 +54,8 @@ class EpubPlayer extends ConsumerStatefulWidget {
       required this.book,
       this.cfi,
       required this.onLoadEnd,
-      required this.initialThemes});
+      required this.initialThemes,
+      required this.updateParent});
 
   @override
   ConsumerState<EpubPlayer> createState() => EpubPlayerState();
@@ -218,6 +220,12 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
       ''');
   }
 
+  void addBookmarkHere() {
+    webViewController.evaluateJavascript(source: '''
+      addBookmarkHere()
+      ''');
+  }
+
   void removeAnnotation(String cfi) =>
       webViewController.evaluateJavascript(source: "removeAnnotation('$cfi')");
 
@@ -357,6 +365,7 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
             bookmarkExists = location['bookmark']['exists'] ?? false;
             bookmarkCfi = location['bookmark']['cfi'] ?? '';
           });
+          widget.updateParent();
           saveReadingProgress();
           readingPageKey.currentState?.resetAwakeTimer();
         });
@@ -466,7 +475,6 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
       callback: (args) async {
         Map<String, dynamic> detail = args[0]['detail'];
         bool remove = args[0]['remove'];
-
         String cfi = detail['cfi'];
         double percentage = detail['percentage'];
         String content = detail['content'];
@@ -475,6 +483,8 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
           ref.read(bookmarkProvider(widget.book.id).notifier).removeBookmark(
                 cfi: cfi,
               );
+          bookmarkCfi = '';
+          bookmarkExists = false;
         } else {
           BookmarkModel bookmark = await ref
               .read(BookmarkProvider(widget.book.id).notifier)
@@ -489,8 +499,12 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
                   createTime: DateTime.now(),
                 ),
               );
+          bookmarkCfi = cfi;
+          bookmarkExists = true;
           addBookmark(bookmark);
         }
+        widget.updateParent();
+        setState(() {});
       },
     );
   }
