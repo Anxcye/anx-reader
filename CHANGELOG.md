@@ -3,8 +3,23 @@
 ## Todo
 
 ## 1.6.0
-- Dx: Improve js debugging process for easier debugging
+‼️If WebDAV sync is enabled, please upgrade all devices to this version, otherwise the book notes list will not be displayed‼️
+‼️如果启用了 WebDAV 同步，需要将各端都升级至此版本，否则书籍笔记列表将无法显示‼️
 
+- Feat: Support adding bookmarks by pulling down
+- Feat: Support opening the menu bar by pulling up
+- Feat: Support adding/removing bookmarks via the bookmark button
+- Feat: Show bookmark list in the table of contents page
+- Feat: Support deleting the current bookmark by pulling down
+- Feat: Support choosing whether to display bookmarks when filtering
+- Dx: Improved JS debugging process for easier debugging
+
+- Feat: 支持下拉添加书签
+- Feat: 支持上拉呼出菜单栏
+- Feat: 支持通过书签按钮添加/删除书签
+- Feat: 在目录页显示书签列表
+- Feat: 支持下拉删除当前书签
+- Feat: 支持在删选时选择是否显示书签
 - Dx: 修改js的调试流程，更方便调试
 
 ## 1.5.3
