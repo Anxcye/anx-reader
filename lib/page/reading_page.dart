@@ -65,6 +65,7 @@ class ReadingPageState extends ConsumerState<ReadingPage>
   String heroTag = 'preventHeroWhenStart';
   Widget? _aiChat;
   final aiChatKey = GlobalKey<AiChatStreamState>();
+  bool bookmarkExists = false;
 
   late FocusOnKeyEventCallback _handleKeyEvent;
 
@@ -310,6 +311,14 @@ class ReadingPageState extends ConsumerState<ReadingPage>
     }
   }
 
+  void updateState() {
+    if (mounted) {
+      setState(() {
+        bookmarkExists = epubPlayerKey.currentState!.bookmarkExists;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     var aiButton = IconButton(
@@ -360,6 +369,19 @@ class ReadingPageState extends ConsumerState<ReadingPage>
                   ),
                   actions: [
                     aiButton,
+                    IconButton(
+                        onPressed: () {
+                          if (bookmarkExists) {
+                            epubPlayerKey.currentState!.removeAnnotation(
+                              epubPlayerKey.currentState!.bookmarkCfi,
+                            );
+                          } else {
+                            epubPlayerKey.currentState!.addBookmarkHere();
+                          }
+                        },
+                        icon: bookmarkExists
+                            ? const Icon(Icons.bookmark)
+                            : const Icon(Icons.bookmark_border)),
                     IconButton(
                       icon: const Icon(EvaIcons.more_vertical),
                       onPressed: () {
@@ -464,13 +486,15 @@ class ReadingPageState extends ConsumerState<ReadingPage>
                             focusNode: FocusNode(),
                             onKeyEvent: _handleKeyEvent,
                             child: EpubPlayer(
-                                key: epubPlayerKey,
-                                book: _book,
-                                cfi: widget.cfi,
-                                showOrHideAppBarAndBottomBar:
-                                    showOrHideAppBarAndBottomBar,
-                                onLoadEnd: onLoadEnd,
-                                initialThemes: widget.initialThemes),
+                              key: epubPlayerKey,
+                              book: _book,
+                              cfi: widget.cfi,
+                              showOrHideAppBarAndBottomBar:
+                                  showOrHideAppBarAndBottomBar,
+                              onLoadEnd: onLoadEnd,
+                              initialThemes: widget.initialThemes,
+                              updateParent: updateState,
+                            ),
                           ),
                         ),
                       ),

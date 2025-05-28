@@ -641,7 +641,14 @@ class Reader {
     this.annotationsByValue.set(value, annotation)
 
     if (annotation.type === 'bookmark') {
-      this.#checkBookmark(annotation)
+      if (this.#checkBookmark(annotation)) {
+        this.#showBookmarkIcon(60)
+        this.#bookmarkInfo = {
+          exists: true,
+          cfi: annotation.value,
+          id: annotation.id,
+        }
+      }
     } else {
       this.view.addAnnotation(annotation)
     }
@@ -659,6 +666,7 @@ class Reader {
           found = this.#checkBookmark(bm) ? true : found
           if (found) {
             bookmark = bm
+            this.#showBookmarkIcon(60)
             break
           }
         }
@@ -685,13 +693,13 @@ class Reader {
 
     if (compare(currStart, bookmarkStart) <= 0 &&
       compare(currEnd, bookmarkStart) > 0) {
-      this.#showBookmarkIcon(60)
       return true
     }
   }
 
   removeAnnotation(cfi) {
     const annotation = this.annotationsByValue.get(cfi)
+    if (!annotation) return
     const { value } = annotation
     const spineCode = (value.split('/')[2].split('!')[0] - 2) / 2
 
@@ -704,6 +712,17 @@ class Reader {
     this.annotationsByValue.delete(value)
 
     this.view.addAnnotation(annotation, true)
+
+    if (annotation.type === 'bookmark' && this.#checkBookmark(annotation)) {
+      this.#hideBookmarkIcon()
+      this.handleBookmark(true)
+      this.#bookmarkInfo = {
+        exists: false,
+        cfi: null,
+        id: null,
+      }
+    }
+
   }
 
   #onLoad({ detail: { doc, index } }) {
@@ -856,10 +875,10 @@ class Reader {
       } else if (deltaY > 60) {
         if (this.#bookMarkExists) {
           this.#hideBookmarkIcon();
-          this.#handleBookmark(true);
+          this.handleBookmark(true);
         } else {
           this.#showBookmarkIcon(deltaY);
-          this.#handleBookmark(false);
+          this.handleBookmark(false);
         }
       } else {
         this.#hideBookmarkIcon();
@@ -916,7 +935,7 @@ class Reader {
     }
   }
 
-  #handleBookmark = (remove) => {
+  handleBookmark = (remove) => {
     const cfi = remove ? this.#bookmarkInfo.cfi : this.view.lastLocation?.cfi
 
     let content = this.view.lastLocation.range.startContainer.data ?? this.view.lastLocation.range.startContainer.innerText
@@ -1117,6 +1136,8 @@ window.getSelection = () => reader.getSelection()
 window.clearSelection = () => reader.view.deselect()
 
 window.addAnnotation = (annotation) => reader.addAnnotation(annotation)
+
+window.addBookmarkHere = () => reader.handleBookmark(false)
 
 window.removeAnnotation = (cfi) => reader.removeAnnotation(cfi)
 
