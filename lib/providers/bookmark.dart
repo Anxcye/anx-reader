@@ -6,7 +6,7 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 part 'bookmark.g.dart';
 
 @Riverpod(keepAlive: true)
-class BookmarkProvider extends _$BookmarkProvider {
+class Bookmark extends _$Bookmark {
   @override
   Future<List<BookmarkModel>> build(int bookId) async {
     final db = await DBHelper().database;
@@ -40,7 +40,7 @@ class BookmarkProvider extends _$BookmarkProvider {
       );
 
       bookmark = bookmark.copyWith(id: id);
-      var newState = [
+      List<BookmarkModel> newState = [
         ...state.valueOrNull ?? [],
         bookmark,
       ];
