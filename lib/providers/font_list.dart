@@ -6,7 +6,6 @@ import 'package:anx_reader/utils/get_path/get_base_path.dart';
 import 'package:flutter/services.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'dart:io';
-import 'package:flutter/material.dart';
 
 part 'font_list.g.dart';
 
@@ -14,14 +13,14 @@ part 'font_list.g.dart';
 class FontList extends _$FontList {
   @override
   Future<List<FontModel>> build() async {
-    return await loadFonts(navigatorKey.currentContext!);
+    return await loadFonts();
   }
 
-  Future<List<FontModel>> loadFonts(BuildContext context) async {
+  Future<List<FontModel>> loadFonts() async {
     Directory fontDir = getFontDir();
     List<FontModel> fontList = [
       FontModel(
-        label: L10n.of(context).system_font,
+        label: L10n.of(navigatorKey.currentContext!).system_font,
         name: 'system',
         path: '',
       ),
@@ -51,6 +50,6 @@ class FontList extends _$FontList {
   }
 
   Future<void> refresh() async {
-    state = AsyncData(await loadFonts(navigatorKey.currentContext!));
+    state = AsyncData(await loadFonts());
   }
 }

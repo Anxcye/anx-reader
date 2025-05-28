@@ -603,8 +603,8 @@ class Reader {
     })
   }
 
-  renderAnnotation() {
-    const bookmarks = allAnnotations ?? []
+  renderAnnotation(annotations) {
+    const bookmarks = annotations ?? allAnnotations ?? []
     for (const bookmark of bookmarks) {
       const { value, type, color, note } = bookmark
       const annotation = {
@@ -1124,7 +1124,7 @@ window.back = () => reader.view.history.back()
 
 window.forward = () => reader.view.history.forward()
 
-window.renderAnnotations = () => reader.renderAnnotation()
+window.renderAnnotations = (annotations) => reader.renderAnnotation(annotations)
 
 window.theChapterContent = () => reader.getChapterContent()
 
@@ -1150,8 +1150,6 @@ window.readingFeatures = (rules) => {
 window.pullUp = () => {
   callFlutter('onPullUp')
 }
-
-
 
 // get varible from url
 var urlParams = new URLSearchParams(window.location.search)
