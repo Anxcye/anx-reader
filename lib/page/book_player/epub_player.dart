@@ -437,6 +437,18 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
         removeOverlay();
       },
     );
+    controller.addJavaScriptHandler(
+      handlerName: 'onPullUp',
+      callback: (args) {
+        widget.showOrHideAppBarAndBottomBar(true);
+      },
+    );
+    controller.addJavaScriptHandler(
+      handlerName: 'handleBookmark',
+      callback: (args) {
+        print(args);
+      },
+    );
   }
 
   Future<void> onWebViewCreated(InAppWebViewController controller) async {
