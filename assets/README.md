@@ -18,6 +18,13 @@ We would like to express our gratitude to Pixabay (https://pixabay.com), a free 
 - Background 5: Ocean Sunset
   https://pixabay.com/photos/sea-sky-sunset-seascape-ocean-7598498/
 
+- bg6
+https://pixabay.com/photos/paper-texture-scrapbooking-753508/
+
+- bg7
+https://pixabay.com/photos/paper-certificate-grunge-antique-1217311/
+
+
 All images are licensed under the Pixabay License which allows free commercial and non-commercial use without attribution.
 
 bg1

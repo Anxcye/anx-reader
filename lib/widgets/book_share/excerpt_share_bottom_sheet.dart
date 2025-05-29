@@ -96,6 +96,8 @@ class _ExcerptShareBottomSheetState
     'assets/images/book_share/bg3.jpg',
     'assets/images/book_share/bg4.jpg',
     'assets/images/book_share/bg5.jpg',
+    'assets/images/book_share/bg6.jpg',
+    'assets/images/book_share/bg7.jpg',
   ];
 
   Future<Uint8List?> _captureCard() async {
