@@ -411,6 +411,7 @@ export class Paginator extends HTMLElement {
   #scrollBounds
   #touchState
   #touchScrolled
+  #transform = { x: 0, y: 0 }
   constructor() {
     super()
     this.#root.innerHTML = `<style>
@@ -684,6 +685,9 @@ export class Paginator extends HTMLElement {
     return this.#vertical ? (scrolled ? 'width' : 'height')
       : scrolled ? 'height' : 'width'
   }
+  get transformProp() {
+    return this.scrollProp === 'scrollLeft' ? 'x' : 'y'
+  }
   get vertical() {
     return this.#vertical
   }
@@ -694,7 +698,7 @@ export class Paginator extends HTMLElement {
     return this.#view.element.getBoundingClientRect()[this.sideProp]
   }
   get start() {
-    return Math.abs(this.#container[this.scrollProp])
+    return Math.abs(this.#transform[this.transformProp])
   }
   get end() {
     return this.start + this.size
@@ -708,13 +712,27 @@ export class Paginator extends HTMLElement {
   scrollBy(dx, dy) {
     const delta = this.#vertical ? dy : dx
     const element = this.#container
-    const { scrollProp } = this
+    const { transformProp, scrollProp } = this
     const [offset, a, b] = this.#scrollBounds
     const rtl = this.#rtl
     const min = rtl ? offset - b : offset - a
     const max = rtl ? offset + a : offset + b
-    element[scrollProp] = Math.max(min, Math.min(max,
-      element[scrollProp] + delta))
+    element[scrollProp] = 0
+
+    this.#transform[transformProp] = Math.max(
+      min,
+      Math.min(
+        max,
+        this.#transform[transformProp] + delta)
+    )
+    this.#applyTransform()
+  }
+  #applyTransform() {
+    const element = this.#container.children[0]
+
+    if (!element) return
+    const { x, y } = this.#transform
+    element.style.transform = `translate3d(${-x}px, ${-y}px, 0)`
   }
   snap(vx, vy) {
     const velocity = this.#vertical ? vy : vx
@@ -762,10 +780,10 @@ export class Paginator extends HTMLElement {
 
     const deltaX = e.changedTouches[0].screenX - this.#touchState.startTouch.x;
     const deltaY = e.changedTouches[0].screenY - this.#touchState.startTouch.y;
-    
+
     const absDeltaX = Math.abs(deltaX);
     const absDeltaY = Math.abs(deltaY);
-    
+
     this.#touchState.delta.x = deltaX
     this.#touchState.delta.y = deltaY
 
@@ -894,9 +912,9 @@ export class Paginator extends HTMLElement {
   }
   async #scrollTo(offset, reason, smooth) {
     const element = this.#container
-    const { scrollProp, size } = this
+    const { transformProp, size } = this
 
-    if (Math.abs(element[scrollProp] - offset) < 1) {
+    if (Math.abs(this.#transform[transformProp] - offset) < 1) {
       this.#scrollBounds = [offset, this.atStart ? 0 : size, this.atEnd ? 0 : size]
       this.#afterScroll(reason)
       return
@@ -908,7 +926,7 @@ export class Paginator extends HTMLElement {
     const useAnimation = (reason === 'snap' || smooth) && this.hasAttribute('animated')
 
     if (useAnimation) {
-      const distance = Math.abs(element[scrollProp] - offset)
+      const distance = Math.abs(this.#transform[transformProp] - offset)
       const baseDuration = 300
       const adaptiveDuration = Math.min(
         500,
@@ -924,13 +942,16 @@ export class Paginator extends HTMLElement {
       this.#justAnchored = true
 
       return animate(
-        element[scrollProp],
+        this.#transform[transformProp],
         offset,
         adaptiveDuration,
         smoothEasing,
-        x => element[scrollProp] = x,
+        x => {
+          this.#transform[transformProp] = x 
+          this.#applyTransform()
+        },
       ).then(() => {
-        element[scrollProp] = offset
+        this.#transform[transformProp] = offset
         this.#scrollBounds = [offset, this.atStart ? 0 : size, this.atEnd ? 0 : size]
 
         return wait(10).then(() => {
@@ -938,7 +959,8 @@ export class Paginator extends HTMLElement {
         })
       })
     } else {
-      element[scrollProp] = offset
+      this.#transform[transformProp] = offset
+      this.#applyTransform()
       this.#scrollBounds = [offset, this.atStart ? 0 : size, this.atEnd ? 0 : size]
       this.#afterScroll(reason)
     }
