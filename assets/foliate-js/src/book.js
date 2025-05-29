@@ -844,18 +844,14 @@ class Reader {
 
   #onTouchMove = ({ detail: e }) => {
     if (this.#ignoreTouch()) return;
-
+    
     const mainView = this.view.shadowRoot.children[0]
     if (e.touchState.direction === 'vertical') {
       const deltaY = e.touchState.delta.y;
-
+      
       if (deltaY > 0) {
-        if (deltaY < 20) {
-          mainView.style.transition = 'transform 0.05s ease-out';
-        } else {
-          mainView.style.transition = '';
-        }
         mainView.style.transform = `translateY(${Math.sqrt(deltaY * 50)}px)`;
+        e.preventDefault();
         this.#showBookmarkIcon(deltaY);
       } else if (deltaY < -60) {
         if (!this.#upTriggered) {

@@ -774,6 +774,7 @@ export class Paginator extends HTMLElement {
         touch: e.changedTouches[0],
         touchState: this.#touchState,
       },
+      preventDefault: () => e.preventDefault(),
       bubbles: true,
       composed: true
     }))
