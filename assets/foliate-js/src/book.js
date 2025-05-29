@@ -902,11 +902,11 @@ class Reader {
       bookmarkIcon.id = 'bookmark-icon';
       bookmarkIcon.innerHTML = bookMarkSvg;
       bookmarkIcon.style.cssText = `
-        height: 60px;
-        width: 20px;
+        height: 80px;
+        width: 26px;
         position: fixed;
-        top: -14px;
-        right: 0px;
+        top: -16px;
+        right: 20px;
         font-size: 24px;
         opacity: 0;
         transition: opacity 0.2s ease;
