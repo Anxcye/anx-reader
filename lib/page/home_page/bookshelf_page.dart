@@ -140,7 +140,7 @@ class BookshelfPageState extends ConsumerState<BookshelfPage> {
                               SliverGridDelegateWithFixedCrossAxisCount(
                             crossAxisCount:
                                 constraints.maxWidth ~/ Prefs().bookCoverWidth,
-                            childAspectRatio: 0.55,
+                            childAspectRatio: 1 / 2.1,
                             mainAxisSpacing: 30,
                             crossAxisSpacing: 20,
                           ),
