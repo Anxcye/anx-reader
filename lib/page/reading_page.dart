@@ -12,7 +12,6 @@ import 'package:anx_reader/page/book_detail.dart';
 import 'package:anx_reader/page/book_player/epub_player.dart';
 import 'package:anx_reader/providers/ai_chat.dart';
 import 'package:anx_reader/providers/anx_webdav.dart';
-import 'package:anx_reader/providers/bookmark.dart';
 import 'package:anx_reader/service/ai/ai_dio.dart';
 import 'package:anx_reader/service/ai/prompt_generate.dart';
 import 'package:anx_reader/utils/toast/common.dart';
