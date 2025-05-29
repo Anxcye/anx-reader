@@ -18,6 +18,7 @@ import 'package:anx_reader/utils/toast/common.dart';
 import 'package:anx_reader/utils/ui/status_bar.dart';
 import 'package:anx_reader/widgets/ai_chat_stream.dart';
 import 'package:anx_reader/widgets/ai_stream.dart';
+import 'package:anx_reader/widgets/page_router/page_dismiss_controller.dart';
 import 'package:anx_reader/widgets/reading_page/notes_widget.dart';
 import 'package:anx_reader/models/reading_time.dart';
 import 'package:anx_reader/widgets/reading_page/progress_widget.dart';
