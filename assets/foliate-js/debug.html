@@ -71,8 +71,8 @@
   if (!urlParams.has('url')) {
     const mockParams = {
       importing: false,
-      url: '../local/alice.epub',
-      initialCfi: 'epubcfi(/6/6!/4/2[pgepubid00003],/40,/42/1:380)',
+      url: '../local/xwz.epub',
+      initialCfi: 'epubcfi(/6/60!/4,/2[CHP27],/10/1:28)',
       style: {
         fontSize: 1.4,
         fontName: "book",
@@ -90,9 +90,12 @@
         justify: true,
         hyphenate: true,
         // 'slide' 'scroll' 'noAnimation'
-        pageTurnStyle: "slide",
+        pageTurnStyle: "scroll",
+        // pageTurnStyle: "slide",
         maxColumnCount: 0,
-        writingMode: "auto",
+        // auto 'horizontal-tb' 'vertical-rl'
+        // writingMode: "vertical-rl",
+        writingMode: "horizontal-tb",
         backgroundImage: "none"
       },
       readingRules: {

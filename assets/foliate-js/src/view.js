@@ -236,41 +236,43 @@ export class View extends HTMLElement {
 
   #handleClick(doc) {
     doc.addEventListener('click', e => {
-      if (window.isFootNoteOpen()){
-          window.closeFootNote()
-          return
+      if (window.isFootNoteOpen()) {
+        window.closeFootNote()
+        return
       }
 
       if (doc.getSelection().type === "Range")
-          return
+        return
 
       const position = doc.position
       const scale = doc.scale
       let { clientX, clientY } = e
 
       // if the position is not null, it is fixed layout
-      if (position){
+      if (position) {
         clientX *= scale
         clientY *= scale
 
         const docWidth = doc.documentElement.getBoundingClientRect().width * scale
-        if (position === 'right' && docWidth * 2.2 < window.innerWidth){
+        if (position === 'right' && docWidth * 2.2 < window.innerWidth) {
           clientX += window.innerWidth * 0.5
         }
         this.#emit('click-view', { x: clientX, y: clientY })
         return
       }
-
       if (this.renderer.vertical) {
-        clientY +=  this.renderer.size
-      } 
-      
-      this.renderer.scrollProp == 'scrollLeft'
-          ? clientX -= (this.renderer.start - this.renderer.size) 
+        this.renderer.scrollProp == 'scrollLeft'
+          ? clientX = this.renderer.size - (this.renderer.viewSize - this.renderer.start - clientX)
+          : clientY -= (this.renderer.start - this.renderer.size)
+      }
+      else {
+        this.renderer.scrollProp == 'scrollLeft'
+          ? clientX -= (this.renderer.start - this.renderer.size)
           : clientY -= (this.renderer.start)
-          
+      }
+
       this.#emit('click-view', { x: clientX, y: clientY })
-  })
+    })
     this.renderer.addEventListener('click', e => {
       const { clientX, clientY } = e
       while (clientX > window.innerWidth) {
