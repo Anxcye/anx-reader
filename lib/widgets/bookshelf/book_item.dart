@@ -67,12 +67,12 @@ class BookItem extends ConsumerWidget {
                 decoration: BoxDecoration(
                   boxShadow: [
                     if (!Prefs().eInkMode)
-                    BoxShadow(
-                      color: Colors.grey.withAlpha(100),
-                      spreadRadius: 5,
-                      blurRadius: 10,
-                      offset: const Offset(0, 2),
-                    ),
+                      BoxShadow(
+                        color: Colors.grey.withAlpha(100),
+                        spreadRadius: 5,
+                        blurRadius: 10,
+                        offset: const Offset(0, 2),
+                      ),
                   ],
                 ),
                 child: Row(
@@ -84,25 +84,32 @@ class BookItem extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 5),
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  book.title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ),
-              if (Prefs().webdavStatus)
-                SizedBox(
-                  height: 20,
-                  width: 20,
-                  child: BookSyncStatusIcon(
-                    syncStatus: bookSyncStatus,
+          SizedBox(
+            height: 40,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Text(
+                    book.title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                    ),
                   ),
                 ),
-            ],
+                if (Prefs().webdavStatus)
+                  SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: BookSyncStatusIcon(
+                      syncStatus: bookSyncStatus,
+                    ),
+                  ),
+              ],
+            ),
           ),
           Row(
             children: [

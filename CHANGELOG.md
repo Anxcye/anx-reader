@@ -12,6 +12,7 @@
 - Feat: Show bookmark list in the table of contents page
 - Feat: Support deleting the current bookmark by pulling down
 - Feat: Support choosing whether to display bookmarks when filtering
+- Feat: Display book name in two lines
 - Dx: Improved JS debugging process for easier debugging
 
 - Feat: 支持下拉添加书签
@@ -19,7 +20,8 @@
 - Feat: 支持通过书签按钮添加/删除书签
 - Feat: 在目录页显示书签列表
 - Feat: 支持下拉删除当前书签
-- Feat: 支持在删选时选择是否显示书签
+- Feat: 支持在笔记列表筛选时选择是否显示书签
+- Feat: 书名显示为两行
 - Dx: 修改js的调试流程，更方便调试
 
 ## 1.5.3
