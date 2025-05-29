@@ -830,17 +830,20 @@ class Reader {
     return range;
   }
 
+  #ignoreTouch = () => { 
+    return this.view.renderer.scrollProp === 'scrollTop'
+  }
+
 
   #onTouchStart = ({ detail: e }) => {
-    if (this.view.renderer.getAttribute('flow') === 'scrolled') return;
+    if (this.#ignoreTouch()) return;
 
     this.#bookMarkExists = !!document.getElementById('bookmark-icon');
     this.#upTriggered = false;
   }
 
   #onTouchMove = ({ detail: e }) => {
-    // ignore if flow pagination
-    if (this.view.renderer.getAttribute('flow') === 'scrolled') return;
+    if (this.#ignoreTouch()) return;
 
     const mainView = this.view.shadowRoot.children[0]
     if (e.touchState.direction === 'vertical') {
@@ -864,7 +867,7 @@ class Reader {
   }
 
   #onTouchEnd = ({ detail: e }) => {
-    if (this.view.renderer.getAttribute('flow') === 'scrolled') return;
+    if (this.#ignoreTouch()) return;
 
     const mainView = this.view.shadowRoot.children[0]
     if (e.touchState.direction === 'vertical') {

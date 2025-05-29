@@ -795,7 +795,10 @@ export class Paginator extends HTMLElement {
       }
     }
 
-    if (this.#touchState.direction !== 'horizontal') {
+    const isHorizontal = this.#touchState.direction === 'horizontal' && this.scrollProp === 'scrollLeft'
+    const isVertical = this.#touchState.direction === 'vertical' && this.scrollProp === 'scrollTop'
+
+    if (!isHorizontal && !isVertical) {
       return
     }
 
