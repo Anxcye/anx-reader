@@ -20,6 +20,7 @@ import 'package:anx_reader/utils/log/common.dart';
 import 'package:anx_reader/utils/toast/common.dart';
 import 'package:anx_reader/utils/webView/gererate_url.dart';
 import 'package:anx_reader/utils/webView/webview_console_message.dart';
+import 'package:anx_reader/widgets/page_router/slide_up_dismiss_route.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
@@ -187,8 +188,8 @@ Future<void> pushToReadingPage(
   final initialThemes = await selectThemes();
   await Navigator.push(
       navigatorKey.currentContext!,
-      CupertinoPageRoute(
-        builder: (context) => ReadingPage(
+      SlideUpDismissRoute(
+        child: ReadingPage(
           key: readingPageKey,
           book: book,
           cfi: cfi,
