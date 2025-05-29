@@ -851,7 +851,6 @@ class Reader {
       
       if (deltaY > 0) {
         mainView.style.transform = `translateY(${Math.sqrt(deltaY * 50)}px)`;
-        e.preventDefault();
         this.#showBookmarkIcon(deltaY);
       } else if (deltaY < -60) {
         if (!this.#upTriggered) {

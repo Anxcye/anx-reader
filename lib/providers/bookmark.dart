@@ -88,7 +88,7 @@ class Bookmark extends _$Bookmark {
       final key = epubPlayerKey.currentState;
       key?.removeAnnotation(cfi!);
     } catch (e) {
-      AnxLog.severe('Error removing bookmark: $e');
+      AnxLog.info('Bookmark already removed: $e');
     }
   }
 }
