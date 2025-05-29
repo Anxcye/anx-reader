@@ -49,7 +49,7 @@ class BookItem extends ConsumerWidget {
 
     return GestureDetector(
       onTap: () {
-        openBook(context, book, ref);
+        pushToReadingPage(ref, context, book);
       },
       onLongPress: () {
         handleLongPress(context);
