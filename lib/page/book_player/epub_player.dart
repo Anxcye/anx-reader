@@ -600,7 +600,7 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
   }
 
   Future<void> saveReadingProgress() async {
-    if (cfi == '') return;
+    if (cfi == '' || widget.cfi != null) return;
     Book book = widget.book;
     book.lastReadPosition = cfi;
     book.readingPercentage = percentage;

@@ -197,10 +197,6 @@ Future<void> pushToReadingPage(
       ));
 }
 
-Future<void> openBook(BuildContext context, Book book, WidgetRef ref) async {
-  await pushToReadingPage(ref, context, book);
-}
-
 void updateBookRating(Book book, double rating) {
   book.rating = rating;
   updateBook(book);
