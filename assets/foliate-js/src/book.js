@@ -548,14 +548,14 @@ class Reader {
     this.view.addEventListener('doctouchmove', this.#onTouchMove.bind(this))
     this.view.addEventListener('doctouchend', this.#onTouchEnd.bind(this))
 
-    // set html bg color t grey 
-    document.documentElement.style.backgroundColor = 'grey'
-
     setStyle()
     if (!cfi)
       this.view.renderer.next()
     this.setView(this.view)
     await this.view.init({ lastLocation: cfi })
+
+    // set html bg color to grey 
+    document.documentElement.style.backgroundColor = 'grey'
   }
 
   setView(view) {

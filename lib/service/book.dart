@@ -188,8 +188,8 @@ Future<void> pushToReadingPage(
   final initialThemes = await selectThemes();
   await Navigator.push(
       navigatorKey.currentContext!,
-      SlideUpDismissRoute(
-        child: ReadingPage(
+      CupertinoPageRoute(
+        builder: (c) => ReadingPage(
           key: readingPageKey,
           book: book,
           cfi: cfi,
