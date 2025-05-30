@@ -17,6 +17,7 @@
 - Feat: Add two background image in share card
 - Feat: Opening a book from the note list will not record reading progress
 - Fix: Fix inaccurate click position recognition in vertical scroll layout
+- Fix: Optimize page-turning animation stuttering
 - Dx: Improved JS debugging process for easier debugging
 
 - Feat: 支持上划退出阅读页面
@@ -30,6 +31,7 @@
 - Feat: 分享卡片新增两个背景图
 - Feat: 从笔记列表打开书不会记录阅读进度
 - Fix: 修复竖向滚动排版点击位置识别不准确的问题
+- Fix: 优化翻页动画卡顿的问题
 - Dx: 修改js的调试流程，更方便调试
 
 ## 1.5.3
