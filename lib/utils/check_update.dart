@@ -41,10 +41,16 @@ Future<void> checkUpdate(bool manualCheck) async {
 
   List<String> newVersionList = newVersion.split('.');
   List<String> currentVersionList = currentVersion.split('.');
+  AnxLog.info('Current version: $currentVersionList, New version: $newVersionList');
   bool needUpdate = false;
   for (int i = 0; i < newVersionList.length; i++) {
-    if (int.parse(newVersionList[i]) > int.parse(currentVersionList[i])) {
+    int newVer = int.parse(newVersionList[i]);
+    int curVer = int.parse(currentVersionList[i]);
+    if (newVer > curVer) {
       needUpdate = true;
+      break;
+    } else if (newVer < curVer) {
+      needUpdate = false;
       break;
     }
   }

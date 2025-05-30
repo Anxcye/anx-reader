@@ -18,6 +18,7 @@
 - Feat: Opening a book from the note list will not record reading progress
 - Fix: Fix inaccurate click position recognition in vertical scroll layout
 - Fix: Optimize page-turning animation stuttering
+- Fix: improve version comparison logic in update check
 - Dx: Improved JS debugging process for easier debugging
 
 - Feat: 支持上划退出阅读页面
@@ -32,6 +33,7 @@
 - Feat: 从笔记列表打开书不会记录阅读进度
 - Fix: 修复竖向滚动排版点击位置识别不准确的问题
 - Fix: 优化翻页动画卡顿的问题
+- Fix: 优化检查更新时版本比较逻辑
 - Dx: 修改js的调试流程，更方便调试
 
 ## 1.5.3
