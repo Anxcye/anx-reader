@@ -40,7 +40,7 @@ class _TocWidgetState extends State<TocWidget>
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 0.6 * MediaQuery.of(context).size.height,
+      height: MediaQuery.of(context).size.height - 200,
       child: Column(
         children: [
           TabBar(
