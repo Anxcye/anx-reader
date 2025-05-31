@@ -28,7 +28,7 @@
     <application
         android:name="${applicationName}"
         android:allowBackup="false"
-        android:icon="@mipmap/launcher_icon"
+        android:icon="@mipmap/ic_launcher"
         android:label="@string/title"
         android:networkSecurityConfig="@xml/network_security_config">
 
