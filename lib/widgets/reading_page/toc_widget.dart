@@ -1,5 +1,4 @@
 import 'package:anx_reader/l10n/generated/L10n.dart';
-import 'package:anx_reader/models/toc_item.dart';
 import 'package:anx_reader/page/book_player/epub_player.dart';
 import 'package:anx_reader/widgets/reading_page/widgets/book_toc.dart';
 import 'package:anx_reader/widgets/reading_page/widgets/bookmark.dart';
@@ -8,12 +7,10 @@ import 'package:flutter/material.dart';
 class TocWidget extends StatefulWidget {
   const TocWidget({
     super.key,
-    required this.tocItems,
     required this.epubPlayerKey,
     required this.hideAppBarAndBottomBar,
   });
 
-  final List<TocItem> tocItems;
   final GlobalKey<EpubPlayerState> epubPlayerKey;
   final Function hideAppBarAndBottomBar;
 
@@ -73,7 +70,6 @@ class _TocWidgetState extends State<TocWidget>
 
   BookToc buildBookToc() {
     return BookToc(
-        tocItems: widget.tocItems,
         epubPlayerKey: widget.epubPlayerKey,
         hideAppBarAndBottomBar: widget.hideAppBarAndBottomBar);
   }

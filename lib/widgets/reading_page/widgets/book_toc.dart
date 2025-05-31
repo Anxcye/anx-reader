@@ -5,44 +5,34 @@ import 'package:anx_reader/models/search_result_model.dart';
 import 'package:anx_reader/page/reading_page.dart';
 import 'package:anx_reader/models/toc_item.dart';
 import 'package:anx_reader/page/book_player/epub_player.dart';
+import 'package:anx_reader/providers/book_toc.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class BookToc extends StatefulWidget {
+class BookToc extends ConsumerStatefulWidget {
   const BookToc({
     super.key,
-    required this.tocItems,
     required this.epubPlayerKey,
     required this.hideAppBarAndBottomBar,
   });
 
-  final List<TocItem> tocItems;
   final GlobalKey<EpubPlayerState> epubPlayerKey;
   final Function hideAppBarAndBottomBar;
 
   @override
-  State<BookToc> createState() => _BookTocState();
+  ConsumerState<BookToc> createState() => _BookTocState();
 }
 
-class _BookTocState extends State<BookToc> {
+class _BookTocState extends ConsumerState<BookToc> {
   String? _searchValue;
   TextEditingController searchBarController = TextEditingController();
   ScrollController listViewController = ScrollController();
   List<bool> isExpanded = [];
+  late List<TocItem> tocItems;
 
   @override
   void initState() {
     super.initState();
-    for (var item in widget.tocItems) {
-      isExpanded.add(_isSelected(item));
-    }
-
-    final offset = isExpanded.indexWhere((isExpanded) => isExpanded);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (listViewController.hasClients) {
-        listViewController.jumpTo(
-            min(offset * 48, listViewController.position.maxScrollExtent - 48));
-      }
-    });
   }
 
   @override
@@ -67,6 +57,19 @@ class _BookTocState extends State<BookToc> {
 
   @override
   Widget build(BuildContext context) {
+    tocItems = ref.watch(bookTocProvider);
+    for (var item in tocItems) {
+      isExpanded.add(_isSelected(item));
+    }
+
+    final offset = isExpanded.indexWhere((isExpanded) => isExpanded);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (listViewController.hasClients) {
+        listViewController.jumpTo(
+            min(offset * 48, listViewController.position.maxScrollExtent - 48));
+      }
+    });
+
     var searchBox = SizedBox(
       height: 35,
       child: SearchBar(
@@ -145,10 +148,10 @@ class _BookTocState extends State<BookToc> {
             : Expanded(
                 child: ListView.builder(
                   controller: listViewController,
-                  itemCount: widget.tocItems.length,
+                  itemCount: tocItems.length,
                   itemBuilder: (context, index) {
                     return TocItemWidget(
-                        tocItem: widget.tocItems[index],
+                        tocItem: tocItems[index],
                         hideAppBarAndBottomBar: widget.hideAppBarAndBottomBar,
                         epubPlayerKey: widget.epubPlayerKey);
                   },

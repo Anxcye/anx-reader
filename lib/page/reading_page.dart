@@ -194,11 +194,10 @@ class ReadingPageState extends ConsumerState<ReadingPage>
   Future<void> tocHandler() async {
     setState(() {
       _tocWidget = TocWidget(
-        tocItems: epubPlayerKey.currentState!.toc,
         epubPlayerKey: epubPlayerKey,
         hideAppBarAndBottomBar: showOrHideAppBarAndBottomBar,
       );
-      _currentPage = null;
+      _currentPage = _tocWidget;
       tocOffstage = false;
     });
   }

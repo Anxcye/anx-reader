@@ -18,6 +18,7 @@ import 'package:anx_reader/page/book_player/image_viewer.dart';
 import 'package:anx_reader/page/home_page.dart';
 import 'package:anx_reader/page/reading_page.dart';
 import 'package:anx_reader/providers/book_list.dart';
+import 'package:anx_reader/providers/book_toc.dart';
 import 'package:anx_reader/providers/bookmark.dart';
 import 'package:anx_reader/service/book_player/book_player_server.dart';
 import 'package:anx_reader/utils/coordinates_to_part.dart';
@@ -71,7 +72,6 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
   String chapterHref = '';
   int chapterCurrentPage = 0;
   int chapterTotalPages = 0;
-  List<TocItem> toc = [];
   OverlayEntry? contextMenuEntry;
   AnimationController? _animationController;
   Animation<double>? _animation;
@@ -282,6 +282,10 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
     webViewController.evaluateJavascript(source: "forward()");
   }
 
+  void refreshToc(){
+    webViewController.evaluateJavascript(source: "refreshToc()");
+  }
+
   Future<String> theChapterContent() async =>
       await webViewController.evaluateJavascript(
         source: "theChapterContent()",
@@ -291,6 +295,7 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
       await webViewController.evaluateJavascript(
         source: "previousContent($count)",
       );
+
 
   void onClick(Map<String, dynamic> location) {
     readingPageKey.currentState?.resetAwakeTimer();
@@ -379,7 +384,8 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
         handlerName: 'onSetToc',
         callback: (args) {
           List<dynamic> t = args[0];
-          toc = t.map((i) => TocItem.fromJson(i)).toList();
+          final toc = t.map((i) => TocItem.fromJson(i)).toList();
+          ref.read(bookTocProvider.notifier).setToc(toc);
         });
     controller.addJavaScriptHandler(
         handlerName: 'onSelectionEnd',
