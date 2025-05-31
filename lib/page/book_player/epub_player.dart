@@ -359,6 +359,9 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
         callback: (args) {
           Map<String, dynamic> location = args[0];
           if (cfi == location['cfi']) return;
+          if (chapterHref != location['chapterHref']) {
+            refreshToc();
+          }
           setState(() {
             cfi = location['cfi'] ?? '';
             percentage =

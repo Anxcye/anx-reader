@@ -979,7 +979,7 @@ class Reader {
         id: item.id,
         level,
         startPercentage: getFractionByHref(item.href),
-        startPage: Math.round(getFractionByHref(item.href) * totalPages),
+        startPage: Math.ceil(getFractionByHref(item.href) * totalPages),
         subitems: buildItems(item.subitems, level + 1)
       })) || [];
     }
