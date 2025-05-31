@@ -406,8 +406,14 @@ export class View extends HTMLElement {
       doc.defaultView.getSelection().removeAllRanges()
   }
   getSectionFractions() {
+    const hrefList = this.#tocProgress?.ids ?? []
     return (this.#sectionProgress?.sectionFractions ?? [])
-      .map(x => x + Number.EPSILON)
+    // .map(x => x + Number.EPSILON)
+      .map((fraction, index) => ({
+        fraction,
+        href: hrefList[index] ?? '',
+        index
+      }))
   }
   getProgressOf(index, range) {
     const tocItem = this.#tocProgress?.getProgress(index, range)
