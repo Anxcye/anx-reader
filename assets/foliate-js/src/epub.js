@@ -584,7 +584,7 @@ class Resources {
     #cache = new Map()
     #children = new Map()
     #refCount = new Map()
-    allowScript = false
+    allowScript = true
     constructor({ loadText, loadBlob, resources }) {
         this.loadText = loadText
         this.loadBlob = loadBlob
