@@ -54,7 +54,7 @@ final GlobalKey<ReadingPageState> readingPageKey =
 final epubPlayerKey = GlobalKey<EpubPlayerState>();
 
 class ReadingPageState extends ConsumerState<ReadingPage>
-    with WidgetsBindingObserver {
+    with WidgetsBindingObserver, TickerProviderStateMixin {
   late Book _book;
   Widget _currentPage = const SizedBox(height: 1);
   final Stopwatch _readTimeWatch = Stopwatch();
@@ -79,6 +79,7 @@ class ReadingPageState extends ConsumerState<ReadingPage>
     if (Prefs().hideStatusBar) {
       hideStatusBar();
     }
+
     WidgetsBinding.instance.addObserver(this);
     _readTimeWatch.start();
     setAwakeTimer(Prefs().awakeTime);
@@ -350,6 +351,11 @@ class ReadingPageState extends ConsumerState<ReadingPage>
               child: GestureDetector(
                   onTap: () {
                     showOrHideAppBarAndBottomBar(false);
+                  },
+                  behavior: HitTestBehavior.opaque,
+                  onVerticalDragUpdate: (details) {
+                  },
+                  onVerticalDragEnd: (details) {
                   },
                   child: Container(
                     color: Colors.black.withAlpha(30),

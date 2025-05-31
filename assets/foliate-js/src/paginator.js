@@ -787,15 +787,7 @@ export class Paginator extends HTMLElement {
     this.#touchState.delta.x = deltaX
     this.#touchState.delta.y = deltaY
 
-    this.dispatchEvent(new CustomEvent('doctouchmove', {
-      detail: {
-        touch: e.changedTouches[0],
-        touchState: this.#touchState,
-      },
-      preventDefault: () => e.preventDefault(),
-      bubbles: true,
-      composed: true
-    }))
+
 
     const threshold = 5
 
@@ -818,6 +810,15 @@ export class Paginator extends HTMLElement {
     const isVertical = this.#touchState.direction === 'vertical' && this.scrollProp === 'scrollTop'
 
     if (!isHorizontal && !isVertical) {
+      this.dispatchEvent(new CustomEvent('doctouchmove', {
+        detail: {
+          touch: e.changedTouches[0],
+          touchState: this.#touchState,
+        },
+        preventDefault: () => e.preventDefault(),
+        bubbles: true,
+        composed: true
+      }))
       return
     }
 

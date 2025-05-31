@@ -85,32 +85,33 @@ class BookItem extends ConsumerWidget {
           ),
           const SizedBox(height: 5),
           SizedBox(
-            height: 40,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            height: 55,
+            child: Column(
               children: [
-                Expanded(
-                  child: Text(
-                    book.title,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 13,
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        book.title,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                        ),
+                      ),
                     ),
-                  ),
+                    if (Prefs().webdavStatus)
+                      SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: BookSyncStatusIcon(
+                          syncStatus: bookSyncStatus,
+                        ),
+                      ),
+                  ],
                 ),
-                if (Prefs().webdavStatus)
-                  SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: BookSyncStatusIcon(
-                      syncStatus: bookSyncStatus,
-                    ),
-                  ),
-              ],
-            ),
-          ),
           Row(
             children: [
               Expanded(
@@ -130,6 +131,9 @@ class BookItem extends ConsumerWidget {
                     overflow: TextOverflow.ellipsis),
               ),
             ],
+          ),
+              ],
+            ),
           ),
         ],
       ),

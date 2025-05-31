@@ -6,6 +6,7 @@
 ‼️If WebDAV sync is enabled, please upgrade all devices to this version, otherwise the book notes list will not be displayed‼️
 ‼️如果启用了 WebDAV 同步，需要将各端都升级至此版本，否则书籍笔记列表将无法显示‼️
 
+- Feat: Support pull up to exit reading page
 - Feat: Support adding bookmarks by pulling down
 - Feat: Support opening the menu bar by pulling up
 - Feat: Support adding/removing bookmarks via the bookmark button
@@ -16,8 +17,11 @@
 - Feat: Add two background image in share card
 - Feat: Opening a book from the note list will not record reading progress
 - Fix: Fix inaccurate click position recognition in vertical scroll layout
+- Fix: Optimize page-turning animation stuttering
+- Fix: improve version comparison logic in update check
 - Dx: Improved JS debugging process for easier debugging
 
+- Feat: 支持上划退出阅读页面
 - Feat: 支持下拉添加书签
 - Feat: 支持上拉呼出菜单栏
 - Feat: 支持通过书签按钮添加/删除书签
@@ -28,6 +32,8 @@
 - Feat: 分享卡片新增两个背景图
 - Feat: 从笔记列表打开书不会记录阅读进度
 - Fix: 修复竖向滚动排版点击位置识别不准确的问题
+- Fix: 优化翻页动画卡顿的问题
+- Fix: 优化检查更新时版本比较逻辑
 - Dx: 修改js的调试流程，更方便调试
 
 ## 1.5.3
