@@ -56,7 +56,7 @@ final epubPlayerKey = GlobalKey<EpubPlayerState>();
 class ReadingPageState extends ConsumerState<ReadingPage>
     with WidgetsBindingObserver, TickerProviderStateMixin {
   late Book _book;
-  Widget? _currentPage;
+  Widget _currentPage = const SizedBox.shrink();
   final Stopwatch _readTimeWatch = Stopwatch();
   Timer? _awakeTimer;
   bool bottomBarOffstage = true;
@@ -174,7 +174,7 @@ class ReadingPageState extends ConsumerState<ReadingPage>
   void hideBottomBar() {
     setState(() {
       tocOffstage = true;
-      _currentPage = null;
+      _currentPage = const SizedBox.shrink();
       bottomBarOffstage = true;
       if (Prefs().hideStatusBar) {
         hideStatusBar();
@@ -197,7 +197,7 @@ class ReadingPageState extends ConsumerState<ReadingPage>
         epubPlayerKey: epubPlayerKey,
         hideAppBarAndBottomBar: showOrHideAppBarAndBottomBar,
       );
-      _currentPage = _tocWidget;
+      _currentPage = const SizedBox.shrink();
       tocOffstage = false;
     });
   }
@@ -361,7 +361,7 @@ class ReadingPageState extends ConsumerState<ReadingPage>
             Column(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                _currentPage != null
+                _currentPage is SizedBox
                     ? const SizedBox.shrink()
                     : AppBar(
                         title:
@@ -416,8 +416,7 @@ class ReadingPageState extends ConsumerState<ReadingPage>
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                if (_currentPage != null)
-                                  Expanded(child: _currentPage!),
+                                  Expanded(child: _currentPage),
                                 Offstage(
                                   offstage:
                                       tocOffstage || _currentPage is! SizedBox,
