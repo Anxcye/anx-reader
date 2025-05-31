@@ -952,6 +952,39 @@ class Reader {
       }
     })
   }
+
+  get toc() {
+    const sectionFractions = this.view.getSectionFractions()
+    const currentHref = this.view.lastLocation?.tocItem?.href.split('#')[0] ?? 'Not Found'
+    let currentChapterIndex = sectionFractions.findIndex(s => s.href === currentHref)
+    if (currentChapterIndex === -1) { 
+     currentChapterIndex = 0; 
+    }
+    const currentSectionStart = sectionFractions[currentChapterIndex]?.fraction || 0
+    const nextSectionStart = sectionFractions[currentChapterIndex + 1]?.fraction || 1
+    const currentSectionPages = this.view.lastLocation?.chapterLocation.total || 1
+
+    const totalPages = currentSectionPages / (nextSectionStart - currentSectionStart)
+
+    const getFractionByHref = (href) => {
+      href = href.split('#')[0]
+      const section = sectionFractions.find(s => s.href === href)
+      return section ? section.fraction : 0
+    }
+  
+    const buildItems = (item,  level) => {
+      return item?.map(item => ({
+        label: item.label,
+        href: item.href,
+        id: item.id,
+        level,
+        startPercentage: getFractionByHref(item.href),
+        startPage: Math.round(getFractionByHref(item.href) * totalPages),
+        subitems: buildItems(item.subitems, level + 1)
+      })) || [];
+    }
+    return buildItems(this.view.book.toc, 1)
+  }
 }
 
 
@@ -1054,7 +1087,7 @@ const onClickView = (x, y) => callFlutter('onClick', { x, y })
 
 const onExternalLink = (link) => console.log(link)
 
-const onSetToc = () => callFlutter('onSetToc', reader.view.book.toc)
+const onSetToc = () => callFlutter('onSetToc', reader.toc)
 
 const getMetadata = async () => {
   const cover = await reader.view.book.getCover()
