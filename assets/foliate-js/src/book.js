@@ -1109,6 +1109,8 @@ const getMetadata = async () => {
   }
 }
 
+window.refreshToc = () => onSetToc()
+
 window.changeStyle = (newStyle) => {
   style = {
     ...style,
