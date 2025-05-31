@@ -413,5 +413,8 @@
   "note_list_show_bookmark": "显示书签",
   "reading_bookmark": "书签",
   "no_bookmarks": "没有书签",
-  "no_bookmarks_tip": "下拉或单击右上角的书签图标以添加书签。"
+  "no_bookmarks_tip": "下拉或单击右上角的书签图标以添加书签。",
+  "settings_advanced_javascript": "JavaScript",
+  "settings_advanced_enable_javascript_for_epub": "为 Epub 书籍启用javaScript"
+
 }

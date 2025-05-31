@@ -37,6 +37,21 @@ class _AdvancedSettingState extends State<AdvancedSetting> {
                 onPressed: onLogPressed),
           ],
         ),
+
+        SettingsSection(
+          title: Text(L10n.of(context).settings_advanced_javascript),
+          tiles: [
+            SettingsTile.switchTile(
+              title: Text(L10n.of(context).settings_advanced_enable_javascript_for_epub),
+              leading: const Icon(Icons.code),
+              initialValue: Prefs().enableJsForEpub,
+              onToggle: (value) {
+                Prefs().enableJsForEpub = value;
+                setState(() {});
+              },
+            ),
+          ],
+        ),
       ],
     );
   }
