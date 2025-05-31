@@ -739,4 +739,13 @@ class Prefs extends ChangeNotifier {
     prefs.setString('bgimg', jsonEncode(bgimg.toJson()));
     notifyListeners();
   }
+
+  bool get enableJsForEpub {
+    return prefs.getBool('enableJsForEpub') ?? false;
+  }
+
+  set enableJsForEpub(bool enable) {
+    prefs.setBool('enableJsForEpub', enable);
+    notifyListeners();
+  }
 }
