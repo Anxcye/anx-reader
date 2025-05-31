@@ -49,7 +49,7 @@ class _BookTocState extends State<BookToc> {
   void dispose() {
     _searchValue = null;
     searchBarController.clear();
-    epubPlayerKey.currentState!.clearSearch();
+    epubPlayerKey.currentState?.clearSearch();
     super.dispose();
   }
 
@@ -277,6 +277,15 @@ class TocItemWidgetState extends State<TocItemWidget> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+            if (widget.tocItem.subitems.isNotEmpty)
+              IconButton(
+                icon: Icon(_isExpanded ? Icons.expand_less : Icons.expand_more),
+                onPressed: () {
+                  setState(() {
+                    _isExpanded = !_isExpanded;
+                  });
+                },
+              ),
             Expanded(
               child: TextButton(
                 onPressed: () {
@@ -287,23 +296,31 @@ class TocItemWidgetState extends State<TocItemWidget> {
                 style: const ButtonStyle(
                   alignment: Alignment.centerLeft,
                 ),
-                child: Text(
-                  widget.tocItem.label.trim(),
-                  style: _isSelected(widget.tocItem)
-                      ? tocStyleSelected(context)
-                      : tocStyle(context),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      children: [
+                        Text(
+                          widget.tocItem.label.trim(),
+                          style: _isSelected(widget.tocItem)
+                              ? tocStyleSelected(context)
+                              : tocStyle(context),
+                        ),
+                      ],
+                    ),
+                    Text(
+                      widget.tocItem.startPage.toString(),
+                      style: _isSelected(widget.tocItem)
+                          ? tocStyleSelected(context).copyWith(
+                              fontSize: 14, fontWeight: FontWeight.w300)
+                          : tocStyle(context).copyWith(
+                              fontSize: 14, fontWeight: FontWeight.w300),
+                    )
+                  ],
                 ),
               ),
             ),
-            if (widget.tocItem.subitems.isNotEmpty)
-              IconButton(
-                icon: Icon(_isExpanded ? Icons.expand_less : Icons.expand_more),
-                onPressed: () {
-                  setState(() {
-                    _isExpanded = !_isExpanded;
-                  });
-                },
-              ),
           ],
         ),
         if (_isExpanded)
