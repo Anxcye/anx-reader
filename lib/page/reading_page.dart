@@ -56,7 +56,7 @@ final epubPlayerKey = GlobalKey<EpubPlayerState>();
 class ReadingPageState extends ConsumerState<ReadingPage>
     with WidgetsBindingObserver, TickerProviderStateMixin {
   late Book _book;
-  Widget _currentPage = const SizedBox(height: 1);
+  Widget? _currentPage;
   final Stopwatch _readTimeWatch = Stopwatch();
   Timer? _awakeTimer;
   bool bottomBarOffstage = true;
@@ -174,7 +174,7 @@ class ReadingPageState extends ConsumerState<ReadingPage>
   void hideBottomBar() {
     setState(() {
       tocOffstage = true;
-      _currentPage = const SizedBox(height: 1);
+      _currentPage = null;
       bottomBarOffstage = true;
       if (Prefs().hideStatusBar) {
         hideStatusBar();
@@ -198,7 +198,7 @@ class ReadingPageState extends ConsumerState<ReadingPage>
         epubPlayerKey: epubPlayerKey,
         hideAppBarAndBottomBar: showOrHideAppBarAndBottomBar,
       );
-      _currentPage = const SizedBox(height: 1);
+      _currentPage = null;
       tocOffstage = false;
     });
   }
@@ -353,10 +353,8 @@ class ReadingPageState extends ConsumerState<ReadingPage>
                     showOrHideAppBarAndBottomBar(false);
                   },
                   behavior: HitTestBehavior.opaque,
-                  onVerticalDragUpdate: (details) {
-                  },
-                  onVerticalDragEnd: (details) {
-                  },
+                  onVerticalDragUpdate: (details) {},
+                  onVerticalDragEnd: (details) {},
                   child: Container(
                     color: Colors.black.withAlpha(30),
                   )),
@@ -364,43 +362,47 @@ class ReadingPageState extends ConsumerState<ReadingPage>
             Column(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                AppBar(
-                  title: Text(_book.title, overflow: TextOverflow.ellipsis),
-                  leading: IconButton(
-                    icon: const Icon(Icons.arrow_back),
-                    onPressed: () {
-                      // close reading page
-                      Navigator.pop(context);
-                    },
-                  ),
-                  actions: [
-                    aiButton,
-                    IconButton(
-                        onPressed: () {
-                          if (bookmarkExists) {
-                            epubPlayerKey.currentState!.removeAnnotation(
-                              epubPlayerKey.currentState!.bookmarkCfi,
-                            );
-                          } else {
-                            epubPlayerKey.currentState!.addBookmarkHere();
-                          }
-                        },
-                        icon: bookmarkExists
-                            ? const Icon(Icons.bookmark)
-                            : const Icon(Icons.bookmark_border)),
-                    IconButton(
-                      icon: const Icon(EvaIcons.more_vertical),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          CupertinoPageRoute(
-                            builder: (context) => BookDetail(book: widget.book),
+                _currentPage != null
+                    ? const SizedBox.shrink()
+                    : AppBar(
+                        title:
+                            Text(_book.title, overflow: TextOverflow.ellipsis),
+                        leading: IconButton(
+                          icon: const Icon(Icons.arrow_back),
+                          onPressed: () {
+                            // close reading page
+                            Navigator.pop(context);
+                          },
+                        ),
+                        actions: [
+                          aiButton,
+                          IconButton(
+                              onPressed: () {
+                                if (bookmarkExists) {
+                                  epubPlayerKey.currentState!.removeAnnotation(
+                                    epubPlayerKey.currentState!.bookmarkCfi,
+                                  );
+                                } else {
+                                  epubPlayerKey.currentState!.addBookmarkHere();
+                                }
+                              },
+                              icon: bookmarkExists
+                                  ? const Icon(Icons.bookmark)
+                                  : const Icon(Icons.bookmark_border)),
+                          IconButton(
+                            icon: const Icon(EvaIcons.more_vertical),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                CupertinoPageRoute(
+                                  builder: (context) =>
+                                      BookDetail(book: widget.book),
+                                ),
+                              );
+                            },
                           ),
-                        );
-                      },
-                    ),
-                  ],
-                ),
+                        ],
+                      ),
                 const Spacer(),
                 BottomSheet(
                   onClosing: () {},
@@ -415,7 +417,8 @@ class ReadingPageState extends ConsumerState<ReadingPage>
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Expanded(child: _currentPage),
+                                if (_currentPage != null)
+                                  Expanded(child: _currentPage!),
                                 Offstage(
                                   offstage:
                                       tocOffstage || _currentPage is! SizedBox,
