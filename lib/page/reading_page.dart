@@ -55,8 +55,9 @@ final epubPlayerKey = GlobalKey<EpubPlayerState>();
 
 class ReadingPageState extends ConsumerState<ReadingPage>
     with WidgetsBindingObserver, TickerProviderStateMixin {
+  static const empty = SizedBox.shrink();
   late Book _book;
-  Widget _currentPage = const SizedBox.shrink();
+  late Widget _currentPage = empty;
   final Stopwatch _readTimeWatch = Stopwatch();
   Timer? _awakeTimer;
   bool bottomBarOffstage = true;
@@ -174,7 +175,7 @@ class ReadingPageState extends ConsumerState<ReadingPage>
   void hideBottomBar() {
     setState(() {
       tocOffstage = true;
-      _currentPage = const SizedBox.shrink();
+      _currentPage = empty;
       bottomBarOffstage = true;
       if (Prefs().hideStatusBar) {
         hideStatusBar();
@@ -197,7 +198,7 @@ class ReadingPageState extends ConsumerState<ReadingPage>
         epubPlayerKey: epubPlayerKey,
         hideAppBarAndBottomBar: showOrHideAppBarAndBottomBar,
       );
-      _currentPage = const SizedBox.shrink();
+      _currentPage = empty;
       tocOffstage = false;
     });
   }
@@ -361,9 +362,7 @@ class ReadingPageState extends ConsumerState<ReadingPage>
             Column(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                _currentPage is SizedBox
-                    ? const SizedBox.shrink()
-                    : AppBar(
+                AppBar(
                         title:
                             Text(_book.title, overflow: TextOverflow.ellipsis),
                         leading: IconButton(
@@ -416,7 +415,7 @@ class ReadingPageState extends ConsumerState<ReadingPage>
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                  Expanded(child: _currentPage),
+                                Expanded(child: _currentPage),
                                 Offstage(
                                   offstage:
                                       tocOffstage || _currentPage is! SizedBox,
