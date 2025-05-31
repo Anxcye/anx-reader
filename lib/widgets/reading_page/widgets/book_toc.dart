@@ -274,57 +274,85 @@ class TocItemWidgetState extends State<TocItemWidget> {
 
   @override
   Widget build(BuildContext context) {
+    bool isEnd = widget.tocItem.subitems.isEmpty && _isSelected(widget.tocItem);
+    var current = widget.epubPlayerKey.currentState!.chapterCurrentPage;
+    var total = widget.epubPlayerKey.currentState!.chapterTotalPages;
+
+    final progress = '$current / $total';
+
     return Column(
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            if (widget.tocItem.subitems.isNotEmpty)
-              IconButton(
-                icon: Icon(_isExpanded ? Icons.expand_less : Icons.expand_more),
-                onPressed: () {
-                  setState(() {
-                    _isExpanded = !_isExpanded;
-                  });
-                },
-              ),
-            Expanded(
-              child: TextButton(
-                onPressed: () {
-                  widget.hideAppBarAndBottomBar(false);
-                  widget.epubPlayerKey.currentState!
-                      .goToHref(widget.tocItem.href);
-                },
-                style: const ButtonStyle(
-                  alignment: Alignment.centerLeft,
+        SizedBox(
+          height: isEnd ? 60 : 32,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              if (widget.tocItem.subitems.isNotEmpty)
+                IconButton(
+                  padding: const EdgeInsets.all(0),
+                  icon: Icon(
+                    _isExpanded ? Icons.expand_less : Icons.expand_more,
+                    size: 32,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _isExpanded = !_isExpanded;
+                    });
+                  },
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      children: [
-                        Text(
-                          widget.tocItem.label.trim(),
-                          style: _isSelected(widget.tocItem)
-                              ? tocStyleSelected(context)
-                              : tocStyle(context),
-                        ),
-                      ],
-                    ),
-                    Text(
-                      widget.tocItem.startPage.toString(),
-                      style: _isSelected(widget.tocItem)
-                          ? tocStyleSelected(context).copyWith(
-                              fontSize: 14, fontWeight: FontWeight.w300)
-                          : tocStyle(context).copyWith(
-                              fontSize: 14, fontWeight: FontWeight.w300),
-                    )
-                  ],
+              Expanded(
+                child: TextButton(
+                  onPressed: () {
+                    widget.hideAppBarAndBottomBar(false);
+                    widget.epubPlayerKey.currentState!
+                        .goToHref(widget.tocItem.href);
+                  },
+                  style: const ButtonStyle(
+                    alignment: Alignment.centerLeft,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            widget.tocItem.label.trim(),
+                            style: _isSelected(widget.tocItem)
+                                ? tocStyleSelected(context)
+                                : tocStyle(context),
+                          ),
+                          if (isEnd)
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 10.0),
+                              child: Row(
+                                children: [
+                                  Icon(Icons.keyboard_arrow_right_rounded),
+                                  SizedBox(width: 10),
+                                  Text(progress),
+                                ],
+                              ),
+                            ),
+                        ],
+                      ),
+                      Text(
+                        widget.tocItem.startPage.toString(),
+                        style: _isSelected(widget.tocItem)
+                            ? tocStyleSelected(context).copyWith(
+                                fontSize: 14, fontWeight: FontWeight.w300)
+                            : tocStyle(context).copyWith(
+                                fontSize: 14, fontWeight: FontWeight.w300),
+                      )
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
         if (_isExpanded)
           for (var subItem in widget.tocItem.subitems)
