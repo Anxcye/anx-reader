@@ -590,6 +590,10 @@ class Resources {
         this.loadBlob = loadBlob
         this.manifest = resources.manifest
         this.assets = resources.manifest
+        
+        var urlParams = new URLSearchParams(window.location.search)
+        this.allowScript = JSON.parse(urlParams.get('style')).allowScript
+        
         // needed only when replacing in (X)HTML w/o parsing (see below)
         //.filter(({ mediaType }) => ![MIME.XHTML, MIME.HTML].includes(mediaType))
     }

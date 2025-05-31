@@ -80,6 +80,7 @@ String generateUrl(
     'maxColumnCount': bookStyle.maxColumnCount,
     'writingMode': Prefs().writingMode.code,
     'backgroundImage': Prefs().bgimg.url,
+    'allowScript': Prefs().enableJsForEpub,
   };
 
   Map<String, dynamic> readingRules = {
