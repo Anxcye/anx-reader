@@ -6,6 +6,7 @@
 ‼️If WebDAV sync is enabled, please upgrade all devices to this version, otherwise the book notes list will not be displayed‼️
 ‼️如果启用了 WebDAV 同步，需要将各端都升级至此版本，否则书籍笔记列表将无法显示‼️
 
+- Feat: Support running JavaScript in Epub books
 - Feat: Support pull up to exit reading page
 - Feat: Support adding bookmarks by pulling down
 - Feat: Support opening the menu bar by pulling up
@@ -21,6 +22,7 @@
 - Fix: improve version comparison logic in update check
 - Dx: Improved JS debugging process for easier debugging
 
+- Feat: 支持运行 Epub 书中的 JavaScript
 - Feat: 支持上划退出阅读页面
 - Feat: 支持下拉添加书签
 - Feat: 支持上拉呼出菜单栏
