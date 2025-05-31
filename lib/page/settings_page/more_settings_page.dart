@@ -135,6 +135,7 @@ class _SubMoreSettingsState extends State<SubMoreSettings> {
             "sections": const AdvancedSetting(),
             "subtitles": [
               L10n.of(context).settings_advanced_log,
+              L10n.of(context).settings_advanced_javascript,
             ],
           },
         ];
