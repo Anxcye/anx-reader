@@ -735,20 +735,24 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
     ];
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 10, 20, 30),
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SafeArea(
+          Padding(
+            padding: EdgeInsets.only(top: Prefs().pageHeaderMargin),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: headerWidgets,
             ),
           ),
           const Spacer(),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: footerWidgets,
+          Padding(
+            padding: EdgeInsets.only(bottom: Prefs().pageFooterMargin),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: footerWidgets,
+            ),
           ),
         ],
       ),
