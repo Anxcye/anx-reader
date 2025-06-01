@@ -415,6 +415,6 @@
   "no_bookmarks": "沒有書籤",
   "no_bookmarks_tip": "下拉或單擊右上角的書籤圖標以添加書籤。",
   "settings_advanced_javascript": "JavaScript",
-  "settings_advanced_enable_javascript_for_epub": "为 Epub 啟用 javaScript",
+  "settings_advanced_enable_javascript_for_epub": "为 Epub 啟用 JavaScript",
   "reading_settings_margin": "边距"
 }
