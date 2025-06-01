@@ -43,23 +43,24 @@ class _BookTocState extends ConsumerState<BookToc> {
     super.dispose();
   }
 
-  bool _isSelected(TocItem tocItem) {
-    if (tocItem.href == widget.epubPlayerKey.currentState!.chapterHref) {
-      return true;
-    }
-    for (var subItem in tocItem.subitems) {
-      if (_isSelected(subItem)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
   @override
   Widget build(BuildContext context) {
+    isExpanded = [];
+    bool isSelected(TocItem tocItem) {
+      if (tocItem.href == widget.epubPlayerKey.currentState!.chapterHref) {
+        return true;
+      }
+      for (var subItem in tocItem.subitems) {
+        if (isSelected(subItem)) {
+          return true;
+        }
+      }
+      return false;
+    }
+
     tocItems = ref.watch(bookTocProvider);
     for (var item in tocItems) {
-      isExpanded.add(_isSelected(item));
+      isExpanded.add(isSelected(item));
     }
 
     final offset = isExpanded.indexWhere((isExpanded) => isExpanded);
@@ -69,7 +70,6 @@ class _BookTocState extends ConsumerState<BookToc> {
             min(offset * 48, listViewController.position.maxScrollExtent - 48));
       }
     });
-
     var searchBox = SizedBox(
       height: 35,
       child: SearchBar(
@@ -340,7 +340,7 @@ class TocItemWidgetState extends State<TocItemWidget> {
                         ],
                       ),
                       Text(
-                        widget.tocItem.startPage.toString(),
+                        widget.tocItem.percentage,
                         style: _isSelected(widget.tocItem)
                             ? tocStyleSelected(context).copyWith(
                                 fontSize: 14, fontWeight: FontWeight.w300)
@@ -357,7 +357,7 @@ class TocItemWidgetState extends State<TocItemWidget> {
         if (_isExpanded)
           for (var subItem in widget.tocItem.subitems)
             Padding(
-              padding: const EdgeInsets.only(left: 26.0),
+              padding: const EdgeInsets.only(left: 40.0),
               child: TocItemWidget(
                   tocItem: subItem,
                   hideAppBarAndBottomBar: widget.hideAppBarAndBottomBar,

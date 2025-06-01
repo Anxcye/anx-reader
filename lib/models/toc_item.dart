@@ -16,6 +16,8 @@ class TocItem {
       required this.startPage,
       required this.startPercentage});
 
+  get percentage => '${(startPercentage * 100).toStringAsFixed(2)}%';
+
   factory TocItem.fromJson(Map<String, dynamic> json) {
     return TocItem(
       id: json['id'].toString(),
