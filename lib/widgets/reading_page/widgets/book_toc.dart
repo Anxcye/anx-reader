@@ -70,6 +70,18 @@ class _BookTocState extends ConsumerState<BookToc> {
             min(offset * 48, listViewController.position.maxScrollExtent - 48));
       }
     });
+
+    var locatingButton = IconButton(
+      icon: const Icon(Icons.my_location),
+      onPressed: () {
+        final offset = isExpanded.indexWhere((isExpanded) => isExpanded);
+        if (listViewController.hasClients) {
+          listViewController.jumpTo(min(
+              offset * 48, listViewController.position.maxScrollExtent - 48));
+        }
+      },
+    );
+
     var searchBox = SizedBox(
       height: 35,
       child: SearchBar(
@@ -142,7 +154,13 @@ class _BookTocState extends ConsumerState<BookToc> {
     ));
     return Column(
       children: [
-        searchBox,
+        Row(
+          children: [
+            Expanded(child: searchBox),
+            if (_searchValue == null)
+            locatingButton,
+          ],
+        ),
         _searchValue != null
             ? searchResult
             : Expanded(
