@@ -6,6 +6,8 @@
 ‼️If WebDAV sync is enabled, please upgrade all devices to this version, otherwise the book notes list will not be displayed‼️
 ‼️如果启用了 WebDAV 同步，需要将各端都升级至此版本，否则书籍笔记列表将无法显示‼️
 
+- Feat: Support locating the current chapter in the table of contents
+- Feat: Custom page header and footer position
 - Feat: Support displaying page numbers in the table of contents
 - Feat: Support running JavaScript in books
 - Feat: Support pull up to exit reading page
@@ -24,8 +26,10 @@
 - Fix: Better app icon for Android
 - Dx: Improved JS debugging process for easier debugging
 
+- Feat: 在目录上定位当前章节
+- Feat: 自定义页眉和页脚的位置
 - Feat: 在目录上显示页码 
-- Feat: 支持运行书中的 JavaScript
+- Feat: 支持运行Epub书中的 JavaScript
 - Feat: 支持上划退出阅读页面
 - Feat: 支持下拉添加书签
 - Feat: 支持上拉呼出菜单栏
