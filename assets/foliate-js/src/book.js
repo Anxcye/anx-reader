@@ -122,7 +122,11 @@ const setSelectionHandler = (view, doc, index) => {
     doc.addEventListener('pointerup', () => handleSelection(view, doc, index));
   }
   else {
-    doc.addEventListener('contextmenu', () => handleSelection(view, doc, index));
+    doc.addEventListener('contextmenu', e => {
+      if (e.pointerType === 'mouse') {
+        handleSelection(view, doc, index);
+      }
+    });
   }
   // doc.addEventListener('selectionchange', () => handleSelection(view, doc, index));
 
@@ -830,7 +834,7 @@ class Reader {
     return range;
   }
 
-  #ignoreTouch = () => { 
+  #ignoreTouch = () => {
     return this.view.renderer.scrollProp === 'scrollTop'
   }
 
@@ -844,11 +848,11 @@ class Reader {
 
   #onTouchMove = ({ detail: e }) => {
     if (this.#ignoreTouch()) return;
-    
+
     const mainView = this.view.shadowRoot.children[0]
     if (e.touchState.direction === 'vertical') {
       const deltaY = e.touchState.delta.y;
-      
+
       if (deltaY > 0) {
         mainView.style.transform = `translateY(${Math.sqrt(deltaY * 50)}px)`;
         this.#showBookmarkIcon(deltaY);
@@ -957,8 +961,8 @@ class Reader {
     const sectionFractions = this.view.getSectionFractions()
     const currentHref = this.view.lastLocation?.tocItem?.href.split('#')[0] ?? 'Not Found'
     let currentChapterIndex = sectionFractions.findIndex(s => s.href === currentHref)
-    if (currentChapterIndex === -1) { 
-     currentChapterIndex = 0; 
+    if (currentChapterIndex === -1) {
+      currentChapterIndex = 0;
     }
     const currentSectionStart = sectionFractions[currentChapterIndex]?.fraction || 0
     const nextSectionStart = sectionFractions[currentChapterIndex + 1]?.fraction || 1
@@ -971,8 +975,8 @@ class Reader {
       const section = sectionFractions.find(s => s.href === href)
       return section ? section.fraction : 0
     }
-  
-    const buildItems = (item,  level) => {
+
+    const buildItems = (item, level) => {
       return item?.map(item => ({
         label: item.label,
         href: item.href,
