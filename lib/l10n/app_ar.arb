@@ -415,5 +415,6 @@
   "no_bookmarks": "لا توجد مرجعية",
   "no_bookmarks_tip": "اسحب لأسفل أو انقر فوق أيقونة الإشارة المرجعية في الزاوية العلوية اليمنى لإضافة إشارة مرجعية.",
   "settings_advanced_javascript": "JavaScript",
-  "settings_advanced_enable_javascript_for_epub": "تمكين JavaScript لـ Epub"
+  "settings_advanced_enable_javascript_for_epub": "تمكين JavaScript لـ Epub",
+  "reading_settings_margin": "هامِش"
 }

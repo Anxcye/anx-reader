@@ -176,24 +176,28 @@ class _ReadingMoreSettingsState extends State<ReadingMoreSettings> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(L10n.of(context).reading_page_writing_direction, style: Theme.of(context).textTheme.titleMedium),
+            Text(L10n.of(context).reading_page_writing_direction,
+                style: Theme.of(context).textTheme.titleMedium),
             Row(
               children: [
                 Expanded(
                   child: SegmentedButton(
                     segments: [
                       ButtonSegment<WritingModeEnum>(
-                        label: Text(L10n.of(context).reading_page_writing_direction_auto),
+                        label: Text(L10n.of(context)
+                            .reading_page_writing_direction_auto),
                         value: WritingModeEnum.auto,
                         icon: const Icon(EvaIcons.activity_outline),
                       ),
                       ButtonSegment<WritingModeEnum>(
-                        label: Text(L10n.of(context).reading_page_writing_direction_vertical),
+                        label: Text(L10n.of(context)
+                            .reading_page_writing_direction_vertical),
                         value: WritingModeEnum.vertical,
                         icon: const Icon(Bootstrap.arrows_vertical),
                       ),
                       ButtonSegment<WritingModeEnum>(
-                        label: Text(L10n.of(context).reading_page_writing_direction_horizontal),
+                        label: Text(L10n.of(context)
+                            .reading_page_writing_direction_horizontal),
                         value: WritingModeEnum.horizontal,
                         icon: const Icon(Bootstrap.arrows),
                       ),
@@ -321,7 +325,27 @@ class _ReadingMoreSettingsState extends State<ReadingMoreSettings> {
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Text(L10n.of(context).reading_settings_margin),
+                  Expanded(
+                    child: Slider(
+                      value: Prefs().pageHeaderMargin.toDouble(),
+                      min: 0,
+                      max: 50,
+                      divisions: 25,
+                      label: Prefs().pageHeaderMargin.toStringAsFixed(1),
+                      onChanged: (value) {
+                        setState(() {
+                          Prefs().pageHeaderMargin = value;
+                          epubPlayerKey.currentState?.changeReadingInfo();
+                        });
+                      },
+                    ),
+                  ),
+                ],
+              ),
+              const Divider(),
               Text(L10n.of(context).reading_page_footer_settings,
                   style: Theme.of(context).textTheme.titleMedium),
               const SizedBox(height: 8),
@@ -372,6 +396,31 @@ class _ReadingMoreSettingsState extends State<ReadingMoreSettings> {
                                 footerRight: value,
                               );
                           Prefs().readingInfo = newRules;
+                          epubPlayerKey.currentState?.changeReadingInfo();
+                        });
+                      },
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  Text(L10n.of(context).reading_settings_margin),
+                  Expanded(
+                    child: Slider(
+                      value: Prefs().pageFooterMargin.toDouble(),
+                      min: 0,
+                      max: 50,
+                      divisions: 25,
+                      label: Prefs().pageFooterMargin.toStringAsFixed(1),
+                      onChanged: (value) {
+                        setState(() {
+                          // final newRules = Prefs().readingInfo.copyWith(
+                          //       headerFontSize: value.toInt(),
+                          //     );
+                          // Prefs().readingInfo = newRules;
+                          // epubPlayerKey.currentState?.changeReadingInfo();
+                          Prefs().pageFooterMargin = value;
                           epubPlayerKey.currentState?.changeReadingInfo();
                         });
                       },

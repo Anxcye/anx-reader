@@ -728,9 +728,7 @@ class Prefs extends ChangeNotifier {
     String? bgimgJson = prefs.getString('bgimg');
     if (bgimgJson == null) {
       return BgimgModel(
-          type: BgimgType.none,
-          path: 'none',
-          alignment: BgimgAlignment.center);
+          type: BgimgType.none, path: 'none', alignment: BgimgAlignment.center);
     }
     return BgimgModel.fromJson(jsonDecode(bgimgJson));
   }
@@ -746,6 +744,26 @@ class Prefs extends ChangeNotifier {
 
   set enableJsForEpub(bool enable) {
     prefs.setBool('enableJsForEpub', enable);
+    notifyListeners();
+  }
+
+  double get pageHeaderMargin {
+    return prefs.getDouble('pageHeaderMargin') ??
+        MediaQuery.of(navigatorKey.currentContext!).padding.bottom;
+  }
+
+  set pageHeaderMargin(double margin) {
+    prefs.setDouble('pageHeaderMargin', margin);
+    notifyListeners();
+  }
+
+  double get pageFooterMargin {
+    return prefs.getDouble('pageFooterMargin') ??
+        MediaQuery.of(navigatorKey.currentContext!).padding.bottom;
+  }
+
+  set pageFooterMargin(double margin) {
+    prefs.setDouble('pageFooterMargin', margin);
     notifyListeners();
   }
 }
