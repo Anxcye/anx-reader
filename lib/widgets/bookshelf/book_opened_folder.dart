@@ -116,7 +116,7 @@ class _BookOpenedFolderState extends ConsumerState<BookOpenedFolder> {
             shrinkWrap: true,
             gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
               maxCrossAxisExtent: Prefs().bookCoverWidth,
-              childAspectRatio: 1 / 2,
+              childAspectRatio: 1 / 2.2,
               crossAxisSpacing: 10,
               mainAxisSpacing: 10,
             ),
