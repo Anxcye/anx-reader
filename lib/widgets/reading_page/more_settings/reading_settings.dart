@@ -332,9 +332,9 @@ class _ReadingMoreSettingsState extends State<ReadingMoreSettings> {
                     child: Slider(
                       value: Prefs().pageHeaderMargin.toDouble(),
                       min: 0,
-                      max: 50,
-                      divisions: 25,
-                      label: Prefs().pageHeaderMargin.toStringAsFixed(1),
+                      max: 80,
+                      divisions: 40,
+                      label: Prefs().pageHeaderMargin.toStringAsFixed(0),
                       onChanged: (value) {
                         setState(() {
                           Prefs().pageHeaderMargin = value;
@@ -410,9 +410,9 @@ class _ReadingMoreSettingsState extends State<ReadingMoreSettings> {
                     child: Slider(
                       value: Prefs().pageFooterMargin.toDouble(),
                       min: 0,
-                      max: 50,
-                      divisions: 25,
-                      label: Prefs().pageFooterMargin.toStringAsFixed(1),
+                      max: 80,
+                      divisions: 40,
+                      label: Prefs().pageFooterMargin.toStringAsFixed(0),
                       onChanged: (value) {
                         setState(() {
                           // final newRules = Prefs().readingInfo.copyWith(

@@ -462,6 +462,7 @@ class _BookNotesListState extends ConsumerState<BookNotesList> {
               if (sortType == type)
                 Icon(
                   asc ? EvaIcons.arrow_up : EvaIcons.arrow_down,
+                  color: Theme.of(context).colorScheme.onPrimary,
                 )
             ],
           ),
