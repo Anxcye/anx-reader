@@ -123,9 +123,9 @@ const setSelectionHandler = (view, doc, index) => {
   }
   else {
     doc.addEventListener('contextmenu', e => {
-      if (e.pointerType === 'mouse') {
+      // if (e.pointerType === 'mouse') {
         handleSelection(view, doc, index);
-      }
+      // }
     });
   }
   // doc.addEventListener('selectionchange', () => handleSelection(view, doc, index));
