@@ -2,6 +2,10 @@
 
 ## Todo
 
+## 1.6.1
+- Fix: Some Android devices cannot select text and pop up context menu
+- Fix: 部分安卓设备无法再选择文段后弹出上下文菜单
+
 ## 1.6.0
 ‼️If WebDAV sync is enabled, please upgrade all devices to this version, otherwise the book notes list will not be displayed‼️
 ‼️如果启用了 WebDAV 同步，需要将各端都升级至此版本，否则书籍笔记列表将无法显示‼️
