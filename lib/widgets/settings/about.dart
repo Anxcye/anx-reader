@@ -152,6 +152,13 @@ class _AboutState extends State<About> {
                     children: [
                       linkIcon(
                           icon: Icon(
+                            IonIcons.earth,
+                            color: Theme.of(context).colorScheme.secondary,
+                          ),
+                          url: 'https://anx.anxcye.com',
+                          mode: LaunchMode.externalApplication),
+                      linkIcon(
+                          icon: Icon(
                             IonIcons.logo_github,
                             color: Theme.of(context).colorScheme.secondary,
                           ),

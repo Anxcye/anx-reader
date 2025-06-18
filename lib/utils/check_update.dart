@@ -94,7 +94,7 @@ $body'''),
               onPressed: () {
                 launchUrl(
                     Uri.parse(
-                        'https://anx.anxcye.com/'),
+                        'https://anx.anxcye.com/download'),
                     mode: LaunchMode.externalApplication);
               },
               child: Text(L10n.of(context).update_via_official_website),
