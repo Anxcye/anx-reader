@@ -416,5 +416,7 @@
   "no_bookmarks_tip": "Pull down or click the bookmark icon in the top-right corner to add a bookmark.",
   "settings_advanced_javascript": "JavaScript",
   "settings_advanced_enable_javascript_for_epub": "Enable JavaScript for Epub",
-  "reading_settings_margin": "Margin"
+  "reading_settings_margin": "Margin",
+  "update_via_github": "Via GitHub",
+  "update_via_official_website": "Via Official Website"
 }

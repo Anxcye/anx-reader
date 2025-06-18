@@ -416,5 +416,7 @@
   "no_bookmarks_tip": "Ziehen Sie nach unten oder klicken Sie auf das Lesezeichen-Symbol in der oberen rechten Ecke, um ein Lesezeichen hinzuzufügen.",
   "settings_advanced_javascript": "JavaScript",
   "settings_advanced_enable_javascript_for_epub": "Aktivieren Sie JavaScript für EPUB",
-  "reading_settings_margin": "Marge"
+  "reading_settings_margin": "Marge",
+  "update_via_github": "Via GitHub",
+  "update_via_official_website": "Über offizielle Website"
 }

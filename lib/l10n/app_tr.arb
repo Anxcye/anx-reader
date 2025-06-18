@@ -416,5 +416,7 @@
   "no_bookmarks_tip": "Bir yer imi eklemek için sağ üst köşedeki yer işareti simgesini aşağı çekin veya tıklayın.",
   "settings_advanced_javascript": "Javascript",
   "settings_advanced_enable_javascript_for_epub": "EPUB için JavaScript'i Etkinleştir",
-  "reading_settings_margin": "Marj"
+  "reading_settings_margin": "Marj",
+  "update_via_github": "Github üzerinden",
+  "update_via_official_website": "Resmi web sitesi aracılığıyla"
 }
