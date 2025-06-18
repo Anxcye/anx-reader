@@ -27,16 +27,16 @@ Future<void> checkUpdate(bool manualCheck) async {
   Response response;
   try {
     response = await Dio()
-        .get('https://api.github.com/repos/Anxcye/anx-reader/releases/latest');
+        .get('https://api.anx.anxcye.com/api/info/latest');
   } catch (e) {
     if (manualCheck) {
       AnxToast.show(L10n.of(context).common_failed);
     }
     throw Exception('Update: Failed to check for updates $e');
   }
-  String newVersion = response.data['tag_name'].toString().substring(1);
+  String newVersion = response.data['version'].toString().substring(1);
   String currentVersion =
-      (await getAppVersion()).substring(0, newVersion.length);
+      (await getAppVersion()).split('+').first;
   AnxLog.info('Update: new version $newVersion');
 
   List<String> newVersionList = newVersion.split('.');
@@ -70,8 +70,8 @@ Future<void> checkUpdate(bool manualCheck) async {
               )),
           content: SingleChildScrollView(
             child: MarkdownBody(
-                data: '''### ${L10n.of(context).update_new_version} $newVersion
-${L10n.of(context).update_current_version} $currentVersion
+                data: '''### ${L10n.of(context).update_new_version} $newVersion\n
+${L10n.of(context).update_current_version} $currentVersion\n
 $body'''),
           ),
           actions: <Widget>[
@@ -88,7 +88,16 @@ $body'''),
                         'https://github.com/Anxcye/anx-reader/releases/latest'),
                     mode: LaunchMode.externalApplication);
               },
-              child: Text(L10n.of(context).common_update),
+              child: Text(L10n.of(context).update_via_github),
+            ),
+            TextButton(
+              onPressed: () {
+                launchUrl(
+                    Uri.parse(
+                        'https://anx.anxcye.com/'),
+                    mode: LaunchMode.externalApplication);
+              },
+              child: Text(L10n.of(context).update_via_official_website),
             ),
           ],
         );
