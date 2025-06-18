@@ -411,6 +411,8 @@ export class Paginator extends HTMLElement {
   #scrollBounds
   #touchState
   #touchScrolled
+  #loadingNext = false
+  #loadingPrev = false
   constructor() {
     super()
     this.#root.innerHTML = `<style>
@@ -523,9 +525,13 @@ export class Paginator extends HTMLElement {
 
     this.#observer.observe(this.#container)
     this.#container.addEventListener('scroll', debounce(() => {
-      if (this.scrolled) {
+      console.log('scrolled', this.scrolled, this.#justAnchored)
+       if (this.scrolled) {
         if (this.#justAnchored) this.#justAnchored = false
-        else this.#afterScroll('scroll')
+        else {
+          this.#afterScroll('scroll')
+          this.#handleScrollBoundaries()
+        }
       }
     }, 50))
 
@@ -1005,6 +1011,50 @@ export class Paginator extends HTMLElement {
     }
     this.dispatchEvent(new CustomEvent('relocate', { detail }))
   }
+  #handleScrollBoundaries() {
+    if (!this.scrolled || this.#locked) return
+    
+    // Only trigger transitions when very close to boundaries (95% through)
+    const threshold = Math.min(50, this.size * 0.05) // Small threshold or 5% of size
+    const atEnd = this.viewSize - this.end <= threshold
+    const atStart = this.start <= threshold
+    
+    // Only auto-load if we're actually at the boundary, not just approaching
+    if (atEnd && !this.#loadingNext) {
+      const nextIndex = this.#adjacentIndex(1)
+      if (nextIndex != null) {
+        this.#loadingNext = true
+        // Small delay to ensure scroll has finished
+        setTimeout(() => {
+          this.#goTo({
+            index: nextIndex,
+            anchor: () => 0,
+          }).then(() => {
+            this.#loadingNext = false
+          }).catch(() => {
+            this.#loadingNext = false
+          })
+        }, 200)
+      }
+    }
+    
+    if (atStart && !this.#loadingPrev) {
+      const prevIndex = this.#adjacentIndex(-1)
+      if (prevIndex != null) {
+        this.#loadingPrev = true
+        setTimeout(() => {
+          this.#goTo({
+            index: prevIndex,
+            anchor: () => 1,
+          }).then(() => {
+            this.#loadingPrev = false
+          }).catch(() => {
+            this.#loadingPrev = false
+          })
+        }, 200)
+      }
+    }
+  }
   async #display(promise) {
     const { index, src, anchor, onLoad, select } = await promise
     this.#index = index
@@ -1096,7 +1146,9 @@ export class Paginator extends HTMLElement {
     // if (this.#locked) return
     this.#locked = true
     const prev = dir === -1
+    console.log(`Turning page ${prev ? 'back' : 'forward'}...`,distance)
     const shouldGo = await (prev ? this.#scrollPrev(distance) : this.#scrollNext(distance))
+    
     if (shouldGo) await this.#goTo({
       index: this.#adjacentIndex(dir),
       anchor: prev ? () => 1 : () => 0,
