@@ -1,3 +1,6 @@
+// Import core-js polyfills for legacy browser support
+import 'core-js/stable';
+
 console.log('book.js')
 console.log('AnxUA', navigator.userAgent)
 

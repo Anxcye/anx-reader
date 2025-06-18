@@ -119,7 +119,7 @@ flutter:
     - assets/fonts/SourceHanSerifSC-Regular.otf
     - pubspec.yaml
     - assets/foliate-js/index.html
-    - assets/foliate-js/dist/bundle.js
+    - assets/foliate-js/dist/
     # - assets/foliate-js/vendor/
     - assets/foliate-js/src/vendor/pdfjs/
     - assets/foliate-js/src/
