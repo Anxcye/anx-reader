@@ -1,0 +1,27 @@
+{
+  "presets": [
+    ["@babel/preset-env", {
+      "targets": {
+        "android": "4.4",
+        "chrome": "30",
+        "safari": "9",
+        "ios": "9"
+      },
+      "useBuiltIns": "entry",
+      "corejs": 3,
+      "modules": "auto"
+    }]
+  ],
+  "plugins": [
+    ["@babel/plugin-transform-runtime", {
+      "regenerator": true,
+      "corejs": false,
+      "helpers": true,
+      "useESModules": false
+    }],
+    "@babel/plugin-transform-class-properties",
+    "@babel/plugin-transform-private-methods", 
+    "@babel/plugin-transform-nullish-coalescing-operator",
+    "@babel/plugin-transform-optional-chaining"
+  ]
+}

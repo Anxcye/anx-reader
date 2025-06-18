@@ -4,7 +4,9 @@
 
 ## 1.6.1
 - Fix: Some Android devices cannot select text and pop up context menu
+- Fix: Compatibility with older WebView versions, now it may run on WebView version 40 and above
 - Fix: 部分安卓设备无法再选择文段后弹出上下文菜单
+- Fix: 兼容较旧的 WebView 版本，，现在或许可以在 WebView 40 以上的版本上运行了
 
 ## 1.6.0
 ‼️If WebDAV sync is enabled, please upgrade all devices to this version, otherwise the book notes list will not be displayed‼️

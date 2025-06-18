@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 
-const minWebviewVersion = 92;
+const minWebviewVersion = 60;
 void showUnsupportedWebviewDialog(int version) {
   SmartDialog.show(
     animationType: SmartAnimationType.fade,
