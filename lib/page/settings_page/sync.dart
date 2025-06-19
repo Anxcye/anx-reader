@@ -4,6 +4,7 @@ import 'package:anx_reader/dao/database.dart';
 import 'package:anx_reader/enums/sync_protocol.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/main.dart';
+import 'package:anx_reader/providers/sync.dart';
 import 'package:anx_reader/service/iap_service.dart';
 import 'package:anx_reader/service/sync/sync_client_factory.dart';
 import 'package:anx_reader/utils/env_var.dart';
@@ -80,6 +81,12 @@ class _SyncSettingState extends ConsumerState<SyncSetting> {
                   setState(() {
                     Prefs().syncCompletedToast = value;
                   });
+                }),
+            SettingsTile.navigation(
+                title: Text('恢复数据库'),
+                leading: const Icon(Icons.restore),
+                onPressed: (context) {
+                  ref.read(syncProvider.notifier).showBackupManagementDialog();
                 })
           ],
         ),

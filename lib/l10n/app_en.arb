@@ -430,5 +430,19 @@
   "testRefused": "Unable to connect to server, please check network and server status",
   "testSsl": "SSL certificate verification failed, please check HTTPS configuration",
   "testDnd": "DNS resolution failed, please check if domain name is correct",
-  "testOther": "Connection test failed, please check configuration and network"
+  "testOther": "Connection test failed, please check configuration and network",
+  "database_backup_management": "Database Backup Management",
+  "available_backups": "Available Backups:",
+  "no_backups_available": "No backups available",
+  "restore": "Restore",
+  "confirmRestore": "Confirm Restore",
+  "restoreWarning": "This operation will replace the current database with the backup file. Current unsynced data may be lost. Do you want to continue?",
+  "restoreSuccess": "Database restored successfully",
+  "downloadFailed": "Download Failed",
+  "downloadFailedContent": "Unable to download database file from server. Please check network connection and server status.",
+  "syncValidationFailed": "Data Validation Failed",
+  "syncValidationFailedContent": "Downloaded database file validation failed, possibly corrupted or empty. Local data has been preserved.",
+  "replacementFailed": "Replacement Failed",
+  "replacementFailedContent": "Database validation failed after replacement, automatically recovered to previous version. Your data is safe.",
+  "syncUnknownError": "Sync Error"
 }

@@ -11,10 +11,11 @@ import 'package:anx_reader/providers/sync_status.dart';
 import 'package:anx_reader/providers/tb_groups.dart';
 import 'package:anx_reader/service/sync/sync_client_factory.dart';
 import 'package:anx_reader/service/sync/sync_client_base.dart';
+import 'package:anx_reader/service/database_sync_manager.dart';
 import 'package:anx_reader/dao/database.dart';
-import 'package:anx_reader/utils/get_path/get_temp_dir.dart';
 import 'package:anx_reader/utils/get_path/databases_path.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:path/path.dart';
 import 'package:anx_reader/utils/log/common.dart';
@@ -262,11 +263,11 @@ class Sync extends _$Sync {
       AnxToast.show(L10n.of(navigatorKey.currentContext!).webdav_syncing);
     }
 
-    // try {
+    try {
       await syncDatabase(finalDirection);
 
       if (await isCurrentEmpty()) {
-        await _recoverDb();
+        await _showSyncAbortedDialog();
         changeState(state.copyWith(isSyncing: false));
         return;
       }
@@ -288,24 +289,24 @@ class Sync extends _$Sync {
         AnxLog.info('Failed to refresh book list: $e');
       }
 
-      await _deleteBackUpDb();
+      // Backup cleanup is now handled by DatabaseSyncManager
 
       if (Prefs().syncCompletedToast) {
         AnxToast.show(
             L10n.of(navigatorKey.currentContext!).webdav_sync_complete);
       }
-    // } catch (e) {
-    //   if (e is DioException && e.type == DioExceptionType.connectionError) {
-    //     AnxToast.show('Sync connection failed, check your network');
-    //     AnxLog.severe('Sync connection failed, connection error\n$e');
-    //   } else {
-    //     AnxToast.show('Sync failed\n$e');
-    //     AnxLog.severe('Sync failed\n$e');
-    //   }
-    // } finally {
-    //   changeState(state.copyWith(isSyncing: false));
-    //   _deleteBackUpDb();
-    // }
+    } catch (e) {
+      if (e is DioException && e.type == DioExceptionType.connectionError) {
+        AnxToast.show('Sync connection failed, check your network');
+        AnxLog.severe('Sync connection failed, connection error\n$e');
+      } else {
+        AnxToast.show('Sync failed\n$e');
+        AnxLog.severe('Sync failed\n$e');
+      }
+    } finally {
+      changeState(state.copyWith(isSyncing: false));
+      // _deleteBackUpDb();
+    }
   }
 
   Future<void> syncFiles() async {
@@ -391,9 +392,6 @@ class Sync extends _$Sync {
     final localDbPath = join(databasePath, 'app_database.db');
     io.File localDb = io.File(localDbPath);
 
-    // Backup local database
-    await _backUpDb();
-
     try {
       switch (direction) {
         case SyncDirection.upload:
@@ -401,16 +399,36 @@ class Sync extends _$Sync {
           await uploadFile(localDbPath, 'anx/$remoteDbFileName');
           await DBHelper().initDB();
           break;
+
         case SyncDirection.download:
           if (remoteDb != null) {
-            DBHelper.close();
-            await downloadFile('anx/$remoteDbFileName', localDbPath);
-            await DBHelper().initDB();
+            // Use safe database download method
+            final result = await DatabaseSyncManager.safeDownloadDatabase(
+              client: client,
+              remoteDbFileName: remoteDbFileName,
+              onProgress: (received, total) {
+                changeState(state.copyWith(
+                  direction: SyncDirection.download,
+                  fileName: remoteDbFileName,
+                  isSyncing: received < total,
+                  count: received,
+                  total: total,
+                ));
+              },
+            );
+
+            if (!result.isSuccess) {
+              await DatabaseSyncManager.showSyncErrorDialog(result);
+              AnxLog.severe('Database sync failed: ${result.message}');
+              // Don't throw exception, let sync continue with file sync
+              return;
+            }
           } else {
             await _showSyncAbortedDialog();
             return;
           }
           break;
+
         case SyncDirection.both:
           if (remoteDb == null ||
               remoteDb.mTime!.isBefore(localDb.lastModifiedSync())) {
@@ -418,9 +436,27 @@ class Sync extends _$Sync {
             await uploadFile(localDbPath, 'anx/$remoteDbFileName');
             await DBHelper().initDB();
           } else if (remoteDb.mTime!.isAfter(localDb.lastModifiedSync())) {
-            DBHelper.close();
-            await downloadFile('anx/$remoteDbFileName', localDbPath);
-            await DBHelper().initDB();
+            // Use safe database download method
+            final result = await DatabaseSyncManager.safeDownloadDatabase(
+              client: client,
+              remoteDbFileName: remoteDbFileName,
+              onProgress: (received, total) {
+                changeState(state.copyWith(
+                  direction: SyncDirection.download,
+                  fileName: remoteDbFileName,
+                  isSyncing: received < total,
+                  count: received,
+                  total: total,
+                ));
+              },
+            );
+
+            if (!result.isSuccess) {
+              await DatabaseSyncManager.showSyncErrorDialog(result);
+              AnxLog.severe('Database sync failed: ${result.message}');
+              // Don't throw exception, let sync continue with file sync
+              return;
+            }
           }
           break;
       }
@@ -431,7 +467,6 @@ class Sync extends _$Sync {
         Prefs().lastUploadBookDate = newRemoteDb.mTime;
       }
     } catch (e) {
-      await _recoverDb();
       AnxLog.severe('Failed to sync database\n$e');
       rethrow;
     }
@@ -614,28 +649,118 @@ class Sync extends _$Sync {
     return totalCurrentFiles.isEmpty;
   }
 
-  Future<void> _backUpDb() async {
-    final databasePath = await getAnxDataBasesPath();
-    final path = join(databasePath, 'app_database.db');
-    String cachePath = (await getAnxTempDir()).path;
-    io.File(path).copySync('$cachePath/app_database.db');
+  /// Get available database backup list
+  Future<List<String>> getAvailableBackups() async {
+    return await DatabaseSyncManager.getAvailableBackups();
   }
 
-  Future<void> _recoverDb() async {
-    AnxLog.info('Sync: recoverDb');
-    final databasePath = await getAnxDataBasesPath();
-    final path = join(databasePath, 'app_database.db');
-    String cachePath = (await getAnxTempDir()).path;
+  /// Show database backup management dialog
+  Future<void> showBackupManagementDialog() async {
+    try {
+      final backups = await getAvailableBackups();
 
-    DBHelper.close();
-    io.File('$cachePath/app_database.db').copySync(path);
-    await DBHelper().initDB();
+      await SmartDialog.show(
+        builder: (context) => AlertDialog(
+          title: Text('Database Backup Management'),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(L10n.of(context).available_backups),
+                const SizedBox(height: 12),
+                if (backups.isEmpty)
+                  Text(
+                    L10n.of(context).no_backups_available,
+                    style: const TextStyle(color: Colors.grey),
+                  )
+                else
+                  SizedBox(
+                    height: 200,
+                    child: ListView.builder(
+                      itemCount: backups.length,
+                      itemBuilder: (context, index) {
+                        final backup = backups[index];
+                        final fileName = backup.split('/').last;
+                        final timestamp = fileName
+                            .replaceAll('backup_database_', '')
+                            .replaceAll('.db', '');
+
+                        return ListTile(
+                          title: Text('Backup ${index + 1}'),
+                          subtitle: Text(timestamp),
+                          trailing: ElevatedButton(
+                            onPressed: () async {
+                              Navigator.of(context).pop();
+                              await _restoreFromBackup(backup);
+                            },
+                            child: Text(L10n.of(context).restore),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(L10n.of(context).common_cancel),
+            ),
+          ],
+        ),
+      );
+    } catch (e) {
+      AnxLog.severe('Failed to show backup management dialog: $e');
+      AnxToast.show('Failed to get backup list: $e');
+    }
   }
 
-  Future<void> _deleteBackUpDb() async {
-    String cachePath = (await getAnxTempDir()).path;
-    if (io.File('$cachePath/app_database.db').existsSync()) {
-      io.File('$cachePath/app_database.db').deleteSync();
+  /// Restore database from specified backup
+  Future<void> _restoreFromBackup(String backupPath) async {
+    try {
+      final databasePath = await getAnxDataBasesPath();
+      final localDbPath = join(databasePath, 'app_database.db');
+
+      // Confirmation dialog
+      final confirmed = await SmartDialog.show<bool>(
+        builder: (context) => AlertDialog(
+          title: Text(L10n.of(context).confirmRestore),
+          content: Text(L10n.of(context).restoreWarning),
+          actions: [
+            TextButton(
+              onPressed: () => SmartDialog.dismiss(result: false),
+              child: Text(L10n.of(context).common_cancel),
+            ),
+            FilledButton(
+              onPressed: () => SmartDialog.dismiss(result: true),
+              child: Text(L10n.of(context).common_confirm),
+            ),
+          ],
+        ),
+      );
+
+      if (confirmed != true) return;
+
+      // Execute restore
+      await DBHelper.close();
+      await io.File(backupPath).copy(localDbPath);
+      await DBHelper().initDB();
+
+      // Refresh related providers
+      try {
+        ref.read(bookListProvider.notifier).refresh();
+        ref.read(groupDaoProvider.notifier).refresh();
+      } catch (e) {
+        AnxLog.info('Failed to refresh providers after restore: $e');
+      }
+
+      AnxToast.show(L10n.of(navigatorKey.currentContext!).restoreSuccess);
+      AnxLog.info('Database restored from backup: $backupPath');
+    } catch (e) {
+      AnxLog.severe('Failed to restore from backup: $e');
+      AnxToast.show('Restore failed: $e');
     }
   }
 

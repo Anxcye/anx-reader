@@ -153,8 +153,8 @@ class DBHelper {
     }
   }
 
-  static void close() {
-    _database?.close();
+  static Future<void> close() async {
+    await _database?.close();
     _database = null;
   }
 
