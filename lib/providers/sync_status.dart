@@ -32,8 +32,7 @@ class SyncStatus extends _$SyncStatus {
         .toList();
     final webdavInfo = ref.read(syncProvider);
 
-    final isSyncing =
-        ref.read(syncProvider.select((value) => value.isSyncing));
+    final isSyncing = ref.read(syncProvider.select((value) => value.isSyncing));
 
     List<int> downloading = isSyncing &&
             webdavInfo.direction == SyncDirection.download &&
@@ -119,14 +118,20 @@ class SyncStatus extends _$SyncStatus {
     return await selectNotDeleteBooks();
   }
 
-  int pathToBookId(String filePath) {
+  int? pathToBookId(String filePath) {
+    if (filePath.endsWith('.db')) {
+      return null;
+    }
     return allBooksInBookShelf
-        .firstWhere((e) => e.filePath.contains(filePath))
+        .firstWhere((e) => filePath.contains(e.filePath))
         .id;
   }
 
   void addDownloading(String filePath) {
     final bookId = pathToBookId(filePath);
+    if (bookId == null || state.value == null) {
+      return;
+    }
     state = AsyncData(
       SyncStatusModel(
         localOnly: state.value!.localOnly,
@@ -138,8 +143,12 @@ class SyncStatus extends _$SyncStatus {
       ),
     );
   }
+
   void addUploading(String filePath) {
     final bookId = pathToBookId(filePath);
+    if (bookId == null || state.value == null) {
+      return;
+    }
     state = AsyncData(
       SyncStatusModel(
         localOnly: state.value!.localOnly,
@@ -154,29 +163,38 @@ class SyncStatus extends _$SyncStatus {
 
   void removeDownloading(String filePath) {
     final bookId = pathToBookId(filePath);
+    if (bookId == null || state.value == null) {
+      return;
+    }
     state = AsyncData(
       SyncStatusModel(
         localOnly: state.value!.localOnly,
         remoteOnly: state.value!.remoteOnly,
-        both: state.value!.both,
+        both: [...state.value!.both, bookId],
         nonExistent: state.value!.nonExistent,
-        downloading: state.value!.downloading.where((e) => e != bookId).toList(),
+        downloading:
+            state.value!.downloading.where((e) => e != bookId).toList(),
         uploading: state.value!.uploading,
       ),
     );
+    ref.invalidateSelf();
   }
+
   void removeUploading(String filePath) {
     final bookId = pathToBookId(filePath);
+    if (bookId == null || state.value == null) {
+      return;
+    }
     state = AsyncData(
       SyncStatusModel(
         localOnly: state.value!.localOnly,
         remoteOnly: state.value!.remoteOnly,
-        both: state.value!.both,
+        both: [...state.value!.both, bookId],
         nonExistent: state.value!.nonExistent,
         downloading: state.value!.downloading,
         uploading: state.value!.uploading.where((e) => e != bookId).toList(),
       ),
     );
+    ref.invalidateSelf();
   }
-
 }
