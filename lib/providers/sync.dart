@@ -691,7 +691,7 @@ class Sync extends _$Sync {
                           subtitle: Text(timestamp),
                           trailing: ElevatedButton(
                             onPressed: () async {
-                              Navigator.of(context).pop();
+                              // Navigator.of(context).pop();
                               await _restoreFromBackup(backup);
                             },
                             child: Text(L10n.of(context).restore),
