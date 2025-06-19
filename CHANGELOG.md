@@ -3,10 +3,23 @@
 ## Todo
 
 ## 1.6.1
+- Feat: Support restoring old versions from history after downloading and overwriting the local database from remote (experimental feature)
 - Fix: Some Android devices cannot select text and pop up context menu
 - Fix: Compatibility with older WebView versions, now it may run on WebView version 40 and above
-- Fix: 部分安卓设备无法再选择文段后弹出上下文菜单
-- Fix: 兼容较旧的 WebView 版本，，现在或许可以在 WebView 40 以上的版本上运行了
+- Fix: WebDAV configuration changes now take effect immediately after saving
+- Fix: Improved sync logic to replace the current database only after confirming the integrity of the new database
+- Fix: Preserve historical versions when replacing the local database
+- Fix: Fixed an issue where PDF files could not be read in the previous version
+- Chore: Prepare for supporting more sync protocols
+
+- Feat: 从远端下载数据库覆盖本地后，能够从历史版本中选择旧版本恢复（实验性功能）
+- Fix: 部分安卓设备无法在选择文段后弹出上下文菜单
+- Fix: 兼容较旧的 WebView 版本，现在或许可以在 WebView 40 以上的版本上运行了
+- Fix: 修复保存 WebDAV 配置信息后未能立即生效的问题
+- Fix: 修复同步逻辑，能够在判断新数据库完整后再替换当前数据库
+- Fix: 在替换本地数据库时能够保留历史版本
+- Fix: 修复上一版本中 PDF 无法阅读的问题
+- Chore: 为更多同步协议做好准备
 
 ## 1.6.0
 ‼️If WebDAV sync is enabled, please upgrade all devices to this version, otherwise the book notes list will not be displayed‼️
