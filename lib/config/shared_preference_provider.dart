@@ -9,6 +9,7 @@ import 'package:anx_reader/enums/excerpt_share_template.dart';
 import 'package:anx_reader/enums/lang_list.dart';
 import 'package:anx_reader/enums/sort_field.dart';
 import 'package:anx_reader/enums/sort_order.dart';
+import 'package:anx_reader/enums/sync_protocol.dart';
 import 'package:anx_reader/enums/writing_mode.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/main.dart';
@@ -131,17 +132,46 @@ class Prefs extends ChangeNotifier {
     return DateTime.parse(beginDateStr);
   }
 
-  void saveWebdavInfo(Map webdavInfo) {
-    prefs.setString('webdavInfo', jsonEncode(webdavInfo));
+  // void saveWebdavInfo(Map webdavInfo) {
+  //   prefs.setString('webdavInfo', jsonEncode(webdavInfo));
+  //   notifyListeners();
+  // }
+
+  // Map get webdavInfo {
+  //   String? webdavInfoJson = prefs.getString('webdavInfo');
+  //   if (webdavInfoJson == null) {
+  //     return {};
+  //   }
+  //   return jsonDecode(webdavInfoJson);
+  // }
+
+  // Sync protocol selection
+  String? get syncProtocol {
+    return prefs.getString('syncProtocol');
+  }
+
+  set syncProtocol(String? protocol) {
+    if (protocol != null) {
+      prefs.setString('syncProtocol', protocol);
+    } else {
+      prefs.remove('syncProtocol');
+    }
     notifyListeners();
   }
 
-  Map get webdavInfo {
-    String? webdavInfoJson = prefs.getString('webdavInfo');
-    if (webdavInfoJson == null) {
-      return {};
+  Map<String, dynamic> getSyncInfo(SyncProtocol protocol) {
+    String? syncInfoJson = prefs.getString('${protocol.name}Info');
+    if (syncInfoJson == null) return {};
+    return Map<String, dynamic>.from(jsonDecode(syncInfoJson));
+  }
+
+  setSyncInfo(SyncProtocol protocol, Map<String, dynamic>? info) {
+    if (info != null) {
+      prefs.setString('${protocol.name}Info', jsonEncode(info));
+    } else {
+      prefs.remove('${protocol.name}Info');
     }
-    return jsonDecode(webdavInfoJson);
+    notifyListeners();
   }
 
   void saveWebdavStatus(bool status) {

@@ -1,4 +1,5 @@
 import 'package:anx_reader/enums/sync_direction.dart';
+import 'package:anx_reader/enums/sync_protocol.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/providers/sync.dart';
 import 'package:anx_reader/config/shared_preference_provider.dart';
@@ -69,7 +70,7 @@ Future<void> testWebdav(Map webdavInfo) async {
 
 Future<bool> testEnableWebdav() async {
   BuildContext context = navigatorKey.currentContext!;
-  final webdavInfo = Prefs().webdavInfo;
+  final webdavInfo = Prefs().getSyncInfo(SyncProtocol.webdav);
   if (webdavInfo['url'] != null &&
       webdavInfo['username'] != null &&
       webdavInfo['password'] != null) {

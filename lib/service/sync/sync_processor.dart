@@ -5,7 +5,7 @@ import 'package:anx_reader/enums/sync_direction.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/main.dart';
 import 'package:anx_reader/models/book.dart';
-import 'package:anx_reader/service/sync/webdav_client.dart';
+import 'package:anx_reader/service/sync/sync_client_base.dart';
 import 'package:anx_reader/utils/get_path/get_base_path.dart';
 import 'package:anx_reader/utils/get_path/get_temp_dir.dart';
 import 'package:anx_reader/utils/get_path/databases_path.dart';
@@ -19,25 +19,25 @@ import 'package:path/path.dart';
 import 'package:webdav_client/webdav_client.dart';
 
 class SyncProcessor {
-  final WebdavClient _webdavClient;
+  final SyncClientBase _syncClient;
   final void Function(
           String fileName, SyncDirection direction, int count, int total)?
       onProgress;
 
   SyncProcessor({
-    required WebdavClient webdavClient,
+    required SyncClientBase syncClient,
     this.onProgress,
-  }) : _webdavClient = webdavClient;
+  }) : _syncClient = syncClient;
 
   Future<void> initializeSync() async {
     try {
-      await _webdavClient.ping();
+      await _syncClient.ping();
       await _createAnxDir();
     } catch (e) {
-      AnxLog.severe('WebDAV connection failed, ping failed\n${e.toString()}');
+      AnxLog.severe('${_syncClient.protocolName} connection failed, ping failed\n${e.toString()}');
       rethrow;
     }
-    AnxLog.info('WebDAV: init');
+    AnxLog.info('${_syncClient.protocolName}: init');
   }
 
   Future<bool> shouldSync() async {
@@ -59,12 +59,12 @@ class SyncProcessor {
 
   Future<void> _createAnxDir() async {
     try {
-      await _webdavClient.isExist('/anx/data/file');
+      await _syncClient.isExist('/anx/data/file');
     } catch (e) {
-      await _webdavClient.mkdir('anx');
-      await _webdavClient.mkdir('anx/data');
-      await _webdavClient.mkdir('anx/data/file');
-      await _webdavClient.mkdir('anx/data/cover');
+      await _syncClient.mkdir('anx');
+      await _syncClient.mkdir('anx/data');
+      await _syncClient.mkdir('anx/data/file');
+      await _syncClient.mkdir('anx/data/cover');
     }
   }
 
@@ -75,10 +75,10 @@ class SyncProcessor {
     // Check for version mismatch
     List<File> remoteFiles = [];
     try {
-      remoteFiles = await _webdavClient.safeReadDir('/anx');
+      remoteFiles = await _syncClient.safeReadDir('/anx');
     } catch (e) {
       await _createAnxDir();
-      remoteFiles = await _webdavClient.safeReadDir('/anx');
+      remoteFiles = await _syncClient.safeReadDir('/anx');
     }
 
     for (var file in remoteFiles) {
@@ -95,8 +95,8 @@ class SyncProcessor {
       }
     }
 
-    // File? remoteDb = await safeReadProps('anx/$remoteDbFileName', _webdavClient);
-    File? remoteDb = await _webdavClient.readProps('anx/$remoteDbFileName');
+    // File? remoteDb = await safeReadProps('anx/$remoteDbFileName', _syncClient);
+    File? remoteDb = await _syncClient.readProps('anx/$remoteDbFileName');
     final databasePath = await getAnxDataBasesPath();
     final localDbPath = join(databasePath, 'app_database.db');
     io.File localDb = io.File(localDbPath);
@@ -171,7 +171,7 @@ class SyncProcessor {
 
   Future<void> syncDatabase(SyncDirection direction) async {
     String remoteDbFileName = 'database$currentDbVersion.db';
-    File? remoteDb = await _webdavClient.readProps('anx/$remoteDbFileName');
+    File? remoteDb = await _syncClient.readProps('anx/$remoteDbFileName');
     final databasePath = await getAnxDataBasesPath();
     final localDbPath = join(databasePath, 'app_database.db');
     io.File localDb = io.File(localDbPath);
@@ -212,7 +212,7 @@ class SyncProcessor {
 
       // Update last sync time
       File? newRemoteDb =
-          await _webdavClient.readProps('anx/$remoteDbFileName');
+          await _syncClient.readProps('anx/$remoteDbFileName');
       if (newRemoteDb != null) {
         Prefs().lastUploadBookDate = newRemoteDb.mTime;
       }
@@ -230,12 +230,12 @@ class SyncProcessor {
     List<String> remoteBooksName = [];
     List<String> remoteCoversName = [];
 
-    List<File> remoteBooks = await _webdavClient.safeReadDir('/anx/data/file');
+    List<File> remoteBooks = await _syncClient.safeReadDir('/anx/data/file');
     remoteBooksName = List.generate(
         remoteBooks.length, (index) => 'file/${remoteBooks[index].name!}');
 
     List<File> remoteCovers =
-        await _webdavClient.safeReadDir('/anx/data/cover');
+        await _syncClient.safeReadDir('/anx/data/cover');
     remoteCoversName = List.generate(
         remoteCovers.length, (index) => 'cover/${remoteCovers[index].name!}');
 
@@ -279,7 +279,7 @@ class SyncProcessor {
     // Remove remote files not in database
     for (var file in totalRemoteFiles) {
       if (!totalCurrentFiles.contains(file)) {
-        await _webdavClient.remove('anx/data/$file');
+        await _syncClient.remove('anx/data/$file');
       }
     }
 
@@ -295,7 +295,7 @@ class SyncProcessor {
     String fileName = localPath.split('/').last;
     onProgress?.call(fileName, SyncDirection.upload, 0, 0);
 
-    await _webdavClient.uploadFile(
+    await _syncClient.uploadFile(
       localPath,
       remotePath,
       onProgress: (sent, total) {
@@ -308,7 +308,7 @@ class SyncProcessor {
     String fileName = remotePath.split('/').last;
     onProgress?.call(fileName, SyncDirection.download, 0, 0);
 
-    await _webdavClient.downloadFile(
+    await _syncClient.downloadFile(
       remotePath,
       localPath,
       onProgress: (received, total) {
@@ -346,7 +346,7 @@ class SyncProcessor {
   }
 
   Future<List<String>> listRemoteBookFiles() async {
-    final remoteFiles = await _webdavClient.safeReadDir('/anx/data/file');
+    final remoteFiles = await _syncClient.safeReadDir('/anx/data/file');
     return remoteFiles.map((e) => e.name!).toList();
   }
 

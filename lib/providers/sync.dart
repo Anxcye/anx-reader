@@ -9,7 +9,8 @@ import 'package:anx_reader/providers/book_list.dart';
 import 'package:anx_reader/providers/sync_status.dart';
 import 'package:anx_reader/providers/tb_groups.dart';
 import 'package:anx_reader/service/sync/sync_processor.dart';
-import 'package:anx_reader/service/sync/webdav_client.dart';
+import 'package:anx_reader/service/sync/sync_client_factory.dart';
+import 'package:anx_reader/service/sync/sync_client_base.dart';
 import 'package:anx_reader/utils/log/common.dart';
 import 'package:anx_reader/utils/toast/common.dart';
 import 'package:anx_reader/utils/get_path/get_base_path.dart';
@@ -48,20 +49,22 @@ class Sync extends _$Sync {
     state = s;
   }
 
-  static WebdavClient? _webdavClientInstance;
   static SyncProcessor? _syncProcessorInstance;
 
-  WebdavClient get _webdavClient {
-    return _webdavClientInstance ??= WebdavClient(
-      url: Prefs().webdavInfo['url'],
-      username: Prefs().webdavInfo['username'],
-      password: Prefs().webdavInfo['password'],
-    );
+  SyncClientBase? get _syncClient {
+    return SyncClientFactory.currentClient;
   }
 
-  SyncProcessor get _syncProcessor {
+  SyncProcessor? get _syncProcessor {
+    if (_syncClient == null) {
+      SyncClientFactory.initializeCurrentClient();
+    }
+    
+    final client = _syncClient;
+    if (client == null) return null;
+    
     return _syncProcessorInstance ??= SyncProcessor(
-      webdavClient: _webdavClient,
+      syncClient: client,
       onProgress: (fileName, direction, count, total) {
         changeState(state.copyWith(
           direction: direction,
@@ -75,33 +78,48 @@ class Sync extends _$Sync {
   }
 
   Future<void> init() async {
+    final processor = _syncProcessor;
+    if (processor == null) {
+      AnxLog.severe('No sync client configured');
+      return;
+    }
+    
     try {
-      await _syncProcessor.initializeSync();
+      await processor.initializeSync();
     } catch (e) {
-      AnxLog.severe('WebDAV connection failed, ping failed\n${e.toString()}');
+      AnxLog.severe('Sync connection failed, ping failed\n${e.toString()}');
       return;
     }
   }
 
   Future<void> createAnxDir() async {
     // This method is now handled inside SyncProcessor.initializeSync()
-    await _syncProcessor.initializeSync();
+    final processor = _syncProcessor;
+    if (processor != null) {
+      await processor.initializeSync();
+    }
   }
 
   Future<void> syncData(SyncDirection direction, WidgetRef? ref) async {
-    if (!(await _syncProcessor.shouldSync())) {
+    final processor = _syncProcessor;
+    if (processor == null) {
+      AnxLog.severe('No sync client configured');
+      return;
+    }
+
+    if (!(await processor.shouldSync())) {
       return;
     }
 
     // Test ping and initialize
     try {
-      await _syncProcessor.initializeSync();
+      await processor.initializeSync();
     } catch (e) {
-      AnxLog.severe('WebDAV connection failed, ping failed2\n${e.toString()}');
+      AnxLog.severe('Sync connection failed, ping failed2\n${e.toString()}');
       return;
     }
 
-    AnxLog.info('WebDAV ping success');
+    AnxLog.info('Sync ping success');
 
     // Check if already syncing
     if (state.isSyncing) {
@@ -110,7 +128,7 @@ class Sync extends _$Sync {
 
     // Determine sync direction
     SyncDirection? finalDirection =
-        await _syncProcessor.determineSyncDirection(direction);
+        await processor.determineSyncDirection(direction);
     if (finalDirection == null) {
       return; // User cancelled or no sync needed
     }
@@ -122,10 +140,10 @@ class Sync extends _$Sync {
     }
 
     try {
-      await _syncProcessor.syncDatabase(finalDirection);
+      await processor.syncDatabase(finalDirection);
 
-      if (await _syncProcessor.isCurrentEmpty()) {
-        await _syncProcessor.deleteBackUpDb();
+      if (await processor.isCurrentEmpty()) {
+        await processor.deleteBackUpDb();
         changeState(state.copyWith(isSyncing: false));
         return;
       }
@@ -135,7 +153,7 @@ class Sync extends _$Sync {
             L10n.of(navigatorKey.currentContext!).webdav_syncing_files);
       }
 
-      await _syncProcessor.syncFiles();
+      await processor.syncFiles();
 
       imageCache.clear();
       imageCache.clearLiveImages();
@@ -147,7 +165,7 @@ class Sync extends _$Sync {
         AnxLog.info('Failed to refresh book list: $e');
       }
 
-      await _syncProcessor.deleteBackUpDb();
+      await processor.deleteBackUpDb();
 
       if (Prefs().syncCompletedToast) {
         AnxToast.show(
@@ -155,8 +173,8 @@ class Sync extends _$Sync {
       }
     } catch (e) {
       if (e is DioException && e.type == DioExceptionType.connectionError) {
-        AnxToast.show('WebDAV connection failed, check your network');
-        AnxLog.severe('WebDAV connection failed, connection error\n$e');
+        AnxToast.show('Sync connection failed, check your network');
+        AnxLog.severe('Sync connection failed, connection error\n$e');
       } else {
         AnxToast.show('Sync failed\n$e');
         AnxLog.severe('Sync failed\n$e');
@@ -167,11 +185,17 @@ class Sync extends _$Sync {
   }
 
   Future<void> syncFiles() async {
-    await _syncProcessor.syncFiles();
+    final processor = _syncProcessor;
+    if (processor != null) {
+      await processor.syncFiles();
+    }
   }
 
   Future<void> syncDatabase(SyncDirection direction) async {
-    await _syncProcessor.syncDatabase(direction);
+    final processor = _syncProcessor;
+    if (processor != null) {
+      await processor.syncDatabase(direction);
+    }
   }
 
   String safeEncodePath(String path) {
@@ -189,18 +213,21 @@ class Sync extends _$Sync {
       fileName: localPath.split('/').last,
     ));
 
-    await _webdavClient.uploadFile(
-      localPath,
-      remotePath,
-      replace: replace,
-      onProgress: (sent, total) {
-        changeState(state.copyWith(
-          isSyncing: true,
-          count: sent,
-          total: total,
-        ));
-      },
-    );
+    final client = _syncClient;
+    if (client != null) {
+      await client.uploadFile(
+        localPath,
+        remotePath,
+        replace: replace,
+        onProgress: (sent, total) {
+          changeState(state.copyWith(
+            isSyncing: true,
+            count: sent,
+            total: total,
+          ));
+        },
+      );
+    }
 
     changeState(state.copyWith(isSyncing: false));
   }
@@ -211,31 +238,42 @@ class Sync extends _$Sync {
       fileName: remotePath.split('/').last,
     ));
 
-    await _webdavClient.downloadFile(
-      remotePath,
-      localPath,
-      onProgress: (received, total) {
-        changeState(state.copyWith(
-          isSyncing: true,
-          count: received,
-          total: total,
-        ));
-      },
-    );
+    final client = _syncClient;
+    if (client != null) {
+      await client.downloadFile(
+        remotePath,
+        localPath,
+        onProgress: (received, total) {
+          changeState(state.copyWith(
+            isSyncing: true,
+            count: received,
+            total: total,
+          ));
+        },
+      );
+    }
 
     changeState(state.copyWith(isSyncing: false));
   }
 
   Future<List<File>> safeReadDir(String path) async {
-    return await _webdavClient.safeReadDir(path);
+    final client = _syncClient;
+    if (client != null) {
+      return await client.safeReadDir(path);
+    }
+    return [];
   }
 
   Future<bool> isCurrentEmpty() async {
-    return await _syncProcessor.isCurrentEmpty();
+    final processor = _syncProcessor;
+    return processor != null ? await processor.isCurrentEmpty() : true;
   }
 
   Future<void> backUpDb() async {
-    await _syncProcessor.deleteBackUpDb(); // Using the same backup method
+    final processor = _syncProcessor;
+    if (processor != null) {
+      await processor.deleteBackUpDb(); // Using the same backup method
+    }
   }
 
   Future<void> recoverDb() async {
@@ -243,11 +281,15 @@ class Sync extends _$Sync {
   }
 
   Future<void> deleteBackUpDb() async {
-    await _syncProcessor.deleteBackUpDb();
+    final processor = _syncProcessor;
+    if (processor != null) {
+      await processor.deleteBackUpDb();
+    }
   }
 
   Future<List<String>> listRemoteBookFiles() async {
-    return await _syncProcessor.listRemoteBookFiles();
+    final processor = _syncProcessor;
+    return processor != null ? await processor.listRemoteBookFiles() : [];
   }
 
   Future<void> downloadBook(Book book) async {
@@ -260,7 +302,10 @@ class Sync extends _$Sync {
     }
 
     try {
-      await _syncProcessor.downloadBook(book);
+      final processor = _syncProcessor;
+      if (processor != null) {
+        await processor.downloadBook(book);
+      }
     } catch (e) {
       // Error handling is done in SyncProcessor
     }
@@ -274,7 +319,10 @@ class Sync extends _$Sync {
     }
 
     Future<void> uploadBook() async {
-      await _syncProcessor.uploadBook(book);
+      final processor = _syncProcessor;
+      if (processor != null) {
+        await processor.uploadBook(book);
+      }
     }
 
     if (syncStatus.remoteOnly.contains(book.id)) {
@@ -301,7 +349,12 @@ class Sync extends _$Sync {
     int failCount = 0;
 
     try {
-      await _webdavClient.ping();
+      final client = _syncClient;
+      if (client != null) {
+        await client.ping();
+      } else {
+        throw Exception('No sync client configured');
+      }
     } catch (e) {
       AnxLog.severe(
           'WebDAV connection failed before batch download, ping failed\n${e.toString()}');
@@ -312,7 +365,10 @@ class Sync extends _$Sync {
       try {
         final book = await selectBookById(bookId);
         AnxLog.info('WebDAV: Downloading book ID $bookId: ${book.title}');
-        await _syncProcessor.downloadBook(book);
+        final processor = _syncProcessor;
+        if (processor != null) {
+          await processor.downloadBook(book);
+        }
         successCount++;
       } catch (e) {
         AnxLog.severe('WebDAV: Failed to download book ID $bookId: $e');
