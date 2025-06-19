@@ -13,9 +13,10 @@ part 'sync_status.g.dart';
 
 @Riverpod(keepAlive: true)
 class SyncStatus extends _$SyncStatus {
+  List<Book> allBooksInBookShelf = [];
   @override
   Future<SyncStatusModel> build() async {
-    final allBooksInBookShelf = await _listAllBooksInBookShelf();
+    allBooksInBookShelf = await _listAllBooksInBookShelf();
     final allBooksInBookShelfIds =
         allBooksInBookShelf.map((e) => e.id).toList();
     final remoteFiles = await _listRemoteFiles(allBooksInBookShelf);
@@ -32,24 +33,26 @@ class SyncStatus extends _$SyncStatus {
     final webdavInfo = ref.read(syncProvider);
 
     final isSyncing =
-        ref.watch(syncProvider.select((value) => value.isSyncing));
+        ref.read(syncProvider.select((value) => value.isSyncing));
 
-    List<int> downloading =
-        isSyncing && webdavInfo.direction == SyncDirection.download
-            ? [
-                allBooksInBookShelf
-                    .firstWhere((e) => e.filePath.contains(webdavInfo.fileName))
-                    .id
-              ]
-            : [];
-    List<int> uploading =
-        isSyncing && webdavInfo.direction == SyncDirection.upload
-            ? [
-                allBooksInBookShelf
-                    .firstWhere((e) => e.filePath.contains(webdavInfo.fileName))
-                    .id
-              ]
-            : [];
+    List<int> downloading = isSyncing &&
+            webdavInfo.direction == SyncDirection.download &&
+            !webdavInfo.fileName.endsWith('.db')
+        ? [
+            allBooksInBookShelf
+                .firstWhere((e) => e.filePath.contains(webdavInfo.fileName))
+                .id
+          ]
+        : [];
+    List<int> uploading = isSyncing &&
+            webdavInfo.direction == SyncDirection.upload &&
+            !webdavInfo.fileName.endsWith('.db')
+        ? [
+            allBooksInBookShelf
+                .firstWhere((e) => e.filePath.contains(webdavInfo.fileName))
+                .id
+          ]
+        : [];
     return SyncStatusModel(
       localOnly: localOnly,
       remoteOnly: remoteOnly,
@@ -115,4 +118,65 @@ class SyncStatus extends _$SyncStatus {
   Future<List<Book>> _listAllBooksInBookShelf() async {
     return await selectNotDeleteBooks();
   }
+
+  int pathToBookId(String filePath) {
+    return allBooksInBookShelf
+        .firstWhere((e) => e.filePath.contains(filePath))
+        .id;
+  }
+
+  void addDownloading(String filePath) {
+    final bookId = pathToBookId(filePath);
+    state = AsyncData(
+      SyncStatusModel(
+        localOnly: state.value!.localOnly,
+        remoteOnly: state.value!.remoteOnly,
+        both: state.value!.both,
+        nonExistent: state.value!.nonExistent,
+        downloading: [...state.value!.downloading, bookId],
+        uploading: state.value!.uploading,
+      ),
+    );
+  }
+  void addUploading(String filePath) {
+    final bookId = pathToBookId(filePath);
+    state = AsyncData(
+      SyncStatusModel(
+        localOnly: state.value!.localOnly,
+        remoteOnly: state.value!.remoteOnly,
+        both: state.value!.both,
+        nonExistent: state.value!.nonExistent,
+        downloading: state.value!.downloading,
+        uploading: [...state.value!.uploading, bookId],
+      ),
+    );
+  }
+
+  void removeDownloading(String filePath) {
+    final bookId = pathToBookId(filePath);
+    state = AsyncData(
+      SyncStatusModel(
+        localOnly: state.value!.localOnly,
+        remoteOnly: state.value!.remoteOnly,
+        both: state.value!.both,
+        nonExistent: state.value!.nonExistent,
+        downloading: state.value!.downloading.where((e) => e != bookId).toList(),
+        uploading: state.value!.uploading,
+      ),
+    );
+  }
+  void removeUploading(String filePath) {
+    final bookId = pathToBookId(filePath);
+    state = AsyncData(
+      SyncStatusModel(
+        localOnly: state.value!.localOnly,
+        remoteOnly: state.value!.remoteOnly,
+        both: state.value!.both,
+        nonExistent: state.value!.nonExistent,
+        downloading: state.value!.downloading,
+        uploading: state.value!.uploading.where((e) => e != bookId).toList(),
+      ),
+    );
+  }
+
 }

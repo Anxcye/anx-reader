@@ -37,8 +37,21 @@ class WebdavClient extends SyncClientBase {
 
   @override
   Future<void> ping() async {
-    await _client.ping();
-  }
+    int count = 0;
+    while (count < 3) {
+      try {
+        await _client.ping();
+        return;
+      } catch (e) {
+        AnxLog.warning('WebDAV ping failed, retrying... ($count)');
+        count++;
+        if (count >= 3) {
+          AnxLog.severe('WebDAV ping failed after 3 attempts: $e');
+          rethrow;
+        }
+      }
+    }
+   }
 
   @override
   Future<void> mkdir(String path) async {
