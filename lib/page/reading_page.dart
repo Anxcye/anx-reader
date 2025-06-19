@@ -11,7 +11,7 @@ import 'package:anx_reader/models/read_theme.dart';
 import 'package:anx_reader/page/book_detail.dart';
 import 'package:anx_reader/page/book_player/epub_player.dart';
 import 'package:anx_reader/providers/ai_chat.dart';
-import 'package:anx_reader/providers/anx_webdav.dart';
+import 'package:anx_reader/providers/sync.dart';
 import 'package:anx_reader/service/ai/ai_dio.dart';
 import 'package:anx_reader/service/ai/prompt_generate.dart';
 import 'package:anx_reader/utils/toast/common.dart';
@@ -100,7 +100,7 @@ class ReadingPageState extends ConsumerState<ReadingPage>
 
   @override
   void dispose() {
-    AnxWebdav().syncData(SyncDirection.upload, ref);
+    Sync().syncData(SyncDirection.upload, ref);
     _readTimeWatch.stop();
     _awakeTimer?.cancel();
     WakelockPlus.disable();
@@ -363,44 +363,42 @@ class ReadingPageState extends ConsumerState<ReadingPage>
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 AppBar(
-                        title:
-                            Text(_book.title, overflow: TextOverflow.ellipsis),
-                        leading: IconButton(
-                          icon: const Icon(Icons.arrow_back),
-                          onPressed: () {
-                            // close reading page
-                            Navigator.pop(context);
-                          },
-                        ),
-                        actions: [
-                          aiButton,
-                          IconButton(
-                              onPressed: () {
-                                if (bookmarkExists) {
-                                  epubPlayerKey.currentState!.removeAnnotation(
-                                    epubPlayerKey.currentState!.bookmarkCfi,
-                                  );
-                                } else {
-                                  epubPlayerKey.currentState!.addBookmarkHere();
-                                }
-                              },
-                              icon: bookmarkExists
-                                  ? const Icon(Icons.bookmark)
-                                  : const Icon(Icons.bookmark_border)),
-                          IconButton(
-                            icon: const Icon(EvaIcons.more_vertical),
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                CupertinoPageRoute(
-                                  builder: (context) =>
-                                      BookDetail(book: widget.book),
-                                ),
-                              );
-                            },
+                  title: Text(_book.title, overflow: TextOverflow.ellipsis),
+                  leading: IconButton(
+                    icon: const Icon(Icons.arrow_back),
+                    onPressed: () {
+                      // close reading page
+                      Navigator.pop(context);
+                    },
+                  ),
+                  actions: [
+                    aiButton,
+                    IconButton(
+                        onPressed: () {
+                          if (bookmarkExists) {
+                            epubPlayerKey.currentState!.removeAnnotation(
+                              epubPlayerKey.currentState!.bookmarkCfi,
+                            );
+                          } else {
+                            epubPlayerKey.currentState!.addBookmarkHere();
+                          }
+                        },
+                        icon: bookmarkExists
+                            ? const Icon(Icons.bookmark)
+                            : const Icon(Icons.bookmark_border)),
+                    IconButton(
+                      icon: const Icon(EvaIcons.more_vertical),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          CupertinoPageRoute(
+                            builder: (context) => BookDetail(book: widget.book),
                           ),
-                        ],
-                      ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
                 const Spacer(),
                 BottomSheet(
                   onClosing: () {},

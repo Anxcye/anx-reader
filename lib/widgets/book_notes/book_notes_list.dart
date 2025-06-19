@@ -4,7 +4,7 @@ import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/models/book_note.dart';
 import 'package:anx_reader/page/reading_page.dart';
-import 'package:anx_reader/providers/anx_webdav.dart';
+import 'package:anx_reader/providers/sync.dart';
 import 'package:anx_reader/providers/bookmark.dart';
 import 'package:anx_reader/service/book.dart';
 import 'package:anx_reader/utils/time_to_human.dart';
@@ -194,7 +194,7 @@ class _BookNotesListState extends ConsumerState<BookNotesList> {
                       updateTime: DateTime.now(),
                     );
                     updateBookNoteById(updatedNote);
-                    AnxWebdav().syncData(SyncDirection.upload, ref);
+                    Sync().syncData(SyncDirection.upload, ref);
                     _loadBookNotes();
                     Navigator.pop(context);
                   },
@@ -653,12 +653,14 @@ class _BookNotesListState extends ConsumerState<BookNotesList> {
           for (int i = 0; i < selectedNotes.length; i++) {
             deleteBookNoteById(selectedNotes[i].id!);
           }
-          AnxWebdav().syncData(SyncDirection.upload, ref);
+          Sync().syncData(SyncDirection.upload, ref);
           setState(() {
             selectedNotes.clear();
             _loadBookNotes();
           });
-          ref.read(BookmarkProvider(widget.book.id).notifier).refreshBookmarks();
+          ref
+              .read(BookmarkProvider(widget.book.id).notifier)
+              .refreshBookmarks();
         },
         deleteIcon: Icon(
           EvaIcons.trash_2,

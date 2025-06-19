@@ -12,7 +12,7 @@ import 'package:anx_reader/utils/check_update.dart';
 import 'package:anx_reader/utils/get_path/get_temp_dir.dart';
 import 'package:anx_reader/utils/load_default_font.dart';
 import 'package:anx_reader/utils/log/common.dart';
-import 'package:anx_reader/providers/anx_webdav.dart';
+import 'package:anx_reader/providers/sync.dart';
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/utils/toast/common.dart';
 import 'package:flutter/foundation.dart';
@@ -95,8 +95,8 @@ class _HomePageState extends ConsumerState<HomePage> {
     AnxToast.init(context);
     checkUpdate(false);
     if (Prefs().webdavStatus) {
-      await AnxWebdav().init();
-      await AnxWebdav().syncData(SyncDirection.both, ref);
+      await Sync().init();
+      await Sync().syncData(SyncDirection.both, ref);
     }
     loadDefaultFont();
 

@@ -5,7 +5,7 @@ import 'package:anx_reader/dao/book.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/page/book_detail.dart';
-import 'package:anx_reader/providers/anx_webdav.dart';
+import 'package:anx_reader/providers/sync.dart';
 import 'package:anx_reader/providers/book_list.dart';
 import 'package:anx_reader/providers/sync_status.dart';
 import 'package:anx_reader/widgets/bookshelf/book_cover.dart';
@@ -59,12 +59,12 @@ class BookBottomSheet extends ConsumerWidget {
 
     void handleUpload(BuildContext context) {
       Future<void> core() async {
-        await ref.read(anxWebdavProvider.notifier).uploadBook(book);
+        await ref.read(syncProvider.notifier).uploadBook(book);
         ref.read(syncStatusProvider.notifier).refresh();
       }
 
       if (Prefs().notShowReleaseLocalSpaceDialog) {
-        ref.read(anxWebdavProvider.notifier).uploadBook(book);
+        ref.read(syncProvider.notifier).uploadBook(book);
       } else {
         SmartDialog.show(
           builder: (context) => AlertDialog(

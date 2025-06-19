@@ -4,7 +4,7 @@ import 'package:anx_reader/dao/book.dart';
 import 'package:anx_reader/enums/sync_direction.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/models/sync_status.dart';
-import 'package:anx_reader/providers/anx_webdav.dart';
+import 'package:anx_reader/providers/sync.dart';
 import 'package:anx_reader/utils/get_path/get_base_path.dart';
 import 'package:anx_reader/utils/log/common.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -29,10 +29,10 @@ class SyncStatus extends _$SyncStatus {
     final nonExistent = allBooksInBookShelfIds
         .where((e) => !localFiles.contains(e) && !remoteFiles.contains(e))
         .toList();
-    final webdavInfo = ref.read(anxWebdavProvider);
+    final webdavInfo = ref.read(syncProvider);
 
     final isSyncing =
-        ref.watch(anxWebdavProvider.select((value) => value.isSyncing));
+        ref.watch(syncProvider.select((value) => value.isSyncing));
 
     List<int> downloading =
         isSyncing && webdavInfo.direction == SyncDirection.download
@@ -67,7 +67,7 @@ class SyncStatus extends _$SyncStatus {
   Future<List<int>> _listRemoteFiles(List<Book> books) async {
     Future<List<int>> core() async {
       final remoteFiles =
-          await ref.read(anxWebdavProvider.notifier).listRemoteBookFiles();
+          await ref.read(syncProvider.notifier).listRemoteBookFiles();
       final remoteFilesIds = books
           .map((e) {
             final filePath = e.filePath.split('/').last;

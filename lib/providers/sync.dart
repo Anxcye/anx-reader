@@ -21,17 +21,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:webdav_client/webdav_client.dart';
 
-part 'anx_webdav.g.dart';
+part 'sync.g.dart';
 
 @Riverpod(keepAlive: true)
-class AnxWebdav extends _$AnxWebdav {
-  static final AnxWebdav _instance = AnxWebdav._internal();
+class Sync extends _$Sync {
+  static final Sync _instance = Sync._internal();
 
-  factory AnxWebdav() {
+  factory Sync() {
     return _instance;
   }
 
-  AnxWebdav._internal();
+  Sync._internal();
 
   @override
   SyncStateModel build() {
@@ -102,14 +102,15 @@ class AnxWebdav extends _$AnxWebdav {
     }
 
     AnxLog.info('WebDAV ping success');
-    
+
     // Check if already syncing
     if (state.isSyncing) {
       return;
     }
 
     // Determine sync direction
-    SyncDirection? finalDirection = await _syncProcessor.determineSyncDirection(direction);
+    SyncDirection? finalDirection =
+        await _syncProcessor.determineSyncDirection(direction);
     if (finalDirection == null) {
       return; // User cancelled or no sync needed
     }
@@ -187,7 +188,7 @@ class AnxWebdav extends _$AnxWebdav {
       direction: SyncDirection.upload,
       fileName: localPath.split('/').last,
     ));
-    
+
     await _webdavClient.uploadFile(
       localPath,
       remotePath,
@@ -209,7 +210,7 @@ class AnxWebdav extends _$AnxWebdav {
       direction: SyncDirection.download,
       fileName: remotePath.split('/').last,
     ));
-    
+
     await _webdavClient.downloadFile(
       remotePath,
       localPath,
@@ -257,7 +258,7 @@ class AnxWebdav extends _$AnxWebdav {
           .book_sync_status_book_not_found_remote);
       return;
     }
-    
+
     try {
       await _syncProcessor.downloadBook(book);
     } catch (e) {

@@ -8,7 +8,7 @@ import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/page/home_page.dart';
 import 'package:anx_reader/page/iap_page.dart';
 import 'package:anx_reader/providers/ai_chat.dart';
-import 'package:anx_reader/providers/anx_webdav.dart';
+import 'package:anx_reader/providers/sync.dart';
 import 'package:anx_reader/providers/book_list.dart';
 import 'package:anx_reader/service/convert_to_epub/txt/convert_from_txt.dart';
 import 'package:anx_reader/service/iap_service.dart';
@@ -169,7 +169,7 @@ Future<void> pushToReadingPage(
   }
 
   if (!File(book.fileFullPath).existsSync()) {
-    ref.read(anxWebdavProvider.notifier).downloadBook(book);
+    ref.read(syncProvider.notifier).downloadBook(book);
     return;
   }
 
