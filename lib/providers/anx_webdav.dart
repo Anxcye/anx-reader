@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io' as io;
-import 'package:anx_reader/dao/database.dart';
 import 'package:anx_reader/enums/sync_direction.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/main.dart';
@@ -9,20 +8,16 @@ import 'package:anx_reader/models/sync_state_model.dart';
 import 'package:anx_reader/providers/book_list.dart';
 import 'package:anx_reader/providers/sync_status.dart';
 import 'package:anx_reader/providers/tb_groups.dart';
-import 'package:anx_reader/utils/get_path/get_temp_dir.dart';
-import 'package:anx_reader/utils/get_path/get_base_path.dart';
-import 'package:anx_reader/utils/get_path/databases_path.dart';
+import 'package:anx_reader/service/sync/sync_processor.dart';
+import 'package:anx_reader/service/sync/webdav_client.dart';
 import 'package:anx_reader/utils/log/common.dart';
 import 'package:anx_reader/utils/toast/common.dart';
-import 'package:anx_reader/utils/webdav/safe_read.dart';
+import 'package:anx_reader/utils/get_path/get_base_path.dart';
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/dao/book.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
-import 'package:path/path.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:webdav_client/webdav_client.dart';
 
@@ -53,170 +48,70 @@ class AnxWebdav extends _$AnxWebdav {
     state = s;
   }
 
-  static Client? clientInstance;
+  static WebdavClient? _webdavClientInstance;
+  static SyncProcessor? _syncProcessorInstance;
 
-  Client get _client {
-    return clientInstance ??= newClient(
-      Prefs().webdavInfo['url'],
-      user: Prefs().webdavInfo['username'],
+  WebdavClient get _webdavClient {
+    return _webdavClientInstance ??= WebdavClient(
+      url: Prefs().webdavInfo['url'],
+      username: Prefs().webdavInfo['username'],
       password: Prefs().webdavInfo['password'],
-      debug: false,
-    )
-      ..setHeaders({
-        'accept-charset': 'utf-8',
-        'Content-Type': 'application/octet-stream'
-      })
-      ..setConnectTimeout(
-        8000,
-      );
+    );
+  }
+
+  SyncProcessor get _syncProcessor {
+    return _syncProcessorInstance ??= SyncProcessor(
+      webdavClient: _webdavClient,
+      onProgress: (fileName, direction, count, total) {
+        changeState(state.copyWith(
+          direction: direction,
+          fileName: fileName,
+          isSyncing: count < total,
+          count: count,
+          total: total,
+        ));
+      },
+    );
   }
 
   Future<void> init() async {
     try {
-      await _client.ping();
+      await _syncProcessor.initializeSync();
     } catch (e) {
       AnxLog.severe('WebDAV connection failed, ping failed\n${e.toString()}');
       return;
     }
-    AnxLog.info('WebDAV: init');
   }
 
   Future<void> createAnxDir() async {
-    try {
-      await _client.read('/anx/data/file');
-    } catch (e) {
-      await _client.mkdir('anx');
-      await _client.mkdir('anx/data');
-      await _client.mkdir('anx/data/file');
-      await _client.mkdir('anx/data/cover');
-    }
+    // This method is now handled inside SyncProcessor.initializeSync()
+    await _syncProcessor.initializeSync();
   }
 
   Future<void> syncData(SyncDirection direction, WidgetRef? ref) async {
-    if (!Prefs().webdavStatus) {
+    if (!(await _syncProcessor.shouldSync())) {
       return;
     }
 
-    if (Prefs().onlySyncWhenWifi &&
-        !(await Connectivity().checkConnectivity())
-            .contains(ConnectivityResult.wifi)) {
-      if (Prefs().syncCompletedToast) {
-        AnxToast.show(L10n.of(navigatorKey.currentContext!).webdav_only_wifi);
-      }
-      return;
-    }
-
-    // test ping
+    // Test ping and initialize
     try {
-      await _client.ping();
+      await _syncProcessor.initializeSync();
     } catch (e) {
       AnxLog.severe('WebDAV connection failed, ping failed2\n${e.toString()}');
       return;
     }
 
     AnxLog.info('WebDAV ping success');
-    // if is syncing
+    
+    // Check if already syncing
     if (state.isSyncing) {
       return;
     }
 
-    await createAnxDir();
-
-    // Check for remote database files with version info
-    String remoteDbFileName = 'database$currentDbVersion.db';
-
-    try {
-      List<File> remoteFiles = [];
-      try {
-        remoteFiles = await safeReadDir('/anx');
-      } catch (e) {
-        await createAnxDir();
-        remoteFiles = await safeReadDir('/anx');
-      }
-      for (var file in remoteFiles) {
-        if (file.name != null &&
-            file.name!.startsWith('database') &&
-            file.name!.endsWith('.db')) {
-          // Extract version number
-          String versionStr =
-              file.name!.replaceAll('database', '').replaceAll('.db', '');
-          int version = int.tryParse(versionStr) ?? 0;
-          if (version > currentDbVersion) {
-            await _showDatabaseVersionMismatchDialog(version);
-            return;
-          }
-        }
-      }
-    } catch (e) {
-      AnxLog.severe('WebDAV: Error checking database versions: $e');
-    }
-
-    File? remoteDb = await safeReadProps('anx/$remoteDbFileName', _client);
-    final databasePath = await getAnxDataBasesPath();
-    final localDbPath = join(databasePath, 'app_database.db');
-    io.File localDb = io.File(localDbPath);
-
-    AnxLog.info(
-        'localDbTime: ${localDb.lastModifiedSync()}, remoteDbTime: ${remoteDb?.mTime}');
-
-    // less than 5s return
-    if (remoteDb != null &&
-        localDb.lastModifiedSync().difference(remoteDb.mTime!).inSeconds.abs() <
-            5) {
-      return;
-    }
-
-    if (remoteDb == null) {
-      direction = SyncDirection.upload;
-    }
-
-    if (direction == SyncDirection.both) {
-      if (Prefs().lastUploadBookDate == null ||
-          Prefs()
-                  .lastUploadBookDate!
-                  .difference(remoteDb!.mTime!)
-                  .inSeconds
-                  .abs() >
-              5) {
-        SyncDirection? newDirection = await showDialog<SyncDirection>(
-          context: navigatorKey.currentContext!,
-          builder: (context) => AlertDialog(
-            title: Text(L10n.of(context).common_attention),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(L10n.of(context).webdav_sync_direction),
-                SizedBox(height: 10),
-                Text('${L10n.of(context).book_sync_status_local_update_time} ${localDb.lastModifiedSync()}'),
-                Text('${L10n.of(context).sync_remote_data_update_time} ${remoteDb!.mTime}'),
-              ],
-            ),
-            actionsOverflowDirection: VerticalDirection.up,
-            actionsOverflowAlignment: OverflowBarAlignment.center,
-            actionsOverflowButtonSpacing: 10,
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop(SyncDirection.upload);
-                },
-                child: Text(L10n.of(context).webdav_upload),
-              ),
-              FilledButton(
-                onPressed: () {
-                  Navigator.of(context).pop(SyncDirection.download);
-                },
-                child: Text(L10n.of(context).webdav_download),
-              ),
-            ],
-          ),
-        );
-        if (newDirection != null) {
-          direction = newDirection;
-        } else {
-          return;
-        }
-      }
+    // Determine sync direction
+    SyncDirection? finalDirection = await _syncProcessor.determineSyncDirection(direction);
+    if (finalDirection == null) {
+      return; // User cancelled or no sync needed
     }
 
     changeState(state.copyWith(isSyncing: true));
@@ -225,18 +120,12 @@ class AnxWebdav extends _$AnxWebdav {
       AnxToast.show(L10n.of(navigatorKey.currentContext!).webdav_syncing);
     }
 
-    await backUpDb();
-
     try {
-      await syncDatabase(direction);
+      await _syncProcessor.syncDatabase(finalDirection);
 
-      File? newRemoteDb = await safeReadProps('anx/$remoteDbFileName', _client);
-
-      Prefs().lastUploadBookDate = newRemoteDb!.mTime;
-
-      if (await isCurrentEmpty()) {
-        await recoverDb();
-        await _showSyncAbortedDialog();
+      if (await _syncProcessor.isCurrentEmpty()) {
+        await _syncProcessor.deleteBackUpDb();
+        changeState(state.copyWith(isSyncing: false));
         return;
       }
 
@@ -245,7 +134,7 @@ class AnxWebdav extends _$AnxWebdav {
             L10n.of(navigatorKey.currentContext!).webdav_syncing_files);
       }
 
-      await syncFiles();
+      await _syncProcessor.syncFiles();
 
       imageCache.clear();
       imageCache.clearLiveImages();
@@ -257,7 +146,7 @@ class AnxWebdav extends _$AnxWebdav {
         AnxLog.info('Failed to refresh book list: $e');
       }
 
-      await deleteBackUpDb();
+      await _syncProcessor.deleteBackUpDb();
 
       if (Prefs().syncCompletedToast) {
         AnxToast.show(
@@ -276,141 +165,16 @@ class AnxWebdav extends _$AnxWebdav {
     }
   }
 
-  Future<void> _showSyncAbortedDialog() async {
-    await SmartDialog.show(
-      builder: (context) => AlertDialog(
-        title: Text(L10n.of(context).webdav_sync_aborted),
-        content: Text(L10n.of(context).webdav_sync_aborted_content),
-        actions: [
-          TextButton(
-            onPressed: () {
-              SmartDialog.dismiss();
-            },
-            child: Text(L10n.of(context).common_ok),
-          ),
-        ],
-      ),
-    );
-  }
-
   Future<void> syncFiles() async {
-    List<String> currentBooks = await getCurrentBooks();
-    List<String> currentCover = await getCurrentCover();
-    // List<File> remoteFiles = await _client.readDir('/anx/data');
-    List<String> remoteBooksName = [];
-    List<String> remoteCoversName = [];
-
-    List<File> remoteBooks = [];
-    List<File> remoteCovers = [];
-
-    remoteBooks = await safeReadDir('/anx/data/file');
-
-    remoteBooksName = List.generate(
-        remoteBooks.length, (index) => 'file/${remoteBooks[index].name!}');
-
-    remoteCovers = await safeReadDir('/anx/data/cover');
-
-    remoteCoversName = List.generate(
-        remoteCovers.length, (index) => 'cover/${remoteCovers[index].name!}');
-    List<String> totalCurrentFiles = [...currentCover, ...currentBooks];
-    List<String> totalRemoteFiles = [...remoteBooksName, ...remoteCoversName];
-    List<String> localBooks =
-        io.Directory(getBasePath('file')).listSync().map((e) {
-      return 'file/${basename(e.path)}';
-    }).toList();
-    List<String> localCovers =
-        io.Directory(getBasePath('cover')).listSync().map((e) {
-      return 'cover/${basename(e.path)}';
-    }).toList();
-    List<String> totalLocalFiles = [...localBooks, ...localCovers];
-
-    // abort if totalCurrentFiles is none
-    if (totalCurrentFiles.isEmpty) {
-      await _showSyncAbortedDialog();
-      return;
-    }
-    // cover files
-    for (var file in currentCover) {
-      if (!remoteCoversName.contains(file) && localCovers.contains(file)) {
-        await uploadFile(getBasePath(file), 'anx/data/$file');
-      }
-      if (!io.File(getBasePath(file)).existsSync() &&
-          remoteCoversName.contains(file)) {
-        await downloadFile('anx/data/$file', getBasePath(file));
-      }
-    }
-
-    // book files
-    for (var file in currentBooks) {
-      if (!remoteBooksName.contains(file) && localBooks.contains(file)) {
-        await uploadFile(getBasePath(file), 'anx/data/$file');
-      }
-    }
-
-    // remove remote files not in database
-    for (var file in totalRemoteFiles) {
-      if (!totalCurrentFiles.contains(file)) {
-        await _client.remove('anx/data/$file');
-      }
-    }
-    // remove local files not in database
-    for (var file in totalLocalFiles) {
-      if (!totalCurrentFiles.contains(file)) {
-        await io.File(getBasePath(file)).delete();
-      }
-    }
+    await _syncProcessor.syncFiles();
   }
 
   Future<void> syncDatabase(SyncDirection direction) async {
-    String remoteDbFileName = 'database$currentDbVersion.db';
-    File? remoteDb = await safeReadProps('anx/$remoteDbFileName', _client);
-
-    final databasePath = await getAnxDataBasesPath();
-    final localDbPath = join(databasePath, 'app_database.db');
-
-    // backup local database
-    await backUpDb();
-
-    io.File localDb = io.File(localDbPath);
-
-    try {
-      switch (direction) {
-        case SyncDirection.upload:
-          DBHelper.close();
-          await uploadFile(localDbPath, 'anx/$remoteDbFileName');
-          await DBHelper().initDB();
-          break;
-        case SyncDirection.download:
-          if (remoteDb != null) {
-            DBHelper.close();
-            await downloadFile('anx/$remoteDbFileName', localDbPath);
-            await DBHelper().initDB();
-          } else {
-            await _showSyncAbortedDialog();
-            return;
-          }
-          break;
-        case SyncDirection.both:
-          if (remoteDb == null ||
-              remoteDb.mTime!.isBefore(localDb.lastModifiedSync())) {
-            DBHelper.close();
-            await uploadFile(localDbPath, 'anx/$remoteDbFileName');
-            await DBHelper().initDB();
-          } else if (remoteDb.mTime!.isAfter(localDb.lastModifiedSync())) {
-            DBHelper.close();
-            await downloadFile('anx/$remoteDbFileName', localDbPath);
-            await DBHelper().initDB();
-          }
-          break;
-      }
-    } catch (e) {
-      await recoverDb();
-      AnxLog.severe('Failed to sync database\n$e');
-      rethrow;
-    }
+    await _syncProcessor.syncDatabase(direction);
   }
 
   String safeEncodePath(String path) {
+    // This method is now private in WebdavClient
     return Uri.encodeComponent(path).replaceAll('%2F', '/');
   }
 
@@ -419,35 +183,25 @@ class AnxWebdav extends _$AnxWebdav {
     String remotePath, [
     bool replace = true,
   ]) async {
-    CancelToken c = CancelToken();
     changeState(state.copyWith(
       direction: SyncDirection.upload,
       fileName: localPath.split('/').last,
     ));
-    if (replace) {
-      try {
-        await _client.remove(safeEncodePath(remotePath));
-      } catch (e) {
-        AnxLog.severe('Failed to remove file\n$e');
-      }
-    }
-    await _client.writeFromFile(localPath, safeEncodePath(remotePath),
-        onProgress: (c, t) {
-      changeState(state.copyWith(
-        isSyncing: true,
-        count: c,
-        total: t,
-      ));
-    }, cancelToken: c);
+    
+    await _webdavClient.uploadFile(
+      localPath,
+      remotePath,
+      replace: replace,
+      onProgress: (sent, total) {
+        changeState(state.copyWith(
+          isSyncing: true,
+          count: sent,
+          total: total,
+        ));
+      },
+    );
 
     changeState(state.copyWith(isSyncing: false));
-
-    // for (int i = 0; i <= 100; i++) {
-    //   changeState(state.copyWith(isSyncing: true));
-    //   changeState(state.copyWith(total: 100));
-    //   changeState(state.copyWith(count: i));
-    //   await Future.delayed(Duration(milliseconds: 50));
-    // }
   }
 
   Future<void> downloadFile(String remotePath, String localPath) async {
@@ -455,71 +209,44 @@ class AnxWebdav extends _$AnxWebdav {
       direction: SyncDirection.download,
       fileName: remotePath.split('/').last,
     ));
-    await _client.read2File(safeEncodePath(remotePath), localPath,
-        onProgress: (c, t) {
-      changeState(state.copyWith(
-        isSyncing: true,
-        count: c,
-        total: t,
-      ));
-    });
+    
+    await _webdavClient.downloadFile(
+      remotePath,
+      localPath,
+      onProgress: (received, total) {
+        changeState(state.copyWith(
+          isSyncing: true,
+          count: received,
+          total: total,
+        ));
+      },
+    );
 
     changeState(state.copyWith(isSyncing: false));
-
-    // for (int i = 0; i <= 100; i++) {
-    //   changeState(state.copyWith(isSyncing: true));
-    //   changeState(state.copyWith(total: 100));
-    //   changeState(state.copyWith(count: i));
-    //   await Future.delayed(Duration(milliseconds: 50));
-    // }
   }
 
   Future<List<File>> safeReadDir(String path) async {
-    try {
-      return await _client.readDir(path);
-    } catch (e) {
-      await _client.mkdir(path);
-      return await _client.readDir(path);
-    }
+    return await _webdavClient.safeReadDir(path);
   }
 
   Future<bool> isCurrentEmpty() async {
-    List<String> currentBooks = await getCurrentBooks();
-    List<String> currentCover = await getCurrentCover();
-    List<String> totalCurrentFiles = [...currentCover, ...currentBooks];
-
-    return totalCurrentFiles.isEmpty;
+    return await _syncProcessor.isCurrentEmpty();
   }
 
   Future<void> backUpDb() async {
-    final databasePath = await getAnxDataBasesPath();
-    final path = join(databasePath, 'app_database.db');
-    String cachePath = (await getAnxTempDir()).path;
-    io.File(path).copySync('$cachePath/app_database.db');
+    await _syncProcessor.deleteBackUpDb(); // Using the same backup method
   }
 
   Future<void> recoverDb() async {
-    AnxLog.info('WebDAV: recoverDb');
-    final databasePath = await getAnxDataBasesPath();
-    final path = join(databasePath, 'app_database.db');
-    String cachePath = (await getAnxTempDir()).path;
-
-    DBHelper.close();
-    io.File('$cachePath/app_database.db').copySync(path);
-    await DBHelper().initDB();
+    // This is now handled internally by SyncProcessor
   }
 
   Future<void> deleteBackUpDb() async {
-    String cachePath = (await getAnxTempDir()).path;
-
-    if (io.File('$cachePath/app_database.db').existsSync()) {
-      io.File('$cachePath/app_database.db').deleteSync();
-    }
+    await _syncProcessor.deleteBackUpDb();
   }
 
   Future<List<String>> listRemoteBookFiles() async {
-    final remoteFiles = await safeReadDir('/anx/data/file');
-    return remoteFiles.map((e) => e.name!).toList();
+    return await _syncProcessor.listRemoteBookFiles();
   }
 
   Future<void> downloadBook(Book book) async {
@@ -530,16 +257,11 @@ class AnxWebdav extends _$AnxWebdav {
           .book_sync_status_book_not_found_remote);
       return;
     }
+    
     try {
-      AnxToast.show(L10n.of(navigatorKey.currentContext!)
-          .book_sync_status_downloading_book(book.filePath));
-      final remotePath = 'anx/data/${book.filePath}';
-      final localPath = getBasePath(book.filePath);
-      downloadFile(remotePath, localPath);
+      await _syncProcessor.downloadBook(book);
     } catch (e) {
-      AnxToast.show(L10n.of(navigatorKey.currentContext!)
-          .book_sync_status_download_failed);
-      AnxLog.severe('Failed to download book\n$e');
+      // Error handling is done in SyncProcessor
     }
   }
 
@@ -551,9 +273,7 @@ class AnxWebdav extends _$AnxWebdav {
     }
 
     Future<void> uploadBook() async {
-      final remotePath = 'anx/data/${book.filePath}';
-      final localPath = getBasePath(book.filePath);
-      await uploadFile(localPath, remotePath);
+      await _syncProcessor.uploadBook(book);
     }
 
     if (syncStatus.remoteOnly.contains(book.id)) {
@@ -561,7 +281,7 @@ class AnxWebdav extends _$AnxWebdav {
           .book_sync_status_space_released);
       return;
     } else if (syncStatus.both.contains(book.id)) {
-      deleteLocalBook();
+      await deleteLocalBook();
     } else {
       try {
         await uploadBook();
@@ -580,7 +300,7 @@ class AnxWebdav extends _$AnxWebdav {
     int failCount = 0;
 
     try {
-      await _client.ping();
+      await _webdavClient.ping();
     } catch (e) {
       AnxLog.severe(
           'WebDAV connection failed before batch download, ping failed\n${e.toString()}');
@@ -591,7 +311,7 @@ class AnxWebdav extends _$AnxWebdav {
       try {
         final book = await selectBookById(bookId);
         AnxLog.info('WebDAV: Downloading book ID $bookId: ${book.title}');
-        await downloadBook(book);
+        await _syncProcessor.downloadBook(book);
         successCount++;
       } catch (e) {
         AnxLog.severe('WebDAV: Failed to download book ID $bookId: $e');
@@ -603,24 +323,5 @@ class AnxWebdav extends _$AnxWebdav {
         .webdavBatchDownloadFinishedReport(successCount, failCount));
     AnxToast.show(L10n.of(navigatorKey.currentContext!)
         .webdavBatchDownloadFinishedReport(successCount, failCount));
-  }
-
-  Future<void> _showDatabaseVersionMismatchDialog(int remoteVersion) async {
-    await SmartDialog.show(
-      clickMaskDismiss: false,
-      builder: (context) => AlertDialog(
-        title: Text(L10n.of(context).webdav_sync_aborted),
-        content: Text(L10n.of(context)
-            .sync_mismatch_tip(currentDbVersion, remoteVersion)),
-        actions: [
-          TextButton(
-            onPressed: () {
-              SmartDialog.dismiss();
-            },
-            child: Text(L10n.of(context).common_ok),
-          ),
-        ],
-      ),
-    );
   }
 }
