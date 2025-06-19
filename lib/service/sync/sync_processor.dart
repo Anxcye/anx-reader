@@ -5,7 +5,9 @@ import 'package:anx_reader/enums/sync_direction.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/main.dart';
 import 'package:anx_reader/models/book.dart';
+import 'package:anx_reader/models/remote_file.dart';
 import 'package:anx_reader/service/sync/sync_client_factory.dart';
+import 'package:anx_reader/service/sync/sync_client_base.dart';
 import 'package:anx_reader/utils/get_path/get_base_path.dart';
 import 'package:anx_reader/utils/get_path/get_temp_dir.dart';
 import 'package:anx_reader/utils/get_path/databases_path.dart';
@@ -16,7 +18,6 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:path/path.dart';
-import 'package:webdav_client/webdav_client.dart';
 
 class SyncProcessor {
   final void Function(
@@ -27,11 +28,11 @@ class SyncProcessor {
     this.onProgress,
   });
 
-  get _syncClient {
+  SyncClientBase get _syncClient {
     if (SyncClientFactory.currentClient == null) {
       SyncClientFactory.initializeCurrentClient();
     }
-    return SyncClientFactory.currentClient;
+    return SyncClientFactory.currentClient!;
   }
 
   Future<void> initializeSync() async {
@@ -81,7 +82,7 @@ class SyncProcessor {
     String remoteDbFileName = 'database$currentDbVersion.db';
 
     // Check for version mismatch
-    List<File> remoteFiles = [];
+    List<RemoteFile> remoteFiles = [];
     try {
       remoteFiles = await _syncClient.safeReadDir('/anx');
     } catch (e) {
@@ -104,7 +105,7 @@ class SyncProcessor {
     }
 
     // File? remoteDb = await safeReadProps('anx/$remoteDbFileName', _syncClient);
-    File? remoteDb = await _syncClient.readProps('anx/$remoteDbFileName');
+    RemoteFile? remoteDb = await _syncClient.readProps('anx/$remoteDbFileName');
     final databasePath = await getAnxDataBasesPath();
     final localDbPath = join(databasePath, 'app_database.db');
     io.File localDb = io.File(localDbPath);
@@ -139,7 +140,7 @@ class SyncProcessor {
   }
 
   Future<SyncDirection?> _showSyncDirectionDialog(
-      io.File localDb, File remoteDb) async {
+      io.File localDb, RemoteFile remoteDb) async {
     return await showDialog<SyncDirection>(
       context: navigatorKey.currentContext!,
       builder: (context) => AlertDialog(
@@ -179,7 +180,7 @@ class SyncProcessor {
 
   Future<void> syncDatabase(SyncDirection direction) async {
     String remoteDbFileName = 'database$currentDbVersion.db';
-    File? remoteDb = await _syncClient.readProps('anx/$remoteDbFileName');
+    RemoteFile? remoteDb = await _syncClient.readProps('anx/$remoteDbFileName');
     final databasePath = await getAnxDataBasesPath();
     final localDbPath = join(databasePath, 'app_database.db');
     io.File localDb = io.File(localDbPath);
@@ -219,7 +220,7 @@ class SyncProcessor {
       }
 
       // Update last sync time
-      File? newRemoteDb = await _syncClient.readProps('anx/$remoteDbFileName');
+      RemoteFile? newRemoteDb = await _syncClient.readProps('anx/$remoteDbFileName');
       if (newRemoteDb != null) {
         Prefs().lastUploadBookDate = newRemoteDb.mTime;
       }
@@ -237,11 +238,11 @@ class SyncProcessor {
     List<String> remoteBooksName = [];
     List<String> remoteCoversName = [];
 
-    List<File> remoteBooks = await _syncClient.safeReadDir('/anx/data/file');
+    List<RemoteFile> remoteBooks = await _syncClient.safeReadDir('/anx/data/file');
     remoteBooksName = List.generate(
         remoteBooks.length, (index) => 'file/${remoteBooks[index].name!}');
 
-    List<File> remoteCovers = await _syncClient.safeReadDir('/anx/data/cover');
+    List<RemoteFile> remoteCovers = await _syncClient.safeReadDir('/anx/data/cover');
     remoteCoversName = List.generate(
         remoteCovers.length, (index) => 'cover/${remoteCovers[index].name!}');
 

@@ -4,6 +4,7 @@ import 'package:anx_reader/enums/sync_direction.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/main.dart';
 import 'package:anx_reader/models/book.dart';
+import 'package:anx_reader/models/remote_file.dart';
 import 'package:anx_reader/models/sync_state_model.dart';
 import 'package:anx_reader/providers/book_list.dart';
 import 'package:anx_reader/providers/sync_status.dart';
@@ -20,7 +21,6 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:webdav_client/webdav_client.dart';
 
 part 'sync.g.dart';
 
@@ -248,7 +248,7 @@ class Sync extends _$Sync {
     changeState(state.copyWith(isSyncing: false));
   }
 
-  Future<List<File>> safeReadDir(String path) async {
+  Future<List<RemoteFile>> safeReadDir(String path) async {
     final client = _syncClient;
     if (client != null) {
       return await client.safeReadDir(path);
