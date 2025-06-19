@@ -1,3 +1,4 @@
+import 'package:anx_reader/models/remote_file.dart';
 import 'package:anx_reader/service/sync/sync_client_base.dart';
 import 'package:anx_reader/utils/log/common.dart';
 import 'package:dio/dio.dart';
@@ -6,10 +7,10 @@ import 'package:webdav_client/webdav_client.dart';
 class WebdavClient extends SyncClientBase {
   late Client _client;
   late Map<String, dynamic> _config;
-  
+
   WebdavClient({
     required String url,
-    required String username, 
+    required String username,
     required String password,
   }) {
     _config = {
@@ -50,22 +51,22 @@ class WebdavClient extends SyncClientBase {
   }
 
   @override
-  Future<List<File>> readDir(String path) async {
-    return await _client.readDir(path);
+  Future<List<RemoteFile>> readDir(String path) async {
+    return (await _client.readDir(path))
+        .map((file) => file.toRemoteFile())
+        .toList();
   }
 
   @override
-  Future<File?> readProps(String path) async {
-    File? file;
+  Future<RemoteFile?> readProps(String path) async {
+    RemoteFile? file;
     try {
-      file = await _client.readProps(path);
+      file = (await _client.readProps(path)).toRemoteFile();
     } catch (e) {
       return null;
     }
     return file;
   }
-
-
 
   @override
   Future<void> remove(String path) async {
@@ -87,9 +88,9 @@ class WebdavClient extends SyncClientBase {
         AnxLog.severe('Failed to remove file\n$e');
       }
     }
-    
+
     await _client.writeFromFile(
-      localPath, 
+      localPath,
       _safeEncodePath(remotePath),
       onProgress: onProgress,
       cancelToken: cancelToken,
@@ -110,7 +111,7 @@ class WebdavClient extends SyncClientBase {
   }
 
   @override
-  Future<List<File>> safeReadDir(String path) async {
+  Future<List<RemoteFile>> safeReadDir(String path) async {
     try {
       return await readDir(path);
     } catch (e) {
@@ -133,12 +134,12 @@ class WebdavClient extends SyncClientBase {
 
   @override
   bool get isConfigured {
-    return _config.containsKey('url') && 
-           _config.containsKey('username') && 
-           _config.containsKey('password') &&
-           _config['url']?.isNotEmpty == true &&
-           _config['username']?.isNotEmpty == true &&
-           _config['password']?.isNotEmpty == true;
+    return _config.containsKey('url') &&
+        _config.containsKey('username') &&
+        _config.containsKey('password') &&
+        _config['url']?.isNotEmpty == true &&
+        _config['username']?.isNotEmpty == true &&
+        _config['password']?.isNotEmpty == true;
   }
 
   String _safeEncodePath(String path) {

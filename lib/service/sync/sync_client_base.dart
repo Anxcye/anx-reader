@@ -1,5 +1,5 @@
+import 'package:anx_reader/models/remote_file.dart';
 import 'package:dio/dio.dart';
-import 'package:webdav_client/webdav_client.dart';
 
 abstract class SyncClientBase {
   /// Test connection to the remote server
@@ -9,7 +9,7 @@ abstract class SyncClientBase {
   Future<void> mkdir(String path);
 
   /// List files and directories in the given path
-  Future<List<File>> readDir(String path);
+  Future<List<RemoteFile>> readDir(String path);
 
   /// Remove a file or directory
   Future<void> remove(String path);
@@ -34,10 +34,10 @@ abstract class SyncClientBase {
   });
 
   /// Safely read directory, create if not exists
-  Future<List<File>> safeReadDir(String path);
+  Future<List<RemoteFile>> safeReadDir(String path);
 
   /// Read file properties, return null if not exists
-  Future<File?> readProps(String path);
+  Future<RemoteFile?> readProps(String path);
 
   /// Get the protocol name for this client
   String get protocolName;
