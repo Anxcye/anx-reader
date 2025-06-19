@@ -32,10 +32,10 @@ class SyncSetting extends ConsumerStatefulWidget {
   const SyncSetting({super.key});
 
   @override
-  ConsumerState<SyncSetting> createState() => _AppearanceSettingState();
+  ConsumerState<SyncSetting> createState() => _SyncSettingState();
 }
 
-class _AppearanceSettingState extends ConsumerState<SyncSetting> {
+class _SyncSettingState extends ConsumerState<SyncSetting> {
   @override
   Widget build(BuildContext context) {
     return settingsSections(
