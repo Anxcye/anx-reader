@@ -59,12 +59,12 @@ class BookBottomSheet extends ConsumerWidget {
 
     void handleUpload(BuildContext context) {
       Future<void> core() async {
-        await ref.read(syncProvider.notifier).uploadBook(book);
+        await ref.read(syncProvider.notifier).releaseBook(book);
         ref.read(syncStatusProvider.notifier).refresh();
       }
 
       if (Prefs().notShowReleaseLocalSpaceDialog) {
-        ref.read(syncProvider.notifier).uploadBook(book);
+        ref.read(syncProvider.notifier).releaseBook(book);
       } else {
         SmartDialog.show(
           builder: (context) => AlertDialog(
