@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:anx_reader/dao/database.dart';
+import 'package:anx_reader/enums/sync_protocol.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/main.dart';
 import 'package:anx_reader/service/iap_service.dart';
@@ -46,7 +47,7 @@ class _AppearanceSettingState extends ConsumerState<SyncSetting> {
             SettingsTile.navigation(
                 title: Text(L10n.of(context).settings_sync_webdav),
                 leading: const Icon(Icons.cloud),
-                value: Text(Prefs().webdavInfo['url'] ?? 'Not set'),
+                value: Text(Prefs().getSyncInfo(SyncProtocol.webdav)['url'] ?? 'Not set'),
                 // enabled: Prefs().webdavStatus,
                 onPressed: (context) async {
                   showWebdavDialog(context);
@@ -313,8 +314,8 @@ Future<void> extractZipFile(Map<String, String> params) async {
 
 void showWebdavDialog(BuildContext context) {
   final title = L10n.of(context).settings_sync_webdav;
-  final prefs = Prefs().saveWebdavInfo;
-  final webdavInfo = Prefs().webdavInfo;
+  // final prefs = Prefs().saveWebdavInfo;
+  final webdavInfo = Prefs().getSyncInfo(SyncProtocol.webdav);
   final webdavUrlController = TextEditingController(text: webdavInfo['url']);
   final webdavUsernameController =
       TextEditingController(text: webdavInfo['username']);
@@ -367,7 +368,7 @@ void showWebdavDialog(BuildContext context) {
                   webdavInfo['url'] = webdavUrlController.text.trim();
                   webdavInfo['username'] = webdavUsernameController.text;
                   webdavInfo['password'] = webdavPasswordController.text;
-                  prefs(webdavInfo);
+                  Prefs().setSyncInfo(SyncProtocol.webdav, webdavInfo);
                   Navigator.pop(context);
                 },
                 child: Text(L10n.of(context).common_save),
