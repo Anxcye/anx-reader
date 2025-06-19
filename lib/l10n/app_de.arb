@@ -418,5 +418,17 @@
   "settings_advanced_enable_javascript_for_epub": "Aktivieren Sie JavaScript für EPUB",
   "reading_settings_margin": "Marge",
   "update_via_github": "Via GitHub",
-  "update_via_official_website": "Über offizielle Website"
+  "update_via_official_website": "Über offizielle Website",
+  "testingConnection": "Testverbindung ...",
+  "unknownErrorWhenTestingConnection": "Unbekannter Fehler beim Testen der Verbindung:",
+  "configurationInformationIsIncomplete": "Konfigurationsinformationen sind unvollständig",
+  "connectionSuccessful": "Verbindung erfolgreich",
+  "connectionTimeout": "Verbindungszeitüberschreitung, bitte überprüfen Sie die Netzwerk- oder Serveradresse",
+  "testUnauthorized": "Benutzername oder Passwort ist falsch",
+  "testForbidden": "Zugriff verweigert. Bitte überprüfen Sie die Berechtigungseinstellungen",
+  "testNotFound": "Die Serveradresse existiert nicht oder der Pfad ist falsch",
+  "testRefused": "Überprüfen Sie bitte den Netzwerk- und Serverstatus, wenn Sie keine Verbindung zum Server herstellen können",
+  "testSsl": "Überprüfung des SSL -Zertifikats fehlgeschlagen. Überprüfen Sie bitte die HTTPS -Konfiguration",
+  "testDnd": "Die DNS -Auflösung ist fehlgeschlagen. Bitte prüfen Sie, ob der Domänenname korrekt ist",
+  "testOther": "Verbindungstest fehlgeschlagen, prüfen Sie die Konfiguration und das Netzwerk"
 }

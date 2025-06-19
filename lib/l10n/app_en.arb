@@ -418,5 +418,17 @@
   "settings_advanced_enable_javascript_for_epub": "Enable JavaScript for Epub",
   "reading_settings_margin": "Margin",
   "update_via_github": "Via GitHub",
-  "update_via_official_website": "Via Official Website"
+  "update_via_official_website": "Via Official Website",
+  "testingConnection": "Testing connection...",
+  "unknownErrorWhenTestingConnection": "Unknown error when testing connection: ",
+  "configurationInformationIsIncomplete": "Configuration information is incomplete",
+  "connectionSuccessful": "Connection successful",
+  "connectionTimeout": "Connection timeout, please check network or server address",
+  "testUnauthorized": "Username or password is incorrect",
+  "testForbidden": "Access denied, please check permission settings",
+  "testNotFound": "Server address does not exist or path is incorrect",
+  "testRefused": "Unable to connect to server, please check network and server status",
+  "testSsl": "SSL certificate verification failed, please check HTTPS configuration",
+  "testDnd": "DNS resolution failed, please check if domain name is correct",
+  "testOther": "Connection test failed, please check configuration and network"
 }
