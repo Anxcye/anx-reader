@@ -12,6 +12,7 @@ import 'package:anx_reader/utils/get_path/databases_path.dart';
 import 'package:anx_reader/utils/get_path/get_base_path.dart';
 import 'package:anx_reader/utils/get_path/shared_prefs_path.dart';
 import 'package:anx_reader/utils/log/common.dart';
+import 'package:anx_reader/utils/sync_test_helper.dart';
 import 'package:anx_reader/utils/toast/common.dart';
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/utils/webdav/test_webdav.dart';
@@ -353,16 +354,14 @@ void showWebdavDialog(BuildContext context) {
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              TextButton(
-                onPressed: () async {
-                  webdavInfo['url'] = webdavUrlController.text.trim();
-                  webdavInfo['username'] = webdavUsernameController.text;
-                  webdavInfo['password'] = webdavPasswordController.text;
-                  testWebdav(webdavInfo);
-                },
-                child:
-                    Text(L10n.of(context).settings_sync_webdav_test_connection),
-              ),
+                  SyncTestHelper.buildTestConnectionButton(
+                    protocol: SyncProtocol.webdav ,
+                    config: {
+                      'url': webdavUrlController.text.trim(),
+                      'username': webdavUsernameController.text,
+                      'password': webdavPasswordController.text,
+                    }
+                  ),
               TextButton(
                 onPressed: () {
                   webdavInfo['url'] = webdavUrlController.text.trim();

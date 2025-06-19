@@ -418,5 +418,17 @@
   "settings_advanced_enable_javascript_for_epub": "为 Epub 啟用 JavaScript",
   "reading_settings_margin": "边距",
   "update_via_github": "通過 GitHub",
-  "update_via_official_website": "通過官方網站"
+  "update_via_official_website": "通過官方網站",
+  "testingConnection": "測試連接...",
+  "unknownErrorWhenTestingConnection": "測試連接時未知錯誤：",
+  "configurationInformationIsIncomplete": "配置信息不完整",
+  "connectionSuccessful": "連接成功",
+  "connectionTimeout": "連接超時，請檢查網絡或服務器地址",
+  "testUnauthorized": "用戶名或密碼不正確",
+  "testForbidden": "訪問被拒絕，請檢查許可設置",
+  "testNotFound": "服務器地址不存在或路徑不正確",
+  "testRefused": "無法連接到服務器，請檢查網絡和服務器狀態",
+  "testSsl": "SSL證書驗證失敗，請檢查HTTPS配置",
+  "testDnd": "DNS分辨率失敗，請檢查域名是否正確",
+  "testOther": "連接測試失敗，請檢查配置和網絡"
 }

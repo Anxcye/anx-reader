@@ -1,89 +1,99 @@
+import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/enums/sync_protocol.dart';
+import 'package:anx_reader/main.dart';
 import 'package:anx_reader/service/sync/sync_client_factory.dart';
 import 'package:anx_reader/utils/log/common.dart';
 
-/// 用于测试同步连接的工具类
+/// Utility class for testing sync connections
 class SyncConnectionTester {
-  /// 测试连接结果
+  /// Test connection result
   static Future<SyncTestResult> testConnection({
     required SyncProtocol protocol,
     required Map<String, dynamic> config,
   }) async {
     try {
-      // 使用临时配置创建客户端
+      // Create client with temporary configuration
       final client = SyncClientFactory.createClient(protocol, config);
-      
-      // 验证配置是否完整
+
+      // Verify if configuration is complete
       if (!client.isConfigured) {
-        return SyncTestResult.failure('配置信息不完整');
+        return SyncTestResult.failure(L10n.of(navigatorKey.currentContext!)
+            .configurationInformationIsIncomplete);
       }
-      
-      // 执行ping测试
+
+      // Execute ping test
       await client.ping();
-      
+
       AnxLog.info('${protocol.displayName} connection test successful');
-      return SyncTestResult.success('连接成功');
-      
+      return SyncTestResult.success(L10n.of(navigatorKey.currentContext!)
+          .connectionSuccessful);
     } catch (e) {
-      final errorMessage = _getErrorMessage(e);
-      AnxLog.severe('${protocol.displayName} connection test failed: $errorMessage');
+      final errorMessage = '${_getErrorMessage(e)}\n$e';
+      AnxLog.severe(
+          '${protocol.displayName} connection test failed: $errorMessage');
       return SyncTestResult.failure(errorMessage);
     }
   }
-  
-  /// 获取用户友好的错误信息
+
+  /// Get user-friendly error message
   static String _getErrorMessage(dynamic error) {
     final errorStr = error.toString().toLowerCase();
-    
-    if (errorStr.contains('timeout') || errorStr.contains('connection timeout')) {
-      return '连接超时，请检查网络或服务器地址';
+
+    final context = navigatorKey.currentContext!;
+
+    if (errorStr.contains('timeout') ||
+        errorStr.contains('connection timeout')) {
+      return L10n.of(context).connectionTimeout;
     }
-    
+
     if (errorStr.contains('unauthorized') || errorStr.contains('401')) {
-      return '用户名或密码错误';
+      return L10n.of(context).testUnauthorized;
     }
-    
+
     if (errorStr.contains('forbidden') || errorStr.contains('403')) {
-      return '访问被拒绝，请检查权限设置';
+      return L10n.of(context).testForbidden;
     }
-    
+
     if (errorStr.contains('not found') || errorStr.contains('404')) {
-      return '服务器地址不存在或路径错误';
+      return L10n.of(context).testNotFound;
     }
-    
-    if (errorStr.contains('connection refused') || errorStr.contains('connection failed')) {
-      return '无法连接到服务器，请检查网络和服务器状态';
+
+    if (errorStr.contains('connection refused') ||
+        errorStr.contains('connection failed')) {
+      return L10n.of(context).testRefused;
     }
-    
-    if (errorStr.contains('certificate') || errorStr.contains('ssl') || errorStr.contains('tls')) {
-      return 'SSL证书验证失败，请检查HTTPS配置';
+
+    if (errorStr.contains('certificate') ||
+        errorStr.contains('ssl') ||
+        errorStr.contains('tls')) {
+      return L10n.of(context).testSsl;
     }
-    
+
     if (errorStr.contains('dns') || errorStr.contains('resolve')) {
-      return 'DNS解析失败，请检查域名是否正确';
+      return L10n.of(context).testDnd;
     }
-    
-    // 返回原始错误信息（但去掉过于技术性的部分）
-    return error.toString().replaceAll(RegExp(r'Exception: |Error: '), '');
+
+    // Return original error message (but remove overly technical parts)
+    return L10n.of(context).testOther;
   }
 }
 
-/// 测试结果类
+/// Test result class
 class SyncTestResult {
   final bool isSuccess;
   final String message;
-  
+
   const SyncTestResult._({
     required this.isSuccess,
     required this.message,
   });
-  
-  /// 创建成功结果
+
+  /// Create success result
   factory SyncTestResult.success(String message) {
     return SyncTestResult._(isSuccess: true, message: message);
   }
-  
-  /// 创建失败结果
+
+  /// Create failure result
   factory SyncTestResult.failure(String message) {
     return SyncTestResult._(isSuccess: false, message: message);
   }

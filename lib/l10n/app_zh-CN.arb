@@ -418,5 +418,17 @@
   "settings_advanced_enable_javascript_for_epub": "为 Epub 书籍启用 JavaScript",
   "reading_settings_margin": "边距",
   "update_via_github": "通过 GitHub",
-  "update_via_official_website": "通过官方网站"
+  "update_via_official_website": "通过官方网站",
+  "testingConnection": "测试连接...",
+  "unknownErrorWhenTestingConnection": "测试连接时未知错误：",
+  "configurationInformationIsIncomplete": "配置信息不完整",
+  "connectionSuccessful": "连接成功",
+  "connectionTimeout": "连接超时，请检查网络或服务器地址",
+  "testUnauthorized": "用户名或密码不正确",
+  "testForbidden": "访问被拒绝，请检查许可设置",
+  "testNotFound": "服务器地址不存在或路径不正确",
+  "testRefused": "无法连接到服务器，请检查网络和服务器状态",
+  "testSsl": "SSL证书验证失败，请检查HTTPS配置",
+  "testDnd": "DNS分辨率失败，请检查域名是否正确",
+  "testOther": "连接测试失败，请检查配置和网络"
 }

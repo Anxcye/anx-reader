@@ -418,5 +418,17 @@
   "settings_advanced_enable_javascript_for_epub": "EPUB için JavaScript'i Etkinleştir",
   "reading_settings_margin": "Marj",
   "update_via_github": "Github üzerinden",
-  "update_via_official_website": "Resmi web sitesi aracılığıyla"
+  "update_via_official_website": "Resmi web sitesi aracılığıyla",
+  "testingConnection": "Test bağlantısı ...",
+  "unknownErrorWhenTestingConnection": "Bağlantı test ederken bilinmeyen hata:",
+  "configurationInformationIsIncomplete": "Yapılandırma bilgileri eksik",
+  "connectionSuccessful": "Bağlantı Başarılı",
+  "connectionTimeout": "Bağlantı Zaman Aşımı, lütfen ağ veya sunucu adresini kontrol edin",
+  "testUnauthorized": "Kullanıcı adı veya şifre yanlış",
+  "testForbidden": "Erişim reddedildi, lütfen izin ayarlarını kontrol edin",
+  "testNotFound": "Sunucu adresi mevcut değil veya yol yanlış",
+  "testRefused": "Sunucuya bağlanılamıyor, lütfen ağ ve sunucu durumunu kontrol edin",
+  "testSsl": "SSL sertifika doğrulaması başarısız oldu, lütfen https yapılandırmasını kontrol edin",
+  "testDnd": "DNS çözünürlüğü başarısız oldu, lütfen etki alanı adının doğru olup olmadığını kontrol edin",
+  "testOther": "Bağlantı testi başarısız oldu, lütfen yapılandırmayı ve ağı kontrol edin"
 }

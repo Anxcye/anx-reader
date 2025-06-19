@@ -418,5 +418,17 @@
   "settings_advanced_enable_javascript_for_epub": "تمكين JavaScript لـ Epub",
   "reading_settings_margin": "هامِش",
   "update_via_github": "عبر جيثب",
-  "update_via_official_website": "عبر الموقع الرسمي"
+  "update_via_official_website": "عبر الموقع الرسمي",
+  "testingConnection": "اختبار الاتصال ...",
+  "unknownErrorWhenTestingConnection": "خطأ غير معروف عند اختبار الاتصال:",
+  "configurationInformationIsIncomplete": "معلومات التكوين غير مكتملة",
+  "connectionSuccessful": "اتصال ناجح",
+  "connectionTimeout": "مهلة الاتصال ، يرجى التحقق من عنوان الشبكة أو الخادم",
+  "testUnauthorized": "اسم المستخدم أو كلمة المرور غير صحيح",
+  "testForbidden": "تم رفض الوصول ، يرجى التحقق من إعدادات الإذن",
+  "testNotFound": "عنوان الخادم غير موجود أو المسار غير صحيح",
+  "testRefused": "غير قادر على الاتصال بالخادم ، يرجى التحقق من حالة الشبكة وخادم",
+  "testSsl": "فشل التحقق من شهادة SSL ، يرجى التحقق من تكوين HTTPS",
+  "testDnd": "فشل دقة DNS ، يرجى التحقق مما إذا كان اسم المجال صحيحًا",
+  "testOther": "فشل اختبار الاتصال ، يرجى التحقق من التكوين والشبكة"
 }
