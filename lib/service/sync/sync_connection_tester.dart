@@ -28,7 +28,7 @@ class SyncConnectionTester {
       return SyncTestResult.success(L10n.of(navigatorKey.currentContext!)
           .connectionSuccessful);
     } catch (e) {
-      final errorMessage = '${_getErrorMessage(e)}\n$e';
+      final errorMessage = '${getErrorMessage(e)}\n$e';
       AnxLog.severe(
           '${protocol.displayName} connection test failed: $errorMessage');
       return SyncTestResult.failure(errorMessage);
@@ -36,7 +36,7 @@ class SyncConnectionTester {
   }
 
   /// Get user-friendly error message
-  static String _getErrorMessage(dynamic error) {
+  static String getErrorMessage(dynamic error) {
     final errorStr = error.toString().toLowerCase();
 
     final context = navigatorKey.currentContext!;

@@ -5,28 +5,7 @@ import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:flutter/material.dart';
 
 class SyncTestHelper {
-  static Widget buildTestConnectionButton({
-    required SyncProtocol protocol,
-    required Map<String, dynamic> config,
-    VoidCallback? onTestStart,
-    Function(bool success, String message)? onTestComplete,
-  }) {
-    return Builder(
-      builder: (context) => TextButton.icon(
-        onPressed: () => _handleTestConnection(
-          context,
-          protocol: protocol,
-          config: config,
-          onTestStart: onTestStart,
-          onTestComplete: onTestComplete,
-        ),
-        icon: const Icon(Icons.wifi_find),
-        label: Text(L10n.of(context).settings_sync_webdav_test_connection),
-      ),
-    );
-  }
-
-  static Future<void> _handleTestConnection(
+  static Future<void> handleTestConnection(
     BuildContext context, {
     required SyncProtocol protocol,
     required Map<String, dynamic> config,
@@ -119,28 +98,5 @@ class SyncTestHelper {
         ),
       );
     }
-  }
-
-  static Widget buildConfigFormWithTest({
-    required Widget configForm,
-    required SyncProtocol protocol,
-    required Map<String, dynamic> Function() getConfig,
-    VoidCallback? onTestSuccess,
-  }) {
-    return Column(
-      children: [
-        configForm,
-        const SizedBox(height: 16),
-        buildTestConnectionButton(
-          protocol: protocol,
-          config: getConfig(),
-          onTestComplete: (success, message) {
-            if (success) {
-              onTestSuccess?.call();
-            }
-          },
-        ),
-      ],
-    );
   }
 }

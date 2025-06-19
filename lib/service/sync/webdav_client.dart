@@ -44,6 +44,7 @@ class WebdavClient extends SyncClientBase {
     await _client.mkdir(path);
   }
 
+  @override
   Future<bool> isExist(String path) async {
     return (await readProps(path)) != null;
   }
