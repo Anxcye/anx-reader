@@ -232,6 +232,7 @@ class SyncProcessor {
   }
 
   Future<void> syncFiles() async {
+    AnxLog.info('Sync: syncFiles');
     List<String> currentBooks = await getCurrentBooks();
     List<String> currentCover = await getCurrentCover();
 

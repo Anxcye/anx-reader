@@ -75,13 +75,6 @@ class Sync extends _$Sync {
       AnxLog.severe('No sync client configured');
       return;
     }
-    
-    try {
-      await processor.initializeSync();
-    } catch (e) {
-      AnxLog.severe('Sync connection failed, ping failed\n${e.toString()}');
-      return;
-    }
   }
 
   Future<void> createAnxDir() async {
@@ -99,15 +92,15 @@ class Sync extends _$Sync {
       return;
     }
 
-    if (!(await processor.shouldSync())) {
-      return;
-    }
-
     // Test ping and initialize
     try {
       await processor.initializeSync();
     } catch (e) {
       AnxLog.severe('Sync connection failed, ping failed2\n${e.toString()}');
+      return;
+    }
+
+    if (!(await processor.shouldSync())) {
       return;
     }
 
@@ -181,6 +174,7 @@ class Sync extends _$Sync {
     if (processor != null) {
       await processor.syncFiles();
     }
+    ref.read(syncStatusProvider.notifier).refresh();
   }
 
   Future<void> syncDatabase(SyncDirection direction) async {
@@ -207,6 +201,7 @@ class Sync extends _$Sync {
 
     final client = _syncClient;
     if (client != null) {
+      ref.read(syncStatusProvider.notifier).addUploading(remotePath);
       await client.uploadFile(
         localPath,
         remotePath,
@@ -219,6 +214,7 @@ class Sync extends _$Sync {
           ));
         },
       );
+      ref.read(syncStatusProvider.notifier).removeUploading(remotePath);
     }
 
     changeState(state.copyWith(isSyncing: false));
@@ -232,6 +228,7 @@ class Sync extends _$Sync {
 
     final client = _syncClient;
     if (client != null) {
+      ref.read(syncStatusProvider.notifier).addDownloading(remotePath);
       await client.downloadFile(
         remotePath,
         localPath,
@@ -243,6 +240,7 @@ class Sync extends _$Sync {
           ));
         },
       );
+      ref.read(syncStatusProvider.notifier).removeDownloading(remotePath);
     }
 
     changeState(state.copyWith(isSyncing: false));
