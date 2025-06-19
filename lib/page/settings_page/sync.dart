@@ -5,6 +5,7 @@ import 'package:anx_reader/enums/sync_protocol.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/main.dart';
 import 'package:anx_reader/service/iap_service.dart';
+import 'package:anx_reader/service/sync/sync_client_factory.dart';
 import 'package:anx_reader/utils/env_var.dart';
 import 'package:anx_reader/utils/save_file_to_download.dart';
 import 'package:anx_reader/utils/get_path/get_temp_dir.dart';
@@ -48,7 +49,8 @@ class _SyncSettingState extends ConsumerState<SyncSetting> {
             SettingsTile.navigation(
                 title: Text(L10n.of(context).settings_sync_webdav),
                 leading: const Icon(Icons.cloud),
-                value: Text(Prefs().getSyncInfo(SyncProtocol.webdav)['url'] ?? 'Not set'),
+                value: Text(Prefs().getSyncInfo(SyncProtocol.webdav)['url'] ??
+                    'Not set'),
                 // enabled: Prefs().webdavStatus,
                 onPressed: (context) async {
                   showWebdavDialog(context);
@@ -146,7 +148,8 @@ class _SyncSettingState extends ConsumerState<SyncSetting> {
 
       if (filePath != null) {
         AnxLog.info('exportData: Saved to: $filePath');
-        AnxToast.show(L10n.of(navigatorKey.currentContext!).export_to(filePath));
+        AnxToast.show(
+            L10n.of(navigatorKey.currentContext!).export_to(filePath));
       } else {
         AnxLog.info('exportData: Cancelled');
         AnxToast.show(L10n.of(navigatorKey.currentContext!).common_canceled);
@@ -170,14 +173,16 @@ class _SyncSettingState extends ConsumerState<SyncSetting> {
     String? filePath = result.files.single.path;
     if (filePath == null) {
       AnxLog.info('importData: cannot get file path');
-      AnxToast.show(L10n.of(navigatorKey.currentContext!).import_cannot_get_file_path);
+      AnxToast.show(
+          L10n.of(navigatorKey.currentContext!).import_cannot_get_file_path);
       return;
     }
 
     File zipFile = File(filePath);
     if (!await zipFile.exists()) {
       AnxLog.info('importData: zip file not found');
-      AnxToast.show(L10n.of(navigatorKey.currentContext!).import_cannot_get_file_path);
+      AnxToast.show(
+          L10n.of(navigatorKey.currentContext!).import_cannot_get_file_path);
       return;
     }
     _showDataDialog(L10n.of(navigatorKey.currentContext!).importing);
@@ -206,7 +211,6 @@ class _SyncSettingState extends ConsumerState<SyncSetting> {
       _copyDirectorySync(Directory('$extractPath${pathSeparator}bgimg'),
           getBgimgDir(path: docPath));
 
-
       DBHelper.close();
       _copyDirectorySync(Directory('$extractPath${pathSeparator}databases'),
           await getAnxDataBasesDir());
@@ -222,10 +226,12 @@ class _SyncSettingState extends ConsumerState<SyncSetting> {
       }
 
       AnxLog.info('importData: import success');
-      AnxToast.show(L10n.of(navigatorKey.currentContext!).import_success_restart_app);
+      AnxToast.show(
+          L10n.of(navigatorKey.currentContext!).import_success_restart_app);
     } catch (e) {
       AnxLog.info('importData: error while unzipping or copying files: $e');
-      AnxToast.show(L10n.of(navigatorKey.currentContext!).import_failed(e.toString()));
+      AnxToast.show(
+          L10n.of(navigatorKey.currentContext!).import_failed(e.toString()));
     } finally {
       SmartDialog.dismiss();
       await Directory(extractPath).delete(recursive: true);
@@ -354,20 +360,27 @@ void showWebdavDialog(BuildContext context) {
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-                  SyncTestHelper.buildTestConnectionButton(
-                    protocol: SyncProtocol.webdav ,
-                    config: {
-                      'url': webdavUrlController.text.trim(),
-                      'username': webdavUsernameController.text,
-                      'password': webdavPasswordController.text,
-                    }
-                  ),
+              TextButton.icon(
+                onPressed: () => SyncTestHelper.handleTestConnection(
+                  context,
+                  protocol: SyncProtocol.webdav,
+                  config: {
+                    'url': webdavUrlController.text.trim(),
+                    'username': webdavUsernameController.text,
+                    'password': webdavPasswordController.text,
+                  },
+                ),
+                icon: const Icon(Icons.wifi_find),
+                label:
+                    Text(L10n.of(context).settings_sync_webdav_test_connection),
+              ),
               TextButton(
                 onPressed: () {
                   webdavInfo['url'] = webdavUrlController.text.trim();
                   webdavInfo['username'] = webdavUsernameController.text;
                   webdavInfo['password'] = webdavPasswordController.text;
                   Prefs().setSyncInfo(SyncProtocol.webdav, webdavInfo);
+                  SyncClientFactory.initializeCurrentClient();
                   Navigator.pop(context);
                 },
                 child: Text(L10n.of(context).common_save),

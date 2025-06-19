@@ -5,7 +5,7 @@ import 'package:anx_reader/enums/sync_direction.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/main.dart';
 import 'package:anx_reader/models/book.dart';
-import 'package:anx_reader/service/sync/sync_client_base.dart';
+import 'package:anx_reader/service/sync/sync_client_factory.dart';
 import 'package:anx_reader/utils/get_path/get_base_path.dart';
 import 'package:anx_reader/utils/get_path/get_temp_dir.dart';
 import 'package:anx_reader/utils/get_path/databases_path.dart';
@@ -19,22 +19,30 @@ import 'package:path/path.dart';
 import 'package:webdav_client/webdav_client.dart';
 
 class SyncProcessor {
-  final SyncClientBase _syncClient;
   final void Function(
           String fileName, SyncDirection direction, int count, int total)?
       onProgress;
 
   SyncProcessor({
-    required SyncClientBase syncClient,
     this.onProgress,
-  }) : _syncClient = syncClient;
+  });
+
+  get _syncClient {
+    if (SyncClientFactory.currentClient == null) {
+      SyncClientFactory.initializeCurrentClient();
+    }
+    return SyncClientFactory.currentClient;
+  }
 
   Future<void> initializeSync() async {
     try {
       await _syncClient.ping();
       await _createAnxDir();
     } catch (e) {
-      AnxLog.severe('${_syncClient.protocolName} connection failed, ping failed\n${e.toString()}');
+      AnxLog.severe(
+          '${_syncClient.protocolName} connection failed, ping failed\n${e.toString()}');
+      AnxToast.show(
+          '${_syncClient.protocolName} connection failed, ping failed\n${e.toString()}');
       rethrow;
     }
     AnxLog.info('${_syncClient.protocolName}: init');
@@ -211,8 +219,7 @@ class SyncProcessor {
       }
 
       // Update last sync time
-      File? newRemoteDb =
-          await _syncClient.readProps('anx/$remoteDbFileName');
+      File? newRemoteDb = await _syncClient.readProps('anx/$remoteDbFileName');
       if (newRemoteDb != null) {
         Prefs().lastUploadBookDate = newRemoteDb.mTime;
       }
@@ -234,8 +241,7 @@ class SyncProcessor {
     remoteBooksName = List.generate(
         remoteBooks.length, (index) => 'file/${remoteBooks[index].name!}');
 
-    List<File> remoteCovers =
-        await _syncClient.safeReadDir('/anx/data/cover');
+    List<File> remoteCovers = await _syncClient.safeReadDir('/anx/data/cover');
     remoteCoversName = List.generate(
         remoteCovers.length, (index) => 'cover/${remoteCovers[index].name!}');
 

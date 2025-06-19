@@ -56,15 +56,12 @@ class Sync extends _$Sync {
   }
 
   SyncProcessor? get _syncProcessor {
-    if (_syncClient == null) {
-      SyncClientFactory.initializeCurrentClient();
-    }
+
     
     final client = _syncClient;
     if (client == null) return null;
     
     return _syncProcessorInstance ??= SyncProcessor(
-      syncClient: client,
       onProgress: (fileName, direction, count, total) {
         changeState(state.copyWith(
           direction: direction,
