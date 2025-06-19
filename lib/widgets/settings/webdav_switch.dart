@@ -1,12 +1,13 @@
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
-import 'package:anx_reader/providers/anx_webdav.dart';
+import 'package:anx_reader/providers/sync.dart';
 import 'package:anx_reader/utils/webdav/test_webdav.dart';
 import 'package:anx_reader/widgets/settings/settings_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-AbstractSettingsTile webdavSwitch(BuildContext context, Function setState, WidgetRef ref) {
+AbstractSettingsTile webdavSwitch(
+    BuildContext context, Function setState, WidgetRef ref) {
   return SettingsTile.switchTile(
     leading: const Icon(Icons.cached),
     initialValue: Prefs().webdavStatus,
@@ -21,7 +22,7 @@ AbstractSettingsTile webdavSwitch(BuildContext context, Function setState, Widge
             Prefs().saveWebdavStatus(!value);
           });
         } else {
-          AnxWebdav().init();
+          Sync().init();
           chooseDirection(ref);
         }
       }

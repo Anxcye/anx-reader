@@ -6,7 +6,7 @@ import 'package:anx_reader/enums/sync_direction.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/main.dart';
 import 'package:anx_reader/models/sync_state_model.dart';
-import 'package:anx_reader/providers/anx_webdav.dart';
+import 'package:anx_reader/providers/sync.dart';
 import 'package:anx_reader/providers/sync_status.dart';
 import 'package:anx_reader/utils/get_path/databases_path.dart';
 import 'package:anx_reader/utils/toast/common.dart';
@@ -35,7 +35,7 @@ class SyncStatusBottomSheet extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final syncState = ref.watch(anxWebdavProvider);
+    final syncState = ref.watch(syncProvider);
     final theme = Theme.of(context);
     final l10n = L10n.of(context);
 
@@ -318,7 +318,7 @@ class SyncStatusBottomSheet extends ConsumerWidget {
                     [];
                 if (remoteOnlyIds.isNotEmpty) {
                   ref
-                      .read(anxWebdavProvider.notifier)
+                      .read(syncProvider.notifier)
                       .downloadMultipleBooks(remoteOnlyIds);
                   AnxToast.show('');
                 } else {
@@ -332,12 +332,12 @@ class SyncStatusBottomSheet extends ConsumerWidget {
                 icon: const Icon(Icons.sync),
                 label: Text(L10n.of(context).sync_now),
                 onPressed: () {
-                  final isSyncing = ref.watch(anxWebdavProvider).isSyncing;
+                  final isSyncing = ref.watch(syncProvider).isSyncing;
                   if (isSyncing) {
                     AnxToast.show(l10n.webdav_syncing);
                   } else {
                     ref
-                        .read(anxWebdavProvider.notifier)
+                        .read(syncProvider.notifier)
                         .syncData(SyncDirection.both, ref);
                   }
                 },

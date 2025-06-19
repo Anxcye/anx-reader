@@ -14,7 +14,7 @@ import 'package:anx_reader/utils/env_var.dart';
 import 'package:anx_reader/utils/error/common.dart';
 import 'package:anx_reader/utils/get_path/get_base_path.dart';
 import 'package:anx_reader/utils/log/common.dart';
-import 'package:anx_reader/providers/anx_webdav.dart';
+import 'package:anx_reader/providers/sync.dart';
 import 'package:audio_service/audio_service.dart';
 import 'package:chinese_font_library/chinese_font_library.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
@@ -136,9 +136,7 @@ class _MyAppState extends ConsumerState<MyApp>
     if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.hidden) {
       if (Prefs().webdavStatus) {
-        ref
-            .read(anxWebdavProvider.notifier)
-            .syncData(SyncDirection.both, ref);
+        ref.read(syncProvider.notifier).syncData(SyncDirection.both, ref);
       }
     } else if (state == AppLifecycleState.resumed) {
       if (Platform.isIOS) {

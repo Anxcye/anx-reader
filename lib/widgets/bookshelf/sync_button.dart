@@ -1,4 +1,4 @@
-import 'package:anx_reader/providers/anx_webdav.dart';
+import 'package:anx_reader/providers/sync.dart';
 import 'package:anx_reader/widgets/bookshelf/sync_status_bottom_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -31,7 +31,7 @@ class _SyncButtonState extends ConsumerState<SyncButton>
 
   @override
   Widget build(BuildContext context) {
-    final syncState = ref.watch(anxWebdavProvider);
+    final syncState = ref.watch(syncProvider);
 
     if (syncState.isSyncing) {
       _syncAnimationController?.repeat();
