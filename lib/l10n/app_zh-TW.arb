@@ -430,5 +430,19 @@
   "testRefused": "無法連接到服務器，請檢查網絡和服務器狀態",
   "testSsl": "SSL證書驗證失敗，請檢查HTTPS配置",
   "testDnd": "DNS分辨率失敗，請檢查域名是否正確",
-  "testOther": "連接測試失敗，請檢查配置和網絡"
+  "testOther": "連接測試失敗，請檢查配置和網絡",
+  "database_backup_management": "數據庫備份管理",
+  "available_backups": "可用備份：",
+  "no_backups_available": "沒有可用的備份",
+  "restore": "恢復",
+  "confirmRestore": "確認還原",
+  "restoreWarning": "此操作將用備份文件替換當前數據庫。當前的未融合數據可能會丟失。你想繼續嗎？",
+  "restoreSuccess": "數據庫成功恢復",
+  "downloadFailed": "下載失敗",
+  "downloadFailedContent": "無法從服務器下載數據庫文件。請檢查網絡連接和服務器狀態。",
+  "syncValidationFailed": "數據驗證失敗",
+  "syncValidationFailedContent": "下載的數據庫文件驗證失敗，可能損壞或空白。保留了本地數據。",
+  "replacementFailed": "替換失敗",
+  "replacementFailedContent": "替換後的數據庫驗證失敗，自動恢復為上一個版本。您的數據是安全的。",
+  "syncUnknownError": "同步錯誤"
 }

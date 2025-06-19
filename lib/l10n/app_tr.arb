@@ -430,5 +430,19 @@
   "testRefused": "Sunucuya bağlanılamıyor, lütfen ağ ve sunucu durumunu kontrol edin",
   "testSsl": "SSL sertifika doğrulaması başarısız oldu, lütfen https yapılandırmasını kontrol edin",
   "testDnd": "DNS çözünürlüğü başarısız oldu, lütfen etki alanı adının doğru olup olmadığını kontrol edin",
-  "testOther": "Bağlantı testi başarısız oldu, lütfen yapılandırmayı ve ağı kontrol edin"
+  "testOther": "Bağlantı testi başarısız oldu, lütfen yapılandırmayı ve ağı kontrol edin",
+  "database_backup_management": "Veritabanı yedekleme yönetimi",
+  "available_backups": "Mevcut Yedeklemeler:",
+  "no_backups_available": "Yedekleme yok",
+  "restore": "Eski haline getirmek",
+  "confirmRestore": "Geri yüklemeyi onaylayın",
+  "restoreWarning": "Bu işlem geçerli veritabanını yedekleme dosyasıyla değiştirecektir. ",
+  "restoreSuccess": "Veritabanı başarıyla geri yüklendi",
+  "downloadFailed": "İndir başarısız",
+  "downloadFailedContent": "Veritabanı dosyasını sunucudan indiremiyor. ",
+  "syncValidationFailed": "Veri doğrulaması başarısız oldu",
+  "syncValidationFailedContent": "İndirilen veritabanı dosyası doğrulaması başarısız, muhtemelen bozuk veya boş. ",
+  "replacementFailed": "Yedek başarısız oldu",
+  "replacementFailedContent": "Veritabanı doğrulaması değiştirildikten sonra başarısız oldu, otomatik olarak önceki sürüme geri kazanıldı. ",
+  "syncUnknownError": "Senkronizasyon Hatası"
 }

@@ -430,5 +430,19 @@
   "testRefused": "无法连接到服务器，请检查网络和服务器状态",
   "testSsl": "SSL证书验证失败，请检查HTTPS配置",
   "testDnd": "DNS分辨率失败，请检查域名是否正确",
-  "testOther": "连接测试失败，请检查配置和网络"
+  "testOther": "连接测试失败，请检查配置和网络",
+  "database_backup_management": "数据库备份管理",
+  "available_backups": "可用备份：",
+  "no_backups_available": "没有可用的备份",
+  "restore": "恢复",
+  "confirmRestore": "确认还原",
+  "restoreWarning": "此操作将用备份文件替换当前数据库。",
+  "restoreSuccess": "数据库成功恢复",
+  "downloadFailed": "下载失败",
+  "downloadFailedContent": "无法从服务器下载数据库文件。",
+  "syncValidationFailed": "数据验证失败",
+  "syncValidationFailedContent": "下载的数据库文件验证失败，可能损坏或空白。",
+  "replacementFailed": "替换失败",
+  "replacementFailedContent": "替换后的数据库验证失败，自动恢复为上一个版本。",
+  "syncUnknownError": "同步错误"
 }
