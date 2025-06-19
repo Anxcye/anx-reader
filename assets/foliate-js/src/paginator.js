@@ -525,7 +525,6 @@ export class Paginator extends HTMLElement {
 
     this.#observer.observe(this.#container)
     this.#container.addEventListener('scroll', debounce(() => {
-      console.log('scrolled', this.scrolled, this.#justAnchored)
        if (this.scrolled) {
         if (this.#justAnchored) this.#justAnchored = false
         else {
@@ -1146,7 +1145,6 @@ export class Paginator extends HTMLElement {
     // if (this.#locked) return
     this.#locked = true
     const prev = dir === -1
-    console.log(`Turning page ${prev ? 'back' : 'forward'}...`,distance)
     const shouldGo = await (prev ? this.#scrollPrev(distance) : this.#scrollNext(distance))
     
     if (shouldGo) await this.#goTo({
