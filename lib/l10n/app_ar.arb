@@ -458,5 +458,8 @@
   "onboarding_next": "التالي",
   "onboarding_back": "السابق",
   "onboarding_done": "البدء",
-  "onboarding_skip": "تخطي"
+  "onboarding_skip": "تخطي",
+  "customizeYourExperience": "تخصيص تجربتك",
+  "moreDisplayOptionsTip": "المزيد من خيارات العرض المتاحة في الإعدادات → المظهر",
+  "optimizedForEInkDisplays": "مُحسّن لشاشات الإبلاغ الإلكترونية"
 }

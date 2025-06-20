@@ -4,8 +4,6 @@ import 'package:introduction_screen/introduction_screen.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/utils/log/common.dart';
 import 'package:anx_reader/config/shared_preference_provider.dart';
-import 'package:anx_reader/widgets/settings/theme_mode.dart';
-import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:provider/provider.dart';
 
 /// Onboarding screen for first-time users
@@ -184,29 +182,62 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       final currentLanguageTag = currentLanguageCode +
           (currentCountryCode.isNotEmpty ? '-$currentCountryCode' : '');
 
-      return DropdownButton<String>(
-        isExpanded: true,
-        underline: const SizedBox(),
-        value: languageOptions
-                .any((option) => option.values.first == currentLanguageTag)
-            ? currentLanguageTag
-            : 'system',
-        onChanged: (String? newValue) {
-          if (newValue != null) {
-            setState(() {
-              Prefs().saveLocaleToPrefs(newValue);
-            });
-          }
-        },
-        items: languageOptions
-            .map<DropdownMenuItem<String>>((Map<String, String> option) {
-          final displayName = option.keys.first;
-          final languageCode = option.values.first;
-          return DropdownMenuItem<String>(
-            value: languageCode,
-            child: Text(displayName),
-          );
-        }).toList(),
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.language,
+                color: Theme.of(context).colorScheme.primary,
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                L10n.of(context).settings_appearance_language,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: Theme.of(context).colorScheme.outline.withAlpha(100),
+              ),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: DropdownButton<String>(
+              isExpanded: true,
+              underline: const SizedBox(),
+              value: languageOptions.any(
+                      (option) => option.values.first == currentLanguageTag)
+                  ? currentLanguageTag
+                  : 'system',
+              onChanged: (String? newValue) {
+                if (newValue != null) {
+                  setState(() {
+                    Prefs().saveLocaleToPrefs(newValue);
+                  });
+                }
+              },
+              items: languageOptions
+                  .map<DropdownMenuItem<String>>((Map<String, String> option) {
+                final displayName = option.keys.first;
+                final languageCode = option.values.first;
+                return DropdownMenuItem<String>(
+                  value: languageCode,
+                  child: Text(displayName),
+                );
+              }).toList(),
+            ),
+          ),
+        ],
       );
     }
 
@@ -231,67 +262,82 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            L10n.of(context).settings_appearance_themeColor,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
+          Row(
+            children: [
+              Icon(
+                Icons.palette,
+                color: Theme.of(context).colorScheme.primary,
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                L10n.of(context).settings_appearance_themeColor,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 8),
-          SizedBox(
-            height: 50,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: themeColors.length,
-              itemBuilder: (context, index) {
-                final color = themeColors[index];
-                final isSelected =
-                    color.toARGB32() == currentThemeColor.toARGB32();
-
-                return GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      Prefs().saveThemeToPrefs(color.toARGB32());
-                    });
-                  },
-                  child: Container(
-                    width: 50,
-                    height: 50,
-                    margin: const EdgeInsets.only(right: 12),
-                    decoration: BoxDecoration(
-                      color: color,
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: isSelected
-                            ? Theme.of(context).colorScheme.onSurface
-                            : Colors.transparent,
-                        width: 3,
-                      ),
-                      boxShadow: isSelected
-                          ? [
-                              BoxShadow(
-                                color: color.withAlpha(100),
-                                blurRadius: 8,
-                                spreadRadius: 2,
-                              ),
-                            ]
-                          : null,
-                    ),
-                    child: isSelected
-                        ? Icon(
-                            Icons.check,
-                            color: color.computeLuminance() > 0.5
-                                ? Colors.black
-                                : Colors.white,
-                            size: 24,
-                          )
-                        : null,
-                  ),
-                );
-              },
+          const SizedBox(height: 12),
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 6,
+              mainAxisSpacing: 8,
+              crossAxisSpacing: 8,
+              childAspectRatio: 1,
             ),
+            itemCount: themeColors.length,
+            itemBuilder: (context, index) {
+              final color = themeColors[index];
+              final isSelected =
+                  color.toARGB32() == currentThemeColor.toARGB32();
+
+              return GestureDetector(
+                onTap: () {
+                  setState(() {
+                    Prefs().saveThemeToPrefs(color.toARGB32());
+                  });
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: color,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: isSelected
+                          ? Theme.of(context).colorScheme.onSurface
+                          : Colors.transparent,
+                      width: 2,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withAlpha(30),
+                        blurRadius: 2,
+                        offset: const Offset(0, 1),
+                      ),
+                      if (isSelected)
+                        BoxShadow(
+                          color: color.withAlpha(100),
+                          blurRadius: 8,
+                          spreadRadius: 1,
+                        ),
+                    ],
+                  ),
+                  child: isSelected
+                      ? Icon(
+                          Icons.check,
+                          color: color.computeLuminance() > 0.5
+                              ? Colors.black
+                              : Colors.white,
+                          size: 20,
+                        )
+                      : null,
+                ),
+              );
+            },
           ),
         ],
       );
@@ -299,41 +345,150 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
     return Consumer<Prefs>(
       builder: (context, prefs, child) {
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const ChangeThemeMode(),
-            buildLanguageSelector(),
-            const SizedBox(height: 16),
-            ListTile(
-              title: Text(L10n.of(context).e_ink_mode),
-              leading: const Icon(Icons.contrast),
-              contentPadding: const EdgeInsets.all(0),
-              trailing: Switch(
-                value: prefs.eInkMode,
-                onChanged: (value) {
-                  setState(() {
-                    if (value) {
-                      prefs.saveThemeModeToPrefs('light');
-                    }
-                    prefs.eInkMode = value;
-                  });
-                },
+        return SingleChildScrollView(
+          child: Column(
+            children: [
+              Column(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .primaryContainer
+                          .withAlpha(50),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.palette_outlined,
+                      size: 48,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    L10n.of(context).settings_appearance,
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w700,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    L10n.of(context).customizeYourExperience,
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withAlpha(150),
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(height: 16),
-            buildThemeColorSelector(),
-            const SizedBox(height: 16),
-            Text(
-              'You can configure more display options in Settings → Appearance',
-              style: TextStyle(
-                fontSize: 14.0,
-                color: Theme.of(context).colorScheme.onSurface.withAlpha(150),
-                fontStyle: FontStyle.italic,
+
+              const SizedBox(height: 24),
+
+              buildLanguageSelector(),
+
+              const SizedBox(height: 12),
+
+              Row(
+                children: [
+                  Icon(
+                    Icons.contrast,
+                    color: Theme.of(context).colorScheme.primary,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          L10n.of(context).e_ink_mode,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
+                        ),
+                        Text(
+                          L10n.of(context).optimizedForEInkDisplays,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withAlpha(150),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Switch(
+                    value: prefs.eInkMode,
+                    onChanged: (value) {
+                      setState(() {
+                        if (value) {
+                          prefs.saveThemeModeToPrefs('light');
+                        }
+                        prefs.eInkMode = value;
+                      });
+                    },
+                  ),
+                ],
               ),
-              textAlign: TextAlign.center,
-            ),
-          ],
+
+              const SizedBox(height: 24),
+
+              // 主题色选择
+              buildThemeColorSelector(),
+
+              const SizedBox(height: 24),
+
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .surfaceContainerHighest
+                      .withAlpha(50),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: Theme.of(context).colorScheme.outline.withAlpha(50),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.info_outline,
+                      color: Theme.of(context).colorScheme.primary,
+                      size: 18,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        L10n.of(context).moreDisplayOptionsTip,
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withAlpha(150),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 16),
+            ],
+          ),
         );
       },
     );
