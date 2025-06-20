@@ -444,5 +444,19 @@
   "syncValidationFailedContent": "İndirilen veritabanı dosyası doğrulaması başarısız, muhtemelen bozuk veya boş. ",
   "replacementFailed": "Yedek başarısız oldu",
   "replacementFailedContent": "Veritabanı doğrulaması değiştirildikten sonra başarısız oldu, otomatik olarak önceki sürüme geri kazanıldı. ",
-  "syncUnknownError": "Senkronizasyon Hatası"
+  "syncUnknownError": "Senkronizasyon Hatası",
+  "onboarding_welcome_title": "Anx Reader'a Hoş Geldiniz",
+  "onboarding_welcome_body": "AI entegrasyonu ve çapraz platform senkronizasyon yetenekleri ile güçlü bir e-kitap okuyucusu.",
+  "onboarding_appearance_title": "Deneyiminizi Özelleştirin",
+  "onboarding_appearance_body": "En iyi okuma deneyimi için tercih ettiğiniz dili, tema renklerini ve e-mürekkep modunu seçin. Ayarlar → Görünüm bölümünde daha fazla görüntü seçeneği yapılandırabilirsiniz.",
+  "onboarding_sync_title": "Çapraz Platform Senkronizasyonu",
+  "onboarding_sync_body": "WebDAV kullanarak kitaplarınızı, okuma ilerlemenizi ve notlarınızı tüm cihazlarınızda senkronize edin. Başlamak için Ayarlar → Senkronizasyon bölümünde senkronizasyonu ayarlayın.",
+  "onboarding_ai_title": "AI Destekli Özellikler",
+  "onboarding_ai_body": "AI destekli çeviri, içerik analizi ve sohbet özellikleri ile okuma deneyiminizi geliştirin. Ayarlar → AI bölümünde tercih ettiğiniz AI sağlayıcısını yapılandırın.",
+  "onboarding_complete_title": "Okumaya Hazır!",
+  "onboarding_complete_body": "Her şey hazır! Kütüphanenize kitap eklemeye başlayın ve premium okuma deneyiminin keyfini çıkarın.",
+  "onboarding_next": "İleri",
+  "onboarding_back": "Geri",
+  "onboarding_done": "Başla",
+  "onboarding_skip": "Atla"
 }

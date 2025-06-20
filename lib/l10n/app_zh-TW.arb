@@ -444,5 +444,19 @@
   "syncValidationFailedContent": "下載的數據庫文件驗證失敗，可能損壞或空白。保留了本地數據。",
   "replacementFailed": "替換失敗",
   "replacementFailedContent": "替換後的數據庫驗證失敗，自動恢復為上一個版本。您的數據是安全的。",
-  "syncUnknownError": "同步錯誤"
+  "syncUnknownError": "同步錯誤",
+  "onboarding_welcome_title": "歡迎使用 Anx Reader",
+  "onboarding_welcome_body": "一款功能強大的電子書閱讀器，整合了 AI 功能和跨平台同步能力。",
+  "onboarding_appearance_title": "自訂您的體驗",
+  "onboarding_appearance_body": "選擇您偏好的語言、主題顏色和電子墨水模式，獲得最佳閱讀體驗。您可以在設定 → 外觀中設定更多顯示選項。",
+  "onboarding_sync_title": "跨平台同步",
+  "onboarding_sync_body": "使用 WebDAV 在所有裝置上同步您的書籍、閱讀進度和筆記。在設定 → 同步中設定同步功能即可開始使用。",
+  "onboarding_ai_title": "AI 智慧功能",
+  "onboarding_ai_body": "透過 AI 驅動的翻譯、內容分析和聊天功能增強您的閱讀體驗。在設定 → AI 中設定您偏好的 AI 服務提供商。",
+  "onboarding_complete_title": "準備開始閱讀！",
+  "onboarding_complete_body": "一切就緒！開始向您的書庫新增書籍，享受優質的閱讀體驗吧。",
+  "onboarding_next": "下一步",
+  "onboarding_back": "返回",
+  "onboarding_done": "開始使用",
+  "onboarding_skip": "跳過"
 }

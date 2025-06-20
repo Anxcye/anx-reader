@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:anx_reader/dao/database.dart';
 import 'package:anx_reader/enums/sync_direction.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
+import 'package:anx_reader/page/app_initialization_screen.dart';
 import 'package:anx_reader/page/home_page/bookshelf_page.dart';
 import 'package:anx_reader/page/home_page/notes_page.dart';
 import 'package:anx_reader/page/home_page/settings_page.dart';
@@ -94,6 +95,7 @@ class _HomePageState extends ConsumerState<HomePage> {
   Future<void> initAnx() async {
     AnxToast.init(context);
     checkUpdate(false);
+    InitializationCheck.check();
     if (Prefs().webdavStatus) {
       await Sync().init();
       await Sync().syncData(SyncDirection.both, ref);
@@ -149,12 +151,6 @@ class _HomePageState extends ConsumerState<HomePage> {
         _expanded ??= constraints.maxWidth > 1000;
         if (constraints.maxWidth > 600) {
           return Scaffold(
-            // floatingActionButton: FloatingActionButton(
-            //   onPressed: () {
-            //     checkUpdate(false);
-            //   },
-            //   child: const Icon(Icons.sync),
-            // ),
             body: Row(
               children: [
                 NavigationRail(

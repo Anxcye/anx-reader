@@ -444,5 +444,19 @@
   "syncValidationFailedContent": "Downloaded database file validation failed, possibly corrupted or empty. Local data has been preserved.",
   "replacementFailed": "Replacement Failed",
   "replacementFailedContent": "Database validation failed after replacement, automatically recovered to previous version. Your data is safe.",
-  "syncUnknownError": "Sync Error"
+  "syncUnknownError": "Sync Error",
+  "onboarding_welcome_title": "Welcome to Anx Reader",
+  "onboarding_welcome_body": "A powerful e-book reader with AI integration and cross-platform sync capabilities.",
+  "onboarding_appearance_title": "Customize Your Experience",
+  "onboarding_appearance_body": "Choose your preferred language, theme colors, and e-ink mode for the best reading experience. You can configure more display options in Settings → Appearance.",
+  "onboarding_sync_title": "Cross-Platform Sync",
+  "onboarding_sync_body": "Sync your books, reading progress, and notes across all your devices using WebDAV. Set up sync in Settings → Sync to get started.",
+  "onboarding_ai_title": "AI-Powered Features",
+  "onboarding_ai_body": "Enhance your reading with AI-powered translation, content analysis, and chat features. Configure your preferred AI provider in Settings → AI.",
+  "onboarding_complete_title": "Ready to Read!",
+  "onboarding_complete_body": "You're all set! Start adding books to your library and enjoy a premium reading experience.",
+  "onboarding_next": "Next",
+  "onboarding_back": "Back",
+  "onboarding_done": "Get Started",
+  "onboarding_skip": "Skip"
 }
