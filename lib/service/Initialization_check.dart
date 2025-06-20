@@ -6,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:anx_reader/page/onboarding_screen.dart';
 import 'package:anx_reader/page/changelog_screen.dart';
 import 'package:anx_reader/utils/log/common.dart';
+import 'package:flutter/material.dart';
 
 class InitializationCheck {
   static String? _lastVersion;
@@ -55,10 +56,14 @@ class InitializationCheck {
     // wait 0.8 seconds to ensure the app is ready
     Future.delayed(const Duration(milliseconds: 800), () {
       showCupertinoSheet(
-          context: navigatorKey.currentContext!,
-          pageBuilder: (context) => OnboardingScreen(
-                onComplete: () {},
-              ));
+        context: navigatorKey.currentContext!,
+        pageBuilder: (context) => Scaffold(
+
+          body: OnboardingScreen(
+            onComplete: () {},
+          ),
+        ),
+      );
     });
   }
 
