@@ -796,4 +796,17 @@ class Prefs extends ChangeNotifier {
     prefs.setDouble('pageFooterMargin', margin);
     notifyListeners();
   }
+
+  String? get lastAppVersion {
+    return prefs.getString('lastAppVersion');
+  }
+
+  set lastAppVersion(String? version) {
+    if (version != null) {
+      prefs.setString('lastAppVersion', version);
+    } else {
+      prefs.remove('lastAppVersion');
+    }
+    notifyListeners();
+  }
 }
