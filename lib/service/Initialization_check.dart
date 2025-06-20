@@ -30,7 +30,7 @@ class InitializationCheck {
     final result = await _checkVersion();
     if (result == VersionCheckType.firstLaunch) {
       _handleFirstLaunch();
-    } else if (result == VersionCheckType.updated) {
+    } else if (result != VersionCheckType.updated) {
       _handleUpdateAvailable();
     } else {
       _handleNormalStartup();
@@ -39,10 +39,10 @@ class InitializationCheck {
 
   static Future<VersionCheckType> _checkVersion() async {
     _lastVersion = Prefs().lastAppVersion;
+      _currentVersion = await getAppVersion();
     if (_lastVersion == null) {
       return VersionCheckType.firstLaunch;
     } else {
-      _currentVersion = await getAppVersion();
       if (lastVersion != currentVersion) {
         return VersionCheckType.updated;
       } else {
@@ -60,7 +60,10 @@ class InitializationCheck {
         pageBuilder: (context) => Scaffold(
 
           body: OnboardingScreen(
-            onComplete: () {},
+            onComplete: () async {
+              Prefs().lastAppVersion = await currentVersion;
+              Navigator.pop(navigatorKey.currentContext!);
+            },
           ),
         ),
       );
@@ -77,7 +80,10 @@ class InitializationCheck {
         pageBuilder: (context) => ChangelogScreen(
           lastVersion: lv,
           currentVersion: cv,
-          onComplete: () {},
+          onComplete: () {
+            Prefs().lastAppVersion = cv;
+            Navigator.pop(navigatorKey.currentContext!);
+          },
         ),
       );
     });
