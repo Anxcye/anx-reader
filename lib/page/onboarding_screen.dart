@@ -104,7 +104,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     return PageViewModel(
       title: L10n.of(context).onboarding_welcome_title,
       body: L10n.of(context).onboarding_welcome_body,
-      image: _buildImage('assets/icon/Anx-logo.png'),
+      image: _buildIconPage(Icons.book_outlined),
       decoration: _getPageDecoration(),
     );
   }
@@ -141,23 +141,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       body: L10n.of(context).onboarding_complete_body,
       image: _buildIconPage(Icons.check_circle_outline),
       decoration: _getPageDecoration(),
-    );
-  }
-
-  Widget _buildImage(String assetName) {
-    return SizedBox(
-      width: 120.0,
-      height: 120.0,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(60.0),
-        child: Image.asset(
-          assetName,
-          errorBuilder: (context, error, stackTrace) {
-            // Fallback to icon if image asset doesn't exist
-            return _buildIconPage(Icons.menu_book_outlined);
-          },
-        ),
-      ),
     );
   }
 
@@ -228,71 +211,89 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     }
 
     Widget buildThemeColorSelector() {
-      Future<void> showColorPickerDialog() async {
-        Color pickedColor = Prefs().themeColor;
+      final List<Color> themeColors = [
+        Colors.purple,
+        Colors.indigo,
+        Colors.blue,
+        Colors.cyan,
+        Colors.teal,
+        Colors.green,
+        Colors.lime,
+        Colors.amber,
+        Colors.orange,
+        Colors.deepOrange,
+        Colors.pink,
+        Colors.red,
+      ]..reversed.toList();
 
-        await showDialog<void>(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: Text(L10n.of(context).settings_appearance_themeColor),
-              content: SingleChildScrollView(
-                child: ColorPicker(
-                  pickerColor: pickedColor,
-                  onColorChanged: (color) {
-                    pickedColor = color;
-                  },
-                  enableAlpha: false,
-                  displayThumbColor: true,
-                  pickerAreaHeightPercent: 0.8,
-                ),
-              ),
-              actions: <Widget>[
-                TextButton(
-                  child: Text(L10n.of(context).common_cancel),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                ),
-                TextButton(
-                  child: Text(L10n.of(context).common_ok),
-                  onPressed: () {
+      final currentThemeColor = Prefs().themeColor;
+
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            L10n.of(context).settings_appearance_themeColor,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+          ),
+          const SizedBox(height: 8),
+          SizedBox(
+            height: 50,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: themeColors.length,
+              itemBuilder: (context, index) {
+                final color = themeColors[index];
+                final isSelected =
+                    color.toARGB32() == currentThemeColor.toARGB32();
+
+                return GestureDetector(
+                  onTap: () {
                     setState(() {
-                      Prefs().saveThemeToPrefs(pickedColor.toARGB32());
+                      Prefs().saveThemeToPrefs(color.toARGB32());
                     });
-                    Navigator.of(context).pop();
                   },
-                ),
-              ],
-            );
-          },
-        );
-      }
-
-      return GestureDetector(
-        onTap: () => showColorPickerDialog(),
-        child: Container(
-          height: 40,
-          width: double.infinity,
-          decoration: BoxDecoration(
-            color: Prefs().themeColor,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: Theme.of(context).colorScheme.outline.withAlpha(150),
+                  child: Container(
+                    width: 50,
+                    height: 50,
+                    margin: const EdgeInsets.only(right: 12),
+                    decoration: BoxDecoration(
+                      color: color,
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: isSelected
+                            ? Theme.of(context).colorScheme.onSurface
+                            : Colors.transparent,
+                        width: 3,
+                      ),
+                      boxShadow: isSelected
+                          ? [
+                              BoxShadow(
+                                color: color.withAlpha(100),
+                                blurRadius: 8,
+                                spreadRadius: 2,
+                              ),
+                            ]
+                          : null,
+                    ),
+                    child: isSelected
+                        ? Icon(
+                            Icons.check,
+                            color: color.computeLuminance() > 0.5
+                                ? Colors.black
+                                : Colors.white,
+                            size: 24,
+                          )
+                        : null,
+                  ),
+                );
+              },
             ),
           ),
-          child: Center(
-            child: Text(
-              'Tap to change',
-              style: TextStyle(
-                color: Prefs().themeColor.computeLuminance() > 0.5
-                    ? Colors.black
-                    : Colors.white,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-        ),
+        ],
       );
     }
 
@@ -302,14 +303,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             const ChangeThemeMode(),
-
             buildLanguageSelector(),
-
             const SizedBox(height: 16),
-
-
-
-
             ListTile(
               title: Text(L10n.of(context).e_ink_mode),
               leading: const Icon(Icons.contrast),
@@ -326,13 +321,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 },
               ),
             ),
-
             const SizedBox(height: 16),
-
             buildThemeColorSelector(),
-
             const SizedBox(height: 16),
-
             Text(
               'You can configure more display options in Settings → Appearance',
               style: TextStyle(
