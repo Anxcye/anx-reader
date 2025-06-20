@@ -461,5 +461,9 @@
   "onboarding_skip": "Atla",
   "customizeYourExperience": "Deneyiminizi Özelleştirin",
   "moreDisplayOptionsTip": "Ayarlarda daha fazla görüntü seçeneği mevcut → görünüm",
-  "optimizedForEInkDisplays": "E-mürekkep ekranları için optimize edilmiş"
+  "optimizedForEInkDisplays": "E-mürekkep ekranları için optimize edilmiş",
+  "common_updated": "Güncellendi!",
+  "update_from_version": "{version} sürümünden güncellendi",
+  "welcome_to_version": "{version} sürümüne hoş geldiniz",
+  "whats_new": "Yenilikler"
 }

@@ -269,6 +269,9 @@
   "about_check_for_updates": "檢查更新",
   "update_new_version": "新版本：",
   "update_current_version": "目前版本：",
+  "update_from_version": "從 {version} 更新",
+  "welcome_to_version": "歡迎使用 {version}",
+  "whats_new": "更新內容",
   "tts_volume": "音量",
   "tts_rate": "語速",
   "tts_pitch": "音調",
@@ -461,5 +464,6 @@
   "onboarding_skip": "跳過",
   "customizeYourExperience": "自定義您的經驗",
   "moreDisplayOptionsTip": "設置中可用的更多顯示選項→外觀",
-  "optimizedForEInkDisplays": "針對E-INK顯示優化"
+  "optimizedForEInkDisplays": "針對E-INK顯示優化",
+  "common_updated": "更新！"
 }

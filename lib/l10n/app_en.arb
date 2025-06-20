@@ -461,5 +461,9 @@
   "onboarding_skip": "Skip",
   "customizeYourExperience": "Customize your experience",
   "moreDisplayOptionsTip": "More display options available in Settings → Appearance",
-  "optimizedForEInkDisplays": "Optimized for e-ink displays"
+  "optimizedForEInkDisplays": "Optimized for e-ink displays",
+  "common_updated": "Updated!",
+  "update_from_version": "Updated from {version}",
+  "welcome_to_version": "Welcome to {version}",
+  "whats_new": "What's New"
 }
