@@ -3,6 +3,8 @@
 ## Todo
 
 ## 1.6.1
+- Feat: Add a guide page for first-time users
+- Feat: Show update log after updating
 - Feat: Support restoring old versions from history after downloading and overwriting the local database from remote (experimental feature)
 - Fix: Some Android devices cannot select text and pop up context menu
 - Fix: Compatibility with older WebView versions, now it may run on WebView version 40 and above
@@ -12,6 +14,8 @@
 - Fix: Fixed an issue where PDF files could not be read in the previous version
 - Chore: Prepare for supporting more sync protocols
 
+- Feat: 添加首次启动的引导页
+- Feat：更新后能够展示更新日志
 - Feat: 从远端下载数据库覆盖本地后，能够从历史版本中选择旧版本恢复（实验性功能）
 - Fix: 部分安卓设备无法在选择文段后弹出上下文菜单
 - Fix: 兼容较旧的 WebView 版本，现在或许可以在 WebView 40 以上的版本上运行了
