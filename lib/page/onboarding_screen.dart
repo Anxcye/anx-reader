@@ -2,7 +2,6 @@ import 'package:anx_reader/page/settings_page/appearance.dart';
 import 'package:flutter/material.dart';
 import 'package:introduction_screen/introduction_screen.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
-import 'package:anx_reader/utils/log/common.dart';
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -495,17 +494,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   void _onIntroEnd() async {
-    try {
-      // Mark first launch as completed
-      // await AppVersionManager.markFirstLaunchCompleted();
-      AnxLog.info('Onboarding completed, first launch marked');
-
-      // Call the completion callback
-      widget.onComplete();
-    } catch (e) {
-      AnxLog.severe('Failed to complete onboarding: $e');
-      // Still proceed to complete onboarding even if there's an error
-      widget.onComplete();
-    }
+    widget.onComplete();
   }
 }
