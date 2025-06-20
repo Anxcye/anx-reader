@@ -27,10 +27,18 @@ class _ChangelogScreenState extends State<ChangelogScreen> {
   String _changelogContent = '';
   bool _isLoading = true;
 
+  String get currentVersion => widget.currentVersion.split('+').first;
+  String get lastVersion => widget.lastVersion.split('+').first;
+
   @override
   void initState() {
     super.initState();
     _loadChangelog();
+  }
+  @override
+  void dispose() {
+    widget.onComplete();
+    super.dispose();
   }
 
   Future<void> _loadChangelog() async {
@@ -81,7 +89,7 @@ class _ChangelogScreenState extends State<ChangelogScreen> {
   String _extractVersionChangelog(String fullChangelog) {
     // Extract version number from currentVersion (e.g., "1.2.3+1234" -> "1.2.3")
     final versionMatch =
-        RegExp(r'^(\d+\.\d+\.\d+)').firstMatch(widget.currentVersion);
+        RegExp(r'^(\d+\.\d+\.\d+)').firstMatch(currentVersion);
     if (versionMatch == null) {
       return _getDefaultChangelog();
     }
@@ -130,7 +138,7 @@ class _ChangelogScreenState extends State<ChangelogScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('What\'s New'),
+        title: Text(L10n.of(context).whats_new),
         elevation: 0,
         actions: [
         ],
@@ -155,7 +163,7 @@ class _ChangelogScreenState extends State<ChangelogScreen> {
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            'Updated from ${widget.lastVersion}',
+                            L10n.of(context).update_from_version(lastVersion),
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
@@ -166,7 +174,7 @@ class _ChangelogScreenState extends State<ChangelogScreen> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Welcome to ${widget.currentVersion}',
+                        L10n.of(context).welcome_to_version(currentVersion),
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
