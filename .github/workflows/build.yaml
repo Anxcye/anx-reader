@@ -234,7 +234,7 @@ jobs:
           else
             MAIN_VERSION=$VERSION
           fi
-          CHANGELOG_CONTENT=$(sed -n "/## $MAIN_VERSION/,/## /p" CHANGELOG.md | sed '$d')
+          CHANGELOG_CONTENT=$(sed -n "/## $MAIN_VERSION/,/## /p" assets/CHANGELOG.md | sed '$d')
           echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
           echo "$CHANGELOG_CONTENT" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
