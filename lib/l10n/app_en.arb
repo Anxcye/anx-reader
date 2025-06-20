@@ -458,5 +458,8 @@
   "onboarding_next": "Next",
   "onboarding_back": "Back",
   "onboarding_done": "Get Started",
-  "onboarding_skip": "Skip"
+  "onboarding_skip": "Skip",
+  "customizeYourExperience": "Customize your experience",
+  "moreDisplayOptionsTip": "More display options available in Settings → Appearance",
+  "optimizedForEInkDisplays": "Optimized for e-ink displays"
 }

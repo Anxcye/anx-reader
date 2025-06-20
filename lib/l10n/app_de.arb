@@ -458,5 +458,8 @@
   "onboarding_next": "Weiter",
   "onboarding_back": "Zurück",
   "onboarding_done": "Loslegen",
-  "onboarding_skip": "Überspringen"
+  "onboarding_skip": "Überspringen",
+  "customizeYourExperience": "Passen Sie Ihre Erfahrung an",
+  "moreDisplayOptionsTip": "Weitere Anzeigeoptionen in den Einstellungen → Aussehen erhältlich",
+  "optimizedForEInkDisplays": "Optimiert für E-Ink-Anzeigen"
 }

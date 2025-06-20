@@ -458,5 +458,8 @@
   "onboarding_next": "İleri",
   "onboarding_back": "Geri",
   "onboarding_done": "Başla",
-  "onboarding_skip": "Atla"
+  "onboarding_skip": "Atla",
+  "customizeYourExperience": "Deneyiminizi Özelleştirin",
+  "moreDisplayOptionsTip": "Ayarlarda daha fazla görüntü seçeneği mevcut → görünüm",
+  "optimizedForEInkDisplays": "E-mürekkep ekranları için optimize edilmiş"
 }

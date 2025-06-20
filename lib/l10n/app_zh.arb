@@ -445,7 +445,7 @@
   "replacementFailed": "替换失败",
   "replacementFailedContent": "替换后的数据库验证失败，自动恢复为上一个版本。",
   "syncUnknownError": "同步错误",
-  "onboarding_welcome_title": "欢迎使用 Anx Reader",
+  "onboarding_welcome_title": "欢迎!",
   "onboarding_welcome_body": "一款功能强大的电子书阅读器，集成了 AI 功能和跨平台同步能力。",
   "onboarding_appearance_title": "自定义您的体验",
   "onboarding_appearance_body": "选择您偏好的语言、主题颜色和墨水屏模式，获得最佳阅读体验。您可以在设置 → 外观中配置更多显示选项。",
@@ -458,5 +458,8 @@
   "onboarding_next": "下一步",
   "onboarding_back": "返回",
   "onboarding_done": "开始使用",
-  "onboarding_skip": "跳过"
+  "onboarding_skip": "跳过",
+  "customizeYourExperience": "自定义您的经验",
+  "moreDisplayOptionsTip": "设置中可用的更多显示选项→外观",
+  "optimizedForEInkDisplays": "针对E-INK显示优化"
 }
