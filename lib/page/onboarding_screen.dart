@@ -104,16 +104,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     return PageViewModel(
       title: L10n.of(context).onboarding_welcome_title,
       body: L10n.of(context).onboarding_welcome_body,
-      image: _buildImage('assets/images/app_icon.png'),
+      image: _buildImage('assets/icon/Anx-logo.png'),
       decoration: _getPageDecoration(),
     );
   }
 
   PageViewModel _buildAppearancePage() {
     return PageViewModel(
-      title: L10n.of(context).onboarding_appearance_title,
+      title: '',
       bodyWidget: _buildAppearanceSettings(),
-      // image: _buildIconPage(Icons.palette_outlined),
       decoration: _getPageDecoration(),
     );
   }
@@ -145,14 +144,20 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 
-  Widget _buildImage(String assetName, [double width = 350]) {
-    return Image.asset(
-      assetName,
-      width: width,
-      errorBuilder: (context, error, stackTrace) {
-        // Fallback to icon if image asset doesn't exist
-        return _buildIconPage(Icons.menu_book_outlined);
-      },
+  Widget _buildImage(String assetName) {
+    return SizedBox(
+      width: 120.0,
+      height: 120.0,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(60.0),
+        child: Image.asset(
+          assetName,
+          errorBuilder: (context, error, stackTrace) {
+            // Fallback to icon if image asset doesn't exist
+            return _buildIconPage(Icons.menu_book_outlined);
+          },
+        ),
+      ),
     );
   }
 
@@ -189,52 +194,127 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Widget _buildAppearanceSettings() {
+    Widget buildLanguageSelector() {
+      final currentLocale = Prefs().locale;
+      final currentLanguageCode = currentLocale?.languageCode ?? 'System';
+      final currentCountryCode = currentLocale?.countryCode ?? '';
+      final currentLanguageTag = currentLanguageCode +
+          (currentCountryCode.isNotEmpty ? '-$currentCountryCode' : '');
+
+      return DropdownButton<String>(
+        isExpanded: true,
+        underline: const SizedBox(),
+        value: languageOptions
+                .any((option) => option.values.first == currentLanguageTag)
+            ? currentLanguageTag
+            : 'system',
+        onChanged: (String? newValue) {
+          if (newValue != null) {
+            setState(() {
+              Prefs().saveLocaleToPrefs(newValue);
+            });
+          }
+        },
+        items: languageOptions
+            .map<DropdownMenuItem<String>>((Map<String, String> option) {
+          final displayName = option.keys.first;
+          final languageCode = option.values.first;
+          return DropdownMenuItem<String>(
+            value: languageCode,
+            child: Text(displayName),
+          );
+        }).toList(),
+      );
+    }
+
+    Widget buildThemeColorSelector() {
+      Future<void> showColorPickerDialog() async {
+        Color pickedColor = Prefs().themeColor;
+
+        await showDialog<void>(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text(L10n.of(context).settings_appearance_themeColor),
+              content: SingleChildScrollView(
+                child: ColorPicker(
+                  pickerColor: pickedColor,
+                  onColorChanged: (color) {
+                    pickedColor = color;
+                  },
+                  enableAlpha: false,
+                  displayThumbColor: true,
+                  pickerAreaHeightPercent: 0.8,
+                ),
+              ),
+              actions: <Widget>[
+                TextButton(
+                  child: Text(L10n.of(context).common_cancel),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+                TextButton(
+                  child: Text(L10n.of(context).common_ok),
+                  onPressed: () {
+                    setState(() {
+                      Prefs().saveThemeToPrefs(pickedColor.toARGB32());
+                    });
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      }
+
+      return GestureDetector(
+        onTap: () => showColorPickerDialog(),
+        child: Container(
+          height: 40,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: Prefs().themeColor,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: Theme.of(context).colorScheme.outline.withAlpha(150),
+            ),
+          ),
+          child: Center(
+            child: Text(
+              'Tap to change',
+              style: TextStyle(
+                color: Prefs().themeColor.computeLuminance() > 0.5
+                    ? Colors.black
+                    : Colors.white,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
     return Consumer<Prefs>(
       builder: (context, prefs, child) {
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              L10n.of(context).onboarding_appearance_body,
-              style: TextStyle(
-                fontSize: 16.0,
-                color: Theme.of(context).colorScheme.onSurface.withAlpha(200),
-              ),
-            ),
-            const SizedBox(height: 24),
-            
-            // Language Selection
-            _buildSettingCard(
-              icon: Icons.language,
-              title: L10n.of(context).settings_appearance_language,
-              child: _buildLanguageSelector(),
-            ),
-            
+            const ChangeThemeMode(),
+
+            buildLanguageSelector(),
+
             const SizedBox(height: 16),
-            
-            // Theme Mode Selection
-            _buildSettingCard(
-              icon: Icons.brightness_6,
-              title: L10n.of(context).settings_appearance_theme,
-              child: const ChangeThemeMode(),
-            ),
-            
-            const SizedBox(height: 16),
-            
-            // Theme Color Selection
-            _buildSettingCard(
-              icon: Icons.color_lens,
-              title: L10n.of(context).settings_appearance_themeColor,
-              child: _buildThemeColorSelector(),
-            ),
-            
-            const SizedBox(height: 16),
-            
-            // E-ink Mode Toggle
-            _buildSettingCard(
-              icon: Icons.contrast,
-              title: L10n.of(context).e_ink_mode,
-              child: Switch(
+
+
+
+
+            ListTile(
+              title: Text(L10n.of(context).e_ink_mode),
+              leading: const Icon(Icons.contrast),
+              contentPadding: const EdgeInsets.all(0),
+              trailing: Switch(
                 value: prefs.eInkMode,
                 onChanged: (value) {
                   setState(() {
@@ -246,9 +326,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 },
               ),
             ),
-            
+
             const SizedBox(height: 16),
-            
+
+            buildThemeColorSelector(),
+
+            const SizedBox(height: 16),
+
             Text(
               'You can configure more display options in Settings → Appearance',
               style: TextStyle(
@@ -264,148 +348,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 
-  Widget _buildSettingCard({
-    required IconData icon,
-    required String title,
-    required Widget child,
-  }) {
-    return Card(
-      elevation: 1,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  icon,
-                  size: 20,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            child,
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLanguageSelector() {
-    final currentLocale = Prefs().locale;
-    final currentLanguageCode = currentLocale?.languageCode ?? 'system';
-    final currentCountryCode = currentLocale?.countryCode ?? '';
-    final currentLanguageTag = currentLanguageCode + 
-        (currentCountryCode.isNotEmpty ? '-$currentCountryCode' : '');
-    
-    return DropdownButton<String>(
-      isExpanded: true,
-      value: languageOptions.any((option) => option.values.first == currentLanguageTag)
-          ? currentLanguageTag
-          : 'system',
-      onChanged: (String? newValue) {
-        if (newValue != null) {
-          setState(() {
-            Prefs().saveLocaleToPrefs(newValue);
-          });
-        }
-      },
-      items: languageOptions.map<DropdownMenuItem<String>>((Map<String, String> option) {
-        final displayName = option.keys.first;
-        final languageCode = option.values.first;
-        return DropdownMenuItem<String>(
-          value: languageCode,
-          child: Text(displayName),
-        );
-      }).toList(),
-    );
-  }
-
-  Widget _buildThemeColorSelector() {
-    return GestureDetector(
-      onTap: () => _showColorPickerDialog(),
-      child: Container(
-        height: 40,
-        width: double.infinity,
-        decoration: BoxDecoration(
-          color: Prefs().themeColor,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: Theme.of(context).colorScheme.outline.withAlpha(150),
-          ),
-        ),
-        child: Center(
-          child: Text(
-            'Tap to change',
-            style: TextStyle(
-              color: Prefs().themeColor.computeLuminance() > 0.5 
-                  ? Colors.black 
-                  : Colors.white,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Future<void> _showColorPickerDialog() async {
-    Color pickedColor = Prefs().themeColor;
-
-    await showDialog<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(L10n.of(context).settings_appearance_themeColor),
-          content: SingleChildScrollView(
-            child: ColorPicker(
-              pickerColor: pickedColor,
-              onColorChanged: (color) {
-                pickedColor = color;
-              },
-              enableAlpha: false,
-              displayThumbColor: true,
-              pickerAreaHeightPercent: 0.8,
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: Text(L10n.of(context).common_cancel),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: Text(L10n.of(context).common_ok),
-              onPressed: () {
-                setState(() {
-                  Prefs().saveThemeToPrefs(pickedColor.toARGB32());
-                });
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   void _onIntroEnd() async {
     try {
       // Mark first launch as completed
       // await AppVersionManager.markFirstLaunchCompleted();
       AnxLog.info('Onboarding completed, first launch marked');
-      
+
       // Call the completion callback
       widget.onComplete();
     } catch (e) {
