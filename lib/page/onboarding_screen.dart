@@ -117,7 +117,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   PageViewModel _buildSyncPage() {
     return PageViewModel(
       title: L10n.of(context).onboarding_sync_title,
-      body: L10n.of(context).onboarding_sync_body,
+      bodyWidget: _buildPageWithTip(
+        L10n.of(context).onboarding_sync_body,
+        L10n.of(context).onboarding_sync_tip,
+      ),
       image: _buildIconPage(Icons.sync_outlined),
       decoration: _getPageDecoration(),
     );
@@ -126,7 +129,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   PageViewModel _buildAIPage() {
     return PageViewModel(
       title: L10n.of(context).onboarding_ai_title,
-      body: L10n.of(context).onboarding_ai_body,
+      bodyWidget: _buildPageWithTip(
+        L10n.of(context).onboarding_ai_body,
+        L10n.of(context).onboarding_ai_tip,
+      ),
       image: _buildIconPage(Icons.auto_awesome_outlined),
       decoration: _getPageDecoration(),
     );
@@ -444,7 +450,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
               const SizedBox(height: 24),
 
-              // 主题色选择
               buildThemeColorSelector(),
 
               const SizedBox(height: 24),
@@ -490,6 +495,58 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildPageWithTip(String bodyText, String tipText) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          bodyText,
+          style: TextStyle(
+            fontSize: 19.0,
+            color: Theme.of(context).colorScheme.onSurface.withAlpha(200),
+          ),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 32),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Theme.of(context)
+                .colorScheme
+                .surfaceContainerHighest
+                .withAlpha(50),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: Theme.of(context).colorScheme.outline.withAlpha(50),
+            ),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                Icons.info_outline,
+                color: Theme.of(context).colorScheme.primary,
+                size: 18,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  tipText,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withAlpha(150),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
