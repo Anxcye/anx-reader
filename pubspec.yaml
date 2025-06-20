@@ -129,6 +129,7 @@ flutter:
     - assets/images/book_share/
     - assets/images/bgimg/
     - assets/icon/Anx-logo.png
+    - assets/CHANGELOG.md
 
   fonts:
     - family: SourceHanSerif

@@ -461,5 +461,9 @@
   "onboarding_skip": "Überspringen",
   "customizeYourExperience": "Passen Sie Ihre Erfahrung an",
   "moreDisplayOptionsTip": "Weitere Anzeigeoptionen in den Einstellungen → Aussehen erhältlich",
-  "optimizedForEInkDisplays": "Optimiert für E-Ink-Anzeigen"
+  "optimizedForEInkDisplays": "Optimiert für E-Ink-Anzeigen",
+  "common_updated": "Aktualisiert!",
+  "update_from_version": "Von {version} aktualisiert",
+  "welcome_to_version": "Willkommen bei {version}",
+  "whats_new": "Was ist neu"
 }

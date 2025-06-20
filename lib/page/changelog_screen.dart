@@ -1,4 +1,7 @@
+import 'package:anx_reader/l10n/generated/L10n.dart';
+import 'package:anx_reader/utils/get_current_language_code.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:anx_reader/utils/log/common.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 
@@ -32,13 +35,15 @@ class _ChangelogScreenState extends State<ChangelogScreen> {
 
   Future<void> _loadChangelog() async {
     try {
-      // Try to load changelog from assets
-      // You can create markdown files for different versions
-      _changelogContent = _getDefaultChangelog();
+      // Load changelog from assets
+      final String fullChangelog =
+          await rootBundle.loadString('assets/CHANGELOG.md');
+      _changelogContent = _extractVersionChangelog(fullChangelog);
     } catch (e) {
-      AnxLog.warning('Failed to load changelog: $e');
+      AnxLog.warning('Failed to load changelog from assets: $e');
       _changelogContent = _getDefaultChangelog();
     } finally {
+      _changelogContent = processChangelogContent(_changelogContent);
       if (mounted) {
         setState(() {
           _isLoading = false;
@@ -47,33 +52,77 @@ class _ChangelogScreenState extends State<ChangelogScreen> {
     }
   }
 
+  String processChangelogContent(String content) {
+    bool isChinese() => getCurrentLanguageCode().contains('zh');
+
+    final lines = content.split('\n');
+    var processedLines = <String>[];
+
+    for (int i = 0; i < lines.length; i++) {
+      final line = lines[i].trim();
+      if (line.isEmpty) {
+        continue;
+      }
+
+      if (line.startsWith('- ') || line.startsWith('* ')) {
+        processedLines.add(line);
+        continue;
+      }
+    }
+    if (isChinese()) {
+      processedLines = processedLines.sublist(processedLines.length ~/ 2);
+    } else {
+      processedLines = processedLines.sublist(0, processedLines.length ~/ 2);
+    }
+
+    return processedLines.join('\n');
+  }
+
+  String _extractVersionChangelog(String fullChangelog) {
+    // Extract version number from currentVersion (e.g., "1.2.3+1234" -> "1.2.3")
+    final versionMatch =
+        RegExp(r'^(\d+\.\d+\.\d+)').firstMatch(widget.currentVersion);
+    if (versionMatch == null) {
+      return _getDefaultChangelog();
+    }
+
+    final version = versionMatch.group(1)!;
+    final versionHeader = '## $version';
+
+    // Find the version section in the changelog
+    final lines = fullChangelog.split('\n');
+    final startIndex = lines.indexWhere((line) => line.trim() == versionHeader);
+
+    if (startIndex == -1) {
+      AnxLog.warning('Version $version not found in changelog');
+      return _getDefaultChangelog();
+    }
+
+    // Find the end of this version section (next version header or end of file)
+    int endIndex = lines.length;
+    for (int i = startIndex + 1; i < lines.length; i++) {
+      if (lines[i].trim().startsWith('## ') &&
+          lines[i].trim() != versionHeader) {
+        endIndex = i;
+        break;
+      }
+    }
+
+    // Extract the content for this version (skip the header line)
+    final versionContent =
+        lines.sublist(startIndex + 1, endIndex).join('\n').trim();
+
+    if (versionContent.isEmpty) {
+      return _getDefaultChangelog();
+    }
+
+    return versionContent;
+  }
+
   String _getDefaultChangelog() {
     return '''
-# What's New in ${widget.currentVersion}
-
-## 🎉 New Features
-- Enhanced WebDAV synchronization with improved safety mechanisms
-- Better database backup and recovery system
-- Improved sync architecture for easier maintenance
-
-## 🔧 Improvements
-- Refactored sync client architecture for better modularity
-- Enhanced error handling and user feedback
-- Performance optimizations for large libraries
-
-## 🐛 Bug Fixes
-- Fixed various sync-related issues
-- Improved stability and reliability
-- Better error messages and recovery options
-
-## 📖 Reading Experience
-- Continued improvements to the reading interface
-- Better support for various e-book formats
-- Enhanced AI integration features
-
----
-
-Thank you for using Anx Reader! We're constantly working to improve your reading experience.
+- Fixed some bugs
+- 修复已知问题
 ''';
   }
 
@@ -84,16 +133,6 @@ Thank you for using Anx Reader! We're constantly working to improve your reading
         title: Text('What\'s New'),
         elevation: 0,
         actions: [
-          TextButton(
-            onPressed: _onComplete,
-            child: Text(
-              'Continue',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.primary,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
         ],
       ),
       body: _isLoading
@@ -103,7 +142,7 @@ Thank you for using Anx Reader! We're constantly working to improve your reading
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(16),
-                  color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
+                  color: Theme.of(context).colorScheme.primaryContainer,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -120,14 +159,14 @@ Thank you for using Anx Reader! We're constantly working to improve your reading
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
-                              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
+                              color: Theme.of(context).colorScheme.onSurface,
                             ),
                           ),
                         ],
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Welcome to Anx Reader ${widget.currentVersion}',
+                        'Welcome to ${widget.currentVersion}',
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -142,7 +181,9 @@ Thank you for using Anx Reader! We're constantly working to improve your reading
                     padding: const EdgeInsets.all(16),
                     child: MarkdownBody(
                       data: _changelogContent,
-                      styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
+                      styleSheet:
+                          MarkdownStyleSheet.fromTheme(Theme.of(context))
+                              .copyWith(
                         h1: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
@@ -156,7 +197,7 @@ Thank you for using Anx Reader! We're constantly working to improve your reading
                         ),
                         p: TextStyle(
                           fontSize: 16,
-                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
+                          color: Theme.of(context).colorScheme.onSurface,
                           height: 1.5,
                         ),
                         listBullet: TextStyle(
@@ -172,7 +213,7 @@ Thank you for using Anx Reader! We're constantly working to improve your reading
                   padding: const EdgeInsets.all(16),
                   child: FilledButton(
                     onPressed: _onComplete,
-                    child: const Text('Continue to App'),
+                    child: Text(L10n.of(context).common_ok),
                   ),
                 ),
               ],
@@ -181,13 +222,6 @@ Thank you for using Anx Reader! We're constantly working to improve your reading
   }
 
   void _onComplete() async {
-    try {      
-      // Call the completion callback
       widget.onComplete();
-    } catch (e) {
-      AnxLog.severe('Failed to mark version update as handled: $e');
-      // Still proceed to complete even if there's an error
-      widget.onComplete();
-    }
   }
 }

@@ -461,5 +461,9 @@
   "onboarding_skip": "تخطي",
   "customizeYourExperience": "تخصيص تجربتك",
   "moreDisplayOptionsTip": "المزيد من خيارات العرض المتاحة في الإعدادات → المظهر",
-  "optimizedForEInkDisplays": "مُحسّن لشاشات الإبلاغ الإلكترونية"
+  "optimizedForEInkDisplays": "مُحسّن لشاشات الإبلاغ الإلكترونية",
+  "common_updated": "محدث!",
+  "update_from_version": "تم التحديث من {version}",
+  "welcome_to_version": "مرحبًا بك في {version}",
+  "whats_new": "الجديد"
 }
