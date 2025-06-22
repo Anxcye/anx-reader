@@ -467,5 +467,6 @@
   "common_updated": "Aktualisiert!",
   "update_from_version": "Von {version} aktualisiert",
   "welcome_to_version": "Willkommen bei {version}",
-  "whats_new": "Was ist neu"
+  "whats_new": "Was ist neu",
+  "databaseBackupManagement": "Datenbanksicherungsverwaltung"
 }

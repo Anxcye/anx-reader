@@ -467,5 +467,6 @@
   "common_updated": "Güncellendi!",
   "update_from_version": "{version} sürümünden güncellendi",
   "welcome_to_version": "{version} sürümüne hoş geldiniz",
-  "whats_new": "Yenilikler"
+  "whats_new": "Yenilikler",
+  "databaseBackupManagement": "Veritabanı yedekleme yönetimi"
 }
