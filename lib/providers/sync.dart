@@ -661,7 +661,7 @@ class Sync extends _$Sync {
 
       await SmartDialog.show(
         builder: (context) => AlertDialog(
-          title: Text('Database Backup Management'),
+          title: Text(L10n.of(context).databaseBackupManagement),
           content: SizedBox(
             width: double.maxFinite,
             child: Column(

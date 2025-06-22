@@ -13,6 +13,7 @@
 - Fix: Preserve historical versions when replacing the local database
 - Fix: Fixed an issue where PDF files could not be read in the previous version
 - Chore: Prepare for supporting more sync protocols
+- Build: Optimize build number
 
 - Feat: 添加首次启动的引导页
 - Feat：更新后能够展示更新日志
@@ -24,6 +25,7 @@
 - Fix: 在替换本地数据库时能够保留历史版本
 - Fix: 修复上一版本中 PDF 无法阅读的问题
 - Chore: 为更多同步协议做好准备
+- Build: 优化构建号
 
 ## 1.6.0
 ‼️If WebDAV sync is enabled, please upgrade all devices to this version, otherwise the book notes list will not be displayed‼️

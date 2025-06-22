@@ -467,5 +467,6 @@
   "customizeYourExperience": "自定義您的經驗",
   "moreDisplayOptionsTip": "設置中可用的更多顯示選項→外觀",
   "optimizedForEInkDisplays": "針對E-INK顯示優化",
-  "common_updated": "更新！"
+  "common_updated": "更新！",
+  "databaseBackupManagement": "數據庫備份管理"
 }

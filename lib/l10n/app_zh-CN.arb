@@ -467,5 +467,6 @@
   "common_updated": "更新！",
   "update_from_version": "从 {version} 更新",
   "welcome_to_version": "欢迎使用 {version}",
-  "whats_new": "更新内容"
+  "whats_new": "更新内容",
+  "databaseBackupManagement": "数据库备份管理"
 }

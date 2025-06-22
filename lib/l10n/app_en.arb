@@ -467,5 +467,6 @@
   "common_updated": "Updated!",
   "update_from_version": "Updated from {version}",
   "welcome_to_version": "Welcome to {version}",
-  "whats_new": "What's New"
+  "whats_new": "What's New",
+  "databaseBackupManagement": "Database Backup Management"
 }
