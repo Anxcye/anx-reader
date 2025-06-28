@@ -36,11 +36,11 @@ void importBookList(List<File> fileList, BuildContext context, WidgetRef ref) {
   AnxLog.info('importBook fileList: ${fileList.toString()}');
 
   List<File> supportedFiles = fileList.where((file) {
-    return allowBookExtensions.contains(file.path.split('.').last);
+    return allowBookExtensions.contains(file.path.split('.').last.toLowerCase());
   }).toList();
 
   List<File> unsupportedFiles = fileList.where((file) {
-    return !allowBookExtensions.contains(file.path.split('.').last);
+    return !allowBookExtensions.contains(file.path.split('.').last.toLowerCase());
   }).toList();
 
   // delete unsupported files
