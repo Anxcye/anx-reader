@@ -3,6 +3,7 @@
 ## Todo
 
 ## 1.6.1
+- Feat: Support choosing whether to enable auto-sync
 - Feat: Add a guide page for first-time users
 - Feat: Show update log after updating
 - Feat: Support restoring old versions from history after downloading and overwriting the local database from remote (experimental feature)
@@ -16,6 +17,7 @@
 - Chore: Prepare for supporting more sync protocols
 - Build: Optimize build number
 
+- Feat: 支持选择是否开启自动同步功能
 - Feat: 添加首次启动的引导页
 - Feat：更新后能够展示更新日志
 - Feat: 从远端下载数据库覆盖本地后，能够从历史版本中选择旧版本恢复（实验性功能）
