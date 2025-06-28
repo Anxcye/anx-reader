@@ -28,9 +28,10 @@ class InitializationCheck {
 
   static Future<void> check() async {
     final result = await _checkVersion();
+    AnxLog.info('Version check result: $result');
     if (result == VersionCheckType.firstLaunch) {
       _handleFirstLaunch();
-    } else if (result != VersionCheckType.updated) {
+    } else if (result == VersionCheckType.updated) {
       _handleUpdateAvailable();
     } else {
       _handleNormalStartup();
@@ -39,11 +40,14 @@ class InitializationCheck {
 
   static Future<VersionCheckType> _checkVersion() async {
     _lastVersion = Prefs().lastAppVersion;
-      _currentVersion = await getAppVersion();
+    _currentVersion = await getAppVersion();
+    print('$_lastVersion, $_currentVersion');
+    print(_lastVersion == currentVersion);
     if (_lastVersion == null) {
       return VersionCheckType.firstLaunch;
     } else {
-      if (lastVersion != currentVersion) {
+      if (_lastVersion != _currentVersion) {
+        print('updated');
         return VersionCheckType.updated;
       } else {
         return VersionCheckType.normal;
@@ -51,18 +55,18 @@ class InitializationCheck {
     }
   }
 
-  static void _handleFirstLaunch() {
+  static Future<void> _handleFirstLaunch() async {
     AnxLog.info('First launch detected, showing onboarding');
+    final cv = await currentVersion;
     // wait 0.8 seconds to ensure the app is ready
     Future.delayed(const Duration(milliseconds: 800), () {
       showCupertinoSheet(
         context: navigatorKey.currentContext!,
         pageBuilder: (context) => Scaffold(
-
           body: OnboardingScreen(
             onComplete: () async {
-              Prefs().lastAppVersion = await currentVersion;
-              Navigator.pop(navigatorKey.currentContext!);
+              Prefs().lastAppVersion = cv;
+              Navigator.pop(context);
             },
           ),
         ),
@@ -82,7 +86,7 @@ class InitializationCheck {
           currentVersion: cv,
           onComplete: () {
             Prefs().lastAppVersion = cv;
-            Navigator.pop(navigatorKey.currentContext!);
+            Navigator.pop(context);
           },
         ),
       );
