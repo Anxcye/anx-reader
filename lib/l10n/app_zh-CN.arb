@@ -240,6 +240,7 @@
   "import_success_restart_app": "导入成功，请重启应用",
   "import_failed": "导入失败: {error}",
   "settings_sync_completed_toast": "同步完成显示提示",
+  "settings_sync_auto_sync": "自动同步",
   "settings_translate": "翻译",
   "settings_translate_current_service": "当前服务",
   "settings_translate_auto": "自动",
@@ -468,5 +469,7 @@
   "update_from_version": "从 {version} 更新",
   "welcome_to_version": "欢迎使用 {version}",
   "whats_new": "更新内容",
-  "databaseBackupManagement": "数据库备份管理"
+  "databaseBackupManagement": "数据库备份管理",
+  "restoreDatabase": "还原数据库",
+  "restoreBackup": "还原备份"
 }

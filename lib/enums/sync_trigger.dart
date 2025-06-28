@@ -1,0 +1,4 @@
+enum SyncTrigger {
+  manual,
+  auto,
+}

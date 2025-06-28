@@ -1,4 +1,5 @@
 import 'package:anx_reader/enums/sync_direction.dart';
+import 'package:anx_reader/enums/sync_trigger.dart';
 import 'package:anx_reader/enums/sync_protocol.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/providers/sync.dart';
@@ -25,7 +26,8 @@ Future<bool> testEnableWebdav() async {
     if (result.isSuccess) {
       return true;
     } else {
-      AnxToast.show(L10n.of(navigatorKey.currentContext!).webdav_connection_failed);
+      AnxToast.show(
+          L10n.of(navigatorKey.currentContext!).webdav_connection_failed);
     }
   } else {
     AnxToast.show(L10n.of(navigatorKey.currentContext!).webdav_set_info_first);
@@ -44,7 +46,8 @@ void chooseDirection(WidgetRef ref) {
             SimpleDialogOption(
               onPressed: () async {
                 Navigator.pop(context);
-                await Sync().syncData(SyncDirection.upload, ref);
+                await Sync().syncData(SyncDirection.upload, ref,
+                    trigger: SyncTrigger.manual);
               },
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 6),
@@ -54,7 +57,8 @@ void chooseDirection(WidgetRef ref) {
             SimpleDialogOption(
               onPressed: () async {
                 Navigator.pop(context);
-                await Sync().syncData(SyncDirection.download, ref);
+                await Sync().syncData(SyncDirection.download, ref,
+                    trigger: SyncTrigger.manual);
               },
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 6),

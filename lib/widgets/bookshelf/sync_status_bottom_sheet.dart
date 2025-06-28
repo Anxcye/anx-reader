@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/enums/book_sync_status.dart';
 import 'package:anx_reader/enums/sync_direction.dart';
+import 'package:anx_reader/enums/sync_trigger.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/main.dart';
 import 'package:anx_reader/models/sync_state_model.dart';
@@ -336,9 +337,9 @@ class SyncStatusBottomSheet extends ConsumerWidget {
                   if (isSyncing) {
                     AnxToast.show(l10n.webdav_syncing);
                   } else {
-                    ref
-                        .read(syncProvider.notifier)
-                        .syncData(SyncDirection.both, ref);
+                    ref.read(syncProvider.notifier).syncData(
+                        SyncDirection.both, ref,
+                        trigger: SyncTrigger.manual);
                   }
                 },
               ),
