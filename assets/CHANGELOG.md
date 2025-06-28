@@ -12,8 +12,10 @@
 - Fix: WebDAV configuration changes now take effect immediately after saving
 - Fix: Improved sync logic to replace the current database only after confirming the integrity of the new database
 - Fix: Preserve historical versions when replacing the local database
-- Fix: Fixed an issue where PDF files could not be read in the previouo version
-- Fix: Fixed an issue where covers could not be synced
+- Fix: PDF files could not be read in the previouo version
+- Fix: covers could not be synced
+- Fix: files with uppercase extensioos could not be imported
+- Fix: books could not be imported on some Windows devices
 - Chore: Prepare for supporting more sync protocols
 - Build: Optimize build number
 
@@ -28,6 +30,8 @@
 - Fix: 在替换本地数据库时能够保留历史版本
 - Fix: 修复上一版本中 PDF 无法阅读的问题
 - Fix: 修复封面无法同步的问题
+- Fix: 修复大写扩展名的文件无法导入的问题
+- Fix: 部分情况下 Windows 端无法导入书籍
 - Chore: 为更多同步协议做好准备
 - Build: 优化构建号
 
