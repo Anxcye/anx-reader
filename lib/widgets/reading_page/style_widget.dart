@@ -124,7 +124,7 @@ class StyleWidgetState extends State<StyleWidget> {
     //       label: getFontNameFromFile(element),
     //       name: 'customFont' + ,
     //       path:
-    //           'http://localhost:${Server().port}/fonts/${element.path.split('/').last}',
+    //           'http://127.0.0.1:${Server().port}/fonts/${element.path.split('/').last}',
     //     ));
     //   }
     // });
@@ -135,7 +135,7 @@ class StyleWidgetState extends State<StyleWidget> {
         label: getFontNameFromFile(element),
         name: 'customFont$i',
         path:
-            'http://localhost:${Server().port}/fonts/${element.path.split(Platform.pathSeparator).last}',
+            'http://127.0.0.1:${Server().port}/fonts/${element.path.split(Platform.pathSeparator).last}',
       ));
     }
 

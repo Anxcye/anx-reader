@@ -762,7 +762,7 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
   @override
   Widget build(BuildContext context) {
     String uri = Uri.encodeComponent(widget.book.fileFullPath);
-    String url = 'http://localhost:${Server().port}/book/$uri';
+    String url = 'http://127.0.0.1:${Server().port}/book/$uri';
     String initialCfi = widget.cfi ?? widget.book.lastReadPosition;
 
     return KeyboardListener(

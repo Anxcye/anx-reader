@@ -18,7 +18,7 @@ String generateUrl(
   bool? importing,
 }) {
   String indexHtmlPath =
-      "http://localhost:${Server().port}/foliate-js/index.html";
+      "http://127.0.0.1:${Server().port}/foliate-js/index.html";
 
   ReadTheme readTheme = Prefs().readTheme;
   bookStyle ??= Prefs().bookStyle;
