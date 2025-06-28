@@ -27,9 +27,9 @@ class Server {
     int port = Prefs().lastServerPort;
 
     try {
-      _server = await io.serve(handler, 'localhost', port);
+      _server = await io.serve(handler, '127.0.0.1', port);
     } catch (e) {
-      _server = await io.serve(handler, 'localhost', 0);
+      _server = await io.serve(handler, '127.0.0.1', 0);
     }
 
     Prefs().lastServerPort = _server!.port;

@@ -30,7 +30,7 @@ class FontModel {
     return FontModel(
       label: json['label'],
       name: json['name'],
-      path: 'http://localhost:${Server().port}/fonts/${json['path']}',
+      path: 'http://127.0.0.1:${Server().port}/fonts/${json['path']}',
     );
   }
 

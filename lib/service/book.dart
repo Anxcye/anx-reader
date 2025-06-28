@@ -264,7 +264,7 @@ Future<void> getBookMetadata(
 
   String cfi = '';
 
-  String bookUrl = "http://localhost:${Server().port}/$serverFileName";
+  String bookUrl = "http://127.0.0.1:${Server().port}/$serverFileName";
   AnxLog.info("import start: book url: $bookUrl");
 
   HeadlessInAppWebView webview = HeadlessInAppWebView(
