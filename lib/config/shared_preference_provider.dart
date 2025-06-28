@@ -573,6 +573,15 @@ class Prefs extends ChangeNotifier {
     return prefs.getBool('syncCompletedToast') ?? true;
   }
 
+  set autoSync(bool status) {
+    prefs.setBool('autoSync', status);
+    notifyListeners();
+  }
+
+  bool get autoSync {
+    return prefs.getBool('autoSync') ?? false;
+  }
+
   set readingInfo(ReadingInfoModel info) {
     prefs.setString('readingInfo', jsonEncode(info.toJson()));
     notifyListeners();
