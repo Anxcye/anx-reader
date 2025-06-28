@@ -579,7 +579,7 @@ class Prefs extends ChangeNotifier {
   }
 
   bool get autoSync {
-    return prefs.getBool('autoSync') ?? false;
+    return prefs.getBool('autoSync') ?? true;
   }
 
   set readingInfo(ReadingInfoModel info) {
