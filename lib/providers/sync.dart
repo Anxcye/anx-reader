@@ -295,13 +295,13 @@ class Sync extends _$Sync {
         AnxToast.show(
             L10n.of(navigatorKey.currentContext!).webdav_sync_complete);
       }
-    } catch (e) {
+    } catch (e, s) {
       if (e is DioException && e.type == DioExceptionType.connectionError) {
         AnxToast.show('Sync connection failed, check your network');
-        AnxLog.severe('Sync connection failed, connection error\n$e');
+        AnxLog.severe('Sync connection failed, connection error\n$e, $s');
       } else {
         AnxToast.show('Sync failed\n$e');
-        AnxLog.severe('Sync failed\n$e');
+        AnxLog.severe('Sync failed\n$e, $s');
       }
     } finally {
       changeState(state.copyWith(isSyncing: false));
