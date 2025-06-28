@@ -67,7 +67,7 @@ class _BookTocState extends ConsumerState<BookToc> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (listViewController.hasClients) {
         listViewController.jumpTo(
-            min(offset * 48, listViewController.position.maxScrollExtent - 48));
+            min(offset * 56, listViewController.position.maxScrollExtent - 56));
       }
     });
 
@@ -77,7 +77,7 @@ class _BookTocState extends ConsumerState<BookToc> {
         final offset = isExpanded.indexWhere((isExpanded) => isExpanded);
         if (listViewController.hasClients) {
           listViewController.jumpTo(min(
-              offset * 48, listViewController.position.maxScrollExtent - 48));
+              offset * 56, listViewController.position.maxScrollExtent - 56));
         }
       },
     );
@@ -268,7 +268,7 @@ class TocItemWidgetState extends State<TocItemWidget> {
   }
 
   TextStyle tocStyle(content) => TextStyle(
-        fontSize: 16,
+        fontSize: 15,
         color: Theme.of(context).colorScheme.onSurface,
       );
 
@@ -301,7 +301,7 @@ class TocItemWidgetState extends State<TocItemWidget> {
     return Column(
       children: [
         SizedBox(
-          height: isEnd ? 60 : 32,
+          height: isEnd ? 60 : 40,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -333,29 +333,32 @@ class TocItemWidgetState extends State<TocItemWidget> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            widget.tocItem.label.trim(),
-                            style: _isSelected(widget.tocItem)
-                                ? tocStyleSelected(context)
-                                : tocStyle(context),
-                          ),
-                          if (isEnd)
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 10.0),
-                              child: Row(
-                                children: [
-                                  Icon(Icons.keyboard_arrow_right_rounded),
-                                  SizedBox(width: 10),
-                                  Text(progress),
-                                ],
-                              ),
+                      Expanded(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              widget.tocItem.label.trim(),
+                              overflow: TextOverflow.ellipsis,
+                              style: _isSelected(widget.tocItem)
+                                  ? tocStyleSelected(context)
+                                  : tocStyle(context),
                             ),
-                        ],
+                            if (isEnd)
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 10.0),
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.keyboard_arrow_right_rounded),
+                                    SizedBox(width: 10),
+                                    Text(progress),
+                                  ],
+                                ),
+                              ),
+                          ],
+                        ),
                       ),
                       Text(
                         widget.tocItem.percentage,
