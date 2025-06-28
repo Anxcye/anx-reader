@@ -468,5 +468,8 @@
   "update_from_version": "Von {version} aktualisiert",
   "welcome_to_version": "Willkommen bei {version}",
   "whats_new": "Was ist neu",
-  "databaseBackupManagement": "Datenbanksicherungsverwaltung"
+  "databaseBackupManagement": "Datenbanksicherungsverwaltung",
+  "settings_sync_auto_sync": "Auto -Synchronisation",
+  "restoreDatabase": "Datenbank wiederherstellen",
+  "restoreBackup": "Backup wiederherstellen"
 }

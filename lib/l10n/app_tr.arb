@@ -468,5 +468,8 @@
   "update_from_version": "{version} sürümünden güncellendi",
   "welcome_to_version": "{version} sürümüne hoş geldiniz",
   "whats_new": "Yenilikler",
-  "databaseBackupManagement": "Veritabanı yedekleme yönetimi"
+  "databaseBackupManagement": "Veritabanı yedekleme yönetimi",
+  "settings_sync_auto_sync": "Otomatik Senkronizasyon",
+  "restoreDatabase": "Veritabanını geri yükle",
+  "restoreBackup": "Yedeklemeyi geri yükle"
 }

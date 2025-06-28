@@ -82,8 +82,18 @@ class _SyncSettingState extends ConsumerState<SyncSetting> {
                     Prefs().syncCompletedToast = value;
                   });
                 }),
+            SettingsTile.switchTile(
+                title: Text(L10n.of(context).settings_sync_auto_sync),
+                leading: const Icon(Icons.sync),
+                initialValue: Prefs().autoSync,
+                enabled: Prefs().webdavStatus,
+                onToggle: (bool value) {
+                  setState(() {
+                    Prefs().autoSync = value;
+                  });
+                }),
             SettingsTile.navigation(
-                title: Text('恢复数据库'),
+                title: Text(L10n.of(context).restoreBackup),
                 leading: const Icon(Icons.restore),
                 onPressed: (context) {
                   ref.read(syncProvider.notifier).showBackupManagementDialog();

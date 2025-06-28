@@ -4,6 +4,7 @@ import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/dao/reading_time.dart';
 import 'package:anx_reader/dao/theme.dart';
 import 'package:anx_reader/enums/sync_direction.dart';
+import 'package:anx_reader/enums/sync_trigger.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/main.dart';
 import 'package:anx_reader/models/book.dart';
@@ -100,7 +101,7 @@ class ReadingPageState extends ConsumerState<ReadingPage>
 
   @override
   void dispose() {
-    Sync().syncData(SyncDirection.upload, ref);
+    Sync().syncData(SyncDirection.upload, ref, trigger: SyncTrigger.auto);
     _readTimeWatch.stop();
     _awakeTimer?.cancel();
     WakelockPlus.disable();

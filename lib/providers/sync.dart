@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io' as io;
 import 'package:anx_reader/enums/sync_direction.dart';
+import 'package:anx_reader/enums/sync_trigger.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/main.dart';
 import 'package:anx_reader/models/book.dart';
@@ -224,10 +225,18 @@ class Sync extends _$Sync {
     );
   }
 
-  Future<void> syncData(SyncDirection direction, WidgetRef? ref) async {
+  Future<void> syncData(
+    SyncDirection direction,
+    WidgetRef? ref, {
+    SyncTrigger trigger = SyncTrigger.auto,
+  }) async {
     final client = _syncClient;
     if (client == null) {
       AnxLog.severe('No sync client configured');
+      return;
+    }
+
+    if (trigger == SyncTrigger.auto && !Prefs().autoSync) {
       return;
     }
 

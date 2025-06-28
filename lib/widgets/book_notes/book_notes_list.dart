@@ -1,5 +1,6 @@
 import 'package:anx_reader/dao/book_note.dart';
 import 'package:anx_reader/enums/sync_direction.dart';
+import 'package:anx_reader/enums/sync_trigger.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/models/book_note.dart';
@@ -194,7 +195,8 @@ class _BookNotesListState extends ConsumerState<BookNotesList> {
                       updateTime: DateTime.now(),
                     );
                     updateBookNoteById(updatedNote);
-                    Sync().syncData(SyncDirection.upload, ref);
+                    Sync().syncData(SyncDirection.upload, ref,
+                        trigger: SyncTrigger.manual);
                     _loadBookNotes();
                     Navigator.pop(context);
                   },
@@ -653,7 +655,8 @@ class _BookNotesListState extends ConsumerState<BookNotesList> {
           for (int i = 0; i < selectedNotes.length; i++) {
             deleteBookNoteById(selectedNotes[i].id!);
           }
-          Sync().syncData(SyncDirection.upload, ref);
+          Sync().syncData(SyncDirection.upload, ref, 
+              trigger: SyncTrigger.auto);
           setState(() {
             selectedNotes.clear();
             _loadBookNotes();

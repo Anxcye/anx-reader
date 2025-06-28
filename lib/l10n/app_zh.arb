@@ -468,5 +468,8 @@
   "update_from_version": "从 {version} 更新",
   "welcome_to_version": "欢迎使用 {version}",
   "whats_new": "更新内容",
-  "databaseBackupManagement": "数据库备份管理"
+  "databaseBackupManagement": "数据库备份管理",
+  "settings_sync_auto_sync": "自动同步",
+  "restoreDatabase": "还原数据库",
+  "restoreBackup": "还原备份"
 }

@@ -240,6 +240,7 @@
   "import_success_restart_app": "Import success, please restart the app",
   "import_failed": "Import failed: {error}",
   "settings_sync_completed_toast": "Show toast when sync completed",
+  "settings_sync_auto_sync": "Auto sync",
   "settings_translate": "Translate",
   "settings_translate_current_service": "Current Service",
   "settings_translate_auto": "Auto",
@@ -468,5 +469,7 @@
   "update_from_version": "Updated from {version}",
   "welcome_to_version": "Welcome to {version}",
   "whats_new": "What's New",
-  "databaseBackupManagement": "Database Backup Management"
+  "databaseBackupManagement": "Database Backup Management",
+  "restoreDatabase": "Restore Database",
+  "restoreBackup": "Restore Backup"
 }
