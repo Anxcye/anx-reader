@@ -127,7 +127,14 @@ class SyncStatus extends _$SyncStatus {
         .id;
   }
 
+  bool isCover(String filePath) {
+    return filePath.contains("/cover/");
+  }
+
   void addDownloading(String filePath) {
+    if (isCover(filePath)) {
+      return;
+    }
     final bookId = pathToBookId(filePath);
     if (bookId == null || state.value == null) {
       return;
@@ -145,6 +152,9 @@ class SyncStatus extends _$SyncStatus {
   }
 
   void addUploading(String filePath) {
+    if (isCover(filePath)) {
+      return;
+    }
     final bookId = pathToBookId(filePath);
     if (bookId == null || state.value == null) {
       return;
@@ -162,6 +172,9 @@ class SyncStatus extends _$SyncStatus {
   }
 
   void removeDownloading(String filePath) {
+    if (isCover(filePath)) {
+      return;
+    }
     final bookId = pathToBookId(filePath);
     if (bookId == null || state.value == null) {
       return;
@@ -181,6 +194,9 @@ class SyncStatus extends _$SyncStatus {
   }
 
   void removeUploading(String filePath) {
+    if (isCover(filePath)) {
+      return;
+    }
     final bookId = pathToBookId(filePath);
     if (bookId == null || state.value == null) {
       return;
