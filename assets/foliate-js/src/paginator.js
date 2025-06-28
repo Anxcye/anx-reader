@@ -529,7 +529,7 @@ export class Paginator extends HTMLElement {
         if (this.#justAnchored) this.#justAnchored = false
         else {
           this.#afterScroll('scroll')
-          this.#handleScrollBoundaries()
+          // this.#handleScrollBoundaries()
         }
       }
     }, 50))
