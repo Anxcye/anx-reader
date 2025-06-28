@@ -35,11 +35,6 @@ class _ChangelogScreenState extends State<ChangelogScreen> {
     super.initState();
     _loadChangelog();
   }
-  @override
-  void dispose() {
-    widget.onComplete();
-    super.dispose();
-  }
 
   Future<void> _loadChangelog() async {
     try {
