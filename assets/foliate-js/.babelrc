@@ -1,11 +1,11 @@
 {
   "presets": [
     ["@babel/preset-env", {
-      "targets": {
-        "android": "4.4",
-        "chrome": "30",
-        "safari": "9",
-        "ios": "9"
+    "targets": {
+      "android": "7",
+      "chrome": "70",
+      "safari": "12",
+      "ios": "12"
       },
       "useBuiltIns": "entry",
       "corejs": 3,

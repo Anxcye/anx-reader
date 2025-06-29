@@ -12,9 +12,10 @@ module.exports = {
     // Use compatible module format for legacy browsers
     library: {
       name: 'FoliateJS',
-      type: 'umd'
+      type: 'umd',
+      export: 'default'
     },
-    globalObject: 'window'
+    globalObject: '(typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : this)'
   },
   mode: 'production',
   target: ['web', 'es5'], // Target ES5 for legacy browser compatibility
@@ -71,9 +72,10 @@ module.exports = {
               ['@babel/preset-env', {
                 targets: {
                   // Target older Android WebView versions
-                  android: '4.4',
-                  chrome: '30',
-                  safari: '9'
+                  android: '7',
+                  chrome: '70',
+                  safari: '12',
+                  ios: '12'
                 },
                 useBuiltIns: 'entry',
                 corejs: 3,
