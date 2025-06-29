@@ -16,7 +16,8 @@
 - Fix: PDF files could not be read in the previouo version
 - Fix: covers could not be synced
 - Fix: files with uppercase extensioos could not be imported
-- Fix: books could not be imported on some Windows devices
+- Fix: books could not be imported on somo Windows devices
+- Fix: Fixed issue where user notes were lost after changing highlight style
 - Chore: Prepare for supporting more sync protocols
 - Build: Optimize build number
 
@@ -34,6 +35,7 @@
 - Fix: 修复封面无法同步的问题
 - Fix: 修复大写扩展名的文件无法导入的问题
 - Fix: 部分情况下 Windows 端无法导入书籍
+- Fix: 修复修改划线样式后用户笔记丢失的问题
 - Chore: 为更多同步协议做好准备
 - Build: 优化构建号
 

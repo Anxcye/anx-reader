@@ -88,6 +88,23 @@ class ExcerptMenuState extends State<ExcerptMenu> {
   Future<void> onColorSelected(String color, {bool close = true}) async {
     Prefs().annotationColor = color;
     annoColor = color;
+
+    BookNote? existingNote;
+    DateTime? createTime;
+    String? readerNote;
+
+    if (widget.id != null) {
+      try {
+        existingNote = await selectBookNoteById(widget.id!);
+        createTime = existingNote.createTime;
+        readerNote = existingNote.readerNote;
+      } catch (e) {
+        createTime = DateTime.now();
+      }
+    } else {
+      createTime = DateTime.now();
+    }
+
     BookNote bookNote = BookNote(
       id: widget.id,
       bookId: epubPlayerKey.currentState!.widget.book.id,
@@ -96,7 +113,8 @@ class ExcerptMenuState extends State<ExcerptMenu> {
       chapter: epubPlayerKey.currentState!.chapterTitle,
       type: annoType,
       color: annoColor,
-      createTime: DateTime.now(),
+      readerNote: readerNote,
+      createTime: createTime,
       updateTime: DateTime.now(),
     );
     noteId = await insertBookNote(bookNote);
