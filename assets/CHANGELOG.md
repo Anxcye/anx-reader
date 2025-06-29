@@ -3,6 +3,7 @@
 ## Todo
 
 ## 1.6.1
+- Feat: Support following book indentation
 - Feat: Support choosing whether to enable auto-sync
 - Feat: Add a guide page for first-time users
 - Feat: Show update log after updating
@@ -19,6 +20,7 @@
 - Chore: Prepare for supporting more sync protocols
 - Build: Optimize build number
 
+- Feat: 支持跟随书籍缩进
 - Feat: 支持选择是否开启自动同步功能
 - Feat: 添加首次启动的引导页
 - Feat：更新后能够展示更新日志
