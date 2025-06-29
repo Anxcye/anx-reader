@@ -471,5 +471,6 @@
   "databaseBackupManagement": "إدارة قاعدة البيانات الاحتياطية",
   "settings_sync_auto_sync": "مزامنة السيارات",
   "restoreDatabase": "استعادة قاعدة البيانات",
-  "restoreBackup": "استعادة النسخ الاحتياطي"
+  "restoreBackup": "استعادة النسخ الاحتياطي",
+  "reading_page_indent_no_change": "لا تغيير"
 }

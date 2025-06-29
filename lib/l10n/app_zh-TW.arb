@@ -471,5 +471,6 @@
   "databaseBackupManagement": "數據庫備份管理",
   "settings_sync_auto_sync": "自動同步",
   "restoreDatabase": "還原數據庫",
-  "restoreBackup": "還原備份"
+  "restoreBackup": "還原備份",
+  "reading_page_indent_no_change": "不變"
 }

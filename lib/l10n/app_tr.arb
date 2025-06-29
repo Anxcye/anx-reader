@@ -471,5 +471,6 @@
   "databaseBackupManagement": "Veritabanı yedekleme yönetimi",
   "settings_sync_auto_sync": "Otomatik Senkronizasyon",
   "restoreDatabase": "Veritabanını geri yükle",
-  "restoreBackup": "Yedeklemeyi geri yükle"
+  "restoreBackup": "Yedeklemeyi geri yükle",
+  "reading_page_indent_no_change": "Değişiklik yok"
 }

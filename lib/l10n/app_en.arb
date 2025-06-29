@@ -123,6 +123,7 @@
   "reading_page_line_spacing": "Line Spacing",
   "reading_page_paragraph_spacing": "Paragraph Spacing",
   "reading_page_indent": "Indent",
+  "reading_page_indent_no_change": "No change",
   "reading_page_side_margin": "Side Margin",
   "reading_page_top_margin": "Top Margin",
   "reading_page_bottom_margin": "Bottom Margin",
