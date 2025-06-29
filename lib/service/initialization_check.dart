@@ -41,13 +41,10 @@ class InitializationCheck {
   static Future<VersionCheckType> _checkVersion() async {
     _lastVersion = Prefs().lastAppVersion;
     _currentVersion = await getAppVersion();
-    print('$_lastVersion, $_currentVersion');
-    print(_lastVersion == currentVersion);
     if (_lastVersion == null) {
       return VersionCheckType.firstLaunch;
     } else {
       if (_lastVersion != _currentVersion) {
-        print('updated');
         return VersionCheckType.updated;
       } else {
         return VersionCheckType.normal;
