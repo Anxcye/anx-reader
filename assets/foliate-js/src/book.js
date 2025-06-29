@@ -375,6 +375,7 @@ const getCSS = ({ fontSize,
         widows: 2;
     }
 
+    ${textIndent >= 0 ? `
     p, li, blockquote, dd, font {
         text-indent: ${textIndent}em !important;
     }
@@ -382,6 +383,7 @@ const getCSS = ({ fontSize,
     p img {
       margin-left: -${textIndent}em;
     }
+    ` : ''}
         
     /* prevent the above from overriding the align attribute */
     [align="left"] { text-align: left; }

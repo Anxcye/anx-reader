@@ -123,6 +123,7 @@
   "reading_page_line_spacing": "行间距",
   "reading_page_paragraph_spacing": "段间距",
   "reading_page_indent": "缩进",
+  "reading_page_indent_no_change": "不修改",
   "reading_page_side_margin": "侧边距",
   "reading_page_top_margin": "上边距",
   "reading_page_bottom_margin": "下边距",

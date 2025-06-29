@@ -471,5 +471,6 @@
   "databaseBackupManagement": "Datenbanksicherungsverwaltung",
   "settings_sync_auto_sync": "Auto -Synchronisation",
   "restoreDatabase": "Datenbank wiederherstellen",
-  "restoreBackup": "Backup wiederherstellen"
+  "restoreBackup": "Backup wiederherstellen",
+  "reading_page_indent_no_change": "Keine Änderung"
 }

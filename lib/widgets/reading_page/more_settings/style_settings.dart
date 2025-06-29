@@ -34,10 +34,12 @@ class _StyleSettingsState extends State<StyleSettings> {
                 Prefs().saveBookStyleToPrefs(bookStyle);
               });
             },
-            min: 0,
+            min: -0.5,
             max: 8,
-            divisions: 16,
-            label: bookStyle.indent.toStringAsFixed(1),
+            divisions: 17,
+            label: bookStyle.indent < 0
+                ? L10n.of(context).reading_page_indent_no_change
+                : bookStyle.indent.toStringAsFixed(1),
           ),
         ),
       ]);
