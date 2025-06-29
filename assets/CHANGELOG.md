@@ -18,6 +18,7 @@
 - Fix: files with uppercase extensioos could not be imported
 - Fix: books could not be imported on somo Windows devices
 - Fix: Fixed issue where user notes were lost after changing highlight style
+- Fix: Fixed issue where PDF files could not be imported
 - Chore: Prepare for supporting more sync protocols
 - Build: Optimize build number
 
@@ -36,6 +37,7 @@
 - Fix: 修复大写扩展名的文件无法导入的问题
 - Fix: 部分情况下 Windows 端无法导入书籍
 - Fix: 修复修改划线样式后用户笔记丢失的问题
+- Fix: pdf 无法导入的问题
 - Chore: 为更多同步协议做好准备
 - Build: 优化构建号
 
