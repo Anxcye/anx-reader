@@ -197,13 +197,16 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
       webViewController.evaluateJavascript(source: "goToCfi('$cfi')");
 
   void addAnnotation(BookNote bookNote) {
+    final noteContent = (bookNote.readerNote ?? '')
+        .replaceAll('\n', ' ')
+        .replaceAll("'", "\\'");
     webViewController.evaluateJavascript(source: '''
       addAnnotation({
         id: ${bookNote.id},
         type: '${bookNote.type}',
         value: '${bookNote.cfi}',
         color: '#${bookNote.color}',
-        note: '${bookNote.content.replaceAll('\n', ' ')}',
+        note: '$noteContent',
       })
       ''');
   }
@@ -282,7 +285,7 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
     webViewController.evaluateJavascript(source: "forward()");
   }
 
-  void refreshToc(){
+  void refreshToc() {
     webViewController.evaluateJavascript(source: "refreshToc()");
   }
 
@@ -295,7 +298,6 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
       await webViewController.evaluateJavascript(
         source: "previousContent($count)",
       );
-
 
   void onClick(Map<String, dynamic> location) {
     readingPageKey.currentState?.resetAwakeTimer();
