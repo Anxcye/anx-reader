@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:anx_reader/dao/book.dart';
 import 'package:anx_reader/dao/theme.dart';
+import 'package:anx_reader/enums/sync_direction.dart';
+import 'package:anx_reader/enums/sync_trigger.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/main.dart';
 import 'package:anx_reader/models/book.dart';
@@ -36,11 +38,13 @@ void importBookList(List<File> fileList, BuildContext context, WidgetRef ref) {
   AnxLog.info('importBook fileList: ${fileList.toString()}');
 
   List<File> supportedFiles = fileList.where((file) {
-    return allowBookExtensions.contains(file.path.split('.').last.toLowerCase());
+    return allowBookExtensions
+        .contains(file.path.split('.').last.toLowerCase());
   }).toList();
 
   List<File> unsupportedFiles = fileList.where((file) {
-    return !allowBookExtensions.contains(file.path.split('.').last.toLowerCase());
+    return !allowBookExtensions
+        .contains(file.path.split('.').last.toLowerCase());
   }).toList();
 
   // delete unsupported files
@@ -74,6 +78,7 @@ void importBookList(List<File> fileList, BuildContext context, WidgetRef ref) {
       builder: (BuildContext context) {
         String currentHandlingFile = '';
         List<String> errorFiles = [];
+        bool finished = false;
 
         return StatefulBuilder(builder: (context, setState) {
           return AlertDialog(
@@ -123,23 +128,38 @@ void importBookList(List<File> fileList, BuildContext context, WidgetRef ref) {
               if (supportedFiles.isNotEmpty)
                 TextButton(
                     onPressed: () async {
+                      if (finished) {
+                        Navigator.of(context).pop('dialog');
+                        return;
+                      }
                       for (var file in supportedFiles) {
                         AnxToast.show(file.path.split('/').last);
                         setState(() {
                           currentHandlingFile = file.path;
                         });
-                        // try {
-                        await importBook(file, ref);
-                        // } catch (e) {
-                        //   setState(() {
-                        //     errorFiles.add(file.path);
-                        //   });
-                        // }
+                        try {
+                          await importBook(file, ref);
+                          setState(() {
+                            currentHandlingFile = '';
+                          });
+                        } catch (e) {
+                          setState(() {
+                            errorFiles.add(file.path);
+                          });
+                        }
                       }
-                      Navigator.of(navigatorKey.currentContext!).pop('dialog');
+                      setState(() {
+                        finished = true;
+                      });
+                      ref.read(syncProvider.notifier).syncData(
+                          SyncDirection.upload, ref,
+                          trigger: SyncTrigger.auto);
+                      // Navigator.of(navigatorKey.currentContext!).pop('dialog');
                     },
-                    child: Text(L10n.of(context)
-                        .import_import_n_books(supportedFiles.length))),
+                    child: Text(finished
+                        ? L10n.of(context).common_ok
+                        : L10n.of(context).import_import_n_books(
+                            supportedFiles.length - errorFiles.length))),
             ],
           );
         });

@@ -118,24 +118,31 @@ class SyncStatus extends _$SyncStatus {
     return await selectNotDeleteBooks();
   }
 
-  int? pathToBookId(String filePath) {
+  Future<int?> pathToBookId(String filePath) async {
     if (filePath.endsWith('.db')) {
       return null;
     }
-    return allBooksInBookShelf
-        .firstWhere((e) => filePath.contains(e.filePath))
-        .id;
+    try {
+      return allBooksInBookShelf
+          .firstWhere((e) => filePath.contains(e.filePath))
+          .id;
+    } catch (e) {
+      allBooksInBookShelf = await _listAllBooksInBookShelf();
+      return allBooksInBookShelf
+          .firstWhere((e) => filePath.contains(e.filePath))
+          .id;
+    }
   }
 
   bool isCover(String filePath) {
     return filePath.contains("/cover/");
   }
 
-  void addDownloading(String filePath) {
+  Future<void> addDownloading(String filePath) async {
     if (isCover(filePath)) {
       return;
     }
-    final bookId = pathToBookId(filePath);
+    final bookId = await pathToBookId(filePath);
     if (bookId == null || state.value == null) {
       return;
     }
@@ -151,11 +158,11 @@ class SyncStatus extends _$SyncStatus {
     );
   }
 
-  void addUploading(String filePath) {
+  Future<void> addUploading(String filePath) async {
     if (isCover(filePath)) {
       return;
     }
-    final bookId = pathToBookId(filePath);
+    final bookId = await pathToBookId(filePath);
     if (bookId == null || state.value == null) {
       return;
     }
@@ -171,11 +178,11 @@ class SyncStatus extends _$SyncStatus {
     );
   }
 
-  void removeDownloading(String filePath) {
+  Future<void> removeDownloading(String filePath) async {
     if (isCover(filePath)) {
       return;
     }
-    final bookId = pathToBookId(filePath);
+    final bookId = await pathToBookId(filePath);
     if (bookId == null || state.value == null) {
       return;
     }
@@ -193,11 +200,11 @@ class SyncStatus extends _$SyncStatus {
     ref.invalidateSelf();
   }
 
-  void removeUploading(String filePath) {
+  Future<void> removeUploading(String filePath) async {
     if (isCover(filePath)) {
       return;
     }
-    final bookId = pathToBookId(filePath);
+    final bookId = await  pathToBookId(filePath);
     if (bookId == null || state.value == null) {
       return;
     }
