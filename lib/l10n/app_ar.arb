@@ -472,5 +472,11 @@
   "settings_sync_auto_sync": "مزامنة السيارات",
   "restoreDatabase": "استعادة قاعدة البيانات",
   "restoreBackup": "استعادة النسخ الاحتياطي",
-  "reading_page_indent_no_change": "لا تغيير"
+  "reading_page_indent_no_change": "لا تغيير",
+  "custom_css_enabled": "تمكين CSS مخصص",
+  "css_validation_unmatched_braces": "الأقواس غير متطابقة",
+  "css_validation_missing_semicolon": "فاصلة منقوطة مفقودة في السطر {lineNumber}",
+  "css_save_and_apply": "حفظ وتطبيق",
+  "css_restore_default": "استعادة الافتراضي",
+  "css_editor_hint": "CSS المخصص الخاص بك هنا..."
 }

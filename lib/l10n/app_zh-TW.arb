@@ -472,5 +472,11 @@
   "settings_sync_auto_sync": "自動同步",
   "restoreDatabase": "還原數據庫",
   "restoreBackup": "還原備份",
-  "reading_page_indent_no_change": "不變"
+  "reading_page_indent_no_change": "不變",
+  "custom_css_enabled": "啟用自訂CSS",
+  "css_validation_unmatched_braces": "花括號不匹配",
+  "css_validation_missing_semicolon": "第{lineNumber}行缺少分號",
+  "css_save_and_apply": "儲存並套用",
+  "css_restore_default": "恢復預設",
+  "css_editor_hint": "在此輸入您的自訂CSS..."
 }

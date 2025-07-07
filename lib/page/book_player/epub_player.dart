@@ -159,6 +159,8 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
         maxColumnCount: ${style.maxColumnCount},
         writingMode: '${Prefs().writingMode.code}',
         backgroundImage: '${Prefs().bgimg.url}',
+        customCSS: `${Prefs().customCSS.replaceAll('`', '\\`')}`,
+        customCSSEnabled: ${Prefs().customCSSEnabled},
       })
       ''');
     });

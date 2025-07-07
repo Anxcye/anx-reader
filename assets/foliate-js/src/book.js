@@ -1,4 +1,3 @@
-// Import core-js polyfills for legacy browser support
 import 'core-js/stable';
 
 console.log('book.js')
@@ -303,7 +302,9 @@ const getCSS = ({ fontSize,
   hyphenate,
   writingMode,
   backgroundImage,
-  flow
+  flow,
+  customCSS,
+  customCSSEnabled
 }) => {
 
   const fontFamily = fontName === 'book' ? '' :
@@ -400,6 +401,8 @@ const getCSS = ({ fontSize,
     aside[epub|type~="rearnote"] {
         display: none;
     }
+    
+    ${customCSSEnabled && customCSS ? customCSS : ''}
 `}
 
 const convertChineseHandler = (mode, doc) => {
@@ -510,6 +513,8 @@ const replaceFootnote = (view) => {
     backgroundColor: 'transparent',
     justify: true,
     hyphenate: true,
+    customCSS: style.customCSS,
+    customCSSEnabled: style.customCSSEnabled,
   }
   renderer.setStyles(getCSS(footNoteStyle))
   // set background color of dialog
@@ -1062,7 +1067,9 @@ const setStyle = () => {
     hyphenate: style.hyphenate,
     writingMode: style.writingMode,
     backgroundImage: style.backgroundImage,
-    flow: turn.scroll
+    flow: turn.scroll,
+    customCSS: style.customCSS,
+    customCSSEnabled: style.customCSSEnabled
   }
   reader.view.renderer.setStyles?.(getCSS(newStyle))
 }

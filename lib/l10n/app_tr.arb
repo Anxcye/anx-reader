@@ -472,5 +472,11 @@
   "settings_sync_auto_sync": "Otomatik Senkronizasyon",
   "restoreDatabase": "Veritabanını geri yükle",
   "restoreBackup": "Yedeklemeyi geri yükle",
-  "reading_page_indent_no_change": "Değişiklik yok"
+  "reading_page_indent_no_change": "Değişiklik yok",
+  "custom_css_enabled": "Özel CSS'i Etkinleştir",
+  "css_validation_unmatched_braces": "Eşleşmeyen parantezler",
+  "css_validation_missing_semicolon": "{lineNumber} satırında noktalı virgül eksik",
+  "css_save_and_apply": "Kaydet ve Uygula",
+  "css_restore_default": "Varsayılanı Geri Yükle",
+  "css_editor_hint": "Özel CSS'iniz buraya..."
 }

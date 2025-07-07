@@ -2,6 +2,10 @@
 
 ## Todo
 
+## 1.6.2
+- Feat: Support custom CSS styles
+- Feat: 支持自定义 CSS 样式
+
 ## 1.6.1
 - Feat: Support following book indentation
 - Feat: Support choosing whether to enable auto-sync
