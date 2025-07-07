@@ -818,4 +818,22 @@ class Prefs extends ChangeNotifier {
     }
     notifyListeners();
   }
+
+  set customCSSEnabled(bool enabled) {
+    prefs.setBool('customCSSEnabled', enabled);
+    notifyListeners();
+  }
+
+  bool get customCSSEnabled {
+    return prefs.getBool('customCSSEnabled') ?? false;
+  }
+
+  set customCSS(String css) {
+    prefs.setString('customCSS', css);
+    notifyListeners();
+  }
+
+  String get customCSS {
+    return prefs.getString('customCSS') ?? '';
+  }
 }
