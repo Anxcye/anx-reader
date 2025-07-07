@@ -472,5 +472,11 @@
   "whats_new": "更新内容",
   "databaseBackupManagement": "数据库备份管理",
   "restoreDatabase": "还原数据库",
-  "restoreBackup": "还原备份"
+  "restoreBackup": "还原备份",
+  "custom_css_enabled": "启用自定义CSS",
+  "css_validation_unmatched_braces": "花括号不匹配",
+  "css_validation_missing_semicolon": "第{lineNumber}行缺少分号",
+  "css_save_and_apply": "保存并应用",
+  "css_restore_default": "恢复默认",
+  "css_editor_hint": "在此输入您的自定义CSS..."
 }

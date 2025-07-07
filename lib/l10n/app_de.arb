@@ -472,5 +472,11 @@
   "settings_sync_auto_sync": "Auto -Synchronisation",
   "restoreDatabase": "Datenbank wiederherstellen",
   "restoreBackup": "Backup wiederherstellen",
-  "reading_page_indent_no_change": "Keine Änderung"
+  "reading_page_indent_no_change": "Keine Änderung",
+  "custom_css_enabled": "Benutzerdefiniertes CSS aktivieren",
+  "css_validation_unmatched_braces": "Nicht übereinstimmende Klammern",
+  "css_validation_missing_semicolon": "Fehlender Strichpunkt in Zeile {lineNumber}",
+  "css_save_and_apply": "Speichern & Anwenden",
+  "css_restore_default": "Standard wiederherstellen",
+  "css_editor_hint": "Ihr benutzerdefiniertes CSS hier..."
 }

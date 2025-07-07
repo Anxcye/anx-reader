@@ -81,6 +81,8 @@ String generateUrl(
     'writingMode': Prefs().writingMode.code,
     'backgroundImage': Prefs().bgimg.url,
     'allowScript': Prefs().enableJsForEpub,
+    'customCSS': Prefs().customCSS,
+    'customCSSEnabled': Prefs().customCSSEnabled,
   };
 
   Map<String, dynamic> readingRules = {

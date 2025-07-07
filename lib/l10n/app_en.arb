@@ -472,5 +472,11 @@
   "whats_new": "What's New",
   "databaseBackupManagement": "Database Backup Management",
   "restoreDatabase": "Restore Database",
-  "restoreBackup": "Restore Backup"
+  "restoreBackup": "Restore Backup",
+  "custom_css_enabled": "Enable Custom CSS",
+  "css_validation_unmatched_braces": "Unmatched braces",
+  "css_validation_missing_semicolon": "Missing semicolon on line {lineNumber}",
+  "css_save_and_apply": "Save & Apply",
+  "css_restore_default": "Restore Default",
+  "css_editor_hint": "Your custom CSS here..."
 }
