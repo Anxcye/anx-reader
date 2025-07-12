@@ -12,6 +12,7 @@ class Book {
   String? description;
   double rating;
   int groupId;
+  String? md5;
   DateTime createTime;
   DateTime updateTime;
 
@@ -27,6 +28,7 @@ class Book {
       this.description,
       required this.rating,
       this.groupId = 0,
+      this.md5,
       required this.createTime,
       required this.updateTime});
 
@@ -50,6 +52,7 @@ class Book {
       'description': description,
       'rating': rating,
       'group_id': groupId,
+      'file_md5': md5,
       'create_time': createTime.toIso8601String(),
       'update_time': updateTime.toIso8601String(),
     };
@@ -67,6 +70,7 @@ class Book {
     String? description,
     double? rating,
     int? groupId,
+    String? md5,
     DateTime? createTime,
     DateTime? updateTime,
   }) {
@@ -82,6 +86,7 @@ class Book {
       description: description ?? this.description,
       rating: rating ?? this.rating,
       groupId: groupId ?? this.groupId,
+      md5: md5 ?? this.md5,
       createTime: createTime ?? this.createTime,
       updateTime: updateTime ?? this.updateTime,
     );
