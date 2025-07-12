@@ -133,7 +133,7 @@ Future<List<Book>> getBooksWithoutMd5() async {
   final db = await DBHelper().database;
   final List<Map<String, dynamic>> maps = await db.query(
     'tb_books',
-    where: 'is_deleted = 0 AND (file_md5 IS NULL OR file_md5 = "")',
+    where: "is_deleted = 0 AND (file_md5 IS NULL OR file_md5 = '')",
     orderBy: 'update_time DESC',
   );
 
