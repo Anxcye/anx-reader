@@ -3,8 +3,13 @@
 ## Todo
 
 ## 1.6.2
+- Feat: Support preventing duplicate file imports
+- Feat: Support calculating feature values of existing files to prevent duplicate imports
 - Feat: Support custom CSS styles
 - Fix: Fix sync failure when WebDAV is empty
+
+- Feat: 支持防止文件重复导入
+- Feat：支持计算已有文件特征值，用于防止重复导入
 - Feat: 支持自定义 CSS 样式
 - Fix: WebDAV 为空时同步失败的问题
 
