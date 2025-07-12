@@ -53,3 +53,5 @@ release.sh
 /.vscode/
 CLAUDE.md
 .claude/
+
+macos/DerivedData/
