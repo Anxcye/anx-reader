@@ -14,6 +14,7 @@ import 'package:anx_reader/providers/sync.dart';
 import 'package:anx_reader/providers/book_list.dart';
 import 'package:anx_reader/service/convert_to_epub/txt/convert_from_txt.dart';
 import 'package:anx_reader/service/iap_service.dart';
+import 'package:anx_reader/service/md5_service.dart';
 import 'package:anx_reader/utils/env_var.dart';
 import 'package:anx_reader/utils/get_path/get_base_path.dart';
 import 'package:anx_reader/page/reading_page.dart';
@@ -30,11 +31,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'book_player/book_player_server.dart';
 
 HeadlessInAppWebView? headlessInAppWebView;
+final allowBookExtensions = ["epub", "mobi", "azw3", "fb2", "txt", "pdf"];
 
 /// import book list and **delete file**
 void importBookList(List<File> fileList, BuildContext context, WidgetRef ref) {
-  final allowBookExtensions = ["epub", "mobi", "azw3", "fb2", "txt", "pdf"];
-
   AnxLog.info('importBook fileList: ${fileList.toString()}');
 
   List<File> supportedFiles = fileList.where((file) {
@@ -47,31 +47,136 @@ void importBookList(List<File> fileList, BuildContext context, WidgetRef ref) {
         .contains(file.path.split('.').last.toLowerCase());
   }).toList();
 
+  _checkDuplicatesAndShowDialog(
+    supportedFiles,
+    unsupportedFiles,
+    fileList,
+    context,
+    ref,
+  );
+}
+
+void _checkDuplicatesAndShowDialog(
+    List<File> supportedFiles,
+    List<File> unsupportedFiles,
+    List<File> fileList,
+    BuildContext context,
+    WidgetRef ref) async {
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (context) => AlertDialog(
+      title: Text(L10n.of(context).md5_calculating),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const CircularProgressIndicator(),
+          const SizedBox(height: 16),
+          Text(L10n.of(context).md5_calculating),
+        ],
+      ),
+    ),
+  );
+
+  try {
+    final filePaths = supportedFiles.map((f) => f.path).toList();
+    final checkResults = await MD5Service.checkImportFiles(filePaths);
+
+    Navigator.of(context).pop(); // 关闭进度对话框
+
+    List<File> duplicateFiles = [];
+    List<File> uniqueFiles = [];
+    Map<String, Book> duplicateInfo = {};
+
+    for (int i = 0; i < supportedFiles.length; i++) {
+      final file = supportedFiles[i];
+      final result = checkResults[i];
+
+      if (result.isDuplicate && result.duplicateBook != null) {
+        duplicateFiles.add(file);
+        duplicateInfo[file.path] = result.duplicateBook!;
+      } else {
+        uniqueFiles.add(file);
+      }
+    }
+
+    _showImportDialog(
+      uniqueFiles,
+      duplicateFiles,
+      duplicateInfo,
+      unsupportedFiles,
+      fileList,
+      ref,
+    );
+  } catch (e) {
+    Navigator.of(navigatorKey.currentContext!).pop(); 
+    AnxLog.severe('MD5 check failed: $e');
+    _showImportDialog(
+      supportedFiles,
+      [],
+      {},
+      unsupportedFiles,
+      fileList,
+      ref,
+    );
+  }
+}
+
+void _showImportDialog(
+  List<File> uniqueFiles,
+  List<File> duplicateFiles,
+  Map<String, Book> duplicateInfo,
+  List<File> unsupportedFiles,
+  List<File> fileList,
+  WidgetRef ref,
+) {
   // delete unsupported files
   for (var file in unsupportedFiles) {
     file.deleteSync();
   }
 
-  Widget bookItem(String path, Widget icon) {
-    return Row(
+  BuildContext context = navigatorKey.currentContext!;
+
+  Widget bookItem(String path, Widget icon,
+      {bool isDuplicate = false, String? duplicateTitle}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(
-          width: 24,
-          height: 24,
-          child: icon,
+        Row(
+          children: [
+            SizedBox(
+              width: 24,
+              height: 24,
+              child: icon,
+            ),
+            Expanded(
+              child: Text(
+                path.split('/').last,
+                style: TextStyle(
+                  fontWeight: FontWeight.w300,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ),
+          ],
         ),
-        Expanded(
-          child: Text(
-            path.split('/').last,
-            style: const TextStyle(
-                fontWeight: FontWeight.w300,
-                // fontSize: ,
-                overflow: TextOverflow.ellipsis),
+        if (isDuplicate && duplicateTitle != null)
+          Padding(
+            padding: const EdgeInsets.only(left: 28, top: 2),
+            child: Text(
+              L10n.of(context).duplicate_of(duplicateTitle),
+              style: const TextStyle(
+                fontSize: 12,
+                color: Colors.grey,
+              ),
+            ),
           ),
-        ),
       ],
     );
   }
+
+  final supportedFiles = [...uniqueFiles, ...duplicateFiles];
+  bool skipDuplicates = true;
 
   showDialog(
       context: context,
@@ -84,20 +189,18 @@ void importBookList(List<File> fileList, BuildContext context, WidgetRef ref) {
           return AlertDialog(
             title:
                 Text(L10n.of(context).import_n_books_selected(fileList.length)),
+            contentPadding: const EdgeInsets.all(16),
             content: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(L10n.of(context)
                       .import_support_types(allowBookExtensions.join(' / '))),
+
                   const SizedBox(height: 10),
-                  if (unsupportedFiles.isNotEmpty)
-                    Text(L10n.of(context)
-                        .import_n_books_not_support(unsupportedFiles.length)),
-                  const SizedBox(height: 20),
-                  for (var file in unsupportedFiles)
-                    bookItem(file.path, const Icon(Icons.error)),
-                  for (var file in supportedFiles)
+
+                  // show unique files
+                  for (var file in uniqueFiles)
                     file.path == currentHandlingFile
                         ? bookItem(
                             file.path,
@@ -112,6 +215,72 @@ void importBookList(List<File> fileList, BuildContext context, WidgetRef ref) {
                             errorFiles.contains(file.path)
                                 ? const Icon(Icons.error)
                                 : const Icon(Icons.done)),
+
+                  // show unsupported files
+                  if (unsupportedFiles.isNotEmpty) ...[
+                    Divider(),
+                    SizedBox(height: 10),
+                    Text(L10n.of(context)
+                        .import_n_books_not_support(unsupportedFiles.length))
+                  ],
+                  for (var file in unsupportedFiles)
+                    bookItem(file.path, const Icon(Icons.error)),
+
+                  // show duplicate files
+                  if (duplicateFiles.isNotEmpty) ...[
+                    Divider(),
+                    const SizedBox(height: 10),
+                    Text(L10n.of(context).duplicate_file),
+                  ],
+                  for (var file in duplicateFiles)
+                    if (skipDuplicates)
+                      bookItem(
+                        file.path,
+                        const Icon(Icons.double_arrow_rounded),
+                        isDuplicate: true,
+                        duplicateTitle: duplicateInfo[file.path]?.title,
+                      )
+                    else
+                      file.path == currentHandlingFile
+                          ? bookItem(
+                              file.path,
+                              Container(
+                                padding: const EdgeInsets.all(3),
+                                width: 20,
+                                height: 20,
+                                child: const CircularProgressIndicator(),
+                              ),
+                              isDuplicate: true,
+                              duplicateTitle: duplicateInfo[file.path]?.title,
+                            )
+                          : bookItem(
+                              file.path,
+                              errorFiles.contains(file.path)
+                                  ? const Icon(Icons.error)
+                                  : const Icon(Icons.done),
+                              isDuplicate: true,
+                              duplicateTitle: duplicateInfo[file.path]?.title,
+                            ),
+
+                  // select skip duplicates
+                  if (duplicateFiles.isNotEmpty) ...[
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Checkbox(
+                          value: skipDuplicates,
+                          onChanged: (value) {
+                            setState(() {
+                              skipDuplicates = value ?? true;
+                            });
+                          },
+                        ),
+                        Expanded(
+                          child: Text(L10n.of(context).skip_duplicate_files),
+                        ),
+                      ],
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -125,14 +294,21 @@ void importBookList(List<File> fileList, BuildContext context, WidgetRef ref) {
                 },
                 child: Text(L10n.of(context).common_cancel),
               ),
-              if (supportedFiles.isNotEmpty)
+              if (uniqueFiles.isNotEmpty ||
+                  (duplicateFiles.isNotEmpty && !skipDuplicates))
                 TextButton(
                     onPressed: () async {
                       if (finished) {
                         Navigator.of(context).pop('dialog');
                         return;
                       }
-                      for (var file in supportedFiles) {
+
+                      List<File> filesToImport = [...uniqueFiles];
+                      if (!skipDuplicates) {
+                        filesToImport.addAll(duplicateFiles);
+                      }
+
+                      for (var file in filesToImport) {
                         AnxToast.show(file.path.split('/').last);
                         setState(() {
                           currentHandlingFile = file.path;
@@ -148,18 +324,29 @@ void importBookList(List<File> fileList, BuildContext context, WidgetRef ref) {
                           });
                         }
                       }
+
+                      // dumplicateFiles will be deleted if skipDuplicates is true
+                      // if skipDuplicates is false, they will be imported
+                      // and then deleted in the importBook function
+                      if (skipDuplicates) {
+                        for (var file in duplicateFiles) {
+                          file.deleteSync();
+                        }
+                      }
+
                       setState(() {
                         finished = true;
                       });
                       ref.read(syncProvider.notifier).syncData(
                           SyncDirection.upload, ref,
                           trigger: SyncTrigger.auto);
-                      // Navigator.of(navigatorKey.currentContext!).pop('dialog');
                     },
                     child: Text(finished
                         ? L10n.of(context).common_ok
                         : L10n.of(context).import_import_n_books(
-                            supportedFiles.length - errorFiles.length))),
+                            uniqueFiles.length +
+                                (skipDuplicates ? 0 : duplicateFiles.length) -
+                                errorFiles.length))),
             ],
           );
         });
@@ -255,6 +442,8 @@ Future<void> saveBook(
 
   dbCoverPath = await saveImageToLocal(cover, dbCoverPath);
 
+  String? md5 = await MD5Service.calculateFileMd5(filePath);
+
   Book book = Book(
       id: provideBook != null ? provideBook.id : -1,
       title: title,
@@ -265,6 +454,7 @@ Future<void> saveBook(
       author: author,
       isDeleted: false,
       rating: 0.0,
+      md5: md5,
       createTime: DateTime.now(),
       updateTime: DateTime.now());
 
