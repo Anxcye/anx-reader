@@ -65,38 +65,45 @@ class _AdvancedSettingState extends State<AdvancedSetting> {
           tiles: [
             if (_md5Stats != null)
               SettingsTile(
-                title: Column(
+                title: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(L10n.of(context).md5_statistics),
-                    const SizedBox(height: 4),
-                    Text(
-                      L10n.of(context).md5_total_books(_md5Stats!.totalBooks),
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                    Text(
-                      L10n.of(context)
-                          .md5_books_with_md5(_md5Stats!.booksWithMd5),
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                    Text(
-                      L10n.of(context)
-                          .md5_books_without_md5(_md5Stats!.booksWithoutMd5),
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                    Text(
-                      L10n.of(context)
-                          .md5_local_files(_md5Stats!.localFilesCount),
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                    Text(
-                      L10n.of(context).md5_local_files_without_md5(
-                          _md5Stats!.localFilesWithoutMd5),
-                      style: Theme.of(context).textTheme.bodySmall,
+                    const Icon(Icons.fingerprint),
+                    SizedBox(width: 8),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(L10n.of(context).md5_statistics),
+                        const SizedBox(height: 4),
+                        Text(
+                          L10n.of(context)
+                              .md5_total_books(_md5Stats!.totalBooks),
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                        Text(
+                          L10n.of(context)
+                              .md5_books_with_md5(_md5Stats!.booksWithMd5),
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                        Text(
+                          L10n.of(context).md5_books_without_md5(
+                              _md5Stats!.booksWithoutMd5),
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                        Text(
+                          L10n.of(context)
+                              .md5_local_files(_md5Stats!.localFilesCount),
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                        Text(
+                          L10n.of(context).md5_local_files_without_md5(
+                              _md5Stats!.localFilesWithoutMd5),
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ],
                     ),
                   ],
                 ),
-                leading: const Icon(Icons.fingerprint),
               ),
             if (_isCalculating)
               SettingsTile(
@@ -170,7 +177,7 @@ class _AdvancedSettingState extends State<AdvancedSetting> {
                 ),
                 child: Row(
                   children: [
-                     Icon(Icons.info_outline,
+                    Icon(Icons.info_outline,
                         color: Theme.of(context).colorScheme.primary, size: 16),
                     const SizedBox(width: 8),
                     Expanded(
