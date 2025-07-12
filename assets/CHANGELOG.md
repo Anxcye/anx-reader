@@ -4,7 +4,9 @@
 
 ## 1.6.2
 - Feat: Support custom CSS styles
+- Fix: Fix sync failure when WebDAV is empty
 - Feat: 支持自定义 CSS 样式
+- Fix: WebDAV 为空时同步失败的问题
 
 ## 1.6.1
 - Feat: Support following book indentation
