@@ -129,7 +129,7 @@ class WebdavClient extends SyncClientBase {
       return await readDir(path);
     } catch (e) {
       await mkdir(path);
-      return await readDir(path);
+      return [];
     }
   }
 
