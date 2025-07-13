@@ -17,7 +17,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 
 class StatisticPage extends StatefulWidget {
-  const StatisticPage({super.key});
+  const StatisticPage({super.key, this.controller});
+
+  final ScrollController? controller;
 
   @override
   State<StatisticPage> createState() => _StatisticPageState();
@@ -27,6 +29,8 @@ class _StatisticPageState extends State<StatisticPage> {
   int totalNumberOfBook = 0;
   int totalNumberOfDate = 0;
   int totalNumberOfNotes = 0;
+  late final ScrollController _scrollController =
+      widget.controller ?? ScrollController();
 
   void setNumbers() async {
     final numberOfBook = await selectTotalNumberOfBook();
@@ -41,6 +45,7 @@ class _StatisticPageState extends State<StatisticPage> {
 
   @override
   void initState() {
+    print("@@@");
     setNumbers();
     super.initState();
   }
@@ -73,6 +78,7 @@ class _StatisticPageState extends State<StatisticPage> {
                     const SizedBox(width: 20),
                     Expanded(
                       child: ListView(
+                        controller: _scrollController,
                         children: const [
                           DateBooks(),
                         ],
@@ -89,11 +95,13 @@ class _StatisticPageState extends State<StatisticPage> {
                     baseStatistic(context),
                     const SizedBox(height: 30),
                     Expanded(
-                      child: ListView(children: const [
-                        StatisticCard(),
-                        SizedBox(height: 20),
-                        DateBooks(),
-                      ]),
+                      child: ListView(
+                          controller: _scrollController,
+                          children: const [
+                            StatisticCard(),
+                            SizedBox(height: 20),
+                            DateBooks(),
+                          ]),
                     ),
                   ],
                 );

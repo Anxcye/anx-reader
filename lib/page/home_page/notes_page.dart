@@ -12,13 +12,17 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class NotesPage extends StatefulWidget {
-  const NotesPage({super.key});
+  const NotesPage({super.key, this.controller});
+
+  final ScrollController? controller;
 
   @override
   State<NotesPage> createState() => _NotesPageState();
 }
 
 class _NotesPageState extends State<NotesPage> {
+  late final ScrollController _scrollController =
+      widget.controller ?? ScrollController();
   @override
   void initState() {
     super.initState();
@@ -124,6 +128,7 @@ class _NotesPageState extends State<NotesPage> {
                 ? const Expanded(child: Center(child: NotesTips()))
                 : Expanded(
                     child: ListView.builder(
+                      controller: _scrollController,
                         itemCount: snapshot.data!.length,
                         itemBuilder: (context, index) {
                           return bookNotes(
