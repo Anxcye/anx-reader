@@ -1,0 +1,103 @@
+name: Build Windows
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
+    secrets:
+      SIGNPATH_API_TOKEN:
+        required: true
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: '3.32.4'
+
+      - name: Get Dependencies
+        run: |
+          flutter --version
+          flutter pub get
+
+      - name: Prepare for Windows
+        shell: bash
+        run: |
+          flutter config --enable-windows-desktop
+          sed -i "1i #define MyAppVersion \"${{ inputs.version }}\"" scripts/compile_windows_setup-inno.iss
+
+      - name: Install winget
+        uses: Cyberboss/install-winget@v1
+
+      - name: Build for Windows
+        shell: pwsh
+        run: ./scripts/build_windows.ps1
+
+      - name: Upload unsigned Windows zip
+        uses: actions/upload-artifact@v4
+        id: upload-unsigned-zip
+        with:
+          name: windows-unsigned-zip
+          path: build/windows/unsigned/app.zip
+          if-no-files-found: error
+
+      - name: Sign Windows zip
+        uses: signpath/github-action-submit-signing-request@v1.1
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: '254a26d6-6c3a-4a55-9ca6-890d0d34deb1'
+          project-slug: 'anx-reader'
+          signing-policy-slug: 'release-signing'
+          artifact-configuration-slug: 'initial_zip'
+          github-artifact-id: ${{ steps.upload-unsigned-zip.outputs.artifact-id }}
+          wait-for-completion: true
+          output-artifact-directory: 'build/windows'
+      
+      - name: Build unsigned Windows exe
+        shell: pwsh
+        run: ./scripts/build_windows_exe.ps1
+
+      - name: Upload unsigned Windows exe
+        uses: actions/upload-artifact@v4
+        id: upload-unsigned-exe
+        with:
+          name: windows-unsigned-exe
+          path: build/windows/unsigned/app.exe
+          if-no-files-found: error
+
+      - name: Sign Windows exe
+        uses: signpath/github-action-submit-signing-request@v1.1
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: 254a26d6-6c3a-4a55-9ca6-890d0d34deb1
+          project-slug: 'anx-reader'
+          signing-policy-slug: 'release-signing'
+          artifact-configuration-slug: 'initial_exe'
+          github-artifact-id: ${{ steps.upload-unsigned-exe.outputs.artifact-id }}
+          wait-for-completion: true
+          output-artifact-directory: 'build/windows'
+
+      - name: Rename builds
+        run: |
+          cd build
+          mv windows/app.zip windows/Anx-Reader-windows-${{ inputs.version }}.zip
+          mv windows/app.exe windows/Anx-Reader-windows-${{ inputs.version }}.exe
+        shell: bash
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-artifacts
+          path: |
+            build/windows/*.zip
+            build/windows/*.exe
+          if-no-files-found: error

@@ -1,0 +1,61 @@
+name: Release
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
+      is_alpha:
+        required: true
+        type: string
+      is_beta:
+        required: true
+        type: string
+      release_notes:
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  upload-artifacts:
+    if: inputs.is_alpha == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Upload Alpha Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: alpha-release-${{ inputs.version }}
+          path: artifacts/
+          if-no-files-found: warn
+
+  create-release:
+    if: inputs.is_alpha != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            artifacts/android-artifacts/*.apk
+            artifacts/windows-artifacts/*.zip
+            artifacts/windows-artifacts/*.exe
+            artifacts/macos-artifacts/*.dmg
+            artifacts/macos-artifacts/*.zip
+            artifacts/ios-artifacts/*.ipa
+            artifacts/ios-artifacts/*.zip
+          body: ${{ inputs.release_notes }}
+          generate_release_notes: false
+          prerelease: ${{ inputs.is_beta == 'true' }}
