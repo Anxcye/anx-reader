@@ -6,6 +6,7 @@ import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/page/book_detail.dart';
 import 'package:anx_reader/providers/statistic_data.dart';
+import 'package:anx_reader/providers/total_reading_time.dart';
 import 'package:anx_reader/utils/date/convert_seconds.dart';
 import 'package:anx_reader/utils/date/week_of_year.dart';
 import 'package:anx_reader/widgets/bookshelf/book_cover.dart';
@@ -45,7 +46,6 @@ class _StatisticPageState extends State<StatisticPage> {
 
   @override
   void initState() {
-    print("@@@");
     setNumbers();
     super.initState();
   }
@@ -68,7 +68,7 @@ class _StatisticPageState extends State<StatisticPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _totalReadTime(),
+                          const TotalReadTime(),
                           const SizedBox(height: 20),
                           baseStatistic(context),
                           const StatisticCard(),
@@ -90,7 +90,7 @@ class _StatisticPageState extends State<StatisticPage> {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _totalReadTime(),
+                    const TotalReadTime(),
                     const SizedBox(height: 20),
                     baseStatistic(context),
                     const SizedBox(height: 30),
@@ -147,24 +147,28 @@ class _StatisticPageState extends State<StatisticPage> {
   }
 }
 
-Widget _totalReadTime() {
-  TextStyle textStyle = const TextStyle(
-    fontSize: 30,
-    fontWeight: FontWeight.bold,
-  );
+class TotalReadTime extends ConsumerWidget {
+  const TotalReadTime({super.key});
 
-  TextStyle digitStyle = const TextStyle(
-    fontSize: 24,
-    fontWeight: FontWeight.bold,
-  );
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final totalReadingTime = ref.watch(totalReadingTimeProvider);
 
-  return FutureBuilder<int>(
-    future: selectTotalReadingTime(),
-    builder: (context, snapshot) {
-      if (snapshot.connectionState == ConnectionState.done) {
+    TextStyle textStyle = const TextStyle(
+      fontSize: 30,
+      fontWeight: FontWeight.bold,
+    );
+
+    TextStyle digitStyle = const TextStyle(
+      fontSize: 24,
+      fontWeight: FontWeight.bold,
+    );
+
+    return totalReadingTime.when(
+      data: (totalSeconds) {
         // 12 h 34 m
-        int H = snapshot.data! ~/ 3600;
-        int M = (snapshot.data! % 3600) ~/ 60;
+        int H = totalSeconds ~/ 3600;
+        int M = (totalSeconds % 3600) ~/ 60;
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -193,11 +197,11 @@ Widget _totalReadTime() {
             )
           ],
         );
-      } else {
-        return const CircularProgressIndicator();
-      }
-    },
-  );
+      },
+      loading: () => const CircularProgressIndicator(),
+      error: (error, stack) => Text('Error: $error'),
+    );
+  }
 }
 
 class DateBooks extends ConsumerStatefulWidget {
