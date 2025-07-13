@@ -128,7 +128,7 @@ flutter:
     - assets/images/
     - assets/images/book_share/
     - assets/images/bgimg/
-    - assets/icon/Anx-logo.png
+    - assets/icon/
     - assets/CHANGELOG.md
 
   fonts:

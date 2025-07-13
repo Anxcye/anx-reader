@@ -140,8 +140,8 @@ class _HomePageState extends ConsumerState<HomePage> {
       );
     }).toList();
 
-    List<NavigationDestination> bottomBarItems = navBarItems.map((item) {
-      return NavigationDestination(
+    List<BottomNavigationBarItem> bottomBarItems = navBarItems.map((item) {
+      return BottomNavigationBarItem(
         icon: Icon(item['icon'] as IconData),
         label: item['label'] as String,
       );
@@ -152,36 +152,55 @@ class _HomePageState extends ConsumerState<HomePage> {
         _expanded ??= constraints.maxWidth > 1000;
         if (constraints.maxWidth > 600) {
           return Scaffold(
+            extendBody: true,
             body: Row(
               children: [
-                NavigationRail(
-                  trailing: Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        IconButton(
-                          alignment: Alignment.bottomLeft,
-                          icon: const Icon(Icons.menu),
-                          onPressed: () {
-                            _expanded = !_expanded!;
-                            setState(() {});
-                          },
+                Container(
+                  margin: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    // color: ElevationOverlay.applySurfaceTint(
+                    //   Theme.of(context).colorScheme.surface,
+                    //   Theme.of(context).colorScheme.primary,
+                    //   3,
+                    // ),
+                    borderRadius: BorderRadius.circular(20),
+                    // boxShadow: [
+                    //   BoxShadow(
+                    //     color: Theme.of(context).primaryColor.withAlpha(100),
+                    //     blurRadius: 8,
+                    //     offset: const Offset(2, 0),
+                    //   ),
+                    // ],
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: NavigationRail(
+                      leading: Expanded(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(right:2.0),
+                              child: Image.asset(
+                                width: 32,
+                                height: 32,
+                                'assets/icon/Anx-logo-tined.png',
+                                color: Theme.of(context).colorScheme.secondary,
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 20),
-                      ],
+                      ),
+                      groupAlignment: 0,
+                      extended: false,
+                      selectedIndex: _currentIndex,
+                      onDestinationSelected: _onBottomTap,
+                      destinations: railBarItems,
+                      labelType: NavigationRailLabelType.all,
+                      backgroundColor: Colors.transparent,
+                      // elevation: 0,
                     ),
                   ),
-                  extended: _expanded!,
-                  selectedIndex: _currentIndex,
-                  onDestinationSelected: _onBottomTap,
-                  destinations: railBarItems,
-                  labelType: _expanded!
-                      ? NavigationRailLabelType.none
-                      : NavigationRailLabelType.all,
-                  backgroundColor: ElevationOverlay.applySurfaceTint(
-                      Theme.of(context).colorScheme.surface,
-                      Theme.of(context).colorScheme.primary,
-                      1),
                 ),
                 Expanded(child: pages[_currentIndex]),
               ],
@@ -189,13 +208,49 @@ class _HomePageState extends ConsumerState<HomePage> {
           );
         } else {
           return Scaffold(
-            body: pages[_currentIndex],
-            bottomNavigationBar: NavigationBar(
-              selectedIndex: _currentIndex,
-              onDestinationSelected: _onBottomTap,
-              destinations: bottomBarItems,
+            extendBody: true,
+            body: Stack(
+              children: [
+                pages[_currentIndex],
+                Positioned(
+                  left: 16,
+                  right: 16,
+                  bottom: MediaQuery.of(context).padding.bottom + 16,
+                  child: Container(
+                    constraints: const BoxConstraints(
+                      maxWidth: 280,
+                    ),
+                    height: 64,
+                    decoration: BoxDecoration(
+                      color: ElevationOverlay.applySurfaceTint(
+                        Theme.of(context).colorScheme.surface,
+                        Theme.of(context).colorScheme.primary,
+                        3,
+                      ),
+                      borderRadius: BorderRadius.circular(32),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Theme.of(context).colorScheme.primaryContainer.withAlpha(100),
+                          blurRadius: 8,
+                        ),
+                      ],
+                    ),
+                    child: BottomNavigationBar(
+                      enableFeedback: false,
+                      type: BottomNavigationBarType.fixed,
+                      landscapeLayout:
+                          BottomNavigationBarLandscapeLayout.linear,
+                      currentIndex: _currentIndex,
+                      onTap: _onBottomTap,
+                      items: bottomBarItems,
+                      backgroundColor: Colors.transparent,
+                      elevation: 0,
+                      // height: 64,
+                    ),
+                  ),
+                ),
+              ],
             ),
-            // ],
           );
         }
       },
