@@ -122,9 +122,9 @@ class _HomePageState extends ConsumerState<HomePage> {
     Widget pages(int index, ScrollController? controller) {
       final page = [
         BookshelfPage(controller: controller),
-        if (Prefs().bottomNavigatorShowStatistics) const StatisticPage(),
-        if (Prefs().bottomNavigatorShowNote) const NotesPage(),
-        const SettingsPage(),
+        if (Prefs().bottomNavigatorShowStatistics)  StatisticPage(controller: controller,),
+        if (Prefs().bottomNavigatorShowNote)  NotesPage(controller: controller),
+         SettingsPage(controller: controller),
       ];
       return page[index];
     }
