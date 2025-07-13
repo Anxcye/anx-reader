@@ -55,3 +55,12 @@ CLAUDE.md
 .claude/
 
 macos/DerivedData/
+
+.env
+*.jks
+key.properties
+google_service_account.json
+**/fastlane/report.xml
+**/fastlane/Preview.html
+**/fastlane/screenshots
+**/fastlane/test_output
