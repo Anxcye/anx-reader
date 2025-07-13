@@ -1,43 +1,29 @@
 import 'package:anx_reader/dao/book.dart';
-import 'package:anx_reader/dao/book_note.dart';
 import 'package:anx_reader/dao/reading_time.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/page/book_notes_page.dart';
+import 'package:anx_reader/providers/notes_page_current_book.dart';
+import 'package:anx_reader/providers/notes_statistics.dart';
 import 'package:anx_reader/utils/date/convert_seconds.dart';
 import 'package:anx_reader/widgets/bookshelf/book_cover.dart';
 import 'package:anx_reader/widgets/highlight_digit.dart';
 import 'package:anx_reader/widgets/tips/notes_tips.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class NotesPage extends StatefulWidget {
+class NotesPage extends ConsumerStatefulWidget {
   const NotesPage({super.key, this.controller});
 
   final ScrollController? controller;
 
   @override
-  State<NotesPage> createState() => _NotesPageState();
+  ConsumerState<NotesPage> createState() => _NotesPageState();
 }
 
-class _NotesPageState extends State<NotesPage> {
+class _NotesPageState extends ConsumerState<NotesPage> {
   late final ScrollController _scrollController =
       widget.controller ?? ScrollController();
-  @override
-  void initState() {
-    super.initState();
-    initialBook();
-  }
-
-  void initialBook() async {
-    List<Map<String, int>> bookIdAndNotes = await selectAllBookIdAndNotes();
-
-    if (bookIdAndNotes.isNotEmpty) {
-      Book book = await selectBookById(bookIdAndNotes[0]['bookId']!);
-      Provider.of<NotesDetailModel>(context, listen: false)
-          .updateCurrentBook(book, bookIdAndNotes[0]['numberOfNotes']!);
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -79,73 +65,70 @@ class _NotesPageState extends State<NotesPage> {
   }
 
   Widget notesStatistic() {
+    final notesStats = ref.watch(notesStatisticsProvider);
+
     TextStyle digitStyle = const TextStyle(
       fontSize: 24,
       fontWeight: FontWeight.bold,
-      // fontFamily: 'SourceHanSerif',
     );
-    TextStyle textStyle = const TextStyle(
-        fontSize: 18,
-        // fontWeight: FontWeight.bold,
-        fontFamily: 'SourceHanSerif');
-    return FutureBuilder<Map<String, int>>(
-        future: selectNumberOfNotesAndBooks(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
-            return Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    highlightDigit(
-                      context,
-                      L10n.of(context)
-                          .notes_notes_across(snapshot.data!['numberOfNotes']!),
-                      textStyle,
-                      digitStyle,
-                    ),
-                    highlightDigit(
-                      context,
-                      L10n.of(context)
-                          .notes_books(snapshot.data!['numberOfBooks']!),
-                      textStyle,
-                      digitStyle,
-                    ),
-                  ]),
-            );
-          } else {
-            return const CircularProgressIndicator();
-          }
-        });
+    TextStyle textStyle =
+        const TextStyle(fontSize: 18, fontFamily: 'SourceHanSerif');
+
+    return notesStats.when(
+      data: (data) {
+        return Padding(
+          padding: const EdgeInsets.all(10.0),
+          child:
+              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            highlightDigit(
+              context,
+              L10n.of(context).notes_notes_across(data['numberOfNotes']!),
+              textStyle,
+              digitStyle,
+            ),
+            highlightDigit(
+              context,
+              L10n.of(context).notes_books(data['numberOfBooks']!),
+              textStyle,
+              digitStyle,
+            ),
+          ]),
+        );
+      },
+      loading: () => const CircularProgressIndicator(),
+      error: (error, stack) => Text('Error: $error'),
+    );
   }
 
   Widget bookNotesList(bool isMobile) {
-    return FutureBuilder<List<Map<String, int>>>(
-        future: selectAllBookIdAndNotes(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
-            return snapshot.data!.isEmpty
-                ? const Expanded(child: Center(child: NotesTips()))
-                : Expanded(
-                    child: ListView.builder(
-                      controller: _scrollController,
-                        itemCount: snapshot.data!.length,
-                        itemBuilder: (context, index) {
-                          return bookNotes(
-                              context,
-                              snapshot.data![index]['bookId']!,
-                              snapshot.data![index]['numberOfNotes']!,
-                              isMobile);
-                        }),
-                  );
-          } else {
-            return const CircularProgressIndicator();
-          }
-        });
+    final bookIdAndNotes = ref.watch(bookIdAndNotesProvider);
+
+    return bookIdAndNotes.when(
+      data: (data) {
+        return data.isEmpty
+            ? const Expanded(child: Center(child: NotesTips()))
+            : Expanded(
+                child: ListView.builder(
+                    controller: _scrollController,
+                    itemCount: data.length,
+                    itemBuilder: (context, index) {
+                      return bookNotes(
+                          bookId: data[index]['bookId']!,
+                          numberOfNotes: data[index]['numberOfNotes']!,
+                          isMobile: isMobile);
+                    }),
+              );
+      },
+      loading: () => const CircularProgressIndicator(),
+      error: (error, stack) => Text('Error: $error'),
+    );
   }
 
-  Widget bookNotes(
-      BuildContext context, int bookId, int numberOfNotes, bool isMobile) {
+  Widget bookNotes({
+    required int bookId,
+    required int numberOfNotes,
+    required bool isMobile,
+  }) {
     TextStyle digitStyle = const TextStyle(
       fontSize: 28,
       fontWeight: FontWeight.bold,
@@ -180,8 +163,9 @@ class _NotesPageState extends State<NotesPage> {
                             )),
                   );
                 } else {
-                  Provider.of<NotesDetailModel>(context, listen: false)
-                      .updateCurrentBook(snapshot.data!, numberOfNotes);
+                  ref
+                      .read(notesPageCurrentBookProvider.notifier)
+                      .setData(snapshot.data!, numberOfNotes);
                 }
               },
               child: Card(
@@ -250,35 +234,20 @@ class _NotesPageState extends State<NotesPage> {
   }
 }
 
-class NotesDetail extends StatelessWidget {
+class NotesDetail extends ConsumerWidget {
   const NotesDetail({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Consumer<NotesDetailModel>(
-      builder: (context, model, child) {
-        return model.currentBookNotes;
-      },
-    );
-  }
-}
-
-class NotesDetailModel with ChangeNotifier {
-  Book? currentBook;
-  int currentNumberOfNotes = 0;
-
-  Widget get currentBookNotes {
-    return currentBook == null
-        ? const Center(child: NotesTips())
-        : BookNotesPage(
-            isMobile: false,
-            book: currentBook!,
-            numberOfNotes: currentNumberOfNotes);
-  }
-
-  void updateCurrentBook(Book book, int numberOfNotes) {
-    currentBook = book;
-    currentNumberOfNotes = numberOfNotes;
-    notifyListeners();
+  Widget build(BuildContext context, WidgetRef ref) {
+    return ref.watch(notesPageCurrentBookProvider).when(
+          data: (current) {
+            return BookNotesPage(
+                isMobile: false,
+                book: current.book,
+                numberOfNotes: current.numberOfNotes);
+          },
+          loading: () => const CircularProgressIndicator(),
+          error: (error, stack) => Text('Error: $error'),
+        );
   }
 }

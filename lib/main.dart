@@ -7,7 +7,6 @@ import 'package:anx_reader/enums/sync_trigger.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/models/window_info.dart';
 import 'package:anx_reader/page/home_page.dart';
-import 'package:anx_reader/page/home_page/notes_page.dart';
 import 'package:anx_reader/service/book_player/book_player_server.dart';
 import 'package:anx_reader/service/iap_service.dart';
 import 'package:anx_reader/service/tts/tts_handler.dart';
@@ -153,9 +152,6 @@ class _MyAppState extends ConsumerState<MyApp>
         provider.ChangeNotifierProvider(
           create: (_) => Prefs(),
         ),
-        provider.ChangeNotifierProvider(
-          create: (_) => NotesDetailModel(),
-        )
       ],
       child: provider.Consumer<Prefs>(
         builder: (context, prefsNotifier, child) {
