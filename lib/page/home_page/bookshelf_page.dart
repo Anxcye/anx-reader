@@ -23,14 +23,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:icons_plus/icons_plus.dart';
 
 class BookshelfPage extends ConsumerStatefulWidget {
-  const BookshelfPage({super.key});
+  const BookshelfPage({super.key,
+  this.controller  
+  });
+  final ScrollController? controller;
 
   @override
   ConsumerState<BookshelfPage> createState() => BookshelfPageState();
 }
 
 class BookshelfPageState extends ConsumerState<BookshelfPage> {
-  final _scrollController = ScrollController();
+  late final _scrollController = widget.controller ?? ScrollController();
   final _gridViewKey = GlobalKey();
   bool _dragging = false;
   String? _searchValue;
