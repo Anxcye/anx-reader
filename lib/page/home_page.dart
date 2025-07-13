@@ -17,6 +17,7 @@ import 'package:anx_reader/utils/log/common.dart';
 import 'package:anx_reader/providers/sync.dart';
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/utils/toast/common.dart';
+import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
@@ -118,12 +119,16 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> pages = [
-      const BookshelfPage(),
-      if (Prefs().bottomNavigatorShowStatistics) const StatisticPage(),
-      if (Prefs().bottomNavigatorShowNote) const NotesPage(),
-      const SettingsPage(),
-    ];
+    Widget pages(int index, ScrollController? controller) {
+      final page = [
+        BookshelfPage(controller: controller),
+        if (Prefs().bottomNavigatorShowStatistics) const StatisticPage(),
+        if (Prefs().bottomNavigatorShowNote) const NotesPage(),
+        const SettingsPage(),
+      ];
+      return page[index];
+    }
+
     List<Map<String, dynamic>> navBarItems = [
       {'icon': EvaIcons.book_open, 'label': L10n.of(context).navBar_bookshelf},
       if (Prefs().bottomNavigatorShowStatistics)
@@ -158,19 +163,12 @@ class _HomePageState extends ConsumerState<HomePage> {
                 Container(
                   margin: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    // color: ElevationOverlay.applySurfaceTint(
-                    //   Theme.of(context).colorScheme.surface,
-                    //   Theme.of(context).colorScheme.primary,
-                    //   3,
-                    // ),
+                    color: ElevationOverlay.applySurfaceTint(
+                      Theme.of(context).colorScheme.surface,
+                      Theme.of(context).colorScheme.primary,
+                      3,
+                    ),
                     borderRadius: BorderRadius.circular(20),
-                    // boxShadow: [
-                    //   BoxShadow(
-                    //     color: Theme.of(context).primaryColor.withAlpha(100),
-                    //     blurRadius: 8,
-                    //     offset: const Offset(2, 0),
-                    //   ),
-                    // ],
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(20),
@@ -180,7 +178,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
                             Padding(
-                              padding: const EdgeInsets.only(right:2.0),
+                              padding: const EdgeInsets.only(right: 2.0),
                               child: Image.asset(
                                 width: 32,
                                 height: 32,
@@ -202,7 +200,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                     ),
                   ),
                 ),
-                Expanded(child: pages[_currentIndex]),
+                Expanded(child: pages(_currentIndex, null)),
               ],
             ),
           );
@@ -211,15 +209,12 @@ class _HomePageState extends ConsumerState<HomePage> {
             extendBody: true,
             body: Stack(
               children: [
-                pages[_currentIndex],
-                Positioned(
-                  left: 16,
-                  right: 16,
-                  bottom: MediaQuery.of(context).padding.bottom + 16,
+                BottomBar(
+                  body: (_, controller) => pages(_currentIndex, controller),
+                  borderRadius: BorderRadius.circular(500),
+                  hideOnScroll: true,
+                  scrollOpposite: false,
                   child: Container(
-                    constraints: const BoxConstraints(
-                      maxWidth: 280,
-                    ),
                     height: 64,
                     decoration: BoxDecoration(
                       color: ElevationOverlay.applySurfaceTint(
@@ -230,7 +225,10 @@ class _HomePageState extends ConsumerState<HomePage> {
                       borderRadius: BorderRadius.circular(32),
                       boxShadow: [
                         BoxShadow(
-                          color: Theme.of(context).colorScheme.primaryContainer.withAlpha(100),
+                          color: Theme.of(context)
+                              .colorScheme
+                              .primaryContainer
+                              .withAlpha(100),
                           blurRadius: 8,
                         ),
                       ],
