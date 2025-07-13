@@ -1,0 +1,75 @@
+import "../../Fastfile"
+
+default_platform(:ios)
+
+
+platform :ios do
+  # Authenticate with Apple Store
+  private_lane :authenticate_apple_store do
+    app_store_connect_api_key(
+      key_id: ENV["ASC_KEY_ID"],
+      issuer_id: ENV["ASC_ISSUER_ID"],
+      key_content: ENV["ASC_KEY_P8_BASE64"],
+      is_key_content_base64: true,
+      in_house: false
+    )
+  end
+
+  # Build iOS app
+  lane :build_ipa do
+    commit = last_git_commit
+    puts "*** Starting iOS release for commit(#{commit[:abbreviated_commit_hash]}) ***"
+
+    authenticate_apple_store
+    
+    sh_on_root(command: "flutter build ipa --dart-define=isAppStore=true")
+  end
+
+
+  desc "Release a new build to Apple Store"
+  lane :release_app_store do |options|
+    verify_env(envs: [
+      "ASC_KEY_ID",
+      "ASC_ISSUER_ID",
+      "ASC_KEY_P8_BASE64",
+      "APP_BUNDLE_ID",
+      "MATCH_PASSWORD",
+      "MATCH_GIT_BASIC_AUTHORIZATION",
+    ])
+
+    authenticate_apple_store
+
+    # Sync certificates and profiles using match
+    UI.message("Syncing certificates and profiles")
+
+    sync_code_signing(
+      type: "appstore",
+      readonly: is_ci,
+    )
+
+    build_ipa
+
+    build_app(
+      skip_build_archive: true,
+      archive_path: "../build/ios/archive/Runner.xcarchive",
+    )
+
+    upload_to_testflight(
+      skip_waiting_for_build_processing: true
+    )
+  end
+  
+  # This is a work in progress, requiring ad-hoc export method
+  # desc "Release to Play Store using Firebase App Distribution"
+  # lane :release_to_firebase do |options|
+  #   begin
+  #     build_ipa
+
+  #     firebase_app_distribution(
+  #       app: ENV["FIREBASE_APP_ID"],
+  #       service_credentials_file: google_service_account_json_path,
+  #       ipa_path: "../build/ios/Runner.ipa"
+  #     )
+  #   end
+  # end
+end
