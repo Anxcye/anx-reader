@@ -1,8 +1,6 @@
 name: Build for App Store Connect
 
-on:
-  push:
-    - develop
+on: push
   # workflow_call:
   #   inputs:
   #     version:
