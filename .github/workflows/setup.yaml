@@ -1,0 +1,64 @@
+name: Setup Environment
+
+on:
+  workflow_call:
+    outputs:
+      version:
+        description: "Version string"
+        value: ${{ jobs.setup.outputs.version }}
+      is_alpha:
+        description: "Is alpha release"
+        value: ${{ jobs.setup.outputs.is_alpha }}
+      is_beta:
+        description: "Is beta release"
+        value: ${{ jobs.setup.outputs.is_beta }}
+      release_notes:
+        description: "Release notes"
+        value: ${{ jobs.setup.outputs.release_notes }}
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get_version.outputs.version }}
+      is_alpha: ${{ steps.get_version.outputs.is_alpha }}
+      is_beta: ${{ steps.get_version.outputs.is_beta }}
+      release_notes: ${{ steps.extract_release_notes.outputs.release_notes }}
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Get version from pubspec.yaml and determine release type
+        id: get_version
+        shell: bash
+        run: |
+          VERSION=$( grep '^version:' pubspec.yaml | cut -d ' ' -f 2 | cut -d '+' -f 1 )
+          if [[ ${{ github.ref }} == refs/tags/alpha-* ]]; then
+            echo "is_alpha=true" >> $GITHUB_OUTPUT
+            echo "is_beta=false" >> $GITHUB_OUTPUT
+            echo "version=alpha-${VERSION}" >> $GITHUB_OUTPUT
+          elif [[ ${{ github.ref }} == refs/tags/beta-* ]]; then
+            echo "is_alpha=false" >> $GITHUB_OUTPUT
+            echo "is_beta=true" >> $GITHUB_OUTPUT
+            echo "version=beta-${VERSION}" >> $GITHUB_OUTPUT
+          else
+            echo "is_alpha=false" >> $GITHUB_OUTPUT
+            echo "is_beta=false" >> $GITHUB_OUTPUT
+            echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Extract release notes
+        id: extract_release_notes
+        run: |
+          VERSION=${{ steps.get_version.outputs.version }}
+          if [[ $VERSION == beta-* ]] || [[ $VERSION == alpha-* ]]; then
+            MAIN_VERSION=$(echo $VERSION | cut -d'-' -f2 | cut -d'-' -f1)
+          else
+            MAIN_VERSION=$VERSION
+          fi
+          CHANGELOG_CONTENT=$(sed -n "/## $MAIN_VERSION/,/## /p" assets/CHANGELOG.md | sed '$d')
+          echo "release_notes<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGELOG_CONTENT" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+        shell: bash
