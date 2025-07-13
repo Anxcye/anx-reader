@@ -122,9 +122,12 @@ class _HomePageState extends ConsumerState<HomePage> {
     Widget pages(int index, ScrollController? controller) {
       final page = [
         BookshelfPage(controller: controller),
-        if (Prefs().bottomNavigatorShowStatistics)  StatisticPage(controller: controller,),
-        if (Prefs().bottomNavigatorShowNote)  NotesPage(controller: controller),
-         SettingsPage(controller: controller),
+        if (Prefs().bottomNavigatorShowStatistics)
+          StatisticPage(
+            controller: controller,
+          ),
+        if (Prefs().bottomNavigatorShowNote) NotesPage(controller: controller),
+        SettingsPage(controller: controller),
       ];
       return page[index];
     }
@@ -211,9 +214,14 @@ class _HomePageState extends ConsumerState<HomePage> {
               children: [
                 BottomBar(
                   body: (_, controller) => pages(_currentIndex, controller),
-                  borderRadius: BorderRadius.circular(500),
                   hideOnScroll: true,
                   scrollOpposite: false,
+                  curve: Curves.easeIn,
+                  barColor: Colors.transparent,
+                  iconDecoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primary,
+                    borderRadius: BorderRadius.circular(500),
+                  ),
                   child: Container(
                     height: 64,
                     decoration: BoxDecoration(
@@ -228,7 +236,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                           color: Theme.of(context)
                               .colorScheme
                               .primaryContainer
-                              .withAlpha(100),
+                              .withAlpha(200),
                           blurRadius: 8,
                         ),
                       ],
