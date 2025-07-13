@@ -1,0 +1,192 @@
+name: Build for App Store Connect
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
+      is_alpha:
+        required: true
+        type: string
+      is_beta:
+        required: true
+        type: string
+    secrets:
+      # App Store Connect API credentials
+      APP_STORE_CONNECT_API_KEY_ID:
+        required: false
+      APP_STORE_CONNECT_ISSUER_ID:
+        required: false
+      APP_STORE_CONNECT_API_PRIVATE_KEY:
+        required: false
+      # iOS signing certificates
+      IOS_DISTRIBUTION_CERTIFICATE:
+        required: false
+      IOS_DISTRIBUTION_CERTIFICATE_PASSWORD:
+        required: false
+      IOS_PROVISIONING_PROFILE:
+        required: false
+      # macOS signing certificates
+      MACOS_DISTRIBUTION_CERTIFICATE:
+        required: false
+      MACOS_DISTRIBUTION_CERTIFICATE_PASSWORD:
+        required: false
+      MACOS_PROVISIONING_PROFILE:
+        required: false
+
+jobs:
+  build-appstore:
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        platform: [ios, macos]
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: '3.32.4'
+
+      - name: Get Dependencies
+        run: |
+          flutter --version
+          flutter pub get
+
+      - name: Setup iOS signing (if certificates provided)
+        if: matrix.platform == 'ios' && ${{ secrets.IOS_DISTRIBUTION_CERTIFICATE != '' }}
+        run: |
+          # Create keychain
+          security create-keychain -p "" build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p "" build.keychain
+          security set-keychain-settings -t 3600 -u build.keychain
+          
+          # Import certificate
+          echo "${{ secrets.IOS_DISTRIBUTION_CERTIFICATE }}" | base64 --decode > certificate.p12
+          security import certificate.p12 -k build.keychain -P "${{ secrets.IOS_DISTRIBUTION_CERTIFICATE_PASSWORD }}" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple: -s -k "" build.keychain
+          
+          # Install provisioning profile
+          if [ -n "${{ secrets.IOS_PROVISIONING_PROFILE }}" ]; then
+            echo "${{ secrets.IOS_PROVISIONING_PROFILE }}" | base64 --decode > profile.mobileprovision
+            mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+            cp profile.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
+          fi
+
+      - name: Setup macOS signing (if certificates provided)
+        if: matrix.platform == 'macos' && ${{ secrets.MACOS_DISTRIBUTION_CERTIFICATE != '' }}
+        run: |
+          # Create keychain
+          security create-keychain -p "" build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p "" build.keychain
+          security set-keychain-settings -t 3600 -u build.keychain
+          
+          # Import certificate
+          echo "${{ secrets.MACOS_DISTRIBUTION_CERTIFICATE }}" | base64 --decode > certificate.p12
+          security import certificate.p12 -k build.keychain -P "${{ secrets.MACOS_DISTRIBUTION_CERTIFICATE_PASSWORD }}" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple: -s -k "" build.keychain
+          
+          # Install provisioning profile
+          if [ -n "${{ secrets.MACOS_PROVISIONING_PROFILE }}" ]; then
+            echo "${{ secrets.MACOS_PROVISIONING_PROFILE }}" | base64 --decode > profile.provisionprofile
+            mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+            cp profile.provisionprofile ~/Library/MobileDevice/Provisioning\ Profiles/
+          fi
+
+      - name: Prepare for macOS
+        if: matrix.platform == 'macos'
+        shell: bash
+        run: flutter config --enable-macos-desktop
+
+      - name: Build for iOS App Store
+        if: matrix.platform == 'ios'
+        run: |
+          sudo xcode-select -switch /Applications/Xcode_16.2.app/Contents/Developer
+          flutter gen-l10n
+          dart run build_runner build --delete-conflicting-outputs
+          flutter build ipa --dart-define=isAppStore=true --release
+
+      - name: Build for macOS App Store
+        if: matrix.platform == 'macos'
+        run: |
+          sudo xcode-select -switch /Applications/Xcode_16.2.app/Contents/Developer
+          flutter gen-l10n
+          dart run build_runner build --delete-conflicting-outputs
+          flutter build macos --dart-define=isAppStore=true --release
+          cd build/macos/Build/Products/Release
+          # Create pkg for Mac App Store
+          productbuild --component "Anx Reader.app" /Applications build/Anx-Reader-${{ matrix.platform }}-appstore-${{ inputs.version }}.pkg
+
+      - name: Rename iOS build
+        if: matrix.platform == 'ios'
+        run: |
+          cd build/ios/ipa
+          mv *.ipa Anx-Reader-${{ matrix.platform }}-appstore-${{ inputs.version }}.ipa
+
+      - name: Upload iOS to TestFlight (beta/alpha)
+        if: matrix.platform == 'ios' && (inputs.is_alpha == 'true' || inputs.is_beta == 'true') && ${{ secrets.APP_STORE_CONNECT_API_KEY_ID != '' }}
+        run: |
+          # Create API key file
+          mkdir -p ~/.appstoreconnect/private_keys
+          echo "${{ secrets.APP_STORE_CONNECT_API_PRIVATE_KEY }}" > ~/.appstoreconnect/private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}.p8
+          
+          # Upload to TestFlight
+          xcrun altool --upload-app \
+            --type ios \
+            --file build/ios/ipa/Anx-Reader-${{ matrix.platform }}-appstore-${{ inputs.version }}.ipa \
+            --apiKey ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }} \
+            --apiIssuer ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+
+      - name: Upload iOS to App Store (production)
+        if: matrix.platform == 'ios' && inputs.is_alpha == 'false' && inputs.is_beta == 'false' && ${{ secrets.APP_STORE_CONNECT_API_KEY_ID != '' }}
+        run: |
+          # Create API key file
+          mkdir -p ~/.appstoreconnect/private_keys
+          echo "${{ secrets.APP_STORE_CONNECT_API_PRIVATE_KEY }}" > ~/.appstoreconnect/private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}.p8
+          
+          # Upload to App Store for review
+          xcrun altool --upload-app \
+            --type ios \
+            --file build/ios/ipa/Anx-Reader-${{ matrix.platform }}-appstore-${{ inputs.version }}.ipa \
+            --apiKey ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }} \
+            --apiIssuer ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+
+      - name: Upload macOS to TestFlight (beta/alpha)
+        if: matrix.platform == 'macos' && (inputs.is_alpha == 'true' || inputs.is_beta == 'true') && ${{ secrets.APP_STORE_CONNECT_API_KEY_ID != '' }}
+        run: |
+          # Create API key file
+          mkdir -p ~/.appstoreconnect/private_keys
+          echo "${{ secrets.APP_STORE_CONNECT_API_PRIVATE_KEY }}" > ~/.appstoreconnect/private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}.p8
+          
+          # Upload to TestFlight
+          xcrun altool --upload-app \
+            --type osx \
+            --file build/Anx-Reader-${{ matrix.platform }}-appstore-${{ inputs.version }}.pkg \
+            --apiKey ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }} \
+            --apiIssuer ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+
+      - name: Upload macOS to App Store (production)
+        if: matrix.platform == 'macos' && inputs.is_alpha == 'false' && inputs.is_beta == 'false' && ${{ secrets.APP_STORE_CONNECT_API_KEY_ID != '' }}
+        run: |
+          # Create API key file
+          mkdir -p ~/.appstoreconnect/private_keys
+          echo "${{ secrets.APP_STORE_CONNECT_API_PRIVATE_KEY }}" > ~/.appstoreconnect/private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}.p8
+          
+          # Upload to App Store for review
+          xcrun altool --upload-app \
+            --type osx \
+            --file build/Anx-Reader-${{ matrix.platform }}-appstore-${{ inputs.version }}.pkg \
+            --apiKey ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }} \
+            --apiIssuer ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+
+      - name: Cleanup keychain
+        if: always()
+        run: |
+          security delete-keychain build.keychain || true
+          rm -f certificate.p12 profile.mobileprovision profile.provisionprofile || true
