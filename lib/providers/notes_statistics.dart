@@ -8,7 +8,6 @@ part 'notes_statistics.g.dart';
 class NotesStatistics extends _$NotesStatistics {
   @override
   Future<Map<String, int>> build() async {
-    
     return _getNotesStatistics();
   }
 
