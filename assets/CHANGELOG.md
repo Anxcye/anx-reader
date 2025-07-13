@@ -3,11 +3,13 @@
 ## Todo
 
 ## 1.6.2
+- UI: Modify bottom navigation bar style
 - Feat: Support preventing duplicate file imports
 - Feat: Support calculating feature values of existing files to prevent duplicate imports
 - Feat: Support custom CSS styles
 - Fix: Fix sync failure when WebDAV is empty
 
+- UI: 修改底部导航栏样式
 - Feat: 支持防止文件重复导入
 - Feat：支持计算已有文件特征值，用于防止重复导入
 - Feat: 支持自定义 CSS 样式
