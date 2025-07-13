@@ -1,0 +1,51 @@
+name: Build iOS
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
+
+jobs:
+  build-ios:
+    runs-on: macos-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: '3.32.4'
+
+      - name: Get Dependencies
+        run: |
+          flutter --version
+          flutter pub get
+
+      - name: Build for iOS
+        run: |
+          sudo xcode-select -switch /Applications/Xcode_16.2.app/Contents/Developer
+          flutter gen-l10n
+          dart run build_runner build --delete-conflicting-outputs
+          flutter build ios --release --no-codesign
+          cd build/ios/Release-iphoneos
+          mkdir -p Payload
+          cp -r Runner.app Payload/
+          zip -r Anx-Reader-ios-${{ inputs.version }}-unsigned.zip Payload
+          cp Anx-Reader-ios-${{ inputs.version }}-unsigned.zip Anx-Reader-ios-${{ inputs.version }}-unsigned.ipa
+          mkdir -p ../../ios
+          cp Anx-Reader-ios-${{ inputs.version }}-unsigned.ipa ../../ios/
+          cp Anx-Reader-ios-${{ inputs.version }}-unsigned.zip ../../ios/
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-artifacts
+          path: |
+            build/ios/*.ipa
+            build/ios/*.zip
+          if-no-files-found: error

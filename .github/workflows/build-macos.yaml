@@ -1,0 +1,64 @@
+name: Build macOS
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
+
+jobs:
+  build-macos:
+    runs-on: macos-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: '3.32.4'
+
+      - name: Get Dependencies
+        run: |
+          flutter --version
+          flutter pub get
+
+      - name: Prepare for macOS
+        shell: bash
+        run: flutter config --enable-macos-desktop
+
+      - name: Build for macOS
+        shell: bash
+        run: |
+          sudo xcode-select -switch /Applications/Xcode_16.2.app/Contents/Developer
+          flutter gen-l10n
+          dart run build_runner build --delete-conflicting-outputs
+          chmod +x ./scripts/macos_nosign.sh
+          ./scripts/macos_nosign.sh
+          flutter build macos
+          cd build/macos/Build/Products/Release
+          mkdir -p "Anx Reader"
+          cp -r "Anx Reader.app" "Anx Reader/AnxReader.app"
+          ln -s /Applications "Anx Reader/Applications"
+          hdiutil create -volname "Anx Reader" -srcfolder "Anx Reader" -ov -format UDZO Anx-Reader-${{ inputs.version }}.dmg
+          ditto -c -k --keepParent "Anx Reader.app" "Anx-Reader-${{ inputs.version }}.zip"
+
+      - name: Rename builds
+        run: |
+          cd build
+          mkdir -p macos
+          mv macos/Build/Products/Release/Anx-Reader-${{ inputs.version }}.dmg macos/Anx-Reader-macos-${{ inputs.version }}.dmg
+          mv macos/Build/Products/Release/Anx-Reader-${{ inputs.version }}.zip macos/Anx-Reader-macos-${{ inputs.version }}.zip
+        shell: bash
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-artifacts
+          path: |
+            build/macos/*.dmg
+            build/macos/*.zip
+          if-no-files-found: error
