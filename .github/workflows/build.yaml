@@ -1,4 +1,5 @@
 name: Build & Release
+
 on:
   push:
     tags:
@@ -10,263 +11,45 @@ permissions:
   contents: write
 
 jobs:
-  build:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        include:
-          - platform: android
-            os: ubuntu-latest
-          - platform: windows
-            os: windows-latest
-          - platform: macos
-            os: macos-latest
-          - platform: ios
-            os: macos-latest
-            
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+  setup:
+    uses: ./.github/workflows/setup.yaml
 
-      - name: Get version from pubspec.yaml and determine release type
-        id: get_version
-        shell: bash
-        run: |
-          VERSION=$( grep '^version:' pubspec.yaml | cut -d ' ' -f 2 | cut -d '+' -f 1 )
-          if [[ ${{ github.ref }} == refs/tags/alpha-* ]]; then
-            echo "IS_ALPHA=true" >> $GITHUB_ENV
-            echo "IS_BETA=false" >> $GITHUB_ENV
-            echo "VERSION=alpha-${VERSION}" >> $GITHUB_ENV
-          elif [[ ${{ github.ref }} == refs/tags/beta-* ]]; then
-            echo "IS_ALPHA=false" >> $GITHUB_ENV
-            echo "IS_BETA=true" >> $GITHUB_ENV
-            echo "VERSION=beta-${VERSION}" >> $GITHUB_ENV
-          else
-            echo "IS_ALPHA=false" >> $GITHUB_ENV
-            echo "IS_BETA=false" >> $GITHUB_ENV
-            echo "VERSION=${VERSION}" >> $GITHUB_ENV
-          fi
-        
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          flutter-version: '3.32.4'
+  build-android:
+    needs: setup
+    uses: ./.github/workflows/build-android.yaml
+    with:
+      version: ${{ needs.setup.outputs.version }}
+    secrets:
+      KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+      KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+      KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+      KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
 
-      - name: Get Dependencies
-        run: |
-          flutter --version
-          flutter pub get
+  build-ios:
+    needs: setup
+    uses: ./.github/workflows/build-ios.yaml
+    with:
+      version: ${{ needs.setup.outputs.version }}
 
-      - name: Setup Java
-        if: matrix.platform == 'android'
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'zulu'
-          java-version: '17'
-          cache: 'gradle'
-          check-latest: true
+  build-windows:
+    needs: setup
+    uses: ./.github/workflows/build-windows.yaml
+    with:
+      version: ${{ needs.setup.outputs.version }}
+    secrets:
+      SIGNPATH_API_TOKEN: ${{ secrets.SIGNPATH_API_TOKEN }}
 
-      # - name: Setup for Windows
-      #   if: matrix.platform == 'windows'
-      #   uses: msys2/setup-msys2@v2
-      #   with:
-      #     msystem: mingw64
-      #     install: mingw-w64-x86_64-gcc
-      #     update: true
+  build-macos:
+    needs: setup
+    uses: ./.github/workflows/build-macos.yaml
+    with:
+      version: ${{ needs.setup.outputs.version }}
 
-      # - name: Set Mingw64 Env
-      #   if: matrix.platform == 'windows'
-      #   shell: bash
-      #   run: |
-      #     echo "${{ runner.temp }}\msys64\mingw64\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-      #     gcc -v
-
-
-      - name: Setup Android signing
-        if: matrix.platform == 'android'
-        run: |
-          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/keystore.jks        
-          echo "storePassword=${{ secrets.KEYSTORE_PASSWORD }}" > android/key.properties    
-          echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> android/key.properties    
-          echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> android/key.properties    
-          echo "storeFile=keystore.jks" >> android/key.properties
-
-      - name: Prepare for Windows
-        if: matrix.platform == 'windows'
-        shell: bash
-        run: |
-          flutter config --enable-windows-desktop
-          sed -i "1i #define MyAppVersion \"${{ env.VERSION }}\"" scripts/compile_windows_setup-inno.iss
-
-      - name: Prepare for macOS
-        if: matrix.platform == 'macos'
-        shell: bash
-        run: |
-          flutter config --enable-macos-desktop
-          
-      - name: Build for Android
-        if: matrix.platform == 'android'
-        run: |
-            flutter gen-l10n
-            dart run build_runner build --delete-conflicting-outputs
-            flutter build apk --release
-            flutter build apk --split-per-abi
-        shell: bash
-
-      - name: Build for iOS
-        if: matrix.platform == 'ios'
-        run: |
-          sudo xcode-select -switch /Applications/Xcode_16.2.app/Contents/Developer
-          flutter gen-l10n
-          dart run build_runner build --delete-conflicting-outputs
-          flutter build ios --release --no-codesign
-          cd build/ios/Release-iphoneos
-          mkdir -p Payload
-          cp -r Runner.app Payload/
-          zip -r Anx-Reader-${{ matrix.platform }}-${{ env.VERSION }}-unsigned.zip Payload
-          cp Anx-Reader-${{ matrix.platform }}-${{ env.VERSION }}-unsigned.zip Anx-Reader-${{ matrix.platform }}-${{ env.VERSION }}-unsigned.ipa
-          mkdir -p ../../ios
-          cp Anx-Reader-${{ matrix.platform }}-${{ env.VERSION }}-unsigned.ipa ../../ios/
-          cp Anx-Reader-${{ matrix.platform }}-${{ env.VERSION }}-unsigned.zip ../../ios/
-        shell: bash
-
-      - name: Install winget
-        if: matrix.platform == 'windows'
-        uses: Cyberboss/install-winget@v1
-
-      - name: Build for Windows
-        if: matrix.platform == 'windows'
-        shell: pwsh
-        run: ./scripts/build_windows.ps1
-
-      - name: Upload unsigned Windows zip
-        if: matrix.platform == 'windows'
-        uses: actions/upload-artifact@v4
-        id: upload-unsigned-zip
-        with:
-          name: windows-unsigned-zip
-          path: build/windows/unsigned/app.zip
-          if-no-files-found: error
-
-      - name: Sign Windows zip
-        if: matrix.platform == 'windows'
-        uses: signpath/github-action-submit-signing-request@v1.1
-        with:
-          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
-          organization-id: '254a26d6-6c3a-4a55-9ca6-890d0d34deb1'
-          project-slug: 'anx-reader'
-          signing-policy-slug: 'release-signing'
-          artifact-configuration-slug: 'initial_zip'
-          github-artifact-id: ${{ steps.upload-unsigned-zip.outputs.artifact-id }}
-          wait-for-completion: true
-          output-artifact-directory: 'build/windows'
-      
-      - name: Build unsigned Windows exe
-        if: matrix.platform == 'windows'
-        shell: pwsh
-        run: ./scripts/build_windows_exe.ps1
-
-      - name: Upload unsigned Windows exe
-        if: matrix.platform == 'windows'
-        uses: actions/upload-artifact@v4
-        id: upload-unsigned-exe
-        with:
-          name: windows-unsigned-exe
-          path: build/windows/unsigned/app.exe
-          if-no-files-found: error
-
-      - name: Sign Windows exe
-        if: matrix.platform == 'windows'
-        uses: signpath/github-action-submit-signing-request@v1.1
-        with:
-          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
-          organization-id: 254a26d6-6c3a-4a55-9ca6-890d0d34deb1
-          project-slug: 'anx-reader'
-          signing-policy-slug: 'release-signing'
-          artifact-configuration-slug: 'initial_exe'
-          github-artifact-id: ${{ steps.upload-unsigned-exe.outputs.artifact-id }}
-          wait-for-completion: true
-          output-artifact-directory: 'build/windows'
-
-      - name: Build for macOS
-        if: matrix.platform == 'macos'
-        shell: bash
-        run: |
-          sudo xcode-select -switch /Applications/Xcode_16.2.app/Contents/Developer
-          flutter gen-l10n
-          dart run build_runner build --delete-conflicting-outputs
-          chmod +x ./scripts/macos_nosign.sh
-          ./scripts/macos_nosign.sh
-          flutter build macos
-          cd build/macos/Build/Products/Release
-          mkdir -p "Anx Reader"
-          cp -r "Anx Reader.app" "Anx Reader/AnxReader.app"
-          ln -s /Applications "Anx Reader/Applications"
-          hdiutil create -volname "Anx Reader" -srcfolder "Anx Reader" -ov -format UDZO Anx-Reader-${{ env.VERSION }}.dmg
-          ditto -c -k --keepParent "Anx Reader.app" "Anx-Reader-${{ env.VERSION }}.zip"
-
-      - name: Rename builds
-        run: |
-          cd build
-          if [ "${{ matrix.platform }}" == "android" ]; then
-            cd app/outputs/flutter-apk
-            mv app-armeabi-v7a-release.apk Anx-Reader-${{ matrix.platform }}-${{ env.VERSION }}-armeabi-v7a.apk
-            mv app-arm64-v8a-release.apk Anx-Reader-${{ matrix.platform }}-${{ env.VERSION }}-arm64-v8a.apk
-            mv app-x86_64-release.apk Anx-Reader-${{ matrix.platform }}-${{ env.VERSION }}-x86_64.apk
-            mv app-release.apk Anx-Reader-${{ matrix.platform }}-${{ env.VERSION }}-universal.apk
-          elif [ "${{ matrix.platform }}" == "windows" ]; then
-            mv windows/app.zip windows/Anx-Reader-${{ matrix.platform }}-${{ env.VERSION }}.zip
-            mv windows/app.exe windows/Anx-Reader-${{ matrix.platform }}-${{ env.VERSION }}.exe
-          elif [ "${{ matrix.platform }}" == "macos" ]; then
-            mkdir -p macos
-            mv macos/Build/Products/Release/Anx-Reader-${{ env.VERSION }}.dmg macos/Anx-Reader-${{ matrix.platform }}-${{ env.VERSION }}.dmg
-            mv macos/Build/Products/Release/Anx-Reader-${{ env.VERSION }}.zip macos/Anx-Reader-${{ matrix.platform }}-${{ env.VERSION }}.zip
-          fi
-        shell: bash
-
-      - name: Extract release notes
-        id: extract_release_notes
-        run: |
-          VERSION=${{ env.VERSION }}
-          if [[ $VERSION == beta-* ]] || [[ $VERSION == alpha-* ]]; then
-            MAIN_VERSION=$(echo $VERSION | cut -d'-' -f2 | cut -d'-' -f1)
-          else
-            MAIN_VERSION=$VERSION
-          fi
-          CHANGELOG_CONTENT=$(sed -n "/## $MAIN_VERSION/,/## /p" assets/CHANGELOG.md | sed '$d')
-          echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
-          echo "$CHANGELOG_CONTENT" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
-        shell: bash
-      
-      - name: Upload artifacts
-        if: env.IS_ALPHA == 'true'
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.platform }}-artifacts
-          path: |
-            build/app/outputs/flutter-apk/*.apk
-            build/windows/*.zip
-            build/windows/*.exe
-            build/macos/*.dmg
-            build/macos/*.zip
-            build/ios/*.ipa
-            build/ios/*.zip
-          if-no-files-found: warn
-
-      - name: Create Release
-        if: env.IS_ALPHA != 'true'
-        uses: softprops/action-gh-release@v2
-        with:
-          files: |
-            build/app/outputs/flutter-apk/*.apk
-            build/windows/*.zip
-            build/windows/*.exe
-            build/macos/*.dmg
-            build/macos/*.zip
-            build/ios/*.ipa
-            build/ios/*.zip
-          body: ${{ env.RELEASE_NOTES }}
-          generate_release_notes: false
-          prerelease: ${{ env.IS_BETA == 'true' }}
+  release:
+    needs: [setup, build-android, build-ios, build-windows, build-macos]
+    uses: ./.github/workflows/release.yaml
+    with:
+      version: ${{ needs.setup.outputs.version }}
+      is_alpha: ${{ needs.setup.outputs.is_alpha }}
+      is_beta: ${{ needs.setup.outputs.is_beta }}
+      release_notes: ${{ needs.setup.outputs.release_notes }}
