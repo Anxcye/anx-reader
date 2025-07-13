@@ -34,13 +34,15 @@ on: push
   #       required: false
   #     MACOS_PROVISIONING_PROFILE:
   #       required: false
-
+env:
+  FLUTTER_CHANNEL: "stable"
+  RUBY_VERSION: "3.2.2"
 jobs:
   build-appstore:
     runs-on: macos-latest
-    strategy:
-      matrix:
-        platform: [ios, macos]
+  #   strategy:
+  #     matrix:
+  #       platform: [ios, macos]
     
     steps:
       - name: Checkout repository
@@ -57,6 +59,13 @@ jobs:
           flutter --version
           flutter pub get
           dart run build_runner build --delete-conflicting-outputs
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ env.RUBY_VERSION }}
+          bundler-cache: true
+          working-directory: 'ios'
 
       - uses: maierj/fastlane-action@v3.1.0
         with:
