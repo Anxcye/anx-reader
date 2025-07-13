@@ -1,5 +1,3 @@
-import 'package:anx_reader/dao/book.dart';
-import 'package:anx_reader/dao/reading_time.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/page/book_notes_page.dart';
@@ -112,10 +110,12 @@ class _NotesPageState extends ConsumerState<NotesPage> {
                     controller: _scrollController,
                     itemCount: data.length,
                     itemBuilder: (context, index) {
-                      return bookNotes(
-                          bookId: data[index]['bookId']!,
-                          numberOfNotes: data[index]['numberOfNotes']!,
-                          isMobile: isMobile);
+                      return bookNotesItem(
+                        book: data[index]['book']!,
+                        numberOfNotes: data[index]['numberOfNotes']!,
+                        isMobile: isMobile,
+                        readingTime: data[index]['readingTime']!,
+                      );
                     }),
               );
       },
@@ -124,10 +124,11 @@ class _NotesPageState extends ConsumerState<NotesPage> {
     );
   }
 
-  Widget bookNotes({
-    required int bookId,
+  Widget bookNotesItem({
+    required Book book,
     required int numberOfNotes,
     required bool isMobile,
+    required int readingTime,
   }) {
     TextStyle digitStyle = const TextStyle(
       fontSize: 28,
@@ -146,91 +147,70 @@ class _NotesPageState extends ConsumerState<NotesPage> {
       fontSize: 14,
       color: Colors.grey,
     );
-    return FutureBuilder<Book>(
-        future: selectBookById(bookId),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
-            return GestureDetector(
-              onTap: () {
-                if (isMobile) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => BookNotesPage(
-                              book: snapshot.data!,
-                              numberOfNotes: numberOfNotes,
-                              isMobile: true,
-                            )),
-                  );
-                } else {
-                  ref
-                      .read(notesPageCurrentBookProvider.notifier)
-                      .setData(snapshot.data!, numberOfNotes);
-                }
-              },
-              child: Card(
-                margin: const EdgeInsets.only(top: 8, left: 15, right: 15),
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        flex: 3,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            highlightDigit(
-                              context,
-                              L10n.of(context).notes_notes(numberOfNotes),
-                              textStyle,
-                              digitStyle,
-                            ),
-                            const SizedBox(height: 8),
-                            Text(snapshot.data!.title, style: titleStyle),
-                            const SizedBox(height: 18),
-                            // Reading time
-                            FutureBuilder<int>(
-                              future: selectTotalReadingTimeByBookId(bookId),
-                              builder: (context, snapshot) {
-                                if (snapshot.connectionState ==
-                                    ConnectionState.done) {
-                                  return Text(
-                                    convertSeconds(snapshot.data!),
-                                    style: readingTimeStyle,
-                                  );
-                                } else {
-                                  return Text(
-                                    convertSeconds(0),
-                                    style: readingTimeStyle,
-                                  );
-                                }
-                              },
-                            )
-                          ],
-                        ),
-                      ),
-                      // Expanded(child: SizedBox()),
-                      Hero(
-                        tag: isMobile
-                            ? snapshot.data!.coverFullPath
-                            : '${snapshot.data!.coverFullPath}notMobile',
-                        child: bookCover(
-                          context,
-                          snapshot.data!,
-                          height: 130,
-                          width: 90,
-                        ),
-                      ),
-                    ],
-                  ),
+    return GestureDetector(
+      onTap: () {
+        if (isMobile) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => BookNotesPage(
+                      book: book,
+                      numberOfNotes: numberOfNotes,
+                      isMobile: true,
+                    )),
+          );
+        } else {
+          ref
+              .read(notesPageCurrentBookProvider.notifier)
+              .setData(book, numberOfNotes);
+        }
+      },
+      child: Card(
+        margin: const EdgeInsets.only(top: 8, left: 15, right: 15),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                flex: 3,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    highlightDigit(
+                      context,
+                      L10n.of(context).notes_notes(numberOfNotes),
+                      textStyle,
+                      digitStyle,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(book.title, style: titleStyle),
+                    const SizedBox(height: 18),
+                    // Reading time
+                    Text(
+                      convertSeconds(readingTime),
+                      style: readingTimeStyle,
+                    ),
+                  ],
                 ),
               ),
-            );
-          } else {
-            return const CircularProgressIndicator();
-          }
-        });
+              // Expanded(child: SizedBox()),
+              Hero(
+                tag: isMobile
+                    ? book.coverFullPath
+                    : '${book.coverFullPath}notMobile',
+                child: bookCover(
+                  context,
+                  book,
+                  height: 130,
+                  width: 90,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 

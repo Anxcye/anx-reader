@@ -1,5 +1,7 @@
+import 'package:anx_reader/dao/book.dart';
 import 'package:anx_reader/dao/book_note.dart';
 import 'package:anx_reader/dao/reading_time.dart';
+import 'package:anx_reader/models/book.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'notes_statistics.g.dart';
@@ -24,11 +26,25 @@ class NotesStatistics extends _$NotesStatistics {
 @riverpod
 class BookIdAndNotes extends _$BookIdAndNotes {
   @override
-  Future<List<Map<String, int>>> build() async {
-    return _getBookIdAndNotes();
+  Future<List<Map<String, dynamic>>> build() async {
+    final bookDataList = await _getBookIdAndNotes();
+    final result = <Map<String, dynamic>>[];
+
+    for (final data in bookDataList) {
+      Book book = await selectBookById(data['bookId']);
+      int readingTime = await selectTotalReadingTimeByBookId(book.id);
+      result.add({
+        'bookId': data['bookId'],
+        'numberOfNotes': data['numberOfNotes'],
+        'book': book,
+        'readingTime': readingTime,
+      });
+    }
+
+    return result;
   }
 
-  Future<List<Map<String, int>>> _getBookIdAndNotes() async {
+  Future<List<Map<String, dynamic>>> _getBookIdAndNotes() async {
     return await selectAllBookIdAndNotes();
   }
 
