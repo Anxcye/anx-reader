@@ -60,17 +60,15 @@ jobs:
           flutter pub get
           dart run build_runner build --delete-conflicting-outputs
 
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: ${{ env.RUBY_VERSION }}
-          bundler-cache: true
-          working-directory: 'ios'
+      - name: Set up fastlane
+        run: |
+          brew install fastlane
+          cd ios && bundle install
 
-      - uses: maierj/fastlane-action@v3.1.0
-        with:
-          lane: 'release_app_store'
-          subdirectory: ios
+      - name: Build iOS App
+        run: |
+          cd ios
+          fastlane ios release_app_store
         env:
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
