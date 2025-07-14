@@ -36,7 +36,7 @@ on: push
   #       required: false
 env:
   FLUTTER_CHANNEL: "stable"
-  RUBY_VERSION: "3.3.4"
+  RUBY_VERSION: "3.2.2"
 jobs:
   build-appstore:
     runs-on: macos-latest
@@ -61,9 +61,11 @@ jobs:
           dart run build_runner build --delete-conflicting-outputs
 
       - name: Set up Ruby
-        run: |
-          brew install fastlane
-          
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ env.RUBY_VERSION }}
+          bundler-cache: true
+          working-directory: 'ios'
 
       - uses: maierj/fastlane-action@v3.1.0
         with:
