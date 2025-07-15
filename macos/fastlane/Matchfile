@@ -1,0 +1,5 @@
+git_url("https://github.com/Anxcye/anx-secret.git")
+storage_mode("git")
+type("appstore") # The default type, can be: appstore, adhoc, enterprise or development
+
+app_identifier([ENV["APP_BUNDLE_ID"], "com.anxcye.anxReader.shareExtension"])

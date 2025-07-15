@@ -1,4 +1,5 @@
-platform :osx, '10.15'
+# Uncomment this line to define a global platform for your project
+platform :ios, '15.2'
 
 # CocoaPods analytics sends network stats synchronously affecting flutter build latency.
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
@@ -10,33 +11,84 @@ project 'Runner', {
 }
 
 def flutter_root
-  generated_xcode_build_settings_path = File.expand_path(File.join('..', 'Flutter', 'ephemeral', 'Flutter-Generated.xcconfig'), __FILE__)
+  generated_xcode_build_settings_path = File.expand_path(File.join('..', 'Flutter', 'Generated.xcconfig'), __FILE__)
   unless File.exist?(generated_xcode_build_settings_path)
-    raise "#{generated_xcode_build_settings_path} must exist. If you're running pod install manually, make sure \"flutter pub get\" is executed first"
+    raise "#{generated_xcode_build_settings_path} must exist. If you're running pod install manually, make sure flutter pub get is executed first"
   end
 
   File.foreach(generated_xcode_build_settings_path) do |line|
     matches = line.match(/FLUTTER_ROOT\=(.*)/)
     return matches[1].strip if matches
   end
-  raise "FLUTTER_ROOT not found in #{generated_xcode_build_settings_path}. Try deleting Flutter-Generated.xcconfig, then run \"flutter pub get\""
+  raise "FLUTTER_ROOT not found in #{generated_xcode_build_settings_path}. Try deleting Generated.xcconfig, then run flutter pub get"
 end
 
 require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelper'), flutter_root)
 
-flutter_macos_podfile_setup
+flutter_ios_podfile_setup
 
 target 'Runner' do
   use_frameworks!
+  use_modular_headers!
 
-  flutter_install_all_macos_pods File.dirname(File.realpath(__FILE__))
+
+  flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
   target 'RunnerTests' do
+    inherit! :search_paths
+  end
+  target 'shareExtension' do
     inherit! :search_paths
   end
 end
 
 post_install do |installer|
   installer.pods_project.targets.each do |target|
-    flutter_additional_macos_build_settings(target)
+    flutter_additional_ios_build_settings(target)
+    target.build_configurations.each do |config|
+        # Removing unused permissions by setting their value to to 0
+        # for more information: https://github.com/BaseflowIT/flutter-permission-handler/blob/develop/permission_handler/ios/Classes/PermissionHandlerEnums.h
+        # put '#' in front of a permission if you need it.
+        config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= [
+            '$(inherited)',
+
+            ## dart: PermissionGroup.calendar
+            'PERMISSION_EVENTS=0',
+
+            ## dart: PermissionGroup.reminders
+            'PERMISSION_REMINDERS=0',
+
+            ## dart: PermissionGroup.contacts
+            'PERMISSION_CONTACTS=0',
+
+            ## dart: PermissionGroup.camera
+            'PERMISSION_CAMERA=0',
+
+            ## dart: PermissionGroup.microphone
+            'PERMISSION_MICROPHONE=0',
+
+            'AUDIO_SESSION_MICROPHONE=0',
+
+            ## dart: PermissionGroup.speech
+            'PERMISSION_SPEECH_RECOGNIZER=0',
+
+            ## dart: PermissionGroup.photos
+            'PERMISSION_PHOTOS=1',
+
+            ## dart: [PermissionGroup.location, PermissionGroup.locationAlways, PermissionGroup.locationWhenInUse]
+            'PERMISSION_LOCATION=0',
+
+            ## dart: PermissionGroup.notification
+            'PERMISSION_NOTIFICATIONS=0',
+
+            ## dart: PermissionGroup.mediaLibrary
+            'PERMISSION_MEDIA_LIBRARY=0',
+
+            ## dart: PermissionGroup.sensors
+            'PERMISSION_SENSORS=0',
+
+            ## dart: PermissionGroup.bluetooth
+            'PERMISSION_BLUETOOTH=0'
+        ]
+    end
   end
 end
