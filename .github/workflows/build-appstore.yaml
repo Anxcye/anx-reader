@@ -50,6 +50,7 @@ jobs:
         with:
           ruby-version: ${{ env.RUBY_VERSION }}
           bundler-cache: true
+      - name: Install Fastlane and CocoaPods
         run: |
           gem install fastlane --no-document
           gem install cocoapods --no-document
