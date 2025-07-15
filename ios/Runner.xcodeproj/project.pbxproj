@@ -17,6 +17,8 @@
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
 		C5988192A52F49758802CFE1 /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F3506A27362E161C260D510D /* Pods_Runner.framework */; };
+		FC40F4592E26AA5800FD841D /* MainInterface.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FC40F4542E26AA5800FD841D /* MainInterface.storyboard */; };
+		FC40F45A2E26AA5800FD841D /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC40F4562E26AA5800FD841D /* ShareViewController.swift */; };
 		FC5AD2A62DDDF7FF00CC4EE3 /* shareExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = FC5AD29C2DDDF7FF00CC4EE3 /* shareExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		FCC05C1B2DA64F4D00FD1EDD /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCC05C1A2DA64F4D00FD1EDD /* StoreKit.framework */; };
 /* End PBXBuildFile section */
@@ -90,6 +92,10 @@
 		F3506A27362E161C260D510D /* Pods_Runner.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Runner.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F542B1EE7CF977C0D26E2A42 /* Pods-Runner.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.profile.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.profile.xcconfig"; sourceTree = "<group>"; };
 		F5CC069C62A25F6396F23ADB /* Pods-Runner.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.release.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"; sourceTree = "<group>"; };
+		FC40F4522E26AA5800FD841D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		FC40F4532E26AA5800FD841D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/MainInterface.storyboard; sourceTree = "<group>"; };
+		FC40F4552E26AA5800FD841D /* shareExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = shareExtension.entitlements; sourceTree = "<group>"; };
+		FC40F4562E26AA5800FD841D /* ShareViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewController.swift; sourceTree = "<group>"; };
 		FC5AD29C2DDDF7FF00CC4EE3 /* shareExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = shareExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		FC5AD2AD2DDDF9F500CC4EE3 /* Runner.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Runner.entitlements; sourceTree = "<group>"; };
 		FCA4F1322DCB98D500499E37 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Main.strings"; sourceTree = "<group>"; };
@@ -104,31 +110,6 @@
 		FCA4F13B2DCB98F600499E37 /* tr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = tr; path = tr.lproj/LaunchScreen.strings; sourceTree = "<group>"; };
 		FCC05C1A2DA64F4D00FD1EDD /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
-
-/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		FC5AD2AB2DDDF7FF00CC4EE3 /* Exceptions for "shareExtension" folder in "shareExtension" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Info.plist,
-			);
-			target = FC5AD29B2DDDF7FF00CC4EE3 /* shareExtension */;
-		};
-/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
-
-/* Begin PBXFileSystemSynchronizedRootGroup section */
-		FC5AD29D2DDDF7FF00CC4EE3 /* shareExtension */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				FC5AD2AB2DDDF7FF00CC4EE3 /* Exceptions for "shareExtension" folder in "shareExtension" target */,
-			);
-			explicitFileTypes = {
-			};
-			explicitFolders = (
-			);
-			path = shareExtension;
-			sourceTree = "<group>";
-		};
-/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		97C146EB1CF9000F007C117D /* Frameworks */ = {
@@ -210,7 +191,7 @@
 			children = (
 				9740EEB11CF90186004384FC /* Flutter */,
 				97C146F01CF9000F007C117D /* Runner */,
-				FC5AD29D2DDDF7FF00CC4EE3 /* shareExtension */,
+				FC40F4572E26AA5800FD841D /* shareExtension */,
 				97C146EF1CF9000F007C117D /* Products */,
 				331C8082294A63A400263BE5 /* RunnerTests */,
 				24D7A286CB4FA35CE0CB06A3 /* Pods */,
@@ -242,6 +223,17 @@
 				74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */,
 			);
 			path = Runner;
+			sourceTree = "<group>";
+		};
+		FC40F4572E26AA5800FD841D /* shareExtension */ = {
+			isa = PBXGroup;
+			children = (
+				FC40F4522E26AA5800FD841D /* Info.plist */,
+				FC40F4542E26AA5800FD841D /* MainInterface.storyboard */,
+				FC40F4552E26AA5800FD841D /* shareExtension.entitlements */,
+				FC40F4562E26AA5800FD841D /* ShareViewController.swift */,
+			);
+			path = shareExtension;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -303,9 +295,6 @@
 			buildRules = (
 			);
 			dependencies = (
-			);
-			fileSystemSynchronizedGroups = (
-				FC5AD29D2DDDF7FF00CC4EE3 /* shareExtension */,
 			);
 			name = shareExtension;
 			productName = shareExtension;
@@ -384,6 +373,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FC40F4592E26AA5800FD841D /* MainInterface.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -436,9 +426,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -475,9 +469,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -545,6 +543,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FC40F45A2E26AA5800FD841D /* ShareViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -588,6 +587,14 @@
 				FCA4F13B2DCB98F600499E37 /* tr */,
 			);
 			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+		FC40F4542E26AA5800FD841D /* MainInterface.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				FC40F4532E26AA5800FD841D /* Base */,
+			);
+			name = MainInterface.storyboard;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
