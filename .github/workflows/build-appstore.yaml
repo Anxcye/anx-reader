@@ -52,6 +52,9 @@ jobs:
           bundler-cache: true
       - name: Install Fastlane and CocoaPods
         run: |
+          which gem
+          gem install bundler --no-document
+          cd ios && bundle install && cd ..
           gem install fastlane --no-document
           gem install cocoapods --no-document
           which fastlane
