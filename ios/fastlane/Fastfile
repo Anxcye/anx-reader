@@ -22,7 +22,7 @@ platform :ios do
 
     authenticate_apple_store
     
-    sh_on_root(command: "which pod && which ruby")
+    sh_on_root(command: "which pod && which ruby && which pod")
     sh_on_root(command: "flutter build ipa --dart-define=isAppStore=true")
   end
 

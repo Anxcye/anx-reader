@@ -115,9 +115,9 @@
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
-/* Begin PBXGroup section */
+/* Begin PBXFileSystemSynchronizedRootGroup section */
 		FC5AD29D2DDDF7FF00CC4EE3 /* shareExtension */ = {
-			isa = PBXGroup;
+			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				FC5AD2AB2DDDF7FF00CC4EE3 /* Exceptions for "shareExtension" folder in "shareExtension" target */,
 			);
@@ -128,7 +128,7 @@
 			path = shareExtension;
 			sourceTree = "<group>";
 		};
-/* End PBXGroup section */
+/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		97C146EB1CF9000F007C117D /* Frameworks */ = {
