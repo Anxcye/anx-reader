@@ -17,18 +17,6 @@ platform :ios do
 
   # Build iOS app
   lane :build_ipa do
-    commit = last_git_commit
-    puts "*** Starting iOS release for commit(#{commit[:abbreviated_commit_hash]}) ***"
-
-    authenticate_apple_store
-    
-    sh_on_root(command: "which pod && which ruby && which pod")
-    # sh_on_root(command: "flutter build ipa --dart-define=isAppStore=true -v")
-  end
-
-
-  desc "Release a new build to Apple Store"
-  lane :release_app_store do |options|
     verify_env(envs: [
       "ASC_KEY_ID",
       "ASC_ISSUER_ID",
@@ -47,6 +35,19 @@ platform :ios do
       type: "appstore",
       readonly: is_ci,
     )
+    commit = last_git_commit
+    puts "*** Starting iOS release for commit(#{commit[:abbreviated_commit_hash]}) ***"
+
+    authenticate_apple_store
+    
+    sh_on_root(command: "which pod && which ruby && which pod")
+    # sh_on_root(command: "flutter build ipa --dart-define=isAppStore=true -v")
+  end
+
+
+  desc "Release a new build to Apple Store"
+  lane :release_app_store do |options|
+
 
     build_ipa
 
