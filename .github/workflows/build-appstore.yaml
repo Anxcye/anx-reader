@@ -105,6 +105,10 @@ jobs:
           cd ios
           bundle install
           gem install ffi
+
+          fastlane ios build_ipa
+          flutter build ipa --dart-define=isAppStore=true -v
+
           fastlane ios release_app_store
         env:
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
