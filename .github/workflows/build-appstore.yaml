@@ -86,7 +86,7 @@ jobs:
           flutter --version
           flutter pub get
           dart run build_runner build --delete-conflicting-outputs
-          flutter build ipa --dart-define=isAppStore=true"
+          flutter build ipa --dart-define=isAppStore=true
 
 
       - name: Build iOS App
