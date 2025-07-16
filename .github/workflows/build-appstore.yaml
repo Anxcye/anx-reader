@@ -80,20 +80,26 @@ jobs:
           dart run build_runner build --delete-conflicting-outputs
           flutter doctor
 
-      - name: Install Fastlane and CocoaPods
-        run: |
-          which gem
-          gem install bundler --no-document
-          cd ios && bundle install && cd ..
-          gem install fastlane --no-document
-          gem install cocoapods --no-document
-          gem install ffi
-          which fastlane
-          fastlane --version
+      # - name: Install Fastlane and CocoaPods
+      #   run: |
+      #     which gem
+      #     gem install bundler --no-document
+      #     cd ios && bundle install && cd ..
+      #     gem install fastlane --no-document
+      #     gem install cocoapods --no-document
+      #     gem install ffi
+      #     which fastlane
+      #     fastlane --version
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4.4'
 
       - name: Build iOS App
         run: |
           cd ios
+          bundle install
+          gem install ffi
           fastlane ios release_app_store
         env:
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
