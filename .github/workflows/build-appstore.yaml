@@ -51,15 +51,7 @@ jobs:
         with:
           ruby-version: ${{ env.RUBY_VERSION }}
           bundler-cache: true
-      - name: Install Fastlane and CocoaPods
-        run: |
-          which gem
-          gem install bundler --no-document
-          cd ios && bundle install && cd ..
-          gem install fastlane --no-document
-          gem install cocoapods --no-document
-          which fastlane
-          fastlane --version
+
 
       - name: Setup Xcode
         uses: maxim-lobanov/setup-xcode@v1
@@ -88,6 +80,16 @@ jobs:
           dart run build_runner build --delete-conflicting-outputs
           flutter doctor
 
+      - name: Install Fastlane and CocoaPods
+        run: |
+          which gem
+          gem install bundler --no-document
+          cd ios && bundle install && cd ..
+          gem install fastlane --no-document
+          gem install cocoapods --no-document
+          gem install ffi
+          which fastlane
+          fastlane --version
 
       - name: Build iOS App
         run: |
