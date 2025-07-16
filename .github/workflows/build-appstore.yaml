@@ -94,10 +94,10 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.4.4'
-          
+
       - name: Install CocoaPods
         run: |
-          sudo gem install cocoapods
+          gem install cocoapods
           pod setup
 
       - name: Build iOS App
