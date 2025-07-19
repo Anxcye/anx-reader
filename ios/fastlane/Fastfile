@@ -55,6 +55,11 @@ platform :ios do
 
     build_ipa
 
+
+    get_certificates
+    get_provisioning_profile(app_identifier: "com.anxcye.anxReader")
+    get_provisioning_profile(app_identifier: "com.anxcye.anxReader.shareExtension")
+
     build_app(
       skip_build_archive: false,
       archive_path: "../build/ios/archive/Runner.xcarchive",
