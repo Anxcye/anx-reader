@@ -68,9 +68,9 @@ jobs:
         run: |
           sudo xcode-select -switch /Applications/Xcode_16.2.app/Contents/Developer
           flutter --version
-          flutter doctor -v
-          flutter pub get
-          dart run build_runner build --delete-conflicting-outputs
+          # flutter doctor -v
+          # flutter pub get
+          # dart run build_runner build --delete-conflicting-outputs
 
       - name: Build iOS App
         run: |

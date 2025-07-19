@@ -45,7 +45,7 @@ platform :ios do
     fetch_dependencies
     sh_on_root(command: "flutter build ios --release --no-codesign")
   
-    fetch_dependencies
+    # fetch_dependencies
     sh_on_root(command: "flutter build ipa --dart-define=isAppStore=true -v")
   end
 
