@@ -73,6 +73,7 @@ jobs:
           flutter pub get
           dart run build_runner build --delete-conflicting-outputs
           flutter doctor
+          which pod && which ruby
           flutter build ios --release --no-codesign
 
       - name: Build iOS App
@@ -82,7 +83,7 @@ jobs:
           gem install ffi
 
           fastlane ios build_ipa
-          flutter build ipa --dart-define=isAppStore=true -v
+          flutter build ipa --dart-define=isAppStore=true 
 
           fastlane ios release_app_store
         env:
