@@ -31,6 +31,11 @@ platform :ios do
     # Sync certificates and profiles using match
     UI.message("Syncing certificates and profiles")
 
+
+    get_certificates
+    get_provisioning_profile(app_identifier: "com.anxcye.anxReader")
+    get_provisioning_profile(app_identifier: "com.anxcye.anxReader.shareExtension")
+  
     sync_code_signing(
       type: "appstore",
       readonly: is_ci,
@@ -45,7 +50,7 @@ platform :ios do
     sh_on_root(command: "security find-identity -v -p codesigning")
 
     fetch_dependencies
-    sh_on_root(command: "flutter build ipa --release --no-codesign --dart-define=isAppStore=true")
+    sh_on_root(command: "flutter build ipa --release --dart-define=isAppStore=true")
   end
 
 
@@ -56,9 +61,6 @@ platform :ios do
     build_ipa
 
 
-    get_certificates
-    get_provisioning_profile(app_identifier: "com.anxcye.anxReader")
-    get_provisioning_profile(app_identifier: "com.anxcye.anxReader.shareExtension")
 
     build_app(
       skip_build_archive: false,
