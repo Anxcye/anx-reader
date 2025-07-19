@@ -32,9 +32,9 @@ platform :ios do
     UI.message("Syncing certificates and profiles")
 
 
-    get_certificates
-    get_provisioning_profile(app_identifier: "com.anxcye.anxReader")
-    get_provisioning_profile(app_identifier: "com.anxcye.anxReader.shareExtension")
+    # get_certificates
+    # get_provisioning_profile(app_identifier: "com.anxcye.anxReader")
+    # get_provisioning_profile(app_identifier: "com.anxcye.anxReader.shareExtension")
   
     sync_code_signing(
       type: "appstore",
