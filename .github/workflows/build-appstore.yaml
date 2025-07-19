@@ -34,8 +34,6 @@ on: push
   #       required: false
   #     MACOS_PROVISIONING_PROFILE:
   #       required: false
-env:
-  RUBY_VERSION: "3.4.4"
 jobs:
   build-appstore:
     runs-on: macos-latest
@@ -60,11 +58,11 @@ jobs:
       #     ruby-version: ${{ env.RUBY_VERSION }}
       #     bundler-cache: true
 
-      - name: Set up Xcode
-        run: |
-          xcode-select -p
-          xcodebuild -version
-          xcrun --show-sdk-version --sdk iphoneos
+      # - name: Set up Xcode
+      #   run: |
+      #     xcode-select -p
+      #     xcodebuild -version
+      #     xcrun --show-sdk-version --sdk iphoneos
 
       - name: Get Dependencies
         run: |
@@ -80,9 +78,6 @@ jobs:
       - name: Build iOS App
         run: |
           cd ios
-          bundle install
-          gem install ffi
-
           fastlane ios build_ipa
           flutter build ipa --dart-define=isAppStore=true 
           fastlane ios release_app_store
