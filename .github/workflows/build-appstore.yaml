@@ -35,7 +35,6 @@ on: push
   #     MACOS_PROVISIONING_PROFILE:
   #       required: false
 env:
-  FLUTTER_CHANNEL: "stable"
   RUBY_VERSION: "3.4.4"
 jobs:
   build-appstore:
@@ -46,24 +45,6 @@ jobs:
   #       platform: [ios, macos]
     
     steps:
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: ${{ env.RUBY_VERSION }}
-          bundler-cache: true
-
-
-      - name: Setup Xcode
-        uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: '16.2'
-      - name: Show environment info
-        run: |
-          xcode-select -p
-          xcodebuild -version
-          xcrun --show-sdk-version --sdk iphoneos
-
-
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -73,34 +54,27 @@ jobs:
           channel: stable
           flutter-version: '3.32.4'
 
+    steps:
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ env.RUBY_VERSION }}
+          bundler-cache: true
+
+      - name: Set up Xcode
+        run: |
+          xcode-select -p
+          xcodebuild -version
+          xcrun --show-sdk-version --sdk iphoneos
+
       - name: Get Dependencies
         run: |
+          sudo xcode-select -switch /Applications/Xcode_16.2.app/Contents/Developer
           flutter --version
           flutter pub get
           dart run build_runner build --delete-conflicting-outputs
           flutter doctor
           flutter build ios --release --no-codesign
-
-
-      # - name: Install Fastlane and CocoaPods
-      #   run: |
-      #     which gem
-      #     gem install bundler --no-document
-      #     cd ios && bundle install && cd ..
-      #     gem install fastlane --no-document
-      #     gem install cocoapods --no-document
-      #     gem install ffi
-      #     which fastlane
-      #     fastlane --version
-      - name: Setup Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.4.4'
-
-      - name: Install CocoaPods
-        run: |
-          gem install cocoapods
-          pod setup
 
       - name: Build iOS App
         run: |
