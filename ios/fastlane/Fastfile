@@ -44,7 +44,7 @@ platform :ios do
     puts "*** Starting iOS release for commit(#{commit[:abbreviated_commit_hash]}) ***"
     
     sh_on_root(command: "which pod && which ruby")
-    sh_on_root(command: "brew install cocoapods")
+    sh_on_root(command: "brew install ruby && brew install cocoapods")
     sh_on_root(command: "which pod && which ruby")
 
     # Verify certificates are available
