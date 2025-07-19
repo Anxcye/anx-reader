@@ -37,13 +37,15 @@ platform :ios do
     )
     commit = last_git_commit
     puts "*** Starting iOS release for commit(#{commit[:abbreviated_commit_hash]}) ***"
-
-    authenticate_apple_store
     
     sh_on_root(command: "which pod && which ruby && which pod")
 
+    # Verify certificates are available
+    UI.message("Checking available certificates...")
+    sh_on_root(command: "security find-identity -v -p codesigning")
+
     fetch_dependencies
-    sh_on_root(command: "flutter build ios --release --no-codesign")
+    sh_on_root(command: "flutter build ipa --release --no-codesign")
   
     # fetch_dependencies
     sh_on_root(command: "flutter build ipa --dart-define=isAppStore=true -v")
