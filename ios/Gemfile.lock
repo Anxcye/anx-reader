@@ -1,9 +1,3 @@
-GIT
-  remote: https://github.com/tianhaoz95/fastlane-plugin-flutter-version
-  revision: aa92b678f4fe842d8c1428e45cea4cba837fdfea
-  specs:
-    fastlane-plugin-flutter_version (1.1.15)
-
 GEM
   remote: https://rubygems.org/
   specs:
@@ -11,21 +5,13 @@ GEM
       base64
       nkf
       rexml
-    activesupport (7.0.8)
-      concurrent-ruby (~> 1.0, >= 1.0.2)
-      i18n (>= 1.6, < 2)
-      minitest (>= 5.1)
-      tzinfo (~> 2.0)
     addressable (2.8.7)
       public_suffix (>= 2.0.2, < 7.0)
-    algoliasearch (1.27.5)
-      httpclient (~> 2.8, >= 2.8.3)
-      json (>= 1.5.1)
     artifactory (3.0.17)
     atomos (0.1.3)
     aws-eventstream (1.4.0)
-    aws-partitions (1.1126.0)
-    aws-sdk-core (3.226.2)
+    aws-partitions (1.1131.0)
+    aws-sdk-core (3.226.3)
       aws-eventstream (~> 1, >= 1.3.0)
       aws-partitions (~> 1, >= 1.992.0)
       aws-sigv4 (~> 1.9)
@@ -35,7 +21,7 @@ GEM
     aws-sdk-kms (1.106.0)
       aws-sdk-core (~> 3, >= 3.225.0)
       aws-sigv4 (~> 1.5)
-    aws-sdk-s3 (1.192.0)
+    aws-sdk-s3 (1.193.0)
       aws-sdk-core (~> 3, >= 3.225.0)
       aws-sdk-kms (~> 1)
       aws-sigv4 (~> 1.5)
@@ -44,57 +30,16 @@ GEM
     babosa (1.0.4)
     base64 (0.3.0)
     claide (1.1.0)
-    cocoapods (1.16.2)
-      addressable (~> 2.8)
-      claide (>= 1.0.2, < 2.0)
-      cocoapods-core (= 1.16.2)
-      cocoapods-deintegrate (>= 1.0.3, < 2.0)
-      cocoapods-downloader (>= 2.1, < 3.0)
-      cocoapods-plugins (>= 1.0.0, < 2.0)
-      cocoapods-search (>= 1.0.0, < 2.0)
-      cocoapods-trunk (>= 1.6.0, < 2.0)
-      cocoapods-try (>= 1.1.0, < 2.0)
-      colored2 (~> 3.1)
-      escape (~> 0.0.4)
-      fourflusher (>= 2.3.0, < 3.0)
-      gh_inspector (~> 1.0)
-      molinillo (~> 0.8.0)
-      nap (~> 1.0)
-      ruby-macho (>= 2.3.0, < 3.0)
-      xcodeproj (>= 1.27.0, < 2.0)
-    cocoapods-core (1.16.2)
-      activesupport (>= 5.0, < 8)
-      addressable (~> 2.8)
-      algoliasearch (~> 1.0)
-      concurrent-ruby (~> 1.1)
-      fuzzy_match (~> 2.0.4)
-      nap (~> 1.0)
-      netrc (~> 0.11)
-      public_suffix (~> 4.0)
-      typhoeus (~> 1.0)
-    cocoapods-deintegrate (1.0.5)
-    cocoapods-downloader (2.1)
-    cocoapods-plugins (1.0.0)
-      nap
-    cocoapods-search (1.0.1)
-    cocoapods-trunk (1.6.0)
-      nap (>= 0.8, < 2.0)
-      netrc (~> 0.11)
-    cocoapods-try (1.2.0)
     colored (1.2)
     colored2 (3.1.2)
     commander (4.6.0)
       highline (~> 2.0.0)
-    concurrent-ruby (1.3.5)
     declarative (0.0.20)
     digest-crc (0.7.0)
       rake (>= 12.0.0, < 14.0.0)
     domain_name (0.6.20240107)
     dotenv (2.8.1)
     emoji_regex (3.2.3)
-    escape (0.0.4)
-    ethon (0.16.0)
-      ffi (>= 1.15.0)
     excon (0.112.0)
     faraday (1.10.4)
       faraday-em_http (~> 1.0)
@@ -169,19 +114,6 @@ GEM
       xcpretty-travis-formatter (>= 0.0.3, < 2.0.0)
     fastlane-sirp (1.0.0)
       sysrandom (~> 1.0)
-    ffi (1.17.2)
-    ffi (1.17.2-aarch64-linux-gnu)
-    ffi (1.17.2-aarch64-linux-musl)
-    ffi (1.17.2-arm-linux-gnu)
-    ffi (1.17.2-arm-linux-musl)
-    ffi (1.17.2-arm64-darwin)
-    ffi (1.17.2-x86-linux-gnu)
-    ffi (1.17.2-x86-linux-musl)
-    ffi (1.17.2-x86_64-darwin)
-    ffi (1.17.2-x86_64-linux-gnu)
-    ffi (1.17.2-x86_64-linux-musl)
-    fourflusher (2.3.1)
-    fuzzy_match (2.0.4)
     gh_inspector (1.1.3)
     google-apis-androidpublisher_v3 (0.54.0)
       google-apis-core (>= 0.11.0, < 2.a)
@@ -224,29 +156,23 @@ GEM
       domain_name (~> 0.5)
     httpclient (2.9.0)
       mutex_m
-    i18n (1.14.7)
-      concurrent-ruby (~> 1.0)
     jmespath (1.6.2)
-    json (2.12.2)
+    json (2.13.0)
     jwt (2.10.2)
       base64
     logger (1.7.0)
     mini_magick (4.13.2)
     mini_mime (1.1.5)
-    minitest (5.25.5)
-    molinillo (0.8.0)
-    multi_json (1.16.0)
+    multi_json (1.17.0)
     multipart-post (2.4.1)
     mutex_m (0.3.0)
     nanaimo (0.4.0)
-    nap (1.1.0)
     naturally (2.3.0)
-    netrc (0.11.0)
     nkf (0.2.0)
     optparse (0.6.0)
     os (1.1.4)
     plist (3.7.2)
-    public_suffix (4.0.7)
+    public_suffix (6.0.2)
     rake (13.3.0)
     representable (3.2.0)
       declarative (< 0.1.0)
@@ -255,7 +181,6 @@ GEM
     retriable (3.1.2)
     rexml (3.4.1)
     rouge (3.28.0)
-    ruby-macho (2.5.1)
     ruby2_keywords (0.0.5)
     rubyzip (2.4.1)
     security (0.1.5)
@@ -276,10 +201,6 @@ GEM
     tty-screen (0.8.2)
     tty-spinner (0.9.3)
       tty-cursor (~> 0.7)
-    typhoeus (1.4.1)
-      ethon (>= 0.9.0)
-    tzinfo (2.0.6)
-      concurrent-ruby (~> 1.0)
     uber (0.1.0)
     unicode-display_width (2.6.0)
     word_wrap (1.0.0)
@@ -296,23 +217,11 @@ GEM
       xcpretty (~> 0.2, >= 0.0.7)
 
 PLATFORMS
-  aarch64-linux-gnu
-  aarch64-linux-musl
-  arm-linux-gnu
-  arm-linux-musl
-  arm64-darwin
+  arm64-darwin-25
   ruby
-  x86-linux-gnu
-  x86-linux-musl
-  x86_64-darwin
-  x86_64-linux-gnu
-  x86_64-linux-musl
 
 DEPENDENCIES
-  activesupport (= 7.0.8)
-  cocoapods
   fastlane
-  fastlane-plugin-flutter_version!
 
 BUNDLED WITH
    2.6.7
