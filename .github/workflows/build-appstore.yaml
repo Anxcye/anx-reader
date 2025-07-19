@@ -79,6 +79,8 @@ jobs:
           flutter pub get
           dart run build_runner build --delete-conflicting-outputs
           flutter doctor
+          flutter build ios --release --no-codesign
+
 
       # - name: Install Fastlane and CocoaPods
       #   run: |
