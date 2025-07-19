@@ -40,11 +40,11 @@ platform :ios do
 
     authenticate_apple_store
     
-    # sh_on_root(command: "which pod && which ruby && which pod")
+    sh_on_root(command: "which pod && which ruby && which pod")
 
-    # fetch_dependencies
+    fetch_dependencies
 
-    # sh_on_root(command: "flutter build ipa --dart-define=isAppStore=true -v")
+    sh_on_root(command: "flutter build ios --release --no-codesign -v")
   end
 
 
