@@ -14,7 +14,6 @@ end
 # Tasks to be reused on each platform flow
 lane :fetch_dependencies do
   sh_on_root(command: "flutter clean")
-  sh_on_root(command: "pod cache clean --all")
   sh_on_root(command: "dart run build_runner build --delete-conflicting-outputs")
 end
 
