@@ -52,7 +52,7 @@ platform :ios do
   lane :release_app_store do |options|
 
 
-    # build_ipa
+    build_ipa
 
     build_app(
       skip_build_archive: true,
