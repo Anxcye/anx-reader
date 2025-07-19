@@ -52,11 +52,11 @@ jobs:
           channel: stable
           flutter-version: '3.32.4'
 
-      # - name: Set up Ruby
-      #   uses: ruby/setup-ruby@v1
-      #   with:
-      #     ruby-version: ${{ env.RUBY_VERSION }}
-      #     bundler-cache: true
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ env.RUBY_VERSION }}
+          bundler-cache: true
 
       # - name: Set up Xcode
       #   run: |
@@ -77,7 +77,7 @@ jobs:
           cd ios
           # fastlane ios build_ipa
           # flutter build ipa --dart-define=isAppStore=true
-          fastlane ios release_app_store
+          bundle exec fastlane ios release_app_store
         env:
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
