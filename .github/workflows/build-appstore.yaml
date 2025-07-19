@@ -57,6 +57,8 @@ jobs:
         with:
           ruby-version: '3.4.4'
           bundler-cache: true
+          working-directory: ios
+
 
       # - name: Set up Xcode
       #   run: |
