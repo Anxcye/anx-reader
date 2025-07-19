@@ -32,9 +32,9 @@ platform :ios do
     UI.message("Syncing certificates and profiles")
 
 
-    # get_certificates
-    # get_provisioning_profile(app_identifier: "com.anxcye.anxReader")
-    # get_provisioning_profile(app_identifier: "com.anxcye.anxReader.shareExtension")
+    get_certificates
+    get_provisioning_profile(app_identifier: "com.anxcye.anxReader")
+    get_provisioning_profile(app_identifier: "com.anxcye.anxReader.shareExtension")
   
     sync_code_signing(
       type: "appstore",
@@ -43,9 +43,9 @@ platform :ios do
     commit = last_git_commit
     puts "*** Starting iOS release for commit(#{commit[:abbreviated_commit_hash]}) ***"
     
-    sh_on_root(command: "which pod && which ruby && pod --version")
+    sh_on_root(command: "which pod && which ruby")
     sh_on_root(command: "brew install cocoapods")
-    sh_on_root(command: "which pod && which ruby && pod --version")
+    sh_on_root(command: "which pod && which ruby")
 
     # Verify certificates are available
     UI.message("Checking available certificates...")
