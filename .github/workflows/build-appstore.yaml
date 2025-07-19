@@ -75,10 +75,10 @@ jobs:
       - name: Build iOS App
         run: |
           cd ios
-          gem install fastlane CFPropertyList sqlite3 digest
+          gem install CFPropertyList sqlite3 digest
           # fastlane ios build_ipa
           # flutter build ipa --dart-define=isAppStore=true
-          bundle exec fastlane ios release_app_store
+          fastlane ios release_app_store
         env:
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
