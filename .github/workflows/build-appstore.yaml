@@ -54,7 +54,6 @@ jobs:
           channel: stable
           flutter-version: '3.32.4'
 
-    steps:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
