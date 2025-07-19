@@ -68,19 +68,16 @@ jobs:
         run: |
           sudo xcode-select -switch /Applications/Xcode_16.2.app/Contents/Developer
           flutter --version
+          flutter doctor -v
           flutter pub get
           dart run build_runner build --delete-conflicting-outputs
-          flutter doctor
-          which pod && which ruby
-          pod cache clean --all
-          pod repo update --silent
+          flutter build ios --release --no-codesign
 
       - name: Build iOS App
         run: |
           cd ios
-          flutter build ios --release --no-codesign
-          fastlane ios build_ipa
-          flutter build ipa --dart-define=isAppStore=true -v
+          # fastlane ios build_ipa
+          # flutter build ipa --dart-define=isAppStore=true
           fastlane ios release_app_store
         env:
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
