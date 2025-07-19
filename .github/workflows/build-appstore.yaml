@@ -54,11 +54,11 @@ jobs:
           channel: stable
           flutter-version: '3.32.4'
 
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: ${{ env.RUBY_VERSION }}
-          bundler-cache: true
+      # - name: Set up Ruby
+      #   uses: ruby/setup-ruby@v1
+      #   with:
+      #     ruby-version: ${{ env.RUBY_VERSION }}
+      #     bundler-cache: true
 
       - name: Set up Xcode
         run: |
