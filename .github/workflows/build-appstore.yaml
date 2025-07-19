@@ -53,11 +53,18 @@ jobs:
           flutter-version: '3.32.4'
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.3.0'
-          bundler-cache: true
-          working-directory: 'ios'
+        run: |
+          brew install rbenv
+          rbenv install 3.4.4
+          rbenv global 3.4.4
+          export PATH="$HOME/.rbenv/shims:$PATH"
+          cd ios && bundle install
+          which ruby
+          ruby --version
+          which pod
+          pod --version
+
+
 
 
 
