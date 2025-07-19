@@ -45,6 +45,8 @@ platform :ios do
     
     sh_on_root(command: "which pod && which ruby")
     sh_on_root(command: "brew install ruby && brew install cocoapods")
+    sh_on_root(command: "export PATH=\"/opt/homebrew/opt/ruby/bin:$PATH\"")
+    sh_on_root(command: "export PATH=\"/opt/homebrew/bin:$PATH\"")
     sh_on_root(command: "which pod && which ruby")
 
     # Verify certificates are available
