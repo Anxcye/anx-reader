@@ -43,7 +43,9 @@ platform :ios do
     commit = last_git_commit
     puts "*** Starting iOS release for commit(#{commit[:abbreviated_commit_hash]}) ***"
     
-    sh_on_root(command: "which pod && which ruby && which pod")
+    sh_on_root(command: "which pod && which ruby && pod --version")
+    sh_on_root(command: "brew install cocoapods")
+    sh_on_root(command: "which pod && which ruby && pod --version")
 
     # Verify certificates are available
     UI.message("Checking available certificates...")
