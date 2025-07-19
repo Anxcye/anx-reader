@@ -74,7 +74,6 @@ jobs:
           dart run build_runner build --delete-conflicting-outputs
           flutter doctor
           which pod && which ruby
-          flutter build ios --release --no-codesign
 
       - name: Build iOS App
         run: |
@@ -84,7 +83,6 @@ jobs:
 
           fastlane ios build_ipa
           flutter build ipa --dart-define=isAppStore=true 
-          alias pod=/usr/local/bin/pod
           fastlane ios release_app_store
         env:
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
