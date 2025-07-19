@@ -74,6 +74,8 @@ jobs:
           dart run build_runner build --delete-conflicting-outputs
           flutter doctor
           which pod && which ruby
+          pod cache clean --all
+          pod repo update --silent
 
       - name: Build iOS App
         run: |
