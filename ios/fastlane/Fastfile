@@ -38,7 +38,6 @@ platform :ios do
     # get_provisioning_profile(app_identifier: "com.anxcye.anxReader.shareExtension")
   
     if is_ci
-      # CI 环境需要设置 keychain 密码
       create_keychain(
         name: "fastlane_tmp_keychain",
         password: "temp_password",
@@ -60,29 +59,26 @@ platform :ios do
     
     sh_on_root(command: "which pod && which ruby")
 
-      # 在 CI 中添加更多调试信息
-  if is_ci
-    UI.message("CI Debug: Checking keychain status...")
-    sh_on_root(command: "security list-keychains")
-    sh_on_root(command: "security default-keychain")
+  # if is_ci
+  #   UI.message("CI Debug: Checking keychain status...")
+  #   sh_on_root(command: "security list-keychains")
+  #   sh_on_root(command: "security default-keychain")
     
-    UI.message("CI Debug: Checking provisioning profiles...")
-    sh_on_root(command: "ls -la ~/Library/MobileDevice/Provisioning\\ Profiles/ || echo 'Provisioning profiles directory not found'")
+  #   UI.message("CI Debug: Checking provisioning profiles...")
+  #   sh_on_root(command: "ls -la ~/Library/MobileDevice/Provisioning\\ Profiles/ || echo 'Provisioning profiles directory not found'")
     
-    UI.message("CI Debug: Checking certificates in keychain...")
-    sh_on_root(command: "security find-certificate -a -p | grep 'BEGIN CERTIFICATE' | wc -l")
-  end
+  #   UI.message("CI Debug: Checking certificates in keychain...")
+  #   sh_on_root(command: "security find-certificate -a -p | grep 'BEGIN CERTIFICATE' | wc -l")
+  # end
 
-    # Verify certificates are available
-    UI.message("Checking available certificates...")
-    sh_on_root(command: "security find-identity -v -p codesigning")
+    # # Verify certificates are available
+    # UI.message("Checking available certificates...")
+    # sh_on_root(command: "security find-identity -v -p codesigning")
 
     fetch_dependencies
     
-    # 分步骤：先构建 archive，再导出 IPA
     sh_on_root(command: "flutter build ipa --release --dart-define=isAppStore=true")
     
-    # 使用 fastlane 的 build_app 来处理导出，确保使用正确的配置文件
     build_app(
       skip_build_archive: true,
       archive_path: "../build/ios/archive/Runner.xcarchive",
