@@ -2,7 +2,7 @@ opt_out_usage
 
 # Have an easy way to get the root of the project
 def root_path
-  Dir.pwd.sub(/.*\Kfastlane/, '').sub(/.*\Kandroid/, '').sub(/.*\Kios/, '').sub(/.*\K\/\//, '')
+  Dir.pwd.sub(/.*\Kfastlane/, '').sub(/.*\Kandroid/, '').sub(/.*\Kios/, '').sub(/.*\Kmacos/, '').sub(/.*\K\/\//, '')
 end
 
 # Have an easy way to run flutter tasks on the root of the project

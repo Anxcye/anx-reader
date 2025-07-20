@@ -1,9 +1,9 @@
 import "../../Fastfile"
 
-default_platform(:ios)
+default_platform(:mac)
 
 
-platform :ios do
+platform :mac do
   # Authenticate with Apple Store
   private_lane :authenticate_apple_store do
     app_store_connect_api_key(
@@ -16,8 +16,8 @@ platform :ios do
 
   end
 
-  # Build iOS app
-  lane :build_ipa do
+  # Build macOS app
+  lane :build_app do
     verify_env(envs: [
       "ASC_KEY_ID",
       "ASC_ISSUER_ID",
@@ -31,12 +31,7 @@ platform :ios do
 
     # Sync certificates and profiles using match
     UI.message("Syncing certificates and profiles")
-
-
-    # get_certificates
-    # get_provisioning_profile(app_identifier: "com.anxcye.anxReader")
-    # get_provisioning_profile(app_identifier: "com.anxcye.anxReader.shareExtension")
-  
+    
     if is_ci
       create_keychain(
         name: "fastlane_tmp_keychain",
@@ -48,73 +43,60 @@ platform :ios do
       )
     end
     
+    # Default to developer_id for direct distribution
+    cert_type = ENV["CERT_TYPE"] || "developer_id"
+    
     sync_code_signing(
-      type: "appstore",
+      type: cert_type,
+      platform: "macos",
       readonly: is_ci,
       keychain_name: is_ci ? "fastlane_tmp_keychain" : "login.keychain",
       keychain_password: is_ci ? "temp_password" : nil,
     )
+    
     commit = last_git_commit
-    puts "*** Starting iOS release for commit(#{commit[:abbreviated_commit_hash]}) ***"
-    
-    sh_on_root(command: "which pod && which ruby")
-
-  # if is_ci
-  #   UI.message("CI Debug: Checking keychain status...")
-  #   sh_on_root(command: "security list-keychains")
-  #   sh_on_root(command: "security default-keychain")
-    
-  #   UI.message("CI Debug: Checking provisioning profiles...")
-  #   sh_on_root(command: "ls -la ~/Library/MobileDevice/Provisioning\\ Profiles/ || echo 'Provisioning profiles directory not found'")
-    
-  #   UI.message("CI Debug: Checking certificates in keychain...")
-  #   sh_on_root(command: "security find-certificate -a -p | grep 'BEGIN CERTIFICATE' | wc -l")
-  # end
-
-    # # Verify certificates are available
-    # UI.message("Checking available certificates...")
-    # sh_on_root(command: "security find-identity -v -p codesigning")
+    puts "*** Starting macOS release for commit(#{commit[:abbreviated_commit_hash]}) ***"
 
     fetch_dependencies
     
-    sh_on_root(command: "flutter build ipa --release --dart-define=isAppStore=true")
+    # Build macOS app
+    sh_on_root(command: "flutter build macos --release --dart-define=isAppStore=true")
     
-    build_app(
-      skip_build_archive: true,
-      archive_path: "../build/ios/archive/Runner.xcarchive",
+    # Package for Mac App Store
+    build_mac_app(
+      skip_package_pkg: false,
+      archive_path: "../build/macos/Build/Products/Release/Runner.xcarchive",
       export_method: "app-store",
       export_options: {
-        teamID: "28W956D5K8",
-        provisioningProfiles: {
-          "com.anxcye.anxReader" => "match AppStore com.anxcye.anxReader",
-          "com.anxcye.anxReader.shareExtension" => "match AppStore com.anxcye.anxReader.shareExtension"
-        }
+        teamID: "28W956D5K8"
       }
     )
   end
 
 
-  desc "Release a new build to Apple Store"
+  desc "Release a new build to Mac App Store"
   lane :release_app_store do |options|
+    # Set environment for App Store build
+    ENV["CERT_TYPE"] = "appstore"
+    
+    build_app
 
-    build_ipa
-
-    upload_to_testflight(
+    upload_to_app_store(
+      platform: "osx",
       skip_waiting_for_build_processing: false
     )
   end
   
-  # This is a work in progress, requiring ad-hoc export method
-  # desc "Release to Play Store using Firebase App Distribution"
-  # lane :release_to_firebase do |options|
-  #   begin
-  #     build_ipa
-
-  #     firebase_app_distribution(
-  #       app: ENV["FIREBASE_APP_ID"],
-  #       service_credentials_file: google_service_account_json_path,
-  #       ipa_path: "../build/ios/Runner.ipa"
-  #     )
-  #   end
-  # end
+  desc "Build and notarize for direct distribution"
+  lane :release_direct do |options|
+    # Set environment for Developer ID build  
+    ENV["CERT_TYPE"] = "developer_id"
+    
+    build_app
+    
+    # Notarize the app
+    notarize(
+      package: "../build/macos/Build/Products/Release/Runner.app"
+    )
+  end
 end
