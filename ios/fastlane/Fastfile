@@ -64,8 +64,8 @@ platform :ios do
     sh_on_root(command: "security find-identity -v -p codesigning")
 
     fetch_dependencies
-    sh_on_root(command: "flutter build ipa --release --dart-define=isAppStore=true --no-codesign -v")
-    sh_on_root(command: "flutter build ipa --release --dart-define=isAppStore=true -v")
+    sh_on_root(command: "flutter build ipa --release --dart-define=isAppStore=true --no-codesign")
+    sh_on_root(command: "flutter build ipa --release --dart-define=isAppStore=true --export-options-plist=ios/ExportOptions.plist -v")
   end
 
 
