@@ -54,15 +54,17 @@ jobs:
 
       - name: Set up Ruby
         run: |
-          brew install rbenv
-          rbenv install 3.4.4
-          rbenv global 3.4.4
-          export PATH="$HOME/.rbenv/shims:$PATH"
+          brew install ruby
+          brew link --overwrite ruby --force
+          brew install cocoapods
+          brew link --overwrite pod
+
           cd ios && bundle install
-          which ruby
-          ruby --version
-          which pod
-          pod --version
+
+          which ruby && ruby --version
+          which pod && pod --version
+
+
 
 
 
