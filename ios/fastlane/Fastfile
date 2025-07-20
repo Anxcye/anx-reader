@@ -79,8 +79,8 @@ platform :ios do
 
     fetch_dependencies
     
-    # 只构建 archive，不签名
-    sh_on_root(command: "flutter build ios --release --dart-define=isAppStore=true")
+    # 直接使用 flutter build ipa，已经包含签名
+    sh_on_root(command: "flutter build ipa --release --dart-define=isAppStore=true")
   end
 
 
@@ -89,13 +89,9 @@ platform :ios do
 
     build_ipa
 
-    build_app(
-      skip_build_archive: true,
-      archive_path: "../build/ios/archive/Runner.xcarchive",
-    )
-
     upload_to_testflight(
-      skip_waiting_for_build_processing: false
+      skip_waiting_for_build_processing: false,
+      ipa: "../build/ios/ipa/Runner.ipa"
     )
   end
   
