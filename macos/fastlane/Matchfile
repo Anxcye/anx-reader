@@ -1,6 +1,6 @@
 git_url("https://github.com/Anxcye/anx-secret.git")
 storage_mode("git")
-type("developer_id") # For macOS: developer_id for direct distribution, appstore for Mac App Store
+type("appstore") # For macOS: developer_id for direct distribution, appstore for Mac App Store
 
 app_identifier([ENV["APP_BUNDLE_ID"]])
 platform("macos")

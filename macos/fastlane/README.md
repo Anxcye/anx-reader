@@ -50,10 +50,10 @@ For _fastlane_ installation instructions, see [Installing _fastlane_](https://do
 
 ## Mac
 
-### mac build_app
+### mac build_mac
 
 ```sh
-[bundle exec] fastlane mac build_app
+[bundle exec] fastlane mac build_mac
 ```
 
 
