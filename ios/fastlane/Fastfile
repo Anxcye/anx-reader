@@ -66,8 +66,8 @@ platform :ios do
       export_method: "app-store",
       export_options: {
         provisioningProfiles: {
-          com.anxcye.anxReader => "match AppStore com.anxcye.anxReader",
-          com.anxcye.anxReader.shareExtension => "match AppStore com.anxcye.anxReader.shareExtension"
+          "com.anxcye.anxReader" => "match AppStore com.anxcye.anxReader",
+          "com.anxcye.anxReader.shareExtension" => "match AppStore com.anxcye.anxReader.shareExtension"
         }
       }
 
