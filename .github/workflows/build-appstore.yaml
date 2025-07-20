@@ -70,6 +70,7 @@ jobs:
         run: |
           cd ios
           bundle install
+          gem install sqlite3
           fastlane ios release_app_store
         env:
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
