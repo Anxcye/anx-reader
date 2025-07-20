@@ -74,6 +74,10 @@ platform :ios do
 
     build_ipa
 
+    get_certificates           # invokes cert
+    get_provisioning_profile   # invokes sigh
+
+
   begin
     build_app(
       skip_build_archive: false,
