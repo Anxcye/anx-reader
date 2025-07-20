@@ -79,8 +79,22 @@ platform :ios do
 
     fetch_dependencies
     
-    # 直接使用 flutter build ipa，已经包含签名
+    # 分步骤：先构建 archive，再导出 IPA
     sh_on_root(command: "flutter build ipa --release --dart-define=isAppStore=true")
+    
+    # 使用 fastlane 的 build_app 来处理导出，确保使用正确的配置文件
+    build_app(
+      skip_build_archive: true,
+      archive_path: "../build/ios/archive/Runner.xcarchive",
+      export_method: "app-store",
+      export_options: {
+        teamID: "28W956D5K8",
+        provisioningProfiles: {
+          "com.anxcye.anxReader" => "match AppStore com.anxcye.anxReader",
+          "com.anxcye.anxReader.shareExtension" => "match AppStore com.anxcye.anxReader.shareExtension"
+        }
+      }
+    )
   end
 
 
@@ -90,8 +104,7 @@ platform :ios do
     build_ipa
 
     upload_to_testflight(
-      skip_waiting_for_build_processing: false,
-      ipa: "../build/ios/ipa/Runner.ipa"
+      skip_waiting_for_build_processing: false
     )
   end
   
