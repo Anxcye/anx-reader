@@ -67,11 +67,10 @@ jobs:
           # dart run build_runner build --delete-conflicting-outputs
 
       - name: Build iOS App
-        timeout-minutes: 15
+        timeout-minutes: 20
         run: |
           cd ios
           bundle install
-          gem install sqlite3
           fastlane ios release_app_store
         env:
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
