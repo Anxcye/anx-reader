@@ -68,17 +68,18 @@ platform :ios do
     # 只构建 archive，不签名
     sh_on_root(command: "flutter build ios --release --dart-define=isAppStore=true --no-codesign")
     
-    # 手动创建 archive 和 ipa
+    # 检查配置文件名称
+    UI.message("Checking provisioning profile names...")
+    sh_on_root(command: "security cms -D -i ~/Library/MobileDevice/Provisioning\\ Profiles/abe9ffa3-e5d8-42da-b048-647f8299ae76.mobileprovision | grep -A1 -B1 'Name\\|ApplicationIdentifierPrefix\\|Entitlements' | head -20")
+    sh_on_root(command: "security cms -D -i ~/Library/MobileDevice/Provisioning\\ Profiles/ebad6635-ee4d-4aa4-b7a1-97225c982146.mobileprovision | grep -A1 -B1 'Name\\|ApplicationIdentifierPrefix\\|Entitlements' | head -20")
+    
+    # 简化签名配置，让 Xcode 自动选择
     build_app(
       skip_build_archive: false,
       archive_path: "../build/ios/archive/Runner.xcarchive",
       export_method: "app-store",
       export_options: {
-        teamID: "28W956D5K8",
-        provisioningProfiles: {
-          "com.anxcye.anxReader" => "match AppStore com.anxcye.anxReader",
-          "com.anxcye.anxReader.shareExtension" => "match AppStore com.anxcye.anxReader.shareExtension"
-        }
+        teamID: "28W956D5K8"
       }
     )
   end
