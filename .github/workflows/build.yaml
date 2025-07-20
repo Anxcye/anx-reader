@@ -50,18 +50,6 @@ jobs:
     uses: ./.github/workflows/build-appstore.yaml
     with:
       version: ${{ needs.setup.outputs.version }}
-      is_alpha: ${{ needs.setup.outputs.is_alpha }}
-      is_beta: ${{ needs.setup.outputs.is_beta }}
-    secrets:
-      APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
-      APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
-      APP_STORE_CONNECT_API_PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_API_PRIVATE_KEY }}
-      IOS_DISTRIBUTION_CERTIFICATE: ${{ secrets.IOS_DISTRIBUTION_CERTIFICATE }}
-      IOS_DISTRIBUTION_CERTIFICATE_PASSWORD: ${{ secrets.IOS_DISTRIBUTION_CERTIFICATE_PASSWORD }}
-      IOS_PROVISIONING_PROFILE: ${{ secrets.IOS_PROVISIONING_PROFILE }}
-      MACOS_DISTRIBUTION_CERTIFICATE: ${{ secrets.MACOS_DISTRIBUTION_CERTIFICATE }}
-      MACOS_DISTRIBUTION_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_DISTRIBUTION_CERTIFICATE_PASSWORD }}
-      MACOS_PROVISIONING_PROFILE: ${{ secrets.MACOS_PROVISIONING_PROFILE }}
 
   release:
     needs: [setup, build-android, build-ios, build-windows, build-macos]
