@@ -80,15 +80,15 @@ platform :ios do
     fetch_dependencies
     
     # 只构建 archive，不签名
-    sh_on_root(command: "flutter build ios --release --dart-define=isAppStore=true --no-codesign")
+    sh_on_root(command: "flutter build ios --release --dart-define=isAppStore=true")
     
     # 直接使用 xcodebuild 避免 Fastlane 的签名问题
-    UI.message("Creating archive with xcodebuild...")
-    keychain_args = is_ci ? "OTHER_CODE_SIGN_FLAGS='--keychain fastlane_tmp_keychain'" : ""
-    sh_on_root(command: "xcodebuild -workspace ios/Runner.xcworkspace -scheme Runner -configuration Release -destination 'generic/platform=iOS' -archivePath build/ios/archive/Runner.xcarchive archive CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM=28W956D5K8 #{keychain_args}")
+    # UI.message("Creating archive with xcodebuild...")
+    # keychain_args = is_ci ? "OTHER_CODE_SIGN_FLAGS='--keychain fastlane_tmp_keychain'" : ""
+    # sh_on_root(command: "xcodebuild -workspace ios/Runner.xcworkspace -scheme Runner -configuration Release -destination 'generic/platform=iOS' -archivePath build/ios/archive/Runner.xcarchive archive CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM=28W956D5K8 #{keychain_args}")
     
-    UI.message("Exporting IPA...")
-    sh_on_root(command: "xcodebuild -exportArchive -archivePath build/ios/archive/Runner.xcarchive -exportPath build/ios/ipa -exportOptionsPlist ios/ExportOptions.plist")
+    # UI.message("Exporting IPA...")
+    # sh_on_root(command: "xcodebuild -exportArchive -archivePath build/ios/archive/Runner.xcarchive -exportPath build/ios/ipa -exportOptionsPlist ios/ExportOptions.plist")
   end
 
 
