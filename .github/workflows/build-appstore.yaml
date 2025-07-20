@@ -96,10 +96,11 @@ jobs:
           # flutter pub get
           # dart run build_runner build --delete-conflicting-outputs
 
-      - uses: maierj/fastlane-action@v3.1.0
-        with:
-          lane: 'release_app_store'
-          subdirectory: ios
+      - name: Build iOS App
+        run: |
+          cd ios
+          bundle install
+          fastlane ios release_app_store
         env:
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
