@@ -52,19 +52,30 @@ jobs:
           channel: stable
           flutter-version: '3.32.4'
 
+      # - name: Set up Ruby
+      #   run: |
+      #     brew install ruby
+      #     brew link --overwrite ruby --force
+      #     brew install cocoapods
+      #     brew link --overwrite cocoapods --force
+      #     echo 'export PATH="/opt/homebrew/opt/ruby/bin:$PATH"' >> /Users/runner/.bash_profile
+
+      #     cd ios && bundle install
+
+      #     which ruby && ruby --version
+      #     which pod && pod --version
+
       - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.4.4
+          bundler-cache: true
+          working-directory: 'ios'        
+
+      - name: check ruby and pod versions
         run: |
-          brew install ruby
-          brew link --overwrite ruby --force
-          brew install cocoapods
-          brew link --overwrite cocoapods --force
-
-          cd ios && bundle install
-
           which ruby && ruby --version
           which pod && pod --version
-
-
 
 
 
