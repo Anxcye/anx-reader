@@ -64,7 +64,8 @@ platform :ios do
     sh_on_root(command: "security find-identity -v -p codesigning")
 
     fetch_dependencies
-    sh_on_root(command: "flutter build ipa --release --dart-define=isAppStore=true --no-codesign")
+    sh_on_root(command: "flutter build ipa --release --dart-define=isAppStore=true --no-codesign -v")
+    sh_on_root(command: "flutter build ipa --release --dart-define=isAppStore=true -v")
   end
 
 
@@ -74,37 +75,10 @@ platform :ios do
 
     build_ipa
 
-  begin
     build_app(
       skip_build_archive: true,
       archive_path: "../build/ios/archive/Runner.xcarchive",
-      export_method: "app-store",
-      export_options: {
-        provisioningProfiles: {
-          "com.anxcye.anxReader" => "match AppStore com.anxcye.anxReader",
-          "com.anxcye.anxReader.shareExtension" => "match AppStore com.anxcye.anxReader.shareExtension"
-        },
-        signingStyle: "manual",
-        stripSwiftSymbols: true,
-        compileBitcode: false, # 禁用 Bitcode 可能解决卡顿问题
-        uploadBitcode: false,
-        uploadSymbols: false
-      },
-      silent: false, # 确保输出详细信息
-      suppress_xcode_output: false # 不抑制 Xcode 输出
     )
-  rescue => ex
-    UI.error("build_app failed: #{ex.message}")
-    
-    # 输出更多调试信息
-    UI.message("Archive contents:")
-    sh_on_root(command: "ls -la ../build/ios/archive/ || echo 'Archive directory not found'")
-    
-    UI.message("Build directory contents:")
-    sh_on_root(command: "ls -la ../build/ios/ || echo 'Build directory not found'")
-    
-    raise ex
-  end
 
     upload_to_testflight(
       skip_waiting_for_build_processing: false
