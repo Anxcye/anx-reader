@@ -90,7 +90,6 @@ platform :ios do
         uploadBitcode: false,
         uploadSymbols: false
       },
-      export_timeout: 600, # 增加到10分钟超时
       silent: false, # 确保输出详细信息
       suppress_xcode_output: false # 不抑制 Xcode 输出
     )

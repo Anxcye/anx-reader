@@ -67,6 +67,7 @@ jobs:
           # dart run build_runner build --delete-conflicting-outputs
 
       - name: Build iOS App
+        timeout-minutes: 15
         run: |
           cd ios
           bundle install
