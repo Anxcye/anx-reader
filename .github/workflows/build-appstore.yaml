@@ -1,46 +1,16 @@
 name: Build for App Store Connect
 
-on: push
-  # workflow_call:
-  #   inputs:
-  #     version:
-  #       required: true
-  #       type: string
-  #     is_alpha:
-  #       required: true
-  #       type: string
-  #     is_beta:
-  #       required: true
-  #       type: string
-  #   secrets:
-  #     # App Store Connect API credentials
-  #     APP_STORE_CONNECT_API_KEY_ID:
-  #       required: false
-  #     APP_STORE_CONNECT_ISSUER_ID:
-  #       required: false
-  #     APP_STORE_CONNECT_API_PRIVATE_KEY:
-  #       required: false
-  #     # iOS signing certificates
-  #     IOS_DISTRIBUTION_CERTIFICATE:
-  #       required: false
-  #     IOS_DISTRIBUTION_CERTIFICATE_PASSWORD:
-  #       required: false
-  #     IOS_PROVISIONING_PROFILE:
-  #       required: false
-  #     # macOS signing certificates
-  #     MACOS_DISTRIBUTION_CERTIFICATE:
-  #       required: false
-  #     MACOS_DISTRIBUTION_CERTIFICATE_PASSWORD:
-  #       required: false
-  #     MACOS_PROVISIONING_PROFILE:
-  #       required: false
+on:
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
+
 jobs:
   build-appstore:
     runs-on: macos-latest
     timeout-minutes: 60
-  #   strategy:
-  #     matrix:
-  #       platform: [ios, macos]
     
     steps:
       - name: Checkout repository
@@ -66,19 +36,19 @@ jobs:
           # flutter pub get
           # dart run build_runner build --delete-conflicting-outputs
 
-      # - name: Build iOS App
-      #   timeout-minutes: 20
-      #   run: |
-      #     cd ios
-      #     bundle install
-      #     fastlane ios release_app_store
-      #   env:
-      #     ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
-      #     ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
-      #     ASC_KEY_P8_BASE64: ${{ secrets.ASC_KEY_P8_BASE64 }}
-      #     MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
-      #     MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
-      #     APP_BUNDLE_ID: ${{ secrets.APP_BUNDLE_ID }}
+      - name: Build iOS App
+        timeout-minutes: 20
+        run: |
+          cd ios
+          bundle install
+          fastlane ios release_app_store
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_P8_BASE64: ${{ secrets.ASC_KEY_P8_BASE64 }}
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
+          APP_BUNDLE_ID: ${{ secrets.APP_BUNDLE_ID }}
 
       - name: Build macos App
         timeout-minutes: 20
