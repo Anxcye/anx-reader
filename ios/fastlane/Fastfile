@@ -61,8 +61,16 @@ platform :ios do
     build_ipa
 
     build_app(
-      skip_build_archive: true,
+      skip_build_archive: false,
       archive_path: "../build/ios/archive/Runner.xcarchive",
+      export_method: "app-store",
+      export_options: {
+        provisioningProfiles: {
+          com.anxcye.anxReader => "match AppStore com.anxcye.anxReader",
+          com.anxcye.anxReader.shareExtension => "match AppStore com.anxcye.anxReader.shareExtension"
+        }
+      }
+
     )
 
     upload_to_testflight(
