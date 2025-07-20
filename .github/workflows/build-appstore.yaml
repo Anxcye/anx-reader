@@ -57,7 +57,7 @@ jobs:
           brew install ruby
           brew link --overwrite ruby --force
           brew install cocoapods
-          brew link --overwrite pod
+          brew link --overwrite cocoapods --force
 
           cd ios && bundle install
 
