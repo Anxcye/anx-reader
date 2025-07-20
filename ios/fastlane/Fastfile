@@ -37,9 +37,23 @@ platform :ios do
     # get_provisioning_profile(app_identifier: "com.anxcye.anxReader")
     # get_provisioning_profile(app_identifier: "com.anxcye.anxReader.shareExtension")
   
+    if is_ci
+      # CI 环境需要设置 keychain 密码
+      create_keychain(
+        name: "fastlane_tmp_keychain",
+        password: "temp_password",
+        default_keychain: true,
+        unlock: true,
+        timeout: 3600,
+        add_to_search_list: true
+      )
+    end
+    
     sync_code_signing(
       type: "appstore",
       readonly: is_ci,
+      keychain_name: is_ci ? "fastlane_tmp_keychain" : "login.keychain",
+      keychain_password: is_ci ? "temp_password" : nil,
     )
     commit = last_git_commit
     puts "*** Starting iOS release for commit(#{commit[:abbreviated_commit_hash]}) ***"
@@ -70,7 +84,8 @@ platform :ios do
     
     # 直接使用 xcodebuild 避免 Fastlane 的签名问题
     UI.message("Creating archive with xcodebuild...")
-    sh_on_root(command: "xcodebuild -workspace ios/Runner.xcworkspace -scheme Runner -configuration Release -destination 'generic/platform=iOS' -archivePath build/ios/archive/Runner.xcarchive archive CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM=28W956D5K8")
+    keychain_args = is_ci ? "OTHER_CODE_SIGN_FLAGS='--keychain fastlane_tmp_keychain'" : ""
+    sh_on_root(command: "xcodebuild -workspace ios/Runner.xcworkspace -scheme Runner -configuration Release -destination 'generic/platform=iOS' -archivePath build/ios/archive/Runner.xcarchive archive CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM=28W956D5K8 #{keychain_args}")
     
     UI.message("Exporting IPA...")
     sh_on_root(command: "xcodebuild -exportArchive -archivePath build/ios/archive/Runner.xcarchive -exportPath build/ios/ipa -exportOptionsPlist ios/ExportOptions.plist")
