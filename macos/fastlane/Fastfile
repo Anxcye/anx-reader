@@ -17,7 +17,7 @@ platform :mac do
   end
 
   # Build macOS app
-  lane :build_app do
+  lane :build_mac do
     verify_env(envs: [
       "ASC_KEY_ID",
       "ASC_ISSUER_ID",
@@ -52,6 +52,7 @@ platform :mac do
       readonly: is_ci,
       keychain_name: is_ci ? "fastlane_tmp_keychain" : "login.keychain",
       keychain_password: is_ci ? "temp_password" : nil,
+      additional_cert_types: ["mac_installer_distribution"]
     )
     
     commit = last_git_commit
@@ -79,11 +80,14 @@ platform :mac do
     # Set environment for App Store build
     ENV["CERT_TYPE"] = "appstore"
     
-    build_app
+    build_mac
 
     upload_to_app_store(
       platform: "osx",
-      skip_waiting_for_build_processing: false
+      skip_screenshots: true,
+      skip_metadata: true,
+      precheck_include_in_app_purchases: false,
+      pkg: "./Anx Reader.pkg"
     )
   end
   
@@ -92,7 +96,7 @@ platform :mac do
     # Set environment for Developer ID build  
     ENV["CERT_TYPE"] = "developer_id"
     
-    build_app
+    build_mac
     
     # Notarize the app
     notarize(
