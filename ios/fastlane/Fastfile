@@ -13,6 +13,7 @@ platform :ios do
       is_key_content_base64: true,
       in_house: false
     )
+
   end
 
   # Build iOS app
@@ -45,6 +46,19 @@ platform :ios do
     
     sh_on_root(command: "which pod && which ruby")
 
+      # 在 CI 中添加更多调试信息
+  if is_ci
+    UI.message("CI Debug: Checking keychain status...")
+    sh_on_root(command: "security list-keychains")
+    sh_on_root(command: "security default-keychain")
+    
+    UI.message("CI Debug: Checking provisioning profiles...")
+    sh_on_root(command: "ls -la ~/Library/MobileDevice/Provisioning\\ Profiles/ || echo 'Provisioning profiles directory not found'")
+    
+    UI.message("CI Debug: Checking certificates in keychain...")
+    sh_on_root(command: "security find-certificate -a -p | grep 'BEGIN CERTIFICATE' | wc -l")
+  end
+
     # Verify certificates are available
     UI.message("Checking available certificates...")
     sh_on_root(command: "security find-identity -v -p codesigning")
@@ -60,6 +74,7 @@ platform :ios do
 
     build_ipa
 
+  begin
     build_app(
       skip_build_archive: false,
       archive_path: "../build/ios/archive/Runner.xcarchive",
@@ -68,10 +83,29 @@ platform :ios do
         provisioningProfiles: {
           "com.anxcye.anxReader" => "match AppStore com.anxcye.anxReader",
           "com.anxcye.anxReader.shareExtension" => "match AppStore com.anxcye.anxReader.shareExtension"
-        }
-      }
-
+        },
+        signingStyle: "manual",
+        stripSwiftSymbols: true,
+        compileBitcode: false, # 禁用 Bitcode 可能解决卡顿问题
+        uploadBitcode: false,
+        uploadSymbols: false
+      },
+      export_timeout: 600, # 增加到10分钟超时
+      silent: false, # 确保输出详细信息
+      suppress_xcode_output: false # 不抑制 Xcode 输出
     )
+  rescue => ex
+    UI.error("build_app failed: #{ex.message}")
+    
+    # 输出更多调试信息
+    UI.message("Archive contents:")
+    sh_on_root(command: "ls -la ../build/ios/archive/ || echo 'Archive directory not found'")
+    
+    UI.message("Build directory contents:")
+    sh_on_root(command: "ls -la ../build/ios/ || echo 'Build directory not found'")
+    
+    raise ex
+  end
 
     upload_to_testflight(
       skip_waiting_for_build_processing: true
