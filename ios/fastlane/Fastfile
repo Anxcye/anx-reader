@@ -64,21 +64,30 @@ platform :ios do
     sh_on_root(command: "security find-identity -v -p codesigning")
 
     fetch_dependencies
-    sh_on_root(command: "flutter build ipa --release --dart-define=isAppStore=true --no-codesign")
-    sh_on_root(command: "flutter build ipa --release --dart-define=isAppStore=true --export-options-plist=ios/ExportOptions.plist -v")
+    
+    # 只构建 archive，不签名
+    sh_on_root(command: "flutter build ios --release --dart-define=isAppStore=true --no-codesign")
+    
+    # 手动创建 archive 和 ipa
+    build_app(
+      skip_build_archive: false,
+      archive_path: "../build/ios/archive/Runner.xcarchive",
+      export_method: "app-store",
+      export_options: {
+        teamID: "28W956D5K8",
+        provisioningProfiles: {
+          "com.anxcye.anxReader" => "match AppStore com.anxcye.anxReader",
+          "com.anxcye.anxReader.shareExtension" => "match AppStore com.anxcye.anxReader.shareExtension"
+        }
+      }
+    )
   end
 
 
   desc "Release a new build to Apple Store"
   lane :release_app_store do |options|
 
-
     build_ipa
-
-    build_app(
-      skip_build_archive: true,
-      archive_path: "../build/ios/archive/Runner.xcarchive",
-    )
 
     upload_to_testflight(
       skip_waiting_for_build_processing: false
