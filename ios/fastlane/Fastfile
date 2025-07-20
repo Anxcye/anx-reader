@@ -50,7 +50,7 @@ platform :ios do
     sh_on_root(command: "security find-identity -v -p codesigning")
 
     fetch_dependencies
-    sh_on_root(command: "flutter build ipa --release --dart-define=isAppStore=true -v")
+    sh_on_root(command: "flutter build ipa --release --dart-define=isAppStore=true -v --no-codesign")
   end
 
 
@@ -60,10 +60,8 @@ platform :ios do
 
     build_ipa
 
-
-
     build_app(
-      skip_build_archive: false,
+      skip_build_archive: true,
       archive_path: "../build/ios/archive/Runner.xcarchive",
     )
 
