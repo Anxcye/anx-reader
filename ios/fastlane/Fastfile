@@ -74,13 +74,9 @@ platform :ios do
 
     build_ipa
 
-    get_certificates           # invokes cert
-    get_provisioning_profile   # invokes sigh
-
-
   begin
     build_app(
-      skip_build_archive: false,
+      skip_build_archive: true,
       archive_path: "../build/ios/archive/Runner.xcarchive",
       export_method: "app-store",
       export_options: {
@@ -111,7 +107,7 @@ platform :ios do
   end
 
     upload_to_testflight(
-      skip_waiting_for_build_processing: true
+      skip_waiting_for_build_processing: false
     )
   end
   
