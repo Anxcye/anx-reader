@@ -65,15 +65,16 @@ jobs:
       #     which ruby && ruby --version
       #     which pod && pod --version
 
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: 3.4.4
-          bundler-cache: true
-          working-directory: 'ios'        
+      # - name: Set up Ruby
+      #   uses: ruby/setup-ruby@v1
+      #   with:
+      #     ruby-version: 3.4.4
+      #     bundler-cache: true
+      #     working-directory: 'ios'        
 
       - name: check ruby and pod versions
         run: |
+          cd ios && bundle install
           which ruby && ruby --version
           which pod && pod --version
 
