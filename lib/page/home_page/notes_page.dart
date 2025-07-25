@@ -227,7 +227,8 @@ class NotesDetail extends ConsumerWidget {
                 numberOfNotes: current.numberOfNotes);
           },
           loading: () => const CircularProgressIndicator(),
-          error: (error, stack) => Text('Error: $error'),
+          error: (error, stack) => NotesTips(
+          ),
         );
   }
 }
