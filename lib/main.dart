@@ -27,28 +27,21 @@ import 'package:window_manager/window_manager.dart';
 final navigatorKey = GlobalKey<NavigatorState>();
 late AudioHandler audioHandler;
 
+
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Prefs().initPrefs();
-  if (Platform.isWindows) {
-    await windowManager.ensureInitialized();
-    final size = Size(
-      Prefs().windowInfo.width,
-      Prefs().windowInfo.height,
-    );
-    final offset = Offset(
-      Prefs().windowInfo.x,
-      Prefs().windowInfo.y,
-    );
 
-    WindowManager.instance.setTitle('Anx Reader');
-    if (size.width > 0 && size.height > 0) {
-      await WindowManager.instance.setPosition(offset);
-      await WindowManager.instance.setSize(size);
-    }
+
+   if (Platform.isWindows) {
+    await windowManager.ensureInitialized();
+    await WindowManager.instance.setTitle('Anx Reader');
     await WindowManager.instance.show();
     await WindowManager.instance.focus();
   }
+
+
 
   initBasePath();
   AnxLog.init();
