@@ -235,8 +235,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                         BoxShadow(
                           color: Theme.of(context)
                               .colorScheme
-                              .primaryContainer
-                              .withAlpha(200),
+                              .secondaryContainer,
                           blurRadius: 8,
                         ),
                       ],
