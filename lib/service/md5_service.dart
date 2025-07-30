@@ -105,7 +105,7 @@ class MD5Service {
       results.add(ImportFileCheck(
         filePath: filePath,
         md5: md5,
-        isDuplicate: duplicateBook != null,
+        isDuplicate: duplicateBook != null && !duplicateBook.isDeleted,
         duplicateBook: duplicateBook,
       ));
     }

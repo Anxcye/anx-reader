@@ -95,7 +95,7 @@ Future<Book?> getBookByMd5(String md5) async {
   final db = await DBHelper().database;
   final List<Map<String, dynamic>> maps = await db.query(
     'tb_books',
-    where: 'file_md5 = ? AND is_deleted = 0',
+    where: 'file_md5 = ?',
     whereArgs: [md5],
   );
 
