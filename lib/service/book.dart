@@ -82,7 +82,7 @@ void _checkDuplicatesAndShowDialog(
     final filePaths = supportedFiles.map((f) => f.path).toList();
     final checkResults = await MD5Service.checkImportFiles(filePaths);
 
-    Navigator.of(context).pop(); // 关闭进度对话框
+    Navigator.of(context).pop();
 
     List<File> duplicateFiles = [];
     List<File> uniqueFiles = [];

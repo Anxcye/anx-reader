@@ -230,7 +230,7 @@ class Sync extends _$Sync {
   }) async {
     final client = _syncClient;
     if (client == null) {
-      AnxLog.severe('No sync client configured');
+      AnxLog.info('No sync client configured');
       return;
     }
 
