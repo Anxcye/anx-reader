@@ -109,7 +109,7 @@ void _checkDuplicatesAndShowDialog(
       ref,
     );
   } catch (e) {
-    Navigator.of(navigatorKey.currentContext!).pop(); 
+    Navigator.of(navigatorKey.currentContext!).pop();
     AnxLog.severe('MD5 check failed: $e');
     _showImportDialog(
       supportedFiles,
@@ -354,13 +354,15 @@ void _showImportDialog(
 }
 
 Future<void> importBook(File file, WidgetRef ref) async {
+  String? md5 = await MD5Service.calculateFileMd5(file.path);
+
   if (file.path.split('.').last == 'txt') {
     final tempFile = await convertFromTxt(file);
     file.deleteSync();
     file = tempFile;
   }
 
-  await getBookMetadata(file, ref: ref);
+  await getBookMetadata(file, md5: md5, ref: ref);
   ref.read(bookListProvider.notifier).refresh();
 }
 
@@ -419,6 +421,7 @@ Future<void> saveBook(
   String title,
   String author,
   String description,
+  String? md5,
   String cover, {
   Book? provideBook,
 }) async {
@@ -441,21 +444,22 @@ Future<void> saveBook(
   file.delete();
 
   dbCoverPath = await saveImageToLocal(cover, dbCoverPath);
-
-  String? md5 = await MD5Service.calculateFileMd5(filePath);
+  if (md5 != null) {
+    provideBook ??= await getBookByMd5(md5);
+  }
 
   Book book = Book(
       id: provideBook != null ? provideBook.id : -1,
-      title: title,
+      title: provideBook?.title ?? title,
       coverPath: dbCoverPath,
       filePath: dbFilePath,
-      lastReadPosition: '',
-      readingPercentage: 0,
-      author: author,
+      lastReadPosition: provideBook?.lastReadPosition ?? '',
+      readingPercentage: provideBook?.readingPercentage ?? 0,
+      author: provideBook?.author ?? author,
       isDeleted: false,
-      rating: 0.0,
+      rating: provideBook?.rating ?? 0.0,
       md5: md5,
-      createTime: DateTime.now(),
+      createTime: provideBook?.createTime ?? DateTime.now(),
       updateTime: DateTime.now());
 
   book.id = await insertBook(book);
@@ -468,6 +472,7 @@ Future<void> saveBook(
 Future<void> getBookMetadata(
   File file, {
   Book? book,
+  String? md5,
   WidgetRef? ref,
 }) async {
   String serverFileName = Server().setTempFile(file);
@@ -503,7 +508,15 @@ Future<void> getBookMetadata(
             // base64 cover
             String cover = metadata['cover'] ?? '';
             String description = metadata['description'] ?? '';
-            saveBook(file, title, author, description, cover);
+            saveBook(
+              file,
+              title,
+              author,
+              description,
+              md5,
+              cover,
+              provideBook: book,
+            );
             ref?.read(bookListProvider.notifier).refresh();
             // return;
           });

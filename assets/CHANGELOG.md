@@ -4,16 +4,20 @@
 
 ## 1.6.2
 - UI: Modify bottom navigation bar style
+- Feat: Import previously deleted files and automatically associate notes, progress, etc.
 - Feat: Support preventing duplicate file imports
 - Feat: Support calculating feature values of existing files to prevent duplicate imports
 - Feat: Support custom CSS styles
 - Fix: Fix sync failure when WebDAV is empty
+- Fix: Fix issue where txt files could not be correctly judged as duplicates
 
 - UI: 修改底部导航栏样式
+- Feat: 导入曾经删除的文件时自动关联笔记、进度等信息
 - Feat: 支持防止文件重复导入
 - Feat：支持计算已有文件特征值，用于防止重复导入
 - Feat: 支持自定义 CSS 样式
 - Fix: WebDAV 为空时同步失败的问题
+- Fix: 修复 txt 文件无法正确判断是否重复的问题
 
 ## 1.6.1
 - Feat: Support following book indentation

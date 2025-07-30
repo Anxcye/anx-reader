@@ -39,6 +39,7 @@ class BookBottomSheet extends ConsumerWidget {
         isDeleted: true,
         description: book.description,
         rating: book.rating,
+        md5: book.md5,
         createTime: book.createTime,
         updateTime: DateTime.now(),
       ));
