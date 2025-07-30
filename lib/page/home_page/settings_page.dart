@@ -26,48 +26,51 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     return Scaffold(
       body: SingleChildScrollView(
         controller: _scrollController,
-        child: Column(
-          children: [
-            GestureDetector(
-              onTap: () {},
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(0, 60, 0, 20),
-                child: Center(
-                  child: Text(
-                    'Anx',
-                    style: TextStyle(
-                      fontSize: 130,
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.primary,
+        child: Padding(
+          padding: const EdgeInsets.only(bottom: 80),
+          child: Column(
+            children: [
+              GestureDetector(
+                onTap: () {},
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 60, 0, 20),
+                  child: Center(
+                    child: Text(
+                      'Anx',
+                      style: TextStyle(
+                        fontSize: 130,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-            const Divider(),
-            const Padding(
-              padding: EdgeInsets.fromLTRB(20, 8, 10, 8),
-              child: ChangeThemeMode(),
-            ),
-            const Divider(),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: webdavSwitch(context, setState, ref),
-            ),
-            const Divider(),
-            const MoreSettings(),
-            if (EnvVar.isAppStore)
-              ListTile(
-                title: Text(L10n.of(context).iap_page_title),
-                leading: const Icon(Icons.star_outline),
-                subtitle: Text(IAPService().statusTitle(context)),
-                onTap: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => const IAPPage()));
-              },
-            ),
-            const About(),
-          ],
+              const Divider(),
+              const Padding(
+                padding: EdgeInsets.fromLTRB(20, 8, 10, 8),
+                child: ChangeThemeMode(),
+              ),
+              const Divider(),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: webdavSwitch(context, setState, ref),
+              ),
+              const Divider(),
+              const MoreSettings(),
+              if (EnvVar.isAppStore)
+                ListTile(
+                  title: Text(L10n.of(context).iap_page_title),
+                  leading: const Icon(Icons.star_outline),
+                  subtitle: Text(IAPService().statusTitle(context)),
+                  onTap: () {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => const IAPPage()));
+                },
+              ),
+              const About(),
+            ],
+          ),
         ),
       ),
     );

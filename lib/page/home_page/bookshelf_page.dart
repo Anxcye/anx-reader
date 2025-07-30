@@ -138,7 +138,7 @@ class BookshelfPageState extends ConsumerState<BookshelfPage> {
                         return GridView(
                           key: _gridViewKey,
                           controller: _scrollController,
-                          padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
+                          padding: const EdgeInsets.fromLTRB(20, 20, 20, 80),
                           gridDelegate:
                               SliverGridDelegateWithFixedCrossAxisCount(
                             crossAxisCount:
