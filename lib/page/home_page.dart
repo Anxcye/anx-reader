@@ -17,6 +17,7 @@ import 'package:anx_reader/utils/log/common.dart';
 import 'package:anx_reader/providers/sync.dart';
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/utils/toast/common.dart';
+import 'package:anx_reader/widgets/settings/about.dart';
 import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -180,13 +181,17 @@ class _HomePageState extends ConsumerState<HomePage> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
-                            Padding(
-                              padding: const EdgeInsets.only(right: 2.0),
-                              child: Image.asset(
-                                width: 32,
-                                height: 32,
-                                'assets/icon/Anx-logo-tined.png',
-                                color: Theme.of(context).colorScheme.secondary,
+                            InkWell(
+                              onTap: () => openAboutDialog(),
+                              child: Padding(
+                                padding: const EdgeInsets.only(right: 2.0),
+                                child: Image.asset(
+                                  width: 32,
+                                  height: 32,
+                                  'assets/icon/Anx-logo-tined.png',
+                                  color:
+                                      Theme.of(context).colorScheme.secondary,
+                                ),
                               ),
                             ),
                           ],
@@ -233,9 +238,8 @@ class _HomePageState extends ConsumerState<HomePage> {
                       borderRadius: BorderRadius.circular(32),
                       boxShadow: [
                         BoxShadow(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .secondaryContainer,
+                          color:
+                              Theme.of(context).colorScheme.secondaryContainer,
                           blurRadius: 8,
                         ),
                       ],
