@@ -1,13 +1,24 @@
 name: Build for App Store Connect
 
-# on:
-#   workflow_call:
-#     inputs:
-#       version:
-#         required: true
-#         type: string
-
-on: push
+on:
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
+    secrets:
+      ASC_KEY_ID:
+        required: true
+      ASC_ISSUER_ID:
+        required: true
+      ASC_KEY_P8_BASE64:
+        required: true
+      MATCH_PASSWORD:
+        required: true
+      MATCH_GIT_BASIC_AUTHORIZATION:
+        required: true
+      APP_BUNDLE_ID:
+        required: true
 
 jobs:
   build-appstore:

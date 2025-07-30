@@ -50,6 +50,13 @@ jobs:
     uses: ./.github/workflows/build-appstore.yaml
     with:
       version: ${{ needs.setup.outputs.version }}
+    secrets:
+      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+      ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+      ASC_KEY_P8_BASE64: ${{ secrets.ASC_KEY_P8_BASE64 }}
+      MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+      MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
+      APP_BUNDLE_ID: ${{ secrets.APP_BUNDLE_ID }}
 
   release:
     needs: [setup, build-android, build-ios, build-windows, build-macos]
