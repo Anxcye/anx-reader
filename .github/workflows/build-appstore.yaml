@@ -1,11 +1,13 @@
 name: Build for App Store Connect
 
-on:
-  workflow_call:
-    inputs:
-      version:
-        required: true
-        type: string
+# on:
+#   workflow_call:
+#     inputs:
+#       version:
+#         required: true
+#         type: string
+
+on: push
 
 jobs:
   build-appstore:
