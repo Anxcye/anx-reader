@@ -72,23 +72,25 @@ class _NotesPageState extends ConsumerState<NotesPage> {
 
     return notesStats.when(
       data: (data) {
-        return Padding(
-          padding: const EdgeInsets.all(10.0),
-          child:
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            highlightDigit(
-              context,
-              L10n.of(context).notes_notes_across(data['numberOfNotes']!),
-              textStyle,
-              digitStyle,
-            ),
-            highlightDigit(
-              context,
-              L10n.of(context).notes_books(data['numberOfBooks']!),
-              textStyle,
-              digitStyle,
-            ),
-          ]),
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(10.0),
+            child:
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              highlightDigit(
+                context,
+                L10n.of(context).notes_notes_across(data['numberOfNotes']!),
+                textStyle,
+                digitStyle,
+              ),
+              highlightDigit(
+                context,
+                L10n.of(context).notes_books(data['numberOfBooks']!),
+                textStyle,
+                digitStyle,
+              ),
+            ]),
+          ),
         );
       },
       loading: () => const CircularProgressIndicator(),
