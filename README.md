@@ -1,4 +1,4 @@
-**English** | [简体中文](README_zh.md) | [Türkçe](README_tr.md)
+**English** | [简体中文](README_zh.md) | [Türkçe](README_tr.md) | [Русский](README_RU.md)
 
 <br>
 
