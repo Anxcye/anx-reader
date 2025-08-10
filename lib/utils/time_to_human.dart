@@ -8,18 +8,18 @@ String timeToHuman(DateTime? date, BuildContext context) {
   }
   final Duration difference = now.difference(date);
   if (difference.inSeconds < 60) {
-    return '${difference.inSeconds} ${L10n.of(context).statistic_just_now}';
+    return '${difference.inSeconds} ${L10n.of(context).statisticJustNow}';
   } else if (difference.inMinutes < 60) {
-    return L10n.of(context).statistic_minutes_ago(difference.inMinutes);
+    return L10n.of(context).statisticMinutesAgo(difference.inMinutes);
   } else if (difference.inHours < 24) {
-    return L10n.of(context).statistic_hours_ago(difference.inHours);
+    return L10n.of(context).statisticHoursAgo(difference.inHours);
   } else if (difference.inHours < 48) {
-    return L10n.of(context).statistic_yesterday(difference.inDays);
+    return L10n.of(context).statisticYesterday(difference.inDays);
   } else if (difference.inDays < 30) {
-    return L10n.of(context).statistic_days_ago(difference.inDays);
+    return L10n.of(context).statisticDaysAgo(difference.inDays);
   } else if (difference.inDays < 365) {
-    return L10n.of(context).statistic_months_ago(difference.inDays ~/ 30);
+    return L10n.of(context).statisticMonthsAgo(difference.inDays ~/ 30);
   } else {
-    return L10n.of(context).statistic_years_ago(difference.inDays ~/ 365);
+    return L10n.of(context).statisticYearsAgo(difference.inDays ~/ 365);
   }
 }

@@ -10,7 +10,7 @@ class AiChatPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(L10n.of(context).ai_chat),
+        title: Text(L10n.of(context).aiChat),
       ),
       body: const SafeArea(
         child: Padding(

@@ -16,9 +16,9 @@ void showMoreSettings(ReadingSettings settings) {
   readingPageKey.currentState!.showOrHideAppBarAndBottomBar(false);
 
   List<Tab> tabs = [
-    Tab(text: L10n.of(context).reading_page_reading),
-    Tab(text: L10n.of(context).reading_page_style),
-    Tab(text: L10n.of(context).reading_page_other),
+    Tab(text: L10n.of(context).readingPageReading),
+    Tab(text: L10n.of(context).readingPageStyle),
+    Tab(text: L10n.of(context).readingPageOther),
   ];
 
   List<Widget> children = [

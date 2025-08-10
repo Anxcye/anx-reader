@@ -25,12 +25,12 @@ class StatisticsTips extends StatelessWidget {
                   color: Colors.grey)),
           const SizedBox(height: 50),
           Text(
-            L10n.of(context).statistics_tips_1,
+            L10n.of(context).statisticsTips_1,
             style: textStyleBig,
           ),
           const SizedBox(height: 10),
           Text(
-            L10n.of(context).statistics_tips_2,
+            L10n.of(context).statisticsTips_2,
             style: textStyle,
           ),
         ],

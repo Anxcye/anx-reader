@@ -12,13 +12,13 @@ extension ExcerptShareTemplateEnumExtension on ExcerptShareTemplateEnum {
   String getL10n(BuildContext context) {
     switch (this) {
       case ExcerptShareTemplateEnum.defaultTemplate:
-        return L10n.of(context).reading_page_share_template_classic;
+        return L10n.of(context).readingPageShareTemplateClassic;
       case ExcerptShareTemplateEnum.simpleTemplate:
-        return L10n.of(context).reading_page_share_template_simple;
+        return L10n.of(context).readingPageShareTemplateSimple;
       case ExcerptShareTemplateEnum.elegantTemplate:
-        return L10n.of(context).reading_page_share_template_elegant;
+        return L10n.of(context).readingPageShareTemplateElegant;
       case ExcerptShareTemplateEnum.verticalTemplate:
-        return L10n.of(context).reading_page_share_template_modern;
+        return L10n.of(context).readingPageShareTemplateModern;
     }
   }
 }

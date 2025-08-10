@@ -194,12 +194,12 @@ class ExcerptMenuState extends State<ExcerptMenu> {
           InkWell(
             onTap: () {
               Clipboard.setData(ClipboardData(text: widget.annoContent));
-              AnxToast.show(L10n.of(context).notes_page_copied);
+              AnxToast.show(L10n.of(context).notesPageCopied);
               widget.onClose();
             },
             child: IconAndText(
               icon: const Icon(EvaIcons.copy),
-              text: L10n.of(context).context_menu_copy,
+              text: L10n.of(context).contextMenuCopy,
             ),
           ),
           // Web search
@@ -214,7 +214,7 @@ class ExcerptMenuState extends State<ExcerptMenu> {
             },
             child: IconAndText(
               icon: const Icon(EvaIcons.globe),
-              text: L10n.of(context).context_menu_search,
+              text: L10n.of(context).contextMenuSearch,
             ),
           ),
           // toggle translation menu
@@ -222,7 +222,7 @@ class ExcerptMenuState extends State<ExcerptMenu> {
             onTap: widget.toggleTranslationMenu,
             child: IconAndText(
               icon: const Icon(Icons.translate),
-              text: L10n.of(context).context_menu_translate,
+              text: L10n.of(context).contextMenuTranslate,
             ),
           ),
           // edit note
@@ -236,7 +236,7 @@ class ExcerptMenuState extends State<ExcerptMenu> {
               },
               child: IconAndText(
                 icon: const Icon(EvaIcons.edit_2_outline),
-                text: L10n.of(context).context_menu_write_idea,
+                text: L10n.of(context).contextMenuWriteIdea,
               ),
             ),
           // AI chat
@@ -255,7 +255,7 @@ class ExcerptMenuState extends State<ExcerptMenu> {
             },
             child: IconAndText(
               icon: const Icon(EvaIcons.message_circle_outline),
-              text: L10n.of(context).ai_chat,
+              text: L10n.of(context).aiChat,
             ),
           ),
           // share
@@ -272,7 +272,7 @@ class ExcerptMenuState extends State<ExcerptMenu> {
             },
             child: IconAndText(
               icon: const Icon(EvaIcons.share_outline),
-              text: L10n.of(context).context_menu_share,
+              text: L10n.of(context).contextMenuShare,
             ),
           ),
         ],

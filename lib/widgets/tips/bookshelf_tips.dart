@@ -25,12 +25,12 @@ class BookshelfTips extends StatelessWidget {
                   color: Colors.grey)),
           const SizedBox(height: 50),
           Text(
-            L10n.of(context).bookshelf_tips_1,
+            L10n.of(context).bookshelfTips_1,
             style: textStyleBig,
           ),
           const SizedBox(height: 10),
           Text(
-            L10n.of(context).bookshelf_tips_2,
+            L10n.of(context).bookshelfTips_2,
             style: textStyle,
           ),
         ],

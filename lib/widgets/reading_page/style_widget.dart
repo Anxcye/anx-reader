@@ -30,7 +30,7 @@ enum PageTurn {
   String getLabel(BuildContext context) {
     switch (this) {
       case PageTurn.noAnimation:
-        return L10n.of(context).no_animation;
+        return L10n.of(context).noAnimation;
       case PageTurn.slide:
         return L10n.of(context).slide;
       case PageTurn.scroll:
@@ -68,7 +68,7 @@ class StyleWidgetState extends State<StyleWidget> {
       child: Column(
         children: [
           widgetTitle(
-              L10n.of(context).reading_page_style, ReadingSettings.theme),
+              L10n.of(context).readingPageStyle, ReadingSettings.theme),
           sliders(),
           const SizedBox(height: 10),
           fontAndPageTurn(),
@@ -85,7 +85,7 @@ class StyleWidgetState extends State<StyleWidget> {
                 },
                 icon: const Icon(Icons.arrow_forward_ios),
                 iconAlignment: IconAlignment.end,
-                label: Text(L10n.of(context).reading_page_style_background),
+                label: Text(L10n.of(context).readingPageStyleBackground),
               )
             ],
           ),
@@ -98,22 +98,22 @@ class StyleWidgetState extends State<StyleWidget> {
     Directory fontDir = getFontDir();
     List<FontModel> fontList = [
       FontModel(
-        label: L10n.of(context).download_fonts,
+        label: L10n.of(context).downloadFonts,
         name: 'download',
         path: '',
       ),
       FontModel(
-        label: L10n.of(context).add_new_font,
+        label: L10n.of(context).addNewFont,
         name: 'newFont',
         path: '',
       ),
       FontModel(
-        label: L10n.of(context).follow_book,
+        label: L10n.of(context).followBook,
         name: 'book',
         path: '',
       ),
       FontModel(
-        label: L10n.of(context).system_font,
+        label: L10n.of(context).systemFont,
         name: 'system',
         path: 'system',
       ),
@@ -146,7 +146,7 @@ class StyleWidgetState extends State<StyleWidget> {
     FontModel? font = fonts().firstWhere(
         (element) => element.path == Prefs().font.path,
         orElse: () => FontModel(
-            label: L10n.of(context).follow_book, name: 'book', path: ''));
+            label: L10n.of(context).followBook, name: 'book', path: ''));
 
     Widget? leadingIcon(String name) {
       if (name == 'download') {
@@ -160,7 +160,7 @@ class StyleWidgetState extends State<StyleWidget> {
     return Row(children: [
       Expanded(
         child: DropdownMenu<PageTurn>(
-          label: Text(L10n.of(context).reading_page_page_turning_method),
+          label: Text(L10n.of(context).readingPagePageTurningMethod),
           initialSelection: Prefs().pageTurnStyle,
           expandedInsets: const EdgeInsets.only(right: 5),
           inputDecorationTheme: InputDecorationTheme(
@@ -198,7 +198,7 @@ class StyleWidgetState extends State<StyleWidget> {
               widget.hideAppBarAndBottomBar(false);
               await importFont();
               AnxToast.show(
-                  L10n.of(navigatorKey.currentContext!).common_success);
+                  L10n.of(navigatorKey.currentContext!).commonSuccess);
               return;
             } else if (font.name == 'download') {
               widget.hideAppBarAndBottomBar(false);
@@ -241,7 +241,7 @@ class StyleWidgetState extends State<StyleWidget> {
       children: [
         IconAndText(
           icon: const Icon(Icons.line_weight),
-          text: L10n.of(context).reading_page_line_spacing,
+          text: L10n.of(context).readingPageLineSpacing,
         ),
         Expanded(
           child: Slider(
@@ -261,7 +261,7 @@ class StyleWidgetState extends State<StyleWidget> {
         ),
         IconAndText(
           icon: const Icon(Icons.height),
-          text: L10n.of(context).reading_page_paragraph_spacing,
+          text: L10n.of(context).readingPageParagraphSpacing,
         ),
         Expanded(
           child: Slider(
@@ -289,7 +289,7 @@ class StyleWidgetState extends State<StyleWidget> {
       children: [
         IconAndText(
           icon: const Icon(Icons.format_size),
-          text: L10n.of(context).reading_page_font_size,
+          text: L10n.of(context).readingPageFontSize,
         ),
         Expanded(
           child: Slider(

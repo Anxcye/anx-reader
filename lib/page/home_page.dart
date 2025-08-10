@@ -55,7 +55,7 @@ class _HomePageState extends ConsumerState<HomePage> {
       SmartDialog.show(
         builder: (context) => AlertDialog(
           title: const Icon(Icons.error),
-          content: Text(L10n.of(context).webview2_not_installed),
+          content: Text(L10n.of(context).webview2NotInstalled),
           actions: [
             TextButton(
               onPressed: () => {
@@ -64,7 +64,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                         'https://developer.microsoft.com/en-us/microsoft-edge/webview2'),
                     mode: LaunchMode.externalApplication)
               },
-              child: Text(L10n.of(context).webview2_install),
+              child: Text(L10n.of(context).webview2Install),
             ),
           ],
         ),
@@ -81,14 +81,14 @@ class _HomePageState extends ConsumerState<HomePage> {
     SmartDialog.show(
       clickMaskDismiss: false,
       builder: (context) => AlertDialog(
-        title: Text(L10n.of(context).common_attention),
-        content: Text(L10n.of(context).db_updated_tip),
+        title: Text(L10n.of(context).commonAttention),
+        content: Text(L10n.of(context).dbUpdatedTip),
         actions: [
           TextButton(
             onPressed: () {
               SmartDialog.dismiss();
             },
-            child: Text(L10n.of(context).common_ok),
+            child: Text(L10n.of(context).commonOk),
           ),
         ],
       ),
@@ -134,12 +134,12 @@ class _HomePageState extends ConsumerState<HomePage> {
     }
 
     List<Map<String, dynamic>> navBarItems = [
-      {'icon': EvaIcons.book_open, 'label': L10n.of(context).navBar_bookshelf},
+      {'icon': EvaIcons.book_open, 'label': L10n.of(context).navBarBookshelf},
       if (Prefs().bottomNavigatorShowStatistics)
-        {'icon': Icons.show_chart, 'label': L10n.of(context).navBar_statistics},
+        {'icon': Icons.show_chart, 'label': L10n.of(context).navBarStatistics},
       if (Prefs().bottomNavigatorShowNote)
-        {'icon': Icons.note, 'label': L10n.of(context).navBar_notes},
-      {'icon': EvaIcons.settings_2, 'label': L10n.of(context).navBar_settings},
+        {'icon': Icons.note, 'label': L10n.of(context).navBarNotes},
+      {'icon': EvaIcons.settings_2, 'label': L10n.of(context).navBarSettings},
     ];
 
     List<NavigationRailDestination> railBarItems = navBarItems.map((item) {

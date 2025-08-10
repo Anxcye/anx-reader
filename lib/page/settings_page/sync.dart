@@ -44,11 +44,11 @@ class _SyncSettingState extends ConsumerState<SyncSetting> {
     return settingsSections(
       sections: [
         SettingsSection(
-          title: Text(L10n.of(context).settings_sync_webdav),
+          title: Text(L10n.of(context).settingsSyncWebdav),
           tiles: [
             webdavSwitch(context, setState, ref),
             SettingsTile.navigation(
-                title: Text(L10n.of(context).settings_sync_webdav),
+                title: Text(L10n.of(context).settingsSyncWebdav),
                 leading: const Icon(Icons.cloud),
                 value: Text(Prefs().getSyncInfo(SyncProtocol.webdav)['url'] ??
                     'Not set'),
@@ -57,7 +57,7 @@ class _SyncSettingState extends ConsumerState<SyncSetting> {
                   showWebdavDialog(context);
                 }),
             SettingsTile.navigation(
-                title: Text(L10n.of(context).settings_sync_webdav_sync_now),
+                title: Text(L10n.of(context).settingsSyncWebdavSyncNow),
                 leading: const Icon(Icons.sync_alt),
                 // value: Text(Prefs().syncDirection),
                 enabled: Prefs().webdavStatus,
@@ -65,7 +65,7 @@ class _SyncSettingState extends ConsumerState<SyncSetting> {
                   chooseDirection(ref);
                 }),
             SettingsTile.switchTile(
-                title: Text(L10n.of(context).webdav_only_wifi),
+                title: Text(L10n.of(context).webdavOnlyWifi),
                 leading: const Icon(Icons.wifi),
                 initialValue: Prefs().onlySyncWhenWifi,
                 onToggle: (bool value) {
@@ -74,7 +74,7 @@ class _SyncSettingState extends ConsumerState<SyncSetting> {
                   });
                 }),
             SettingsTile.switchTile(
-                title: Text(L10n.of(context).settings_sync_completed_toast),
+                title: Text(L10n.of(context).settingsSyncCompletedToast),
                 leading: const Icon(Icons.notifications),
                 initialValue: Prefs().syncCompletedToast,
                 onToggle: (bool value) {
@@ -83,7 +83,7 @@ class _SyncSettingState extends ConsumerState<SyncSetting> {
                   });
                 }),
             SettingsTile.switchTile(
-                title: Text(L10n.of(context).settings_sync_auto_sync),
+                title: Text(L10n.of(context).settingsSyncAutoSync),
                 leading: const Icon(Icons.sync),
                 initialValue: Prefs().autoSync,
                 enabled: Prefs().webdavStatus,
@@ -101,16 +101,16 @@ class _SyncSettingState extends ConsumerState<SyncSetting> {
           ],
         ),
         SettingsSection(
-          title: Text(L10n.of(context).export_and_import),
+          title: Text(L10n.of(context).exportAndImport),
           tiles: [
             SettingsTile.navigation(
-                title: Text(L10n.of(context).export_and_import_export),
+                title: Text(L10n.of(context).exportAndImportExport),
                 leading: const Icon(Icons.cloud_upload),
                 onPressed: (context) {
                   exportData(context);
                 }),
             SettingsTile.navigation(
-                title: Text(L10n.of(context).export_and_import_import),
+                title: Text(L10n.of(context).exportAndImportImport),
                 leading: const Icon(Icons.cloud_download),
                 onPressed: (context) {
                   importData();
@@ -166,10 +166,10 @@ class _SyncSettingState extends ConsumerState<SyncSetting> {
       if (filePath != null) {
         AnxLog.info('exportData: Saved to: $filePath');
         AnxToast.show(
-            L10n.of(navigatorKey.currentContext!).export_to(filePath));
+            L10n.of(navigatorKey.currentContext!).exportTo(filePath));
       } else {
         AnxLog.info('exportData: Cancelled');
-        AnxToast.show(L10n.of(navigatorKey.currentContext!).common_canceled);
+        AnxToast.show(L10n.of(navigatorKey.currentContext!).commonCanceled);
       }
     }
   }
@@ -191,7 +191,7 @@ class _SyncSettingState extends ConsumerState<SyncSetting> {
     if (filePath == null) {
       AnxLog.info('importData: cannot get file path');
       AnxToast.show(
-          L10n.of(navigatorKey.currentContext!).import_cannot_get_file_path);
+          L10n.of(navigatorKey.currentContext!).importCannotGetFilePath);
       return;
     }
 
@@ -199,7 +199,7 @@ class _SyncSettingState extends ConsumerState<SyncSetting> {
     if (!await zipFile.exists()) {
       AnxLog.info('importData: zip file not found');
       AnxToast.show(
-          L10n.of(navigatorKey.currentContext!).import_cannot_get_file_path);
+          L10n.of(navigatorKey.currentContext!).importCannotGetFilePath);
       return;
     }
     _showDataDialog(L10n.of(navigatorKey.currentContext!).importing);
@@ -244,11 +244,11 @@ class _SyncSettingState extends ConsumerState<SyncSetting> {
 
       AnxLog.info('importData: import success');
       AnxToast.show(
-          L10n.of(navigatorKey.currentContext!).import_success_restart_app);
+          L10n.of(navigatorKey.currentContext!).importSuccessRestartApp);
     } catch (e) {
       AnxLog.info('importData: error while unzipping or copying files: $e');
       AnxToast.show(
-          L10n.of(navigatorKey.currentContext!).import_failed(e.toString()));
+          L10n.of(navigatorKey.currentContext!).importFailed(e.toString()));
     } finally {
       SmartDialog.dismiss();
       await Directory(extractPath).delete(recursive: true);
@@ -337,7 +337,7 @@ Future<void> extractZipFile(Map<String, String> params) async {
 }
 
 void showWebdavDialog(BuildContext context) {
-  final title = L10n.of(context).settings_sync_webdav;
+  final title = L10n.of(context).settingsSyncWebdav;
   // final prefs = Prefs().saveWebdavInfo;
   final webdavInfo = Prefs().getSyncInfo(SyncProtocol.webdav);
   final webdavUrlController = TextEditingController(text: webdavInfo['url']);
@@ -349,7 +349,7 @@ void showWebdavDialog(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: TextField(
-        obscureText: labelText == L10n.of(context).settings_sync_webdav_password
+        obscureText: labelText == L10n.of(context).settingsSyncWebdavPassword
             ? true
             : false,
         controller: controller,
@@ -369,10 +369,10 @@ void showWebdavDialog(BuildContext context) {
         contentPadding: const EdgeInsets.all(20),
         children: [
           buildTextField(
-              L10n.of(context).settings_sync_webdav_url, webdavUrlController),
-          buildTextField(L10n.of(context).settings_sync_webdav_username,
+              L10n.of(context).settingsSyncWebdavUrl, webdavUrlController),
+          buildTextField(L10n.of(context).settingsSyncWebdavUsername,
               webdavUsernameController),
-          buildTextField(L10n.of(context).settings_sync_webdav_password,
+          buildTextField(L10n.of(context).settingsSyncWebdavPassword,
               webdavPasswordController),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
@@ -389,7 +389,7 @@ void showWebdavDialog(BuildContext context) {
                 ),
                 icon: const Icon(Icons.wifi_find),
                 label:
-                    Text(L10n.of(context).settings_sync_webdav_test_connection),
+                    Text(L10n.of(context).settingsSyncWebdavTestConnection),
               ),
               TextButton(
                 onPressed: () {
@@ -400,7 +400,7 @@ void showWebdavDialog(BuildContext context) {
                   SyncClientFactory.initializeCurrentClient();
                   Navigator.pop(context);
                 },
-                child: Text(L10n.of(context).common_save),
+                child: Text(L10n.of(context).commonSave),
               ),
             ],
           ),

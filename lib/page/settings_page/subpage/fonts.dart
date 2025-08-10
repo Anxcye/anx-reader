@@ -14,7 +14,7 @@ class FontsSettingPage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(L10n.of(context).download_fonts),
+        title: Text(L10n.of(context).downloadFonts),
       ),
       body: fontList.when(
         data: (fonts) {
@@ -73,7 +73,7 @@ class FontsSettingPage extends ConsumerWidget {
                                 },
                                 icon: const Icon(Icons.link),
                                 label: Text(
-                                  L10n.of(context).font_official_website,
+                                  L10n.of(context).fontOfficialWebsite,
                                   style: TextStyle(
                                     color: Theme.of(context).primaryColor,
                                     decoration: TextDecoration.underline,
@@ -111,7 +111,7 @@ class FontsSettingPage extends ConsumerWidget {
         },
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => Center(
-          child: Text(L10n.of(context).font_failed_to_load_fonts),
+          child: Text(L10n.of(context).fontFailedToLoadFonts),
         ),
       ),
     );
@@ -131,7 +131,7 @@ class FontsSettingPage extends ConsumerWidget {
       return ElevatedButton.icon(
           onPressed: null,
           icon: const Icon(Icons.check),
-          label: Text(L10n.of(context).font_downloaded));
+          label: Text(L10n.of(context).fontDownloaded));
     }
 
     if (downloadState != null) {
@@ -145,21 +145,21 @@ class FontsSettingPage extends ConsumerWidget {
               Row(
                 children: [
                   Text(
-                      '${L10n.of(context).font_downloading((downloadState.progress * 100).toStringAsFixed(1))}%'),
+                      '${L10n.of(context).fontDownloading((downloadState.progress * 100).toStringAsFixed(1))}%'),
                   const Spacer(),
                   TextButton.icon(
                     onPressed: () => ref
                         .read(fontDownloadsProvider.notifier)
                         .pauseDownload(font.id),
                     icon: const Icon(Icons.pause),
-                    label: Text(L10n.of(context).common_pause),
+                    label: Text(L10n.of(context).commonPause),
                   ),
                   TextButton.icon(
                     onPressed: () => ref
                         .read(fontDownloadsProvider.notifier)
                         .cancelDownload(font.id),
                     icon: const Icon(Icons.cancel),
-                    label: Text(L10n.of(context).common_cancel),
+                    label: Text(L10n.of(context).commonCancel),
                   ),
                 ],
               ),
@@ -170,21 +170,21 @@ class FontsSettingPage extends ConsumerWidget {
           return Row(
             children: [
               Text(
-                  '${L10n.of(context).font_cancelled((downloadState.progress * 100).toStringAsFixed(1))}%'),
+                  '${L10n.of(context).fontCancelled((downloadState.progress * 100).toStringAsFixed(1))}%'),
               const Spacer(),
               TextButton.icon(
                 onPressed: () => ref
                     .read(fontDownloadsProvider.notifier)
                     .resumeDownload(font),
                 icon: const Icon(Icons.play_arrow),
-                label: Text(L10n.of(context).common_resume),
+                label: Text(L10n.of(context).commonResume),
               ),
               TextButton.icon(
                 onPressed: () => ref
                     .read(fontDownloadsProvider.notifier)
                     .cancelDownload(font.id),
                 icon: const Icon(Icons.cancel),
-                label: Text(L10n.of(context).common_cancel),
+                label: Text(L10n.of(context).commonCancel),
               ),
             ],
           );
@@ -194,7 +194,7 @@ class FontsSettingPage extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                  '${L10n.of(context).common_download_failed}: ${downloadState.error}',
+                  '${L10n.of(context).commonDownloadFailed}: ${downloadState.error}',
                   style: const TextStyle(color: Colors.red)),
               const SizedBox(height: 8),
               ElevatedButton.icon(
@@ -202,7 +202,7 @@ class FontsSettingPage extends ConsumerWidget {
                     .read(fontDownloadsProvider.notifier)
                     .startDownload(font),
                 icon: const Icon(Icons.refresh),
-                label: Text(L10n.of(context).common_retry),
+                label: Text(L10n.of(context).commonRetry),
               ),
             ],
           );
@@ -216,7 +216,7 @@ class FontsSettingPage extends ConsumerWidget {
       onPressed: () =>
           ref.read(fontDownloadsProvider.notifier).startDownload(font),
       icon: const Icon(Icons.download),
-      label: Text(L10n.of(context).common_download),
+      label: Text(L10n.of(context).commonDownload),
     );
   }
 }

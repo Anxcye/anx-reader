@@ -140,28 +140,28 @@ class _AISettingsState extends ConsumerState<AISettings> {
     List<Map<String, dynamic>> prompts = [
       {
         "identifier": AiPrompts.test,
-        "title": L10n.of(context).settings_ai_prompt_test,
+        "title": L10n.of(context).settingsAiPromptTest,
         "variables": ["language_locale"],
       },
       {
         "identifier": AiPrompts.summaryTheChapter,
-        "title": L10n.of(context).settings_ai_prompt_summary_the_chapter,
+        "title": L10n.of(context).settingsAiPromptSummaryTheChapter,
         "variables": ["chapter"],
       },
       {
         "identifier": AiPrompts.summaryTheBook,
-        "title": L10n.of(context).settings_ai_prompt_summary_the_book,
+        "title": L10n.of(context).settingsAiPromptSummaryTheBook,
         "variables": ["book", "author"],
       },
       {
         "identifier": AiPrompts.summaryThePreviousContent,
         "title":
-            L10n.of(context).settings_ai_prompt_summary_the_previous_content,
+            L10n.of(context).settingsAiPromptSummaryThePreviousContent,
         "variables": ["previous_content"],
       },
       {
         "identifier": AiPrompts.translate,
-        "title": L10n.of(context).settings_ai_prompt_translate_and_dictionary,
+        "title": L10n.of(context).settingsAiPromptTranslateAndDictionary,
         "variables": ["text", "to_locale", "from_locale"],
       }
     ];
@@ -219,7 +219,7 @@ class _AISettingsState extends ConsumerState<AISettings> {
                         initialServicesConfig[currentIndex]["config"]);
                     setState(() {});
                   },
-                  child: Text(L10n.of(context).common_reset)),
+                  child: Text(L10n.of(context).commonReset)),
               TextButton(
                   onPressed: () {
                     SmartDialog.show(
@@ -227,7 +227,7 @@ class _AISettingsState extends ConsumerState<AISettings> {
                         AiDio.instance.cancel();
                       },
                       builder: (context) => AlertDialog(
-                          title: Text(L10n.of(context).common_test),
+                          title: Text(L10n.of(context).commonTest),
                           content: AiStream(
                               prompt: generatePromptTest(),
                               identifier: services[currentIndex]["identifier"],
@@ -235,7 +235,7 @@ class _AISettingsState extends ConsumerState<AISettings> {
                               regenerate: true)),
                     );
                   },
-                  child: Text(L10n.of(context).common_test)),
+                  child: Text(L10n.of(context).commonTest)),
               TextButton(
                   onPressed: () {
                     Prefs().saveAiConfig(
@@ -247,7 +247,7 @@ class _AISettingsState extends ConsumerState<AISettings> {
                       showSettings = false;
                     });
                   },
-                  child: Text(L10n.of(context).common_save)),
+                  child: Text(L10n.of(context).commonSave)),
               TextButton(
                   onPressed: () {
                     Prefs().selectedAiService =
@@ -261,7 +261,7 @@ class _AISettingsState extends ConsumerState<AISettings> {
                       showSettings = false;
                     });
                   },
-                  child: Text(L10n.of(context).common_apply)),
+                  child: Text(L10n.of(context).commonApply)),
             ],
           )
         ],
@@ -366,7 +366,7 @@ class _AISettingsState extends ConsumerState<AISettings> {
                 );
 
                 return AlertDialog(
-                  title: Text(L10n.of(context).common_edit),
+                  title: Text(L10n.of(context).commonEdit),
                   content: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -416,7 +416,7 @@ class _AISettingsState extends ConsumerState<AISettings> {
                           AiPrompts.values[index],
                         );
                       },
-                      child: Text(L10n.of(context).common_reset),
+                      child: Text(L10n.of(context).commonReset),
                     ),
                     TextButton(
                       onPressed: () {
@@ -425,7 +425,7 @@ class _AISettingsState extends ConsumerState<AISettings> {
                           controller.text,
                         );
                       },
-                      child: Text(L10n.of(context).common_save),
+                      child: Text(L10n.of(context).commonSave),
                     ),
                   ],
                 );
@@ -438,12 +438,12 @@ class _AISettingsState extends ConsumerState<AISettings> {
 
     return settingsSections(sections: [
       SettingsSection(
-        title: Text(L10n.of(context).settings_ai_services),
+        title: Text(L10n.of(context).settingsAiServices),
         tiles: [
           servicesTile,
           SettingsTile.navigation(
             leading: const Icon(Icons.chat),
-            title: Text(L10n.of(context).ai_chat),
+            title: Text(L10n.of(context).aiChat),
             onPressed: (context) {
               Navigator.push(
                 context,
@@ -456,22 +456,22 @@ class _AISettingsState extends ConsumerState<AISettings> {
         ],
       ),
       SettingsSection(
-        title: Text(L10n.of(context).settings_ai_prompt),
+        title: Text(L10n.of(context).settingsAiPrompt),
         tiles: [
           promptTile,
         ],
       ),
       SettingsSection(
-        title: Text(L10n.of(context).settings_ai_cache),
+        title: Text(L10n.of(context).settingsAiCache),
         tiles: [
           CustomSettingsTile(
             child: ListTile(
               title: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(L10n.of(context).settings_ai_cache_size),
+                  Text(L10n.of(context).settingsAiCacheSize),
                   Text(
-                    L10n.of(context).settings_ai_cache_current_size(ref
+                    L10n.of(context).settingsAiCacheCurrentSize(ref
                         .watch(aiCacheCountProvider)
                         .when(
                             data: (value) => value,
@@ -501,24 +501,24 @@ class _AISettingsState extends ConsumerState<AISettings> {
             ),
           ),
           SettingsTile.navigation(
-              title: Text(L10n.of(context).settings_ai_cache_clear),
+              title: Text(L10n.of(context).settingsAiCacheClear),
               onPressed: (context) {
                 SmartDialog.show(
                   builder: (context) => AlertDialog(
-                    title: Text(L10n.of(context).common_confirm),
+                    title: Text(L10n.of(context).commonConfirm),
                     actions: [
                       TextButton(
                         onPressed: () {
                           SmartDialog.dismiss();
                         },
-                        child: Text(L10n.of(context).common_cancel),
+                        child: Text(L10n.of(context).commonCancel),
                       ),
                       TextButton(
                         onPressed: () {
                           ref.read(aiCacheCountProvider.notifier).clearCache();
                           SmartDialog.dismiss();
                         },
-                        child: Text(L10n.of(context).common_confirm),
+                        child: Text(L10n.of(context).commonConfirm),
                       ),
                     ],
                   ),

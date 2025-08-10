@@ -190,11 +190,11 @@ class _IAPPageState extends State<IAPPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(L10n.of(context).iap_page_title),
+        title: Text(L10n.of(context).iapPageTitle),
         actions: [
           TextButton(
             onPressed: _restorePurchases,
-            child: Text(L10n.of(context).iap_page_restore),
+            child: Text(L10n.of(context).iapPageRestore),
           ),
         ],
       ),
@@ -206,33 +206,33 @@ class _IAPPageState extends State<IAPPage> {
     List<Map<String, dynamic>> content = [
       {
         'icon': Icons.auto_awesome,
-        'title': L10n.of(context).iap_page_feature_ai,
-        'desc': L10n.of(context).iap_page_feature_ai_desc,
+        'title': L10n.of(context).iapPageFeatureAi,
+        'desc': L10n.of(context).iapPageFeatureAiDesc,
       },
       {
         'icon': Icons.sync,
-        'title': L10n.of(context).iap_page_feature_sync,
-        'desc': L10n.of(context).iap_page_feature_sync_desc,
+        'title': L10n.of(context).iapPageFeatureSync,
+        'desc': L10n.of(context).iapPageFeatureSyncDesc,
       },
       {
         'icon': Icons.bar_chart,
-        'title': L10n.of(context).iap_page_feature_stats,
-        'desc': L10n.of(context).iap_page_feature_stats_desc,
+        'title': L10n.of(context).iapPageFeatureStats,
+        'desc': L10n.of(context).iapPageFeatureStatsDesc,
       },
       {
         'icon': Icons.color_lens,
-        'title': L10n.of(context).iap_page_feature_custom,
-        'desc': L10n.of(context).iap_page_feature_custom_desc,
+        'title': L10n.of(context).iapPageFeatureCustom,
+        'desc': L10n.of(context).iapPageFeatureCustomDesc,
       },
       {
         'icon': Icons.note,
-        'title': L10n.of(context).iap_page_feature_note,
-        'desc': L10n.of(context).iap_page_feature_note_desc,
+        'title': L10n.of(context).iapPageFeatureNote,
+        'desc': L10n.of(context).iapPageFeatureNoteDesc,
       },
       {
         'icon': Icons.more_horiz,
-        'title': L10n.of(context).iap_page_feature_rich,
-        'desc': L10n.of(context).iap_page_feature_rich_desc,
+        'title': L10n.of(context).iapPageFeatureRich,
+        'desc': L10n.of(context).iapPageFeatureRichDesc,
       },
     ];
     return Padding(
@@ -251,7 +251,7 @@ class _IAPPageState extends State<IAPPage> {
 
                   // Feature introduction
                   Text(
-                    L10n.of(context).iap_page_why_choose,
+                    L10n.of(context).iapPageWhyChoose,
                     style: const TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
@@ -273,13 +273,13 @@ class _IAPPageState extends State<IAPPage> {
                     }
                   ),
                   const SizedBox(height: 30),
-                  Text(L10n.of(context).iap_page_restore_hint),
+                  Text(L10n.of(context).iapPageRestoreHint),
 
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       TextButton(
-                        child: Text(L10n.of(context).about_privacy_policy),
+                        child: Text(L10n.of(context).aboutPrivacyPolicy),
                         onPressed: () async {
                           launchUrl(
                             Uri.parse('https://anx.anxcye.com/privacy.html'),
@@ -288,7 +288,7 @@ class _IAPPageState extends State<IAPPage> {
                         },
                       ),
                       TextButton(
-                        child: Text(L10n.of(context).about_terms_of_use),
+                        child: Text(L10n.of(context).aboutTermsOfUse),
                         onPressed: () async {
                           launchUrl(
                             Uri.parse('https://anx.anxcye.com/terms.html'),
@@ -311,7 +311,7 @@ class _IAPPageState extends State<IAPPage> {
                       Padding(
                         padding: const EdgeInsets.all(10.0),
                         child: Text(
-                          L10n.of(context).iap_page_lifetime_hint(
+                          L10n.of(context).iapPageLifetimeHint(
                               _products.isEmpty ? '' : _products.first.price),
                           textAlign: TextAlign.center,
                           style: const TextStyle(
@@ -338,7 +338,7 @@ class _IAPPageState extends State<IAPPage> {
                                 ),
                               )
                             : Text(
-                                L10n.of(context).iap_page_one_time_purchase,
+                                L10n.of(context).iapPageOneTimePurchase,
                                 style: const TextStyle(
                                     fontSize: 18, color: Colors.white),
                               ),
@@ -369,57 +369,57 @@ class _IAPPageState extends State<IAPPage> {
     switch (_iapService.iapStatus) {
       case IAPStatus.purchased:
         statusIcon = Icons.verified;
-        statusDescription = L10n.of(context).iap_page_status_purchased;
+        statusDescription = L10n.of(context).iapPageStatusPurchased;
         cardColor = Colors.green;
         // Get purchase date
         final purchaseDate = _iapService.purchaseDate;
         if (purchaseDate != null) {
-          timeInfo = L10n.of(context).iap_page_date_purchased(
+          timeInfo = L10n.of(context).iapPageDatePurchased(
             _formatDate(purchaseDate),
           );
         }
         break;
       case IAPStatus.trial:
         statusIcon = Icons.access_time;
-        statusDescription = L10n.of(context).iap_page_status_trial(
+        statusDescription = L10n.of(context).iapPageStatusTrial(
           _iapService.trialDaysLeft.toString(),
         );
         cardColor = Colors.blue;
         // Get trial start date
         final originalDate = _iapService.originalDate;
         if (originalDate.millisecondsSinceEpoch > 0) {
-          timeInfo = L10n.of(context).iap_page_date_trial_start(
+          timeInfo = L10n.of(context).iapPageDateTrialStart(
             _formatDate(originalDate),
           );
         }
         break;
       case IAPStatus.trialExpired:
         statusIcon = Icons.timer_off;
-        statusDescription = L10n.of(context).iap_page_status_trial_expired;
+        statusDescription = L10n.of(context).iapPageStatusTrialExpired;
         cardColor = Colors.orange;
         // Get trial start date
         final originalDate = _iapService.originalDate;
         if (originalDate.millisecondsSinceEpoch > 0) {
-          timeInfo = L10n.of(context).iap_page_date_trial_start(
+          timeInfo = L10n.of(context).iapPageDateTrialStart(
             _formatDate(originalDate),
           );
         }
         break;
       case IAPStatus.originalUser:
         statusIcon = Icons.stars;
-        statusDescription = L10n.of(context).iap_page_status_original;
+        statusDescription = L10n.of(context).iapPageStatusOriginal;
         cardColor = Colors.purple;
         // Get original user date
         final originalDate = _iapService.originalDate;
         if (originalDate.millisecondsSinceEpoch > 0) {
-          timeInfo = L10n.of(context).iap_page_date_original(
+          timeInfo = L10n.of(context).iapPageDateOriginal(
             _formatDate(originalDate),
           );
         }
         break;
       case IAPStatus.unknown:
         statusIcon = Icons.help_outline;
-        statusDescription = L10n.of(context).iap_page_status_unknown;
+        statusDescription = L10n.of(context).iapPageStatusUnknown;
         cardColor = Colors.grey;
         break;
     }

@@ -17,10 +17,10 @@ void showUnsupportedWebviewDialog(int version) {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(L10n.of(context).webview_unsupported_version,
+            Text(L10n.of(context).webviewUnsupportedVersion,
                 style: Theme.of(context).textTheme.titleMedium),
             Text(L10n.of(context)
-                .webview_unsupported_message(minWebviewVersion, version)),
+                .webviewUnsupportedMessage(minWebviewVersion, version)),
           ],
         ),
         actions: [
@@ -28,7 +28,7 @@ void showUnsupportedWebviewDialog(int version) {
               onPressed: () {
                 SmartDialog.dismiss();
               },
-              child: Text(L10n.of(context).webview_cancel)),
+              child: Text(L10n.of(context).webviewCancel)),
         ],
       );
     },

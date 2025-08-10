@@ -26,7 +26,7 @@ class _ReadingMoreSettingsState extends State<ReadingMoreSettings> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(L10n.of(context).reading_page_convert_chinese,
+              Text(L10n.of(context).readingPageConvertChinese,
                   style: Theme.of(context).textTheme.titleMedium),
               Row(
                 children: [
@@ -34,18 +34,18 @@ class _ReadingMoreSettingsState extends State<ReadingMoreSettings> {
                     child: SegmentedButton<ConvertChineseMode>(
                       segments: [
                         ButtonSegment<ConvertChineseMode>(
-                          label: Text(L10n.of(context).reading_page_original),
+                          label: Text(L10n.of(context).readingPageOriginal),
                           value: ConvertChineseMode.none,
                           icon: const Text("原", style: iconStyle),
                         ),
                         ButtonSegment<ConvertChineseMode>(
-                          label: Text(L10n.of(context).reading_page_simplified),
+                          label: Text(L10n.of(context).readingPageSimplified),
                           value: ConvertChineseMode.t2s,
                           icon: const Text("简", style: iconStyle),
                         ),
                         ButtonSegment<ConvertChineseMode>(
                           label:
-                              Text(L10n.of(context).reading_page_traditional),
+                              Text(L10n.of(context).readingPageTraditional),
                           value: ConvertChineseMode.s2t,
                           icon: const Text("繁", style: iconStyle),
                         ),
@@ -71,7 +71,7 @@ class _ReadingMoreSettingsState extends State<ReadingMoreSettings> {
                   const Icon(Icons.error_outline),
                   Expanded(
                     child: Text(
-                      L10n.of(context).reading_page_convert_chinese_tips,
+                      L10n.of(context).readingPageConvertChineseTips,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -88,12 +88,12 @@ class _ReadingMoreSettingsState extends State<ReadingMoreSettings> {
     //   return StatefulBuilder(
     //     builder: (context, setState) => ListTile(
     //       contentPadding: EdgeInsets.zero,
-    //       title: Text(L10n.of(context).reading_page_bionic_reading,
+    //       title: Text(L10n.of(context).readingPageBionicReading,
     //           style: Theme.of(context).textTheme.titleMedium),
     //       subtitle: GestureDetector(
     //         child: Text(
     //           textAlign: TextAlign.start,
-    //           L10n.of(context).reading_page_bionic_reading_tips,
+    //           L10n.of(context).readingPageBionicReadingTips,
     //           style: const TextStyle(
     //             fontSize: 12,
     //             color: Color(0xFF666666),
@@ -128,7 +128,7 @@ class _ReadingMoreSettingsState extends State<ReadingMoreSettings> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(L10n.of(context).reading_page_column_count,
+            Text(L10n.of(context).readingPageColumnCount,
                 style: Theme.of(context).textTheme.titleMedium),
             Row(
               children: [
@@ -136,17 +136,17 @@ class _ReadingMoreSettingsState extends State<ReadingMoreSettings> {
                   child: SegmentedButton(
                     segments: [
                       ButtonSegment<int>(
-                        label: Text(L10n.of(context).reading_page_auto),
+                        label: Text(L10n.of(context).readingPageAuto),
                         value: 0,
                         icon: const Icon(Icons.auto_awesome),
                       ),
                       ButtonSegment<int>(
-                        label: Text(L10n.of(context).reading_page_single),
+                        label: Text(L10n.of(context).readingPageSingle),
                         value: 1,
                         icon: const Icon(EvaIcons.book),
                       ),
                       ButtonSegment<int>(
-                        label: Text(L10n.of(context).reading_page_double),
+                        label: Text(L10n.of(context).readingPageDouble),
                         value: 2,
                         icon: const Icon(EvaIcons.book_open),
                       ),
@@ -176,7 +176,7 @@ class _ReadingMoreSettingsState extends State<ReadingMoreSettings> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(L10n.of(context).reading_page_writing_direction,
+            Text(L10n.of(context).readingPageWritingDirection,
                 style: Theme.of(context).textTheme.titleMedium),
             Row(
               children: [
@@ -185,19 +185,19 @@ class _ReadingMoreSettingsState extends State<ReadingMoreSettings> {
                     segments: [
                       ButtonSegment<WritingModeEnum>(
                         label: Text(L10n.of(context)
-                            .reading_page_writing_direction_auto),
+                            .readingPageWritingDirectionAuto),
                         value: WritingModeEnum.auto,
                         icon: const Icon(EvaIcons.activity_outline),
                       ),
                       ButtonSegment<WritingModeEnum>(
                         label: Text(L10n.of(context)
-                            .reading_page_writing_direction_vertical),
+                            .readingPageWritingDirectionVertical),
                         value: WritingModeEnum.vertical,
                         icon: const Icon(Bootstrap.arrows_vertical),
                       ),
                       ButtonSegment<WritingModeEnum>(
                         label: Text(L10n.of(context)
-                            .reading_page_writing_direction_horizontal),
+                            .readingPageWritingDirectionHorizontal),
                         value: WritingModeEnum.horizontal,
                         icon: const Icon(Bootstrap.arrows),
                       ),
@@ -266,7 +266,7 @@ class _ReadingMoreSettingsState extends State<ReadingMoreSettings> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                L10n.of(context).reading_page_header_settings,
+                L10n.of(context).readingPageHeaderSettings,
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 8),
@@ -275,7 +275,7 @@ class _ReadingMoreSettingsState extends State<ReadingMoreSettings> {
                   Expanded(
                     child: buildInfoDropdown(
                       context,
-                      L10n.of(context).reading_page_left,
+                      L10n.of(context).readingPageLeft,
                       Prefs().readingInfo.headerLeft,
                       (value) {
                         setState(() {
@@ -292,7 +292,7 @@ class _ReadingMoreSettingsState extends State<ReadingMoreSettings> {
                   Expanded(
                     child: buildInfoDropdown(
                       context,
-                      L10n.of(context).reading_page_center,
+                      L10n.of(context).readingPageCenter,
                       Prefs().readingInfo.headerCenter,
                       (value) {
                         setState(() {
@@ -310,7 +310,7 @@ class _ReadingMoreSettingsState extends State<ReadingMoreSettings> {
                   Expanded(
                     child: buildInfoDropdown(
                       context,
-                      L10n.of(context).reading_page_right,
+                      L10n.of(context).readingPageRight,
                       Prefs().readingInfo.headerRight,
                       (value) {
                         setState(() {
@@ -327,7 +327,7 @@ class _ReadingMoreSettingsState extends State<ReadingMoreSettings> {
               ),
               Row(
                 children: [
-                  Text(L10n.of(context).reading_settings_margin),
+                  Text(L10n.of(context).readingSettingsMargin),
                   Expanded(
                     child: Slider(
                       value: Prefs().pageHeaderMargin.toDouble(),
@@ -346,7 +346,7 @@ class _ReadingMoreSettingsState extends State<ReadingMoreSettings> {
                 ],
               ),
               const Divider(),
-              Text(L10n.of(context).reading_page_footer_settings,
+              Text(L10n.of(context).readingPageFooterSettings,
                   style: Theme.of(context).textTheme.titleMedium),
               const SizedBox(height: 8),
               Row(
@@ -354,7 +354,7 @@ class _ReadingMoreSettingsState extends State<ReadingMoreSettings> {
                   Expanded(
                     child: buildInfoDropdown(
                       context,
-                      L10n.of(context).reading_page_left,
+                      L10n.of(context).readingPageLeft,
                       Prefs().readingInfo.footerLeft,
                       (value) {
                         setState(() {
@@ -371,7 +371,7 @@ class _ReadingMoreSettingsState extends State<ReadingMoreSettings> {
                   Expanded(
                     child: buildInfoDropdown(
                       context,
-                      L10n.of(context).reading_page_center,
+                      L10n.of(context).readingPageCenter,
                       Prefs().readingInfo.footerCenter,
                       (value) {
                         setState(() {
@@ -388,7 +388,7 @@ class _ReadingMoreSettingsState extends State<ReadingMoreSettings> {
                   Expanded(
                     child: buildInfoDropdown(
                       context,
-                      L10n.of(context).reading_page_right,
+                      L10n.of(context).readingPageRight,
                       Prefs().readingInfo.footerRight,
                       (value) {
                         setState(() {
@@ -405,7 +405,7 @@ class _ReadingMoreSettingsState extends State<ReadingMoreSettings> {
               ),
               Row(
                 children: [
-                  Text(L10n.of(context).reading_settings_margin),
+                  Text(L10n.of(context).readingSettingsMargin),
                   Expanded(
                     child: Slider(
                       value: Prefs().pageFooterMargin.toDouble(),
@@ -437,7 +437,7 @@ class _ReadingMoreSettingsState extends State<ReadingMoreSettings> {
     Widget downloadFonts() {
       return ListTile(
         contentPadding: EdgeInsets.zero,
-        title: Text(L10n.of(context).download_fonts),
+        title: Text(L10n.of(context).downloadFonts),
         leading: const Icon(Icons.font_download_outlined),
         trailing: const Icon(Icons.arrow_forward_ios),
         onTap: () {

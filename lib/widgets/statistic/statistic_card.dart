@@ -50,22 +50,22 @@ class StatisticCard extends ConsumerWidget {
                 segments: <ButtonSegment<ChartMode>>[
                   ButtonSegment<ChartMode>(
                     value: ChartMode.week,
-                    label: Text(L10n.of(context).statistic_week),
+                    label: Text(L10n.of(context).statisticWeek),
                     icon: const Icon(Icons.calendar_view_week),
                   ),
                   ButtonSegment<ChartMode>(
                     value: ChartMode.month,
-                    label: Text(L10n.of(context).statistic_month),
+                    label: Text(L10n.of(context).statisticMonth),
                     icon: const Icon(Icons.calendar_month),
                   ),
                   ButtonSegment<ChartMode>(
                     value: ChartMode.year,
-                    label: Text(L10n.of(context).statistic_year),
+                    label: Text(L10n.of(context).statisticYear),
                     icon: const Icon(Icons.calendar_today),
                   ),
                   ButtonSegment<ChartMode>(
                     value: ChartMode.heatmap,
-                    label: Text(L10n.of(context).statistic_all),
+                    label: Text(L10n.of(context).statisticAll),
                     icon: const Icon(Icons.grid_view_rounded),
                   ),
                 ],

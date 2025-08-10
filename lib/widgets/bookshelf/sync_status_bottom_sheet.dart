@@ -91,7 +91,7 @@ class SyncStatusBottomSheet extends ConsumerWidget {
         Icon(Icons.info_outline, size: 16),
         Expanded(
           child: Text(
-            l10n.book_sync_status_non_existent_tip,
+            l10n.bookSyncStatusNonExistentTip,
             style: TextStyle(fontSize: 12),
           ),
         ),
@@ -118,7 +118,7 @@ class SyncStatusBottomSheet extends ConsumerWidget {
 
     if (!syncState.isSyncing) {
       return Text(
-        l10n.book_sync_status_not_syncing,
+        l10n.bookSyncStatusNotSyncing,
         style: theme.textTheme.titleMedium?.copyWith(
           fontWeight: FontWeight.bold,
         ),
@@ -126,8 +126,8 @@ class SyncStatusBottomSheet extends ConsumerWidget {
     }
 
     final syncDirection = syncState.direction == SyncDirection.upload
-        ? l10n.book_sync_status_uploading_title
-        : l10n.book_sync_status_downloading_title;
+        ? l10n.bookSyncStatusUploadingTitle
+        : l10n.bookSyncStatusDownloadingTitle;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -173,14 +173,14 @@ class SyncStatusBottomSheet extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        buildTimeRow(l10n.book_sync_status_local_update_time,
+        buildTimeRow(l10n.bookSyncStatusLocalUpdateTime,
             dateFormatter.format(localTime), theme),
         const SizedBox(height: 5),
         buildTimeRow(
-            l10n.book_sync_status_last_sync_time,
+            l10n.bookSyncStatusLastSyncTime,
             lastUploadTime != null
                 ? dateFormatter.format(lastUploadTime)
-                : l10n.book_sync_status_no_sync_yet,
+                : l10n.bookSyncStatusNoSyncYet,
             theme),
       ],
     );
@@ -252,26 +252,26 @@ class SyncStatusBottomSheet extends ConsumerWidget {
       children: [
         const SizedBox(height: 10),
         _buildStatRow(
-            l10n.book_sync_status_local_only_books,
-            l10n.book_sync_status_books_count(localOnly),
+            l10n.bookSyncStatusLocalOnlyBooks,
+            l10n.bookSyncStatusBooksCount(localOnly),
             BookSyncStatusEnum.localOnly,
             theme),
         const SizedBox(height: 5),
         _buildStatRow(
-            l10n.book_sync_status_remote_only_books,
-            l10n.book_sync_status_books_count(remoteOnly),
+            l10n.bookSyncStatusRemoteOnlyBooks,
+            l10n.bookSyncStatusBooksCount(remoteOnly),
             BookSyncStatusEnum.remoteOnly,
             theme),
         const SizedBox(height: 5),
         _buildStatRow(
-            l10n.book_sync_status_both_books,
-            l10n.book_sync_status_books_count(both),
+            l10n.bookSyncStatusBothBooks,
+            l10n.bookSyncStatusBooksCount(both),
             BookSyncStatusEnum.both,
             theme),
         const SizedBox(height: 5),
         _buildStatRow(
-            l10n.book_sync_status_non_existent_books,
-            l10n.book_sync_status_books_count(nonExistent),
+            l10n.bookSyncStatusNonExistentBooks,
+            l10n.bookSyncStatusBooksCount(nonExistent),
             BookSyncStatusEnum.nonExistent,
             theme),
       ],
@@ -331,11 +331,11 @@ class SyncStatusBottomSheet extends ConsumerWidget {
             Expanded(
               child: FilledButton.icon(
                 icon: const Icon(Icons.sync),
-                label: Text(L10n.of(context).sync_now),
+                label: Text(L10n.of(context).syncNow),
                 onPressed: () {
                   final isSyncing = ref.watch(syncProvider).isSyncing;
                   if (isSyncing) {
-                    AnxToast.show(l10n.webdav_syncing);
+                    AnxToast.show(l10n.webdavSyncing);
                   } else {
                     ref.read(syncProvider.notifier).syncData(
                         SyncDirection.both, ref,

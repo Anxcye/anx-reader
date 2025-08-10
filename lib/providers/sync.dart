@@ -93,7 +93,7 @@ class Sync extends _$Sync {
         !(await Connectivity().checkConnectivity())
             .contains(ConnectivityResult.wifi)) {
       if (Prefs().syncCompletedToast) {
-        AnxToast.show(L10n.of(navigatorKey.currentContext!).webdav_only_wifi);
+        AnxToast.show(L10n.of(navigatorKey.currentContext!).webdavOnlyWifi);
       }
       return false;
     }
@@ -170,17 +170,17 @@ class Sync extends _$Sync {
     return await showDialog<SyncDirection>(
       context: navigatorKey.currentContext!,
       builder: (context) => AlertDialog(
-        title: Text(L10n.of(context).common_attention),
+        title: Text(L10n.of(context).commonAttention),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(L10n.of(context).webdav_sync_direction),
+            Text(L10n.of(context).webdavSyncDirection),
             SizedBox(height: 10),
             Text(
-                '${L10n.of(context).book_sync_status_local_update_time} ${localDb.lastModifiedSync()}'),
+                '${L10n.of(context).bookSyncStatusLocalUpdateTime} ${localDb.lastModifiedSync()}'),
             Text(
-                '${L10n.of(context).sync_remote_data_update_time} ${remoteDb.mTime}'),
+                '${L10n.of(context).syncRemoteDataUpdateTime} ${remoteDb.mTime}'),
           ],
         ),
         actionsOverflowDirection: VerticalDirection.up,
@@ -191,13 +191,13 @@ class Sync extends _$Sync {
             onPressed: () {
               Navigator.of(context).pop(SyncDirection.upload);
             },
-            child: Text(L10n.of(context).webdav_upload),
+            child: Text(L10n.of(context).webdavUpload),
           ),
           FilledButton(
             onPressed: () {
               Navigator.of(context).pop(SyncDirection.download);
             },
-            child: Text(L10n.of(context).webdav_download),
+            child: Text(L10n.of(context).webdavDownload),
           ),
         ],
       ),
@@ -208,15 +208,15 @@ class Sync extends _$Sync {
     await SmartDialog.show(
       clickMaskDismiss: false,
       builder: (context) => AlertDialog(
-        title: Text(L10n.of(context).webdav_sync_aborted),
+        title: Text(L10n.of(context).webdavSyncAborted),
         content: Text(L10n.of(context)
-            .sync_mismatch_tip(currentDbVersion, remoteVersion)),
+            .syncMismatchTip(currentDbVersion, remoteVersion)),
         actions: [
           TextButton(
             onPressed: () {
               SmartDialog.dismiss();
             },
-            child: Text(L10n.of(context).common_ok),
+            child: Text(L10n.of(context).commonOk),
           ),
         ],
       ),
@@ -267,7 +267,7 @@ class Sync extends _$Sync {
     changeState(state.copyWith(isSyncing: true));
 
     if (Prefs().syncCompletedToast) {
-      AnxToast.show(L10n.of(navigatorKey.currentContext!).webdav_syncing);
+      AnxToast.show(L10n.of(navigatorKey.currentContext!).webdavSyncing);
     }
 
     try {
@@ -281,7 +281,7 @@ class Sync extends _$Sync {
 
       if (Prefs().syncCompletedToast) {
         AnxToast.show(
-            L10n.of(navigatorKey.currentContext!).webdav_syncing_files);
+            L10n.of(navigatorKey.currentContext!).webdavSyncingFiles);
       }
 
       await syncFiles();
@@ -300,7 +300,7 @@ class Sync extends _$Sync {
 
       if (Prefs().syncCompletedToast) {
         AnxToast.show(
-            L10n.of(navigatorKey.currentContext!).webdav_sync_complete);
+            L10n.of(navigatorKey.currentContext!).webdavSyncComplete);
       }
     } catch (e, s) {
       if (e is DioException && e.type == DioExceptionType.connectionError) {
@@ -549,7 +549,7 @@ class Sync extends _$Sync {
 
     if (!syncStatus.remoteOnly.contains(book.id)) {
       AnxToast.show(L10n.of(navigatorKey.currentContext!)
-          .book_sync_status_book_not_found_remote);
+          .bookSyncStatusBookNotFoundRemote);
       return;
     }
 
@@ -574,7 +574,7 @@ class Sync extends _$Sync {
         await uploadFile(localPath, remotePath);
       } catch (e) {
         AnxToast.show(L10n.of(navigatorKey.currentContext!)
-            .book_sync_status_upload_failed);
+            .bookSyncStatusUploadFailed);
         AnxLog.severe('Failed to upload book\n$e');
         rethrow;
       }
@@ -582,7 +582,7 @@ class Sync extends _$Sync {
 
     if (syncStatus.remoteOnly.contains(book.id)) {
       AnxToast.show(L10n.of(navigatorKey.currentContext!)
-          .book_sync_status_space_released);
+          .bookSyncStatusSpaceReleased);
       return;
     } else if (syncStatus.both.contains(book.id)) {
       await deleteLocalBook();
@@ -592,7 +592,7 @@ class Sync extends _$Sync {
         await deleteLocalBook();
       } catch (e) {
         AnxToast.show(L10n.of(navigatorKey.currentContext!)
-            .book_sync_status_upload_failed);
+            .bookSyncStatusUploadFailed);
       }
     }
   }
@@ -637,13 +637,13 @@ class Sync extends _$Sync {
   Future<void> _downloadBook(Book book) async {
     try {
       AnxToast.show(L10n.of(navigatorKey.currentContext!)
-          .book_sync_status_downloading_book(book.filePath));
+          .bookSyncStatusDownloadingBook(book.filePath));
       final remotePath = 'anx/data/${book.filePath}';
       final localPath = getBasePath(book.filePath);
       await downloadFile(remotePath, localPath);
     } catch (e) {
       AnxToast.show(L10n.of(navigatorKey.currentContext!)
-          .book_sync_status_download_failed);
+          .bookSyncStatusDownloadFailed);
       AnxLog.severe('Failed to download book\n$e');
       rethrow;
     }
@@ -674,11 +674,11 @@ class Sync extends _$Sync {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(L10n.of(context).available_backups),
+                Text(L10n.of(context).availableBackups),
                 const SizedBox(height: 12),
                 if (backups.isEmpty)
                   Text(
-                    L10n.of(context).no_backups_available,
+                    L10n.of(context).noBackupsAvailable,
                     style: const TextStyle(color: Colors.grey),
                   )
                 else
@@ -713,7 +713,7 @@ class Sync extends _$Sync {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text(L10n.of(context).common_cancel),
+              child: Text(L10n.of(context).commonCancel),
             ),
           ],
         ),
@@ -738,11 +738,11 @@ class Sync extends _$Sync {
           actions: [
             TextButton(
               onPressed: () => SmartDialog.dismiss(result: false),
-              child: Text(L10n.of(context).common_cancel),
+              child: Text(L10n.of(context).commonCancel),
             ),
             FilledButton(
               onPressed: () => SmartDialog.dismiss(result: true),
-              child: Text(L10n.of(context).common_confirm),
+              child: Text(L10n.of(context).commonConfirm),
             ),
           ],
         ),
@@ -774,14 +774,14 @@ class Sync extends _$Sync {
   Future<void> _showSyncAbortedDialog() async {
     await SmartDialog.show(
       builder: (context) => AlertDialog(
-        title: Text(L10n.of(context).webdav_sync_aborted),
-        content: Text(L10n.of(context).webdav_sync_aborted_content),
+        title: Text(L10n.of(context).webdavSyncAborted),
+        content: Text(L10n.of(context).webdavSyncAbortedContent),
         actions: [
           TextButton(
             onPressed: () {
               SmartDialog.dismiss();
             },
-            child: Text(L10n.of(context).common_ok),
+            child: Text(L10n.of(context).commonOk),
           ),
         ],
       ),

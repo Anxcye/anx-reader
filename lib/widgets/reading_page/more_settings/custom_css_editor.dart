@@ -68,7 +68,7 @@ class _CustomCSSEditorState extends State<CustomCSSEditor> {
       if (openBraces != closeBraces) {
         setState(() {
           _hasValidationErrors = true;
-          _validationMessage = L10n.of(context).css_validation_unmatched_braces;
+          _validationMessage = L10n.of(context).cssValidationUnmatchedBraces;
         });
         return;
       }
@@ -78,7 +78,7 @@ class _CustomCSSEditorState extends State<CustomCSSEditor> {
           setState(() {
             _hasValidationErrors = true;
             _validationMessage =
-                L10n.of(context).css_validation_missing_semicolon(i + 1);
+                L10n.of(context).cssValidationMissingSemicolon(i + 1);
           });
           return;
         }
@@ -99,7 +99,7 @@ class _CustomCSSEditorState extends State<CustomCSSEditor> {
       _applyCSS();
     }
 
-    AnxToast.show(L10n.of(context).common_saved);
+    AnxToast.show(L10n.of(context).commonSaved);
   }
 
   void _restoreDefault() {
@@ -115,7 +115,7 @@ class _CustomCSSEditorState extends State<CustomCSSEditor> {
       children: [
         Row(
           children: [
-            Expanded(child: Text(L10n.of(context).custom_css_enabled)),
+            Expanded(child: Text(L10n.of(context).customCssEnabled)),
             Switch(
               value: Prefs().customCSSEnabled,
               onChanged: (value) {
@@ -170,7 +170,7 @@ class _CustomCSSEditorState extends State<CustomCSSEditor> {
                 height: 1.4,
               ),
               decoration: InputDecoration(
-                hintText: L10n.of(context).css_editor_hint,
+                hintText: L10n.of(context).cssEditorHint,
                 border: InputBorder.none,
                 contentPadding: const EdgeInsets.all(12),
               ),
@@ -184,13 +184,13 @@ class _CustomCSSEditorState extends State<CustomCSSEditor> {
               TextButton.icon(
                 onPressed: _restoreDefault,
                 icon: const Icon(Icons.restore, size: 16),
-                label: Text(L10n.of(context).css_restore_default),
+                label: Text(L10n.of(context).cssRestoreDefault),
               ),
               const SizedBox(width: 12),
               ElevatedButton.icon(
                 onPressed: _hasValidationErrors ? null : _saveAndApply,
                 icon: const Icon(Icons.save, size: 16),
-                label: Text(L10n.of(context).css_save_and_apply),
+                label: Text(L10n.of(context).cssSaveAndApply),
                 style: ElevatedButton.styleFrom(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

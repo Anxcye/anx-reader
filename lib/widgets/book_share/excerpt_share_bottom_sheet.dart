@@ -190,7 +190,7 @@ class _ExcerptShareBottomSheetState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      L10n.of(context).reading_page_share_template,
+                      L10n.of(context).readingPageShareTemplate,
                       style: _getTitleStyle(context),
                     ),
                     SizedBox(
@@ -222,7 +222,7 @@ class _ExcerptShareBottomSheetState
                     const SizedBox(height: 16),
 
                     Text(
-                      L10n.of(context).reading_page_share_font,
+                      L10n.of(context).readingPageShareFont,
                       style: _getTitleStyle(context),
                     ),
                     SizedBox(
@@ -261,7 +261,7 @@ class _ExcerptShareBottomSheetState
                     const SizedBox(height: 16),
 
                     Text(
-                      L10n.of(context).reading_page_share_color,
+                      L10n.of(context).readingPageShareColor,
                       style: _getTitleStyle(context),
                     ),
                     SizedBox(
@@ -317,7 +317,7 @@ class _ExcerptShareBottomSheetState
                     const SizedBox(height: 16),
 
                     Text(
-                      L10n.of(context).reading_page_share_background,
+                      L10n.of(context).readingPageShareBackground,
                       style: _getTitleStyle(context),
                     ),
                     SizedBox(
@@ -375,20 +375,20 @@ class _ExcerptShareBottomSheetState
             children: [
               IconAndText(
                 icon: const Icon(Icons.save_alt),
-                text: L10n.of(context).reading_page_share_save,
+                text: L10n.of(context).readingPageShareSave,
                 onTap: _saveAsImage,
               ),
               IconAndText(
                 icon: const Icon(Icons.share),
-                text: L10n.of(context).reading_page_share_share,
+                text: L10n.of(context).readingPageShareShare,
                 onTap: _shareAsImage,
               ),
               IconAndText(
                 icon: const Icon(Icons.copy),
-                text: L10n.of(context).common_copy,
+                text: L10n.of(context).commonCopy,
                 onTap: () {
                   Clipboard.setData(ClipboardData(text: widget.excerpt));
-                  AnxToast.show(L10n.of(context).notes_page_copied);
+                  AnxToast.show(L10n.of(context).notesPageCopied);
                 },
               ),
             ],

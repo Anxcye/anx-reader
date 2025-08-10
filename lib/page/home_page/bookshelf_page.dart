@@ -196,7 +196,7 @@ class BookshelfPageState extends ConsumerState<BookshelfPage> {
                       color: Theme.of(context).colorScheme.onSurface,
                     ),
                     Text(
-                      L10n.of(context).bookshelf_dragging,
+                      L10n.of(context).bookshelfDragging,
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                   ],

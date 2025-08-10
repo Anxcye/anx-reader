@@ -49,7 +49,7 @@ enum LangListEnum {
   final String nativeName;
 
   String getNative(BuildContext context) => this == LangListEnum.auto
-      ? L10n.of(context).settings_translate_auto
+      ? L10n.of(context).settingsTranslateAuto
       : nativeName;
 }
 

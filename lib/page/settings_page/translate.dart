@@ -26,7 +26,7 @@ class _TranslateSettingState extends State<TranslateSetting> {
           Prefs().autoTranslateSelection = value;
         }),
       ),
-      title: Text(L10n.of(context).reading_page_auto_translate_selection),
+      title: Text(L10n.of(context).readingPageAutoTranslateSelection),
     );
   }
 
@@ -95,7 +95,7 @@ class TranslationConfig extends StatelessWidget {
                 style: currentServiceTextStyle,
               ),
             ),
-            Text(L10n.of(context).settings_translate_current_service),
+            Text(L10n.of(context).settingsTranslateCurrentService),
           ],
         ),
         const Divider(),
@@ -378,9 +378,9 @@ class _TranslateSettingItemState extends State<TranslateSettingItem> {
   void _saveConfig() {
     try {
       saveTranslateServiceConfig(widget.service, _currentConfig);
-      AnxToast.show(L10n.of(context).common_saved);
+      AnxToast.show(L10n.of(context).commonSaved);
     } catch (e) {
-      AnxToast.show(L10n.of(context).common_failed);
+      AnxToast.show(L10n.of(context).commonFailed);
     }
   }
 
@@ -467,7 +467,7 @@ class _TranslateSettingItemState extends State<TranslateSettingItem> {
                                   ),
                                 );
                               },
-                              child: Text(L10n.of(context).common_test),
+                              child: Text(L10n.of(context).commonTest),
                             ),
                             TextButton(
                               onPressed: () {
@@ -476,7 +476,7 @@ class _TranslateSettingItemState extends State<TranslateSettingItem> {
                                   isExpanded = !isExpanded;
                                 });
                               },
-                              child: Text(L10n.of(context).common_save),
+                              child: Text(L10n.of(context).commonSave),
                             ),
                           ],
                         ),

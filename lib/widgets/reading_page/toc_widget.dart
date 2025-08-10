@@ -43,8 +43,8 @@ class _TocWidgetState extends State<TocWidget>
           TabBar(
             controller: _tabController,
             tabs: [
-              Tab(text: L10n.of(context).reading_contents),
-              Tab(text: L10n.of(context).reading_bookmark),
+              Tab(text: L10n.of(context).readingContents),
+              Tab(text: L10n.of(context).readingBookmark),
             ],
           ),
           Expanded(

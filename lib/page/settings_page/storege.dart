@@ -56,40 +56,40 @@ class _StorageSettingsState extends ConsumerState<StorageSettings>
           await ref.read(storageInfoProvider.notifier).clearCache();
           ref.invalidate(storageInfoProvider);
         },
-        child: Text('${L10n.of(context).storage_clear_cache} $size'),
+        child: Text('${L10n.of(context).storageClearCache} $size'),
       );
     }
 
     return settingsSections(sections: [
       SettingsSection(
-        title: Text(L10n.of(context).storage_info),
+        title: Text(L10n.of(context).storageInfo),
         tiles: [
           CustomSettingsTile(
             child: Column(
               children: [
                 ListTile(
-                  title: Text(L10n.of(context).storage_total_size),
+                  title: Text(L10n.of(context).storageTotalSize),
                   trailing:
                       fileSizeTriling(storageInfoAsync.value?.totalSizeStr),
                 ),
                 ListTile(
-                  title: Text(L10n.of(context).storage_database_file),
+                  title: Text(L10n.of(context).storageDatabaseFile),
                   trailing:
                       fileSizeTriling(storageInfoAsync.value?.databaseSizeStr),
                 ),
                 ListTile(
-                  title: Text(L10n.of(context).storage_log_file),
+                  title: Text(L10n.of(context).storageLogFile),
                   trailing: fileSizeTriling(storageInfoAsync.value?.logSizeStr),
                 ),
                 ListTile(
-                  title: Text(L10n.of(context).storage_cache_file),
+                  title: Text(L10n.of(context).storageCacheFile),
                   trailing:
                       cacheSizeTriling(storageInfoAsync.value?.cacheSizeStr),
                 ),
                 Column(
                   children: [
                     ListTile(
-                      title: Text(L10n.of(context).storage_data_file),
+                      title: Text(L10n.of(context).storageDataFile),
                       trailing: fileSizeTriling(
                           storageInfoAsync.value?.dataFilesSizeStr),
                     ),
@@ -98,17 +98,17 @@ class _StorageSettingsState extends ConsumerState<StorageSettings>
                       child: Column(
                         children: [
                           ListTile(
-                            title: Text(L10n.of(context).storage_book_file),
+                            title: Text(L10n.of(context).storageBookFile),
                             trailing: fileSizeTriling(
                                 storageInfoAsync.value?.booksSizeStr),
                           ),
                           ListTile(
-                            title: Text(L10n.of(context).storage_cover_file),
+                            title: Text(L10n.of(context).storageCoverFile),
                             trailing: fileSizeTriling(
                                 storageInfoAsync.value?.coverSizeStr),
                           ),
                           ListTile(
-                            title: Text(L10n.of(context).storage_font_file),
+                            title: Text(L10n.of(context).storageFontFile),
                             trailing: fileSizeTriling(
                                 storageInfoAsync.value?.fontSizeStr),
                           ),
@@ -125,7 +125,7 @@ class _StorageSettingsState extends ConsumerState<StorageSettings>
 
       // Tab view for data files details
       SettingsSection(
-          title: Text(L10n.of(context).storage_data_file_details),
+          title: Text(L10n.of(context).storageDataFileDetails),
           tiles: [
             CustomSettingsTile(
               child: Padding(
@@ -136,13 +136,13 @@ class _StorageSettingsState extends ConsumerState<StorageSettings>
                       controller: _tabController,
                       tabs: [
                         Tab(
-                            text: L10n.of(context).storage_book_file,
+                            text: L10n.of(context).storageBookFile,
                             icon: const Icon(Icons.book)),
                         Tab(
-                            text: L10n.of(context).storage_cover_file,
+                            text: L10n.of(context).storageCoverFile,
                             icon: const Icon(Icons.image)),
                         Tab(
-                            text: L10n.of(context).storage_font_file,
+                            text: L10n.of(context).storageFontFile,
                             icon: const Icon(Icons.font_download)),
                       ],
                     ),
@@ -158,7 +158,7 @@ class _StorageSettingsState extends ConsumerState<StorageSettings>
                           // Books tab
                           storageInfoAsync.when(
                             data: (_) => DataFilesDetailTab(
-                              title: L10n.of(context).storage_book_file,
+                              title: L10n.of(context).storageBookFile,
                               icon: Icons.book,
                               listFiles: ref
                                   .read(storageInfoProvider.notifier)
@@ -169,12 +169,12 @@ class _StorageSettingsState extends ConsumerState<StorageSettings>
                             loading: () => const Center(
                                 child: CircularProgressIndicator.adaptive()),
                             error: (_, __) => Center(
-                                child: Text(L10n.of(context).common_error)),
+                                child: Text(L10n.of(context).commonError)),
                           ),
                           // Covers tab
                           storageInfoAsync.when(
                             data: (_) => DataFilesDetailTab(
-                              title: L10n.of(context).storage_cover_file,
+                              title: L10n.of(context).storageCoverFile,
                               icon: Icons.image,
                               listFiles: ref
                                   .read(storageInfoProvider.notifier)
@@ -185,12 +185,12 @@ class _StorageSettingsState extends ConsumerState<StorageSettings>
                             loading: () => const Center(
                                 child: CircularProgressIndicator.adaptive()),
                             error: (_, __) => Center(
-                                child: Text(L10n.of(context).common_error)),
+                                child: Text(L10n.of(context).commonError)),
                           ),
                           // Fonts tab
                           storageInfoAsync.when(
                             data: (_) => DataFilesDetailTab(
-                              title: L10n.of(context).storage_font_file,
+                              title: L10n.of(context).storageFontFile,
                               icon: Icons.font_download,
                               listFiles: ref
                                   .read(storageInfoProvider.notifier)
@@ -201,7 +201,7 @@ class _StorageSettingsState extends ConsumerState<StorageSettings>
                             loading: () => const Center(
                                 child: CircularProgressIndicator.adaptive()),
                             error: (_, __) => Center(
-                                child: Text(L10n.of(context).common_error)),
+                                child: Text(L10n.of(context).commonError)),
                           ),
                         ],
                       ),

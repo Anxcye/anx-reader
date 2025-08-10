@@ -66,13 +66,13 @@ void _checkDuplicatesAndShowDialog(
     context: context,
     barrierDismissible: false,
     builder: (context) => AlertDialog(
-      title: Text(L10n.of(context).md5_calculating),
+      title: Text(L10n.of(context).md5Calculating),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           const CircularProgressIndicator(),
           const SizedBox(height: 16),
-          Text(L10n.of(context).md5_calculating),
+          Text(L10n.of(context).md5Calculating),
         ],
       ),
     ),
@@ -164,7 +164,7 @@ void _showImportDialog(
           Padding(
             padding: const EdgeInsets.only(left: 28, top: 2),
             child: Text(
-              L10n.of(context).duplicate_of(duplicateTitle),
+              L10n.of(context).duplicateOf(duplicateTitle),
               style: const TextStyle(
                 fontSize: 12,
                 color: Colors.grey,
@@ -188,14 +188,14 @@ void _showImportDialog(
         return StatefulBuilder(builder: (context, setState) {
           return AlertDialog(
             title:
-                Text(L10n.of(context).import_n_books_selected(fileList.length)),
+                Text(L10n.of(context).importNBooksSelected(fileList.length)),
             contentPadding: const EdgeInsets.all(16),
             content: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(L10n.of(context)
-                      .import_support_types(allowBookExtensions.join(' / '))),
+                      .importSupportTypes(allowBookExtensions.join(' / '))),
 
                   const SizedBox(height: 10),
 
@@ -221,7 +221,7 @@ void _showImportDialog(
                     Divider(),
                     SizedBox(height: 10),
                     Text(L10n.of(context)
-                        .import_n_books_not_support(unsupportedFiles.length))
+                        .importNBooksNotSupport(unsupportedFiles.length))
                   ],
                   for (var file in unsupportedFiles)
                     bookItem(file.path, const Icon(Icons.error)),
@@ -230,7 +230,7 @@ void _showImportDialog(
                   if (duplicateFiles.isNotEmpty) ...[
                     Divider(),
                     const SizedBox(height: 10),
-                    Text(L10n.of(context).duplicate_file),
+                    Text(L10n.of(context).duplicateFile),
                   ],
                   for (var file in duplicateFiles)
                     if (skipDuplicates)
@@ -276,7 +276,7 @@ void _showImportDialog(
                           },
                         ),
                         Expanded(
-                          child: Text(L10n.of(context).skip_duplicate_files),
+                          child: Text(L10n.of(context).skipDuplicateFiles),
                         ),
                       ],
                     ),
@@ -292,7 +292,7 @@ void _showImportDialog(
                     file.deleteSync();
                   }
                 },
-                child: Text(L10n.of(context).common_cancel),
+                child: Text(L10n.of(context).commonCancel),
               ),
               if (uniqueFiles.isNotEmpty ||
                   (duplicateFiles.isNotEmpty && !skipDuplicates))
@@ -342,8 +342,8 @@ void _showImportDialog(
                           trigger: SyncTrigger.auto);
                     },
                     child: Text(finished
-                        ? L10n.of(context).common_ok
-                        : L10n.of(context).import_import_n_books(
+                        ? L10n.of(context).commonOk
+                        : L10n.of(context).importImportNBooks(
                             uniqueFiles.length +
                                 (skipDuplicates ? 0 : duplicateFiles.length) -
                                 errorFiles.length))),
@@ -373,7 +373,7 @@ Future<void> pushToReadingPage(
   String? cfi,
 }) async {
   if (book.isDeleted) {
-    AnxToast.show(L10n.of(context).book_deleted);
+    AnxToast.show(L10n.of(context).bookDeleted);
     return;
   }
 
@@ -463,7 +463,7 @@ Future<void> saveBook(
       updateTime: DateTime.now());
 
   book.id = await insertBook(book);
-  AnxToast.show(L10n.of(navigatorKey.currentContext!).service_import_success);
+  AnxToast.show(L10n.of(navigatorKey.currentContext!).serviceImportSuccess);
   headlessInAppWebView?.dispose();
   headlessInAppWebView = null;
   return;

@@ -156,15 +156,15 @@ class _BookOpenedFolderState extends ConsumerState<BookOpenedFolder> {
               ref.read(bookListProvider.notifier).dissolveGroup(books);
               Navigator.pop(context);
             },
-            child: Text(L10n.of(context).common_dissolve)),
+            child: Text(L10n.of(context).commonDissolve)),
         TextButton(
             onPressed: () {
               isEditing = !isEditing;
               setState(() {});
             },
             child: Text(isEditing
-                ? L10n.of(context).common_cancel
-                : L10n.of(context).common_edit)),
+                ? L10n.of(context).commonCancel
+                : L10n.of(context).commonEdit)),
       ],
     );
   }

@@ -56,7 +56,7 @@ class _TtsWidgetState extends State<TtsWidget> {
           Widget volume() {
             return Row(
               children: [
-                Text(L10n.of(context).tts_volume),
+                Text(L10n.of(context).ttsVolume),
                 Expanded(
                   child: Slider(
                       value: TtsHandler().volume,
@@ -77,7 +77,7 @@ class _TtsWidgetState extends State<TtsWidget> {
           Widget pitch() {
             return Row(
               children: [
-                Text(L10n.of(context).tts_pitch),
+                Text(L10n.of(context).ttsPitch),
                 Expanded(
                   child: Slider(
                     value: TtsHandler().pitch,
@@ -99,7 +99,7 @@ class _TtsWidgetState extends State<TtsWidget> {
           Widget rate() {
             return Row(
               children: [
-                Text(L10n.of(context).tts_rate),
+                Text(L10n.of(context).ttsRate),
                 Expanded(
                   child: Slider(
                     value: TtsHandler().rate,
@@ -128,11 +128,11 @@ class _TtsWidgetState extends State<TtsWidget> {
                   rate(),
                   Row(
                     children: [
-                      Text(L10n.of(context).tts_type),
+                      Text(L10n.of(context).ttsType),
                       const Spacer(),
                       Row(
                         children: [
-                          Text(L10n.of(context).tts_type_internal),
+                          Text(L10n.of(context).ttsTypeInternal),
                           Switch(
                             value: Prefs().isSystemTts,
                             onChanged: (value) async {
@@ -150,7 +150,7 @@ class _TtsWidgetState extends State<TtsWidget> {
                               setState(() {});
                             },
                           ),
-                          Text(L10n.of(context).tts_type_system),
+                          Text(L10n.of(context).ttsTypeSystem),
                         ],
                       ),
                     ],
@@ -248,11 +248,11 @@ class _TtsWidgetState extends State<TtsWidget> {
                       min: 0.0,
                       max: 60.0,
                       label: L10n.of(context)
-                          .common_minutes_full((stopSeconds / 60).round()),
+                          .commonMinutesFull((stopSeconds / 60).round()),
                     ),
                   ),
                   Text(L10n.of(context)
-                      .tts_stop_after((stopSeconds / 60).ceil())),
+                      .ttsStopAfter((stopSeconds / 60).ceil())),
                 ],
               ),
             );
@@ -263,7 +263,7 @@ class _TtsWidgetState extends State<TtsWidget> {
             child: Column(
               children: [
                 widgetTitle(
-                    L10n.of(context).tts_narrator, ReadingSettings.style),
+                    L10n.of(context).ttsNarrator, ReadingSettings.style),
                 buttons(),
                 const Divider(),
                 stopTimerWidget(),

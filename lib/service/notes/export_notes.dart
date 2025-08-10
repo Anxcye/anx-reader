@@ -38,7 +38,7 @@ Future<void> exportNotes(
       }).join('\n\n');
 
       await Clipboard.setData(ClipboardData(text: notes));
-      AnxToast.show(L10n.of(context).notes_page_copied);
+      AnxToast.show(L10n.of(context).notesPageCopied);
       break;
 
     case ExportType.md:
@@ -62,7 +62,7 @@ Future<void> exportNotes(
           mimeType: 'text/markdown');
 
       if (filePath != null) {
-        AnxToast.show('${L10n.of(context).notes_page_exported_to} $filePath');
+        AnxToast.show('${L10n.of(context).notesPageExportedTo} $filePath');
       }
       break;
 
@@ -84,7 +84,7 @@ Future<void> exportNotes(
           fileName: '${book.title}.txt',
           mimeType: 'text/plain');
       if (filePath != null) {
-        AnxToast.show('${L10n.of(context).notes_page_exported_to} $filePath');
+        AnxToast.show('${L10n.of(context).notesPageExportedTo} $filePath');
       }
       break;
 
@@ -123,7 +123,7 @@ Future<void> exportNotes(
           fileName: '${book.title}.csv',
           mimeType: 'text/csv');
       if (filePath != null) {
-        AnxToast.show('${L10n.of(context).notes_page_exported_to} $filePath');
+        AnxToast.show('${L10n.of(context).notesPageExportedTo} $filePath');
       }
       break;
   }

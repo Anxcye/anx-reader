@@ -26,17 +26,17 @@ class _ChangeThemeModeState extends State<ChangeThemeMode> {
       segments: <ButtonSegment<String>>[
         ButtonSegment<String>(
           value: 'auto',
-          label: Text(L10n.of(context).settings_system_mode),
+          label: Text(L10n.of(context).settingsSystemMode),
           icon: const Icon(Icons.brightness_auto),
         ),
         ButtonSegment<String>(
           value: 'dark',
-          label: Text(L10n.of(context).settings_dark_mode),
+          label: Text(L10n.of(context).settingsDarkMode),
           icon: const Icon(Icons.brightness_2),
         ),
         ButtonSegment<String>(
           value: 'light',
-          label: Text(L10n.of(context).settings_light_mode),
+          label: Text(L10n.of(context).settingsLightMode),
           icon: const Icon(Icons.brightness_5),
         ),
       ],

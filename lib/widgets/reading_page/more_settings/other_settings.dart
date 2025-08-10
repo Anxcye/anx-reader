@@ -22,7 +22,7 @@ class _OtherSettingsState extends State<OtherSettings> {
       return ListTile(
         contentPadding: EdgeInsets.zero,
         title: Text(
-          L10n.of(context).reading_page_screen_timeout,
+          L10n.of(context).readingPageScreenTimeout,
           style: Theme.of(context).textTheme.titleMedium,
         ),
         leadingAndTrailingTextStyle: TextStyle(
@@ -31,7 +31,7 @@ class _OtherSettingsState extends State<OtherSettings> {
         ),
         subtitle: Row(
           children: [
-            Text(L10n.of(context).common_minutes(Prefs().awakeTime)),
+            Text(L10n.of(context).commonMinutes(Prefs().awakeTime)),
             Expanded(
               child: Slider(
                   min: 0,
@@ -64,7 +64,7 @@ class _OtherSettingsState extends State<OtherSettings> {
                     showStatusBar();
                   }
                 })),
-        title: Text(L10n.of(context).reading_page_full_screen),
+        title: Text(L10n.of(context).readingPageFullScreen),
       );
     }
 
@@ -86,7 +86,7 @@ class _OtherSettingsState extends State<OtherSettings> {
         return ListTile(
           contentPadding: EdgeInsets.zero,
           title: Text(
-            L10n.of(context).reading_page_page_turning_method,
+            L10n.of(context).readingPagePageTurningMethod,
             style: Theme.of(context).textTheme.titleMedium,
           ),
           subtitle: SizedBox(
@@ -125,7 +125,7 @@ class _OtherSettingsState extends State<OtherSettings> {
             Prefs().autoTranslateSelection = value;
           }),
         ),
-        title: Text(L10n.of(context).reading_page_auto_translate_selection),
+        title: Text(L10n.of(context).readingPageAutoTranslateSelection),
       );
     }
 
@@ -133,7 +133,7 @@ class _OtherSettingsState extends State<OtherSettings> {
       return ListTile(
         contentPadding: EdgeInsets.zero,
         title:
-            Text(L10n.of(context).reading_page_auto_summary_previous_content),
+            Text(L10n.of(context).readingPageAutoSummaryPreviousContent),
         trailing: Switch(
           value: Prefs().autoSummaryPreviousContent,
           onChanged: (bool value) => setState(() {
@@ -146,9 +146,9 @@ class _OtherSettingsState extends State<OtherSettings> {
     ListTile autoAdjustReadingTheme() {
       return ListTile(
         contentPadding: EdgeInsets.zero,
-        title: Text(L10n.of(context).reading_page_auto_adjust_reading_theme),
+        title: Text(L10n.of(context).readingPageAutoAdjustReadingTheme),
         subtitle:
-            Text(L10n.of(context).reading_page_auto_adjust_reading_theme_tips),
+            Text(L10n.of(context).readingPageAutoAdjustReadingThemeTips),
         trailing: Switch(
           value: Prefs().autoAdjustReadingTheme,
           onChanged: (bool value) => setState(() {
@@ -161,7 +161,7 @@ class _OtherSettingsState extends State<OtherSettings> {
     ListTile keyboardTurnPage() {
       return ListTile(
         contentPadding: EdgeInsets.zero,
-        title: Text(L10n.of(context).reading_page_volume_key_turn_page),
+        title: Text(L10n.of(context).readingPageVolumeKeyTurnPage),
         trailing: Switch(
           value: Prefs().volumeKeyTurnPage,
           onChanged: (bool value) => setState(() {
@@ -174,8 +174,8 @@ class _OtherSettingsState extends State<OtherSettings> {
     ListTile swapPageTurnArea() {
       return ListTile(
         contentPadding: EdgeInsets.zero,
-        title: Text(L10n.of(context).reading_page_swap_page_turn_area ?? "Swap page turn area"),
-        subtitle: Text(L10n.of(context).reading_page_swap_page_turn_area_tips ?? "Turn the up area into down area"),
+        title: Text(L10n.of(context).readingPageSwapPageTurnArea ?? "Swap page turn area"),
+        subtitle: Text(L10n.of(context).readingPageSwapPageTurnAreaTips ?? "Turn the up area into down area"),
         trailing: Switch(
           value: Prefs().swapPageTurnArea,
           onChanged: (bool value) => setState(() {

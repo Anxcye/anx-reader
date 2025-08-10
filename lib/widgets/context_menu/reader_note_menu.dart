@@ -86,7 +86,7 @@ class ReaderNoteMenuState extends State<ReaderNoteMenu> {
                     controller: textFieldController,
                     decoration: InputDecoration(
                       border: InputBorder.none,
-                      hintText: L10n.of(context).context_menu_add_note_tips,
+                      hintText: L10n.of(context).contextMenuAddNoteTips,
                       suffixIcon: !showSaveButton
                           ? null
                           : IconButton(

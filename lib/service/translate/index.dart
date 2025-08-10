@@ -96,7 +96,7 @@ abstract class TranslateServiceProvider {
                   TextButton(
                       onPressed: () => Clipboard.setData(
                           ClipboardData(text: snapshot.data!)),
-                      child: Text(L10n.of(context).common_copy))
+                      child: Text(L10n.of(context).commonCopy))
                 ],
               )
             ],
