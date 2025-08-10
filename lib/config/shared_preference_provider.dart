@@ -519,6 +519,14 @@ class Prefs extends ChangeNotifier {
     return prefs.getBool('volumeKeyTurnPage') ?? false;
   }
 
+  set swapPageTurnArea(bool status) {
+    prefs.setBool('swapPageTurnArea', status);
+  }
+
+  bool get swapPageTurnArea {
+    return prefs.getBool('swapPageTurnArea') ?? false;
+  }
+
   set bookCoverWidth(double width) {
     prefs.setDouble('bookCoverWidth', width);
     notifyListeners();
