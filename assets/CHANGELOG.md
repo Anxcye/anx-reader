@@ -7,8 +7,10 @@
 ## Todo
 
 ## 1.6.3
+- Feat: Support swapping page turn area
 - Fix: Fix multiple tools bar
 
+- Feat: 支持交换翻页区域
 - Fix: 修复工具栏无法正确关闭的问题
 ## 1.6.2
 - UI: Modify bottom navigation bar style
