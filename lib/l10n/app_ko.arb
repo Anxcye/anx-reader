@@ -435,7 +435,6 @@
   "testSsl": "SSL 인증서 확인 실패, HTTPS 구성을 확인하세요",
   "testDnd": "DNS 해상도 실패, 도메인 이름이 올바른지 확인하세요",
   "testOther": "연결 테스트 실패, 구성과 네트워크를 확인하세요",
-  "databaseBackupManagement": "데이터베이스 백업 관리",
   "availableBackups": "사용 가능한 백업:",
   "noBackupsAvailable": "사용 가능한 백업이 없습니다",
   "restore": "복원",

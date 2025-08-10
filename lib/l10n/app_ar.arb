@@ -468,7 +468,6 @@
   "updateFromVersion": "تم التحديث من {version}",
   "welcomeToVersion": "مرحبًا بك في {version}",
   "whatsNew": "الجديد",
-  "databaseBackupManagement": "إدارة قاعدة البيانات الاحتياطية",
   "settingsSyncAutoSync": "مزامنة السيارات",
   "restoreDatabase": "استعادة قاعدة البيانات",
   "restoreBackup": "استعادة النسخ الاحتياطي",

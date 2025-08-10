@@ -434,7 +434,6 @@
   "testSsl": "SSL證書驗證失敗，請檢查HTTPS配置",
   "testDnd": "DNS分辨率失敗，請檢查域名是否正確",
   "testOther": "連接測試失敗，請檢查配置和網絡",
-  "databaseBackupManagement": "數據庫備份管理",
   "availableBackups": "可用備份：",
   "noBackupsAvailable": "沒有可用的備份",
   "restore": "恢復",

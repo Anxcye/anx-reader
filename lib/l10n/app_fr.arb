@@ -433,7 +433,6 @@
   "testSsl": "Échec de la vérification du certificat SSL, veuillez vérifier la configuration HTTPS",
   "testDnd": "Échec de la résolution DNS, veuillez vérifier si le nom de domaine est correct",
   "testOther": "Échec du test de connexion, veuillez vérifier la configuration et le réseau",
-  "databaseBackupManagement": "Gestion des Sauvegardes de Base de Données",
   "availableBackups": "Sauvegardes Disponibles :",
   "noBackupsAvailable": "Aucune sauvegarde disponible",
   "restore": "Restaurer",

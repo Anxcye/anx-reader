@@ -472,7 +472,6 @@
   "updateFromVersion": "Atualizado da versão {version}",
   "welcomeToVersion": "Bem-vindo à versão {version}",
   "whatsNew": "O que há de novo",
-  "databaseBackupManagement": "Gerenciamento de Backup do Banco de Dados",
   "restoreDatabase": "Restaurar Banco de Dados",
   "restoreBackup": "Restaurar Backup",
   "customCssEnabled": "Habilitar CSS Personalizado",

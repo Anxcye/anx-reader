@@ -431,7 +431,6 @@
   "testSsl": "Überprüfung des SSL -Zertifikats fehlgeschlagen. Überprüfen Sie bitte die HTTPS -Konfiguration",
   "testDnd": "Die DNS -Auflösung ist fehlgeschlagen. Bitte prüfen Sie, ob der Domänenname korrekt ist",
   "testOther": "Verbindungstest fehlgeschlagen, prüfen Sie die Konfiguration und das Netzwerk",
-  "databaseBackupManagement": "Datenbanksicherungsverwaltung",
   "availableBackups": "Verfügbare Backups:",
   "noBackupsAvailable": "Keine Backups verfügbar",
   "restore": "Wiederherstellen",

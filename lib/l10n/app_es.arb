@@ -435,7 +435,6 @@
   "testSsl": "Verificación de certificado SSL fallida, verifica configuración HTTPS",
   "testDnd": "Resolución DNS fallida, verifica si el nombre de dominio es correcto",
   "testOther": "Prueba de conexión fallida, verifica configuración y red",
-  "databaseBackupManagement": "Gestión de Respaldo de Base de Datos",
   "availableBackups": "Respaldos Disponibles:",
   "noBackupsAvailable": "No hay respaldos disponibles",
   "restore": "Restaurar",

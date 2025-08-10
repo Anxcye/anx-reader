@@ -433,7 +433,6 @@
   "testSsl": "Verifica certificato SSL fallita, per favore controlla la configurazione HTTPS",
   "testDnd": "Risoluzione DNS fallita, per favore controlla se il nome del dominio è corretto",
   "testOther": "Test di connessione fallito, per favore controlla la configurazione e la rete",
-  "databaseBackupManagement": "Gestione Backup Database",
   "availableBackups": "Backup Disponibili:",
   "noBackupsAvailable": "Nessun backup disponibile",
   "restore": "Ripristina",
