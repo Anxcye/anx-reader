@@ -89,7 +89,7 @@ class _StatisticPageState extends State<StatisticPage> {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SafeArea(child: const TotalReadTime()),
+                  SafeArea(bottom: false, child: const TotalReadTime()),
                   const SizedBox(height: 20),
                   baseStatistic(context),
                   const SizedBox(height: 30),
