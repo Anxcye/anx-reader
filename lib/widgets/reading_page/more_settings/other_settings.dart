@@ -174,8 +174,8 @@ class _OtherSettingsState extends State<OtherSettings> {
     ListTile swapPageTurnArea() {
       return ListTile(
         contentPadding: EdgeInsets.zero,
-        title: Text(L10n.of(context).readingPageSwapPageTurnArea ?? "Swap page turn area"),
-        subtitle: Text(L10n.of(context).readingPageSwapPageTurnAreaTips ?? "Turn the up area into down area"),
+        title: Text(L10n.of(context).readingPageSwapPageTurnArea),
+        subtitle: Text(L10n.of(context).readingPageSwapPageTurnAreaTips),
         trailing: Switch(
           value: Prefs().swapPageTurnArea,
           onChanged: (bool value) => setState(() {
