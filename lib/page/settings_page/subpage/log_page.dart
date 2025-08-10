@@ -35,7 +35,7 @@ class _LogPageState extends State<LogPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(L10n.of(context).settings_advanced_log),
+        title: Text(L10n.of(context).settingsAdvancedLog),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -67,14 +67,14 @@ class _LogPageState extends State<LogPage> {
         PopupMenuItem(
           child: ListTile(
             leading: const Icon(Icons.delete),
-            title: Text(L10n.of(context).settings_advanced_log_clear_log),
+            title: Text(L10n.of(context).settingsAdvancedLogClearLog),
             onTap: () => clearLog(),
           ),
         ),
         PopupMenuItem(
             child: ListTile(
           leading: const Icon(Icons.file_upload_outlined),
-          title: Text(L10n.of(context).settings_advanced_log_export_log),
+          title: Text(L10n.of(context).settingsAdvancedLogExportLog),
           onTap: () => exportLog(),
         ))
       ],
@@ -135,7 +135,7 @@ Widget logItem(String logStr, BuildContext context) {
               onPressed: () {
                 Clipboard.setData(ClipboardData(text: logStr));
               },
-              child: Text(L10n.of(context).common_copy),
+              child: Text(L10n.of(context).commonCopy),
             ),
           ],
         ),

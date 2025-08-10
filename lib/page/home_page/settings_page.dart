@@ -60,7 +60,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               const MoreSettings(),
               if (EnvVar.isAppStore)
                 ListTile(
-                  title: Text(L10n.of(context).iap_page_title),
+                  title: Text(L10n.of(context).iapPageTitle),
                   leading: const Icon(Icons.star_outline),
                   subtitle: Text(IAPService().statusTitle(context)),
                   onTap: () {

@@ -8,10 +8,10 @@ String convertSeconds(int seconds) {
   final int minutes = (seconds % 3600) ~/ 60;
   final int second = seconds % 60;
   if (hours > 0) {
-    return '${L10n.of(context).common_hours(hours)} ${L10n.of(context).common_minutes(minutes)}';
+    return '${L10n.of(context).commonHours(hours)} ${L10n.of(context).commonMinutes(minutes)}';
   } else if (minutes > 0) {
-    return L10n.of(context).common_minutes_full(minutes);
+    return L10n.of(context).commonMinutesFull(minutes);
   } else {
-    return L10n.of(context).common_seconds_full(second);
+    return L10n.of(context).commonSecondsFull(second);
   }
 }

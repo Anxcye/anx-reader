@@ -42,11 +42,11 @@ class _AdvancedSettingState extends State<AdvancedSetting> {
     return settingsSections(
       sections: [
         SettingsSection(
-          title: Text(L10n.of(context).settings_advanced_log),
+          title: Text(L10n.of(context).settingsAdvancedLog),
           tiles: [
             SettingsTile.switchTile(
               title:
-                  Text(L10n.of(context).settings_advanced_clear_log_when_start),
+                  Text(L10n.of(context).settingsAdvancedClearLogWhenStart),
               leading: const Icon(Icons.delete_forever_outlined),
               initialValue: Prefs().clearLogWhenStart,
               onToggle: (value) {
@@ -56,12 +56,12 @@ class _AdvancedSettingState extends State<AdvancedSetting> {
             ),
             SettingsTile.navigation(
                 leading: const Icon(Icons.bug_report),
-                title: Text(L10n.of(context).settings_advanced_log),
+                title: Text(L10n.of(context).settingsAdvancedLog),
                 onPressed: onLogPressed),
           ],
         ),
         SettingsSection(
-          title: Text(L10n.of(context).md5_management),
+          title: Text(L10n.of(context).md5Management),
           tiles: [
             if (_md5Stats != null)
               SettingsTile(
@@ -73,30 +73,30 @@ class _AdvancedSettingState extends State<AdvancedSetting> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(L10n.of(context).md5_statistics),
+                        Text(L10n.of(context).md5Statistics),
                         const SizedBox(height: 4),
                         Text(
                           L10n.of(context)
-                              .md5_total_books(_md5Stats!.totalBooks),
+                              .md5TotalBooks(_md5Stats!.totalBooks),
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
                         Text(
                           L10n.of(context)
-                              .md5_books_with_md5(_md5Stats!.booksWithMd5),
+                              .md5BooksWithMd5(_md5Stats!.booksWithMd5),
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
                         Text(
-                          L10n.of(context).md5_books_without_md5(
+                          L10n.of(context).md5BooksWithoutMd5(
                               _md5Stats!.booksWithoutMd5),
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
                         Text(
                           L10n.of(context)
-                              .md5_local_files(_md5Stats!.localFilesCount),
+                              .md5LocalFiles(_md5Stats!.localFilesCount),
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
                         Text(
-                          L10n.of(context).md5_local_files_without_md5(
+                          L10n.of(context).md5LocalFilesWithoutMd5(
                               _md5Stats!.localFilesWithoutMd5),
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
@@ -110,7 +110,7 @@ class _AdvancedSettingState extends State<AdvancedSetting> {
                 title: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(L10n.of(context).md5_calculating),
+                    Text(L10n.of(context).md5Calculating),
                     const SizedBox(height: 8),
                     LinearProgressIndicator(value: _progress),
                     const SizedBox(height: 4),
@@ -124,7 +124,7 @@ class _AdvancedSettingState extends State<AdvancedSetting> {
               )
             else
               SettingsTile.navigation(
-                title: Text(L10n.of(context).md5_calculate_missing),
+                title: Text(L10n.of(context).md5CalculateMissing),
                 leading: const Icon(Icons.calculate),
                 onPressed: _calculateMd5,
                 // enabled: _md5Stats?.booksWithoutMd5 != 0,
@@ -132,11 +132,11 @@ class _AdvancedSettingState extends State<AdvancedSetting> {
           ],
         ),
         SettingsSection(
-          title: Text(L10n.of(context).settings_advanced_javascript),
+          title: Text(L10n.of(context).settingsAdvancedJavascript),
           tiles: [
             SettingsTile.switchTile(
               title: Text(L10n.of(context)
-                  .settings_advanced_enable_javascript_for_epub),
+                  .settingsAdvancedEnableJavascriptForEpub),
               leading: const Icon(Icons.code),
               initialValue: Prefs().enableJsForEpub,
               onToggle: (value) {
@@ -154,19 +154,19 @@ class _AdvancedSettingState extends State<AdvancedSetting> {
     if (_isCalculating) return;
 
     if (_md5Stats?.localFilesWithoutMd5 == 0) {
-      AnxToast.show(L10n.of(context).md5_no_calculation_needed);
+      AnxToast.show(L10n.of(context).md5NoCalculationNeeded);
       return;
     }
 
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(L10n.of(context).md5_calculate_confirm_title),
+        title: Text(L10n.of(context).md5CalculateConfirmTitle),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(L10n.of(context).md5_calculate_confirm_content),
+            Text(L10n.of(context).md5CalculateConfirmContent),
             const SizedBox(height: 8),
             if (_md5Stats!.localFilesWithoutMd5 < _md5Stats!.booksWithoutMd5)
               Container(
@@ -182,7 +182,7 @@ class _AdvancedSettingState extends State<AdvancedSetting> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        L10n.of(context).md5_missing_files_tip,
+                        L10n.of(context).md5MissingFilesTip,
                         style: const TextStyle(fontSize: 12),
                       ),
                     ),
@@ -194,11 +194,11 @@ class _AdvancedSettingState extends State<AdvancedSetting> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: Text(L10n.of(context).common_cancel),
+            child: Text(L10n.of(context).commonCancel),
           ),
           ElevatedButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: Text(L10n.of(context).common_confirm),
+            child: Text(L10n.of(context).commonConfirm),
           ),
         ],
       ),
@@ -237,34 +237,34 @@ class _AdvancedSettingState extends State<AdvancedSetting> {
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
-            title: Text(L10n.of(context).md5_calculation_complete),
+            title: Text(L10n.of(context).md5CalculationComplete),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(L10n.of(context)
-                    .md5_calculation_result_calculated(result.calculated)),
+                    .md5CalculationResultCalculated(result.calculated)),
                 Text(L10n.of(context)
-                    .md5_calculation_result_skipped(result.skipped)),
+                    .md5CalculationResultSkipped(result.skipped)),
                 Text(L10n.of(context)
-                    .md5_calculation_result_failed(result.failed)),
+                    .md5CalculationResultFailed(result.failed)),
                 if (result.missingFiles.isNotEmpty) ...[
                   const SizedBox(height: 8),
                   Text(
-                    L10n.of(context).md5_missing_files,
+                    L10n.of(context).md5MissingFiles,
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   ...result.missingFiles.take(5).map((file) => Text('• $file')),
                   if (result.missingFiles.length > 5)
                     Text(L10n.of(context)
-                        .md5_and_more(result.missingFiles.length - 5)),
+                        .md5AndMore(result.missingFiles.length - 5)),
                 ],
               ],
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: Text(L10n.of(context).common_ok),
+                child: Text(L10n.of(context).commonOk),
               ),
             ],
           ),
@@ -278,7 +278,7 @@ class _AdvancedSettingState extends State<AdvancedSetting> {
       });
 
       if (context.mounted) {
-        AnxToast.show(L10n.of(context).md5_calculation_error(e.toString()));
+        AnxToast.show(L10n.of(context).md5CalculationError(e.toString()));
       }
     }
   }

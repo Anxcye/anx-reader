@@ -9,8 +9,8 @@ enum SortOrderEnum {
 extension SortOrderExtension on SortOrderEnum {
   String getL10n(BuildContext context) {
     return switch (this) {
-      SortOrderEnum.ascending => L10n.of(context).common_ascending,
-      SortOrderEnum.descending => L10n.of(context).common_descending,
+      SortOrderEnum.ascending => L10n.of(context).commonAscending,
+      SortOrderEnum.descending => L10n.of(context).commonDescending,
     };
   }
 }

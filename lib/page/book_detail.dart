@@ -305,7 +305,7 @@ class _BookDetailState extends ConsumerState<BookDetail> {
                     children: [
                       const Icon(Icons.save),
                       const SizedBox(width: 5),
-                      Text(L10n.of(context).book_detail_save),
+                      Text(L10n.of(context).bookDetailSave),
                     ],
                   ),
                   onPressed: () {
@@ -322,7 +322,7 @@ class _BookDetailState extends ConsumerState<BookDetail> {
                     children: [
                       const Icon(Icons.edit),
                       const SizedBox(width: 5),
-                      Text(L10n.of(context).book_detail_edit),
+                      Text(L10n.of(context).bookDetailEdit),
                     ],
                   ),
                   onPressed: () {
@@ -349,7 +349,7 @@ class _BookDetailState extends ConsumerState<BookDetail> {
           padding: const EdgeInsets.only(left: 20, right: 20),
           child: highlightDigit(
               context,
-              L10n.of(context).book_detail_nth_book(widget.book.id),
+              L10n.of(context).bookDetailNthBook(widget.book.id),
               textStyle,
               digitStyle),
         );
@@ -405,13 +405,13 @@ class _BookDetailState extends ConsumerState<BookDetail> {
                   children: [
                     highlightDigit(
                       context,
-                      L10n.of(context).common_hours(hours),
+                      L10n.of(context).commonHours(hours),
                       textStyle,
                       digitStyle,
                     ),
                     highlightDigit(
                       context,
-                      L10n.of(context).common_minutes(minutes),
+                      L10n.of(context).commonMinutes(minutes),
                       textStyle,
                       digitStyle,
                     ),
@@ -510,11 +510,11 @@ class _BookDetailState extends ConsumerState<BookDetail> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '${L10n.of(context).book_detail_import_date}${widget.book.createTime.toString().substring(0, 10)}',
+                      '${L10n.of(context).bookDetailImportDate}${widget.book.createTime.toString().substring(0, 10)}',
                       style: textStyle,
                     ),
                     Text(
-                      '${L10n.of(context).book_detail_last_read_date}${widget.book.updateTime.toString().substring(0, 10)}',
+                      '${L10n.of(context).bookDetailLastReadDate}${widget.book.updateTime.toString().substring(0, 10)}',
                       style: textStyle,
                     ),
                     const Divider(),

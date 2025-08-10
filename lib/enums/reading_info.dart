@@ -15,19 +15,19 @@ extension ReadingInfoL10n on ReadingInfoEnum {
   String getL10n(BuildContext context) {
     switch (this) {
       case ReadingInfoEnum.none:
-        return L10n.of(context).common_none;
+        return L10n.of(context).commonNone;
       case ReadingInfoEnum.chapterTitle:
-        return L10n.of(context).reading_page_reading_info_chapter_title;
+        return L10n.of(context).readingPageReadingInfoChapterTitle;
       case ReadingInfoEnum.battery:
-        return L10n.of(context).reading_page_reading_info_battery;
+        return L10n.of(context).readingPageReadingInfoBattery;
       case ReadingInfoEnum.time:
-        return L10n.of(context).reading_page_reading_info_time;
+        return L10n.of(context).readingPageReadingInfoTime;
       case ReadingInfoEnum.batteryAndTime:
-        return L10n.of(context).reading_page_reading_info_battery_and_time;
+        return L10n.of(context).readingPageReadingInfoBatteryAndTime;
       case ReadingInfoEnum.chapterProgress:
-        return L10n.of(context).reading_page_reading_info_chapter_progress;
+        return L10n.of(context).readingPageReadingInfoChapterProgress;
       case ReadingInfoEnum.bookProgress:
-        return L10n.of(context).reading_page_reading_info_book_progress;
+        return L10n.of(context).readingPageReadingInfoBookProgress;
     }
   }
 }

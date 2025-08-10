@@ -27,24 +27,24 @@ class AiChatStreamState extends ConsumerState<AiChatStream> {
   List<Map<String, String>> _getQuickPrompts(BuildContext context) {
     return [
       {
-        'label': L10n.of(context).ai_quick_prompt_explain,
-        'prompt': L10n.of(context).ai_quick_prompt_explain_text
+        'label': L10n.of(context).aiQuickPromptExplain,
+        'prompt': L10n.of(context).aiQuickPromptExplainText
       },
       {
-        'label': L10n.of(context).ai_quick_prompt_opinion,
-        'prompt': L10n.of(context).ai_quick_prompt_opinion_text
+        'label': L10n.of(context).aiQuickPromptOpinion,
+        'prompt': L10n.of(context).aiQuickPromptOpinionText
       },
       {
-        'label': L10n.of(context).ai_quick_prompt_summary,
-        'prompt': L10n.of(context).ai_quick_prompt_summary_text
+        'label': L10n.of(context).aiQuickPromptSummary,
+        'prompt': L10n.of(context).aiQuickPromptSummaryText
       },
       {
-        'label': L10n.of(context).ai_quick_prompt_analyze,
-        'prompt': L10n.of(context).ai_quick_prompt_analyze_text
+        'label': L10n.of(context).aiQuickPromptAnalyze,
+        'prompt': L10n.of(context).aiQuickPromptAnalyzeText
       },
       {
-        'label': L10n.of(context).ai_quick_prompt_suggest,
-        'prompt': L10n.of(context).ai_quick_prompt_suggest_text
+        'label': L10n.of(context).aiQuickPromptSuggest,
+        'prompt': L10n.of(context).aiQuickPromptSuggestText
       },
     ];
   }
@@ -127,7 +127,7 @@ class AiChatStreamState extends ConsumerState<AiChatStream> {
 
   void _copyMessageContent(String content) {
     Clipboard.setData(ClipboardData(text: content));
-    AnxToast.show(L10n.of(context).notes_page_copied);
+    AnxToast.show(L10n.of(context).notesPageCopied);
   }
 
   AiMessage? _getLastAssistantMessage() {
@@ -177,7 +177,7 @@ class AiChatStreamState extends ConsumerState<AiChatStream> {
                         data: (messages) {
                           if (messages.isEmpty) {
                             return Center(
-                              child: Text(L10n.of(context).ai_hint_text),
+                              child: Text(L10n.of(context).aiHintText),
                             );
                           }
 
@@ -225,7 +225,7 @@ class AiChatStreamState extends ConsumerState<AiChatStream> {
                     controller: inputController,
                     decoration: InputDecoration(
                       isDense: true,
-                      hintText: L10n.of(context).ai_hint_input_placeholder,
+                      hintText: L10n.of(context).aiHintInputPlaceholder,
                       border: const OutlineInputBorder(
                         borderRadius: BorderRadius.all(Radius.circular(30)),
                       ),
@@ -295,11 +295,11 @@ class AiChatStreamState extends ConsumerState<AiChatStream> {
                         if (message == lastAssistantMessage)
                           TextButton(
                             onPressed: _regenerateLastMessage,
-                            child: Text(L10n.of(context).ai_regenerate),
+                            child: Text(L10n.of(context).aiRegenerate),
                           ),
                         TextButton(
                           onPressed: () => _copyMessageContent(message.content),
-                          child: Text(L10n.of(context).common_copy),
+                          child: Text(L10n.of(context).commonCopy),
                         ),
                       ],
                     ),
@@ -395,8 +395,8 @@ class _CollapsibleTextState extends State<_CollapsibleText> {
             });
           },
           child: Text(_isExpanded
-              ? L10n.of(context).ai_hint_collapse
-              : L10n.of(context).ai_hint_expand),
+              ? L10n.of(context).aiHintCollapse
+              : L10n.of(context).aiHintExpand),
         ),
       ],
     );
@@ -462,8 +462,8 @@ class _CollapsibleMarkdownState extends State<_CollapsibleMarkdown> {
             });
           },
           child: Text(_isExpanded
-              ? L10n.of(context).ai_hint_collapse
-              : L10n.of(context).ai_hint_expand),
+              ? L10n.of(context).aiHintCollapse
+              : L10n.of(context).aiHintExpand),
         ),
       ],
     );

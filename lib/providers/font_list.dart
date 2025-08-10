@@ -20,7 +20,7 @@ class FontList extends _$FontList {
     Directory fontDir = getFontDir();
     List<FontModel> fontList = [
       FontModel(
-        label: L10n.of(navigatorKey.currentContext!).system_font,
+        label: L10n.of(navigatorKey.currentContext!).systemFont,
         name: 'system',
         path: '',
       ),

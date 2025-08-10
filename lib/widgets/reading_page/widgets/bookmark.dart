@@ -33,13 +33,13 @@ class _BookmarkWidgetState extends ConsumerState<BookmarkWidget> {
             child: Column(
               children: [
                 Text(
-                  L10n.of(context).no_bookmarks,
+                  L10n.of(context).noBookmarks,
                   style: Theme.of(context).textTheme.titleLarge!.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                 ),
                 SizedBox(height: 16.0),
-                Text(L10n.of(context).no_bookmarks_tip),
+                Text(L10n.of(context).noBookmarksTip),
               ],
             ),
           );

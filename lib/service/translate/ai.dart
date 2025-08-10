@@ -26,7 +26,7 @@ class AiTranslateProvider extends TranslateServiceProvider {
         label: 'Tip',
         type: ConfigItemType.tip,
         defaultValue:
-            L10n.of(navigatorKey.currentContext!).settings_translate_ai_tip,
+            L10n.of(navigatorKey.currentContext!).settingsTranslateAiTip,
       ),
     ];
   }

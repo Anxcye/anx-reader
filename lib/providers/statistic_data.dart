@@ -84,13 +84,13 @@ class StatisticData extends _$StatisticData {
     BuildContext context = navigatorKey.currentContext!;
     final labelGenerators = {
       ChartMode.week: () => [
-            L10n.of(context).statistic_monday,
-            L10n.of(context).statistic_tuesday,
-            L10n.of(context).statistic_wednesday,
-            L10n.of(context).statistic_thursday,
-            L10n.of(context).statistic_friday,
-            L10n.of(context).statistic_saturday,
-            L10n.of(context).statistic_sunday,
+            L10n.of(context).statisticMonday,
+            L10n.of(context).statisticTuesday,
+            L10n.of(context).statisticWednesday,
+            L10n.of(context).statisticThursday,
+            L10n.of(context).statisticFriday,
+            L10n.of(context).statisticSaturday,
+            L10n.of(context).statisticSunday,
           ],
       ChartMode.month: () {
         final daysInMonth = DateTime(date.year, date.month + 1, 0).day;

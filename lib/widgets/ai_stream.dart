@@ -87,14 +87,14 @@ class AiStreamState extends ConsumerState<AiStream> {
                           );
                         });
                       },
-                      child: Text(L10n.of(context).ai_regenerate),
+                      child: Text(L10n.of(context).aiRegenerate),
                     ),
                     TextButton(
                       onPressed: () {
                         Clipboard.setData(ClipboardData(text: snapshot.data!));
-                        AnxToast.show(L10n.of(context).notes_page_copied);
+                        AnxToast.show(L10n.of(context).notesPageCopied);
                       },
-                      child: Text(L10n.of(context).common_copy),
+                      child: Text(L10n.of(context).commonCopy),
                     ),
                   ],
                 ),

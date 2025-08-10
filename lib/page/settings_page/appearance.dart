@@ -53,7 +53,7 @@ class _AppearanceSettingState extends State<AppearanceSetting> {
     return settingsSections(
       sections: [
         SettingsSection(
-          title: Text(L10n.of(context).settings_appearance_theme),
+          title: Text(L10n.of(context).settingsAppearanceTheme),
           tiles: [
             const CustomSettingsTile(
                 child: Padding(
@@ -61,7 +61,7 @@ class _AppearanceSettingState extends State<AppearanceSetting> {
               child: ChangeThemeMode(),
             )),
             SettingsTile.navigation(
-                title: Text(L10n.of(context).settings_appearance_themeColor),
+                title: Text(L10n.of(context).settingsAppearanceThemeColor),
                 leading: const Icon(Icons.color_lens),
                 onPressed: (context) async {
                   await showColorPickerDialog(context);
@@ -77,7 +77,7 @@ class _AppearanceSettingState extends State<AppearanceSetting> {
               },
             ),
             SettingsTile.switchTile(
-              title: Text(L10n.of(context).e_ink_mode),
+              title: Text(L10n.of(context).eInkMode),
               leading: const Icon(Icons.contrast),
               initialValue: Prefs().eInkMode,
               onToggle: (bool value) {
@@ -90,10 +90,10 @@ class _AppearanceSettingState extends State<AppearanceSetting> {
           ],
         ),
         SettingsSection(
-            title: Text(L10n.of(context).settings_appearance_display),
+            title: Text(L10n.of(context).settingsAppearanceDisplay),
             tiles: [
               SettingsTile.navigation(
-                  title: Text(L10n.of(context).settings_appearance_language),
+                  title: Text(L10n.of(context).settingsAppearanceLanguage),
                   value: Text(languageSubtitle),
                   leading: const Icon(Icons.language),
                   onPressed: (context) {
@@ -101,7 +101,7 @@ class _AppearanceSettingState extends State<AppearanceSetting> {
                   }),
               SettingsTile.switchTile(
                 title: Text(
-                    L10n.of(context).settings_appearance_open_book_animation),
+                    L10n.of(context).settingsAppearanceOpenBookAnimation),
                 leading: const Icon(Icons.animation),
                 initialValue: Prefs().openBookAnimation,
                 onToggle: (bool value) {
@@ -112,11 +112,11 @@ class _AppearanceSettingState extends State<AppearanceSetting> {
               ),
             ]),
         SettingsSection(
-            title: Text(L10n.of(context).settings_bookshelf_cover),
+            title: Text(L10n.of(context).settingsBookshelfCover),
             tiles: [
               CustomSettingsTile(
                   child: ListTile(
-                title: Text(L10n.of(context).settings_bookshelf_cover_width),
+                title: Text(L10n.of(context).settingsBookshelfCoverWidth),
                 subtitle: Row(
                   children: [
                     Text(Prefs().bookCoverWidth.toStringAsFixed(0)),
@@ -139,10 +139,10 @@ class _AppearanceSettingState extends State<AppearanceSetting> {
             ]),
         SettingsSection(
           title:
-              Text(L10n.of(context).settings_appearance_bottom_navigator_show),
+              Text(L10n.of(context).settingsAppearanceBottomNavigatorShow),
           tiles: [
             SettingsTile.switchTile(
-              title: Text(L10n.of(context).navBar_statistics),
+              title: Text(L10n.of(context).navBarStatistics),
               initialValue: Prefs().bottomNavigatorShowStatistics,
               onToggle: (bool value) {
                 setState(() {
@@ -151,7 +151,7 @@ class _AppearanceSettingState extends State<AppearanceSetting> {
               },
             ),
             SettingsTile.switchTile(
-              title: Text(L10n.of(context).navBar_notes),
+              title: Text(L10n.of(context).navBarNotes),
               initialValue: Prefs().bottomNavigatorShowNote,
               onToggle: (bool value) {
                 setState(() {
@@ -167,7 +167,7 @@ class _AppearanceSettingState extends State<AppearanceSetting> {
 }
 
 void showLanguagePickerDialog(BuildContext context) {
-  final title = L10n.of(context).settings_appearance_language;
+  final title = L10n.of(context).settingsAppearanceLanguage;
   final saveToPrefs = Prefs().saveLocaleToPrefs;
 
   final children = languageOptions.map((e) {
@@ -188,7 +188,7 @@ Future<void> showColorPickerDialog(BuildContext context) async {
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
-        title: Text(L10n.of(context).settings_appearance_themeColor),
+        title: Text(L10n.of(context).settingsAppearanceThemeColor),
         content: SingleChildScrollView(
           child: ColorPicker(
             pickerColor: pickedColor,
@@ -202,13 +202,13 @@ Future<void> showColorPickerDialog(BuildContext context) async {
         ),
         actions: <Widget>[
           TextButton(
-            child: Text(L10n.of(context).common_cancel),
+            child: Text(L10n.of(context).commonCancel),
             onPressed: () {
               Navigator.of(context).pop();
             },
           ),
           TextButton(
-            child: Text(L10n.of(context).common_ok),
+            child: Text(L10n.of(context).commonOk),
             onPressed: () {
               prefsProvider.saveThemeToPrefs(pickedColor.value);
               Navigator.of(context).pop();

@@ -22,7 +22,7 @@ Stream<String> aiGenerateStream(
 
   final url = config['url'];
   if (url == null || url.isEmpty) {
-    yield L10n.of(navigatorKey.currentContext!).ai_service_not_configured;
+    yield L10n.of(navigatorKey.currentContext!).aiServiceNotConfigured;
     return;
   }
 

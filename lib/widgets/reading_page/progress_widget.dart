@@ -92,12 +92,12 @@ class _ProgressWidgetState extends State<ProgressWidget> {
               ProgressDisplay(
                 mainText: widget.epubPlayerKey.currentState!.chapterCurrentPage
                     .toString(),
-                subText: L10n.of(context).reading_page_current_page,
+                subText: L10n.of(context).readingPageCurrentPage,
               ),
               ProgressDisplay(
                 mainText: widget.epubPlayerKey.currentState!.chapterTotalPages
                     .toString(),
-                subText: L10n.of(context).reading_page_chapter_pages,
+                subText: L10n.of(context).readingPageChapterPages,
               ),
               ProgressDisplay(
                 mainText: (widget.epubPlayerKey.currentState!.percentage * 100)

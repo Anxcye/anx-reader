@@ -75,7 +75,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         color: Theme.of(context).colorScheme.onSurface.withAlpha(150),
       ),
       done: Text(
-        L10n.of(context).onboarding_done,
+        L10n.of(context).onboardingDone,
         style: TextStyle(
           fontWeight: FontWeight.w600,
           color: Theme.of(context).colorScheme.primary,
@@ -88,7 +88,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     return TextButton(
       onPressed: _onIntroEnd,
       child: Text(
-        L10n.of(context).onboarding_skip,
+        L10n.of(context).onboardingSkip,
         style: TextStyle(
           color: Theme.of(context).colorScheme.onSurface.withAlpha(150),
           fontWeight: FontWeight.w600,
@@ -99,8 +99,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   PageViewModel _buildWelcomePage() {
     return PageViewModel(
-      title: L10n.of(context).onboarding_welcome_title,
-      body: L10n.of(context).onboarding_welcome_body,
+      title: L10n.of(context).onboardingWelcomeTitle,
+      body: L10n.of(context).onboardingWelcomeBody,
       image: _buildIconPage(Icons.book_outlined),
       decoration: _getPageDecoration(),
     );
@@ -116,10 +116,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   PageViewModel _buildSyncPage() {
     return PageViewModel(
-      title: L10n.of(context).onboarding_sync_title,
+      title: L10n.of(context).onboardingSyncTitle,
       bodyWidget: _buildPageWithTip(
-        L10n.of(context).onboarding_sync_body,
-        L10n.of(context).onboarding_sync_tip,
+        L10n.of(context).onboardingSyncBody,
+        L10n.of(context).onboardingSyncTip,
       ),
       image: _buildIconPage(Icons.sync_outlined),
       decoration: _getPageDecoration(),
@@ -128,10 +128,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   PageViewModel _buildAIPage() {
     return PageViewModel(
-      title: L10n.of(context).onboarding_ai_title,
+      title: L10n.of(context).onboardingAiTitle,
       bodyWidget: _buildPageWithTip(
-        L10n.of(context).onboarding_ai_body,
-        L10n.of(context).onboarding_ai_tip,
+        L10n.of(context).onboardingAiBody,
+        L10n.of(context).onboardingAiTip,
       ),
       image: _buildIconPage(Icons.auto_awesome_outlined),
       decoration: _getPageDecoration(),
@@ -140,8 +140,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   PageViewModel _buildCompletePage() {
     return PageViewModel(
-      title: L10n.of(context).onboarding_complete_title,
-      body: L10n.of(context).onboarding_complete_body,
+      title: L10n.of(context).onboardingCompleteTitle,
+      body: L10n.of(context).onboardingCompleteBody,
       image: _buildIconPage(Icons.check_circle_outline),
       decoration: _getPageDecoration(),
     );
@@ -199,7 +199,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               ),
               const SizedBox(width: 8),
               Text(
-                L10n.of(context).settings_appearance_language,
+                L10n.of(context).settingsAppearanceLanguage,
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
@@ -276,7 +276,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               ),
               const SizedBox(width: 8),
               Text(
-                L10n.of(context).settings_appearance_themeColor,
+                L10n.of(context).settingsAppearanceThemeColor,
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
@@ -372,7 +372,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    L10n.of(context).settings_appearance,
+                    L10n.of(context).settingsAppearance,
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.w700,
@@ -414,7 +414,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          L10n.of(context).e_ink_mode,
+                          L10n.of(context).eInkMode,
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,

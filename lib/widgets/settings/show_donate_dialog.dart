@@ -6,8 +6,8 @@ import 'package:url_launcher/url_launcher.dart';
 void showDonateDialog(BuildContext context) {
   SmartDialog.show(
     builder: (context) => AlertDialog(
-      title: Text(L10n.of(context).app_donate),
-      content: Text(L10n.of(context).app_donate_tips),
+      title: Text(L10n.of(context).appDonate),
+      content: Text(L10n.of(context).appDonateTips),
       actions: [
         TextButton(
           onPressed: () {
@@ -16,7 +16,7 @@ void showDonateDialog(BuildContext context) {
               mode: LaunchMode.externalApplication,
             );
           },
-          child: Text(L10n.of(context).app_donate),
+          child: Text(L10n.of(context).appDonate),
         ),
       ],
     ),

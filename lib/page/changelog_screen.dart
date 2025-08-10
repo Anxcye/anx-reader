@@ -133,7 +133,7 @@ class _ChangelogScreenState extends State<ChangelogScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(L10n.of(context).whats_new),
+        title: Text(L10n.of(context).whatsNew),
         elevation: 0,
         actions: [
         ],
@@ -158,7 +158,7 @@ class _ChangelogScreenState extends State<ChangelogScreen> {
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            L10n.of(context).update_from_version(lastVersion),
+                            L10n.of(context).updateFromVersion(lastVersion),
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
@@ -169,7 +169,7 @@ class _ChangelogScreenState extends State<ChangelogScreen> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        L10n.of(context).welcome_to_version(currentVersion),
+                        L10n.of(context).welcomeToVersion(currentVersion),
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -216,7 +216,7 @@ class _ChangelogScreenState extends State<ChangelogScreen> {
                   padding: const EdgeInsets.all(16),
                   child: FilledButton(
                     onPressed: _onComplete,
-                    child: Text(L10n.of(context).common_ok),
+                    child: Text(L10n.of(context).commonOk),
                   ),
                 ),
               ],

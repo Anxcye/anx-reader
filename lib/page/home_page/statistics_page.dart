@@ -126,19 +126,19 @@ class _StatisticPageState extends State<StatisticPage> {
         Expanded(
             child: highlightDigit(
                 context,
-                L10n.of(context).statistic_books_read(totalNumberOfBook),
+                L10n.of(context).statisticBooksRead(totalNumberOfBook),
                 textStyle,
                 digitStyle)),
         Expanded(
             child: highlightDigit(
                 context,
-                L10n.of(context).statistic_days_of_reading(totalNumberOfDate),
+                L10n.of(context).statisticDaysOfReading(totalNumberOfDate),
                 textStyle,
                 digitStyle)),
         Expanded(
             child: highlightDigit(
                 context,
-                L10n.of(context).statistic_notes(totalNumberOfNotes),
+                L10n.of(context).statisticNotes(totalNumberOfNotes),
                 textStyle,
                 digitStyle)),
       ],
@@ -175,20 +175,20 @@ class TotalReadTime extends ConsumerWidget {
               children: [
                 highlightDigit(
                   context,
-                  L10n.of(context).common_hours(H),
+                  L10n.of(context).commonHours(H),
                   digitStyle,
                   textStyle,
                 ),
                 highlightDigit(
                   context,
-                  L10n.of(context).common_minutes(M),
+                  L10n.of(context).commonMinutes(M),
                   digitStyle,
                   textStyle,
                 ),
               ],
             ),
             Text(
-              '${Prefs().beginDate.toString().substring(0, 10)} ${L10n.of(context).statistic_to_present}',
+              '${Prefs().beginDate.toString().substring(0, 10)} ${L10n.of(context).statisticToPresent}',
               style: TextStyle(
                 fontSize: 16,
                 color: Colors.grey[600],
@@ -254,7 +254,7 @@ class _DateBooksState extends ConsumerState<DateBooks> {
                               size: 30,
                             ),
                             Text(
-                              L10n.of(context).statistic_deleted_records,
+                              L10n.of(context).statisticDeletedRecords,
                               style: TextStyle(
                                   fontSize: 20, fontWeight: FontWeight.bold),
                             ),
@@ -266,7 +266,7 @@ class _DateBooksState extends ConsumerState<DateBooks> {
                                 deleteBookIds.remove(bookId);
                               });
                             },
-                            child: Text(L10n.of(context).common_undo)),
+                            child: Text(L10n.of(context).commonUndo)),
                       ],
                     ),
                     const Spacer(),
@@ -274,7 +274,7 @@ class _DateBooksState extends ConsumerState<DateBooks> {
                     Row(
                       children: [
                         Icon(Icons.info_outline, size: 18),
-                        Text(L10n.of(context).statistic_deleted_records_tips),
+                        Text(L10n.of(context).statisticDeletedRecordsTips),
                       ],
                     ),
                   ],
@@ -293,7 +293,7 @@ class _DateBooksState extends ConsumerState<DateBooks> {
                 });
               },
               icon: Icons.delete,
-              label: L10n.of(context).common_delete,
+              label: L10n.of(context).commonDelete,
               backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             ),
           ],
@@ -317,7 +317,7 @@ class _DateBooksState extends ConsumerState<DateBooks> {
                     ? '${data.date.year}.${data.date.month}'
                     : data.mode == ChartMode.year
                         ? data.date.year.toString()
-                        : L10n.of(context).statistic_all_time;
+                        : L10n.of(context).statisticAllTime;
 
         final books = data.bookReadingTime;
         return Column(

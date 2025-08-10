@@ -27,10 +27,10 @@ Future<bool> testEnableWebdav() async {
       return true;
     } else {
       AnxToast.show(
-          L10n.of(navigatorKey.currentContext!).webdav_connection_failed);
+          L10n.of(navigatorKey.currentContext!).webdavConnectionFailed);
     }
   } else {
-    AnxToast.show(L10n.of(navigatorKey.currentContext!).webdav_set_info_first);
+    AnxToast.show(L10n.of(navigatorKey.currentContext!).webdavSetInfoFirst);
   }
   return false;
 }
@@ -41,7 +41,7 @@ void chooseDirection(WidgetRef ref) {
       context: navigatorKey.currentContext!,
       builder: (context) {
         return SimpleDialog(
-          title: Text(L10n.of(context).webdav_choose_Sources),
+          title: Text(L10n.of(context).webdavChoose_Sources),
           children: [
             SimpleDialogOption(
               onPressed: () async {
@@ -51,7 +51,7 @@ void chooseDirection(WidgetRef ref) {
               },
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 6),
-                child: Text(L10n.of(context).webdav_upload),
+                child: Text(L10n.of(context).webdavUpload),
               ),
             ),
             SimpleDialogOption(
@@ -62,7 +62,7 @@ void chooseDirection(WidgetRef ref) {
               },
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 6),
-                child: Text(L10n.of(context).webdav_download),
+                child: Text(L10n.of(context).webdavDownload),
               ),
             ),
           ],

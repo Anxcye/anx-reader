@@ -70,7 +70,7 @@ class DeepLTranslateProvider extends TranslateServiceProvider {
       }
     } catch (e) {
       AnxLog.severe(
-          "Deepl ${L10n.of(navigatorKey.currentContext!).translate_error}: $e");
+          "Deepl ${L10n.of(navigatorKey.currentContext!).translateError}: $e");
       yield* Stream.error(Exception(e));
     }
   }
@@ -106,7 +106,7 @@ class DeepLTranslateProvider extends TranslateServiceProvider {
       ConfigItem(
         key: 'api_key',
         label: 'DeepL API Key',
-        description: L10n.of(navigatorKey.currentContext!).deepl_key_tip,
+        description: L10n.of(navigatorKey.currentContext!).deeplKeyTip,
         type: ConfigItemType.password,
         defaultValue: '',
       ),

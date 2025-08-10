@@ -27,6 +27,6 @@ AbstractSettingsTile webdavSwitch(
         }
       }
     },
-    title: Text(L10n.of(context).settings_sync_enable_webdav),
+    title: Text(L10n.of(context).settingsSyncEnableWebdav),
   );
 }

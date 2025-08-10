@@ -99,7 +99,7 @@ class _BookNotesListState extends ConsumerState<BookNotesList> {
                               decoration: InputDecoration(
                                 border: const OutlineInputBorder(),
                                 hintText:
-                                    L10n.of(context).context_menu_add_note_tips,
+                                    L10n.of(context).contextMenuAddNoteTips,
                               ),
                               maxLines: 3,
                             )
@@ -167,7 +167,7 @@ class _BookNotesListState extends ConsumerState<BookNotesList> {
                         controller: noteController,
                         decoration: InputDecoration(
                           border: const OutlineInputBorder(),
-                          hintText: L10n.of(context).context_menu_add_note_tips,
+                          hintText: L10n.of(context).contextMenuAddNoteTips,
                         ),
                         maxLines: 3,
                       ),
@@ -178,7 +178,7 @@ class _BookNotesListState extends ConsumerState<BookNotesList> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: Text(L10n.of(context).common_cancel),
+                  child: Text(L10n.of(context).commonCancel),
                 ),
                 TextButton(
                   onPressed: () {
@@ -200,7 +200,7 @@ class _BookNotesListState extends ConsumerState<BookNotesList> {
                     _loadBookNotes();
                     Navigator.pop(context);
                   },
-                  child: Text(L10n.of(context).common_save),
+                  child: Text(L10n.of(context).commonSave),
                 ),
               ],
             );
@@ -543,13 +543,13 @@ class _BookNotesListState extends ConsumerState<BookNotesList> {
                       sortButton(
                         context,
                         sheetState,
-                        L10n.of(context).notes_page_sort_time,
+                        L10n.of(context).notesPageSortTime,
                         'time',
                       ),
                       sortButton(
                         context,
                         sheetState,
-                        L10n.of(context).notes_page_sort_chapter,
+                        L10n.of(context).notesPageSortChapter,
                         'cfi',
                       ),
                       const Spacer(),
@@ -573,7 +573,7 @@ class _BookNotesListState extends ConsumerState<BookNotesList> {
                                 : EvaIcons.bookmark_outline,
                             color: Theme.of(context).colorScheme.primary,
                           ),
-                          label: Text(L10n.of(context).note_list_show_bookmark),
+                          label: Text(L10n.of(context).noteListShowBookmark),
                         ),
                       ),
                     ],
@@ -594,7 +594,7 @@ class _BookNotesListState extends ConsumerState<BookNotesList> {
                             });
                           },
                           child:
-                              Text(L10n.of(context).notes_page_filter_reset)),
+                              Text(L10n.of(context).notesPageFilterReset)),
                       const SizedBox(width: 10),
                       Expanded(
                         child: ElevatedButton(
@@ -605,7 +605,7 @@ class _BookNotesListState extends ConsumerState<BookNotesList> {
                                     Theme.of(context).colorScheme.onPrimary),
                             onPressed: Navigator.of(context).pop,
                             child: Text(L10n.of(context)
-                                .notes_page_view_all_n_notes(
+                                .notesPageViewAllNNotes(
                                     showNotes.length))),
                       ),
                     ],
@@ -707,7 +707,7 @@ class _BookNotesListState extends ConsumerState<BookNotesList> {
             );
           },
           icon: Icons.share,
-          label: L10n.of(context).reading_page_share_share,
+          label: L10n.of(context).readingPageShareShare,
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         ),
         SlidableAction(
@@ -715,7 +715,7 @@ class _BookNotesListState extends ConsumerState<BookNotesList> {
             _editBookNote(context, bookNote);
           },
           icon: Icons.edit,
-          label: L10n.of(context).common_edit,
+          label: L10n.of(context).commonEdit,
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         ),
       ],

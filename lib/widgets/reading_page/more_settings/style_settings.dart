@@ -22,7 +22,7 @@ class _StyleSettingsState extends State<StyleSettings> {
       return Row(children: [
         IconAndText(
           icon: const Icon(Icons.format_indent_increase),
-          text: L10n.of(context).reading_page_indent,
+          text: L10n.of(context).readingPageIndent,
         ),
         Expanded(
           child: Slider(
@@ -39,7 +39,7 @@ class _StyleSettingsState extends State<StyleSettings> {
             max: 8,
             divisions: 17,
             label: bookStyle.indent < 0
-                ? L10n.of(context).reading_page_indent_no_change
+                ? L10n.of(context).readingPageIndentNoChange
                 : bookStyle.indent.toStringAsFixed(1),
           ),
         ),
@@ -51,11 +51,11 @@ class _StyleSettingsState extends State<StyleSettings> {
         Prefs().writingMode == WritingModeEnum.vertical
             ? IconAndText(
                 icon: const Icon(Bootstrap.arrows_vertical),
-                text: L10n.of(context).reading_page_verticle_margin,
+                text: L10n.of(context).readingPageVerticleMargin,
               )
             : IconAndText(
                 icon: const Icon(Bootstrap.arrows),
-                text: L10n.of(context).reading_page_side_margin,
+                text: L10n.of(context).readingPageSideMargin,
               ),
         Expanded(
           child: Slider(
@@ -81,7 +81,7 @@ class _StyleSettingsState extends State<StyleSettings> {
       return Row(children: [
         IconAndText(
           icon: const Icon(Icons.compare_arrows),
-          text: L10n.of(context).reading_page_letter_spacing,
+          text: L10n.of(context).readingPageLetterSpacing,
         ),
         Expanded(
           child: Slider(
@@ -108,11 +108,11 @@ class _StyleSettingsState extends State<StyleSettings> {
         Prefs().writingMode == WritingModeEnum.vertical
             ? IconAndText(
                 icon: const Icon(Bootstrap.chevron_bar_right),
-                text: L10n.of(context).reading_page_right_margin,
+                text: L10n.of(context).readingPageRightMargin,
               )
             : IconAndText(
                 icon: const Icon(Bootstrap.chevron_bar_up),
-                text: L10n.of(context).reading_page_top_margin,
+                text: L10n.of(context).readingPageTopMargin,
               ),
         Expanded(
           child: Slider(
@@ -134,11 +134,11 @@ class _StyleSettingsState extends State<StyleSettings> {
         Prefs().writingMode == WritingModeEnum.vertical
             ? IconAndText(
                 icon: const Icon(Bootstrap.chevron_bar_left),
-                text: L10n.of(context).reading_page_left_margin,
+                text: L10n.of(context).readingPageLeftMargin,
               )
             : IconAndText(
                 icon: const Icon(Bootstrap.chevron_bar_down),
-                text: L10n.of(context).reading_page_bottom_margin,
+                text: L10n.of(context).readingPageBottomMargin,
               ),
         Expanded(
           child: Slider(
@@ -164,7 +164,7 @@ class _StyleSettingsState extends State<StyleSettings> {
       return Row(children: [
         IconAndText(
           icon: const Icon(Icons.format_bold),
-          text: L10n.of(context).reading_page_font_weight,
+          text: L10n.of(context).readingPageFontWeight,
         ),
         Expanded(
           child: Slider(

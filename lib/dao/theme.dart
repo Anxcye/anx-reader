@@ -27,7 +27,7 @@ void deleteTheme(int id) async {
   final db = await DBHelper().database;
   final numberOfCurrentThemes = await db.query('tb_themes');
   if (numberOfCurrentThemes.length <= 2) {
-    AnxToast.show(L10n.of(navigatorKey.currentContext!).reading_page_at_least_two_themes);
+    AnxToast.show(L10n.of(navigatorKey.currentContext!).readingPageAtLeastTwoThemes);
     return;
   }
   await db.delete(

@@ -75,7 +75,7 @@ class ReadingPageState extends ConsumerState<ReadingPage>
   void initState() {
     if (widget.book.isDeleted) {
       Navigator.pop(context);
-      AnxToast.show(L10n.of(context).book_deleted);
+      AnxToast.show(L10n.of(context).bookDeleted);
       return;
     }
     if (Prefs().hideStatusBar) {
@@ -249,7 +249,7 @@ class ReadingPageState extends ConsumerState<ReadingPage>
           await epubPlayerKey.currentState!.previousContent(2000);
       SmartDialog.show(
         builder: (context) => AlertDialog(
-            title: Text(L10n.of(context).reading_page_summary_previous_content),
+            title: Text(L10n.of(context).readingPageSummaryPreviousContent),
             content: AiStream(
               prompt: generatePromptSummaryThePreviousContent(previousContent),
             )),

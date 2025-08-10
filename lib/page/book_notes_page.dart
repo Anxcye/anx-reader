@@ -162,7 +162,7 @@ class _BookNotesPageState extends State<BookNotesPage> {
     return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
       IconAndText(
           icon: const Icon(Icons.details),
-          text: L10n.of(context).notes_page_detail,
+          text: L10n.of(context).notesPageDetail,
           onTap: () {
         Navigator.push(
           context,
@@ -173,7 +173,7 @@ class _BookNotesPageState extends State<BookNotesPage> {
       }),
       IconAndText(
           icon: const Icon(Icons.ios_share),
-          text: L10n.of(context).notes_page_export,
+          text: L10n.of(context).notesPageExport,
           onTap: () {
         handleExportNotes(context, book);
       }),
@@ -195,12 +195,12 @@ class _BookNotesPageState extends State<BookNotesPage> {
       children: [
         highlightDigit(
           context,
-          L10n.of(context).notes_notes(numberOfNotes),
+          L10n.of(context).notesNotes(numberOfNotes),
           textStyle,
           digitStyle,
         ),
         Text(
-          L10n.of(context).notes_read_percentage(
+          L10n.of(context).notesReadPercentage(
               '${(book.readingPercentage * 100).toStringAsFixed(2)}%'),
         ),
       ],

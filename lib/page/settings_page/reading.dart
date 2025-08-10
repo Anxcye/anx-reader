@@ -22,19 +22,19 @@ class _ReadingSettingsState extends ConsumerState<ReadingSettings> {
   Widget build(BuildContext context) {
     return settingsSections(sections: [
       SettingsSection(
-        title:Text(L10n.of(context).reading_page_reading),
+        title:Text(L10n.of(context).readingPageReading),
         tiles: [
           CustomSettingsTile(child: ReadingMoreSettings()),
         ]
       ),
       SettingsSection(
-        title:Text(L10n.of(context).reading_page_style),
+        title:Text(L10n.of(context).readingPageStyle),
         tiles: [
           CustomSettingsTile(child: StyleSettings()),
         ]
       ),
       SettingsSection(
-        title:Text(L10n.of(context).reading_page_other),
+        title:Text(L10n.of(context).readingPageOther),
         tiles: [
           CustomSettingsTile(child: OtherSettings()),
 

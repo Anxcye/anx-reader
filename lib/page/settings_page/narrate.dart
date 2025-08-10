@@ -276,7 +276,7 @@ class _NarrateSettingsState extends ConsumerState<NarrateSettings>
 
   String _getCurrentModelDisplayName() {
     if (_currentModelDetails == null) {
-      return L10n.of(context).settings_narrate_voice_model_not_selected;
+      return L10n.of(context).settingsNarrateVoiceModelNotSelected;
     }
 
     String shortName = _currentModelDetails!['ShortName'] as String;
@@ -306,9 +306,9 @@ class _NarrateSettingsState extends ConsumerState<NarrateSettings>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SettingsSection(title: Text(L10n.of(context).tts_type), tiles: [
+        SettingsSection(title: Text(L10n.of(context).ttsType), tiles: [
           SettingsTile.switchTile(
-              title: Text(L10n.of(context).tts_type_system),
+              title: Text(L10n.of(context).ttsTypeSystem),
               initialValue: Prefs().isSystemTts,
               onToggle: (value) async {
                 await TtsHandler().switchTtsType(value);
@@ -357,7 +357,7 @@ class _NarrateSettingsState extends ConsumerState<NarrateSettings>
                   children: [
                     Text(
                       L10n.of(context)
-                          .settings_narrate_voice_model_current_model,
+                          .settingsNarrateVoiceModelCurrentModel,
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -414,7 +414,7 @@ class _NarrateSettingsState extends ConsumerState<NarrateSettings>
                   children: [
                     Text(
                       L10n.of(context)
-                          .settings_narrate_voice_model_click_to_view,
+                          .settingsNarrateVoiceModelClickToView,
                       style: TextStyle(
                         fontSize: 14,
                         color: Theme.of(context).colorScheme.primary,
@@ -514,8 +514,8 @@ class _NarrateSettingsState extends ConsumerState<NarrateSettings>
                       ),
                     ),
                     subtitle: Text(gender == 'Male'
-                        ? L10n.of(context).settings_narrate_voice_model_male
-                        : L10n.of(context).settings_narrate_voice_model_female),
+                        ? L10n.of(context).settingsNarrateVoiceModelMale
+                        : L10n.of(context).settingsNarrateVoiceModelFemale),
                     trailing: Radio<String>(
                       value: shortName,
                       groupValue: selectedVoiceModel,

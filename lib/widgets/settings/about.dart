@@ -39,7 +39,7 @@ class _AboutState extends State<About> {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      title: Text(L10n.of(context).app_about),
+      title: Text(L10n.of(context).appAbout),
       leading: Icon(Icons.info_outline,
           color: widget.leadingColor
               ? Theme.of(context).colorScheme.primary
@@ -84,25 +84,25 @@ Future<void> openAboutDialog() async {
                 ),
                 const Divider(),
                 ListTile(
-                    title: Text(L10n.of(context).app_version),
+                    title: Text(L10n.of(context).appVersion),
                     subtitle: Text(version + (kDebugMode ? ' (debug)' : '')),
                     onTap: () {
                       Clipboard.setData(ClipboardData(text: version));
-                      AnxToast.show(L10n.of(context).notes_page_copied);
+                      AnxToast.show(L10n.of(context).notesPageCopied);
                     }),
                 if (!EnvVar.isAppStore)
                   ListTile(
-                      title: Text(L10n.of(context).about_check_for_updates),
+                      title: Text(L10n.of(context).aboutCheckForUpdates),
                       onTap: () => checkUpdate(true)),
                 if (!EnvVar.isAppStore)
                   ListTile(
-                    title: Text(L10n.of(context).app_donate),
+                    title: Text(L10n.of(context).appDonate),
                     onTap: () {
                       showDonateDialog(context);
                     },
                   ),
                 ListTile(
-                  title: Text(L10n.of(context).app_license),
+                  title: Text(L10n.of(context).appLicense),
                   onTap: () {
                     showLicensePage(
                       context: context,
@@ -112,7 +112,7 @@ Future<void> openAboutDialog() async {
                   },
                 ),
                 ListTile(
-                  title: Text(L10n.of(context).app_author),
+                  title: Text(L10n.of(context).appAuthor),
                   onTap: () {
                     launchUrl(
                       Uri.parse(
@@ -122,7 +122,7 @@ Future<void> openAboutDialog() async {
                   },
                 ),
                 ListTile(
-                  title: Text(L10n.of(context).about_privacy_policy),
+                  title: Text(L10n.of(context).aboutPrivacyPolicy),
                   onTap: () async {
                     launchUrl(
                       Uri.parse('https://anx.anxcye.com/privacy.html'),
@@ -131,7 +131,7 @@ Future<void> openAboutDialog() async {
                   },
                 ),
                 ListTile(
-                  title: Text(L10n.of(context).about_terms_of_use),
+                  title: Text(L10n.of(context).aboutTermsOfUse),
                   onTap: () async {
                     launchUrl(
                       Uri.parse('https://anx.anxcye.com/terms.html'),

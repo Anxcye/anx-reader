@@ -70,12 +70,12 @@ class BookBottomSheet extends ConsumerWidget {
         SmartDialog.show(
           builder: (context) => AlertDialog(
             title: Text(
-                L10n.of(context).book_sync_status_release_space_dialog_title),
+                L10n.of(context).bookSyncStatusReleaseSpaceDialogTitle),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(L10n.of(context)
-                    .book_sync_status_release_space_dialog_content),
+                    .bookSyncStatusReleaseSpaceDialogContent),
                 Row(
                   children: [
                     StatefulBuilder(builder: (context, setState) {
@@ -87,7 +87,7 @@ class BookBottomSheet extends ConsumerWidget {
                             setState(() {});
                           });
                     }),
-                    Text(L10n.of(context).book_sync_status_do_not_show_again),
+                    Text(L10n.of(context).bookSyncStatusDoNotShowAgain),
                   ],
                 )
               ],
@@ -97,14 +97,14 @@ class BookBottomSheet extends ConsumerWidget {
                 onPressed: () {
                   SmartDialog.dismiss();
                 },
-                child: Text(L10n.of(context).common_cancel),
+                child: Text(L10n.of(context).commonCancel),
               ),
               TextButton(
                 onPressed: () {
                   SmartDialog.dismiss();
                   core();
                 },
-                child: Text(L10n.of(context).common_confirm),
+                child: Text(L10n.of(context).commonConfirm),
               ),
             ],
           ),
@@ -129,13 +129,13 @@ class BookBottomSheet extends ConsumerWidget {
           ),
           IconAndText(
               icon: const Icon(EvaIcons.cloud_upload),
-              text: L10n.of(context).book_sync_status_release_space,
+              text: L10n.of(context).bookSyncStatusReleaseSpace,
               onTap: () {
                 handleUpload(context);
               }),
           IconAndText(
             icon: const Icon(EvaIcons.more_vertical),
-            text: L10n.of(context).notes_page_detail,
+            text: L10n.of(context).notesPageDetail,
             onTap: () {
               handleDetail(context);
             },
@@ -146,14 +146,14 @@ class BookBottomSheet extends ConsumerWidget {
             },
             deleteIcon: IconAndText(
               icon: const Icon(EvaIcons.trash),
-              text: L10n.of(context).common_delete,
+              text: L10n.of(context).commonDelete,
             ),
             confirmIcon: IconAndText(
               icon: const Icon(
                 EvaIcons.checkmark_circle_2,
                 color: Colors.red,
               ),
-              text: L10n.of(context).common_confirm,
+              text: L10n.of(context).commonConfirm,
             ),
           )
         ],

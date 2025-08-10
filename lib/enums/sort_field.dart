@@ -12,11 +12,11 @@ enum SortFieldEnum {
 extension SortFieldExtension on SortFieldEnum {
   String getL10n(BuildContext context) {
     return switch (this) {
-      SortFieldEnum.title => L10n.of(context).bookshelf_title,
-      SortFieldEnum.author => L10n.of(context).bookshelf_author,
-      SortFieldEnum.lastReadTime => L10n.of(context).bookshelf_lastReadTime,
-      SortFieldEnum.progress => L10n.of(context).bookshelf_progress,
-      SortFieldEnum.importTime => L10n.of(context).bookshelf_importTime,
+      SortFieldEnum.title => L10n.of(context).bookshelfTitle,
+      SortFieldEnum.author => L10n.of(context).bookshelfAuthor,
+      SortFieldEnum.lastReadTime => L10n.of(context).bookshelfLastReadTime,
+      SortFieldEnum.progress => L10n.of(context).bookshelfProgress,
+      SortFieldEnum.importTime => L10n.of(context).bookshelfImportTime,
     };
   }
 }

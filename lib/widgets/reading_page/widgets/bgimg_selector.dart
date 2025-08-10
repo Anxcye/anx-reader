@@ -57,7 +57,7 @@ class _BgimgSelectorState extends ConsumerState<BgimgSelector> {
         children: [
           Icon(Icons.add, color: Theme.of(context).colorScheme.onSecondary),
           SizedBox(height: 10),
-          Text(L10n.of(context).reading_page_style_import_background_image,
+          Text(L10n.of(context).readingPageStyleImportBackgroundImage,
               style: TextStyle(
                 color: Theme.of(context).colorScheme.onSecondary,
               )),
@@ -77,7 +77,7 @@ class _BgimgSelectorState extends ConsumerState<BgimgSelector> {
           Icon(Icons.not_interested,
               color: Theme.of(context).colorScheme.onSecondary),
           SizedBox(height: 10),
-          Text(L10n.of(context).reading_page_style_no_background_image,
+          Text(L10n.of(context).readingPageStyleNoBackgroundImage,
               style: TextStyle(
                 color: Theme.of(context).colorScheme.onSecondary,
               )),
@@ -112,7 +112,7 @@ class _BgimgSelectorState extends ConsumerState<BgimgSelector> {
             ref.read(bgimgProvider.notifier).deleteBgimg(bgimgModel);
           },
           icon: Icons.delete,
-          label: L10n.of(context).common_delete,
+          label: L10n.of(context).commonDelete,
           backgroundColor: Theme.of(context).colorScheme.surface,
         ),
       ],

@@ -114,15 +114,15 @@ class IAPService {
   String statusTitle(BuildContext context) {
     switch (iapStatus) {
       case IAPStatus.purchased:
-        return L10n.of(context).iap_status_purchased;
+        return L10n.of(context).iapStatusPurchased;
       case IAPStatus.trial:
-        return L10n.of(context).iap_status_trial;
+        return L10n.of(context).iapStatusTrial;
       case IAPStatus.trialExpired:
-        return L10n.of(context).iap_status_trial_expired;
+        return L10n.of(context).iapStatusTrialExpired;
       case IAPStatus.originalUser:
-        return L10n.of(context).iap_status_original;
+        return L10n.of(context).iapStatusOriginal;
       default:
-        return L10n.of(context).iap_status_unknown;
+        return L10n.of(context).iapStatusUnknown;
     }
   }
 

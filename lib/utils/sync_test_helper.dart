@@ -65,14 +65,14 @@ class SyncTestHelper {
             children: [
               const Icon(Icons.check_circle, color: Colors.green),
               const SizedBox(width: 8),
-              Text(L10n.of(context).common_success),
+              Text(L10n.of(context).commonSuccess),
             ],
           ),
           content: Text(result.message),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text(L10n.of(context).common_ok),
+              child: Text(L10n.of(context).commonOk),
             ),
           ],
         ),
@@ -85,14 +85,14 @@ class SyncTestHelper {
             children: [
               const Icon(Icons.error, color: Colors.red),
               const SizedBox(width: 8),
-              Text(L10n.of(context).common_failed),
+              Text(L10n.of(context).commonFailed),
             ],
           ),
           content: Text(result.message),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text(L10n.of(context).common_ok),
+              child: Text(L10n.of(context).commonOk),
             ),
           ],
         ),

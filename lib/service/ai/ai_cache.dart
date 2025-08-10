@@ -52,7 +52,7 @@ class AiCache {
     if (entry != null) {
       String data = entry['data'] as String;
       String identifier = entry['identifier'] as String;
-      return '$data\n\n> ${L10n.of(context).ai_cached_by(identifier)}';
+      return '$data\n\n> ${L10n.of(context).aiCachedBy(identifier)}';
     }
     return null;
   }

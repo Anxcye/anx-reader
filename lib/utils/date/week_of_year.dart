@@ -6,5 +6,5 @@ String weekOfYear(DateTime date) {
   BuildContext context = navigatorKey.currentContext!;
   final int dayOfYear = date.difference(DateTime(date.year, 1, 1)).inDays;
   final int weekOfYear = (dayOfYear - date.weekday + 10) ~/ 7;
-  return '${date.year}-${L10n.of(context).common_nth_week(weekOfYear)}';
+  return '${date.year}-${L10n.of(context).commonNthWeek(weekOfYear)}';
 }

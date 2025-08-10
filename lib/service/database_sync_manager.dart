@@ -322,7 +322,7 @@ class DatabaseSyncManager {
         actions: [
           TextButton(
             onPressed: () => SmartDialog.dismiss(),
-            child: Text(L10n.of(navigatorKey.currentContext!).common_ok),
+            child: Text(L10n.of(navigatorKey.currentContext!).commonOk),
           ),
         ],
       ),

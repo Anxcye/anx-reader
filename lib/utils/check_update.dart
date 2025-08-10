@@ -30,7 +30,7 @@ Future<void> checkUpdate(bool manualCheck) async {
         .get('https://api.anx.anxcye.com/api/info/latest');
   } catch (e) {
     if (manualCheck) {
-      AnxToast.show(L10n.of(context).common_failed);
+      AnxToast.show(L10n.of(context).commonFailed);
     }
     throw Exception('Update: Failed to check for updates $e');
   }
@@ -64,14 +64,14 @@ Future<void> checkUpdate(bool manualCheck) async {
         final body =
             response.data['body'].toString().split('\n').skip(1).join('\n');
         return AlertDialog(
-          title: Text(L10n.of(context).common_new_version,
+          title: Text(L10n.of(context).commonNewVersion,
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
               )),
           content: SingleChildScrollView(
             child: MarkdownBody(
-                data: '''### ${L10n.of(context).update_new_version} $newVersion\n
-${L10n.of(context).update_current_version} $currentVersion\n
+                data: '''### ${L10n.of(context).updateNewVersion} $newVersion\n
+${L10n.of(context).updateCurrentVersion} $currentVersion\n
 $body'''),
           ),
           actions: <Widget>[
@@ -79,7 +79,7 @@ $body'''),
               onPressed: () {
                 SmartDialog.dismiss();
               },  
-              child: Text(L10n.of(context).common_cancel),
+              child: Text(L10n.of(context).commonCancel),
             ),
             TextButton(
               onPressed: () {
@@ -88,7 +88,7 @@ $body'''),
                         'https://github.com/Anxcye/anx-reader/releases/latest'),
                     mode: LaunchMode.externalApplication);
               },
-              child: Text(L10n.of(context).update_via_github),
+              child: Text(L10n.of(context).updateViaGithub),
             ),
             TextButton(
               onPressed: () {
@@ -97,7 +97,7 @@ $body'''),
                         'https://anx.anxcye.com/download'),
                     mode: LaunchMode.externalApplication);
               },
-              child: Text(L10n.of(context).update_via_official_website),
+              child: Text(L10n.of(context).updateViaOfficialWebsite),
             ),
           ],
         );
@@ -105,7 +105,7 @@ $body'''),
     );
   } else {
     if (manualCheck) {
-      AnxToast.show(L10n.of(context).common_no_new_version);
+      AnxToast.show(L10n.of(context).commonNoNewVersion);
     }
   }
 }

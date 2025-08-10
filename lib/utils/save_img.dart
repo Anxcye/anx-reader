@@ -21,14 +21,14 @@ class SaveImg {
         animationType: SmartAnimationType.centerFade_otherSlide,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text(L10n.of(context).storage_permission_denied),
-            content: Text(L10n.of(context).storage_permission_denied),
+            title: Text(L10n.of(context).storagePermissionDenied),
+            content: Text(L10n.of(context).storagePermissionDenied),
             actions: [
               TextButton(
                 onPressed: () async {
                   openAppSettings();
                 },
-                child: Text(L10n.of(context).goto_authorize),
+                child: Text(L10n.of(context).gotoAuthorize),
               )
             ],
           );
@@ -50,14 +50,14 @@ class SaveImg {
         animationType: SmartAnimationType.centerFade_otherSlide,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text(L10n.of(context).common_attention),
-            content: Text(L10n.of(context).gallery_permission_denied),
+            title: Text(L10n.of(context).commonAttention),
+            content: Text(L10n.of(context).galleryPermissionDenied),
             actions: [
               TextButton(
                 onPressed: () async {
                   openAppSettings();
                 },
-                child: Text(L10n.of(context).goto_authorize),
+                child: Text(L10n.of(context).gotoAuthorize),
               )
             ],
           );
@@ -76,7 +76,7 @@ class SaveImg {
   ) async {
     try {
       SmartDialog.showLoading(
-          msg: L10n.of(navigatorKey.currentContext!).common_saving);
+          msg: L10n.of(navigatorKey.currentContext!).commonSaving);
 
       final SaveResult result = await SaverGallery.saveImage(
         img,
@@ -88,12 +88,12 @@ class SaveImg {
       SmartDialog.dismiss();
       if (result.isSuccess) {
         await SmartDialog.showToast(
-            '「${'$name.$extension'}」${L10n.of(navigatorKey.currentContext!).common_saved}');
+            '「${'$name.$extension'}」${L10n.of(navigatorKey.currentContext!).commonSaved}');
       }
       return true;
     } catch (err) {
       SmartDialog.dismiss();
-      AnxToast.show(L10n.of(navigatorKey.currentContext!).common_failed);
+      AnxToast.show(L10n.of(navigatorKey.currentContext!).commonFailed);
       AnxLog.severe("saveImage: saveImage error: $err");
       return true;
     }
@@ -123,7 +123,7 @@ class SaveImg {
       return await saveImg(img, extension, name);
     } catch (err) {
       SmartDialog.dismiss();
-      AnxToast.show(L10n.of(navigatorKey.currentContext!).common_failed);
+      AnxToast.show(L10n.of(navigatorKey.currentContext!).commonFailed);
       AnxLog.severe("saveImage: saveImage error: $err");
       return true;
     }
@@ -144,7 +144,7 @@ class SaveImg {
       return false;
     }
     AnxToast.show(
-        '「$name.$extension」${L10n.of(navigatorKey.currentContext!).common_saved}');
+        '「$name.$extension」${L10n.of(navigatorKey.currentContext!).commonSaved}');
     return true;
   }
 
