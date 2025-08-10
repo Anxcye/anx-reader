@@ -590,6 +590,7 @@ class Reader {
     view.addEventListener('show-annotation', e => {
       const annotation = this.annotationsByValue.get(e.detail.value)
       const pos = getPosition(e.detail.range)
+      if (window.getSelection()?.toString()) return
       onAnnotationClick({ annotation, pos })
     })
     view.addEventListener('external-link', e => {
