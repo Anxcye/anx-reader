@@ -433,7 +433,6 @@
   "testSsl": "SSL certificate verification failed, please check HTTPS configuration",
   "testDnd": "DNS resolution failed, please check if domain name is correct",
   "testOther": "Connection test failed, please check configuration and network",
-  "databaseBackupManagement": "Database Backup Management",
   "availableBackups": "Available Backups:",
   "noBackupsAvailable": "No backups available",
   "restore": "Restore",

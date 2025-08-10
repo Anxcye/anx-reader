@@ -433,7 +433,6 @@
   "testSsl": "SSL证书验证失败，请检查HTTPS配置",
   "testDnd": "DNS分辨率失败，请检查域名是否正确",
   "testOther": "连接测试失败，请检查配置和网络",
-  "databaseBackupManagement": "数据库备份管理",
   "availableBackups": "可用备份：",
   "noBackupsAvailable": "没有可用的备份",
   "restore": "恢复",

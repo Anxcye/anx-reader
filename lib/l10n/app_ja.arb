@@ -435,7 +435,6 @@
   "testSsl": "SSL証明書検証失敗、HTTPS設定を確認してください",
   "testDnd": "DNS解決失敗、ドメイン名が正しいか確認してください",
   "testOther": "接続テスト失敗、設定とネットワークを確認してください",
-  "databaseBackupManagement": "データベースバックアップ管理",
   "availableBackups": "利用可能なバックアップ:",
   "noBackupsAvailable": "利用可能なバックアップはありません",
   "restore": "復元",
