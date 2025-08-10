@@ -312,7 +312,18 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
     final part = coordinatesToPart(x, y);
     final currentPageTurningType = Prefs().pageTurningType;
     final pageTurningType = pageTurningTypes[currentPageTurningType];
-    switch (pageTurningType[part]) {
+
+    var action = pageTurningType[part];
+
+    if (Prefs().swapPageTurnArea) {
+      if (action == PageTurningType.prev) {
+        action = PageTurningType.next;
+      } else if (action == PageTurningType.next) {
+        action = PageTurningType.prev;
+      }
+    }
+
+    switch (action) {
       case PageTurningType.prev:
         prevPage();
         break;

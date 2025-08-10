@@ -501,5 +501,7 @@
   "md5_calculation_error": "Calculation error: {error}",
   "duplicate_file": "Duplicate File",
   "duplicate_of": "Duplicate of: {title}",
-  "skip_duplicate_files": "Skip Duplicate Files"
+  "skip_duplicate_files": "Skip Duplicate Files",
+  "reading_page_swap_page_turn_area": "Swap Page Turn Area",
+  "reading_page_swap_page_turn_area_tips": "Turn the previous area into next area"
 }

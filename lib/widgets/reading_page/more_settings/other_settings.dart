@@ -171,12 +171,27 @@ class _OtherSettingsState extends State<OtherSettings> {
       );
     }
 
+    ListTile swapPageTurnArea() {
+      return ListTile(
+        contentPadding: EdgeInsets.zero,
+        title: Text(L10n.of(context).reading_page_swap_page_turn_area ?? "Swap page turn area"),
+        subtitle: Text(L10n.of(context).reading_page_swap_page_turn_area_tips ?? "Turn the up area into down area"),
+        trailing: Switch(
+          value: Prefs().swapPageTurnArea,
+          onChanged: (bool value) => setState(() {
+            Prefs().swapPageTurnArea = value;
+          }),
+        ),
+      );
+    }
+
     return Container(
       padding: const EdgeInsets.all(8.0),
       child: Column(
         children: [
           fullScreen(),
           if (Platform.isAndroid) keyboardTurnPage(),
+          swapPageTurnArea(),
           autoAdjustReadingTheme(),
           autoTranslateSelection(),
           autoSummaryPreviousContent(),
