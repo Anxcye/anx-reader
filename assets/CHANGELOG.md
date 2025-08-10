@@ -2,6 +2,10 @@
 
 ## Todo
 
+## 1.6.3
+- Fix: Fix multiple tools bar
+
+- Fix: 修复工具栏无法正确关闭的问题
 ## 1.6.2
 - UI: Modify bottom navigation bar style
 - Feat: Import previously deleted files and automatically associate notes, progress, etc.
