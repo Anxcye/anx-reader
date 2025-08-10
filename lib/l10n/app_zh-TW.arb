@@ -501,5 +501,7 @@
   "md5_calculation_error": "計算錯誤: {error}",
   "duplicate_file": "重複檔案",
   "duplicate_of": "與以下檔案重複: {title}",
-  "skip_duplicate_files": "跳過重複檔案"
+  "skip_duplicate_files": "跳過重複檔案",
+  "reading_page_swap_page_turn_area": "交換翻頁區域",
+  "reading_page_swap_page_turn_area_tips": "將向前翻頁區域改為向後翻頁"
 }
