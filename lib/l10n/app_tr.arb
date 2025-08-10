@@ -501,5 +501,7 @@
   "md5_calculation_error": "Hesaplama hatası: {error}",
   "duplicate_file": "Yinelenen Dosya",
   "duplicate_of": "Şunun kopyası: {title}",
-  "skip_duplicate_files": "Yinelenen Dosyaları Atla"
+  "skip_duplicate_files": "Yinelenen Dosyaları Atla",
+  "reading_page_swap_page_turn_area": "Sayfa çevirme alanını değiştir",
+  "reading_page_swap_page_turn_area_tips": "İleri sayfa çevirme alanını geri sayfa çevirme olarak değiştir"
 }

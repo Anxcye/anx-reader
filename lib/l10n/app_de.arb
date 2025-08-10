@@ -501,5 +501,7 @@
   "md5_calculation_error": "Berechnungsfehler: {error}",
   "duplicate_file": "Doppelte Datei",
   "duplicate_of": "Duplikat von: {title}",
-  "skip_duplicate_files": "Doppelte Dateien überspringen"
+  "skip_duplicate_files": "Doppelte Dateien überspringen",
+  "reading_page_swap_page_turn_area": "Seitenumblätterungsbereich tauschen",
+  "reading_page_swap_page_turn_area_tips": "Vorwärts-Umblätterungsbereich zu Rückwärts-Umblätterung ändern"
 }

@@ -501,5 +501,7 @@
   "md5_calculation_error": "خطأ في الحساب: {error}",
   "duplicate_file": "ملف مكرر",
   "duplicate_of": "مكرر من: {title}",
-  "skip_duplicate_files": "تخطي الملفات المكررة"
+  "skip_duplicate_files": "تخطي الملفات المكررة",
+  "reading_page_swap_page_turn_area": "تبديل منطقة تقليب الصفحات",
+  "reading_page_swap_page_turn_area_tips": "تغيير منطقة التقليب للأمام إلى التقليب للخلف"
 }
