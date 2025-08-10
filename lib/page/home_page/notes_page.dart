@@ -73,6 +73,7 @@ class _NotesPageState extends ConsumerState<NotesPage> {
     return notesStats.when(
       data: (data) {
         return SafeArea(
+          bottom: false,
           child: Padding(
             padding: const EdgeInsets.all(10.0),
             child:
