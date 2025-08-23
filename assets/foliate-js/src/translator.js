@@ -71,6 +71,15 @@ export class Translator {
         this.#updateTranslationDisplay()
       }
     }
+
+    // Re-render annotations after translation mode change
+    if (window.reader && window.reader.annotationsByValue) {
+      const existingAnnotations = Array.from(window.reader.annotationsByValue.values())
+      if (existingAnnotations.length > 0) {
+        console.log('Re-rendering annotations after translation mode change:', existingAnnotations.length)
+        window.renderAnnotations(existingAnnotations)
+      }
+    }
   }
 
   getTranslationMode() {
