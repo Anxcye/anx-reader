@@ -5,6 +5,7 @@ import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/dao/book.dart';
 import 'package:anx_reader/dao/book_note.dart';
 import 'package:anx_reader/enums/reading_info.dart';
+import 'package:anx_reader/enums/translation_mode.dart';
 import 'package:anx_reader/main.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/models/book_style.dart';
@@ -117,6 +118,14 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
   void nextChapter() {
     webViewController.evaluateJavascript(source: '''
       nextSection()
+      ''');
+  }
+
+  void setTranslationMode(TranslationModeEnum mode) {
+    webViewController.evaluateJavascript(source: '''
+      if (typeof view !== 'undefined' && view.setTranslationMode) {
+        view.setTranslationMode('${mode.code}');
+      }
       ''');
   }
 
@@ -539,6 +548,11 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
     }
     webViewController = controller;
     setHandler(controller);
+    
+    // Initialize translation mode
+    Future.delayed(const Duration(milliseconds: 500), () {
+      setTranslationMode(Prefs().translationMode);
+    });
   }
 
   void removeOverlay() {

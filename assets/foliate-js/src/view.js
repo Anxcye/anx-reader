@@ -2,6 +2,7 @@ import * as CFI from './epubcfi.js'
 import { TOCProgress, SectionProgress } from './progress.js'
 import { Overlayer } from './overlayer.js'
 import { textWalker } from './text-walker.js'
+import { Translator, TranslationMode } from './translator.js'
 const { TTS } = await import('./tts.js')
 
 const SEARCH_PREFIX = 'foliate-search:'
@@ -74,6 +75,7 @@ export class View extends HTMLElement {
   lastLocation
   history = new History()
   #lastCfi = null
+  #translator = new Translator()
   constructor() {
     super()
     this.history.addEventListener('popstate', ({ detail }) => {
@@ -148,6 +150,7 @@ export class View extends HTMLElement {
     this.history.clear()
     this.tts = null
     this.mediaOverlay = null
+    this.#translator?.destroy()
   }
   goToTextStart() {
     return this.goTo(this.book.landmarks
@@ -201,6 +204,10 @@ export class View extends HTMLElement {
     this.#handleLinks(doc, index)
     this.#handleClick(doc)
     this.#handleImage(doc)
+    
+    // Start translation observation for this document
+    this.#translator.observeDocument(doc)
+    
     this.#emit('load', { doc, index })
   }
   #handleLinks(doc, index) {
@@ -528,6 +535,19 @@ export class View extends HTMLElement {
   startMediaOverlay() {
     const { index } = this.renderer.getContents()[0]
     return this.mediaOverlay.start(index)
+  }
+  
+  // Translation control methods
+  setTranslationMode(mode) {
+    this.#translator.setTranslationMode(mode)
+  }
+  
+  getTranslationMode() {
+    return this.#translator.getTranslationMode()
+  }
+  
+  clearTranslations() {
+    this.#translator.clearTranslations()
   }
 }
 
