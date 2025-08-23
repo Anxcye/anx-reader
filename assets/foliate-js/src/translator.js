@@ -99,7 +99,7 @@ export class Translator {
   }
 
   clearTranslations() {
-    // Remove all translation elements
+    // Remove all translation elements and restore original content
     this.observedElements.forEach(element => {
       const translationElements = element.querySelectorAll('.translated-text')
       translationElements.forEach(trans => trans.remove())
@@ -233,38 +233,61 @@ export class Translator {
   }
 
   #hideOriginalText(element) {
-    // Store original text nodes and hide them
-    const textNodes = Array.from(element.childNodes).filter(
-      node => node.nodeType === Node.TEXT_NODE
-    )
-    
-    textNodes.forEach(textNode => {
-      if (!textNode.hasAttribute?.('data-original-stored')) {
-        textNode.setAttribute?.('data-original-content', textNode.textContent)
-        textNode.setAttribute?.('data-original-stored', 'true')
-      }
-      textNode.textContent = ''
-    })
+    // Store the complete innerHTML and hide all original content
+    if (!element.hasAttribute('data-original-html')) {
+      // Store the original HTML content (excluding any existing translations)
+      const originalChildren = Array.from(element.childNodes).filter(node => {
+        return !(node.nodeType === Node.ELEMENT_NODE && 
+                node.classList && node.classList.contains('translated-text'))
+      })
+      
+      const originalHTML = originalChildren.map(node => {
+        if (node.nodeType === Node.ELEMENT_NODE) {
+          return node.outerHTML
+        } else if (node.nodeType === Node.TEXT_NODE) {
+          return node.textContent
+        }
+        return ''
+      }).join('')
+      
+      element.setAttribute('data-original-html', originalHTML)
+      
+      // Remove all original content (but keep translations)
+      originalChildren.forEach(node => {
+        if (node.parentNode === element) {
+          element.removeChild(node)
+        }
+      })
+    }
     
     // Mark element as having hidden text
     element.classList.add('translation-source-hidden')
   }
 
   #restoreOriginalText(element) {
-    // Restore original text nodes
-    const textNodes = Array.from(element.childNodes).filter(
-      node => node.nodeType === Node.TEXT_NODE && 
-             node.hasAttribute?.('data-original-stored')
-    )
-    
-    textNodes.forEach(textNode => {
-      const originalContent = textNode.getAttribute?.('data-original-content')
-      if (originalContent) {
-        textNode.textContent = originalContent
-        textNode.removeAttribute?.('data-original-content')
-        textNode.removeAttribute?.('data-original-stored')
-      }
-    })
+    // Restore the original HTML content
+    if (element.hasAttribute('data-original-html')) {
+      const originalHTML = element.getAttribute('data-original-html')
+      
+      // First, collect all translation elements to preserve them
+      const translationElements = Array.from(element.querySelectorAll('.translated-text'))
+      const translationHTMLs = translationElements.map(el => el.outerHTML)
+      
+      // Clear the element and restore original content
+      element.innerHTML = originalHTML
+      
+      // Re-add the translation elements
+      translationHTMLs.forEach(html => {
+        const tempDiv = document.createElement('div')
+        tempDiv.innerHTML = html
+        const translationEl = tempDiv.firstChild
+        if (translationEl) {
+          element.appendChild(translationEl)
+        }
+      })
+      
+      element.removeAttribute('data-original-html')
+    }
     
     element.classList.remove('translation-source-hidden')
   }
