@@ -73,7 +73,7 @@
     const mockParams = {
       importing: false,
       url: '../local/alice.epub',
-      initialCfi: null,
+      initialCfi: "epubcfi(/6/6!/4/2[pgepubid00003],/16/1:223,/20/7:170)",
       style: {
         fontSize: 1.4,
         fontName: "book",
@@ -91,9 +91,9 @@
         justify: true,
         hyphenate: true,
         // 'slide' 'scroll' 'noAnimation'
-        pageTurnStyle: "scroll",
+        pageTurnStyle: "slide",
         // pageTurnStyle: "slide",
-        maxColumnCount: 0,
+        maxColumnCount: 1,
         // auto 'horizontal-tb' 'vertical-rl'
         // writingMode: "vertical-rl",
         writingMode: "horizontal-tb",
@@ -123,10 +123,11 @@
     }
   };
 
+  // available types: highlight, underline, bookmark
     const anno = [
-    // { id: 1, type: 'highlight', value: "epubcfi(/6/6!/4/2[pgepubid00003],/38/9:0,/42/1:408)", color: 'blue', note: 'this is' },
-    // { id: 2, type: 'bookmark', value: "epubcfi(/6/6!/4/2[pgepubid00003],/42/1:408,/44/1:345)", color: '0.02', note: 'this is' },
-    // { id: 3, type: 'underline', value: "epubcfi(/6/4!/4/4,/1:294,/1:301)", color: 'red', note: 'this is' },
+    { id: 1, type: 'highlight', value: "epubcfi(/6/6!/4/2[pgepubid00003]/18,/1:1,/1:18)", color: 'blue', note: 'this is' },
+    { id: 2, type: 'highlight', value: "epubcfi(/6/6!/4/2[pgepubid00003]/18,/3:300,/5:102)", color: '#66ccff', note: 'this is' },
+    { id: 3, type: 'underline', value: "epubcfi(/6/6!/4/2[pgepubid00003]/20,/1:1,/1:28)", color: 'red', note: 'this is' },
   ]
 
   setTimeout(() => {
