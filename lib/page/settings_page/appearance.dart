@@ -14,6 +14,7 @@ const List<Map<String, String>> languageOptions = [
   {'English': 'en'},
   {'简体中文': 'zh-CN'},
   {'繁體中文': 'zh-TW'},
+  {'文言文': 'zh-LZH'},
   {'Türkçe': 'tr'},
   {'Deutsch': 'de'},
   {'العربية': 'ar'},
