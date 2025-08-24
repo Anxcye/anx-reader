@@ -1,4 +1,4 @@
-// import 'core-js/stable';
+import 'core-js/stable';
 
 console.log('book.js')
 console.log('AnxUA', navigator.userAgent)
