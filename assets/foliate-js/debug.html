@@ -153,6 +153,11 @@
   window.flutter_inappwebview = {
     callHandler: (name, data) => {
       console.log(`Flutter Handler Called: ${name}`, data);
+      // Mock translation response for testing
+      if (name === 'translateText') {
+        return Promise.resolve(`【模拟翻译】${data}`);
+      }
+      return Promise.resolve(null);
     }
   };
 

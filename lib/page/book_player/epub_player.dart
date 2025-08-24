@@ -6,6 +6,10 @@ import 'package:anx_reader/dao/book.dart';
 import 'package:anx_reader/dao/book_note.dart';
 import 'package:anx_reader/enums/reading_info.dart';
 import 'package:anx_reader/enums/translation_mode.dart';
+import 'package:anx_reader/service/translate/index.dart';
+import 'package:anx_reader/service/translate/google.dart';
+import 'package:anx_reader/service/translate/microsoft.dart';
+import 'package:anx_reader/service/translate/deepl.dart';
 import 'package:anx_reader/main.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/models/book_style.dart';
@@ -538,6 +542,55 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
         }
         widget.updateParent();
         setState(() {});
+      },
+    );
+    controller.addJavaScriptHandler(
+      handlerName: 'translateText',
+      callback: (args) async {
+        try {
+          String text = args[0];
+          
+          // Use the existing translation service
+          final translateService = Prefs().translateService;
+          final from = Prefs().translateFrom;
+          final to = Prefs().translateTo;
+          
+          // Get translation provider
+          final provider = TranslateFactory.getProvider(translateService);
+          
+          // For different translation services, we need to handle them differently
+          String translatedText = '';
+          
+          switch (translateService) {
+            case TranslateService.google:
+              final googleProvider = provider as GoogleTranslateProvider;
+              await for (String chunk in googleProvider.translateStream(text, from, to)) {
+                translatedText = chunk;
+              }
+              break;
+            case TranslateService.microsoft:
+              final microsoftProvider = provider as MicrosoftTranslateProvider;
+              await for (String chunk in microsoftProvider.translateStream(text, from, to)) {
+                translatedText = chunk;
+              }
+              break;
+            case TranslateService.deepl:
+              final deeplProvider = provider as DeepLTranslateProvider;
+              await for (String chunk in deeplProvider.translateStream(text, from, to)) {
+                translatedText = chunk;
+              }
+              break;
+            case TranslateService.ai:
+              // AI translation doesn't have translateStream, so we'll return a placeholder
+              translatedText = 'AI翻译暂不支持';
+              break;
+          }
+          
+          return translatedText;
+        } catch (e) {
+          debugPrint('Translation error: $e');
+          return '翻译失败: $e';
+        }
       },
     );
   }

@@ -11,11 +11,22 @@ if (typeof window !== 'undefined') {
   window.TranslationMode = TranslationMode
 }
 
-// Mock translation function - returns fixed Chinese text
-const mockTranslate = async (text) => {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 100))
-  return `【翻译】${text.substring(0, 20)}...的中文翻译内容`
+// Translation function that calls Flutter's translation service
+const translate = async (text) => {
+  try {
+    // Call Flutter's translation handler
+    if (window.flutter_inappwebview && window.flutter_inappwebview.callHandler) {
+      const result = await window.flutter_inappwebview.callHandler('translateText', text)
+      return result || `翻译失败: ${text}`
+    } else {
+      // Fallback for debugging/testing
+      console.warn('Flutter translation handler not available, using mock')
+      return `【翻译】${text.substring(0, 20)}...的中文翻译内容`
+    }
+  } catch (error) {
+    console.error('Translation failed:', error)
+    return `翻译错误: ${text}`
+  }
 }
 
 export class Translator {
@@ -175,7 +186,7 @@ export class Translator {
     if (!text) return
     
     try {
-      const translatedText = await mockTranslate(text)
+      const translatedText = await translate(text)
       
       // Mark as translated to prevent re-processing
       this.#translatedElements.set(element, {
