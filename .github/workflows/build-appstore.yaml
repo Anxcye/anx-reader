@@ -43,7 +43,7 @@ jobs:
 
       - name: Get Dependencies
         run: |
-          sudo xcode-select -switch /Applications/Xcode_16.2.app/Contents/Developer
+          sudo xcode-select -switch /Applications/Xcode_16.2.0.app/Contents/Developer
           flutter --version
           # flutter doctor -v
           # flutter pub get
