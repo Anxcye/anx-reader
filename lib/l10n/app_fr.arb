@@ -502,5 +502,13 @@
   "duplicateOf": "Duplicata de : {title}",
   "skipDuplicateFiles": "Ignorer les Fichiers Dupliqués",
   "readingPageSwapPageTurnArea": "Échanger la Zone de Changement de Page",
-  "readingPageSwapPageTurnAreaTips": "Transformer la zone précédente en zone suivante"
+  "readingPageSwapPageTurnAreaTips": "Transformer la zone précédente en zone suivante",
+  "underlineTranslation": "Traduction de soulignement",
+  "underlineTranslationTip": "Caractéristique de traduction pour le texte sélectionné par soulignement, tel que la traduction du dictionnaire, etc.",
+  "fullTextTranslation": "Traduction en texte intégral",
+  "fullTextTranslationTip": "Caractéristique de traduction parallèle bilingue pour la lecture des pages, traduisant un contenu entier.",
+  "translationServiceConfiguration": "Configuration du service de traduction",
+  "translationMode": "Mode de traduction",
+  "translationOnly": "Traduction uniquement",
+  "bilingual": "Bilingue"
 }

@@ -502,5 +502,13 @@
   "duplicateOf": "مكرر من: {title}",
   "skipDuplicateFiles": "تخطي الملفات المكررة",
   "readingPageSwapPageTurnArea": "تبديل منطقة تقليب الصفحات",
-  "readingPageSwapPageTurnAreaTips": "تغيير منطقة التقليب للأمام إلى التقليب للخلف"
+  "readingPageSwapPageTurnAreaTips": "تغيير منطقة التقليب للأمام إلى التقليب للخلف",
+  "underlineTranslation": "تسطير الترجمة",
+  "underlineTranslationTip": "ميزة الترجمة للنص المحدد عن طريق التأكيد ، مثل ترجمة القاموس ، إلخ.",
+  "fullTextTranslation": "ترجمة النص الكامل",
+  "fullTextTranslationTip": "ميزة الترجمة المتوازية ثنائية اللغة لقراءة الصفحات ، وترجمة المحتوى بأكمله.",
+  "translationServiceConfiguration": "تكوين خدمة الترجمة",
+  "translationMode": "وضع الترجمة",
+  "translationOnly": "الترجمة فقط",
+  "bilingual": "ثنائي اللغة"
 }

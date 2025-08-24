@@ -119,8 +119,6 @@
   "readingPageAutoAdjustReadingTheme": "Ajustar Tema de Lectura Automáticamente",
   "readingPageAutoAdjustReadingThemeTips": "Usar los colores 1º y 2º en la tabla de colores como modos día y noche respectivamente",
   "readingPageVolumeKeyTurnPage": "Tecla de Volumen para Cambiar Página",
-  "readingPageSwapPageTurnArea": "Intercambiar área de cambio de página",
-  "readingPageSwapPageTurnAreaTips": "Convertir el área anterior en área siguiente",
   "readingPageFontSize": "Tamaño de Fuente",
   "readingPageLineSpacing": "Espaciado de Líneas",
   "readingPageParagraphSpacing": "Espaciado de Párrafos",
@@ -502,5 +500,15 @@
   "md5CalculationError": "Error de cálculo: {error}",
   "duplicateFile": "Archivo Duplicado",
   "duplicateOf": "Duplicado de: {title}",
-  "skipDuplicateFiles": "Omitir Archivos Duplicados"
+  "skipDuplicateFiles": "Omitir Archivos Duplicados",
+  "readingPageSwapPageTurnArea": "Intercambiar área de cambio de página",
+  "readingPageSwapPageTurnAreaTips": "Cambiar el área de cambio anterior en el área siguiente",
+  "underlineTranslation": "Subrayar la traducción",
+  "underlineTranslationTip": "Característica de traducción para texto seleccionado por subrayado, como la traducción del diccionario, etc.",
+  "fullTextTranslation": "Traducción de texto completo",
+  "fullTextTranslationTip": "Característica de traducción paralela bilingüe para páginas de lectura, traduciendo contenido completo.",
+  "translationServiceConfiguration": "Configuración del servicio de traducción",
+  "translationMode": "Modo de traducción",
+  "translationOnly": "Solo traducción",
+  "bilingual": "Bilingüe"
 }

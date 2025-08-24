@@ -502,5 +502,13 @@
   "duplicateOf": "与以下文件重复: {title}",
   "skipDuplicateFiles": "跳过重复文件",
   "readingPageSwapPageTurnArea": "交换翻页区域",
-  "readingPageSwapPageTurnAreaTips": "将向前翻页区域改为向后翻页"
+  "readingPageSwapPageTurnAreaTips": "将向前翻页区域改为向后翻页",
+  "underlineTranslation": "下划线翻译",
+  "underlineTranslationTip": "通过下划线选择的文本的翻译功能，例如字典翻译等。",
+  "fullTextTranslation": "全文翻译",
+  "fullTextTranslationTip": "阅读页面的双语平行翻译功能，翻译整个内容。",
+  "translationServiceConfiguration": "翻译服务配置",
+  "translationMode": "翻译模式",
+  "translationOnly": "仅翻译",
+  "bilingual": "双语"
 }

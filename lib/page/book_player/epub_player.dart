@@ -5,6 +5,8 @@ import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/dao/book.dart';
 import 'package:anx_reader/dao/book_note.dart';
 import 'package:anx_reader/enums/reading_info.dart';
+import 'package:anx_reader/enums/translation_mode.dart';
+import 'package:anx_reader/service/translate/index.dart';
 import 'package:anx_reader/main.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/models/book_style.dart';
@@ -24,6 +26,7 @@ import 'package:anx_reader/service/book_player/book_player_server.dart';
 import 'package:anx_reader/utils/coordinates_to_part.dart';
 import 'package:anx_reader/utils/js/convert_dart_color_to_js.dart';
 import 'package:anx_reader/models/book_note.dart';
+import 'package:anx_reader/utils/log/common.dart';
 import 'package:anx_reader/utils/webView/gererate_url.dart';
 import 'package:anx_reader/utils/webView/webview_console_message.dart';
 import 'package:anx_reader/widgets/bookshelf/book_cover.dart';
@@ -117,6 +120,14 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
   void nextChapter() {
     webViewController.evaluateJavascript(source: '''
       nextSection()
+      ''');
+  }
+
+  void setTranslationMode(TranslationModeEnum mode) {
+    webViewController.evaluateJavascript(source: '''
+      if (typeof reader.view !== 'undefined' && reader.view.setTranslationMode) {
+        reader.view.setTranslationMode('${mode.code}');
+      }
       ''');
   }
 
@@ -531,6 +542,22 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
         setState(() {});
       },
     );
+    controller.addJavaScriptHandler(
+      handlerName: 'translateText',
+      callback: (args) async {
+        try {
+          String text = args[0];
+          final service = Prefs().fullTextTranslateService;
+          final from = Prefs().fullTextTranslateFrom;
+          final to = Prefs().fullTextTranslateTo;
+          
+          return await TranslateFactory.getProvider(service).translateTextOnly(text, from, to);
+        } catch (e) {
+          AnxLog.severe('Translation error: $e');
+          return 'Translation error: $e';
+        }
+      },
+    );
   }
 
   Future<void> onWebViewCreated(InAppWebViewController controller) async {
@@ -539,6 +566,11 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
     }
     webViewController = controller;
     setHandler(controller);
+    
+    // Initialize translation mode
+    Future.delayed(const Duration(milliseconds: 500), () {
+      setTranslationMode(Prefs().translationMode);
+    });
   }
 
   void removeOverlay() {

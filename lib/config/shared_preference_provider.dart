@@ -10,6 +10,7 @@ import 'package:anx_reader/enums/lang_list.dart';
 import 'package:anx_reader/enums/sort_field.dart';
 import 'package:anx_reader/enums/sort_order.dart';
 import 'package:anx_reader/enums/sync_protocol.dart';
+import 'package:anx_reader/enums/translation_mode.dart';
 import 'package:anx_reader/enums/writing_mode.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/main.dart';
@@ -398,6 +399,34 @@ class Prefs extends ChangeNotifier {
     return prefs.getBool('autoTranslateSelection') ?? true;
   }
 
+  set fullTextTranslateService(TranslateService service) {
+    prefs.setString('fullTextTranslateService', service.name);
+    notifyListeners();
+  }
+
+  TranslateService get fullTextTranslateService {
+    return getTranslateService(
+        prefs.getString('webviewTranslateService') ?? 'microsoft');
+  }
+
+  set fullTextTranslateFrom(LangListEnum from) {
+    prefs.setString('fullTextTranslateFrom', from.code);
+    notifyListeners();
+  }
+
+  LangListEnum get fullTextTranslateFrom {
+    return getLang(prefs.getString('fullTextTranslateFrom') ?? 'auto');
+  }
+
+  set fullTextTranslateTo(LangListEnum to) {
+    prefs.setString('fullTextTranslateTo', to.code);
+    notifyListeners();
+  }
+
+  LangListEnum get fullTextTranslateTo {
+    return getLang(prefs.getString('fullTextTranslateTo') ?? 'en');
+  }
+
   // set convertChineseMode(ConvertChineseMode mode) {
   //   prefs.setString('convertChineseMode', mode.name);
   //   notifyListeners();
@@ -768,6 +797,15 @@ class Prefs extends ChangeNotifier {
 
   set writingMode(WritingModeEnum mode) {
     prefs.setString('writingMode', mode.code);
+    notifyListeners();
+  }
+
+  TranslationModeEnum get translationMode {
+    return TranslationModeEnum.fromCode(prefs.getString('translationMode') ?? 'off');
+  }
+
+  set translationMode(TranslationModeEnum mode) {
+    prefs.setString('translationMode', mode.code);
     notifyListeners();
   }
 

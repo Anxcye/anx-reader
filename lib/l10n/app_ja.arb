@@ -67,8 +67,6 @@
   "readingPageAutoAdjustReadingTheme": "読書テーマの自動調整",
   "readingPageAutoAdjustReadingThemeTips": "カラーテーブルの1番目と2番目の色をそれぞれ昼モードと夜モードとして使用します",
   "readingPageVolumeKeyTurnPage": "音量キーでページめくり",
-  "readingPageSwapPageTurnArea": "ページめくりエリアを交換",
-  "readingPageSwapPageTurnAreaTips": "前のエリアを次のエリアに変更",
   "readingPageFontSize": "フォントサイズ",
   "readingPageLineSpacing": "行間",
   "readingPageParagraphSpacing": "段落間隔",
@@ -502,5 +500,15 @@
   "md5CalculationError": "計算エラー: {error}",
   "duplicateFile": "重複ファイル",
   "duplicateOf": "重複対象: {title}",
-  "skipDuplicateFiles": "重複ファイルをスキップ"
+  "skipDuplicateFiles": "重複ファイルをスキップ",
+  "readingPageSwapPageTurnArea": "ページめくり領域を交換",
+  "readingPageSwapPageTurnAreaTips": "前のエリアを次のエリアに変換",
+  "underlineTranslation": "下線翻訳",
+  "underlineTranslationTip": "辞書翻訳など、下線によって選択されたテキストの翻訳機能。",
+  "fullTextTranslation": "フルテキスト翻訳",
+  "fullTextTranslationTip": "コンテンツ全体を翻訳するページを読むためのバイリンガル並列翻訳機能。",
+  "translationServiceConfiguration": "翻訳サービスの構成",
+  "translationMode": "翻訳モード",
+  "translationOnly": "翻訳のみ",
+  "bilingual": "バイリンガル"
 }

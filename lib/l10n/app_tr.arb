@@ -502,5 +502,13 @@
   "duplicateOf": "Şunun kopyası: {title}",
   "skipDuplicateFiles": "Yinelenen Dosyaları Atla",
   "readingPageSwapPageTurnArea": "Sayfa çevirme alanını değiştir",
-  "readingPageSwapPageTurnAreaTips": "İleri sayfa çevirme alanını geri sayfa çevirme olarak değiştir"
+  "readingPageSwapPageTurnAreaTips": "İleri sayfa çevirme alanını geri sayfa çevirme olarak değiştir",
+  "underlineTranslation": "Çevrenin altını çizme",
+  "underlineTranslationTip": "Sözlük çevirisi, vb. Gibi alt çizgiyle seçilen metin için çeviri özelliği vb.",
+  "fullTextTranslation": "Tam metin çeviri",
+  "fullTextTranslationTip": "İki dilli paralel çeviri özelliği, tüm içeriği tercüme etmek için sayfaları okumak için.",
+  "translationServiceConfiguration": "Çeviri Hizmet Yapılandırması",
+  "translationMode": "Çeviri modu",
+  "translationOnly": "Yalnızca Çeviri",
+  "bilingual": "İki dilli"
 }
