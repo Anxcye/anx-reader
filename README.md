@@ -116,6 +116,20 @@ Anx Reader, a thoughtfully crafted e-book reader for book lovers. Featuring powe
 - Seamless experience on Android / Windows / MacOS / iOS
 - Consistent user interface across devices
 
+
+## Community Projects
+The following projects are maintained by the community and not officially supported. For issues or feedback related to these projects, please contact the respective project maintainers.
+
+**Calibre Plugin** [anx-reader-calibre-plugin](https://github.com/ptbsare/anx-reader-calibre-plugin)
+
+A Calibre plugin that enables direct management of your ANX Reader ebook library from Calibre. Particularly useful for NAS users looking to centralize their ebook collection.
+
+
+**Web Library Manager** [anx-calibre-manager](https://github.com/ptbsare/anx-calibre-manager)
+
+A modern web application for managing your ebook library with Calibre integration and WebDAV server functionality for ANX Reader devices.
+
+
 ### TODO
 - [X] UI adaptation for tablets
 - [X] Page-turning animation
@@ -148,19 +162,6 @@ QQ Group：1042905699
 | :----------------------------: | :----------------------------: | :----------------------------: |
 | ![](./docs/images/mobile4.png) | ![](./docs/images/mobile5.png) | ![](./docs/images/mobile6.png) |
 | ![](./docs/images/mobile7.png) | ![](./docs/images/mobile8.png) | ![](./docs/images/mobile9.png) |
-
-## Community Projects
-The following projects are maintained by the community and not officially supported. For issues or feedback related to these projects, please contact the respective project maintainers.
-
-**Calibre Plugin** [anx-reader-calibre-plugin](https://github.com/ptbsare/anx-reader-calibre-plugin)
-
-A Calibre plugin that enables direct management of your ANX Reader ebook library from Calibre. Particularly useful for NAS users looking to centralize their ebook collection.
-
-
-**Web Library Manager** [anx-calibre-manager](https://github.com/ptbsare/anx-calibre-manager)
-
-A modern web application for managing your ebook library with Calibre integration and WebDAV server functionality for ANX Reader devices.
-
 
 ## Donations
 If you like Anx Reader, please consider supporting the project by donating. Your donation will help me maintain and improve the project.
