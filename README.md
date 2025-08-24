@@ -149,6 +149,24 @@ QQ Group：1042905699
 | ![](./docs/images/mobile4.png) | ![](./docs/images/mobile5.png) | ![](./docs/images/mobile6.png) |
 | ![](./docs/images/mobile7.png) | ![](./docs/images/mobile8.png) | ![](./docs/images/mobile9.png) |
 
+## Community Projects
+The following projects are maintained by the community and not officially supported. For issues or feedback related to these projects, please contact the respective project maintainers.
+
+**Calibre Plugin**
+A Calibre plugin that enables direct management of your ANX Reader ebook library from Calibre. Particularly useful for NAS users looking to centralize their ebook collection.
+
+🔗 [anx-reader-calibre-plugin](https://github.com/ptbsare/anx-reader-calibre-plugin)
+
+**Web Library Manager**
+A modern web application for managing your ebook library with Calibre integration and WebDAV server functionality for ANX Reader devices.
+
+🔗 [anx-calibre-manager](https://github.com/ptbsare/anx-calibre-manager)
+
+## Donations
+If you like Anx Reader, please consider supporting the project by donating. Your donation will help me maintain and improve the project.
+
+❤️ [Donate](https://anxcye.com/home/7)
+// ...existing code...
 ## Donations
 If you like Anx Reader, please consider supporting the project by donating. Your donation will help me maintain and improve the project.
 
