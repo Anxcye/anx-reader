@@ -53,7 +53,7 @@ export class Translator {
     )
   }
 
-  setTranslationMode(mode) {
+  async setTranslationMode(mode) {
     if (!Object.values(TranslationMode).includes(mode)) {
       console.warn(`Invalid translation mode: ${mode}`)
       return
@@ -69,15 +69,15 @@ export class Translator {
         // Turn off translation
         this.#updateTranslationDisplay()
       } else if (oldMode === TranslationMode.OFF) {
-        // Turn on translation - force translate visible elements
-        this.#forceTranslateVisibleElements()
+        // Turn on translation - force translate visible elements and wait for completion
+        await this.#forceTranslateVisibleElements()
       } else {
         // Just update display mode
         this.#updateTranslationDisplay()
       }
     }
 
-    // Re-render annotations after translation mode change
+    // Re-render annotations after translation mode change (and after translation completion)
     if (window.reader && window.reader.annotationsByValue) {
       const existingAnnotations = Array.from(window.reader.annotationsByValue.values())
       if (existingAnnotations.length > 0) {
@@ -306,8 +306,10 @@ export class Translator {
     element.classList.remove('translation-source-hidden')
   }
 
-  #forceTranslateVisibleElements() {
+  async #forceTranslateVisibleElements() {
     console.log('Force translating visible elements')
+    
+    const translationPromises = []
     
     // Find elements in viewport and translate them immediately
     this.observedElements.forEach(element => {
@@ -316,9 +318,10 @@ export class Translator {
       
       if (isVisible && !this.#translatedElements.has(element)) {
         console.log('Force translating visible element:', element)
-        this.#translateElement(element).catch(error => 
+        const translationPromise = this.#translateElement(element).catch(error => {
           console.warn('Force translation failed:', error)
-        )
+        })
+        translationPromises.push(translationPromise)
       } else if (isVisible && this.#translatedElements.has(element)) {
         // Element already translated, just update display
         const translationWrapper = element.querySelector('.translated-text')
@@ -327,6 +330,13 @@ export class Translator {
         }
       }
     })
+    
+    // Wait for all visible translations to complete
+    if (translationPromises.length > 0) {
+      console.log(`Waiting for ${translationPromises.length} translations to complete`)
+      await Promise.allSettled(translationPromises)
+      console.log('All visible translations completed')
+    }
   }
 
   #updateTranslationDisplay() {
