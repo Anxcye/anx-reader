@@ -546,7 +546,12 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
       callback: (args) async {
         try {
           String text = args[0];
-          return await translateTextOnly(text);
+          // 使用WebView专用的翻译配置
+          final service = Prefs().webviewTranslateService;
+          final from = Prefs().webviewTranslateFrom;
+          final to = Prefs().webviewTranslateTo;
+          
+          return await TranslateFactory.getProvider(service).translateTextOnly(text, from, to);
         } catch (e) {
           debugPrint('Translation error: $e');
           return '翻译失败: $e';

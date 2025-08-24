@@ -35,14 +35,34 @@ class _TranslateSettingState extends State<TranslateSetting> {
     return settingsSections(
       sections: [
         SettingsSection(
+          title: Text('选择翻译'),
           tiles: [
             CustomSettingsTile(
               child: Card(
                 shadowColor: Colors.transparent,
                 child: Padding(
                   padding: EdgeInsets.all(8.0),
-                  child: TranslationConfig(
-                    setState: () => setState(() {}),
+                  child: Column(
+                    children: [
+                      TranslationConfig(
+                        setState: () => setState(() {}),
+                      ),
+                      Row(
+                        children: [
+                          Icon(Icons.info_outline, color: Colors.blue),
+                          SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              '用于划线选择文本后的翻译功能，如词典翻译等',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -53,12 +73,52 @@ class _TranslateSettingState extends State<TranslateSetting> {
                 child: autoTranslateSelection(),
               ),
             ),
+          ],
+        ),
+        SettingsSection(
+          title: Text('WebView翻译'),
+          tiles: [
+            CustomSettingsTile(
+              child: Card(
+                shadowColor: Colors.transparent,
+                child: Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Column(
+                    children: [
+                      WebViewTranslationConfig(
+                        setState: () => setState(() {}),
+                      ),
+                      Row(
+                        children: [
+                          Icon(Icons.info_outline, color: Colors.orange),
+                          SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              '用于阅读页面中的双语对照翻译功能，翻译整个段落或页面内容',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+        SettingsSection(
+          title: Text('翻译服务配置'),
+          tiles: [
             for (var service in TranslateService.values)
               CustomSettingsTile(
                 child: TranslateSettingItem(service: service),
               ),
           ],
-        )
+        ),
       ],
     );
   }
@@ -107,8 +167,8 @@ class TranslationConfig extends StatelessWidget {
                 onPressed: () {
                   showModalBottomSheet(
                     context: context,
-                    builder: (context) =>
-                        const TranslateLangPicker(isFrom: true),
+                    builder: (context) => const TranslateLangPicker(
+                        isFrom: true, isWebView: false),
                   ).then((value) {
                     setState();
                   });
@@ -122,14 +182,91 @@ class TranslationConfig extends StatelessWidget {
                 onPressed: () {
                   showModalBottomSheet(
                     context: context,
-                    builder: (context) =>
-                        const TranslateLangPicker(isFrom: false),
+                    builder: (context) => const TranslateLangPicker(
+                        isFrom: false, isWebView: false),
                   ).then((value) {
                     setState();
                   });
                 },
                 child: Text(
                   Prefs().translateTo.getNative(context),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class WebViewTranslationConfig extends StatelessWidget {
+  const WebViewTranslationConfig({super.key, required this.setState});
+
+  final VoidCallback setState;
+
+  static const currentServiceTextStyle = TextStyle(
+    fontSize: 18,
+    fontWeight: FontWeight.bold,
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            TextButton(
+              onPressed: () {
+                showModalBottomSheet(
+                  context: context,
+                  builder: (context) => const WebViewTranslateServicePicker(),
+                ).then((value) {
+                  setState();
+                });
+              },
+              child: Text(
+                Prefs().webviewTranslateService.label,
+                style: currentServiceTextStyle,
+              ),
+            ),
+            Text(L10n.of(context).settingsTranslateCurrentService),
+          ],
+        ),
+        const Divider(),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: TextButton(
+                onPressed: () {
+                  showModalBottomSheet(
+                    context: context,
+                    builder: (context) => const TranslateLangPicker(
+                        isFrom: true, isWebView: true),
+                  ).then((value) {
+                    setState();
+                  });
+                },
+                child: Text(Prefs().webviewTranslateFrom.getNative(context)),
+              ),
+            ),
+            const Icon(Icons.arrow_forward_ios),
+            Expanded(
+              child: TextButton(
+                onPressed: () {
+                  showModalBottomSheet(
+                    context: context,
+                    builder: (context) => const TranslateLangPicker(
+                        isFrom: false, isWebView: true),
+                  ).then((value) {
+                    setState();
+                  });
+                },
+                child: Text(
+                  Prefs().webviewTranslateTo.getNative(context),
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -159,10 +296,30 @@ class TranslateServicePicker extends StatelessWidget {
   }
 }
 
+class WebViewTranslateServicePicker extends StatelessWidget {
+  const WebViewTranslateServicePicker({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      itemCount: TranslateService.values.length,
+      itemBuilder: (context, index) => ListTile(
+        title: Text(TranslateService.values[index].label),
+        onTap: () {
+          Prefs().webviewTranslateService = TranslateService.values[index];
+          Navigator.pop(context);
+        },
+      ),
+    );
+  }
+}
+
 class TranslateLangPicker extends StatelessWidget {
-  const TranslateLangPicker({super.key, required this.isFrom});
+  const TranslateLangPicker(
+      {super.key, required this.isFrom, this.isWebView = false});
 
   final bool isFrom;
+  final bool isWebView;
 
   @override
   Widget build(BuildContext context) {
@@ -173,10 +330,18 @@ class TranslateLangPicker extends StatelessWidget {
         subtitle: Text(LangListEnum.values[index].name[0].toUpperCase() +
             LangListEnum.values[index].name.substring(1)),
         onTap: () {
-          if (isFrom) {
-            Prefs().translateFrom = LangListEnum.values[index];
+          if (isWebView) {
+            if (isFrom) {
+              Prefs().webviewTranslateFrom = LangListEnum.values[index];
+            } else {
+              Prefs().webviewTranslateTo = LangListEnum.values[index];
+            }
           } else {
-            Prefs().translateTo = LangListEnum.values[index];
+            if (isFrom) {
+              Prefs().translateFrom = LangListEnum.values[index];
+            } else {
+              Prefs().translateTo = LangListEnum.values[index];
+            }
           }
           Navigator.pop(context);
         },

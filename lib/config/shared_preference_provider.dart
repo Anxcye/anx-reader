@@ -399,6 +399,35 @@ class Prefs extends ChangeNotifier {
     return prefs.getBool('autoTranslateSelection') ?? true;
   }
 
+  // WebView专用翻译配置
+  set webviewTranslateService(TranslateService service) {
+    prefs.setString('webviewTranslateService', service.name);
+    notifyListeners();
+  }
+
+  TranslateService get webviewTranslateService {
+    return getTranslateService(
+        prefs.getString('webviewTranslateService') ?? 'microsoft');
+  }
+
+  set webviewTranslateFrom(LangListEnum from) {
+    prefs.setString('webviewTranslateFrom', from.code);
+    notifyListeners();
+  }
+
+  LangListEnum get webviewTranslateFrom {
+    return getLang(prefs.getString('webviewTranslateFrom') ?? 'auto');
+  }
+
+  set webviewTranslateTo(LangListEnum to) {
+    prefs.setString('webviewTranslateTo', to.code);
+    notifyListeners();
+  }
+
+  LangListEnum get webviewTranslateTo {
+    return getLang(prefs.getString('webviewTranslateTo') ?? 'en');
+  }
+
   // set convertChineseMode(ConvertChineseMode mode) {
   //   prefs.setString('convertChineseMode', mode.name);
   //   notifyListeners();
