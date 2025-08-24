@@ -387,7 +387,7 @@ class Prefs extends ChangeNotifier {
   }
 
   LangListEnum get translateTo {
-    return getLang(prefs.getString('translateTo') ?? 'en');
+    return getLang(prefs.getString('translateTo') ?? getCurrentLanguageCode());
   }
 
   set autoTranslateSelection(bool status) {
@@ -424,7 +424,7 @@ class Prefs extends ChangeNotifier {
   }
 
   LangListEnum get fullTextTranslateTo {
-    return getLang(prefs.getString('fullTextTranslateTo') ?? 'en');
+    return getLang(prefs.getString('fullTextTranslateTo') ?? getCurrentLanguageCode());
   }
 
   // set convertChineseMode(ConvertChineseMode mode) {
