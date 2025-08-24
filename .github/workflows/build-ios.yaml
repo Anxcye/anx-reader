@@ -28,7 +28,7 @@ jobs:
 
       - name: Build for iOS
         run: |
-          sudo xcode-select -switch /Applications/Xcode_16.2.app/Contents/Developer
+          sudo xcode-select -switch /Applications/Xcode_16.2.0.app/Contents/Developer
           flutter gen-l10n
           dart run build_runner build --delete-conflicting-outputs
           flutter build ios --release --no-codesign
