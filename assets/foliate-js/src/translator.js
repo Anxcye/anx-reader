@@ -206,9 +206,9 @@ export class Translator {
     wrapper.className = 'translated-text'
     wrapper.setAttribute('data-translation-mark', '1')
     wrapper.style.display = 'block'
-    wrapper.style.fontSize = '0.9em'
-    wrapper.style.color = '#666'
-    wrapper.style.fontStyle = 'italic'
+    // wrapper.style.fontSize = '0.9em'
+    // wrapper.style.color = '#666'
+    // wrapper.style.fontStyle = 'italic'
     wrapper.style.marginTop = '0.2em'
     wrapper.textContent = translatedText
     
