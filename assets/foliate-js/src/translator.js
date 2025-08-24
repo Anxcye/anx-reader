@@ -242,29 +242,27 @@ export class Translator {
   }
 
   #hideOriginalText(element) {
-    // Store the complete innerHTML and hide all original content
-    if (!element.hasAttribute('data-original-html')) {
-      // Store the original HTML content (excluding any existing translations)
-      const originalChildren = Array.from(element.childNodes).filter(node => {
-        return !(node.nodeType === Node.ELEMENT_NODE && 
-                node.classList && node.classList.contains('translated-text'))
-      })
+    // Use CSS to hide original content instead of removing DOM nodes
+    if (!element.hasAttribute('data-original-visibility')) {
+      element.setAttribute('data-original-visibility', 'hidden')
       
-      const originalHTML = originalChildren.map(node => {
+      // Hide all child nodes except translation elements using CSS
+      Array.from(element.childNodes).forEach(node => {
         if (node.nodeType === Node.ELEMENT_NODE) {
-          return node.outerHTML
+          const el = node
+          if (!el.classList || !el.classList.contains('translated-text')) {
+            // Store and hide using CSS
+            if (!el.hasAttribute('data-original-display')) {
+              el.setAttribute('data-original-display', el.style.display || 'initial')
+              el.style.display = 'none'
+            }
+          }
         } else if (node.nodeType === Node.TEXT_NODE) {
-          return node.textContent
-        }
-        return ''
-      }).join('')
-      
-      element.setAttribute('data-original-html', originalHTML)
-      
-      // Remove all original content (but keep translations)
-      originalChildren.forEach(node => {
-        if (node.parentNode === element) {
-          element.removeChild(node)
+          // For text nodes, store content and make invisible
+          if (!node.__originalContent) {
+            node.__originalContent = node.textContent
+            node.textContent = ''
+          }
         }
       })
     }
@@ -274,28 +272,30 @@ export class Translator {
   }
 
   #restoreOriginalText(element) {
-    // Restore the original HTML content
-    if (element.hasAttribute('data-original-html')) {
-      const originalHTML = element.getAttribute('data-original-html')
-      
-      // First, collect all translation elements to preserve them
-      const translationElements = Array.from(element.querySelectorAll('.translated-text'))
-      const translationHTMLs = translationElements.map(el => el.outerHTML)
-      
-      // Clear the element and restore original content
-      element.innerHTML = originalHTML
-      
-      // Re-add the translation elements
-      translationHTMLs.forEach(html => {
-        const tempDiv = document.createElement('div')
-        tempDiv.innerHTML = html
-        const translationEl = tempDiv.firstChild
-        if (translationEl) {
-          element.appendChild(translationEl)
+    // Restore visibility by reversing the hide operations
+    if (element.hasAttribute('data-original-visibility')) {
+      // Restore all child nodes
+      Array.from(element.childNodes).forEach(node => {
+        if (node.nodeType === Node.ELEMENT_NODE) {
+          const el = node
+          if (!el.classList || !el.classList.contains('translated-text')) {
+            // Restore original display
+            if (el.hasAttribute('data-original-display')) {
+              const originalDisplay = el.getAttribute('data-original-display')
+              el.style.display = originalDisplay === 'initial' ? '' : originalDisplay
+              el.removeAttribute('data-original-display')
+            }
+          }
+        } else if (node.nodeType === Node.TEXT_NODE) {
+          // Restore text content
+          if (node.__originalContent !== undefined) {
+            node.textContent = node.__originalContent
+            delete node.__originalContent
+          }
         }
       })
       
-      element.removeAttribute('data-original-html')
+      element.removeAttribute('data-original-visibility')
     }
     
     element.classList.remove('translation-source-hidden')
