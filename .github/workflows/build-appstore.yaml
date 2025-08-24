@@ -22,7 +22,7 @@ on:
 
 jobs:
   build-appstore:
-    runs-on: macos-latest
+    runs-on: macos-15
     timeout-minutes: 60
     
     steps:
@@ -43,7 +43,8 @@ jobs:
 
       - name: Get Dependencies
         run: |
-          sudo xcode-select -switch /Applications/Xcode_16.2.0.app/Contents/Developer
+          sudo xcode-select -switch /Applications/Xcode_16.4.0.app/Contents/Developer
+          # xcodebuild -downloadPlatform iOS -buildVersion 18.2
           flutter --version
           # flutter doctor -v
           # flutter pub get
