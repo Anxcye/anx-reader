@@ -7,6 +7,7 @@ import 'package:anx_reader/service/translate/ai.dart';
 import 'package:anx_reader/service/translate/deepl.dart';
 import 'package:anx_reader/service/translate/google.dart';
 import 'package:anx_reader/service/translate/microsoft.dart';
+import 'package:anx_reader/utils/log/common.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -70,6 +71,43 @@ class ConfigItem {
 
 abstract class TranslateServiceProvider {
   Widget translate(String text, LangListEnum from, LangListEnum to);
+  
+  /// 所有翻译服务都必须实现的Stream方法
+  Stream<String> translateStream(String text, LangListEnum from, LangListEnum to);
+  
+  /// 专门用于返回翻译文本的方法，用于WebView等场景
+  Future<String> translateTextOnly(String text, LangListEnum from, LangListEnum to) async {
+    const int maxRetries = 2;
+    
+    for (int attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        String? lastResult;
+        await for (String result in translateStream(text, from, to)) {
+          lastResult = result;
+          // 跳过加载状态，只返回实际的翻译结果
+          if (result != '...' && result.trim().isNotEmpty) {
+            return result; // 成功获取翻译结果
+          }
+        }
+        
+        // 如果没有获取到有效结果，抛出异常触发重试
+        throw Exception('Translation returned no valid result: ${lastResult ?? 'No result'}');
+        
+      } catch (e) {
+        if (attempt < maxRetries) {
+          AnxLog.warning('Translation attempt ${attempt + 1} failed with exception: $e. Retrying...');
+          // 指数退避：每次重试延迟时间递增
+          await Future.delayed(Duration(milliseconds: 100 * (attempt + 1)));
+          continue;
+        } else {
+          // 最后一次尝试失败，抛出异常
+          throw Exception('Translation failed after ${maxRetries + 1} attempts: $e');
+        }
+      }
+    }
+    
+    throw Exception('Translation failed after all retry attempts');
+  }
 
   List<ConfigItem> getConfigItems();
 
@@ -143,4 +181,12 @@ Map<String, dynamic> getTranslateServiceConfig(TranslateService service) {
 void saveTranslateServiceConfig(
     TranslateService service, Map<String, dynamic> config) {
   return TranslateFactory.getProvider(service).saveConfig(config);
+}
+
+Future<String> translateTextOnly(String text, {TranslateService? service}) async {
+  service ??= Prefs().translateService;
+  final from = Prefs().translateFrom;
+  final to = Prefs().translateTo;
+
+  return await TranslateFactory.getProvider(service).translateTextOnly(text, from, to);
 }

@@ -61,3 +61,59 @@ Stream<String> aiGenerateStream(
     await AiCache.setAiCache(hash, buffer, identifier);
   }
 }
+
+/// 不依赖WidgetRef的AI生成流，专用于翻译等无UI场景
+Stream<String> aiGenerateStreamWithoutRef(
+  List<AiMessage> messages, {
+  String? identifier,
+  Map<String, String>? config,
+  bool regenerate = false,
+}) async* {
+  identifier ??= Prefs().selectedAiService;
+  config ??= Prefs().getAiConfig(identifier);
+  String buffer = '';
+
+  final url = config['url'];
+  if (url == null || url.isEmpty) {
+    yield 'AI服务未配置，请在设置中配置AI服务';
+    return;
+  }
+
+  AnxLog.info('aiGenerateStreamWithoutRef: $identifier');
+
+  final messagesStr =
+      messages.map((m) => '${m.role.toJson()}: ${m.content}').join('\n');
+  final hash = messagesStr.hashCode;
+  final aiCache = await AiCache.getAiCache(hash);
+
+  if (aiCache != null && aiCache.isNotEmpty && !regenerate) {
+    AnxLog.info('aiGenerateStreamWithoutRef: Cache hit hash: $hash');
+    yield aiCache;
+    return;
+  }
+
+  final formattedMessages = messages
+      .map((message) => {
+            'role': message.role.toJson(),
+            'content': message.content,
+          })
+      .toList();
+
+  AiDio.instance.newDio();
+
+  try {
+    Stream<String> stream =
+        AiFactory.generateStream(identifier, formattedMessages, config);
+
+    await for (final chunk in stream) {
+      buffer += chunk;
+      yield buffer;
+    }
+  } catch (e) {
+    AnxLog.severe('AI translation error: $e');
+    yield 'AI翻译失败: $e';
+  } finally {
+    AiDio.instance.cancel();
+    await AiCache.setAiCache(hash, buffer, identifier);
+  }
+}
