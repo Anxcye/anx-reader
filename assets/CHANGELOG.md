@@ -8,10 +8,17 @@
 
 ## 1.6.3
 - Feat: Support swapping page turn area
+- Feat: Support full-text bilingual translation
+- Feat: Support translation only mode
 - Fix: Fix multiple tools bar
+- L10n: Add literally Chinese, Spanish, French, Italian, Japanese, Korean, Portuguese, Russian
 
 - Feat: 支持交换翻页区域
+- Feat: 支持全文双语对照翻译
+- Feat: 支持仅显示翻译
 - Fix: 修复工具栏无法正确关闭的问题
+- L10n: 添加文言文、 西班牙语、法语、意大利语、日语、韩语、葡萄牙语、俄语
+
 ## 1.6.2
 - UI: Modify bottom navigation bar style
 - Feat: Import previously deleted files and automatically associate notes, progress, etc.
