@@ -502,5 +502,13 @@
   "duplicateOf": "與以下檔案重複: {title}",
   "skipDuplicateFiles": "跳過重複檔案",
   "readingPageSwapPageTurnArea": "交換翻頁區域",
-  "readingPageSwapPageTurnAreaTips": "將向前翻頁區域改為向後翻頁"
+  "readingPageSwapPageTurnAreaTips": "將向前翻頁區域改為向後翻頁",
+  "underlineTranslation": "劃線翻譯",
+  "underlineTranslationTip": "透過劃線選取文字之翻譯功能，如詞典翻譯等。",
+  "fullTextTranslation": "全文翻譯",
+  "fullTextTranslationTip": "閱讀頁面之雙語對照翻譯功能，翻譯全篇內容。",
+  "translationServiceConfiguration": "翻譯服務配置",
+  "translationMode": "翻譯模式",
+  "translationOnly": "僅翻譯",
+  "bilingual": "雙語"
 }

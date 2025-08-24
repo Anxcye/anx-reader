@@ -502,5 +502,13 @@
   "duplicateOf": "Duplikat von: {title}",
   "skipDuplicateFiles": "Doppelte Dateien überspringen",
   "readingPageSwapPageTurnArea": "Seitenumblätterungsbereich tauschen",
-  "readingPageSwapPageTurnAreaTips": "Vorwärts-Umblätterungsbereich zu Rückwärts-Umblätterung ändern"
+  "readingPageSwapPageTurnAreaTips": "Vorwärts-Umblätterungsbereich zu Rückwärts-Umblätterung ändern",
+  "underlineTranslation": "Unterstreichungs-Übersetzung",
+  "underlineTranslationTip": "Übersetzungsfunktion für Text, der durch Unterstreichung ausgewählt wurde, wie z.B. Wörterbuchübersetzung etc.",
+  "fullTextTranslation": "Volltextübersetzung",
+  "fullTextTranslationTip": "Zweisprachige parallele Übersetzungsfunktion für das Lesen von Seiten, Übersetzen des gesamten Inhalts.",
+  "translationServiceConfiguration": "Übersetzungsdienstkonfiguration",
+  "translationMode": "Übersetzungsmodus",
+  "translationOnly": "Nur Übersetzung",
+  "bilingual": "Zweisprachig"
 }

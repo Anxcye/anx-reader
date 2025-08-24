@@ -1,6 +1,7 @@
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/enums/convert_chinese_mode.dart';
 import 'package:anx_reader/enums/reading_info.dart';
+import 'package:anx_reader/enums/translation_mode.dart';
 import 'package:anx_reader/enums/writing_mode.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/page/reading_page.dart';
@@ -210,6 +211,56 @@ class _ReadingMoreSettingsState extends State<ReadingMoreSettings> {
                         Prefs().saveBookStyleToPrefs(newBookStyle);
                         Prefs().writingMode = value.first;
                         epubPlayerKey.currentState?.changeStyle(newBookStyle);
+                      });
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+    }
+
+    Widget translationMode() {
+      return StatefulBuilder(
+        builder: (context, setState) => Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(L10n.of(context).translationMode,
+                style: Theme.of(context).textTheme.titleMedium),
+            Row(
+              children: [
+                Expanded(
+                  child: SegmentedButton(
+                    segments: [
+                      ButtonSegment<TranslationModeEnum>(
+                        label: Text(L10n.of(context).readingPageOriginal),
+                        value: TranslationModeEnum.off,
+                        icon: const Icon(Icons.translate_outlined),
+                      ),
+                      ButtonSegment<TranslationModeEnum>(
+                        label: Text(L10n.of(context).translationOnly),
+                        value: TranslationModeEnum.translationOnly,
+                        icon: const Icon(Icons.g_translate),
+                      ),
+                      // ButtonSegment<TranslationModeEnum>(
+                      //   label: const Text('Original'),
+                      //   value: TranslationModeEnum.originalOnly,
+                      //   icon: const Icon(Icons.text_fields),
+                      // ),
+                      ButtonSegment<TranslationModeEnum>(
+                        label: Text(L10n.of(context).bilingual),
+                        value: TranslationModeEnum.bilingual,
+                        icon: const Icon(Icons.compare),
+                      ),
+                    ],
+                    selected: {Prefs().translationMode},
+                    onSelectionChanged: (value) {
+                      setState(() {
+                        Prefs().translationMode = value.first;
+                        epubPlayerKey.currentState?.setTranslationMode(value.first);
                       });
                     },
                   ),
@@ -458,6 +509,7 @@ class _ReadingMoreSettingsState extends State<ReadingMoreSettings> {
           downloadFonts(),
           const Divider(height: 20),
           writingMode(),
+          translationMode(),
           columnCount(),
           convertChinese(),
           const Divider(height: 15),

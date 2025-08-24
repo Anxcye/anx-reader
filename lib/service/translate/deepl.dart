@@ -19,6 +19,7 @@ class DeepLTranslateProvider extends TranslateServiceProvider {
     return convertStreamToWidget(translateStream(text, from, to));
   }
 
+  @override
   Stream<String> translateStream(
       String text, LangListEnum from, LangListEnum to) async* {
     try {

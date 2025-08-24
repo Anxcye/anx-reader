@@ -53,7 +53,7 @@
   "readingPageConvertChinese": "Письменность: Упрощённая/Традиционная",
   "readingPageOriginal": "Как есть",
   "readingPageSimplified": "Упрощ.",
-  "readingPageTraditional": "Трад.", 
+  "readingPageTraditional": "Трад.",
   "readingPageConvertChineseTips": "Конвертация может быть неточной, используйте с осторожностью",
   "readingPageColumnCount": "Колонок текста на странице",
   "readingPageAuto": "Авто",
@@ -503,5 +503,13 @@
   "duplicateOf": "Дубликат: {title}",
   "skipDuplicateFiles": "Пропустить дубликаты",
   "readingPageSwapPageTurnArea": "Поменять область переворота страниц",
-  "readingPageSwapPageTurnAreaTips": "Изменить область переворота вперед"
+  "readingPageSwapPageTurnAreaTips": "Изменить область переворота вперед на область переворота назад",
+  "underlineTranslation": "Подчеркнутый перевод",
+  "underlineTranslationTip": "Функция перевода для текста, выделенного подчеркиванием, например словарный перевод и т.д.",
+  "fullTextTranslation": "Полнотекстовый перевод",
+  "fullTextTranslationTip": "Двуязычная параллельная функция перевода для чтения страниц, перевод всего контента.",
+  "translationServiceConfiguration": "Конфигурация службы перевода",
+  "translationMode": "Режим перевода",
+  "translationOnly": "Только перевод",
+  "bilingual": "Двуязычный"
 }

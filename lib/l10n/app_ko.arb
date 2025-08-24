@@ -67,8 +67,6 @@
   "readingPageAutoAdjustReadingTheme": "읽기 테마 자동 조정",
   "readingPageAutoAdjustReadingThemeTips": "색상표의 1번째와 2번째 색상을 각각 낮 모드와 밤 모드로 사용합니다",
   "readingPageVolumeKeyTurnPage": "볼륨 키로 페이지 넘기기",
-  "readingPageSwapPageTurnArea": "페이지 넘김 영역 바꾸기",
-  "readingPageSwapPageTurnAreaTips": "이전 영역을 다음 영역으로 변경",
   "readingPageFontSize": "폰트 크기",
   "readingPageLineSpacing": "줄 간격",
   "readingPageParagraphSpacing": "단락 간격",
@@ -502,5 +500,15 @@
   "md5CalculationError": "계산 오류: {error}",
   "duplicateFile": "중복 파일",
   "duplicateOf": "중복 대상: {title}",
-  "skipDuplicateFiles": "중복 파일 건너뛰기"
+  "skipDuplicateFiles": "중복 파일 건너뛰기",
+  "readingPageSwapPageTurnArea": "페이지 넘김 영역 교환",
+  "readingPageSwapPageTurnAreaTips": "이전 영역을 다음 영역으로 변환",
+  "underlineTranslation": "밑줄 번역",
+  "underlineTranslationTip": "사전 번역 등과 같은 밑줄로 선택한 텍스트의 번역 기능.",
+  "fullTextTranslation": "전체 텍스트 번역",
+  "fullTextTranslationTip": "읽기 페이지를위한 이중 언어 병렬 번역 기능 전체 내용을 번역합니다.",
+  "translationServiceConfiguration": "번역 서비스 구성",
+  "translationMode": "번역 모드",
+  "translationOnly": "번역 전용",
+  "bilingual": "이중 언어"
 }
