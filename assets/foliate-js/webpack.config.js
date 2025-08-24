@@ -71,11 +71,11 @@ module.exports = {
             presets: [
               ['@babel/preset-env', {
                 targets: {
-                  // Target older Android WebView versions
-                  android: '7',
-                  chrome: '70',
-                  safari: '12',
-                  ios: '12'
+                  // Target much older browser versions including Chrome 40
+                  chrome: '40',
+                  safari: '9',
+                  ios: '9',
+                  android: '4.4',
                 },
                 useBuiltIns: 'entry',
                 corejs: 3,
