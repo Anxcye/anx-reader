@@ -882,4 +882,36 @@ class Prefs extends ChangeNotifier {
   String get customCSS {
     return prefs.getString('customCSS') ?? '';
   }
+
+  Map<String, TranslationModeEnum> get bookTranslationModes {
+    String? modesJson = prefs.getString('bookTranslationModes');
+    if (modesJson == null) return {};
+    
+    Map<String, dynamic> decoded = jsonDecode(modesJson);
+    return decoded.map((key, value) => 
+      MapEntry(key, TranslationModeEnum.fromCode(value as String)));
+  }
+
+  set bookTranslationModes(Map<String, TranslationModeEnum> modes) {
+    Map<String, String> encoded = modes.map((key, value) => 
+      MapEntry(key, value.code));
+    prefs.setString('bookTranslationModes', jsonEncode(encoded));
+    notifyListeners();
+  }
+
+  TranslationModeEnum getBookTranslationMode(int bookId) {
+    return bookTranslationModes[bookId.toString()] ?? TranslationModeEnum.off;
+  }
+
+  void setBookTranslationMode(int bookId, TranslationModeEnum mode) {
+    Map<String, TranslationModeEnum> modes = bookTranslationModes;
+    String bookIdStr = bookId.toString();
+    
+    if (mode == TranslationModeEnum.off) {
+      modes.remove(bookIdStr); // 默认状态不保存，节省空间
+    } else {
+      modes[bookIdStr] = mode;
+    }
+    bookTranslationModes = modes;
+  }
 }

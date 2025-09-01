@@ -567,9 +567,9 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
     webViewController = controller;
     setHandler(controller);
     
-    // Initialize translation mode
-    Future.delayed(const Duration(milliseconds: 500), () {
-      setTranslationMode(Prefs().translationMode);
+    // Initialize translation mode based on book-specific settings
+    Future.delayed(const Duration(milliseconds: 300), () {
+      setTranslationMode(Prefs().getBookTranslationMode(widget.book.id));
     });
   }
 

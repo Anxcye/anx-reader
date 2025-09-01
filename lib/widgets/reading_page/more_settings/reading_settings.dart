@@ -256,11 +256,19 @@ class _ReadingMoreSettingsState extends State<ReadingMoreSettings> {
                         icon: const Icon(Icons.compare),
                       ),
                     ],
-                    selected: {Prefs().translationMode},
+                    selected: {
+                      epubPlayerKey.currentState != null 
+                        ? Prefs().getBookTranslationMode(epubPlayerKey.currentState!.widget.book.id)
+                        : TranslationModeEnum.off
+                    },
                     onSelectionChanged: (value) {
                       setState(() {
-                        Prefs().translationMode = value.first;
-                        epubPlayerKey.currentState?.setTranslationMode(value.first);
+                        final currentBookId = epubPlayerKey.currentState!.widget.book.id;
+                        final newMode = value.first;
+                        
+                        Prefs().setBookTranslationMode(currentBookId, newMode);
+                        
+                        epubPlayerKey.currentState?.setTranslationMode(newMode);
                       });
                     },
                   ),
