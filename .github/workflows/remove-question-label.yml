@@ -1,0 +1,36 @@
+name: Remove Question Label on Response
+
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  remove-question-label:
+    # Only run if the comment is from the issue author (not maintainers)
+    if: github.event.issue.user.login == github.event.comment.user.login
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Remove question label when user responds
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = context.issue;
+            const labels = context.payload.issue.labels.map(label => label.name);
+            
+            // Check if the issue has the 'question' label
+            if (labels.includes('question')) {
+              console.log('User responded to question, removing question label');
+              
+              // Remove the question label
+              await github.rest.issues.removeLabel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                name: 'question'
+              });
+              
+              console.log('Question label removed successfully');
+            } else {
+              console.log('No question label found, nothing to remove');
+            }

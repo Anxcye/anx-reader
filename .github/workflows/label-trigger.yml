@@ -1,0 +1,181 @@
+name: Label Trigger Actions
+
+on:
+  issues:
+    types: [labeled]
+
+jobs:
+  handle-special-labels:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Validate Bug Report
+        if: github.event.label.name == 'bug'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = context.issue;
+            const issueBody = context.payload.issue.body || '';
+            
+            // Check if platform information is complete
+            const platformSection = issueBody.match(/- Platform:.*?\n.*?- OS:.*?\n.*?- AnxReader Version:.*?\n.*?- Device:.*?\n/s);
+            
+            if (!platformSection) {
+              console.log('Platform section not found');
+              return;
+            }
+            
+            const platformText = platformSection[0];
+            
+            // Check for incomplete/default values
+            const incompletePatterns = [
+              /\[e\.g\.\s+Android\]/,
+              /\[e\.g\.\s+Android13\(MIUI14\)\]/,
+              /\[e\.g\.\s+1\.2\.0\+2033\]/,
+              /\[e\.g\.\s+Xiaomi\s+13\]/,
+              /- Platform:\s*\|\s*平台：\s*$/m,
+              /- OS:\s*\|\s*操作系统：\s*$/m,
+              /- AnxReader Version:\s*\|\s*安读版本：\s*$/m,
+              /- Device:\s*\|\s*设备：\s*$/m
+            ];
+            
+            const isIncomplete = incompletePatterns.some(pattern => pattern.test(platformText));
+            
+            if (isIncomplete) {
+              // Add question label
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                labels: ['question']
+              });
+              
+              // Add comment
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: `👋 感谢您提交bug报告！
+
+我注意到您的平台信息可能不够完整。为了更好地帮助您解决问题，请提供以下完整信息：
+
+- **Platform | 平台**：(如: Android, iOS, Windows, macOS, Linux)
+- **OS | 操作系统**：(如: Android 13 (MIUI 14), iOS 17.1, Windows 11)  
+- **AnxReader Version | 安读版本**：(如: 1.6.3+2100，可在应用设置中查看)
+- **Device | 设备**：(如: Xiaomi 13, iPhone 15, ThinkPad X1)
+
+请编辑您的issue并填写完整的平台信息，这将帮助我们更快地定位和解决问题。
+
+---
+
+Thank you for submitting this bug report!
+
+I noticed that your platform information might be incomplete. To better help you solve the issue, please provide complete information for:
+
+- **Platform**: (e.g., Android, iOS, Windows, macOS, Linux)
+- **OS**: (e.g., Android 13 (MIUI 14), iOS 17.1, Windows 11)
+- **AnxReader Version**: (e.g., 1.6.3+2100, check in app settings)
+- **Device**: (e.g., Xiaomi 13, iPhone 15, ThinkPad X1)
+
+Please edit your issue and fill in the complete platform information to help us locate and resolve the issue faster.`
+              });
+            }
+      - name: Handle need-test-file Label
+        if: github.event.label.name == 'need-test-file'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = context.issue;
+            
+            // Add question label
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issue.number,
+              labels: ['question']
+            });
+            
+            // Add comment requesting test file
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issue.number,
+              body: `📁 **需要测试文件 | Test File Required**
+
+为了更好地重现和解决您遇到的问题，我们需要您提供相关的测试文件。
+
+请提供：
+- 出现问题的书籍文件（epub、pdf、txt等）
+- 或者能够重现问题的最小示例文件
+- 如果涉及特定格式，请说明文件的具体格式和来源
+
+您可以：
+1. 直接拖拽文件到此评论区上传
+2. 提供文件的下载链接
+3. 如果文件较大，可以使用网盘分享
+
+**注意**：如果涉及版权内容，请提供公开或自创的测试文件。
+
+---
+
+To better reproduce and resolve the issue you encountered, we need you to provide relevant test files.
+
+Please provide:
+- The book file where the problem occurs (epub, pdf, txt, etc.)
+- Or a minimal example file that can reproduce the issue  
+- If it involves a specific format, please specify the file format and source
+
+You can:
+1. Drag and drop files directly to this comment area to upload
+2. Provide download links for the files
+3. Use cloud storage sharing if the files are large
+
+**Note**: If copyrighted content is involved, please provide public or self-created test files.`
+            });
+            
+      - name: Handle need-more-info Label  
+        if: github.event.label.name == 'need-more-info'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = context.issue;
+            
+            // Add question label
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issue.number,
+              labels: ['question']
+            });
+            
+            // Add comment requesting more information
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issue.number,
+              body: `ℹ️ **需要更多信息 | More Information Required**
+
+为了更好地帮助您解决问题，我们需要更多详细信息。
+
+请提供：
+- 详细的操作步骤
+- 错误信息的完整截图或日志
+- 问题出现的具体场景
+- 您的设备和软件版本信息
+- 任何可能相关的其他信息
+
+请编辑您的原始issue或在评论中补充这些信息。
+
+---
+
+To better help you solve the issue, we need more detailed information.
+
+Please provide:
+- Detailed steps to reproduce
+- Complete screenshots or logs of error messages
+- Specific scenarios where the issue occurs
+- Your device and software version information  
+- Any other potentially relevant information
+
+Please edit your original issue or add this information in the comments.`
+            });
