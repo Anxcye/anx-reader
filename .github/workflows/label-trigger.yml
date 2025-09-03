@@ -7,6 +7,9 @@ on:
 jobs:
   handle-special-labels:
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
     
     steps:
       - name: Validate Bug Report

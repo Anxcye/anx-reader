@@ -9,6 +9,9 @@ on:
 jobs:
   stale:
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
     steps:
       - uses: actions/stale@v9
         with:
@@ -105,6 +108,9 @@ jobs:
 
   stale-questions:
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
     steps:
       - uses: actions/stale@v9
         with:
@@ -167,6 +173,9 @@ jobs:
 
   lock-closed-issues:
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
     steps:
       - uses: dessant/lock-threads@v5
         with:
