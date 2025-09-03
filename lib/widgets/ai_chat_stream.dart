@@ -161,7 +161,7 @@ class AiChatStreamState extends ConsumerState<AiChatStream> {
                         }
 
                         final messages = snapshot.data!;
-                        _scrollToBottom();
+                        // _scrollToBottom();
 
                         return ListView.builder(
                           controller: _scrollController,
@@ -269,7 +269,7 @@ class AiChatStreamState extends ConsumerState<AiChatStream> {
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: isUser
-                    ? Theme.of(context).colorScheme.primaryContainer
+                    ? Theme.of(context).colorScheme.secondaryContainer
                     : Theme.of(context).colorScheme.surfaceContainer,
                 borderRadius: BorderRadius.only(
                   topLeft: isUser ? const Radius.circular(12) : Radius.zero,
@@ -378,9 +378,9 @@ class _CollapsibleTextState extends State<_CollapsibleText> {
                       colors: [
                         Theme.of(context)
                             .colorScheme
-                            .primaryContainer
+                            .secondaryContainer
                             .withValues(alpha: 0),
-                        Theme.of(context).colorScheme.primaryContainer,
+                        Theme.of(context).colorScheme.secondaryContainer,
                       ],
                     ),
                   ),
