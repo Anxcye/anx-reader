@@ -1,19 +1,24 @@
 # Changelog
 
-## Todo
 
-## 1.6.3
+## 1.7.0
+- Feat: TTS can be configured to play together with other audio
 - Feat: Support swapping page turn area
 - Feat: Support full-text bilingual translation
 - Feat: Support translation only mode
 - Feat: Support book-specific translation settings
+- Fix: Improved garbled text detection in txt file encoding handling
+- Fix: Issue with WebDAV initialization
 - Fix: Fix multiple tools bar
 - L10n: Add literally Chinese, Spanish, French, Italian, Japanese, Korean, Portuguese, Russian
 
+- Feat: TTS可配置是否和其他音频一起播放  
 - Feat: 支持交换翻页区域
 - Feat: 支持全文双语对照翻译
 - Feat: 支持仅显示翻译
 - Feat: 支持每本书独立的翻译设置
+- Fix: 改进 txt 文件编码处理中的乱码检测  
+- Fix: WebDAV初始化的问题  
 - Fix: 修复工具栏无法正确关闭的问题
 - L10n: 添加文言文、 西班牙语、法语、意大利语、日语、韩语、葡萄牙语、俄语
 

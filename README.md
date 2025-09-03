@@ -167,11 +167,6 @@ QQ Group：1042905699
 If you like Anx Reader, please consider supporting the project by donating. Your donation will help me maintain and improve the project.
 
 ❤️ [Donate](https://anxcye.com/home/7)
-// ...existing code...
-## Donations
-If you like Anx Reader, please consider supporting the project by donating. Your donation will help me maintain and improve the project.
-
-❤️ [Donate](https://anxcye.com/home/7)
 
 ## Building
 Want to build Anx Reader from source? Please follow these steps:
