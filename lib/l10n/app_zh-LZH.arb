@@ -510,5 +510,7 @@
   "translationServiceConfiguration": "翻譯服務配置",
   "translationMode": "翻譯模式",
   "translationOnly": "僅翻譯",
-  "bilingual": "雙語"
+  "bilingual": "雙語",
+  "allowMixing": "Allow Mixing",
+  "enableMixTip": "啟用與其他音頻應用程序的混合"
 }

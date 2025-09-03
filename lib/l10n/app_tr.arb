@@ -510,5 +510,7 @@
   "translationServiceConfiguration": "Çeviri Hizmet Yapılandırması",
   "translationMode": "Çeviri modu",
   "translationOnly": "Yalnızca Çeviri",
-  "bilingual": "İki dilli"
+  "bilingual": "İki dilli",
+  "allowMixing": "Karıştırmaya izin ver",
+  "enableMixTip": "Diğer ses uygulamalarıyla karışmayı etkinleştirin"
 }

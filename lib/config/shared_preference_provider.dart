@@ -914,4 +914,13 @@ class Prefs extends ChangeNotifier {
     }
     bookTranslationModes = modes;
   }
+
+  bool get allowMixWithOtherAudio {
+    return prefs.getBool('allowMixWithOtherAudio') ?? false;
+  }
+
+  set allowMixWithOtherAudio(bool allow) {
+    prefs.setBool('allowMixWithOtherAudio', allow);
+    notifyListeners();
+  }
 }

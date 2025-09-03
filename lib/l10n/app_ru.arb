@@ -510,5 +510,7 @@
   "translationServiceConfiguration": "Конфигурация службы перевода",
   "translationMode": "Режим перевода",
   "translationOnly": "Только перевод",
-  "bilingual": "Двуязычный"
+  "bilingual": "Двуязычный",
+  "allowMixing": "Разрешить смешивание",
+  "enableMixTip": "Включить смешивание с другими приложениями аудио"
 }

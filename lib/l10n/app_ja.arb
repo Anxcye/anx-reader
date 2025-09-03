@@ -510,5 +510,7 @@
   "translationServiceConfiguration": "翻訳サービスの構成",
   "translationMode": "翻訳モード",
   "translationOnly": "翻訳のみ",
-  "bilingual": "バイリンガル"
+  "bilingual": "バイリンガル",
+  "allowMixing": "混合を許可します",
+  "enableMixTip": "他のオーディオアプリケーションと混合できるようにします"
 }

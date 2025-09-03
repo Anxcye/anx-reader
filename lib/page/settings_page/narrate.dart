@@ -314,6 +314,14 @@ class _NarrateSettingsState extends ConsumerState<NarrateSettings>
                 await TtsHandler().switchTtsType(value);
                 setState(() {});
               }),
+          SettingsTile.switchTile(
+              title: Text(L10n.of(context).allowMixing),
+              description: Text(L10n.of(context).enableMixTip),
+              initialValue: Prefs().allowMixWithOtherAudio,
+              onToggle: (value) {
+                Prefs().allowMixWithOtherAudio = value;
+                setState(() {});
+              }),
         ]),
         Visibility(
           visible: !Prefs().isSystemTts,

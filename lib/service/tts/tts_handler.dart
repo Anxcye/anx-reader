@@ -1,3 +1,4 @@
+import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/page/reading_page.dart';
 import 'package:anx_reader/service/tts/base_tts.dart';
 import 'package:anx_reader/service/tts/tts_factory.dart';
@@ -21,6 +22,16 @@ class TtsHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
 
   Future<void> _initAudioSession() async {
     final session = await AudioSession.instance;
+
+    final allowMix = Prefs().allowMixWithOtherAudio;
+
+    await session.configure(AudioSessionConfiguration(
+      avAudioSessionCategory: AVAudioSessionCategory.playback,
+      avAudioSessionCategoryOptions: allowMix
+          ? AVAudioSessionCategoryOptions.mixWithOthers
+          : AVAudioSessionCategoryOptions.none,
+      avAudioSessionMode: AVAudioSessionMode.spokenAudio,
+    ));
     session.interruptionEventStream.listen((event) {
       if (event.begin) {
         // if (tts.isPlaying) {
