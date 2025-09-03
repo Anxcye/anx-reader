@@ -536,7 +536,7 @@ class _BookDetailState extends ConsumerState<BookDetail> {
         },
         child: Stack(
           children: [
-            Expanded(child: buildBackground()),
+            buildBackground(),
             CustomScrollView(
               slivers: [
                 SliverAppBar(
