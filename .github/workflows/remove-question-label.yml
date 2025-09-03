@@ -3,18 +3,23 @@ name: Remove Question Label on Response
 on:
   issue_comment:
     types: [created]
+  issues:
+    types: [edited]
 
 jobs:
   remove-question-label:
-    # Only run if the comment is from the issue author (not maintainers)
-    if: github.event.issue.user.login == github.event.comment.user.login
+    # Only run if the action is from the issue author (not maintainers)
+    # This includes both comments and issue edits
+    if: |
+      (github.event_name == 'issue_comment' && github.event.issue.user.login == github.event.comment.user.login) ||
+      (github.event_name == 'issues' && github.event.issue.user.login == github.event.sender.login)
     runs-on: ubuntu-latest
     permissions:
       issues: write
       pull-requests: write
     
     steps:
-      - name: Remove question label when user responds
+      - name: Remove question label when user responds or updates issue
         uses: actions/github-script@v7
         with:
           script: |
@@ -23,7 +28,7 @@ jobs:
             
             // Check if the issue has the 'question' label
             if (labels.includes('question')) {
-              console.log('User responded to question, removing question label');
+              console.log('User responded to question or updated issue, removing question label');
               
               // Remove the question label
               await github.rest.issues.removeLabel({
