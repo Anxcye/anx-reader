@@ -251,6 +251,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(32),
                       child: BottomNavigationBar(
+                        selectedFontSize: 12,
                         enableFeedback: true,
                         type: BottomNavigationBarType.fixed,
                         landscapeLayout:
