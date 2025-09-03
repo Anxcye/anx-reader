@@ -6,6 +6,7 @@ import 'package:anx_reader/widgets/bookshelf/book_cover.dart';
 import 'package:anx_reader/widgets/book_notes/book_notes_list.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/page/book_detail.dart';
+import 'package:anx_reader/widgets/container/filled_container.dart';
 import 'package:anx_reader/widgets/highlight_digit.dart';
 import 'package:anx_reader/widgets/icon_and_text.dart';
 import 'package:flutter/material.dart';
@@ -35,79 +36,77 @@ class _BookNotesPageState extends State<BookNotesPage> {
       overflow: TextOverflow.ellipsis,
       fontFamily: 'SourceHanSerif',
     );
-    return Card(
-      child: Container(
-        padding: const EdgeInsets.all(10.0),
-        child: LayoutBuilder(builder: (context, constraints) {
-          if (constraints.maxWidth > 500) {
-            return Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        book.title,
-                        style: titleStyle,
-                        maxLines: 1,
-                      ),
-                      notesStatistic(context, numberOfNotes, book),
-                      const SizedBox(
-                        height: 25,
-                      ),
-                      operators(context, book),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 30),
-                Hero(
-                    tag: book.coverFullPath,
-                    child: bookCover(
-                      context,
-                      book,
-                      height: 180,
-                      width: 120,
-                    )),
-              ],
-            );
-          } else {
-            return Column(
-              children: [
-                Row(
+    return FilledContainer(
+      padding: const EdgeInsets.all(10.0),
+      child: LayoutBuilder(builder: (context, constraints) {
+        if (constraints.maxWidth > 500) {
+          return Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            book.title,
-                            style: titleStyle,
-                            maxLines: 2,
-                          ),
-                          notesStatistic(context, numberOfNotes, book),
-                          const SizedBox(
-                            height: 25,
-                          ),
-                        ],
-                      ),
+                    Text(
+                      book.title,
+                      style: titleStyle,
+                      maxLines: 1,
                     ),
-                    const SizedBox(width: 30),
-                    Hero(
-                        tag: book.coverFullPath,
-                        child: bookCover(
-                          context,
-                          book,
-                          height: 180,
-                          width: 120,
-                        )),
+                    notesStatistic(context, numberOfNotes, book),
+                    const SizedBox(
+                      height: 25,
+                    ),
+                    operators(context, book),
                   ],
                 ),
-                operators(context, book),
-              ],
-            );
-          }
-        }),
-      ),
+              ),
+              const SizedBox(width: 30),
+              Hero(
+                  tag: book.coverFullPath,
+                  child: bookCover(
+                    context,
+                    book,
+                    height: 180,
+                    width: 120,
+                  )),
+            ],
+          );
+        } else {
+          return Column(
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          book.title,
+                          style: titleStyle,
+                          maxLines: 2,
+                        ),
+                        notesStatistic(context, numberOfNotes, book),
+                        const SizedBox(
+                          height: 25,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 30),
+                  Hero(
+                      tag: book.coverFullPath,
+                      child: bookCover(
+                        context,
+                        book,
+                        height: 180,
+                        width: 120,
+                      )),
+                ],
+              ),
+              operators(context, book),
+            ],
+          );
+        }
+      }),
     );
   }
 
@@ -135,23 +134,23 @@ class _BookNotesPageState extends State<BookNotesPage> {
                     icon: const Icon(IonIcons.logo_markdown),
                     text: 'Markdown',
                     onTap: () {
-                  Navigator.pop(context);
-                  exportNotes(book, notes!, ExportType.md);
-                }),
+                      Navigator.pop(context);
+                      exportNotes(book, notes!, ExportType.md);
+                    }),
                 IconAndText(
                     icon: const Icon(Icons.text_snippet),
                     text: 'Text',
                     onTap: () {
-                  Navigator.pop(context);
-                  exportNotes(book, notes!, ExportType.txt);
-                }),
+                      Navigator.pop(context);
+                      exportNotes(book, notes!, ExportType.txt);
+                    }),
                 IconAndText(
                     icon: const Icon(Icons.table_chart),
                     text: 'CSV',
                     onTap: () {
-                  Navigator.pop(context);
-                  exportNotes(book, notes!, ExportType.csv);
-                }),
+                      Navigator.pop(context);
+                      exportNotes(book, notes!, ExportType.csv);
+                    }),
               ],
             ),
           );
@@ -164,19 +163,19 @@ class _BookNotesPageState extends State<BookNotesPage> {
           icon: const Icon(Icons.details),
           text: L10n.of(context).notesPageDetail,
           onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => BookDetail(book: book),
-          ),
-        );
-      }),
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => BookDetail(book: book),
+              ),
+            );
+          }),
       IconAndText(
           icon: const Icon(Icons.ios_share),
           text: L10n.of(context).notesPageExport,
           onTap: () {
-        handleExportNotes(context, book);
-      }),
+            handleExportNotes(context, book);
+          }),
     ]);
   }
 

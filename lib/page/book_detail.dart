@@ -15,6 +15,7 @@ import 'package:anx_reader/utils/date/convert_seconds.dart';
 import 'package:anx_reader/utils/get_path/get_base_path.dart';
 import 'package:anx_reader/utils/log/common.dart';
 import 'package:anx_reader/widgets/bookshelf/book_cover.dart';
+import 'package:anx_reader/widgets/container/filled_container.dart';
 import 'package:anx_reader/widgets/highlight_digit.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -100,7 +101,8 @@ class _BookDetailState extends ConsumerState<BookDetail> {
               child: SizedBox(
                   height: 120,
                   width: width,
-                  child: Card(
+                  child: FilledContainer(
+                    padding: EdgeInsetsGeometry.zero,
                     child: Row(
                       children: [
                         const Spacer(),
@@ -431,9 +433,10 @@ class _BookDetailState extends ConsumerState<BookDetail> {
       return SizedBox(
         height: 130,
         width: MediaQuery.of(context).size.width,
-        child: Card(
+        child: FilledContainer(
+          padding: EdgeInsetsGeometry.zero,
           child: ListView(
-            padding: const EdgeInsets.all(10),
+            padding: const EdgeInsets.symmetric(horizontal: 10),
             scrollDirection: Axis.horizontal,
             children: [
               Row(
@@ -496,27 +499,25 @@ class _BookDetailState extends ConsumerState<BookDetail> {
         child: SizedBox(
             // height: 500,
             width: MediaQuery.of(context).size.width,
-            child: Card(
-              child: Padding(
-                padding: const EdgeInsets.all(15.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '${L10n.of(context).bookDetailImportDate}${widget.book.createTime.toString().substring(0, 10)}',
-                      style: textStyle,
-                    ),
-                    Text(
-                      '${L10n.of(context).bookDetailLastReadDate}${widget.book.updateTime.toString().substring(0, 10)}',
-                      style: textStyle,
-                    ),
-                    const Divider(),
-                    SizedBox(
-                      // height: 200,
-                      child: buildReadingDetail(),
-                    ),
-                  ],
-                ),
+            child: FilledContainer(
+              padding: const EdgeInsets.all(15.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '${L10n.of(context).bookDetailImportDate}${widget.book.createTime.toString().substring(0, 10)}',
+                    style: textStyle,
+                  ),
+                  Text(
+                    '${L10n.of(context).bookDetailLastReadDate}${widget.book.updateTime.toString().substring(0, 10)}',
+                    style: textStyle,
+                  ),
+                  const Divider(),
+                  SizedBox(
+                    // height: 200,
+                    child: buildReadingDetail(),
+                  ),
+                ],
               ),
             )),
       );

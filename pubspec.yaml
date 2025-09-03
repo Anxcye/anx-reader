@@ -98,6 +98,7 @@ dependencies:
   mongol: ^9.0.0
   introduction_screen: ^3.1.17
   flutter_floating_bottom_bar: ^1.3.0
+  figma_squircle: ^0.6.3
 
 
 dev_dependencies:

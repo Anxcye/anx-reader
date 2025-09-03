@@ -7,16 +7,19 @@ class OutlinedContainer extends StatelessWidget {
     this.width,
     this.height,
     this.padding = const EdgeInsets.all(16.0),
+    this.margin = const EdgeInsets.all(0.0),
   });
 
   final Widget child;
   final double? width;
   final double? height;
   final EdgeInsetsGeometry padding;
+  final EdgeInsetsGeometry margin;
 
   @override
   Widget build(BuildContext context) {
     return Container(
+      margin: margin,
       width: width,
       height: height,
       decoration: BoxDecoration(
@@ -24,7 +27,7 @@ class OutlinedContainer extends StatelessWidget {
           color: Theme.of(context).colorScheme.outline,
           width: 1,
         ),
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(20),
       ),
       child: Padding(
         padding: padding,

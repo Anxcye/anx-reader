@@ -10,6 +10,7 @@ import 'package:anx_reader/providers/bookmark.dart';
 import 'package:anx_reader/service/book.dart';
 import 'package:anx_reader/utils/time_to_human.dart';
 import 'package:anx_reader/widgets/book_share/excerpt_share_service.dart';
+import 'package:anx_reader/widgets/container/filled_container.dart';
 import 'package:anx_reader/widgets/delete_confirm.dart';
 import 'package:anx_reader/widgets/context_menu/excerpt_menu.dart';
 import 'package:anx_reader/widgets/tips/notes_tips.dart';
@@ -256,97 +257,94 @@ class _BookNotesListState extends ConsumerState<BookNotesList> {
           }
         });
       },
-      child: Card(
-        shadowColor: Colors.transparent,
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                  padding: const EdgeInsets.only(left: 10, right: 10, top: 10),
-                  child: icon()),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      bookNote.content,
-                      style: const TextStyle(
-                        fontSize: 16,
-                      ),
+      child: FilledContainer(
+        padding: const EdgeInsets.all(8.0),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+                padding: const EdgeInsets.only(left: 10, right: 10, top: 10),
+                child: icon()),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    bookNote.content,
+                    style: const TextStyle(
+                      fontSize: 16,
                     ),
-                    if (bookNote.readerNote != null &&
-                        bookNote.readerNote!.isNotEmpty)
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const SizedBox(height: 4),
-                          IntrinsicHeight(
-                            child: Row(
-                              children: [
-                                const VerticalDivider(
-                                  thickness: 3,
-                                ),
-                                Expanded(
-                                  child: Text(
-                                    bookNote.readerNote!,
-                                    style: infoStyle.copyWith(
-                                      color: Colors.grey.shade600,
-                                    ),
+                  ),
+                  if (bookNote.readerNote != null &&
+                      bookNote.readerNote!.isNotEmpty)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const SizedBox(height: 4),
+                        IntrinsicHeight(
+                          child: Row(
+                            children: [
+                              const VerticalDivider(
+                                thickness: 3,
+                              ),
+                              Expanded(
+                                child: Text(
+                                  bookNote.readerNote!,
+                                  style: infoStyle.copyWith(
+                                    color: Colors.grey.shade600,
                                   ),
                                 ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                        ],
-                      ),
-                    Divider(
-                      indent: 4,
-                      height: 3,
-                      color: Colors.grey.shade300,
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            bookNote.chapter,
-                            style: infoStyle,
-                            overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
                           ),
                         ),
-                        Text(
-                          timeToHuman(bookNote.createTime, context),
-                          style: infoStyle,
-                        )
+                        const SizedBox(height: 4),
                       ],
                     ),
-                  ],
+                  Divider(
+                    indent: 4,
+                    height: 3,
+                    color: Colors.grey.shade300,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          bookNote.chapter,
+                          style: infoStyle,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      Text(
+                        timeToHuman(bookNote.createTime, context),
+                        style: infoStyle,
+                      )
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            if (selectedNotes.isNotEmpty)
+              IconButton(
+                onPressed: () {
+                  setState(() {
+                    if (selectedNotes.contains(bookNote)) {
+                      selectedNotes.remove(bookNote);
+                    } else {
+                      selectedNotes.add(bookNote);
+                    }
+                  });
+                },
+                icon: Icon(
+                  selectedNotes.contains(bookNote)
+                      ? EvaIcons.checkmark_circle
+                      : Icons.circle_outlined,
+                  color: Theme.of(context).colorScheme.primary,
                 ),
               ),
-              if (selectedNotes.isNotEmpty)
-                IconButton(
-                  onPressed: () {
-                    setState(() {
-                      if (selectedNotes.contains(bookNote)) {
-                        selectedNotes.remove(bookNote);
-                      } else {
-                        selectedNotes.add(bookNote);
-                      }
-                    });
-                  },
-                  icon: Icon(
-                    selectedNotes.contains(bookNote)
-                        ? EvaIcons.checkmark_circle
-                        : Icons.circle_outlined,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                ),
-            ],
-          ),
+          ],
         ),
       ),
     );
@@ -593,8 +591,7 @@ class _BookNotesListState extends ConsumerState<BookNotesList> {
                               });
                             });
                           },
-                          child:
-                              Text(L10n.of(context).notesPageFilterReset)),
+                          child: Text(L10n.of(context).notesPageFilterReset)),
                       const SizedBox(width: 10),
                       Expanded(
                         child: ElevatedButton(
@@ -605,8 +602,7 @@ class _BookNotesListState extends ConsumerState<BookNotesList> {
                                     Theme.of(context).colorScheme.onPrimary),
                             onPressed: Navigator.of(context).pop,
                             child: Text(L10n.of(context)
-                                .notesPageViewAllNNotes(
-                                    showNotes.length))),
+                                .notesPageViewAllNNotes(showNotes.length))),
                       ),
                     ],
                   ),
@@ -655,8 +651,7 @@ class _BookNotesListState extends ConsumerState<BookNotesList> {
           for (int i = 0; i < selectedNotes.length; i++) {
             deleteBookNoteById(selectedNotes[i].id!);
           }
-          Sync().syncData(SyncDirection.upload, ref, 
-              trigger: SyncTrigger.auto);
+          Sync().syncData(SyncDirection.upload, ref, trigger: SyncTrigger.auto);
           setState(() {
             selectedNotes.clear();
             _loadBookNotes();

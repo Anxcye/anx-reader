@@ -5,6 +5,7 @@ import 'package:anx_reader/providers/notes_page_current_book.dart';
 import 'package:anx_reader/providers/notes_statistics.dart';
 import 'package:anx_reader/utils/date/convert_seconds.dart';
 import 'package:anx_reader/widgets/bookshelf/book_cover.dart';
+import 'package:anx_reader/widgets/container/filled_container.dart';
 import 'package:anx_reader/widgets/highlight_digit.dart';
 import 'package:anx_reader/widgets/tips/notes_tips.dart';
 import 'package:flutter/material.dart';
@@ -167,49 +168,60 @@ class _NotesPageState extends ConsumerState<NotesPage> {
               .setData(book, numberOfNotes);
         }
       },
-      child: Card(
+      child: FilledContainer(
         margin: const EdgeInsets.only(top: 8, left: 15, right: 15),
-        child: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                flex: 3,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              flex: 3,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  highlightDigit(
+                  context,
+                  L10n.of(context).notesNotes(numberOfNotes),
+                  textStyle,
+                  digitStyle,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(book.title, style: titleStyle),
+                  const SizedBox(height: 18),
+                  // Reading time
+                  Row(
                   children: [
-                    highlightDigit(
-                      context,
-                      L10n.of(context).notesNotes(numberOfNotes),
-                      textStyle,
-                      digitStyle,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(book.title, style: titleStyle),
-                    const SizedBox(height: 18),
-                    // Reading time
+                    Icon(Icons.access_time, size: 16, color: Colors.grey),
+                    const SizedBox(width: 4),
                     Text(
-                      convertSeconds(readingTime),
-                      style: readingTimeStyle,
+                    convertSeconds(readingTime),
+                    style: readingTimeStyle,
+                    ),
+                    Text(" | ", style: readingTimeStyle),
+                    Icon(Icons.bar_chart, size: 16, color: Colors.grey),
+                    const SizedBox(width: 4),
+                    Text(
+                    '${(book.readingPercentage * 100).toStringAsFixed(1)}%',
+                    style: readingTimeStyle,
                     ),
                   ],
-                ),
+                  ),
+                ],
               ),
-              // Expanded(child: SizedBox()),
-              Hero(
-                tag: isMobile
-                    ? book.coverFullPath
-                    : '${book.coverFullPath}notMobile',
-                child: bookCover(
-                  context,
-                  book,
-                  height: 130,
-                  width: 90,
-                ),
+            ),
+            // Expanded(child: SizedBox()),
+            Hero(
+              tag: isMobile
+                  ? book.coverFullPath
+                  : '${book.coverFullPath}notMobile',
+              child: bookCover(
+                context,
+                book,
+                height: 130,
+                width: 90,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

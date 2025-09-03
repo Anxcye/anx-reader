@@ -2,6 +2,7 @@ import 'package:anx_reader/enums/chart_mode.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/providers/statistic_data.dart';
 import 'package:anx_reader/utils/date/week_of_year.dart';
+import 'package:anx_reader/widgets/container/filled_container.dart';
 import 'package:anx_reader/widgets/statistic/heatmap_chart.dart';
 import 'package:anx_reader/widgets/statistic/statistic_chart.dart';
 import 'package:flutter/material.dart';
@@ -145,12 +146,8 @@ class StatisticCard extends ConsumerWidget {
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOutBack,
       alignment: Alignment.topCenter,
-      child: Container(
+      child: FilledContainer(
         padding: const EdgeInsets.fromLTRB(10, 0, 10, 5),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceContainer,
-          borderRadius: BorderRadius.circular(15),
-        ),
         child: statisticData.when(
             data: (data) => Column(
                   children: [

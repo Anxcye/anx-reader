@@ -10,6 +10,8 @@ import 'package:anx_reader/providers/total_reading_time.dart';
 import 'package:anx_reader/utils/date/convert_seconds.dart';
 import 'package:anx_reader/utils/date/week_of_year.dart';
 import 'package:anx_reader/widgets/bookshelf/book_cover.dart';
+import 'package:anx_reader/widgets/container/filled_container.dart';
+import 'package:anx_reader/widgets/container/outlined_container.dart';
 import 'package:anx_reader/widgets/highlight_digit.dart';
 import 'package:anx_reader/widgets/statistic/statistic_card.dart';
 import 'package:anx_reader/widgets/tips/statistic_tips.dart';
@@ -95,7 +97,7 @@ class _StatisticPageState extends State<StatisticPage> {
                   const SizedBox(height: 30),
                   Expanded(
                     child: ListView(
-                      padding: const EdgeInsets.only(bottom: 80),
+                        padding: const EdgeInsets.only(bottom: 80),
                         controller: _scrollController,
                         children: const [
                           StatisticCard(),
@@ -235,51 +237,48 @@ class _DateBooksState extends ConsumerState<DateBooks> {
     Widget dragToDelete(Widget child, int bookId) {
       return StatefulBuilder(builder: (context, localSetState) {
         if (deleteBookIds.contains(bookId)) {
-          return Card(
-            child: SizedBox(
-              height: 146,
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
+          return OutlinedContainer(
+            margin: const EdgeInsets.only(bottom: 10),
+            height: 146,
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              children: [
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const SizedBox(height: 20),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.delete,
-                              size: 30,
-                            ),
-                            Text(
-                              L10n.of(context).statisticDeletedRecords,
-                              style: TextStyle(
-                                  fontSize: 20, fontWeight: FontWeight.bold),
-                            ),
-                          ],
+                        Icon(
+                          Icons.delete,
+                          size: 30,
                         ),
-                        FilledButton(
-                            onPressed: () {
-                              localSetState(() {
-                                deleteBookIds.remove(bookId);
-                              });
-                            },
-                            child: Text(L10n.of(context).commonUndo)),
+                        Text(
+                          L10n.of(context).statisticDeletedRecords,
+                          style: TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.bold),
+                        ),
                       ],
                     ),
-                    const Spacer(),
-                    const Divider(),
-                    Row(
-                      children: [
-                        Icon(Icons.info_outline, size: 18),
-                        Text(L10n.of(context).statisticDeletedRecordsTips),
-                      ],
-                    ),
+                    FilledButton(
+                        onPressed: () {
+                          localSetState(() {
+                            deleteBookIds.remove(bookId);
+                          });
+                        },
+                        child: Text(L10n.of(context).commonUndo)),
                   ],
                 ),
-              ),
+                const Spacer(),
+                const Divider(),
+                Row(
+                  children: [
+                    Icon(Icons.info_outline, size: 18),
+                    Text(L10n.of(context).statisticDeletedRecordsTips),
+                  ],
+                ),
+              ],
             ),
           );
         }
@@ -398,60 +397,59 @@ class BookStatisticItem extends StatelessWidget {
                   MaterialPageRoute(
                       builder: (context) => BookDetail(book: snapshot.data!)));
             },
-            child: Card(
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
-                  children: [
-                    Hero(
-                        tag: snapshot.data!.coverFullPath,
-                        child: bookCover(
-                          context,
-                          snapshot.data!,
-                          height: 130,
-                          width: 90,
-                        )),
-                    const SizedBox(width: 15),
-                    Flexible(
-                      child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(snapshot.data!.title, style: bookTitleStyle),
-                            const SizedBox(height: 10),
-                            Row(
-                              children: [
-                                Expanded(
-                                  flex: 3,
-                                  child: Text(snapshot.data!.author,
-                                      style: bookAuthorStyle),
+            child: FilledContainer(
+              margin: const EdgeInsets.only(bottom: 10),
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                children: [
+                  Hero(
+                      tag: snapshot.data!.coverFullPath,
+                      child: bookCover(
+                        context,
+                        snapshot.data!,
+                        height: 130,
+                        width: 90,
+                      )),
+                  const SizedBox(width: 15),
+                  Flexible(
+                    child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(snapshot.data!.title, style: bookTitleStyle),
+                          const SizedBox(height: 10),
+                          Row(
+                            children: [
+                              Expanded(
+                                flex: 3,
+                                child: Text(snapshot.data!.author,
+                                    style: bookAuthorStyle),
+                              ),
+                              Text(
+                                  // getReadingTime(context),
+                                  convertSeconds(readingTime),
+                                  textAlign: TextAlign.end,
+                                  style: bookReadingTimeStyle),
+                            ],
+                          ),
+                          const SizedBox(height: 20),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: LinearProgressIndicator(
+                                  value: snapshot.data!.readingPercentage,
+                                  backgroundColor: Colors.grey[300],
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                      Theme.of(context).colorScheme.primary),
                                 ),
-                                Text(
-                                    // getReadingTime(context),
-                                    convertSeconds(readingTime),
-                                    textAlign: TextAlign.end,
-                                    style: bookReadingTimeStyle),
-                              ],
-                            ),
-                            const SizedBox(height: 20),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: LinearProgressIndicator(
-                                    value: snapshot.data!.readingPercentage,
-                                    backgroundColor: Colors.grey[300],
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                        Theme.of(context).colorScheme.primary),
-                                  ),
-                                ),
-                                const SizedBox(width: 10),
-                                Text(
-                                    '${(snapshot.data!.readingPercentage * 100).toInt()} %'),
-                              ],
-                            ),
-                          ]),
-                    ),
-                  ],
-                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Text(
+                                  '${(snapshot.data!.readingPercentage * 100).toInt()} %'),
+                            ],
+                          ),
+                        ]),
+                  ),
+                ],
               ),
             ),
           );

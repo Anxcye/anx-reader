@@ -1,3 +1,4 @@
+import 'package:anx_reader/widgets/container/filled_container.dart';
 import 'package:anx_reader/widgets/settings/settings_tile.dart';
 import 'package:flutter/material.dart';
 
@@ -49,11 +50,8 @@ class SettingsSection extends AbstractSettingsSection {
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8),
-          child: Container(
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainerLow,
-              borderRadius: BorderRadius.circular(10),
-            ),
+          child: FilledContainer(
+            padding: EdgeInsetsGeometry.zero,
             child: tileList,
           ),
         ),
