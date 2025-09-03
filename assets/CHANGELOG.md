@@ -11,6 +11,7 @@
 - Fix: Issue with WebDAV initialization
 - Fix: Fix multiple tools bar
 - L10n: Add literally Chinese, Spanish, French, Italian, Japanese, Korean, Portuguese, Russian
+- UI: Optimize part of the interface design
 
 - Feat: TTS可配置是否和其他音频一起播放  
 - Feat: 支持交换翻页区域
@@ -21,6 +22,7 @@
 - Fix: WebDAV初始化的问题  
 - Fix: 修复工具栏无法正确关闭的问题
 - L10n: 添加文言文、 西班牙语、法语、意大利语、日语、韩语、葡萄牙语、俄语
+- UI: 优化部分界面设计
 
 ## 1.6.2
 - UI: Modify bottom navigation bar style

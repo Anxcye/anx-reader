@@ -46,41 +46,32 @@ class _BookDetailState extends ConsumerState<BookDetail> {
   @override
   Widget build(BuildContext context) {
     Widget buildBackground() {
-      var bg = Scaffold(
-        body: ShaderMask(
-          shaderCallback: (rect) {
-            return LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Theme.of(context).colorScheme.surface.withAlpha(200),
-                Theme.of(context).colorScheme.surface.withAlpha(10),
-                Theme.of(context).colorScheme.surface.withAlpha(10),
-                // Colors.transparent,
-              ],
-            ).createShader(
-              Rect.fromLTRB(0, 0, rect.width, rect.height),
-            );
-          },
-          blendMode: BlendMode.dstATop,
-          child: bookCover(
-            context,
-            _book,
-            height: MediaQuery.of(context).size.height * 0.8,
-            width: MediaQuery.of(context).size.width,
-          ),
+      var bg = ShaderMask(
+        shaderCallback: (rect) {
+          return LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Theme.of(context).colorScheme.surface.withAlpha(200),
+              Theme.of(context).colorScheme.surface.withAlpha(150),
+              Theme.of(context).colorScheme.surface.withAlpha(10),
+              // Colors.transparent,
+            ],
+          ).createShader(
+            Rect.fromLTRB(0, 0, rect.width, rect.height),
+          );
+        },
+        blendMode: BlendMode.dstATop,
+        child: bookCover(
+          context,
+          _book,
+          height: MediaQuery.of(context).size.height * 0.8,
+          width: MediaQuery.of(context).size.width,
         ),
       );
-      return Stack(
-        children: [
-          bg,
-          BackdropFilter(
-            filter: ImageFilter.blur(sigmaY: 40, sigmaX: 40),
-            child: Container(
-              color: Colors.black12,
-            ),
-          )
-        ],
+      return ImageFiltered(
+        imageFilter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+        child: bg,
       );
     }
 
@@ -198,7 +189,8 @@ class _BookDetailState extends ConsumerState<BookDetail> {
                   setState(() {
                     widget.book.coverPath = newPath;
                     updateBook(widget.book);
-                    Sync().syncData(SyncDirection.upload, ref, trigger: SyncTrigger.auto);
+                    Sync().syncData(SyncDirection.upload, ref,
+                        trigger: SyncTrigger.auto);
                     ref.read(bookListProvider.notifier).refresh();
                   });
                 },
@@ -312,7 +304,8 @@ class _BookDetailState extends ConsumerState<BookDetail> {
                     setState(() {
                       isEditing = false;
                       updateBook(widget.book);
-                      Sync().syncData(SyncDirection.upload, ref, trigger: SyncTrigger.manual);
+                      Sync().syncData(SyncDirection.upload, ref,
+                          trigger: SyncTrigger.manual);
                       ref.read(bookListProvider.notifier).refresh();
                     });
                   },
@@ -529,21 +522,21 @@ class _BookDetailState extends ConsumerState<BookDetail> {
       );
     }
 
-    return Stack(
-      children: [
-        Positioned.fill(child: buildBackground()),
-        Scaffold(
-          backgroundColor: Colors.transparent,
-          body: NotificationListener<ScrollNotification>(
-            onNotification: (ScrollNotification notification) {
-              if (notification is ScrollUpdateNotification) {
-                setState(() {
-                  _isCollapsed = notification.metrics.pixels > 0;
-                });
-              }
-              return false;
-            },
-            child: CustomScrollView(
+    return Scaffold(
+      // backgroundColor: Colors.transparent,
+      body: NotificationListener<ScrollNotification>(
+        onNotification: (ScrollNotification notification) {
+          if (notification is ScrollUpdateNotification) {
+            setState(() {
+              _isCollapsed = notification.metrics.pixels > 0;
+            });
+          }
+          return false;
+        },
+        child: Stack(
+          children: [
+            Expanded(child: buildBackground()),
+            CustomScrollView(
               slivers: [
                 SliverAppBar(
                   expandedHeight: 0,
@@ -615,9 +608,9 @@ class _BookDetailState extends ConsumerState<BookDetail> {
                 ),
               ],
             ),
-          ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }
