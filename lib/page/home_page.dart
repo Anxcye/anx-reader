@@ -236,6 +236,10 @@ class _HomePageState extends ConsumerState<HomePage> {
                         3,
                       ),
                       borderRadius: BorderRadius.circular(32),
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.outlineVariant,
+                        width: 1,
+                      ),
                       boxShadow: [
                         BoxShadow(
                           color:
@@ -244,17 +248,20 @@ class _HomePageState extends ConsumerState<HomePage> {
                         ),
                       ],
                     ),
-                    child: BottomNavigationBar(
-                      enableFeedback: false,
-                      type: BottomNavigationBarType.fixed,
-                      landscapeLayout:
-                          BottomNavigationBarLandscapeLayout.linear,
-                      currentIndex: _currentIndex,
-                      onTap: _onBottomTap,
-                      items: bottomBarItems,
-                      backgroundColor: Colors.transparent,
-                      elevation: 0,
-                      // height: 64,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(32),
+                      child: BottomNavigationBar(
+                        enableFeedback: true,
+                        type: BottomNavigationBarType.fixed,
+                        landscapeLayout:
+                            BottomNavigationBarLandscapeLayout.linear,
+                        currentIndex: _currentIndex,
+                        onTap: _onBottomTap,
+                        items: bottomBarItems,
+                        backgroundColor: Colors.transparent,
+                        elevation: 0,
+                        // height: 64,
+                      ),
                     ),
                   ),
                 ),
