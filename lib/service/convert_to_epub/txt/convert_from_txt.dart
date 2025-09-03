@@ -8,12 +8,16 @@ import 'package:charset/charset.dart';
 
 String readFileWithEncoding(File file) {
   bool checkGarbled(String content) {
-    final garbledPattern = RegExp(r'Õ|Ê||Ç|³|¾|Ð|Ó|Î|Á|É|�');
+    final garbledPattern = RegExp(r'Õ|Ê|�|Ç|³|¾|Ð|Ó|Î|Á|É|�|Ã|Ä|Å|Æ|Ë|Ì|Í|Ï|Ò|Ó|Ô|Õ|Ö|Ù|Ú|Û|Ü|Ý|à|á|â|ã|ä|å|æ|è|é|ê|ë|ì|í|î|ï|ð|ñ|ò|ó|ô|õ|ö|ù|ú|û|ü|ý|ÿ|\x00-\x1F\x7F|｡｢｣､･ｦｧｨｩｪｫｬｭｮｯｰｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝ|€|�');
+    final sampleContent = content.length > 500 
+        ? content.substring(0, 500) 
+        : content;
 
-    final lines = content.split('\n');
+    final matches = garbledPattern.allMatches(sampleContent);
+    
+    final garbledCount = matches.length;
 
-    final sampleLines = lines.take(lines.length > 100 ? 100 : lines.length);
-    return sampleLines.any((line) => garbledPattern.hasMatch(line));
+    return garbledCount / sampleContent.length  > 20 / 500;
   }
 
   final decoder = {
