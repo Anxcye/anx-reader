@@ -51,11 +51,11 @@ class WebdavClient extends SyncClientBase {
         }
       }
     }
-   }
+  }
 
   @override
-  Future<void> mkdir(String path) async {
-    await _client.mkdir(path);
+  Future<void> mkdirAll(String path) async {
+    await _client.mkdirAll(path);
   }
 
   @override
@@ -128,8 +128,11 @@ class WebdavClient extends SyncClientBase {
     try {
       return await readDir(path);
     } catch (e) {
-      await mkdir(path);
-      return [];
+      if (e is DioException && e.response?.statusCode == 404) {
+        await mkdirAll(path);
+        return [];
+      }
+      rethrow;
     }
   }
 

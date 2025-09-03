@@ -77,10 +77,8 @@ class Sync extends _$Sync {
     if (client == null) return;
 
     if (!await client.isExist('/anx/data/file')) {
-      await client.mkdir('anx');
-      await client.mkdir('anx/data');
-      await client.mkdir('anx/data/file');
-      await client.mkdir('anx/data/cover');
+      await client.mkdirAll('anx/data/file');
+      await client.mkdirAll('anx/data/cover');
     }
   }
 

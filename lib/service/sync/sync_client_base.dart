@@ -6,7 +6,7 @@ abstract class SyncClientBase {
   Future<void> ping();
 
   /// Create a directory at the given path
-  Future<void> mkdir(String path);
+  Future<void> mkdirAll(String path);
 
   /// List files and directories in the given path
   Future<List<RemoteFile>> readDir(String path);
