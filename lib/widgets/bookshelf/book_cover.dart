@@ -37,7 +37,7 @@ Widget bookCover(
       height: height,
       width: width,
       decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(7),
+          borderRadius: BorderRadius.circular(radius),
           border: Border.all(
             width: 0.3,
             color: Colors.grey,

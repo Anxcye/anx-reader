@@ -216,6 +216,7 @@ class _BookNotesPageState extends State<BookNotesPage> {
           : null,
       extendBodyBehindAppBar: true,
       body: SafeArea(
+        bottom: false,
         child: ListView(
           padding: const EdgeInsets.all(20),
           children: [

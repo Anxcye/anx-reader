@@ -409,6 +409,7 @@ class BookStatisticItem extends StatelessWidget {
                         snapshot.data!,
                         height: 130,
                         width: 90,
+                        radius: 10,
                       )),
                   const SizedBox(width: 15),
                   Flexible(

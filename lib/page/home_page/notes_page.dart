@@ -219,6 +219,7 @@ class _NotesPageState extends ConsumerState<NotesPage> {
                 book,
                 height: 130,
                 width: 90,
+                radius: 12,
               ),
             ),
           ],
