@@ -512,5 +512,6 @@
   "translationOnly": "Traduction uniquement",
   "bilingual": "Bilingue",
   "allowMixing": "Allow Mixing",
-  "enableMixTip": "Permettre de mélanger avec d'autres applications audio"
+  "enableMixTip": "Permettre de mélanger avec d'autres applications audio",
+  "more": "Plus"
 }

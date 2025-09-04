@@ -69,13 +69,11 @@ class BookBottomSheet extends ConsumerWidget {
       } else {
         SmartDialog.show(
           builder: (context) => AlertDialog(
-            title: Text(
-                L10n.of(context).bookSyncStatusReleaseSpaceDialogTitle),
+            title: Text(L10n.of(context).bookSyncStatusReleaseSpaceDialogTitle),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(L10n.of(context)
-                    .bookSyncStatusReleaseSpaceDialogContent),
+                Text(L10n.of(context).bookSyncStatusReleaseSpaceDialogContent),
                 Row(
                   children: [
                     StatefulBuilder(builder: (context, setState) {
@@ -112,6 +110,19 @@ class BookBottomSheet extends ConsumerWidget {
       }
     }
 
+    final actions = [
+      {
+        "icon": EvaIcons.cloud_upload,
+        "text": L10n.of(context).bookSyncStatusReleaseSpace,
+        "onTap": () => handleUpload(context)
+      },
+      {
+        "icon": EvaIcons.more_vertical,
+        "text": L10n.of(context).notesPageDetail,
+        "onTap": () => handleDetail(context)
+      },
+    ];
+
     return Container(
       padding: const EdgeInsets.all(20),
       height: 100,
@@ -126,19 +137,6 @@ class BookBottomSheet extends ConsumerWidget {
                 style: Theme.of(context).textTheme.titleMedium,
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis),
-          ),
-          IconAndText(
-              icon: const Icon(EvaIcons.cloud_upload),
-              text: L10n.of(context).bookSyncStatusReleaseSpace,
-              onTap: () {
-                handleUpload(context);
-              }),
-          IconAndText(
-            icon: const Icon(EvaIcons.more_vertical),
-            text: L10n.of(context).notesPageDetail,
-            onTap: () {
-              handleDetail(context);
-            },
           ),
           DeleteConfirm(
             delete: () {
@@ -155,7 +153,26 @@ class BookBottomSheet extends ConsumerWidget {
               ),
               text: L10n.of(context).commonConfirm,
             ),
-          )
+          ),
+          PopupMenuButton(
+              itemBuilder: (context) {
+                return actions.map((action) {
+                  return PopupMenuItem(
+                    child: TextButton.icon(
+                      icon: Icon(action["icon"] as IconData),
+                      label: Text(action["text"] as String),
+                      onPressed: () {
+                        Navigator.pop(context);
+                        (action["onTap"] as Function())();
+                      },
+                    ),
+                  );
+                }).toList();
+              },
+              child: IconAndText(
+                icon: const Icon(EvaIcons.more_vertical),
+                text: L10n.of(context).more,
+              ))
         ],
       ),
     );

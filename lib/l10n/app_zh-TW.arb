@@ -512,5 +512,6 @@
   "translationOnly": "僅翻譯",
   "bilingual": "雙語",
   "allowMixing": "允許混合",
-  "enableMixTip": "使能夠與其他音頻應用混合"
+  "enableMixTip": "使能夠與其他音頻應用混合",
+  "more": "更多"
 }
