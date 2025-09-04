@@ -57,7 +57,7 @@ dependencies:
   photo_view: ^0.15.0
   flutter_smart_dialog: ^4.9.8+1
   saver_gallery: ^4.0.1
-  share_plus: ^10.0.2
+  share_plus: ^11.1.0
   device_info_plus: ^11.3.2
   flutter_riverpod: ^2.5.1
   riverpod_annotation: ^2.3.5

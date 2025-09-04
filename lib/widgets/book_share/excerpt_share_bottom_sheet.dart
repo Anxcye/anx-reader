@@ -12,6 +12,7 @@ import 'package:anx_reader/utils/save_img.dart';
 import 'package:anx_reader/utils/toast/common.dart';
 import 'package:anx_reader/widgets/book_share/excerpt_share_card.dart';
 import 'package:anx_reader/widgets/icon_and_text.dart';
+import 'package:anx_reader/widgets/show_loading.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -66,14 +67,14 @@ class _ExcerptShareBottomSheetState
     Prefs().excerptShareBgimgIndex = index;
   }
 
+  Color get _textColor =>
+      _colorSchemes[Prefs().excerptShareColorIndex]['text']!;
 
+  Color get _backgroundColor =>
+      _colorSchemes[Prefs().excerptShareColorIndex]['background']!;
 
-
-  Color get _textColor => _colorSchemes[Prefs().excerptShareColorIndex]['text']!;
-
-  Color get _backgroundColor => _colorSchemes[Prefs().excerptShareColorIndex]['background']!;
-
-  String? get _backgroundImage => _backgroundImages[Prefs().excerptShareBgimgIndex];
+  String? get _backgroundImage =>
+      _backgroundImages[Prefs().excerptShareBgimgIndex];
 
   // final List<String> _fonts = ['default', 'serif', 'sans-serif', 'monospace'];
 
@@ -116,7 +117,7 @@ class _ExcerptShareBottomSheetState
   }
 
   Future<void> _shareAsImage() async {
-    SmartDialog.showLoading();
+    showLoading();
 
     final imageData = await _captureCard();
     if (imageData == null) {
@@ -128,8 +129,10 @@ class _ExcerptShareBottomSheetState
     final file = File('$tempDir/anx_excerpt_share.png');
     await file.writeAsBytes(imageData);
 
+    await SharePlus.instance.share(
+      ShareParams(files: [XFile(file.path)]),
+    );
     SmartDialog.dismiss();
-    await Share.shareXFiles([XFile(file.path)]);
   }
 
   Future<void> _saveAsImage() async {
@@ -218,9 +221,7 @@ class _ExcerptShareBottomSheetState
                         },
                       ),
                     ),
-
                     const SizedBox(height: 16),
-
                     Text(
                       L10n.of(context).readingPageShareFont,
                       style: _getTitleStyle(context),
@@ -257,9 +258,7 @@ class _ExcerptShareBottomSheetState
                             ),
                           ),
                     ),
-
                     const SizedBox(height: 16),
-
                     Text(
                       L10n.of(context).readingPageShareColor,
                       style: _getTitleStyle(context),
@@ -313,9 +312,7 @@ class _ExcerptShareBottomSheetState
                         },
                       ),
                     ),
-
                     const SizedBox(height: 16),
-
                     Text(
                       L10n.of(context).readingPageShareBackground,
                       style: _getTitleStyle(context),
