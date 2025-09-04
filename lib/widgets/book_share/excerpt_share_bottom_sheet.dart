@@ -18,6 +18,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
+import 'package:pointer_interceptor/pointer_interceptor.dart';
 import 'package:share_plus/share_plus.dart';
 
 class ExcerptShareBottomSheet extends ConsumerStatefulWidget {
@@ -407,11 +408,13 @@ Future<void> showExcerptShareBottomSheet({
     context: context,
     showDragHandle: true,
     isScrollControlled: true,
-    builder: (context) => ExcerptShareBottomSheet(
-      bookTitle: bookTitle,
-      author: author,
-      excerpt: excerpt,
-      chapter: chapter,
+    builder: (context) => PointerInterceptor(
+      child: ExcerptShareBottomSheet(
+        bookTitle: bookTitle,
+        author: author,
+        excerpt: excerpt,
+        chapter: chapter,
+      ),
     ),
   );
 }

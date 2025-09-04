@@ -510,7 +510,7 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
       callback: (args) async {
         Map<String, dynamic> detail = args[0]['detail'];
         bool remove = args[0]['remove'];
-        String cfi = detail['cfi'];
+        String cfi = detail['cfi'] ?? '';
         double percentage = detail['percentage'];
         String content = detail['content'];
 
