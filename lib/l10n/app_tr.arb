@@ -513,5 +513,11 @@
   "bilingual": "İki dilli",
   "allowMixing": "Karıştırmaya izin ver",
   "enableMixTip": "Diğer ses uygulamalarıyla karışmayı etkinleştirin",
-  "more": "Daha"
+  "more": "Daha",
+  "textAlignment": "Metin Hizalama",
+  "textAlignmentAuto": "Otomatik",
+  "textAlignmentLeft": "Sol",
+  "textAlignmentCenter": "Orta",
+  "textAlignmentRight": "Sağ",
+  "textAlignmentJustify": "Yasla"
 }

@@ -513,5 +513,11 @@
   "bilingual": "ثنائي اللغة",
   "allowMixing": "السماح للخلط",
   "enableMixTip": "تمكين الاختلاط مع تطبيقات الصوت الأخرى",
-  "more": "أكثر"
+  "more": "أكثر",
+  "textAlignment": "محاذاة النص",
+  "textAlignmentAuto": "تلقائي",
+  "textAlignmentLeft": "يسار",
+  "textAlignmentCenter": "وسط",
+  "textAlignmentRight": "يمين",
+  "textAlignmentJustify": "ضبط"
 }

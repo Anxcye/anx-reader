@@ -513,5 +513,11 @@
   "bilingual": "Bilingue",
   "allowMixing": "Allow Mixing",
   "enableMixTip": "Permettre de mélanger avec d'autres applications audio",
-  "more": "Plus"
+  "more": "Plus",
+  "textAlignment": "Alignement du texte",
+  "textAlignmentAuto": "Auto",
+  "textAlignmentLeft": "Gauche",
+  "textAlignmentCenter": "Centre",
+  "textAlignmentRight": "Droite",
+  "textAlignmentJustify": "Justifier"
 }

@@ -513,5 +513,11 @@
   "bilingual": "Двуязычный",
   "allowMixing": "Разрешить смешивание",
   "enableMixTip": "Включить смешивание с другими приложениями аудио",
-  "more": "Более"
+  "more": "Более",
+  "textAlignment": "Выравнивание текста",
+  "textAlignmentAuto": "Авто",
+  "textAlignmentLeft": "Слева",
+  "textAlignmentCenter": "По центру",
+  "textAlignmentRight": "Справа",
+  "textAlignmentJustify": "По ширине"
 }

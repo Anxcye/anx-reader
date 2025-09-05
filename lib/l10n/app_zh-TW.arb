@@ -513,5 +513,11 @@
   "bilingual": "雙語",
   "allowMixing": "允許混合",
   "enableMixTip": "使能夠與其他音頻應用混合",
-  "more": "更多"
+  "more": "更多",
+  "textAlignment": "文字對齊",
+  "textAlignmentAuto": "自動",
+  "textAlignmentLeft": "左對齊",
+  "textAlignmentCenter": "居中",
+  "textAlignmentRight": "右對齊",
+  "textAlignmentJustify": "兩端對齊"
 }
