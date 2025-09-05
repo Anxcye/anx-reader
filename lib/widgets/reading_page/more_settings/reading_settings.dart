@@ -45,8 +45,7 @@ class _ReadingMoreSettingsState extends State<ReadingMoreSettings> {
                           icon: const Text("简", style: iconStyle),
                         ),
                         ButtonSegment<ConvertChineseMode>(
-                          label:
-                              Text(L10n.of(context).readingPageTraditional),
+                          label: Text(L10n.of(context).readingPageTraditional),
                           value: ConvertChineseMode.s2t,
                           icon: const Text("繁", style: iconStyle),
                         ),
@@ -185,8 +184,8 @@ class _ReadingMoreSettingsState extends State<ReadingMoreSettings> {
                   child: SegmentedButton(
                     segments: [
                       ButtonSegment<WritingModeEnum>(
-                        label: Text(L10n.of(context)
-                            .readingPageWritingDirectionAuto),
+                        label: Text(
+                            L10n.of(context).readingPageWritingDirectionAuto),
                         value: WritingModeEnum.auto,
                         icon: const Icon(EvaIcons.activity_outline),
                       ),
@@ -257,17 +256,19 @@ class _ReadingMoreSettingsState extends State<ReadingMoreSettings> {
                       ),
                     ],
                     selected: {
-                      epubPlayerKey.currentState != null 
-                        ? Prefs().getBookTranslationMode(epubPlayerKey.currentState!.widget.book.id)
-                        : TranslationModeEnum.off
+                      epubPlayerKey.currentState != null
+                          ? Prefs().getBookTranslationMode(
+                              epubPlayerKey.currentState!.widget.book.id)
+                          : TranslationModeEnum.off
                     },
                     onSelectionChanged: (value) {
                       setState(() {
-                        final currentBookId = epubPlayerKey.currentState!.widget.book.id;
+                        final currentBookId =
+                            epubPlayerKey.currentState!.widget.book.id;
                         final newMode = value.first;
-                        
+
                         Prefs().setBookTranslationMode(currentBookId, newMode);
-                        
+
                         epubPlayerKey.currentState?.setTranslationMode(newMode);
                       });
                     },

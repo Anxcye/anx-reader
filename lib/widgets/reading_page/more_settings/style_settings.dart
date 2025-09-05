@@ -1,4 +1,5 @@
 import 'package:anx_reader/config/shared_preference_provider.dart';
+import 'package:anx_reader/enums/text_alignment.dart';
 import 'package:anx_reader/enums/writing_mode.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/models/book_style.dart';
@@ -186,6 +187,71 @@ class _StyleSettingsState extends State<StyleSettings> {
       ]);
     }
 
+    Widget textAlignment() {
+      final items = [
+        {
+          "icon": Icons.auto_awesome,
+          "text": L10n.of(context).textAlignmentAuto,
+          "value": TextAlignmentEnum.auto
+        },
+        {
+          "icon": Icons.format_align_left,
+          "text": L10n.of(context).textAlignmentLeft,
+          "value": TextAlignmentEnum.left
+        },
+        {
+          "icon": Icons.format_align_center,
+          "text": L10n.of(context).textAlignmentCenter,
+          "value": TextAlignmentEnum.center
+        },
+        {
+          "icon": Icons.format_align_right,
+          "text": L10n.of(context).textAlignmentRight,
+          "value": TextAlignmentEnum.right
+        },
+        {
+          "icon": Icons.format_align_justify,
+          "text": L10n.of(context).textAlignmentJustify,
+          "value": TextAlignmentEnum.justify
+        },
+      ];
+
+      return StatefulBuilder(
+        builder: (context, setState) => Row(
+          children: [
+            Icon(Icons.format_align_left,
+                color: Theme.of(context).colorScheme.onSurfaceVariant),
+            const SizedBox(width: 12),
+            Text(L10n.of(context).textAlignment),
+            const Spacer(),
+            DropdownMenu<TextAlignmentEnum>(
+              width: 140,
+              initialSelection: Prefs().textAlignment,
+              inputDecorationTheme: InputDecorationTheme(
+                isDense: false,
+                border: InputBorder.none,
+              ),
+              dropdownMenuEntries: items.map((item) {
+                return DropdownMenuEntry<TextAlignmentEnum>(
+                  value: item["value"] as TextAlignmentEnum,
+                  label: item["text"] as String,
+                  leadingIcon: Icon(item["icon"] as IconData),
+                );
+              }).toList(),
+              onSelected: (value) {
+                if (value != null) {
+                  setState(() {
+                    Prefs().textAlignment = value;
+                    epubPlayerKey.currentState?.changeStyle(Prefs().bookStyle);
+                  });
+                }
+              },
+            ),
+          ],
+        ),
+      );
+    }
+
     Widget sliders() {
       BookStyle bookStyle = Prefs().bookStyle;
       return StatefulBuilder(
@@ -207,6 +273,8 @@ class _StyleSettingsState extends State<StyleSettings> {
         children: [
           sliders(),
           const SizedBox(height: 16),
+          const Divider(),
+          textAlignment(),
           CustomCSSEditor(),
         ],
       ),

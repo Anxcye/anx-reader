@@ -299,6 +299,7 @@ const getCSS = ({ fontSize,
   fontColor,
   backgroundColor,
   justify,
+  textAlign,
   hyphenate,
   writingMode,
   backgroundImage,
@@ -364,7 +365,7 @@ const getCSS = ({ fontSize,
         // line-height: ${spacing} !important;
         font-weight: ${fontWeight} !important;
         padding-bottom: ${paragraphSpacing}em !important;
-        text-align: ${justify ? 'justify' : 'start'};
+        text-align: ${textAlign === 'auto' ? (justify ? 'justify' : 'start') : textAlign};
         -webkit-hyphens: ${hyphenate ? 'auto' : 'manual'};
         hyphens: ${hyphenate ? 'auto' : 'manual'};
         -webkit-hyphenate-limit-before: 3;
@@ -512,6 +513,7 @@ const replaceFootnote = (view) => {
     fontColor: style.fontColor,
     backgroundColor: 'transparent',
     justify: true,
+    textAlign: style.textAlign,
     hyphenate: true,
     customCSS: style.customCSS,
     customCSSEnabled: style.customCSSEnabled,
@@ -1065,6 +1067,7 @@ const setStyle = () => {
     fontColor: style.fontColor,
     backgroundColor: style.backgroundColor,
     justify: style.justify,
+    textAlign: style.textAlign,
     hyphenate: style.hyphenate,
     writingMode: style.writingMode,
     backgroundImage: style.backgroundImage,

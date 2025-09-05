@@ -12,6 +12,7 @@ import 'package:anx_reader/enums/sort_order.dart';
 import 'package:anx_reader/enums/sync_protocol.dart';
 import 'package:anx_reader/enums/translation_mode.dart';
 import 'package:anx_reader/enums/writing_mode.dart';
+import 'package:anx_reader/enums/text_alignment.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/main.dart';
 import 'package:anx_reader/models/bgimg.dart';
@@ -921,6 +922,15 @@ class Prefs extends ChangeNotifier {
 
   set allowMixWithOtherAudio(bool allow) {
     prefs.setBool('allowMixWithOtherAudio', allow);
+    notifyListeners();
+  }
+
+  TextAlignmentEnum get textAlignment {
+    return TextAlignmentEnum.fromCode(prefs.getString('textAlignment') ?? 'auto');
+  }
+
+  set textAlignment(TextAlignmentEnum alignment) {
+    prefs.setString('textAlignment', alignment.code);
     notifyListeners();
   }
 }
