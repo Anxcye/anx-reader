@@ -8,6 +8,7 @@
 - Feat: Support translation only mode
 - Feat: Support book-specific translation settings
 - Feat: Support sharing book files
+- Feat: Support text alignment settings
 - Fix: Improved garbled text detection in txt file encoding handling
 - Fix: Issue with WebDAV initialization
 - Fix: Fix multiple tools bar
@@ -20,8 +21,9 @@
 - Feat: 支持仅显示翻译
 - Feat: 支持每本书独立的翻译设置
 - Feat: 支持分享书籍文件
-- Fix: 改进 txt 文件编码处理中的乱码检测  
-- Fix: WebDAV初始化的问题  
+- Feat: 支持文本对齐设置
+- Fix: 改进 txt 文件编码处理中的乱码检测
+- Fix: WebDAV初始化的问题
 - Fix: 修复工具栏无法正确关闭的问题
 - L10n: 添加文言文、 西班牙语、法语、意大利语、日语、韩语、葡萄牙语、俄语
 - UI: 优化部分界面设计
