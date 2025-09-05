@@ -611,7 +611,7 @@ class Reader {
       })
     })
     view.addEventListener('click-image', async e => {
-      console.log('click-image', e.detail.img.src)
+      // console.log('click-image', e.detail.img.src)
       const blobUrl = e.detail.img.src
       const blob = await fetch(blobUrl).then(r => r.blob())
       const base64 = await new Promise((resolve, reject) => {

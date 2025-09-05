@@ -36,10 +36,10 @@ export class Translator {
   #initializeObserver() {
     this.#observer = new IntersectionObserver(
       (entries) => {
-        console.log(`IntersectionObserver triggered with ${entries.length} entries`)
+        // console.log(`IntersectionObserver triggered with ${entries.length} entries`)
         entries.forEach(entry => {
           if (entry.isIntersecting) {
-            console.log('Element intersecting, translating:', entry.target.tagName, entry.target.textContent?.substring(0, 30))
+            // console.log('Element intersecting, translating:', entry.target.tagName, entry.target.textContent?.substring(0, 30))
             this.#translateElement(entry.target).catch(error => 
               console.warn('Translation failed in observer:', error)
             )
@@ -63,7 +63,7 @@ export class Translator {
     this.#translationMode = mode
     
     if (oldMode !== mode) {
-      console.log(`Translation mode changed from ${oldMode} to ${mode}`)
+      // console.log(`Translation mode changed from ${oldMode} to ${mode}`)
       
       if (mode === TranslationMode.OFF) {
         // Turn off translation
@@ -81,7 +81,7 @@ export class Translator {
     if (window.reader && window.reader.annotationsByValue) {
       const existingAnnotations = Array.from(window.reader.annotationsByValue.values())
       if (existingAnnotations.length > 0) {
-        console.log('Re-rendering annotations after translation mode change:', existingAnnotations.length)
+        // console.log('Re-rendering annotations after translation mode change:', existingAnnotations.length)
         window.renderAnnotations(existingAnnotations)
       }
     }
@@ -92,24 +92,24 @@ export class Translator {
   }
 
   observeDocument(doc) {
-    console.log('Observing document for translation, doc:', doc)
+    // console.log('Observing document for translation, doc:', doc)
     if (!doc) {
       console.warn('No document provided to observeDocument')
       return
     }
         
     const textElements = this.#walkTextNodes(doc.body || doc.documentElement)
-    console.log(`Found ${textElements.length} text elements to observe`)
+    // console.log(`Found ${textElements.length} text elements to observe`)
     
     textElements.forEach(element => {
       if (!this.observedElements.has(element)) {
         this.#observer.observe(element)
         this.observedElements.add(element)
-        console.log('Added element to observer:', element.tagName, element.textContent?.substring(0, 50))
+        // console.log('Added element to observer:', element.tagName, element.textContent?.substring(0, 50))
       }
     })
     
-    console.log(`Total observed elements: ${this.observedElements.size}`)
+    // console.log(`Total observed elements: ${this.observedElements.size}`)
   }
 
   clearTranslations() {
@@ -307,7 +307,7 @@ export class Translator {
   }
 
   async #forceTranslateVisibleElements() {
-    console.log('Force translating visible elements')
+    // console.log('Force translating visible elements')
     
     const translationPromises = []
     
@@ -317,7 +317,7 @@ export class Translator {
       const isVisible = rect.top < window.innerHeight && rect.bottom > 0
       
       if (isVisible && !this.#translatedElements.has(element)) {
-        console.log('Force translating visible element:', element)
+        // console.log('Force translating visible element:', element)
         const translationPromise = this.#translateElement(element).catch(error => {
           console.warn('Force translation failed:', error)
         })
@@ -333,21 +333,21 @@ export class Translator {
     
     // Wait for all visible translations to complete
     if (translationPromises.length > 0) {
-      console.log(`Waiting for ${translationPromises.length} translations to complete`)
+      // console.log(`Waiting for ${translationPromises.length} translations to complete`)
       await Promise.allSettled(translationPromises)
-      console.log('All visible translations completed')
+      // console.log('All visible translations completed')
     }
   }
 
   #updateTranslationDisplay() {
-    console.log('Updating translation display for mode:', this.#translationMode, 'Elements:', this.observedElements.size)
+    // console.log('Updating translation display for mode:', this.#translationMode, 'Elements:', this.observedElements.size)
     this.observedElements.forEach(element => {
       const translationWrapper = element.querySelector('.translated-text')
       if (translationWrapper) {
-        console.log('Updating display for element with translation:', element)
+        // console.log('Updating display for element with translation:', element)
         this.#updateElementDisplay(element, translationWrapper)
       } else {
-        console.log('No translation wrapper found for element:', element)
+        // console.log('No translation wrapper found for element:', element)
       }
     })
   }
