@@ -407,7 +407,7 @@ class Prefs extends ChangeNotifier {
 
   TranslateService get fullTextTranslateService {
     return getTranslateService(
-        prefs.getString('webviewTranslateService') ?? 'microsoft');
+        prefs.getString('fullTextTranslateService') ?? 'microsoft');
   }
 
   set fullTextTranslateFrom(LangListEnum from) {
