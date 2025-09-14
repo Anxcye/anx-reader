@@ -9,6 +9,7 @@
 - Feat: Support book-specific translation settings
 - Feat: Support sharing book files
 - Feat: Support text alignment settings
+- Feat: Translation language follows app interface language
 - Fix: Improved garbled text detection in txt file encoding handling
 - Fix: Issue with WebDAV initialization
 - Fix: Fix multiple tools bar
@@ -22,6 +23,7 @@
 - Feat: 支持每本书独立的翻译设置
 - Feat: 支持分享书籍文件
 - Feat: 支持文本对齐设置
+- Feat: 翻译语言跟随应用界面语言
 - Fix: 改进 txt 文件编码处理中的乱码检测
 - Fix: WebDAV初始化的问题
 - Fix: 修复工具栏无法正确关闭的问题
