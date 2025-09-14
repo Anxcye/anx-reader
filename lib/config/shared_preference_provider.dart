@@ -340,7 +340,7 @@ class Prefs extends ChangeNotifier {
     BuildContext context = navigatorKey.currentContext!;
     if (fontJson == null) {
       return FontModel(
-          label: L10n.of(context).followBook, name: 'book', path: '');
+          label: L10n.of(context).followBook, name: 'book', path: 'book');
     }
     return FontModel.fromJson(fontJson);
   }

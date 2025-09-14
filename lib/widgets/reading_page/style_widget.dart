@@ -67,8 +67,7 @@ class StyleWidgetState extends State<StyleWidget> {
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Column(
         children: [
-          widgetTitle(
-              L10n.of(context).readingPageStyle, ReadingSettings.theme),
+          widgetTitle(L10n.of(context).readingPageStyle, ReadingSettings.theme),
           sliders(),
           const SizedBox(height: 10),
           fontAndPageTurn(),
@@ -100,17 +99,17 @@ class StyleWidgetState extends State<StyleWidget> {
       FontModel(
         label: L10n.of(context).downloadFonts,
         name: 'download',
-        path: '',
+        path: 'download',
       ),
       FontModel(
         label: L10n.of(context).addNewFont,
         name: 'newFont',
-        path: '',
+        path: 'newFount',
       ),
       FontModel(
         label: L10n.of(context).followBook,
         name: 'book',
-        path: '',
+        path: 'book',
       ),
       FontModel(
         label: L10n.of(context).systemFont,
@@ -146,7 +145,7 @@ class StyleWidgetState extends State<StyleWidget> {
     FontModel? font = fonts().firstWhere(
         (element) => element.path == Prefs().font.path,
         orElse: () => FontModel(
-            label: L10n.of(context).followBook, name: 'book', path: ''));
+            label: L10n.of(context).followBook, name: 'book', path: 'book'));
 
     Widget? leadingIcon(String name) {
       if (name == 'download') {
@@ -197,8 +196,6 @@ class StyleWidgetState extends State<StyleWidget> {
             if (font.name == 'newFont') {
               widget.hideAppBarAndBottomBar(false);
               await importFont();
-              AnxToast.show(
-                  L10n.of(navigatorKey.currentContext!).commonSuccess);
               return;
             } else if (font.name == 'download') {
               widget.hideAppBarAndBottomBar(false);
@@ -208,9 +205,10 @@ class StyleWidgetState extends State<StyleWidget> {
                     builder: (context) => const FontsSettingPage()),
               );
               return;
+            } else {
+              epubPlayerKey.currentState!.changeFont(font);
+              Prefs().font = font;
             }
-            epubPlayerKey.currentState!.changeFont(font);
-            Prefs().font = font;
           },
           dropdownMenuEntries: fonts()
               .map((font) => DropdownMenuEntry(
