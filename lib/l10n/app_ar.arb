@@ -519,5 +519,6 @@
   "textAlignmentLeft": "يسار",
   "textAlignmentCenter": "وسط",
   "textAlignmentRight": "يمين",
-  "textAlignmentJustify": "ضبط"
+  "textAlignmentJustify": "ضبط",
+  "shareFile": "مشاركة الملف"
 }

@@ -519,5 +519,6 @@
   "textAlignmentLeft": "왼쪽",
   "textAlignmentCenter": "중앙",
   "textAlignmentRight": "오른쪽",
-  "textAlignmentJustify": "양쪽 맞춤"
+  "textAlignmentJustify": "양쪽 맞춤",
+  "shareFile": "파일을 공유하십시오"
 }

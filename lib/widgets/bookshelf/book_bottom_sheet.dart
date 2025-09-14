@@ -125,7 +125,7 @@ class BookBottomSheet extends ConsumerWidget {
     final actions = [
       {
         "icon": EvaIcons.share,
-        "text": "Share File",
+        "text": L10n.of(context).shareFile,
         "onTap": () => handleShare()
       },
       {

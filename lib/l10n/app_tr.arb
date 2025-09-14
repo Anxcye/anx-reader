@@ -519,5 +519,6 @@
   "textAlignmentLeft": "Sol",
   "textAlignmentCenter": "Orta",
   "textAlignmentRight": "Sağ",
-  "textAlignmentJustify": "Yasla"
+  "textAlignmentJustify": "Yasla",
+  "shareFile": "Paylaşım Dosyası"
 }

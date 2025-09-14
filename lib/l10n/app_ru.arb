@@ -519,5 +519,6 @@
   "textAlignmentLeft": "Слева",
   "textAlignmentCenter": "По центру",
   "textAlignmentRight": "Справа",
-  "textAlignmentJustify": "По ширине"
+  "textAlignmentJustify": "По ширине",
+  "shareFile": "Поделиться файлом"
 }

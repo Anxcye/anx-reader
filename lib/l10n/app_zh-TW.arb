@@ -519,5 +519,6 @@
   "textAlignmentLeft": "左對齊",
   "textAlignmentCenter": "居中",
   "textAlignmentRight": "右對齊",
-  "textAlignmentJustify": "兩端對齊"
+  "textAlignmentJustify": "兩端對齊",
+  "shareFile": "共享文件"
 }

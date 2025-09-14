@@ -519,5 +519,6 @@
   "textAlignmentLeft": "Izquierda",
   "textAlignmentCenter": "Centro",
   "textAlignmentRight": "Derecha",
-  "textAlignmentJustify": "Justificar"
+  "textAlignmentJustify": "Justificar",
+  "shareFile": "Compartir archivo"
 }

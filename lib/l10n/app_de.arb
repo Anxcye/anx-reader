@@ -519,5 +519,6 @@
   "textAlignmentLeft": "Links",
   "textAlignmentCenter": "Zentriert",
   "textAlignmentRight": "Rechts",
-  "textAlignmentJustify": "Blocksatz"
+  "textAlignmentJustify": "Blocksatz",
+  "shareFile": "Datei teilen"
 }
