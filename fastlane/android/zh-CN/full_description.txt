@@ -1,0 +1,46 @@
+Anx Reader，一款为热爱阅读的你精心打造的电子书阅读器。集成多种 AI 能力，支持丰富的电子书格式，让阅读更智能、更专注。现代化界面设计，只为提供纯粹的阅读体验。
+
+<p>📚 <strong>丰富的格式支持</strong></p>
+<ul>
+<li>支持主流电子书格式：EPUB、MOBI、AZW3、FB2、TXT</li>
+<li>完美解析，确保最佳阅读体验</li>
+</ul>
+<p>☁️ <strong>无缝同步体验</strong></p>
+<ul>
+<li>通过 WebDAV 跨设备同步阅读进度、笔记和书籍</li>
+<li>随时随地继续您的阅读之旅</li>
+</ul>
+<p>🤖 <strong>智能 AI 助手</strong></p>
+<ul>
+<li>集成多款顶尖 AI 服务：OpenAI、DeepSeek、Claude、Gemini</li>
+<li>智能总结内容、回忆阅读位置，让阅读更有效率</li>
+</ul>
+<p>🎨 <strong>个性化阅读体验</strong></p>
+<ul>
+<li>精心设计的主题配色，支持自定义</li>
+<li>滚动/分页模式自由切换</li>
+<li>支持导入自定义字体，打造专属阅读空间</li>
+</ul>
+<p>📊 <strong>专业的阅读追踪</strong></p>
+<ul>
+<li>详尽的阅读数据统计</li>
+<li>支持周、月、年度阅读报告</li>
+<li>直观的阅读热力图，记录每一刻阅读时光</li>
+</ul>
+<p>📝 <strong>强大的笔记系统</strong></p>
+<ul>
+<li>灵活的文本批注功能</li>
+<li>支持导出为 TXT、CSV、Markdown 格式</li>
+<li>轻松整理和分享您的读书心得</li>
+</ul>
+<p>🛠️ <strong>实用工具集</strong></p>
+<ul>
+<li>TTS 智能朗读，解放双眼</li>
+<li>全文搜索，快速定位内容</li>
+<li>即时划词翻译，提升阅读效率</li>
+</ul>
+<p>💻 <strong>跨平台支持</strong></p>
+<ul>
+<li>完美支持 Android 与 Windows 系统</li>
+<li>统一的用户体验，无缝切换设备</li>
+</ul>
