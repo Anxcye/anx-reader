@@ -53,7 +53,6 @@ class _ProgressWidgetState extends State<ProgressWidget> {
                 icon: const Icon(Icons.arrow_back),
                 onPressed: () {
                   widget.epubPlayerKey.currentState!.prevChapter();
-                  widget.showOrHideAppBarAndBottomBar(false);
                 },
               ),
               Expanded(
@@ -82,7 +81,6 @@ class _ProgressWidgetState extends State<ProgressWidget> {
                 icon: const Icon(Icons.arrow_forward),
                 onPressed: () {
                   widget.epubPlayerKey.currentState!.nextChapter();
-                  widget.showOrHideAppBarAndBottomBar(false);
                 },
               ),
             ],
