@@ -2,7 +2,7 @@ name: anx_reader
 description: "An e-book reader."
 publish_to: 'none'
 
-version: 1.7.1+4194
+version: 1.7.1+4195
 
 environment:
   sdk: '>=3.5.2 <4.0.0'
