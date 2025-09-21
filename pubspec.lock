@@ -908,11 +908,12 @@ packages:
   flutter_tts:
     dependency: "direct main"
     description:
-      name: flutter_tts
-      sha256: baa3cb6b4990318460fe28bfa8c7869399e97223971532c02bd97c5e876aa3c5
-      url: "https://pub.dev"
-    source: hosted
-    version: "4.2.2"
+      path: "."
+      ref: master
+      resolved-ref: "464b871cb9360c620eeca32a1aada0afb376bb97"
+      url: "https://github.com/Anxcye/flutter_tts.git"
+    source: git
+    version: "4.2.3"
   flutter_web_plugins:
     dependency: transitive
     description: flutter
