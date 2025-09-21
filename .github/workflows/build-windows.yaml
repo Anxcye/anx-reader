@@ -40,8 +40,11 @@ jobs:
           flutter config --enable-windows-desktop
           sed -i "1i #define MyAppVersion \"${{ inputs.version }}\"" scripts/compile_windows_setup-inno.iss
 
-      - name: Install winget
-        uses: Cyberboss/install-winget@v1
+      - name: Install Inno Setup
+        run: |
+          # Use chocolatey to install Inno Setup as it's more reliable than winget in CI
+          choco install innosetup -y --no-progress
+        shell: pwsh
 
       - name: Build for Windows
         shell: pwsh

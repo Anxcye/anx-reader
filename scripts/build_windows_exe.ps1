@@ -1,6 +1,10 @@
 $innoSetupDir = "C:\Program Files (x86)\Inno Setup 6"
 
-winget install -e --id JRSoftware.InnoSetup --location $innoSetupDir --accept-source-agreements
+# Inno Setup should already be installed by the CI workflow
+if (!(Test-Path "$innoSetupDir\ISCC.exe")) {
+    Write-Error "Inno Setup not found at $innoSetupDir. Please ensure it's installed."
+    exit 1
+}
 
 Remove-Item "D:\inno" -Force  -Recurse -ErrorAction SilentlyContinue
 New-Item -ItemType Directory -Force -Path "D:\inno"
