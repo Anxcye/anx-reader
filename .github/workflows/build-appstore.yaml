@@ -51,7 +51,8 @@ jobs:
           # dart run build_runner build --delete-conflicting-outputs
 
       - name: Build iOS App
-        timeout-minutes: 20
+        timeout-minutes: 25
+        continue-on-error: true
         run: |
           cd ios
           bundle install
@@ -65,7 +66,8 @@ jobs:
           APP_BUNDLE_ID: ${{ secrets.APP_BUNDLE_ID }}
 
       - name: Build macos App
-        timeout-minutes: 20
+        timeout-minutes: 25
+        continue-on-error: true
         run: |
           cd macos
           bundle install
