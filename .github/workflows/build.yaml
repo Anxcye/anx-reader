@@ -38,6 +38,7 @@ jobs:
       version: ${{ needs.setup.outputs.version }}
     secrets:
       SIGNPATH_API_TOKEN: ${{ secrets.SIGNPATH_API_TOKEN }}
+      NOTIFICATION_URL: ${{ secrets.NOTIFICATION_URL }}
 
   build-macos:
     needs: setup

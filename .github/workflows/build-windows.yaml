@@ -9,10 +9,15 @@ on:
     secrets:
       SIGNPATH_API_TOKEN:
         required: true
+      NOTIFICATION_URL:
+        required: true
 
 jobs:
   build-windows:
     runs-on: windows-latest
+    env:
+      BASE_NOTIFICATION_URL: ${{ secrets.NOTIFICATION_URL }}/Anx-Reader%20Action
+      NOTIFICATION_PARAMS: ?level=timeSensitive&icon=https://github.githubassets.com/assets/GitHub-Mark-ea2971cee799.png
     
     steps:
       - name: Checkout repository
@@ -50,6 +55,11 @@ jobs:
           path: build/windows/unsigned/app.zip
           if-no-files-found: error
 
+      - name: Send notification after zip signing
+        run: |
+          curl -s "$BASE_NOTIFICATION_URL/zip%20File%20Waiting%20for%20approval$NOTIFICATION_PARAMS" || echo "Notification failed, continuing..."
+        shell: bash
+
       - name: Sign Windows zip
         uses: signpath/github-action-submit-signing-request@v1.1
         with:
@@ -73,6 +83,11 @@ jobs:
           name: windows-unsigned-exe
           path: build/windows/unsigned/app.exe
           if-no-files-found: error
+
+      - name: Send notification after exe signing
+        run: |
+          curl -s "$BASE_NOTIFICATION_URL/exe%20File%20Waiting%20for%20approval$NOTIFICATION_PARAMS" || echo "Notification failed, continuing..."
+        shell: bash
 
       - name: Sign Windows exe
         uses: signpath/github-action-submit-signing-request@v1.1
