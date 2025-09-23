@@ -6,6 +6,7 @@ import 'package:anx_reader/enums/bgimg_alignment.dart';
 import 'package:anx_reader/enums/bgimg_type.dart';
 import 'package:anx_reader/enums/convert_chinese_mode.dart';
 import 'package:anx_reader/enums/excerpt_share_template.dart';
+import 'package:anx_reader/enums/hint_key.dart';
 import 'package:anx_reader/enums/lang_list.dart';
 import 'package:anx_reader/enums/sort_field.dart';
 import 'package:anx_reader/enums/sort_order.dart';
@@ -513,6 +514,22 @@ class Prefs extends ChangeNotifier {
     notifyListeners();
   }
 
+  bool shouldShowHint(HintKey key) {
+    return prefs.getBool('hint_${key.code}') ?? true;
+  }
+
+  void setShowHint(HintKey key, bool value) {
+    prefs.setBool('hint_${key.code}', value);
+    notifyListeners();
+  }
+
+  void resetHints() {
+    for (final hint in HintKey.values) {
+      prefs.remove('hint_${hint.code}');
+    }
+    notifyListeners();
+  }
+
   set autoSummaryPreviousContent(bool status) {
     prefs.setBool('autoSummaryPreviousContent', status);
     notifyListeners();
@@ -742,15 +759,6 @@ class Prefs extends ChangeNotifier {
 
   set excerptShareBgimgIndex(int index) {
     prefs.setInt('excerptShareBgimgIndex', index);
-    notifyListeners();
-  }
-
-  bool get notShowReleaseLocalSpaceDialog {
-    return prefs.getBool('notShowReleaseLocalSpaceDialog') ?? false;
-  }
-
-  set notShowReleaseLocalSpaceDialog(bool status) {
-    prefs.setBool('notShowReleaseLocalSpaceDialog', status);
     notifyListeners();
   }
 

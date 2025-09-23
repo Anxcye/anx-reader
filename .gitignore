@@ -53,6 +53,7 @@ release.sh
 /.vscode/
 CLAUDE.md
 .claude/
+AGENTS.md
 
 macos/DerivedData/
 

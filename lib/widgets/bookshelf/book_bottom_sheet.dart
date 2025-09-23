@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/dao/book.dart';
+import 'package:anx_reader/enums/hint_key.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/page/book_detail.dart';
@@ -67,7 +68,7 @@ class BookBottomSheet extends ConsumerWidget {
         ref.read(syncStatusProvider.notifier).refresh();
       }
 
-      if (Prefs().notShowReleaseLocalSpaceDialog) {
+      if (Prefs().shouldShowHint(HintKey.releaseLocalSpace)) {
         ref.read(syncProvider.notifier).releaseBook(book);
       } else {
         SmartDialog.show(
@@ -81,10 +82,11 @@ class BookBottomSheet extends ConsumerWidget {
                   children: [
                     StatefulBuilder(builder: (context, setState) {
                       return Checkbox(
-                          value: Prefs().notShowReleaseLocalSpaceDialog,
+                          value:
+                              Prefs().shouldShowHint(HintKey.releaseLocalSpace),
                           onChanged: (value) {
-                            Prefs().notShowReleaseLocalSpaceDialog =
-                                value ?? false;
+                            Prefs().setShowHint(
+                                HintKey.releaseLocalSpace, value ?? false);
                             setState(() {});
                           });
                     }),
