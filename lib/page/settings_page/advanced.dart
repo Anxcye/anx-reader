@@ -147,14 +147,14 @@ class _AdvancedSettingState extends State<AdvancedSetting> {
           ],
         ),
         SettingsSection(
-          title: const Text('Hints'),
+          title: Text(L10n.of(context).hints),
           tiles: [
             SettingsTile.navigation(
-              title: const Text('Show all hints again'),
+              title: Text(L10n.of(context).showAllHintsAgain),
               leading: const Icon(Icons.lightbulb_outline),
               onPressed: (_) {
                 Prefs().resetHints();
-                AnxToast.show('All hints will be shown again');
+                AnxToast.show(L10n.of(context).allHintsWillBeShownAgain);
               },
             ),
           ],

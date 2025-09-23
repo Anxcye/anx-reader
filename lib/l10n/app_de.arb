@@ -520,5 +520,8 @@
   "textAlignmentCenter": "Zentriert",
   "textAlignmentRight": "Rechts",
   "textAlignmentJustify": "Blocksatz",
-  "shareFile": "Datei teilen"
+  "shareFile": "Datei teilen",
+  "hints": "Hinweise",
+  "showAllHintsAgain": "Alle Hinweise wieder anzeigen",
+  "allHintsWillBeShownAgain": "Alle Hinweise werden wieder angezeigt"
 }

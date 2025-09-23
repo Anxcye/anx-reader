@@ -520,5 +520,8 @@
   "textAlignmentCenter": "中央",
   "textAlignmentRight": "右",
   "textAlignmentJustify": "両端揃え",
-  "shareFile": "ファイルを共有します"
+  "shareFile": "ファイルを共有します",
+  "hints": "ヒント",
+  "showAllHintsAgain": "すべてのヒントをもう一度見せてください",
+  "allHintsWillBeShownAgain": "すべてのヒントが再び表示されます"
 }

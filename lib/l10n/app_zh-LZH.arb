@@ -520,5 +520,8 @@
   "textAlignmentCenter": "居中",
   "textAlignmentRight": "右對齊",
   "textAlignmentJustify": "兩端對齊",
-  "shareFile": "共享檔案"
+  "shareFile": "共享檔案",
+  "hints": "提示",
+  "showAllHintsAgain": "再示諸提示",
+  "allHintsWillBeShownAgain": "諸提示將復示"
 }

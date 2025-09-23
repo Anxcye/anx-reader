@@ -520,5 +520,8 @@
   "textAlignmentCenter": "Centro",
   "textAlignmentRight": "Destra",
   "textAlignmentJustify": "Giustifica",
-  "shareFile": "File condividi"
+  "shareFile": "Condividi file",
+  "hints": "Suggerimenti",
+  "showAllHintsAgain": "Mostra di nuovo tutti i suggerimenti",
+  "allHintsWillBeShownAgain": "Tutti i suggerimenti verranno mostrati di nuovo"
 }

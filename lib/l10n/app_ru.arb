@@ -520,5 +520,8 @@
   "textAlignmentCenter": "По центру",
   "textAlignmentRight": "Справа",
   "textAlignmentJustify": "По ширине",
-  "shareFile": "Поделиться файлом"
+  "shareFile": "Поделиться файлом",
+  "hints": "Подсказки",
+  "showAllHintsAgain": "Показать все подсказки снова",
+  "allHintsWillBeShownAgain": "Все подсказки будут снова показаны"
 }

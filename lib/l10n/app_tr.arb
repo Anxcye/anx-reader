@@ -520,5 +520,8 @@
   "textAlignmentCenter": "Orta",
   "textAlignmentRight": "Sağ",
   "textAlignmentJustify": "Yasla",
-  "shareFile": "Paylaşım Dosyası"
+  "shareFile": "Paylaşım Dosyası",
+  "hints": "İpucu",
+  "showAllHintsAgain": "Tüm ipuçlarını tekrar göster",
+  "allHintsWillBeShownAgain": "Tüm ipuçları tekrar gösterilecek"
 }

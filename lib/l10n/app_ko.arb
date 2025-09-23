@@ -520,5 +520,8 @@
   "textAlignmentCenter": "중앙",
   "textAlignmentRight": "오른쪽",
   "textAlignmentJustify": "양쪽 맞춤",
-  "shareFile": "파일을 공유하십시오"
+  "shareFile": "파일을 공유하십시오",
+  "hints": "힌트",
+  "showAllHintsAgain": "모든 힌트를 다시 표시하십시오",
+  "allHintsWillBeShownAgain": "모든 힌트가 다시 표시됩니다"
 }

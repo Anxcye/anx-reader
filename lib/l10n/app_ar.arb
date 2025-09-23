@@ -520,5 +520,8 @@
   "textAlignmentCenter": "وسط",
   "textAlignmentRight": "يمين",
   "textAlignmentJustify": "ضبط",
-  "shareFile": "مشاركة الملف"
+  "shareFile": "مشاركة الملف",
+  "hints": "تلميحات",
+  "showAllHintsAgain": "أظهر جميع التلميحات مرة أخرى",
+  "allHintsWillBeShownAgain": "سيتم عرض جميع التلميحات مرة أخرى"
 }
