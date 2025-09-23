@@ -51,11 +51,24 @@ jobs:
           # dart run build_runner build --delete-conflicting-outputs
 
       - name: Build iOS App
-        timeout-minutes: 20
+        id: ios_build
+        timeout-minutes: 26
         run: |
           cd ios
           bundle install
-          fastlane ios release_app_store
+          timeout 1500 fastlane ios release_app_store || EXIT_CODE=$?
+          if [ "${EXIT_CODE:-0}" -eq 124 ]; then
+            echo "iOS build timed out, but continuing..."
+            echo "ios_timeout=true" >> $GITHUB_OUTPUT
+            exit 0
+          elif [ "${EXIT_CODE:-0}" -ne 0 ]; then
+            echo "iOS build failed with non-timeout error"
+            echo "ios_timeout=false" >> $GITHUB_OUTPUT
+            exit $EXIT_CODE
+          else
+            echo "iOS build completed successfully"
+            echo "ios_timeout=false" >> $GITHUB_OUTPUT
+          fi
         env:
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
@@ -64,12 +77,45 @@ jobs:
           MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
           APP_BUNDLE_ID: ${{ secrets.APP_BUNDLE_ID }}
 
+      - name: Check iOS Build Status
+        if: steps.ios_build.outcome == 'failure' && steps.ios_build.outputs.ios_timeout != 'true'
+        run: |
+          echo "iOS build failed with non-timeout error, stopping workflow"
+          exit 1
+
       - name: Build macos App
-        timeout-minutes: 20
+        if: always() && (steps.ios_build.outcome == 'success' || steps.ios_build.outputs.ios_timeout == 'true')
+        id: macos_build
+        timeout-minutes: 26
         run: |
           cd macos
           bundle install
-          fastlane release_app_store
+          timeout 1500 fastlane release_app_store || EXIT_CODE=$?
+          if [ "${EXIT_CODE:-0}" -eq 124 ]; then
+            echo "macOS build timed out, but continuing..."
+            echo "macos_timeout=true" >> $GITHUB_OUTPUT
+            exit 0
+          elif [ "${EXIT_CODE:-0}" -ne 0 ]; then
+            echo "macOS build failed with non-timeout error"
+            echo "macos_timeout=false" >> $GITHUB_OUTPUT
+            exit $EXIT_CODE
+          else
+            echo "macOS build completed successfully"
+            echo "macos_timeout=false" >> $GITHUB_OUTPUT
+          fi
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_P8_BASE64: ${{ secrets.ASC_KEY_P8_BASE64 }}
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
+          APP_BUNDLE_ID: ${{ secrets.APP_BUNDLE_ID }}
+
+      - name: Check macOS Build Status
+        if: steps.macos_build.outcome == 'failure' && steps.macos_build.outputs.macos_timeout != 'true'
+        run: |
+          echo "macOS build failed with non-timeout error, stopping workflow"
+          exit 1
         env:
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}

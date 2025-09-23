@@ -1,0 +1,46 @@
+Anx Reader, a thoughtfully crafted e-book reader for book lovers. Featuring powerful AI capabilities and supporting various e-book formats, it makes reading smarter and more focused. With its modern interface design, we're committed to delivering pure reading pleasure.
+
+<p>📚 <strong>Rich Format Support</strong></p>
+<ul>
+<li>Support for major e-book formats: EPUB, MOBI, AZW3, FB2, TXT</li>
+<li>Perfect parsing for optimal reading experience</li>
+</ul>
+<p>☁️ <strong>Seamless Sync</strong></p>
+<ul>
+<li>Cross-device synchronization of reading progress, notes, and books via WebDAV</li>
+<li>Continue your reading journey anywhere, anytime</li>
+</ul>
+<p>🤖 <strong>Smart AI Assistant</strong></p>
+<ul>
+<li>Integration with leading AI services: OpenAI, DeepSeek, Claude, Gemini</li>
+<li>Intelligent content summarization and reading position recall for enhanced efficiency</li>
+</ul>
+<p>🎨 <strong>Personalized Reading Experience</strong></p>
+<ul>
+<li>Carefully designed theme colors with customization options</li>
+<li>Switch freely between scrolling and pagination modes</li>
+<li>Import custom fonts to create your personal reading space</li>
+</ul>
+<p>📊 <strong>Professional Reading Analytics</strong></p>
+<ul>
+<li>Comprehensive reading statistics</li>
+<li>Weekly, monthly, and yearly reading reports</li>
+<li>Intuitive reading heatmap to track every moment of your reading journey</li>
+</ul>
+<p>📝 <strong>Powerful Note System</strong></p>
+<ul>
+<li>Flexible text annotation features</li>
+<li>Export options in TXT, CSV, and Markdown formats</li>
+<li>Easily organize and share your reading insights</li>
+</ul>
+<p>🛠️ <strong>Practical Tools</strong></p>
+<ul>
+<li>Smart TTS reading to rest your eyes</li>
+<li>Full-text search for quick content location</li>
+<li>Instant word translation to enhance reading efficiency</li>
+</ul>
+<p>💻 <strong>Cross-Platform Support</strong></p>
+<ul>
+<li>Seamless experience on Android / Windows / MacOS / iOS</li>
+<li>Consistent user interface across devices</li>
+</ul>
