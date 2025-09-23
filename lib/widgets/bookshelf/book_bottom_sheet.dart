@@ -81,10 +81,11 @@ class BookBottomSheet extends ConsumerWidget {
                     StatefulBuilder(builder: (context, setState) {
                       return Checkbox(
                           value:
-                              Prefs().shouldShowHint(HintKey.releaseLocalSpace),
+                              !Prefs().shouldShowHint(HintKey.releaseLocalSpace),
                           onChanged: (value) {
+                            value = !(value ?? false);
                             Prefs().setShowHint(
-                                HintKey.releaseLocalSpace, value ?? false);
+                                HintKey.releaseLocalSpace, value);
                             setState(() {});
                           });
                     }),
