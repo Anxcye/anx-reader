@@ -3,10 +3,12 @@
 ## 1.7.1
 - Feat: Menu bar does not close after jumping to chapter
 - Feat: Add more hints to help understand features
+- Feat: Optimize Windows Touch Experience
 - Fix: Underline style highlights do not display correctly in vertical mode
 
 - Feat: 跳转章节后不关闭菜单栏
 - Feat: 添加更多提示信息来帮助了解功能
+- Feat: 优化 Windows 触摸屏体验
 - Fix: 竖排模式下，下划线样式的划线显示不正确的问题
 
 ## 1.7.0
