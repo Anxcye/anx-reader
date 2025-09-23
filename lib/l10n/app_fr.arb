@@ -523,5 +523,9 @@
   "shareFile": "Partager",
   "hints": "Conseils",
   "showAllHintsAgain": "Montrez à nouveau tous les conseils",
-  "allHintsWillBeShownAgain": "Tous les conseils seront à nouveau affichés"
+  "allHintsWillBeShownAgain": "Tous les conseils seront à nouveau affichés",
+  "close": "Fermer",
+  "dragAndDropToCreateFolderHint": "Appuyer longuement et faire glisser vers un autre livre pour créer un dossier",
+  "statisticsSwipeToDeleteHint": "Balayer vers la gauche pour supprimer les enregistrements de lecture. Vous pouvez annuler dans cette page, mais les modifications sont permanentes une fois que vous partez.",
+  "bookNotesOperationsHint": "Appuyer longuement pour sélectionner plusieurs éléments pour supprimer ou exporter, balayer vers la gauche pour modifier ou partager des notes"
 }

@@ -523,5 +523,9 @@
   "shareFile": "Condividi file",
   "hints": "Suggerimenti",
   "showAllHintsAgain": "Mostra di nuovo tutti i suggerimenti",
-  "allHintsWillBeShownAgain": "Tutti i suggerimenti verranno mostrati di nuovo"
+  "allHintsWillBeShownAgain": "Tutti i suggerimenti verranno mostrati di nuovo",
+  "close": "Chiudi",
+  "dragAndDropToCreateFolderHint": "Tieni premuto e trascina su un altro libro per creare una cartella",
+  "statisticsSwipeToDeleteHint": "Scorri a sinistra per eliminare i record di lettura. Puoi annullare in questa pagina, ma le modifiche sono permanenti una volta che esci.",
+  "bookNotesOperationsHint": "Tieni premuto per multi-selezione per eliminare o esportare, scorri a sinistra per modificare o condividere le note"
 }

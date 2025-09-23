@@ -523,5 +523,9 @@
   "shareFile": "共享文件",
   "hints": "提示",
   "showAllHintsAgain": "再次顯示所有提示",
-  "allHintsWillBeShownAgain": "所有提示將再次顯示"
+  "allHintsWillBeShownAgain": "所有提示將再次顯示",
+  "close": "關閉",
+  "dragAndDropToCreateFolderHint": "長按並拖拽到另一本書創建資料夾",
+  "statisticsSwipeToDeleteHint": "向左滑動以刪除閱讀記錄。您可以在此頁面中撤銷，但離開後更改是永久的。",
+  "bookNotesOperationsHint": "長按進行多選以刪除或匯出，向左滑動以編輯或分享筆記"
 }

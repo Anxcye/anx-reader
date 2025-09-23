@@ -523,5 +523,9 @@
   "shareFile": "파일을 공유하십시오",
   "hints": "힌트",
   "showAllHintsAgain": "모든 힌트를 다시 표시하십시오",
-  "allHintsWillBeShownAgain": "모든 힌트가 다시 표시됩니다"
+  "allHintsWillBeShownAgain": "모든 힌트가 다시 표시됩니다",
+  "close": "닫기",
+  "dragAndDropToCreateFolderHint": "길게 누른 후 다른 책으로 끌어서 폴더를 만드세요",
+  "statisticsSwipeToDeleteHint": "왼쪽으로 스와이프하여 읽기 기록을 삭제하세요. 이 페이지에서 취소할 수 있지만, 페이지를 나가면 변경사항은 영구적입니다.",
+  "bookNotesOperationsHint": "길게 눌러서 삭제 또는 내보내기용 다중 선택, 왼쪽으로 스와이프하여 메모 편집 또는 공유"
 }

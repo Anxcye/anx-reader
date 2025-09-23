@@ -523,5 +523,9 @@
   "shareFile": "Datei teilen",
   "hints": "Hinweise",
   "showAllHintsAgain": "Alle Hinweise wieder anzeigen",
-  "allHintsWillBeShownAgain": "Alle Hinweise werden wieder angezeigt"
+  "allHintsWillBeShownAgain": "Alle Hinweise werden wieder angezeigt",
+  "close": "Schließen",
+  "dragAndDropToCreateFolderHint": "Lang drücken und zu einem anderen Buch ziehen, um einen Ordner zu erstellen",
+  "statisticsSwipeToDeleteHint": "Nach links wischen, um Lesedatensätze zu löschen. Sie können in dieser Seite rückgängig machen, aber Änderungen sind dauerhaft, sobald Sie gehen.",
+  "bookNotesOperationsHint": "Lang drücken für Mehrfachauswahl zum Löschen oder Exportieren, nach links wischen zum Bearbeiten oder Teilen von Notizen"
 }
