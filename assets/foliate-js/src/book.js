@@ -585,8 +585,9 @@ class Reader {
     view.addEventListener('draw-annotation', e => {
       const { draw, annotation } = e.detail
       const { color, type } = annotation
-      if (type === 'highlight') draw(Overlayer.highlight, { color })
-      else if (type === 'underline') draw(Overlayer.underline, { color })
+      const opts = { color, writingMode: this.view.renderer.writingMode }
+      if (type === 'highlight') draw(Overlayer.highlight, { ...opts })
+      else if (type === 'underline') draw(Overlayer.underline, { ...opts })
     })
 
     view.addEventListener('show-annotation', e => {

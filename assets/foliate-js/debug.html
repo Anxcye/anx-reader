@@ -66,7 +66,7 @@
   }
 </style>
 
-<div id="debug-controls">
+<!-- <div id="debug-controls">
   <div>
     <button onclick="window.prevPage()">Prev</button>
     <button onclick="window.nextPage()">Next</button>
@@ -83,7 +83,7 @@
     <button onclick="testCFIPreservation()">Test CFI</button>
     <div id="cfi-result" style="font-size: 0.8em; margin-top: 5px;"></div>
   </div>
-</div>
+</div> -->
 
 <div id="footnote-dialog">
   <main></main>
@@ -128,7 +128,7 @@
         maxColumnCount: 1,
         // auto 'horizontal-tb' 'vertical-rl'
         // writingMode: "vertical-rl",
-        writingMode: "horizontal-tb",
+        writingMode: "vertical-rl",
         backgroundImage: "none",
         
         // true, false
@@ -163,8 +163,8 @@
 
   // available types: highlight, underline, bookmark
     const anno = [
-    { id: 1, type: 'highlight', value: "epubcfi(/6/6!/4/2[pgepubid00003]/18,/1:1,/1:18)", color: 'blue', note: 'this is' },
-    { id: 2, type: 'highlight', value: "epubcfi(/6/6!/4/2[pgepubid00003]/18,/3:300,/5:102)", color: '#66ccff', note: 'this is' },
+    { id: 1, type: 'underline', value: "epubcfi(/6/6!/4/2[pgepubid00003]/18,/1:1,/3:16)", color: 'blue', note: 'this is' },
+    { id: 2, type: 'ubderline', value: "epubcfi(/6/6!/4/2[pgepubid00003]/18,/3:300,/5:102)", color: '#66ccff', note: 'this is' },
     { id: 3, type: 'underline', value: "epubcfi(/6/6!/4/2[pgepubid00003]/18/6,/1:1,/1:8)", color: 'red', note: 'this is' },
   ]
 

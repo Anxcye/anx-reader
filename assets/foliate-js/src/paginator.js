@@ -132,7 +132,7 @@ const getDirection = doc => {
   const rtl = doc.body.dir === 'rtl'
     || direction === 'rtl'
     || doc.documentElement.dir === 'rtl'
-  return { vertical, rtl }
+  return { vertical, rtl, writingMode }
 }
 
 // const getBackground = doc => {
@@ -173,6 +173,7 @@ class View {
   #overlayer
   #vertical = false
   #rtl = false
+  #writingMode = 'horizontal-ltr'
   #column = true
   #size
   #layout = {}
@@ -217,11 +218,12 @@ class View {
 
         // it needs to be visible for Firefox to get computed style
         this.#iframe.style.display = 'block'
-        const { vertical, rtl } = getDirection(doc)
+        const { vertical, rtl, writingMode } = getDirection(doc)
         this.#iframe.style.display = 'none'
 
         this.#vertical = vertical
         this.#rtl = rtl
+        this.#writingMode = writingMode
 
         this.#contentRange.selectNodeContents(doc.body)
         const layout = beforeRender?.({ vertical, rtl })
@@ -377,6 +379,9 @@ class View {
   }
   get overlayer() {
     return this.#overlayer
+  }
+  get writingMode() {
+    return this.#writingMode
   }
   destroy() {
     if (this.document) this.#observer.unobserve(this.document.body)
@@ -1197,6 +1202,9 @@ export class Paginator extends HTMLElement {
 
     // needed because the resize observer doesn't work in Firefox
     this.#view?.document?.fonts?.ready?.then(() => this.#view.expand())
+  }
+  get writingMode() {
+    return this.#view?.writingMode
   }
   destroy() {
     this.#observer.unobserve(this)
