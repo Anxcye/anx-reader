@@ -17,7 +17,7 @@ jobs:
     runs-on: windows-latest
     env:
       BASE_NOTIFICATION_URL: ${{ secrets.NOTIFICATION_URL }}/Anx-Reader%20Action
-      NOTIFICATION_PARAMS: ?level=timeSensitive&icon=https://github.githubassets.com/assets/GitHub-Mark-ea2971cee799.png
+      NOTIFICATION_PARAMS: https://app.signpath.io/Web/254a26d6-6c3a-4a55-9ca6-890d0d34deb1/SigningRequests?level=timeSensitive&icon=https://github.githubassets.com/assets/GitHub-Mark-ea2971cee799.png
     
     steps:
       - name: Checkout repository
@@ -60,7 +60,7 @@ jobs:
 
       - name: Send notification after zip signing
         run: |
-          curl -s "$BASE_NOTIFICATION_URL/zip%20File%20Waiting%20for%20approval$NOTIFICATION_PARAMS" || echo "Notification failed, continuing..."
+          curl -s "$BASE_NOTIFICATION_URL/zip%20File%20Waiting%20for%20approval%20$NOTIFICATION_PARAMS" || echo "Notification failed, continuing..."
         shell: bash
 
       - name: Sign Windows zip
@@ -89,7 +89,7 @@ jobs:
 
       - name: Send notification after exe signing
         run: |
-          curl -s "$BASE_NOTIFICATION_URL/exe%20File%20Waiting%20for%20approval$NOTIFICATION_PARAMS" || echo "Notification failed, continuing..."
+          curl -s "$BASE_NOTIFICATION_URL/exe%20File%20Waiting%20for%20approval%20$NOTIFICATION_PARAMS" || echo "Notification failed, continuing..."
         shell: bash
 
       - name: Sign Windows exe
