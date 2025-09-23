@@ -56,7 +56,7 @@ class _ChangelogScreenState extends State<ChangelogScreen> {
   }
 
   String processChangelogContent(String content) {
-    bool isChinese() => getCurrentLanguageCode().contains('zh');
+    bool isChinese() => getCurrentLanguageCode().startsWith('zh');
 
     final lines = content.split('\n');
     var processedLines = <String>[];
