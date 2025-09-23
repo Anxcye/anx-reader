@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:anx_reader/config/shared_preference_provider.dart';
+import 'package:anx_reader/enums/hint_key.dart';
 import 'package:anx_reader/enums/sort_field.dart';
 import 'package:anx_reader/enums/sort_order.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
@@ -13,6 +14,7 @@ import 'package:anx_reader/utils/log/common.dart';
 import 'package:anx_reader/widgets/bookshelf/book_bottom_sheet.dart';
 import 'package:anx_reader/widgets/bookshelf/book_folder.dart';
 import 'package:anx_reader/widgets/bookshelf/sync_button.dart';
+import 'package:anx_reader/widgets/hint/hint_banner.dart';
 import 'package:anx_reader/widgets/tips/bookshelf_tips.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:file_picker/file_picker.dart';
@@ -23,9 +25,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:icons_plus/icons_plus.dart';
 
 class BookshelfPage extends ConsumerStatefulWidget {
-  const BookshelfPage({super.key,
-  this.controller  
-  });
+  const BookshelfPage({super.key, this.controller});
   final ScrollController? controller;
 
   @override
@@ -135,19 +135,31 @@ class BookshelfPageState extends ConsumerState<BookshelfPage> {
                     ],
                     builder: (children) {
                       return LayoutBuilder(builder: (context, constraints) {
-                        return GridView(
-                          key: _gridViewKey,
-                          controller: _scrollController,
-                          padding: const EdgeInsets.fromLTRB(20, 20, 20, 80),
-                          gridDelegate:
-                              SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount:
-                                constraints.maxWidth ~/ Prefs().bookCoverWidth,
-                            childAspectRatio: 1 / 2.1,
-                            mainAxisSpacing: 30,
-                            crossAxisSpacing: 20,
-                          ),
-                          children: children,
+                        return Column(
+                          children: [
+                            HintBanner(
+                                icon: const Icon(Icons.copy),
+                                hintKey: HintKey.dragAndDropToCreateFolder,
+                                margin: EdgeInsets.symmetric(horizontal: 20),
+                                child: Text(L10n.of(context).dragAndDropToCreateFolderHint)),
+                            Expanded(
+                              child: GridView(
+                                key: _gridViewKey,
+                                controller: _scrollController,
+                                padding:
+                                    const EdgeInsets.fromLTRB(20, 20, 20, 80),
+                                gridDelegate:
+                                    SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: constraints.maxWidth ~/
+                                      Prefs().bookCoverWidth,
+                                  childAspectRatio: 1 / 2.1,
+                                  mainAxisSpacing: 30,
+                                  crossAxisSpacing: 20,
+                                ),
+                                children: children,
+                              ),
+                            ),
+                          ],
                         );
                       });
                     });
