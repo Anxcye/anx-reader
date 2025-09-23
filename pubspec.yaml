@@ -30,6 +30,7 @@ dependencies:
   flutter_inappwebview: 
     git:
       url: https://github.com/Anxcye/flutter_inappwebview.git
+      ref: 4a275c3
       path: flutter_inappwebview
   shelf: ^1.4.1
   fl_chart: ^0.70.2
