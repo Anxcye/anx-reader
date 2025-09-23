@@ -62,7 +62,7 @@ class _HintBannerState extends State<HintBanner> {
       margin: widget.margin,
       decoration: BoxDecoration(
         color: backgroundColor,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(color: borderColor.withAlpha(200), width: 1.5),
       ),
       child: Stack(

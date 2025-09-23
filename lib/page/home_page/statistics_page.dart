@@ -2,6 +2,7 @@ import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/dao/book.dart';
 import 'package:anx_reader/dao/reading_time.dart';
 import 'package:anx_reader/enums/chart_mode.dart';
+import 'package:anx_reader/enums/hint_key.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/page/book_detail.dart';
@@ -13,6 +14,7 @@ import 'package:anx_reader/widgets/bookshelf/book_cover.dart';
 import 'package:anx_reader/widgets/container/filled_container.dart';
 import 'package:anx_reader/widgets/container/outlined_container.dart';
 import 'package:anx_reader/widgets/highlight_digit.dart';
+import 'package:anx_reader/widgets/hint/hint_banner.dart';
 import 'package:anx_reader/widgets/statistic/statistic_card.dart';
 import 'package:anx_reader/widgets/tips/statistic_tips.dart';
 import 'package:flutter/material.dart';
@@ -337,17 +339,25 @@ class _DateBooksState extends ConsumerState<DateBooks> {
               )
             else
               Column(
-                children: books.map((bookMap) {
-                  final book = bookMap.keys.first;
-                  final readingTime = bookMap.values.first;
-                  return dragToDelete(
-                    BookStatisticItem(
-                      bookId: book.id,
-                      readingTime: readingTime,
-                    ),
-                    book.id,
-                  );
-                }).toList(),
+                children: [
+                  HintBanner(
+                    icon: const Icon(Icons.swipe_left),
+                    hintKey: HintKey.statisticsSwipeToDelete,
+                    margin: const EdgeInsets.only(bottom: 10),
+                    child: Text(L10n.of(context).statisticsSwipeToDeleteHint),
+                  ),
+                  ...books.map((bookMap) {
+                    final book = bookMap.keys.first;
+                    final readingTime = bookMap.values.first;
+                    return dragToDelete(
+                      BookStatisticItem(
+                        bookId: book.id,
+                        readingTime: readingTime,
+                      ),
+                      book.id,
+                    );
+                  })
+                ],
               ),
           ],
         );

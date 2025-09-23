@@ -1,4 +1,5 @@
 import 'package:anx_reader/dao/book_note.dart';
+import 'package:anx_reader/enums/hint_key.dart';
 import 'package:anx_reader/enums/sync_direction.dart';
 import 'package:anx_reader/enums/sync_trigger.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
@@ -13,6 +14,7 @@ import 'package:anx_reader/widgets/book_share/excerpt_share_service.dart';
 import 'package:anx_reader/widgets/container/filled_container.dart';
 import 'package:anx_reader/widgets/delete_confirm.dart';
 import 'package:anx_reader/widgets/context_menu/excerpt_menu.dart';
+import 'package:anx_reader/widgets/hint/hint_banner.dart';
 import 'package:anx_reader/widgets/tips/notes_tips.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -737,12 +739,20 @@ class _BookNotesListState extends ConsumerState<BookNotesList> {
                   ],
                 )
               : Column(
-                  children: showNotes.map((bookNote) {
-                    return slidbleNotes(
-                      bookNoteItem(context, bookNote, false),
-                      bookNote,
-                    );
-                  }).toList(),
+                  children: [
+                    HintBanner(
+                      icon: const Icon(Icons.info_outline),
+                      hintKey: HintKey.bookNotesOperations,
+                      margin: const EdgeInsets.only(bottom: 10),
+                      child: Text(L10n.of(context).bookNotesOperationsHint),
+                    ),
+                    ...showNotes.map((bookNote) {
+                      return slidbleNotes(
+                        bookNoteItem(context, bookNote, false),
+                        bookNote,
+                      );
+                    })
+                  ],
                 ),
         ),
       ],
