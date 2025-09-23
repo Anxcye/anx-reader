@@ -63,7 +63,7 @@ class _HintBannerState extends State<HintBanner> {
       decoration: BoxDecoration(
         color: backgroundColor,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: borderColor.withAlpha(200), width: 1.5),
+        // border: Border.all(color: borderColor.withAlpha(200), width: 1.5),
       ),
       child: Stack(
         children: [

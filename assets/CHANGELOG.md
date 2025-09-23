@@ -2,8 +2,10 @@
 
 ## 1.7.1
 - Feat: Menu bar does not close after jumping to chapter
+- Feat: Add more hints to help understand features
 
 - Feat: 跳转章节后不关闭菜单栏
+- Feat: 添加更多提示信息来帮助了解功能
 
 ## 1.7.0
 - Feat: TTS can be configured to play together with other audio
