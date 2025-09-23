@@ -117,12 +117,61 @@ const handleSelection = (view, doc, index) => {
 
 const setSelectionHandler = (view, doc, index) => {
   //    doc.addEventListener('pointerdown', () => isSelecting = true);
-  // if windows or macos or iOS
-  if (navigator.platform.includes('Win') || navigator.platform.includes('Mac')
-    || navigator.platform.includes('iPhone') || navigator.platform.includes('iPad')
+  // if macos or iOS
+  if (navigator.platform.includes('Mac')
+    || navigator.platform.includes('iPhone')
+    || navigator.platform.includes('iPad')
   ) {
     doc.addEventListener('pointerup', () => handleSelection(view, doc, index));
   }
+  else if (navigator.platform.includes('Win')) {
+    if (navigator.maxTouchPoints > 0) {
+      // In Edge, the longpress by touch generates following touch event sequence:
+      // pointerover -> enter -> down -> move(n) -> cancel -> out -> leave
+      // While on the flutter webview, it generates:
+      // pointerover -> enter -> down -> move(n) -> up -> out -> leave
+      // Besides above event difference (cancle/up),
+      // the touch event is not triggered when change text selection range.
+      // Thus cannot use pointerup to detect the end of touch selection.
+      // Instead, we use selectionchange event to detect the end of touch selection
+      // for Edge and flutter webview.
+
+      // for mouse pointerup, handle selection directly
+      doc.addEventListener('pointerup', (e) => {
+        if (e.pointerType === 'touch') return;
+        handleSelection(view, doc, index); }
+      );
+
+      // filter out selectionchange event cause by mouse
+      var isMouseSelecting = false;
+      doc.addEventListener('pointerdown', (e) => {
+        if (e.pointerType !== 'mouse') return;
+        isMouseSelecting = true;
+      });
+      doc.addEventListener('pointerup', (e) => {
+        if (e.pointerType !== 'mouse') return;
+        isMouseSelecting = false;
+      });
+
+      var debounceTimerId = undefined;
+      doc.addEventListener('selectionchange', () => {
+        if (isMouseSelecting) return;
+
+        const selRange = getSelectionRange(doc.getSelection())
+        if (!selRange) return;
+
+        clearTimeout(debounceTimerId);
+        let delay = 500;
+        debounceTimerId = setTimeout(() => {
+          handleSelection(view, doc, index);
+        }, delay);
+      });
+
+    } else {
+      doc.addEventListener('pointerup', () => handleSelection(view, doc, index));
+    }
+  }
+
   else {
     doc.addEventListener('contextmenu', e => {
       // if (e.pointerType === 'mouse') {
