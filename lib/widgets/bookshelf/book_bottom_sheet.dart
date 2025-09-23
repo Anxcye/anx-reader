@@ -69,8 +69,6 @@ class BookBottomSheet extends ConsumerWidget {
       }
 
       if (Prefs().shouldShowHint(HintKey.releaseLocalSpace)) {
-        ref.read(syncProvider.notifier).releaseBook(book);
-      } else {
         SmartDialog.show(
           builder: (context) => AlertDialog(
             title: Text(L10n.of(context).bookSyncStatusReleaseSpaceDialogTitle),
@@ -112,6 +110,8 @@ class BookBottomSheet extends ConsumerWidget {
             ],
           ),
         );
+      } else {
+        ref.read(syncProvider.notifier).releaseBook(book);
       }
     }
 

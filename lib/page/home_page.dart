@@ -44,7 +44,7 @@ class _HomePageState extends ConsumerState<HomePage> {
   @override
   void initState() {
     super.initState();
-    initAnx();
+    WidgetsBinding.instance.addPostFrameCallback((_) => initAnx());
   }
 
   Future<void> _checkWindowsWebview() async {

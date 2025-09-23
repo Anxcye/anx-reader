@@ -584,6 +584,7 @@ class Sync extends _$Sync {
       return;
     } else if (syncStatus.both.contains(book.id)) {
       await deleteLocalBook();
+      ref.read(syncStatusProvider.notifier).refresh();
     } else {
       try {
         await uploadBook();
