@@ -5,12 +5,16 @@
 - Feat: Add more hints to help understand features
 - Feat: Optimize Windows Touch Experience
 - Fix: Underline style highlights do not display correctly in vertical mode
+- Fix: Inappropriate sentence segmentation during TTS reading
+- Fix: TTS skips annotation markers during reading
 - Perf: Reduce device GPU usage
 
 - Feat: 跳转章节后不关闭菜单栏
 - Feat: 添加更多提示信息来帮助了解功能
 - Feat: 优化 Windows 触摸屏体验
 - Fix: 竖排模式下，下划线样式的划线显示不正确的问题
+- Fix: 修复 TTS 朗读时分句不恰当的问题
+- Fix: TTS 朗读时跳过注解角标
 - Perf: 降低设备 GPU 使用
 
 ## 1.7.0

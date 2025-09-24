@@ -1,8 +1,3 @@
-const NS = {
-    XML: 'http://www.w3.org/XML/1998/namespace',
-    SSML: 'http://www.w3.org/2001/10/synthesis',
-}
-
 const blockTags = new Set([
     'article', 'aside', 'audio', 'blockquote', 'caption',
     'details', 'dialog', 'div', 'dl', 'dt', 'dd',
@@ -11,53 +6,136 @@ const blockTags = new Set([
     'main', 'math', 'nav', 'ol', 'p', 'pre', 'section', 'tr',
 ])
 
-const getLang = el => {
-    const x = el.lang || el?.getAttributeNS?.(NS.XML, 'lang')
-    return x ? x : el.parentElement ? getLang(el.parentElement) : null
-}
-
 function rangeIsEmpty(range) {
     return range.collapsed || range.toString().trim() === ''
 }
 
-const sentenseEndRegex = (lang) => {
-    switch (lang) {
-        case 'zh':
-            return 
-        case 'en':
-            return /[.!?]["']?/g
-        default:
-            return /[.!?]["']?/g
+const quoteChars = new Set(['"', "'", '“', '”', '‘', '’'])
+
+const isLocalLink = href => {
+    if (!href) return false
+    const trimmed = href.trim()
+    if (!trimmed) return false
+    if (trimmed.startsWith('#')) return true
+    return !/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(trimmed)
+}
+
+const shouldSkipTextNode = node => {
+    const parent = node.parentElement
+    if (!parent) return false
+    const anchor = parent.closest('a')
+    if (!anchor) return false
+    return isLocalLink(anchor.getAttribute('href'))
+}
+
+const getRangeText = range => {
+    const fragment = range.cloneContents()
+    const walker = document.createTreeWalker(fragment, NodeFilter.SHOW_TEXT)
+    let text = ''
+    for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+        if (shouldSkipTextNode(node)) continue
+        text += node.textContent ?? ''
     }
+    return text
+}
+
+const findBlockAncestor = node => {
+    let el = node.parentElement
+    while (el && !blockTags.has(el.tagName?.toLowerCase?.())) {
+        el = el.parentElement
+    }
+    return el ?? node.ownerDocument?.body ?? null
+}
+
+const isSentenceTerminator = (char, nextChar) => {
+    if (char === '.') {
+        if (!nextChar) return true
+        if (quoteChars.has(nextChar)) return true
+        if (/\s/.test(nextChar)) return true
+        return false
+    }
+    return char === '!' || char === '?' || char === '。' || char === '！' || char === '？'
+}
+
+const advancePastQuotes = (text, index) => {
+    let end = index
+    while (end < text.length && quoteChars.has(text[end])) end++
+    return end
 }
 
 function* getBlocks(doc) {
     const walker = doc.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT)
-    let lastRange = null
+    let startNode = null
+    let startOffset = 0
+    let currentBlock = null
+    let lastNode = null
+    let lastOffset = 0
+
+    const flushRange = () => {
+        if (!startNode || !lastNode) return null
+        const range = doc.createRange()
+        range.setStart(startNode, startOffset)
+        range.setEnd(lastNode, lastOffset)
+        startNode = null
+        startOffset = 0
+        currentBlock = null
+        lastNode = null
+        lastOffset = 0
+        if (rangeIsEmpty(range)) return null
+        return range
+    }
 
     for (let node = walker.nextNode(); node; node = walker.nextNode()) {
-        let match
-        // it some times cannot get the lang of the parent element
-        // const regex = sentenseEndRegex(getLang(node.parentElement))
+        if (!node.textContent) continue
+        if (shouldSkipTextNode(node)) continue
 
-        const regex = /[.!?。！？]["'“”‘’]?/g
-        while ((match = regex.exec(node.textContent)) !== null) {
-            const range = doc.createRange()
-            if (lastRange) {
-                lastRange.setEnd(node, match.index + match[0].length)
-                if (!rangeIsEmpty(lastRange)) yield lastRange
+        const block = findBlockAncestor(node)
+
+        if (!startNode) {
+            startNode = node
+            startOffset = 0
+            currentBlock = block
+        } else if (block !== currentBlock) {
+            const range = flushRange()
+            if (range) yield range
+            startNode = node
+            startOffset = 0
+            currentBlock = block
+        }
+
+        const text = node.textContent
+        let index = 0
+        while (index < text.length) {
+            const char = text[index]
+            const nextChar = text[index + 1]
+            if (isSentenceTerminator(char, nextChar)) {
+                const endOffset = advancePastQuotes(text, index + 1)
+                const range = doc.createRange()
+                range.setStart(startNode, startOffset)
+                range.setEnd(node, endOffset)
+                if (!rangeIsEmpty(range)) yield range
+                startNode = node
+                startOffset = endOffset
+                lastNode = node
+                lastOffset = endOffset
+                index = endOffset
+                continue
             }
-            lastRange = doc.createRange()
-            lastRange.setStart(node, match.index + match[0].length)
+            index += 1
         }
 
-        if (lastRange) {
-            lastRange.setEnd(node, node.textContent.length)
-            if (!rangeIsEmpty(lastRange)) yield lastRange
+        lastNode = node
+        lastOffset = text.length
+
+        if (startNode === node && startOffset === text.length) {
+            startNode = null
+            startOffset = 0
+            currentBlock = null
         }
-        lastRange = doc.createRange()
-        lastRange.setStart(node, node.textContent.length)
     }
+
+    const remaining = flushRange()
+    if (remaining) yield remaining
 }
 
 class ListIterator {
@@ -145,7 +223,7 @@ export class TTS {
         this.doc = doc
         this.highlight = highlight
         this.#list = new ListIterator(getBlocks(doc), range => {
-            return [range.toString(), range]
+            return [getRangeText(range), range]
         })
     }
 
