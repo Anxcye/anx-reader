@@ -15,6 +15,9 @@ on:
       release_notes:
         required: true
         type: string
+    secrets:
+      NOTIFICATION_URL:
+        required: true
 
 permissions:
   contents: write
@@ -23,6 +26,8 @@ jobs:
   upload-artifacts:
     if: inputs.is_alpha == 'true'
     runs-on: ubuntu-latest
+    env:
+      BASE_NOTIFICATION_URL: ${{ secrets.NOTIFICATION_URL }}/Anx-Reader%20Action
     steps:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
@@ -36,9 +41,17 @@ jobs:
           path: artifacts/
           if-no-files-found: warn
 
+      - name: Send build completion notification
+        shell: bash
+        run: |
+          RUN_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          curl -s "$BASE_NOTIFICATION_URL/Build%20Completed?url=$RUN_URL&level=timeSensitive&icon=https://github.githubassets.com/assets/GitHub-Mark-ea2971cee799.png" || echo "Notification failed, continuing..."
+
   create-release:
     if: inputs.is_alpha != 'true'
     runs-on: ubuntu-latest
+    env:
+      BASE_NOTIFICATION_URL: ${{ secrets.NOTIFICATION_URL }}/Anx-Reader%20Action
     steps:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
@@ -59,3 +72,10 @@ jobs:
           body: ${{ inputs.release_notes }}
           generate_release_notes: false
           prerelease: ${{ inputs.is_beta == 'true' }}
+
+      - name: Send build completion notification
+        shell: bash
+        run: |
+          RUN_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          curl -s "$BASE_NOTIFICATION_URL/Build%20Completed?url=$RUN_URL&level=timeSensitive&icon=https://github.githubassets.com/assets/GitHub-Mark-ea2971cee799.png" || echo "Notification failed, continuing..."
+

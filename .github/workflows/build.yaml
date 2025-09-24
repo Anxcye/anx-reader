@@ -67,3 +67,5 @@ jobs:
       is_alpha: ${{ needs.setup.outputs.is_alpha }}
       is_beta: ${{ needs.setup.outputs.is_beta }}
       release_notes: ${{ needs.setup.outputs.release_notes }}
+    secrets:
+      NOTIFICATION_URL: ${{ secrets.NOTIFICATION_URL }}
