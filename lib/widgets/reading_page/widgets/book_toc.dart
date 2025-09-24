@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:anx_reader/main.dart';
 import 'package:anx_reader/models/search_result_model.dart';
 import 'package:anx_reader/page/reading_page.dart';
@@ -27,8 +25,9 @@ class _BookTocState extends ConsumerState<BookToc> {
   String? _searchValue;
   TextEditingController searchBarController = TextEditingController();
   ScrollController listViewController = ScrollController();
-  List<bool> isExpanded = [];
   late List<TocItem> tocItems;
+  final Map<String, GlobalKey<TocItemWidgetState>> _itemKeys = {};
+  String? _lastAutoScrolledHref;
 
   @override
   void initState() {
@@ -39,46 +38,99 @@ class _BookTocState extends ConsumerState<BookToc> {
   void dispose() {
     _searchValue = null;
     searchBarController.clear();
-    epubPlayerKey.currentState?.clearSearch();
+    searchBarController.dispose();
+    listViewController.dispose();
+    widget.epubPlayerKey.currentState?.clearSearch();
     super.dispose();
   }
 
+  String _keyForItem(TocItem item) => '${item.id}_${item.href}';
+
+  GlobalKey<TocItemWidgetState> _obtainItemKey(TocItem item) {
+    final key = _keyForItem(item);
+    return _itemKeys.putIfAbsent(key, () => GlobalKey<TocItemWidgetState>());
+  }
+
+  void _reconcileItemKeys(List<TocItem> items) {
+    final keys = <String>{};
+
+    void collect(TocItem item) {
+      keys.add(_keyForItem(item));
+      for (final sub in item.subitems) {
+        collect(sub);
+      }
+    }
+
+    for (final item in items) {
+      collect(item);
+    }
+
+    _itemKeys.removeWhere((key, _) => !keys.contains(key));
+  }
+
+  List<TocItem>? _findPath(List<TocItem> items, String href) {
+    for (final item in items) {
+      if (item.href == href) {
+        return [item];
+      }
+      final nested = _findPath(item.subitems, href);
+      if (nested != null) {
+        return [item, ...nested];
+      }
+    }
+    return null;
+  }
+
+  void _ensureItemVisible(TocItem item, {bool animated = false}) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final key = _keyForItem(item);
+      final context = _itemKeys[key]?.currentContext;
+      if (context == null) {
+        return;
+      }
+      Scrollable.ensureVisible(
+        context,
+        duration:
+            animated ? const Duration(milliseconds: 250) : Duration.zero,
+        alignment: 0.0,
+        curve: Curves.easeInOut,
+      );
+    });
+  }
+
+  void _scrollToCurrent({bool animated = false}) {
+    final currentHref = widget.epubPlayerKey.currentState?.chapterHref ?? '';
+    if (currentHref.isEmpty) {
+      return;
+    }
+    final path = _findPath(tocItems, currentHref);
+    if (path == null || path.isEmpty) {
+      return;
+    }
+    _ensureItemVisible(path.last, animated: animated);
+  }
   @override
   Widget build(BuildContext context) {
-    isExpanded = [];
-    bool isSelected(TocItem tocItem) {
-      if (tocItem.href == widget.epubPlayerKey.currentState!.chapterHref) {
-        return true;
-      }
-      for (var subItem in tocItem.subitems) {
-        if (isSelected(subItem)) {
-          return true;
-        }
-      }
-      return false;
-    }
-
     tocItems = ref.watch(bookTocProvider);
-    for (var item in tocItems) {
-      isExpanded.add(isSelected(item));
-    }
+    _reconcileItemKeys(tocItems);
 
-    final offset = isExpanded.indexWhere((isExpanded) => isExpanded);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (listViewController.hasClients) {
-        listViewController.jumpTo(
-            min(offset * 56, listViewController.position.maxScrollExtent - 56));
-      }
-    });
+    final currentHref = widget.epubPlayerKey.currentState?.chapterHref ?? '';
+    final currentPath = currentHref.isEmpty
+        ? <TocItem>[]
+        : (_findPath(tocItems, currentHref) ?? <TocItem>[]);
+
+    if (_searchValue == null &&
+        currentHref.isNotEmpty &&
+        currentHref != _lastAutoScrolledHref &&
+        currentPath.isNotEmpty) {
+      _lastAutoScrolledHref = currentHref;
+      _ensureItemVisible(currentPath.last);
+    }
 
     var locatingButton = IconButton(
       icon: const Icon(Icons.my_location),
       onPressed: () {
-        final offset = isExpanded.indexWhere((isExpanded) => isExpanded);
-        if (listViewController.hasClients) {
-          listViewController.jumpTo(min(
-              offset * 56, listViewController.position.maxScrollExtent - 56));
-        }
+        _scrollToCurrent(animated: true);
       },
     );
 
@@ -98,7 +150,7 @@ class _BookTocState extends ConsumerState<BookToc> {
                     setState(() {
                       _searchValue = null;
                       searchBarController.clear();
-                      epubPlayerKey.currentState!.clearSearch();
+                      widget.epubPlayerKey.currentState!.clearSearch();
                     });
                   },
                 )
@@ -110,7 +162,7 @@ class _BookTocState extends ConsumerState<BookToc> {
               _searchValue = null;
             } else {
               _searchValue = value;
-              epubPlayerKey.currentState!.search(value);
+              widget.epubPlayerKey.currentState!.search(value);
             }
           });
         },
@@ -152,31 +204,36 @@ class _BookTocState extends ConsumerState<BookToc> {
             }),
       ],
     ));
-    return Column(
-      children: [
-        Row(
-          children: [
-            Expanded(child: searchBox),
-            if (_searchValue == null)
-            locatingButton,
-          ],
-        ),
-        _searchValue != null
-            ? searchResult
-            : Expanded(
-                child: ListView.builder(
-                  controller: listViewController,
-                  itemCount: tocItems.length,
-                  itemBuilder: (context, index) {
-                    return TocItemWidget(
-                        tocItem: tocItems[index],
-                        hideAppBarAndBottomBar: widget.hideAppBarAndBottomBar,
-                        epubPlayerKey: widget.epubPlayerKey);
-                  },
-                ),
+    final columnChildren = <Widget>[
+      Row(
+        children: [
+          Expanded(child: searchBox),
+          if (_searchValue == null) locatingButton,
+        ],
+      ),
+    ];
+
+    columnChildren.add(
+      _searchValue != null
+          ? searchResult
+          : Expanded(
+              child: ListView.builder(
+                controller: listViewController,
+                itemCount: tocItems.length,
+                itemBuilder: (context, index) {
+                  final item = tocItems[index];
+                  return TocItemWidget(
+                    key: _obtainItemKey(item),
+                    tocItem: item,
+                    hideAppBarAndBottomBar: widget.hideAppBarAndBottomBar,
+                    epubPlayerKey: widget.epubPlayerKey,
+                    obtainItemKey: _obtainItemKey,
+                  );
+                },
               ),
-      ],
+            ),
     );
+    return Column(children: columnChildren);
   }
 }
 
@@ -247,12 +304,14 @@ class TocItemWidget extends StatefulWidget {
   final TocItem tocItem;
   final Function hideAppBarAndBottomBar;
   final GlobalKey<EpubPlayerState> epubPlayerKey;
+  final GlobalKey<TocItemWidgetState> Function(TocItem tocItem) obtainItemKey;
 
   const TocItemWidget(
       {super.key,
       required this.tocItem,
       required this.hideAppBarAndBottomBar,
-      required this.epubPlayerKey});
+      required this.epubPlayerKey,
+      required this.obtainItemKey});
 
   @override
   TocItemWidgetState createState() => TocItemWidgetState();
@@ -265,6 +324,14 @@ class TocItemWidgetState extends State<TocItemWidget> {
   void initState() {
     super.initState();
     _isExpanded = _isSelected(widget.tocItem);
+  }
+
+  @override
+  void didUpdateWidget(covariant TocItemWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (_isSelected(widget.tocItem) && !_isExpanded) {
+      _isExpanded = true;
+    }
   }
 
   TextStyle tocStyle(content) => TextStyle(
@@ -380,9 +447,11 @@ class TocItemWidgetState extends State<TocItemWidget> {
             Padding(
               padding: const EdgeInsets.only(left: 40.0),
               child: TocItemWidget(
+                  key: widget.obtainItemKey(subItem),
                   tocItem: subItem,
                   hideAppBarAndBottomBar: widget.hideAppBarAndBottomBar,
-                  epubPlayerKey: widget.epubPlayerKey),
+                  epubPlayerKey: widget.epubPlayerKey,
+                  obtainItemKey: widget.obtainItemKey),
             ),
         Divider(
             indent: 10,

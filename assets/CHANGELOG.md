@@ -7,6 +7,7 @@
 - Fix: Underline style highlights do not display correctly in vertical mode
 - Fix: Inappropriate sentence segmentation during TTS reading
 - Fix: TTS skips annotation markers during reading
+- Fix: Table of contents supports locating the current chapter
 - Perf: Reduce device GPU usage
 
 - Feat: 跳转章节后不关闭菜单栏
@@ -15,6 +16,7 @@
 - Fix: 竖排模式下，下划线样式的划线显示不正确的问题
 - Fix: 修复 TTS 朗读时分句不恰当的问题
 - Fix: TTS 朗读时跳过注解角标
+- Fix: 目录支持定位到当前章节
 - Perf: 降低设备 GPU 使用
 
 ## 1.7.0
