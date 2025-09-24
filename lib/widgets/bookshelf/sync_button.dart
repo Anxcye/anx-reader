@@ -12,13 +12,8 @@ class SyncButton extends ConsumerStatefulWidget {
 
 class _SyncButtonState extends ConsumerState<SyncButton>
     with SingleTickerProviderStateMixin {
-  AnimationController? _syncAnimationController;
-
-  @override
-  void dispose() {
-    _syncAnimationController?.dispose();
-    super.dispose();
-  }
+  late final AnimationController _syncAnimationController;
+  late final Animation<double> _animation;
 
   @override
   void initState() {
@@ -26,31 +21,41 @@ class _SyncButtonState extends ConsumerState<SyncButton>
     _syncAnimationController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 1),
-    )..repeat();
+    );
+
+    _animation = Tween(begin: 1.0, end: 0.0).animate(_syncAnimationController);
+  }
+
+  @override
+  void dispose() {
+    _syncAnimationController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final syncState = ref.watch(syncProvider);
+    ref.listen(syncProvider.select((value) => value.isSyncing), (_, isSyncing) {
+      if (isSyncing) {
+        _syncAnimationController.repeat();
+      } else {
+        _syncAnimationController.stop();
+      }
+    });
 
-    if (syncState.isSyncing) {
-      _syncAnimationController?.repeat();
-      return IconButton(
-        icon: RotationTransition(
-          turns: Tween(begin: 1.0, end: 0.0).animate(_syncAnimationController!),
-          child: const Icon(Icons.sync),
-        ),
-        onPressed: () {
-          showSyncStatusBottomSheet(context);
-        },
-      );
-    } else {
-      return IconButton(
-        icon: const Icon(Icons.sync),
-        onPressed: () {
-          showSyncStatusBottomSheet(context);
-        },
-      );
-    }
+    final isSyncing = ref.watch(syncProvider.select((s) => s.isSyncing));
+
+    return IconButton(
+      icon: isSyncing
+          ? RepaintBoundary(
+              child: RotationTransition(
+                turns: _animation,
+                child: const Icon(Icons.sync),
+              ),
+            )
+          : const Icon(Icons.sync),
+      onPressed: () {
+        showSyncStatusBottomSheet(context);
+      },
+    );
   }
 }
