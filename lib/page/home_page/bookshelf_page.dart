@@ -140,14 +140,14 @@ class BookshelfPageState extends ConsumerState<BookshelfPage> {
                             HintBanner(
                                 icon: const Icon(Icons.copy),
                                 hintKey: HintKey.dragAndDropToCreateFolder,
-                                margin: EdgeInsets.symmetric(horizontal: 20),
+                                margin: EdgeInsets.fromLTRB(20, 0, 20, 5),
                                 child: Text(L10n.of(context).dragAndDropToCreateFolderHint)),
                             Expanded(
                               child: GridView(
                                 key: _gridViewKey,
                                 controller: _scrollController,
                                 padding:
-                                    const EdgeInsets.fromLTRB(20, 20, 20, 80),
+                                    const EdgeInsets.fromLTRB(20, 12, 20, 80),
                                 gridDelegate:
                                     SliverGridDelegateWithFixedCrossAxisCount(
                                   crossAxisCount: constraints.maxWidth ~/
