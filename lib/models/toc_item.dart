@@ -17,6 +17,7 @@ class TocItem {
       required this.startPercentage});
 
   get percentage => '${(startPercentage * 100).toStringAsFixed(2)}%';
+  get hasChildren => subitems.isNotEmpty;
 
   factory TocItem.fromJson(Map<String, dynamic> json) {
     return TocItem(
