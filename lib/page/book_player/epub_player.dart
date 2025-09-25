@@ -44,6 +44,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:intl/intl.dart';
 
+import 'minute_clock.dart';
+
 class EpubPlayer extends ConsumerStatefulWidget {
   final Book book;
   final String? cfi;
@@ -708,12 +710,7 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
     Widget bookProgressWidget =
         Text('${(percentage * 100).toStringAsFixed(2)}%', style: textStyle);
 
-    Widget timeWidget() => StreamBuilder(
-        stream: Stream.periodic(const Duration(seconds: 1)),
-        builder: (context, snapshot) {
-          String currentTime = DateFormat('HH:mm').format(DateTime.now());
-          return Text(currentTime, style: textStyle);
-        });
+    Widget timeWidget = MinuteClock(textStyle: textStyle);
 
     Widget batteryWidget = FutureBuilder(
         future: Battery().batteryLevel,
@@ -747,7 +744,7 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
           children: [
             batteryWidget,
             const SizedBox(width: 5),
-            timeWidget(),
+            timeWidget,
           ],
         );
 
@@ -762,7 +759,7 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
         case ReadingInfoEnum.battery:
           return batteryWidget;
         case ReadingInfoEnum.time:
-          return timeWidget();
+          return timeWidget;
         case ReadingInfoEnum.batteryAndTime:
           return batteryAndTimeWidget();
         case ReadingInfoEnum.none:
