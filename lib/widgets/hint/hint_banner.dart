@@ -1,6 +1,7 @@
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/enums/hint_key.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
+import 'package:anx_reader/widgets/container/filled_container.dart';
 import 'package:flutter/material.dart';
 
 class HintBanner extends StatefulWidget {
@@ -58,13 +59,9 @@ class _HintBannerState extends State<HintBanner> {
     final borderColor = colorScheme.primary;
     final backgroundColor = colorScheme.primary.withAlpha(30);
 
-    return Container(
+    return FilledContainer(
       margin: widget.margin,
-      decoration: BoxDecoration(
         color: backgroundColor,
-        borderRadius: BorderRadius.circular(20),
-        // border: Border.all(color: borderColor.withAlpha(200), width: 1.5),
-      ),
       child: Stack(
         children: [
           Padding(

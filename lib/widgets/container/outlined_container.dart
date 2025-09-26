@@ -6,20 +6,21 @@ class OutlinedContainer extends StatelessWidget {
     required this.child,
     this.width,
     this.height,
-    this.padding = const EdgeInsets.all(16.0),
-    this.margin = const EdgeInsets.all(0.0),
+    this.padding,
+    this.margin,
   });
 
   final Widget child;
   final double? width;
   final double? height;
-  final EdgeInsetsGeometry padding;
-  final EdgeInsetsGeometry margin;
+  final EdgeInsetsGeometry? padding;
+  final EdgeInsetsGeometry? margin;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       margin: margin,
+      padding: padding,
       width: width,
       height: height,
       decoration: ShapeDecoration(
@@ -31,10 +32,7 @@ class OutlinedContainer extends StatelessWidget {
           ),
         ),
       ),
-      child: Padding(
-        padding: padding,
-        child: child,
-      ),
+      child: child,
     );
   }
 }

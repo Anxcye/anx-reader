@@ -8,23 +8,23 @@ class FilledContainer extends StatelessWidget {
     required this.child,
     this.width,
     this.height,
-    this.padding = const EdgeInsets.all(16.0),
-    this.margin = const EdgeInsets.only(bottom: 8.0),
+    this.padding,
+    this.margin,
     this.color,
   });
 
   final Widget child;
   final double? width;
   final double? height;
-  final EdgeInsetsGeometry padding;
-  final EdgeInsetsGeometry margin;
+  final EdgeInsetsGeometry? padding;
+  final EdgeInsetsGeometry? margin;
   final Color? color;
 
   @override
   Widget build(BuildContext context) {
     if (Prefs().eInkMode) {
       return OutlinedContainer(
-        padding: padding,
+        padding: padding ,
         margin: margin,
         width: width,
         height: height,
@@ -35,6 +35,7 @@ class FilledContainer extends StatelessWidget {
         color ?? Theme.of(context).colorScheme.surfaceContainer;
 
     return Container(
+      padding: padding,
       margin: margin,
       width: width,
       height: height,
@@ -43,15 +44,12 @@ class FilledContainer extends StatelessWidget {
         shape: RoundedSuperellipseBorder(
           borderRadius: BorderRadiusGeometry.circular(30),
           side: BorderSide(
-            color: effectiveColor, 
-            width: 2, 
+            color: Colors.transparent,
+            width: 1,
           ),
         ),
       ),
-      child: Padding(
-        padding: padding,
-        child: child,
-      ),
+      child: child,
     );
   }
 }
