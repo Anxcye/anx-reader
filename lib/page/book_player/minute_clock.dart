@@ -55,7 +55,8 @@ class _MinuteClockState extends State<MinuteClock> {
   }
 
   @override
-  void dispose() {    _timer?.cancel();
+  void dispose() {
+    _timer?.cancel();
     super.dispose();
   }
 

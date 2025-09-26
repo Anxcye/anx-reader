@@ -42,7 +42,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:icons_plus/icons_plus.dart';
-import 'package:intl/intl.dart';
 
 import 'minute_clock.dart';
 
@@ -553,8 +552,9 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
           final service = Prefs().fullTextTranslateService;
           final from = Prefs().fullTextTranslateFrom;
           final to = Prefs().fullTextTranslateTo;
-          
-          return await TranslateFactory.getProvider(service).translateTextOnly(text, from, to);
+
+          return await TranslateFactory.getProvider(service)
+              .translateTextOnly(text, from, to);
         } catch (e) {
           AnxLog.severe('Translation error: $e');
           return 'Translation error: $e';
@@ -569,7 +569,7 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
     }
     webViewController = controller;
     setHandler(controller);
-    
+
     // Initialize translation mode based on book-specific settings
     Future.delayed(const Duration(milliseconds: 300), () {
       setTranslationMode(Prefs().getBookTranslationMode(widget.book.id));
