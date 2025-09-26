@@ -19,6 +19,7 @@ jobs:
     uses: ./.github/workflows/build-android.yaml
     with:
       version: ${{ needs.setup.outputs.version }}
+      flutter_version: ${{ needs.setup.outputs.flutter_version }}
     secrets:
       KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
       KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
@@ -30,12 +31,14 @@ jobs:
     uses: ./.github/workflows/build-ios.yaml
     with:
       version: ${{ needs.setup.outputs.version }}
+      flutter_version: ${{ needs.setup.outputs.flutter_version }}
 
   build-windows:
     needs: setup
     uses: ./.github/workflows/build-windows.yaml
     with:
       version: ${{ needs.setup.outputs.version }}
+      flutter_version: ${{ needs.setup.outputs.flutter_version }}
     secrets:
       SIGNPATH_API_TOKEN: ${{ secrets.SIGNPATH_API_TOKEN }}
       NOTIFICATION_URL: ${{ secrets.NOTIFICATION_URL }}
@@ -45,12 +48,14 @@ jobs:
     uses: ./.github/workflows/build-macos.yaml
     with:
       version: ${{ needs.setup.outputs.version }}
+      flutter_version: ${{ needs.setup.outputs.flutter_version }}
 
   build-appstore:
     needs: setup
     uses: ./.github/workflows/build-appstore.yaml
     with:
       version: ${{ needs.setup.outputs.version }}
+      flutter_version: ${{ needs.setup.outputs.flutter_version }}
     secrets:
       ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
       ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}

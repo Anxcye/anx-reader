@@ -15,6 +15,9 @@ on:
       release_notes:
         description: "Release notes"
         value: ${{ jobs.setup.outputs.release_notes }}
+      flutter_version:
+        description: "Flutter SDK version"
+        value: ${{ jobs.setup.outputs.flutter_version }}
 
 jobs:
   setup:
@@ -24,10 +27,17 @@ jobs:
       is_alpha: ${{ steps.get_version.outputs.is_alpha }}
       is_beta: ${{ steps.get_version.outputs.is_beta }}
       release_notes: ${{ steps.extract_release_notes.outputs.release_notes }}
+      flutter_version: ${{ steps.get_flutter_version.outputs.flutter_version }}
     
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Read Flutter version
+        id: get_flutter_version
+        run: |
+          FLUTTER_VERSION=3.35.
+          echo "flutter_version=${FLUTTER_VERSION}" >> $GITHUB_OUTPUT
 
       - name: Get version from pubspec.yaml and determine release type
         id: get_version

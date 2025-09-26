@@ -6,6 +6,9 @@ on:
       version:
         required: true
         type: string
+      flutter_version:
+        required: true
+        type: string
     secrets:
       SIGNPATH_API_TOKEN:
         required: true
@@ -27,7 +30,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version: '3.32.4'
+          flutter-version: ${{ inputs.flutter_version }}
 
       - name: Get Dependencies
         run: |
