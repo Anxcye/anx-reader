@@ -22,12 +22,14 @@ class OutlinedContainer extends StatelessWidget {
       margin: margin,
       width: width,
       height: height,
-      decoration: BoxDecoration(
-        border: Border.all(
-          color: Theme.of(context).colorScheme.outline,
-          width: 1,
+      decoration: ShapeDecoration(
+        shape: RoundedSuperellipseBorder(
+          borderRadius: BorderRadiusGeometry.circular(30),
+          side: BorderSide(
+            color: Theme.of(context).colorScheme.outline,
+            width: 1,
+          ),
         ),
-        borderRadius: BorderRadius.circular(20),
       ),
       child: Padding(
         padding: padding,
