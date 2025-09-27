@@ -8,6 +8,8 @@
 - Fix: Inappropriate sentence segmentation during TTS reading
 - Fix: TTS skips annotation markers during reading
 - Fix: Table of contents supports locating the current chapter
+- Fix: Some interface elements overflow in certain cases
+- UI: Optimize part of the interface design
 - Perf: Reduce device GPU usage
 
 - Feat: 跳转章节后不关闭菜单栏
@@ -17,6 +19,8 @@
 - Fix: 修复 TTS 朗读时分句不恰当的问题
 - Fix: TTS 朗读时跳过注解角标
 - Fix: 目录支持定位到当前章节
+- Fix: 某些情况下部分界面元素溢出的问题
+- UI: 优化部分界面设计
 - Perf: 降低设备 GPU 使用
 
 ## 1.7.0
