@@ -10,14 +10,13 @@ import 'package:anx_reader/page/home_page.dart';
 import 'package:anx_reader/service/book_player/book_player_server.dart';
 import 'package:anx_reader/service/iap_service.dart';
 import 'package:anx_reader/service/tts/tts_handler.dart';
+import 'package:anx_reader/utils/color_scheme.dart';
 import 'package:anx_reader/utils/env_var.dart';
 import 'package:anx_reader/utils/error/common.dart';
 import 'package:anx_reader/utils/get_path/get_base_path.dart';
 import 'package:anx_reader/utils/log/common.dart';
 import 'package:anx_reader/providers/sync.dart';
 import 'package:audio_service/audio_service.dart';
-import 'package:chinese_font_library/chinese_font_library.dart';
-import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
@@ -155,111 +154,26 @@ class _MyAppState extends ConsumerState<MyApp>
       ],
       child: provider.Consumer<Prefs>(
         builder: (context, prefsNotifier, child) {
-          // Color dragToMoveColor = ColorScheme.fromSeed(
-          //   seedColor: prefsNotifier.themeColor,
-          //   brightness: prefsNotifier.themeMode == ThemeMode.light
-          //       ? Brightness.light
-          //       : prefsNotifier.themeMode == ThemeMode.dark
-          //           ? Brightness.dark
-          //           : MediaQuery.platformBrightnessOf(context),
-          // ).surface;
-
-          final isEInkMode = prefsNotifier.eInkMode;
-          final colorScheme = isEInkMode
-              ? const ColorScheme.light(
-                  primary: Colors.black,
-                  onPrimary: Colors.white,
-                  secondary: Colors.grey,
-                  onSecondary: Colors.white,
-                  surface: Colors.white,
-                  onSurface: Colors.black,
-                )
-              : ColorScheme.fromSeed(
-                  seedColor: prefsNotifier.themeColor,
-                  brightness: prefsNotifier.themeMode == ThemeMode.light
-                      ? Brightness.light
-                      : prefsNotifier.themeMode == ThemeMode.dark
-                          ? Brightness.dark
-                          : MediaQuery.platformBrightnessOf(context),
-                );
-
-          // Widget dragToMoveArea = DragToMoveArea(
-          //   child: MaterialApp(
-          //     debugShowCheckedModeBanner: false,
-          //     home: Container(
-          //         color: dragToMoveColor,
-          //         child: Row(
-          //           mainAxisAlignment: MainAxisAlignment.end,
-          //           children: [
-          //             IconButton(
-          //                 onPressed: () {
-          //                   windowManager.minimize();
-          //                 },
-          //                 icon: const Icon(EvaIcons.minus)),
-          //             IconButton(
-          //                 onPressed: () async {
-          //                   if (await WindowManager.instance.isMaximized()) {
-          //                     windowManager.unmaximize();
-          //                   } else {
-          //                     windowManager.maximize();
-          //                   }
-          //                 },
-          //                 icon: const Icon(EvaIcons.square_outline)),
-          //             IconButton(
-          //               onPressed: () {
-          //                 windowManager.close();
-          //               },
-          //               icon: const Icon(EvaIcons.close_outline),
-          //             ),
-          //           ],
-          //         )),
-          //   ),
-          // );
-
-          return Column(
-            children: [
-              // dragToMoveArea,
-              Expanded(
-                child: MaterialApp(
-                  debugShowCheckedModeBanner: false,
-                  scrollBehavior: ScrollConfiguration.of(context).copyWith(
-                    physics: const BouncingScrollPhysics(),
-                    // dragDevices: {
-                    //   PointerDeviceKind.touch,
-                    //   PointerDeviceKind.mouse,
-                    // },
-                  ),
-                  navigatorObservers: [FlutterSmartDialog.observer],
-                  builder: FlutterSmartDialog.init(),
-                  navigatorKey: navigatorKey,
-                  locale: prefsNotifier.locale,
-                  localizationsDelegates: L10n.localizationsDelegates,
-                  supportedLocales: L10n.supportedLocales,
-                  title: 'Anx',
-                  themeMode: prefsNotifier.themeMode,
-                  theme: FlexThemeData.light(
-                          useMaterial3: true,
-                          swapLegacyOnMaterial3: true,
-                          colorScheme: colorScheme)
-                      .copyWith(
-                          sliderTheme: const SliderThemeData(year2023: false),
-                          progressIndicatorTheme:
-                              const ProgressIndicatorThemeData(year2023: false))
-                      .useSystemChineseFont(Brightness.light),
-                  darkTheme: FlexThemeData.dark(
-                          useMaterial3: true,
-                          swapLegacyOnMaterial3: true,
-                          darkIsTrueBlack: prefsNotifier.trueDarkMode,
-                          colorScheme: colorScheme)
-                      .copyWith(
-                          sliderTheme: const SliderThemeData(year2023: false),
-                          progressIndicatorTheme:
-                              const ProgressIndicatorThemeData(year2023: false))
-                      .useSystemChineseFont(Brightness.dark),
-                  home: const HomePage(),
-                ),
-              ),
-            ],
+          return MaterialApp(
+            debugShowCheckedModeBanner: false,
+            scrollBehavior: ScrollConfiguration.of(context).copyWith(
+              physics: const BouncingScrollPhysics(),
+              // dragDevices: {
+              //   PointerDeviceKind.touch,
+              //   PointerDeviceKind.mouse,
+              // },
+            ),
+            navigatorObservers: [FlutterSmartDialog.observer],
+            builder: FlutterSmartDialog.init(),
+            navigatorKey: navigatorKey,
+            locale: prefsNotifier.locale,
+            localizationsDelegates: L10n.localizationsDelegates,
+            supportedLocales: L10n.supportedLocales,
+            title: 'Anx',
+            themeMode: prefsNotifier.themeMode,
+            theme: colorSchema(prefsNotifier, context, Brightness.light),
+            darkTheme: colorSchema(prefsNotifier, context, Brightness.dark),
+            home: const HomePage(),
           );
         },
       ),
