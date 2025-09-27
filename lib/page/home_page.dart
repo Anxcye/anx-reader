@@ -173,30 +173,27 @@ class _HomePageState extends ConsumerState<HomePage> {
                     3,
                   ),
                   radius: 20,
-                  child: ClipRSuperellipse(
-                    borderRadius: BorderRadius.circular(20),
-                    child: NavigationRail(
-                      leading: InkWell(
-                        onTap: () => openAboutDialog(),
-                        child: Padding(
-                          padding: const EdgeInsets.only(right: 2.0),
-                          child: Image.asset(
-                            width: 32,
-                            height: 32,
-                            'assets/icon/Anx-logo-tined.png',
-                            color: Theme.of(context).colorScheme.secondary,
-                          ),
+                  child: NavigationRail(
+                     leading: InkWell(
+                      onTap: () => openAboutDialog(),
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 2.0),
+                        child: Image.asset(
+                          width: 32,
+                          height: 32,
+                          'assets/icon/Anx-logo-tined.png',
+                          color: Theme.of(context).colorScheme.secondary,
                         ),
                       ),
-                      groupAlignment: 0,
-                      extended: false,
-                      selectedIndex: _currentIndex,
-                      onDestinationSelected: _onBottomTap,
-                      destinations: railBarItems,
-                      labelType: NavigationRailLabelType.all,
-                      backgroundColor: Colors.transparent,
-                      // elevation: 0,
                     ),
+                    groupAlignment: 1,
+                    extended: false,
+                    selectedIndex: _currentIndex,
+                    onDestinationSelected: _onBottomTap,
+                    destinations: railBarItems,
+                    labelType: NavigationRailLabelType.all,
+                    backgroundColor: Colors.transparent,
+                    // elevation: 0,
                   ),
                 ),
                 Expanded(child: pages(_currentIndex, null)),
