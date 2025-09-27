@@ -10,7 +10,8 @@ Widget bookCover(
   double? width,
   double? radius,
 }) {
-  radius ??= 8;
+  final double effectiveRadius = radius ?? 8;
+  final BorderRadius borderRadius = BorderRadius.circular(effectiveRadius);
   File file = File(book.coverFullPath);
   Widget child = file.existsSync()
       ? Container(
@@ -33,17 +34,26 @@ Widget bookCover(
           ),
         );
 
-  return Container(
-      height: height,
-      width: width,
-      decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(radius),
-          border: Border.all(
-            width: 0.3,
-            color: Colors.grey,
-          )),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(radius),
+  final RoundedSuperellipseBorder borderShape = RoundedSuperellipseBorder(
+    borderRadius: borderRadius,
+    side: const BorderSide(
+      width: 0.3,
+      color: Colors.grey,
+    ),
+  );
+
+  return SizedBox(
+    height: height,
+    width: width,
+    child: DecoratedBox(
+      position: DecorationPosition.foreground,
+      decoration: ShapeDecoration(
+        shape: borderShape,
+      ),
+      child: ClipRSuperellipse(
+        borderRadius: borderRadius,
         child: child,
-      ));
+      ),
+    ),
+  );
 }
