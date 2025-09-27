@@ -379,7 +379,7 @@ class BookStatisticItem extends StatelessWidget {
   final int bookId;
   final int readingTime;
   final TextStyle bookTitleStyle = const TextStyle(
-    fontSize: 24,
+    fontSize: 20,
     fontFamily: 'SourceHanSerif',
     fontWeight: FontWeight.bold,
     overflow: TextOverflow.ellipsis,
@@ -390,7 +390,7 @@ class BookStatisticItem extends StatelessWidget {
     overflow: TextOverflow.ellipsis,
   );
   final TextStyle bookReadingTimeStyle = const TextStyle(
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: FontWeight.bold,
   );
 

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:anx_reader/dao/database.dart';
 import 'package:anx_reader/enums/sync_direction.dart';
@@ -174,7 +175,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                   ),
                   radius: 20,
                   child: NavigationRail(
-                     leading: InkWell(
+                    leading: InkWell(
                       onTap: () => openAboutDialog(),
                       child: Padding(
                         padding: const EdgeInsets.only(right: 2.0),
@@ -213,41 +214,36 @@ class _HomePageState extends ConsumerState<HomePage> {
                 color: Theme.of(context).colorScheme.primary,
                 borderRadius: BorderRadius.circular(500),
               ),
-              child: Container(
-                height: 64,
-                decoration: BoxDecoration(
-                  color: ElevationOverlay.applySurfaceTint(
-                    Theme.of(context).colorScheme.surface,
-                    Theme.of(context).colorScheme.primary,
-                    3,
-                  ),
-                  borderRadius: BorderRadius.circular(32),
-                  border: Border.all(
-                    color: Theme.of(context).colorScheme.outlineVariant,
-                    width: 1,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color:
-                          Theme.of(context).colorScheme.secondaryContainer,
-                      blurRadius: 8,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(32),
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+                  child: Container(
+                    height: 64,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .surfaceContainer
+                          .withAlpha(123),
+                      borderRadius: BorderRadius.circular(32),
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.outline,
+                        width: 0.5,
+                      ),
                     ),
-                  ],
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(32),
-                  child: BottomNavigationBar(
-                    selectedFontSize: 12,
-                    enableFeedback: true,
-                    type: BottomNavigationBarType.fixed,
-                    landscapeLayout:
-                        BottomNavigationBarLandscapeLayout.linear,
-                    currentIndex: _currentIndex,
-                    onTap: _onBottomTap,
-                    items: bottomBarItems,
-                    backgroundColor: Colors.transparent,
-                    elevation: 0,
-                    // height: 64,
+                    child: BottomNavigationBar(
+                      selectedFontSize: 12,
+                      enableFeedback: true,
+                      type: BottomNavigationBarType.fixed,
+                      landscapeLayout:
+                          BottomNavigationBarLandscapeLayout.linear,
+                      currentIndex: _currentIndex,
+                      onTap: _onBottomTap,
+                      items: bottomBarItems,
+                      backgroundColor: Colors.transparent,
+                      elevation: 0,
+                      // height: 64,
+                    ),
                   ),
                 ),
               ),

@@ -5,6 +5,15 @@ import 'package:flutter/material.dart';
 
 ThemeData colorSchema(
     Prefs prefsNotifier, BuildContext context, Brightness brightness) {
+    brightness = prefsNotifier.eInkMode
+        ? Brightness.light
+        : switch (prefsNotifier.themeMode) {
+            ThemeMode.light => Brightness.light,
+            ThemeMode.dark => Brightness.dark,
+            ThemeMode.system => MediaQuery.platformBrightnessOf(context),
+          };
+    Color seedColor = prefsNotifier.themeColor;
+
   final colorScheme = prefsNotifier.eInkMode
       ? const ColorScheme.light(
           primary: Colors.black,
@@ -14,20 +23,18 @@ ThemeData colorSchema(
           surface: Colors.white,
           onSurface: Colors.black,
         )
-      : switch (prefsNotifier.themeMode) {
-          ThemeMode.light => ColorScheme.fromSeed(
-              seedColor: prefsNotifier.themeColor,
+      : switch (brightness) {
+          Brightness.light => ColorScheme.fromSeed(
+              seedColor: seedColor,
               brightness: Brightness.light,
               surfaceContainer: Color(0xFFFFFFFF),
               surface: Color(0xFFF2F2F7),
-              ),
-          ThemeMode.dark => ColorScheme.fromSeed(
-              seedColor: prefsNotifier.themeColor,
-              brightness: Brightness.dark,
             ),
-          ThemeMode.system => ColorScheme.fromSeed(
-              seedColor: prefsNotifier.themeColor,
-              brightness: MediaQuery.platformBrightnessOf(context),
+          Brightness.dark => ColorScheme.fromSeed(
+              seedColor: seedColor,
+              brightness: Brightness.dark,
+              surfaceContainer: Color(0xFF2C2C2E),
+              surface: Color(0xFF1C1C1E),
             ),
         };
 
@@ -50,7 +57,9 @@ ThemeData colorSchema(
               darkIsTrueBlack: prefsNotifier.trueDarkMode,
               colorScheme: colorScheme,
             ).copyWith(
-              scaffoldBackgroundColor: Colors.black,
+              scaffoldBackgroundColor: prefsNotifier.trueDarkMode
+                  ? Color(0xFF000000)
+                  : Color(0xFF1C1C1E),
             ),
         };
 
