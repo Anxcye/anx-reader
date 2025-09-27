@@ -34,13 +34,17 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 onTap: () {},
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(0, 60, 0, 20),
-                  child: Center(
-                    child: Text(
-                      'Anx',
-                      style: TextStyle(
-                        fontSize: 130,
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.primary,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Container(
+                      constraints: const BoxConstraints(maxWidth: 500),
+                      child: Text(
+                        'Anx',
+                        style: TextStyle(
+                          fontSize: 130,
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
                       ),
                     ),
                   ),
@@ -64,10 +68,12 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   leading: const Icon(Icons.star_outline),
                   subtitle: Text(IAPService().statusTitle(context)),
                   onTap: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => const IAPPage()));
-                },
-              ),
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const IAPPage()));
+                  },
+                ),
               const About(),
             ],
           ),
