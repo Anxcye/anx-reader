@@ -261,6 +261,7 @@ class _BookNotesListState extends ConsumerState<BookNotesList> {
       },
       child: FilledContainer(
         padding: const EdgeInsets.all(8.0),
+        margin: const EdgeInsets.only(bottom: 8),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

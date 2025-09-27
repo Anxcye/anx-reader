@@ -4,17 +4,29 @@ import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 
 ThemeData colorSchema(
-    Prefs prefsNotifier, BuildContext context, Brightness brightness) {
-    brightness = prefsNotifier.eInkMode
-        ? Brightness.light
-        : switch (prefsNotifier.themeMode) {
-            ThemeMode.light => Brightness.light,
-            ThemeMode.dark => Brightness.dark,
-            ThemeMode.system => MediaQuery.platformBrightnessOf(context),
-          };
-    Color seedColor = prefsNotifier.themeColor;
+  Prefs prefsNotifier,
+  BuildContext context,
+  Brightness brightness,
+) {
+  brightness = prefsNotifier.eInkMode
+      ? Brightness.light
+      : switch (prefsNotifier.themeMode) {
+          ThemeMode.light => Brightness.light,
+          ThemeMode.dark => Brightness.dark,
+          ThemeMode.system => MediaQuery.platformBrightnessOf(context),
+        };
+  Color seedColor = prefsNotifier.themeColor;
+  final isDark = brightness == Brightness.dark;
+  final isEinkMode = prefsNotifier.eInkMode;
 
-  final colorScheme = prefsNotifier.eInkMode
+  final lightGropedBackground = const Color(0xFFF2F2F7);
+  final darkGropedBackground =
+      prefsNotifier.trueDarkMode ? Color(0xFF000000) : Color(0xFF1C1C1E);
+  final gropedBackgroundColor = isEinkMode
+      ? Colors.white
+      : isDark ? darkGropedBackground : lightGropedBackground;
+
+  final colorScheme = isEinkMode
       ? const ColorScheme.light(
           primary: Colors.black,
           onPrimary: Colors.white,
@@ -28,17 +40,17 @@ ThemeData colorSchema(
               seedColor: seedColor,
               brightness: Brightness.light,
               surfaceContainer: Color(0xFFFFFFFF),
-              surface: Color(0xFFF2F2F7),
+              surface: lightGropedBackground,
             ),
           Brightness.dark => ColorScheme.fromSeed(
               seedColor: seedColor,
               brightness: Brightness.dark,
               surfaceContainer: Color(0xFF2C2C2E),
-              surface: Color(0xFF1C1C1E),
+              surface: darkGropedBackground,
             ),
         };
 
-  ThemeData themeData = prefsNotifier.eInkMode
+  ThemeData themeData = isEinkMode
       ? FlexThemeData.light(
           useMaterial3: true,
           swapLegacyOnMaterial3: true,
@@ -48,26 +60,25 @@ ThemeData colorSchema(
               useMaterial3: true,
               swapLegacyOnMaterial3: true,
               colorScheme: colorScheme,
-            ).copyWith(
-              scaffoldBackgroundColor: Color(0xFFF2F2F7),
             ),
           Brightness.dark => FlexThemeData.dark(
               useMaterial3: true,
               swapLegacyOnMaterial3: true,
               darkIsTrueBlack: prefsNotifier.trueDarkMode,
               colorScheme: colorScheme,
-            ).copyWith(
-              scaffoldBackgroundColor: prefsNotifier.trueDarkMode
-                  ? Color(0xFF000000)
-                  : Color(0xFF1C1C1E),
-            ),
+            )
         };
 
+  
   return themeData
       .copyWith(
-        sliderTheme: const SliderThemeData(year2023: false),
-        progressIndicatorTheme:
-            const ProgressIndicatorThemeData(year2023: false),
-      )
+          sliderTheme: const SliderThemeData(year2023: false),
+          progressIndicatorTheme:
+              const ProgressIndicatorThemeData(year2023: false),
+          scaffoldBackgroundColor: gropedBackgroundColor,
+          bottomSheetTheme: BottomSheetThemeData()
+              .copyWith(backgroundColor: gropedBackgroundColor),
+          dialogTheme: DialogThemeData()
+              .copyWith(backgroundColor: gropedBackgroundColor))
       .useSystemChineseFont(brightness);
 }
