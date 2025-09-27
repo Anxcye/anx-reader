@@ -8,6 +8,7 @@ class OutlinedContainer extends StatelessWidget {
     this.height,
     this.padding,
     this.margin,
+    this.radius,
   });
 
   final Widget child;
@@ -15,6 +16,7 @@ class OutlinedContainer extends StatelessWidget {
   final double? height;
   final EdgeInsetsGeometry? padding;
   final EdgeInsetsGeometry? margin;
+  final double? radius;
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +27,7 @@ class OutlinedContainer extends StatelessWidget {
       height: height,
       decoration: ShapeDecoration(
         shape: RoundedSuperellipseBorder(
-          borderRadius: BorderRadiusGeometry.circular(30),
+          borderRadius: BorderRadiusGeometry.circular(radius ?? 30),
           side: BorderSide(
             color: Theme.of(context).colorScheme.outline,
             width: 1,

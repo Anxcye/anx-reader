@@ -11,6 +11,7 @@ class FilledContainer extends StatelessWidget {
     this.padding,
     this.margin,
     this.color,
+    this.radius,
   });
 
   final Widget child;
@@ -19,6 +20,7 @@ class FilledContainer extends StatelessWidget {
   final EdgeInsetsGeometry? padding;
   final EdgeInsetsGeometry? margin;
   final Color? color;
+  final double? radius;
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +44,7 @@ class FilledContainer extends StatelessWidget {
       decoration: ShapeDecoration(
         color: effectiveColor,
         shape: RoundedSuperellipseBorder(
-          borderRadius: BorderRadiusGeometry.circular(30),
+          borderRadius: BorderRadiusGeometry.circular(radius ?? 30),
           side: BorderSide(
             color: Colors.transparent,
             width: 1,

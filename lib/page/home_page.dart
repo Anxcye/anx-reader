@@ -17,6 +17,7 @@ import 'package:anx_reader/utils/log/common.dart';
 import 'package:anx_reader/providers/sync.dart';
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/utils/toast/common.dart';
+import 'package:anx_reader/widgets/container/filled_container.dart';
 import 'package:anx_reader/widgets/settings/about.dart';
 import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
 import 'package:flutter/foundation.dart';
@@ -164,37 +165,27 @@ class _HomePageState extends ConsumerState<HomePage> {
             extendBody: true,
             body: Row(
               children: [
-                Container(
+                FilledContainer(
                   margin: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: ElevationOverlay.applySurfaceTint(
-                      Theme.of(context).colorScheme.surface,
-                      Theme.of(context).colorScheme.primary,
-                      3,
-                    ),
-                    borderRadius: BorderRadius.circular(20),
+                  color: ElevationOverlay.applySurfaceTint(
+                    Theme.of(context).colorScheme.surface,
+                    Theme.of(context).colorScheme.primary,
+                    3,
                   ),
-                  child: ClipRRect(
+                  radius: 20,
+                  child: ClipRSuperellipse(
                     borderRadius: BorderRadius.circular(20),
                     child: NavigationRail(
-                      leading: Expanded(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            InkWell(
-                              onTap: () => openAboutDialog(),
-                              child: Padding(
-                                padding: const EdgeInsets.only(right: 2.0),
-                                child: Image.asset(
-                                  width: 32,
-                                  height: 32,
-                                  'assets/icon/Anx-logo-tined.png',
-                                  color:
-                                      Theme.of(context).colorScheme.secondary,
-                                ),
-                              ),
-                            ),
-                          ],
+                      leading: InkWell(
+                        onTap: () => openAboutDialog(),
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: 2.0),
+                          child: Image.asset(
+                            width: 32,
+                            height: 32,
+                            'assets/icon/Anx-logo-tined.png',
+                            color: Theme.of(context).colorScheme.secondary,
+                          ),
                         ),
                       ),
                       groupAlignment: 0,
