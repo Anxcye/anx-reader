@@ -147,8 +147,8 @@ class StatisticCard extends ConsumerWidget {
           ),
         );
     return AnimatedSize(
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOutBack,
+      duration: const Duration(milliseconds: 400),
+      curve: Curves.easeOutBack,
       alignment: Alignment.topCenter,
       child: FilledContainer(
         padding: const EdgeInsets.fromLTRB(10, 0, 10, 5),
