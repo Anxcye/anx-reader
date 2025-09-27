@@ -6,6 +6,7 @@ import 'package:anx_reader/enums/writing_mode.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/page/reading_page.dart';
 import 'package:anx_reader/page/settings_page/subpage/fonts.dart';
+import 'package:anx_reader/widgets/common/anx_segmented_button.dart';
 import 'package:flutter/material.dart';
 import 'package:icons_plus/icons_plus.dart';
 
@@ -32,20 +33,20 @@ class _ReadingMoreSettingsState extends State<ReadingMoreSettings> {
               Row(
                 children: [
                   Expanded(
-                    child: SegmentedButton<ConvertChineseMode>(
+                    child: AnxSegmentedButton<ConvertChineseMode>(
                       segments: [
-                        ButtonSegment<ConvertChineseMode>(
-                          label: Text(L10n.of(context).readingPageOriginal),
+                        SegmentButtonItem(
+                          label: L10n.of(context).readingPageOriginal,
                           value: ConvertChineseMode.none,
                           icon: const Text("原", style: iconStyle),
                         ),
-                        ButtonSegment<ConvertChineseMode>(
-                          label: Text(L10n.of(context).readingPageSimplified),
+                        SegmentButtonItem(
+                          label: L10n.of(context).readingPageSimplified,
                           value: ConvertChineseMode.t2s,
                           icon: const Text("简", style: iconStyle),
                         ),
-                        ButtonSegment<ConvertChineseMode>(
-                          label: Text(L10n.of(context).readingPageTraditional),
+                        SegmentButtonItem(
+                          label: L10n.of(context).readingPageTraditional,
                           value: ConvertChineseMode.s2t,
                           icon: const Text("繁", style: iconStyle),
                         ),
@@ -133,20 +134,20 @@ class _ReadingMoreSettingsState extends State<ReadingMoreSettings> {
             Row(
               children: [
                 Expanded(
-                  child: SegmentedButton(
+                  child: AnxSegmentedButton<int>(
                     segments: [
-                      ButtonSegment<int>(
-                        label: Text(L10n.of(context).readingPageAuto),
+                      SegmentButtonItem(
+                        label: L10n.of(context).readingPageAuto,
                         value: 0,
                         icon: const Icon(Icons.auto_awesome),
                       ),
-                      ButtonSegment<int>(
-                        label: Text(L10n.of(context).readingPageSingle),
+                      SegmentButtonItem(
+                        label: L10n.of(context).readingPageSingle,
                         value: 1,
                         icon: const Icon(EvaIcons.book),
                       ),
-                      ButtonSegment<int>(
-                        label: Text(L10n.of(context).readingPageDouble),
+                      SegmentButtonItem(
+                        label: L10n.of(context).readingPageDouble,
                         value: 2,
                         icon: const Icon(EvaIcons.book_open),
                       ),
@@ -181,23 +182,22 @@ class _ReadingMoreSettingsState extends State<ReadingMoreSettings> {
             Row(
               children: [
                 Expanded(
-                  child: SegmentedButton(
+                  child: AnxSegmentedButton<WritingModeEnum>(
                     segments: [
-                      ButtonSegment<WritingModeEnum>(
-                        label: Text(
-                            L10n.of(context).readingPageWritingDirectionAuto),
+                      SegmentButtonItem(
+                        label: L10n.of(context).readingPageWritingDirectionAuto,
                         value: WritingModeEnum.auto,
                         icon: const Icon(EvaIcons.activity_outline),
                       ),
-                      ButtonSegment<WritingModeEnum>(
-                        label: Text(L10n.of(context)
-                            .readingPageWritingDirectionVertical),
+                      SegmentButtonItem(
+                        label: L10n.of(context)
+                            .readingPageWritingDirectionVertical,
                         value: WritingModeEnum.vertical,
                         icon: const Icon(Bootstrap.arrows_vertical),
                       ),
-                      ButtonSegment<WritingModeEnum>(
-                        label: Text(L10n.of(context)
-                            .readingPageWritingDirectionHorizontal),
+                      SegmentButtonItem(
+                        label: L10n.of(context)
+                            .readingPageWritingDirectionHorizontal,
                         value: WritingModeEnum.horizontal,
                         icon: const Icon(Bootstrap.arrows),
                       ),
@@ -232,25 +232,20 @@ class _ReadingMoreSettingsState extends State<ReadingMoreSettings> {
             Row(
               children: [
                 Expanded(
-                  child: SegmentedButton(
+                  child: AnxSegmentedButton<TranslationModeEnum>(
                     segments: [
-                      ButtonSegment<TranslationModeEnum>(
-                        label: Text(L10n.of(context).readingPageOriginal),
+                      SegmentButtonItem(
+                        label: L10n.of(context).readingPageOriginal,
                         value: TranslationModeEnum.off,
                         icon: const Icon(Icons.translate_outlined),
                       ),
-                      ButtonSegment<TranslationModeEnum>(
-                        label: Text(L10n.of(context).translationOnly),
+                      SegmentButtonItem(
+                        label: L10n.of(context).translationOnly,
                         value: TranslationModeEnum.translationOnly,
                         icon: const Icon(Icons.g_translate),
                       ),
-                      // ButtonSegment<TranslationModeEnum>(
-                      //   label: const Text('Original'),
-                      //   value: TranslationModeEnum.originalOnly,
-                      //   icon: const Icon(Icons.text_fields),
-                      // ),
-                      ButtonSegment<TranslationModeEnum>(
-                        label: Text(L10n.of(context).bilingual),
+                      SegmentButtonItem(
+                        label: L10n.of(context).bilingual,
                         value: TranslationModeEnum.bilingual,
                         icon: const Icon(Icons.compare),
                       ),

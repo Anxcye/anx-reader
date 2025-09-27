@@ -1,8 +1,8 @@
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/utils/theme_mode_to_string.dart';
-import 'package:flutter/material.dart';
-
 import 'package:anx_reader/config/shared_preference_provider.dart';
+import 'package:anx_reader/widgets/common/anx_segmented_button.dart';
+import 'package:flutter/material.dart';
 
 class ChangeThemeMode extends StatefulWidget {
   const ChangeThemeMode({super.key});
@@ -22,21 +22,21 @@ class _ChangeThemeModeState extends State<ChangeThemeMode> {
 
   @override
   Widget build(BuildContext context) {
-    return SegmentedButton<String>(
-      segments: <ButtonSegment<String>>[
-        ButtonSegment<String>(
+    return AnxSegmentedButton<String>(
+      segments: <SegmentButtonItem<String>>[
+        SegmentButtonItem(
           value: 'auto',
-          label: Text(L10n.of(context).settingsSystemMode),
+          label: L10n.of(context).settingsSystemMode,
           icon: const Icon(Icons.brightness_auto),
         ),
-        ButtonSegment<String>(
+        SegmentButtonItem(
           value: 'dark',
-          label: Text(L10n.of(context).settingsDarkMode),
+          label: L10n.of(context).settingsDarkMode,
           icon: const Icon(Icons.brightness_2),
         ),
-        ButtonSegment<String>(
+        SegmentButtonItem(
           value: 'light',
-          label: Text(L10n.of(context).settingsLightMode),
+          label: L10n.of(context).settingsLightMode,
           icon: const Icon(Icons.brightness_5),
         ),
       ],

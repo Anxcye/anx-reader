@@ -3,6 +3,7 @@ import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/providers/statistic_data.dart';
 import 'package:anx_reader/utils/date/week_of_year.dart';
 import 'package:anx_reader/widgets/container/filled_container.dart';
+import 'package:anx_reader/widgets/common/anx_segmented_button.dart';
 import 'package:anx_reader/widgets/statistic/heatmap_chart.dart';
 import 'package:anx_reader/widgets/statistic/statistic_chart.dart';
 import 'package:flutter/material.dart';
@@ -44,32 +45,35 @@ class StatisticCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final statisticData = ref.watch(statisticDataProvider);
+
+    final segmentButtonItems = <SegmentButtonItem<ChartMode>>[
+      SegmentButtonItem(
+        value: ChartMode.week,
+        icon: const Icon(Icons.calendar_view_week),
+        label: L10n.of(context).statisticWeek,
+      ),
+      SegmentButtonItem(
+        value: ChartMode.month,
+        icon: const Icon(Icons.calendar_month),
+        label: L10n.of(context).statisticMonth,
+      ),
+      SegmentButtonItem(
+        value: ChartMode.year,
+        icon: const Icon(Icons.calendar_today),
+        label: L10n.of(context).statisticYear,
+      ),
+      SegmentButtonItem(
+        value: ChartMode.heatmap,
+        icon: const Icon(Icons.grid_view_rounded),
+        label: L10n.of(context).statisticAll,
+      ),
+    ];
+
     Widget segmentButton(data) => Row(
           children: [
             Expanded(
-              child: SegmentedButton<ChartMode>(
-                segments: <ButtonSegment<ChartMode>>[
-                  ButtonSegment<ChartMode>(
-                    value: ChartMode.week,
-                    label: Text(L10n.of(context).statisticWeek),
-                    icon: const Icon(Icons.calendar_view_week),
-                  ),
-                  ButtonSegment<ChartMode>(
-                    value: ChartMode.month,
-                    label: Text(L10n.of(context).statisticMonth),
-                    icon: const Icon(Icons.calendar_month),
-                  ),
-                  ButtonSegment<ChartMode>(
-                    value: ChartMode.year,
-                    label: Text(L10n.of(context).statisticYear),
-                    icon: const Icon(Icons.calendar_today),
-                  ),
-                  ButtonSegment<ChartMode>(
-                    value: ChartMode.heatmap,
-                    label: Text(L10n.of(context).statisticAll),
-                    icon: const Icon(Icons.grid_view_rounded),
-                  ),
-                ],
+              child: AnxSegmentedButton<ChartMode>(
+                segments: segmentButtonItems,
                 selected: {data.mode},
                 onSelectionChanged: (Set<ChartMode> newSelection) {
                   ref

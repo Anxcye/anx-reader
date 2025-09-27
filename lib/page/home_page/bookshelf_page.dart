@@ -15,6 +15,7 @@ import 'package:anx_reader/widgets/bookshelf/book_bottom_sheet.dart';
 import 'package:anx_reader/widgets/bookshelf/book_folder.dart';
 import 'package:anx_reader/widgets/bookshelf/sync_button.dart';
 import 'package:anx_reader/widgets/hint/hint_banner.dart';
+import 'package:anx_reader/widgets/common/anx_segmented_button.dart';
 import 'package:anx_reader/widgets/tips/bookshelf_tips.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:file_picker/file_picker.dart';
@@ -141,7 +142,8 @@ class BookshelfPageState extends ConsumerState<BookshelfPage> {
                                 icon: const Icon(Icons.copy),
                                 hintKey: HintKey.dragAndDropToCreateFolder,
                                 margin: EdgeInsets.fromLTRB(20, 0, 20, 5),
-                                child: Text(L10n.of(context).dragAndDropToCreateFolderHint)),
+                                child: Text(L10n.of(context)
+                                    .dragAndDropToCreateFolderHint)),
                             Expanded(
                               child: GridView(
                                 key: _gridViewKey,
@@ -297,18 +299,20 @@ class BookshelfPageState extends ConsumerState<BookshelfPage> {
                       return Row(
                         children: [
                           Expanded(
-                            child: SegmentedButton(
+                            child: AnxSegmentedButton<SortOrderEnum>(
                               onSelectionChanged: (value) {
                                 Prefs().sortOrder = value.first;
                                 ref.read(bookListProvider.notifier).refresh();
                                 setState(() {});
                               },
                               segments: SortOrderEnum.values
-                                  .map((e) => ButtonSegment(
-                                        value: e,
-                                        label: Text(e.getL10n(
-                                            navigatorKey.currentContext!)),
-                                      ))
+                                  .map(
+                                    (e) => SegmentButtonItem(
+                                      value: e,
+                                      label: e.getL10n(
+                                          navigatorKey.currentContext!),
+                                    ),
+                                  )
                                   .toList(),
                               selected: {Prefs().sortOrder},
                             ),
