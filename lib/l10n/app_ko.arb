@@ -527,5 +527,10 @@
   "close": "닫기",
   "dragAndDropToCreateFolderHint": "길게 누른 후 다른 책으로 끌어서 폴더를 만드세요",
   "statisticsSwipeToDeleteHint": "왼쪽으로 스와이프하여 읽기 기록을 삭제하세요. 이 페이지에서 취소할 수 있지만, 페이지를 나가면 변경사항은 영구적입니다.",
-  "bookNotesOperationsHint": "길게 눌러서 삭제 또는 내보내기용 다중 선택, 왼쪽으로 스와이프하여 메모 편집 또는 공유"
+  "bookNotesOperationsHint": "길게 눌러서 삭제 또는 내보내기용 다중 선택, 왼쪽으로 스와이프하여 메모 편집 또는 공유",
+  "searchBooksOrNotes": "도서 또는 메모 검색",
+  "startTypingToSearch": "검색하려면 입력하세요",
+  "nothingHere": "아무것도 없습니다",
+  "books": "도서",
+  "notes": "메모"
 }

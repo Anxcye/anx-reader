@@ -527,5 +527,10 @@
   "close": "Schließen",
   "dragAndDropToCreateFolderHint": "Lang drücken und zu einem anderen Buch ziehen, um einen Ordner zu erstellen",
   "statisticsSwipeToDeleteHint": "Nach links wischen, um Lesedatensätze zu löschen. Sie können in dieser Seite rückgängig machen, aber Änderungen sind dauerhaft, sobald Sie gehen.",
-  "bookNotesOperationsHint": "Lang drücken für Mehrfachauswahl zum Löschen oder Exportieren, nach links wischen zum Bearbeiten oder Teilen von Notizen"
+  "bookNotesOperationsHint": "Lang drücken für Mehrfachauswahl zum Löschen oder Exportieren, nach links wischen zum Bearbeiten oder Teilen von Notizen",
+  "searchBooksOrNotes": "Suche Bücher oder Notizen",
+  "startTypingToSearch": "Beginnen Sie mit der Eingabe, um zu suchen",
+  "nothingHere": "Nichts hier",
+  "books": "Bücher",
+  "notes": "Notizen"
 }

@@ -527,5 +527,10 @@
   "close": "閉",
   "dragAndDropToCreateFolderHint": "長按並拖至他書以創文件夾",
   "statisticsSwipeToDeleteHint": "左滑以刪讀記錄。可於此頁撤銷，然離此頁後更改永存。",
-  "bookNotesOperationsHint": "長按以多選用於刪除或導出，左滑以編輯或分享筆記"
+  "bookNotesOperationsHint": "長按以多選用於刪除或導出，左滑以編輯或分享筆記",
+  "searchBooksOrNotes": "搜書或札記",
+  "startTypingToSearch": "始入以搜",
+  "nothingHere": "此處無物",
+  "books": "書",
+  "notes": "札記"
 }

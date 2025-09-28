@@ -527,5 +527,10 @@
   "close": "閉じる",
   "dragAndDropToCreateFolderHint": "長押しして別の本にドラッグしてフォルダーを作成します",
   "statisticsSwipeToDeleteHint": "左にスワイプして読書記録を削除します。このページ内で元に戻すことができますが、ページを離れると変更は永続的になります。",
-  "bookNotesOperationsHint": "長押しして削除または書き出し用に複数選択、左にスワイプしてメモを編集または共有"
+  "bookNotesOperationsHint": "長押しして削除または書き出し用に複数選択、左にスワイプしてメモを編集または共有",
+  "searchBooksOrNotes": "本やメモを検索",
+  "startTypingToSearch": "入力して検索",
+  "nothingHere": "何もありません",
+  "books": "本",
+  "notes": "メモ"
 }

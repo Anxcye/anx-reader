@@ -527,5 +527,10 @@
   "close": "Kapat",
   "dragAndDropToCreateFolderHint": "Klasör oluşturmak için uzun basın ve başka bir kitaba sürükleyin",
   "statisticsSwipeToDeleteHint": "Okuma kayıtlarını silmek için sola kaydırın. Bu sayfada geri alabilirsiniz, ancak sayfadan çıktıktan sonra değişiklikler kalıcı olur.",
-  "bookNotesOperationsHint": "Silmek veya dışa aktarmak için çoklu seçim yapmak amacıyla uzun basın, notları düzenlemek veya paylaşmak için sola kaydırın"
+  "bookNotesOperationsHint": "Silmek veya dışa aktarmak için çoklu seçim yapmak amacıyla uzun basın, notları düzenlemek veya paylaşmak için sola kaydırın",
+  "searchBooksOrNotes": "Kitap veya not ara",
+  "startTypingToSearch": "Aramak için yazmaya başlayın",
+  "nothingHere": "Burada hiçbir şey yok",
+  "books": "Kitaplar",
+  "notes": "Notlar"
 }

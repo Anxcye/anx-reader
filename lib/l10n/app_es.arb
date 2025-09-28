@@ -527,5 +527,10 @@
   "close": "Cerrar",
   "dragAndDropToCreateFolderHint": "Mantener presionado y arrastrar a otro libro para crear una carpeta",
   "statisticsSwipeToDeleteHint": "Deslizar hacia la izquierda para eliminar registros de lectura. Puedes deshacer en esta página, pero los cambios son permanentes una vez que sales.",
-  "bookNotesOperationsHint": "Mantener presionado para seleccionar múltiples elementos para eliminar o exportar, deslizar hacia la izquierda para editar o compartir notas"
+  "bookNotesOperationsHint": "Mantener presionado para seleccionar múltiples elementos para eliminar o exportar, deslizar hacia la izquierda para editar o compartir notas",
+  "searchBooksOrNotes": "Buscar libros o notas",
+  "startTypingToSearch": "Empiece a escribir para buscar",
+  "nothingHere": "Nada aquí",
+  "books": "Libros",
+  "notes": "Notas"
 }

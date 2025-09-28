@@ -527,5 +527,10 @@
   "close": "關閉",
   "dragAndDropToCreateFolderHint": "長按並拖拽到另一本書創建資料夾",
   "statisticsSwipeToDeleteHint": "向左滑動以刪除閱讀記錄。您可以在此頁面中撤銷，但離開後更改是永久的。",
-  "bookNotesOperationsHint": "長按進行多選以刪除或匯出，向左滑動以編輯或分享筆記"
+  "bookNotesOperationsHint": "長按進行多選以刪除或匯出，向左滑動以編輯或分享筆記",
+  "searchBooksOrNotes": "搜索書籍或筆記",
+  "startTypingToSearch": "開始輸入以搜索",
+  "nothingHere": "這裡什麼都沒有",
+  "books": "書籍",
+  "notes": "筆記"
 }

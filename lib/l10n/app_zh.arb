@@ -527,5 +527,10 @@
   "close": "关闭",
   "dragAndDropToCreateFolderHint": "长按并拖拽到另一本书创建文件夹",
   "statisticsSwipeToDeleteHint": "向左滑动以删除阅读记录。您可以在此页面内撤销，但离开后更改将永久保存。",
-  "bookNotesOperationsHint": "长按进行多选以删除或导出，向左滑动以编辑或分享笔记"
+  "bookNotesOperationsHint": "长按进行多选以删除或导出，向左滑动以编辑或分享笔记",
+  "searchBooksOrNotes": "搜索图书或笔记",
+  "startTypingToSearch": "开始输入以搜索",
+  "nothingHere": "这里什么都没有",
+  "books": "图书",
+  "notes": "笔记"
 }

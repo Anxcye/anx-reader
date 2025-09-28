@@ -527,5 +527,10 @@
   "close": "Close",
   "dragAndDropToCreateFolderHint": "Long press and drag to another book to create a folder",
   "statisticsSwipeToDeleteHint": "Swipe left to delete reading records. You can undo within this page, but changes are permanent once you leave.",
-  "bookNotesOperationsHint": "Long press to multi-select for delete or export, swipe left to edit or share notes"
+  "bookNotesOperationsHint": "Long press to multi-select for delete or export, swipe left to edit or share notes",
+  "searchBooksOrNotes": "Search books or notes",
+  "startTypingToSearch": "Start typing to search",
+  "nothingHere": "Nothing here",
+  "books": "Books",
+  "notes": "Notes"
 }

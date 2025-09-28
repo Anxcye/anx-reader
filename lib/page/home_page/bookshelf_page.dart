@@ -15,6 +15,7 @@ import 'package:anx_reader/utils/log/common.dart';
 import 'package:anx_reader/widgets/bookshelf/book_bottom_sheet.dart';
 import 'package:anx_reader/widgets/bookshelf/book_folder.dart';
 import 'package:anx_reader/widgets/bookshelf/sync_button.dart';
+import 'package:anx_reader/widgets/container/filled_container.dart';
 import 'package:anx_reader/widgets/hint/hint_banner.dart';
 import 'package:anx_reader/widgets/common/anx_segmented_button.dart';
 import 'package:anx_reader/widgets/tips/bookshelf_tips.dart';
@@ -223,25 +224,34 @@ class BookshelfPageState extends ConsumerState<BookshelfPage> {
     PreferredSizeWidget appBar = AppBar(
       forceMaterialTransparency: true,
       title: Container(
-        height: 34,
-        constraints: const BoxConstraints(maxWidth: 400),
-        child: SearchBar(
-          backgroundColor: WidgetStateProperty.all(
-              Theme.of(context).colorScheme.primary.withAlpha(5)),
-          hintText: 'Search books and notes', // TODO: i18n
-          shadowColor: const WidgetStatePropertyAll<Color>(Colors.transparent),
-          padding: const WidgetStatePropertyAll<EdgeInsets>(
-              EdgeInsets.symmetric(horizontal: 16.0)),
-          leading: const Icon(Icons.search),
-          onTap: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => const SearchPage(),
+          height: 34,
+          constraints: const BoxConstraints(maxWidth: 400),
+          child: InkWell(
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => const SearchPage(),
+                ),
+              );
+            },
+            child: FilledContainer(
+              color: Theme.of(context).colorScheme.surface.withAlpha(80),
+              child: Row(
+                children: [
+                  const Icon(Icons.search, color: Colors.grey),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(L10n.of(context).searchBooksOrNotes,
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodyMedium
+                            ?.copyWith(color: Theme.of(context).hintColor),
+                        overflow: TextOverflow.ellipsis),
+                  )
+                ],
               ),
-            );
-          },
-        ),
-      ),
+            ),
+          )),
       actions: [
         const SyncButton(),
         IconButton(
