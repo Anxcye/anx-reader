@@ -119,6 +119,72 @@ Future<Book?> getBookByMd5(String md5) async {
   );
 }
 
+Future<List<Book>> searchBooks(String keyword) async {
+  final query = keyword.trim();
+  if (query.isEmpty) {
+    return [];
+  }
+
+  final db = await DBHelper().database;
+  final List<Map<String, dynamic>> maps = await db.query(
+    'tb_books',
+    where: 'is_deleted = 0 AND (title LIKE ? OR author LIKE ?)',
+    whereArgs: ['%$query%', '%$query%'],
+    orderBy: 'update_time DESC',
+  );
+
+  return List.generate(maps.length, (i) {
+    return Book(
+      id: maps[i]['id'],
+      title: maps[i]['title'],
+      coverPath: maps[i]['cover_path'],
+      filePath: maps[i]['file_path'],
+      lastReadPosition: maps[i]['last_read_position'],
+      readingPercentage: maps[i]['reading_percentage'],
+      author: maps[i]['author'],
+      isDeleted: maps[i]['is_deleted'] == 1 ? true : false,
+      description: maps[i]['description'],
+      rating: maps[i]['rating'] ?? 0.0,
+      groupId: maps[i]['group_id'],
+      md5: maps[i]['file_md5'],
+      createTime: DateTime.parse(maps[i]['create_time']),
+      updateTime: DateTime.parse(maps[i]['update_time']),
+    );
+  });
+}
+
+Future<List<Book>> selectBooksByIds(List<int> ids) async {
+  if (ids.isEmpty) {
+    return [];
+  }
+
+  final db = await DBHelper().database;
+  final placeholders = List.filled(ids.length, '?').join(',');
+  final List<Map<String, dynamic>> maps = await db.rawQuery(
+    'SELECT * FROM tb_books WHERE is_deleted = 0 AND id IN ($placeholders)',
+    ids,
+  );
+
+  return List.generate(maps.length, (i) {
+    return Book(
+      id: maps[i]['id'],
+      title: maps[i]['title'],
+      coverPath: maps[i]['cover_path'],
+      filePath: maps[i]['file_path'],
+      lastReadPosition: maps[i]['last_read_position'],
+      readingPercentage: maps[i]['reading_percentage'],
+      author: maps[i]['author'],
+      isDeleted: maps[i]['is_deleted'] == 1 ? true : false,
+      description: maps[i]['description'],
+      rating: maps[i]['rating'] ?? 0.0,
+      groupId: maps[i]['group_id'],
+      md5: maps[i]['file_md5'],
+      createTime: DateTime.parse(maps[i]['create_time']),
+      updateTime: DateTime.parse(maps[i]['update_time']),
+    );
+  });
+}
+
 Future<void> updateBookMd5(int bookId, String md5) async {
   final db = await DBHelper().database;
   await db.update(
