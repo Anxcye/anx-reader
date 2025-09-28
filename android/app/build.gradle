@@ -73,6 +73,30 @@ android {
 
         }
     }
+
+    applicationVariants.all { variant ->
+        variant.outputs.each { output ->
+            def abiVersionCode = 0
+            if (output.getFilter(com.android.build.OutputFile.ABI) != null) {
+                def abiName = output.getFilter(com.android.build.OutputFile.ABI)
+                switch(abiName) {
+                    case "armeabi-v7a":
+                        abiVersionCode = 0 
+                        break
+                    case "arm64-v8a":
+                        abiVersionCode = 0
+                        break
+                    case "x86":
+                        abiVersionCode = 0
+                        break
+                    case "x86_64":
+                        abiVersionCode = 0
+                        break
+                }
+            }
+            output.versionCodeOverride = flutterVersionCode.toInteger() + abiVersionCode
+        }
+    }
 }
 
 flutter {
