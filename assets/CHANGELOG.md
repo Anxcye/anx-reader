@@ -1,6 +1,7 @@
 # Changelog
 
 ## 1.7.1
+- Feat: Custom txt chaptering rules
 - Feat: Search books or notes
 - Feat: Menu bar does not close after jumping to chapter
 - Feat: Add more hints to help understand features
@@ -13,6 +14,7 @@
 - UI: Optimize part of the interface design
 - Perf: Reduce device GPU usage
 
+- Feat: 自定义的 txt 分章规则
 - Feat: 可以搜索图书或笔记
 - Feat: 跳转章节后不关闭菜单栏
 - Feat: 添加更多提示信息来帮助了解功能
