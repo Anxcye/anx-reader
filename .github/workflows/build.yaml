@@ -26,46 +26,46 @@ jobs:
       KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
       KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
 
-  # build-ios:
-  #   needs: setup
-  #   uses: ./.github/workflows/build-ios.yaml
-  #   with:
-  #     version: ${{ needs.setup.outputs.version }}
-  #     flutter_version: ${{ needs.setup.outputs.flutter_version }}
+  build-ios:
+    needs: setup
+    uses: ./.github/workflows/build-ios.yaml
+    with:
+      version: ${{ needs.setup.outputs.version }}
+      flutter_version: ${{ needs.setup.outputs.flutter_version }}
 
-  # build-windows:
-  #   needs: setup
-  #   uses: ./.github/workflows/build-windows.yaml
-  #   with:
-  #     version: ${{ needs.setup.outputs.version }}
-  #     flutter_version: ${{ needs.setup.outputs.flutter_version }}
-  #   secrets:
-  #     SIGNPATH_API_TOKEN: ${{ secrets.SIGNPATH_API_TOKEN }}
-  #     NOTIFICATION_URL: ${{ secrets.NOTIFICATION_URL }}
+  build-windows:
+    needs: setup
+    uses: ./.github/workflows/build-windows.yaml
+    with:
+      version: ${{ needs.setup.outputs.version }}
+      flutter_version: ${{ needs.setup.outputs.flutter_version }}
+    secrets:
+      SIGNPATH_API_TOKEN: ${{ secrets.SIGNPATH_API_TOKEN }}
+      NOTIFICATION_URL: ${{ secrets.NOTIFICATION_URL }}
 
-  # build-macos:
-  #   needs: setup
-  #   uses: ./.github/workflows/build-macos.yaml
-  #   with:
-  #     version: ${{ needs.setup.outputs.version }}
-  #     flutter_version: ${{ needs.setup.outputs.flutter_version }}
+  build-macos:
+    needs: setup
+    uses: ./.github/workflows/build-macos.yaml
+    with:
+      version: ${{ needs.setup.outputs.version }}
+      flutter_version: ${{ needs.setup.outputs.flutter_version }}
 
-  # build-appstore:
-  #   needs: setup
-  #   uses: ./.github/workflows/build-appstore.yaml
-  #   with:
-  #     version: ${{ needs.setup.outputs.version }}
-  #     flutter_version: ${{ needs.setup.outputs.flutter_version }}
-  #   secrets:
-  #     ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
-  #     ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
-  #     ASC_KEY_P8_BASE64: ${{ secrets.ASC_KEY_P8_BASE64 }}
-  #     MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
-  #     MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
-  #     APP_BUNDLE_ID: ${{ secrets.APP_BUNDLE_ID }}
+  build-appstore:
+    needs: setup
+    uses: ./.github/workflows/build-appstore.yaml
+    with:
+      version: ${{ needs.setup.outputs.version }}
+      flutter_version: ${{ needs.setup.outputs.flutter_version }}
+    secrets:
+      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+      ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+      ASC_KEY_P8_BASE64: ${{ secrets.ASC_KEY_P8_BASE64 }}
+      MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+      MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
+      APP_BUNDLE_ID: ${{ secrets.APP_BUNDLE_ID }}
 
   release:
-    needs: [setup, build-android, build-ios, build-windows, build-macos]
+    needs: [setup, build-android, build-ios, build-windows, build-macos, build-appstore]
     uses: ./.github/workflows/release.yaml
     with:
       version: ${{ needs.setup.outputs.version }}
