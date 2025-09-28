@@ -1,6 +1,7 @@
 # Changelog
 
 ## 1.7.1
+- Feat: Search books or notes
 - Feat: Menu bar does not close after jumping to chapter
 - Feat: Add more hints to help understand features
 - Feat: Optimize Windows Touch Experience
@@ -12,6 +13,7 @@
 - UI: Optimize part of the interface design
 - Perf: Reduce device GPU usage
 
+- Feat: 可以搜索图书或笔记
 - Feat: 跳转章节后不关闭菜单栏
 - Feat: 添加更多提示信息来帮助了解功能
 - Feat: 优化 Windows 触摸屏体验
