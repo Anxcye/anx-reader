@@ -9,6 +9,7 @@ import 'package:anx_reader/main.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/providers/book_list.dart';
 import 'package:anx_reader/service/book.dart';
+import 'package:anx_reader/page/search/search_page.dart';
 import 'package:anx_reader/utils/get_path/get_temp_dir.dart';
 import 'package:anx_reader/utils/log/common.dart';
 import 'package:anx_reader/widgets/bookshelf/book_bottom_sheet.dart';
@@ -37,8 +38,6 @@ class BookshelfPageState extends ConsumerState<BookshelfPage> {
   late final _scrollController = widget.controller ?? ScrollController();
   final _gridViewKey = GlobalKey();
   bool _dragging = false;
-  String? _searchValue;
-  TextEditingController searchBarController = TextEditingController();
 
   Future<void> _importBook() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -229,35 +228,17 @@ class BookshelfPageState extends ConsumerState<BookshelfPage> {
         child: SearchBar(
           backgroundColor: WidgetStateProperty.all(
               Theme.of(context).colorScheme.primary.withAlpha(5)),
-          controller: searchBarController,
-          hintText: L10n.of(context).appName,
+          hintText: 'Search books and notes', // TODO: i18n
           shadowColor: const WidgetStatePropertyAll<Color>(Colors.transparent),
           padding: const WidgetStatePropertyAll<EdgeInsets>(
               EdgeInsets.symmetric(horizontal: 16.0)),
           leading: const Icon(Icons.search),
-          trailing: [
-            _searchValue != null
-                ? IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () {
-                      setState(() {
-                        _searchValue = null;
-                        searchBarController.clear();
-                        ref.read(bookListProvider.notifier).search(null);
-                      });
-                    },
-                  )
-                : const SizedBox(),
-          ],
-          onSubmitted: (value) {
-            setState(() {
-              if (value.isEmpty) {
-                _searchValue = null;
-              } else {
-                _searchValue = value;
-                ref.read(bookListProvider.notifier).search(value);
-              }
-            });
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => const SearchPage(),
+              ),
+            );
           },
         ),
       ),
