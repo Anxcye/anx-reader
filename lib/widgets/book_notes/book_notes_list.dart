@@ -9,9 +9,8 @@ import 'package:anx_reader/page/reading_page.dart';
 import 'package:anx_reader/providers/sync.dart';
 import 'package:anx_reader/providers/bookmark.dart';
 import 'package:anx_reader/service/book.dart';
-import 'package:anx_reader/utils/time_to_human.dart';
+import 'package:anx_reader/widgets/book_notes/book_note_tile.dart';
 import 'package:anx_reader/widgets/book_share/excerpt_share_service.dart';
-import 'package:anx_reader/widgets/container/filled_container.dart';
 import 'package:anx_reader/widgets/delete_confirm.dart';
 import 'package:anx_reader/widgets/context_menu/excerpt_menu.dart';
 import 'package:anx_reader/widgets/hint/hint_banner.dart';
@@ -213,26 +212,9 @@ class _BookNotesListState extends ConsumerState<BookNotesList> {
     );
   }
 
-  Widget bookNoteItem(BuildContext context, BookNote bookNote, bool selected) {
-    Color iconColor =
-        Color(int.tryParse('0xaa${bookNote.color}') ?? 0xaa555555);
-    TextStyle infoStyle = const TextStyle(
-      fontSize: 14,
-      color: Colors.grey,
-    );
-    Widget icon() {
-      try {
-        return Icon(
-          notesType.firstWhere(
-              (element) => element['type'] == bookNote.type)['icon'],
-          color: iconColor,
-        );
-      } catch (e) {
-        return const Icon(Icons.bookmark, color: Colors.grey);
-      }
-    }
-
-    return GestureDetector(
+  Widget bookNoteItem(BuildContext context, BookNote bookNote) {
+    return BookNoteTile(
+      note: bookNote,
       onTap: () {
         if (selectedNotes.isNotEmpty) {
           setState(() {
@@ -259,97 +241,25 @@ class _BookNotesListState extends ConsumerState<BookNotesList> {
           }
         });
       },
-      child: FilledContainer(
-        padding: const EdgeInsets.all(8.0),
-        margin: const EdgeInsets.only(bottom: 8),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-                padding: const EdgeInsets.only(left: 10, right: 10, top: 10),
-                child: icon()),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    bookNote.content,
-                    style: const TextStyle(
-                      fontSize: 16,
-                    ),
-                  ),
-                  if (bookNote.readerNote != null &&
-                      bookNote.readerNote!.isNotEmpty)
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const SizedBox(height: 4),
-                        IntrinsicHeight(
-                          child: Row(
-                            children: [
-                              const VerticalDivider(
-                                thickness: 3,
-                              ),
-                              Expanded(
-                                child: Text(
-                                  bookNote.readerNote!,
-                                  style: infoStyle.copyWith(
-                                    color: Colors.grey.shade600,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                      ],
-                    ),
-                  Divider(
-                    indent: 4,
-                    height: 3,
-                    color: Colors.grey.shade300,
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          bookNote.chapter,
-                          style: infoStyle,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      Text(
-                        timeToHuman(bookNote.createTime, context),
-                        style: infoStyle,
-                      )
-                    ],
-                  ),
-                ],
+      trailing: selectedNotes.isNotEmpty
+          ? IconButton(
+              onPressed: () {
+                setState(() {
+                  if (selectedNotes.contains(bookNote)) {
+                    selectedNotes.remove(bookNote);
+                  } else {
+                    selectedNotes.add(bookNote);
+                  }
+                });
+              },
+              icon: Icon(
+                selectedNotes.contains(bookNote)
+                    ? EvaIcons.checkmark_circle
+                    : Icons.circle_outlined,
+                color: Theme.of(context).colorScheme.primary,
               ),
-            ),
-            if (selectedNotes.isNotEmpty)
-              IconButton(
-                onPressed: () {
-                  setState(() {
-                    if (selectedNotes.contains(bookNote)) {
-                      selectedNotes.remove(bookNote);
-                    } else {
-                      selectedNotes.add(bookNote);
-                    }
-                  });
-                },
-                icon: Icon(
-                  selectedNotes.contains(bookNote)
-                      ? EvaIcons.checkmark_circle
-                      : Icons.circle_outlined,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-              ),
-          ],
-        ),
-      ),
+            )
+          : null,
     );
   }
 
@@ -749,7 +659,7 @@ class _BookNotesListState extends ConsumerState<BookNotesList> {
                     ),
                     ...showNotes.map((bookNote) {
                       return slidbleNotes(
-                        bookNoteItem(context, bookNote, false),
+                        bookNoteItem(context, bookNote),
                         bookNote,
                       );
                     })
