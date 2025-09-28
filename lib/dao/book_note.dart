@@ -117,3 +117,33 @@ void deleteBookNoteById(int id) async {
     whereArgs: [id],
   );
 }
+
+Future<List<BookNote>> searchBookNotes(String keyword) async {
+  final query = keyword.trim();
+  if (query.isEmpty) {
+    return [];
+  }
+
+  final db = await DBHelper().database;
+  final List<Map<String, dynamic>> maps = await db.query(
+    'tb_notes',
+    where: 'content LIKE ? OR reader_note LIKE ? OR chapter LIKE ?',
+    whereArgs: ['%$query%', '%$query%', '%$query%'],
+    orderBy: 'update_time DESC',
+  );
+
+  return List.generate(maps.length, (i) {
+    return BookNote(
+      id: maps[i]['id'],
+      bookId: maps[i]['book_id'],
+      content: maps[i]['content'],
+      cfi: maps[i]['cfi'],
+      chapter: maps[i]['chapter'],
+      type: maps[i]['type'],
+      color: maps[i]['color'],
+      readerNote: maps[i]['reader_note'],
+      createTime: DateTime.parse(maps[i]['create_time']),
+      updateTime: DateTime.parse(maps[i]['update_time']),
+    );
+  });
+}
