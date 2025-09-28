@@ -18,6 +18,8 @@ import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/main.dart';
 import 'package:anx_reader/models/bgimg.dart';
 import 'package:anx_reader/models/book_style.dart';
+import 'package:anx_reader/models/chapter_split_presets.dart';
+import 'package:anx_reader/models/chapter_split_rule.dart';
 import 'package:anx_reader/models/font_model.dart';
 import 'package:anx_reader/models/read_theme.dart';
 import 'package:anx_reader/models/reading_info.dart';
@@ -25,6 +27,7 @@ import 'package:anx_reader/models/reading_rules.dart';
 import 'package:anx_reader/models/window_info.dart';
 import 'package:anx_reader/service/translate/index.dart';
 import 'package:anx_reader/utils/get_current_language_code.dart';
+import 'package:anx_reader/utils/log/common.dart';
 import 'package:anx_reader/utils/tts_model_list.dart';
 import 'package:anx_reader/widgets/reading_page/style_widget.dart';
 import 'package:flutter/material.dart';
@@ -41,6 +44,10 @@ class Prefs extends ChangeNotifier {
   Prefs._internal() {
     initPrefs();
   }
+
+  static const String _chapterSplitSelectedRuleKey =
+      'chapterSplitSelectedRuleId';
+  static const String _chapterSplitCustomRulesKey = 'chapterSplitCustomRules';
 
   Future<void> initPrefs() async {
     prefs = await SharedPreferences.getInstance();
@@ -426,7 +433,8 @@ class Prefs extends ChangeNotifier {
   }
 
   LangListEnum get fullTextTranslateTo {
-    return getLang(prefs.getString('fullTextTranslateTo') ?? getCurrentLanguageCode());
+    return getLang(
+        prefs.getString('fullTextTranslateTo') ?? getCurrentLanguageCode());
   }
 
   // set convertChineseMode(ConvertChineseMode mode) {
@@ -453,6 +461,118 @@ class Prefs extends ChangeNotifier {
       );
     }
     return ReadingRules.fromJson(rulesJson);
+  }
+
+  List<ChapterSplitRule> get chapterSplitCustomRules {
+    final raw = prefs.getString(_chapterSplitCustomRulesKey);
+    if (raw == null || raw.isEmpty) {
+      return const [];
+    }
+
+    try {
+      final decoded = jsonDecode(raw) as List<dynamic>;
+      return decoded.map((entry) {
+        if (entry is Map<String, dynamic>) {
+          return ChapterSplitRule.fromMap(entry);
+        }
+        if (entry is Map) {
+          return ChapterSplitRule.fromMap(Map<String, dynamic>.from(entry));
+        }
+        throw const FormatException('Invalid chapter split rule entry');
+      }).toList();
+    } catch (e) {
+      AnxLog.warning('Prefs: Failed to decode custom chapter split rules. $e');
+
+      return const [];
+    }
+  }
+
+  set chapterSplitCustomRules(List<ChapterSplitRule> rules) {
+    final encoded = jsonEncode(rules.map((rule) => rule.toMap()).toList());
+    prefs.setString(_chapterSplitCustomRulesKey, encoded);
+    notifyListeners();
+  }
+
+  List<ChapterSplitRule> get allChapterSplitRules {
+    return [
+      ...builtinChapterSplitRules,
+      ...chapterSplitCustomRules,
+    ];
+  }
+
+  String? get _storedChapterSplitRuleId {
+    return prefs.getString(_chapterSplitSelectedRuleKey);
+  }
+
+  set _storedChapterSplitRuleId(String? id) {
+    if (id == null) {
+      prefs.remove(_chapterSplitSelectedRuleKey);
+    } else {
+      prefs.setString(_chapterSplitSelectedRuleKey, id);
+    }
+    notifyListeners();
+  }
+
+  ChapterSplitRule get activeChapterSplitRule {
+    final selectedId = _storedChapterSplitRuleId;
+
+    if (selectedId != null) {
+      final builtin = findBuiltinChapterSplitRuleById(selectedId);
+      if (builtin != null) {
+        try {
+          builtin.buildRegExp();
+          return builtin;
+        } catch (_) {}
+      }
+
+      final custom = chapterSplitCustomRules
+          .where((rule) => rule.id == selectedId)
+          .toList();
+      if (custom.isNotEmpty) {
+        final rule = custom.first;
+        try {
+          rule.buildRegExp();
+          return rule;
+        } catch (_) {}
+      }
+    }
+
+    return getDefaultChapterSplitRule();
+  }
+
+  void selectChapterSplitRule(String id) {
+    _storedChapterSplitRuleId = id;
+  }
+
+  String? get chapterSplitSelectedRuleId => _storedChapterSplitRuleId;
+
+  void saveCustomChapterSplitRule(ChapterSplitRule rule) {
+    if (rule.isBuiltin) {
+      return;
+    }
+
+    final rules = List<ChapterSplitRule>.from(chapterSplitCustomRules);
+    final index = rules.indexWhere((existing) => existing.id == rule.id);
+
+    if (index >= 0) {
+      rules[index] = rule;
+    } else {
+      rules.add(rule);
+    }
+
+    chapterSplitCustomRules = rules;
+  }
+
+  void deleteCustomChapterSplitRule(String id) {
+    final rules = chapterSplitCustomRules
+        .where((rule) => rule.id != id)
+        .toList(growable: false);
+
+    chapterSplitCustomRules = rules;
+
+    if (_storedChapterSplitRuleId == id) {
+      _storedChapterSplitRuleId = kDefaultChapterSplitRuleId;
+    }
   }
 
   set windowInfo(WindowInfo info) {
@@ -810,7 +930,8 @@ class Prefs extends ChangeNotifier {
   }
 
   TranslationModeEnum get translationMode {
-    return TranslationModeEnum.fromCode(prefs.getString('translationMode') ?? 'off');
+    return TranslationModeEnum.fromCode(
+        prefs.getString('translationMode') ?? 'off');
   }
 
   set translationMode(TranslationModeEnum mode) {
@@ -895,15 +1016,15 @@ class Prefs extends ChangeNotifier {
   Map<String, TranslationModeEnum> get bookTranslationModes {
     String? modesJson = prefs.getString('bookTranslationModes');
     if (modesJson == null) return {};
-    
+
     Map<String, dynamic> decoded = jsonDecode(modesJson);
-    return decoded.map((key, value) => 
-      MapEntry(key, TranslationModeEnum.fromCode(value as String)));
+    return decoded.map((key, value) =>
+        MapEntry(key, TranslationModeEnum.fromCode(value as String)));
   }
 
   set bookTranslationModes(Map<String, TranslationModeEnum> modes) {
-    Map<String, String> encoded = modes.map((key, value) => 
-      MapEntry(key, value.code));
+    Map<String, String> encoded =
+        modes.map((key, value) => MapEntry(key, value.code));
     prefs.setString('bookTranslationModes', jsonEncode(encoded));
     notifyListeners();
   }
@@ -915,7 +1036,7 @@ class Prefs extends ChangeNotifier {
   void setBookTranslationMode(int bookId, TranslationModeEnum mode) {
     Map<String, TranslationModeEnum> modes = bookTranslationModes;
     String bookIdStr = bookId.toString();
-    
+
     if (mode == TranslationModeEnum.off) {
       modes.remove(bookIdStr); // 默认状态不保存，节省空间
     } else {
@@ -934,7 +1055,8 @@ class Prefs extends ChangeNotifier {
   }
 
   TextAlignmentEnum get textAlignment {
-    return TextAlignmentEnum.fromCode(prefs.getString('textAlignment') ?? 'auto');
+    return TextAlignmentEnum.fromCode(
+        prefs.getString('textAlignment') ?? 'auto');
   }
 
   set textAlignment(TextAlignmentEnum alignment) {

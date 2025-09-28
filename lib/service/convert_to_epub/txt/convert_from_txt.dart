@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:anx_reader/config/shared_preference_provider.dart';
+import 'package:anx_reader/models/chapter_split_presets.dart';
 import 'package:anx_reader/service/convert_to_epub/create_epub.dart';
 import 'package:anx_reader/service/convert_to_epub/section.dart';
 import 'package:anx_reader/utils/log/common.dart';
@@ -8,16 +10,16 @@ import 'package:charset/charset.dart';
 
 String readFileWithEncoding(File file) {
   bool checkGarbled(String content) {
-    final garbledPattern = RegExp(r'Õ|Ê|�|Ç|³|¾|Ð|Ó|Î|Á|É|�|Ã|Ä|Å|Æ|Ë|Ì|Í|Ï|Ò|Ó|Ô|Õ|Ö|Ù|Ú|Û|Ü|Ý|à|á|â|ã|ä|å|æ|è|é|ê|ë|ì|í|î|ï|ð|ñ|ò|ó|ô|õ|ö|ù|ú|û|ü|ý|ÿ|\x00-\x1F\x7F|｡｢｣､･ｦｧｨｩｪｫｬｭｮｯｰｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝ|€|�');
-    final sampleContent = content.length > 500 
-        ? content.substring(0, 500) 
-        : content;
+    final garbledPattern = RegExp(
+        r'Õ|Ê|�|Ç|³|¾|Ð|Ó|Î|Á|É|�|Ã|Ä|Å|Æ|Ë|Ì|Í|Ï|Ò|Ó|Ô|Õ|Ö|Ù|Ú|Û|Ü|Ý|à|á|â|ã|ä|å|æ|è|é|ê|ë|ì|í|î|ï|ð|ñ|ò|ó|ô|õ|ö|ù|ú|û|ü|ý|ÿ|\x00-\x1F\x7F|｡｢｣､･ｦｧｨｩｪｫｬｭｮｯｰｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝ|€|�');
+    final sampleContent =
+        content.length > 500 ? content.substring(0, 500) : content;
 
     final matches = garbledPattern.allMatches(sampleContent);
-    
+
     final garbledCount = matches.length;
 
-    return garbledCount / sampleContent.length  > 20 / 500;
+    return garbledCount / sampleContent.length > 20 / 500;
   }
 
   final decoder = {
@@ -64,11 +66,15 @@ Future<File> convertFromTxt(File file) async {
 
   AnxLog.info('convert from txt. content: ${content.length}');
 
-  final patternStr = RegExp(
-    r'^(?:(.+ +)|())(第[一二三四五六七八九十零〇百千万两0123456789]+[章卷]|卷[一二三四五六七八九十零〇百千万两0123456789]+|chap(?:ter)\.?|vol(?:ume)?\.?|book|bk)(?:(?: +.+)?|(?:\S.*)?)$',
-    multiLine: true,
-    caseSensitive: false,
-  );
+  final rule = Prefs().activeChapterSplitRule;
+  RegExp patternStr;
+  try {
+    patternStr = rule.buildRegExp();
+  } catch (error) {
+    AnxLog.warning(
+        'Convert: Invalid chapter split rule ${rule.name}, using default. $error');
+    patternStr = getDefaultChapterSplitRule().buildRegExp();
+  }
 
   final matches = patternStr.allMatches(content).toList();
   final sections = <Section>[];

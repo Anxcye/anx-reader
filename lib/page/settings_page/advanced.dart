@@ -2,6 +2,7 @@ import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/dao/book.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/models/md5_statistics.dart';
+import 'package:anx_reader/page/settings_page/subpage/chapter_split_rules_page.dart';
 import 'package:anx_reader/page/settings_page/subpage/log_page.dart';
 import 'package:anx_reader/service/md5_service.dart';
 import 'package:anx_reader/utils/toast/common.dart';
@@ -42,11 +43,26 @@ class _AdvancedSettingState extends State<AdvancedSetting> {
     return settingsSections(
       sections: [
         SettingsSection(
+          title: Text(L10n.of(context).eBookProcess),
+          tiles: [
+            SettingsTile.navigation(
+              leading: const Icon(Icons.auto_stories_outlined),
+              title: Text(L10n.of(context).chapterSplitting),
+              onPressed: (_) {
+                Navigator.of(context).push(
+                  CupertinoPageRoute(
+                    builder: (context) => const ChapterSplitRulesPage(),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+        SettingsSection(
           title: Text(L10n.of(context).settingsAdvancedLog),
           tiles: [
             SettingsTile.switchTile(
-              title:
-                  Text(L10n.of(context).settingsAdvancedClearLogWhenStart),
+              title: Text(L10n.of(context).settingsAdvancedClearLogWhenStart),
               leading: const Icon(Icons.delete_forever_outlined),
               initialValue: Prefs().clearLogWhenStart,
               onToggle: (value) {
@@ -76,8 +92,7 @@ class _AdvancedSettingState extends State<AdvancedSetting> {
                         Text(L10n.of(context).md5Statistics),
                         const SizedBox(height: 4),
                         Text(
-                          L10n.of(context)
-                              .md5TotalBooks(_md5Stats!.totalBooks),
+                          L10n.of(context).md5TotalBooks(_md5Stats!.totalBooks),
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
                         Text(
@@ -86,8 +101,8 @@ class _AdvancedSettingState extends State<AdvancedSetting> {
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
                         Text(
-                          L10n.of(context).md5BooksWithoutMd5(
-                              _md5Stats!.booksWithoutMd5),
+                          L10n.of(context)
+                              .md5BooksWithoutMd5(_md5Stats!.booksWithoutMd5),
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
                         Text(
@@ -135,8 +150,8 @@ class _AdvancedSettingState extends State<AdvancedSetting> {
           title: Text(L10n.of(context).settingsAdvancedJavascript),
           tiles: [
             SettingsTile.switchTile(
-              title: Text(L10n.of(context)
-                  .settingsAdvancedEnableJavascriptForEpub),
+              title: Text(
+                  L10n.of(context).settingsAdvancedEnableJavascriptForEpub),
               leading: const Icon(Icons.code),
               initialValue: Prefs().enableJsForEpub,
               onToggle: (value) {
@@ -259,8 +274,8 @@ class _AdvancedSettingState extends State<AdvancedSetting> {
                     .md5CalculationResultCalculated(result.calculated)),
                 Text(L10n.of(context)
                     .md5CalculationResultSkipped(result.skipped)),
-                Text(L10n.of(context)
-                    .md5CalculationResultFailed(result.failed)),
+                Text(
+                    L10n.of(context).md5CalculationResultFailed(result.failed)),
                 if (result.missingFiles.isNotEmpty) ...[
                   const SizedBox(height: 8),
                   Text(
