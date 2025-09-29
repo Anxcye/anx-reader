@@ -11,6 +11,7 @@
 - Fix: TTS skips annotation markers during reading
 - Fix: Table of contents supports locating the current chapter
 - Fix: Some interface elements overflow in certain cases
+- Fix: Abnormal generation of txt file directory
 - UI: Optimize part of the interface design
 - Perf: Reduce device GPU usage
 
@@ -24,6 +25,7 @@
 - Fix: TTS 朗读时跳过注解角标
 - Fix: 目录支持定位到当前章节
 - Fix: 某些情况下部分界面元素溢出的问题
+- Fix: txt 文件目录生成不正常的问题
 - UI: 优化部分界面设计
 - Perf: 降低设备 GPU 使用
 
