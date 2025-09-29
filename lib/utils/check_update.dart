@@ -32,7 +32,8 @@ Future<void> checkUpdate(bool manualCheck) async {
     if (manualCheck) {
       AnxToast.show(L10n.of(context).commonFailed);
     }
-    throw Exception('Update: Failed to check for updates $e');
+    AnxLog.severe('Update: Failed to check for updates $e');
+    return;
   }
   String newVersion = response.data['version'].toString().substring(1);
   String currentVersion =
