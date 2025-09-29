@@ -1,71 +1,94 @@
+import 'dart:math' as math;
+
 import 'package:anx_reader/service/convert_to_epub/section.dart';
 
+String _escapeXml(String value) {
+  return value
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&apos;');
+}
+
+String _indent(int level) => '  ' * (level + 1);
+
 String generateNestedToc(List<Section> sections) {
-  final tocItems = sections
-      .map((s) => _TocItem(
-            title: s.title.isNotEmpty ? s.title : s.content.trim().split('\n').first,
-            index: sections.indexOf(s),
-            level: s.level,
-          ))
+  if (sections.isEmpty) {
+    return '';
+  }
+
+  final tocItems = List.generate(sections.length, (index) {
+    final section = sections[index];
+    final fallbackTitle = section.content.trim().split('\n').firstWhere(
+          (line) => line.trim().isNotEmpty,
+          orElse: () => 'Section ${index + 1}',
+        );
+    final title = section.title.trim().isNotEmpty
+        ? section.title.trim()
+        : fallbackTitle.trim();
+
+    final level = section.level < 1 ? 1 : section.level;
+
+    return _TocItem(title: title, index: index, level: level);
+  });
+
+  final positiveLevels = tocItems
+      .where((item) => item.level > 0)
+      .map((item) => item.level)
       .toList();
 
-  while (tocItems.every((item) => item.level > 1 || item.level == 0) &&
-      tocItems.any((item) => item.level != 0)) {
-    for (int i = 0; i < tocItems.length; i++) {
-      tocItems[i].level = tocItems[i].level == 0 ? 0 : tocItems[i].level - 1;
+  if (positiveLevels.isNotEmpty) {
+    final baseLevel = positiveLevels.reduce(math.min);
+    for (final item in tocItems) {
+      item.level = item.level - baseLevel + 1;
+    }
+  } else {
+    for (final item in tocItems) {
+      item.level = 1;
     }
   }
 
-  String buildNavPoints(
-    List<_TocItem> items,
-    int currentLevel,
-    int startIndex,
-  ) {
-    StringBuffer result = StringBuffer();
+  final buffer = StringBuffer();
+  final levelStack = <int>[];
+  var playOrder = 1;
 
-    for (int i = startIndex; i < items.length; i++) {
-      var item = items[i];
+  for (final item in tocItems) {
+    final level = item.level.clamp(1, 6);
 
-      if (item.level == 0) {
-        result.writeln('''
-    <navPoint id="${item.index}" playOrder="${item.index}">
-      <navLabel><text>${item.title}</text></navLabel>
-      <content src="xhtml/${item.index}.xhtml"/>
-    </navPoint>''');
-        continue;
-      }
-
-      if (item.level == currentLevel) {
-        result.writeln('''
-    <navPoint id="${item.index}" playOrder="${item.index}">
-      <navLabel><text>${item.title}</text></navLabel>
-      <content src="xhtml/${item.index}.xhtml"/>''');
-
-        int nextIndex = i + 1;
-        if (nextIndex < items.length && items[nextIndex].level > currentLevel) {
-          result.writeln(buildNavPoints(items, currentLevel + 1, nextIndex));
-        }
-
-        result.writeln('    </navPoint>');
-      } else if (item.level < currentLevel) {
-        break;
-      }
+    while (levelStack.isNotEmpty && level <= levelStack.last) {
+      final closingLevel = levelStack.removeLast();
+      buffer.writeln('${_indent(closingLevel)}</navPoint>');
     }
 
-    return result.toString();
+    buffer.write(_indent(level));
+    buffer.writeln(
+        '<navPoint id="navPoint-${item.index}" playOrder="$playOrder">');
+    buffer.write(_indent(level));
+    buffer.writeln(
+        '  <navLabel><text>${_escapeXml(item.title)}</text></navLabel>');
+    buffer.write(_indent(level));
+    buffer.writeln('  <content src="xhtml/${item.index}.xhtml"/>');
+    levelStack.add(level);
+    playOrder += 1;
   }
 
-  return buildNavPoints(tocItems, 1, 0);
+  while (levelStack.isNotEmpty) {
+    final closingLevel = levelStack.removeLast();
+    buffer.writeln('${_indent(closingLevel)}</navPoint>');
+  }
+
+  return buffer.toString();
 }
 
 class _TocItem {
-  final String title;
-  final int index;
-  int level;
-
   _TocItem({
     required this.title,
     required this.index,
     required this.level,
   });
+
+  final String title;
+  final int index;
+  int level;
 }

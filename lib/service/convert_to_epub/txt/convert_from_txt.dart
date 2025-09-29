@@ -47,6 +47,104 @@ String readFileWithEncoding(File file) {
   throw Exception('Convert: Failed to read file with any encoding');
 }
 
+String _normalizeLineBreaks(String input) {
+  return input.replaceAll('\r\n', '\n').replaceAll('\r', '\n');
+}
+
+int _inferSectionLevel(String title) {
+  final simplified = title.replaceAll(RegExp(r'[\s\u3000]+'), ' ').trim();
+
+  final hasVolumeKeyword = RegExp(
+    r'(卷|部|篇|册|合集|季|part|volume|vol\.?|book\b)',
+    caseSensitive: false,
+  ).hasMatch(simplified);
+
+  if (hasVolumeKeyword) {
+    return 1;
+  }
+
+  final hasChapterKeyword = RegExp(
+    r'(章|节|回|话|折|集|章回|chapter|chap\b|episode|section|\bch\b)',
+    caseSensitive: false,
+  ).hasMatch(simplified);
+
+  if (hasChapterKeyword) {
+    return 2;
+  }
+
+  final prologueKeyword = RegExp(r'(序|序章|序言|前言|楔子|引子)', caseSensitive: false);
+  if (prologueKeyword.hasMatch(simplified)) {
+    return 1;
+  }
+
+  return 2;
+}
+
+List<Section> _buildSectionsFromMatches({
+  required String content,
+  required List<RegExpMatch> matches,
+  required String fallbackTitle,
+}) {
+  final sections = <Section>[];
+
+  final firstMatch = matches.first;
+  if (firstMatch.start > 0) {
+    final intro = content.substring(0, firstMatch.start).trim();
+    if (intro.isNotEmpty) {
+      sections.add(Section('', intro, 1));
+    }
+  }
+
+  for (var i = 0; i < matches.length; i++) {
+    final match = matches[i];
+    final title = match.group(0)?.trim() ?? 'Chapter ${i + 1}';
+
+    final startPos = match.end;
+    final endPos =
+        i < matches.length - 1 ? matches[i + 1].start : content.length;
+
+    final rawBody = content.substring(startPos, endPos);
+    final body = rawBody.trim();
+
+    final level = _inferSectionLevel(title);
+
+    sections.add(Section(title, body, level));
+  }
+
+  if (sections.isEmpty) {
+    sections.add(Section(fallbackTitle, content.trim(), 2));
+  }
+
+  return sections;
+}
+
+List<Section> _fallbackChunking(String filename, String content) {
+  final sections = <Section>[];
+  if (content.length <= 20000) {
+    sections.add(Section(filename, content.trim(), 2));
+    return sections;
+  }
+
+  var startIndex = 0;
+  while (startIndex < content.length) {
+    final endIndex = startIndex + 20000;
+    if (endIndex >= content.length) {
+      sections.add(Section('No.${sections.length + 1}',
+          content.substring(startIndex).trim(), 2));
+      break;
+    }
+
+    final nextNewline = content.indexOf('\n', endIndex);
+    final chapterEndIndex = nextNewline == -1 ? content.length : nextNewline;
+
+    sections.add(Section('No.${sections.length + 1}',
+        content.substring(startIndex, chapterEndIndex).trim(), 2));
+    startIndex = chapterEndIndex + 1;
+  }
+
+  return sections;
+}
+
 Future<File> convertFromTxt(File file) async {
   var filename = file.path.split('/').last;
 
@@ -61,6 +159,7 @@ Future<File> convertFromTxt(File file) async {
 
   // read file
   String content = readFileWithEncoding(file);
+  content = _normalizeLineBreaks(content);
 
   // content = content.replaceAll(RegExp(r'(\n*|^)(\s|　)+'), '\n');
 
@@ -77,64 +176,18 @@ Future<File> convertFromTxt(File file) async {
   }
 
   final matches = patternStr.allMatches(content).toList();
-  final sections = <Section>[];
-
   AnxLog.info('matches: ${matches.length}');
 
+  List<Section> sections;
   if (matches.isEmpty) {
-    final newSections = <Section>[];
-
-    if (content.length <= 20000) {
-      newSections.add(Section(filename, content, 2));
-      return createEpub(titleString, authorString, newSections);
-    } else {
-      var startIndex = 0;
-      while (startIndex < content.length) {
-        final endIndex = startIndex + 20000;
-        if (endIndex >= content.length) {
-          newSections.add(Section('No.${newSections.length + 1}',
-              content.substring(startIndex), 2));
-          break;
-        }
-
-        final nextNewline = content.indexOf('\n', endIndex);
-        final chapterEndIndex =
-            nextNewline == -1 ? content.length : nextNewline;
-
-        newSections.add(Section('No.${newSections.length + 1}',
-            content.substring(startIndex, chapterEndIndex), 2));
-        startIndex = chapterEndIndex + 1;
-      }
-      return createEpub(titleString, authorString, newSections);
-    }
+    sections = _fallbackChunking(filename, content);
+  } else {
+    sections = _buildSectionsFromMatches(
+      content: content,
+      matches: matches,
+      fallbackTitle: filename,
+    );
   }
-
-  if (matches.first.start > 0) {
-    sections.add(Section('', content.substring(0, matches.first.start), 0));
-  }
-
-  for (int i = 0; i < matches.length; i++) {
-    final match = matches[i];
-    final title = match.group(0)!;
-
-    final startPos = match.start;
-    final endPos =
-        i < matches.length - 1 ? matches[i + 1].start : content.length;
-
-    final fullContent = content.substring(startPos, endPos);
-    final contentWithoutTitle = fullContent.substring(title.length).trim();
-
-    final volumeKeyword = ['卷', 'Book', 'bk', 'Vol'];
-    final chapterKeyword = ['章', 'Chapter', 'chap', 'Ch'];
-    final level = chapterKeyword.any((keyword) => title.contains(keyword))
-        ? 2
-        : volumeKeyword.any((keyword) => title.contains(keyword))
-            ? 1
-            : 0;
-
-    sections.add(Section(title.trim(), contentWithoutTitle.trim(), level));
-  }
-
   final epubFile = await createEpub(titleString, authorString, sections);
   return epubFile;
 }

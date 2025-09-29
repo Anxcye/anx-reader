@@ -6,6 +6,15 @@ import 'package:anx_reader/utils/get_path/get_temp_dir.dart';
 import 'package:archive/archive_io.dart';
 import 'package:uuid/uuid.dart';
 
+String _escapeXml(String value) {
+  return value
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&apos;');
+}
+
 Future<File> createEpub(
   String titleString,
   String authorString,
@@ -44,22 +53,31 @@ Future<File> createEpub(
   // content.opf
   final contentFile = File('${oebpsDir.path}/content.opf');
   contentFile.createSync();
+  final manifestItems = List.generate(
+          sections.length,
+          (index) =>
+              '    <item id="item$index" href="xhtml/$index.xhtml" media-type="application/xhtml+xml"/>')
+      .join('\n');
+  final spineItems = List.generate(
+          sections.length, (index) => '    <itemref idref="item$index"/>')
+      .join('\n');
+
   contentFile.writeAsStringSync('''<?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="pub-id">
   <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
-    <dc:title>$titleString</dc:title>
-    <dc:creator>$authorString</dc:creator>
+    <dc:title>${_escapeXml(titleString)}</dc:title>
+    <dc:creator>${_escapeXml(authorString)}</dc:creator>
     <dc:identifier id="pub-id">urn:uuid:${const Uuid().v4()}</dc:identifier>
   </metadata>
 
   <manifest>
     <item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/>
     <item id="css" href="style.css" media-type="text/css"/>
-    ${sections.map((e) => '    <item id="${sections.indexOf(e)}" href="xhtml/${sections.indexOf(e)}.xhtml" media-type="application/xhtml+xml"/>').join('\n')}
+    $manifestItems
   </manifest>
 
   <spine toc="ncx">
-    ${sections.map((e) => '    <itemref idref="${sections.indexOf(e)}"/>').join('\n')}
+    $spineItems
   </spine>
 </package>''');
 
@@ -74,7 +92,7 @@ Future<File> createEpub(
     <meta name="dtb:totalPageCount" content="${sections.length}"/>
   </head>
   <docTitle>
-    <text>$titleString</text>
+    <text>${_escapeXml(titleString)}</text>
   </docTitle>
   <navMap>
     ${generateNestedToc(sections)}
@@ -95,18 +113,38 @@ Future<File> createEpub(
     final xhtmlFile = File('${xhtmlDir.path}/$i.xhtml');
     xhtmlFile.createSync();
 
-    final title = sections[i].title;
-    final level = sections[i].level;
+    final rawTitle = sections[i].title.trim();
+    final level = sections[i].level.clamp(1, 6);
     final content = sections[i].content;
+
+    final heading = rawTitle.isEmpty
+        ? ''
+        : '    <h$level>${_escapeXml(rawTitle)}</h$level>';
+
+    final paragraphLines = content
+        .split('\n')
+        .map((e) => e.trim())
+        .where((line) => line.isNotEmpty)
+        .map((line) => '    <p>${_escapeXml(line)}</p>')
+        .toList();
+
+    final bodyBuffer = StringBuffer();
+    if (heading.isNotEmpty) {
+      bodyBuffer.writeln(heading);
+    }
+    for (final line in paragraphLines) {
+      bodyBuffer.writeln(line);
+    }
+
+    final bodyContent = bodyBuffer.toString().trimRight();
 
     xhtmlFile.writeAsStringSync('''<?xml version="1.0" encoding="utf-8"?>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
   <head>
-    <title>$title</title>
+    <title>${_escapeXml(rawTitle.isEmpty ? titleString : rawTitle)}</title>
   </head>
   <body>
-    <h$level>$title</h$level>
-    ${content.split('\n').map((e) => e.trim().isNotEmpty ? '<p>${e.trim()}</p>' : '').join('\n')}
+${bodyContent.isEmpty ? '' : '$bodyContent\n'}
   </body>
 </html>''');
   }
