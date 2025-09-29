@@ -320,19 +320,13 @@ Future<void> extractZipFile(Map<String, String> params) async {
   final zipFilePath = params['zipFilePath']!;
   final destinationPath = params['destinationPath']!;
 
-  final bytes = File(zipFilePath).readAsBytesSync();
-  final archive = ZipDecoder().decodeBytes(bytes);
-
-  for (final file in archive) {
-    final filename = file.name;
-    if (file.isFile) {
-      final data = file.content as List<int>;
-      File('$destinationPath/$filename')
-        ..createSync(recursive: true)
-        ..writeAsBytesSync(data);
-    } else {
-      Directory('$destinationPath/$filename').createSync(recursive: true);
-    }
+  final input = InputFileStream(zipFilePath);
+  try {
+    final archive = ZipDecoder().decodeBuffer(input);
+    extractArchiveToDiskSync(archive, destinationPath);
+    archive.clearSync();
+  } finally {
+    await input.close();
   }
 }
 
