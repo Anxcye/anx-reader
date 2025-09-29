@@ -74,3 +74,5 @@ jobs:
       release_notes: ${{ needs.setup.outputs.release_notes }}
     secrets:
       NOTIFICATION_URL: ${{ secrets.NOTIFICATION_URL }}
+      TELEGRAM_TO: ${{ secrets.TELEGRAM_TO }}
+      TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
