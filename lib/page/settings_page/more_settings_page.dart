@@ -134,6 +134,7 @@ class _SubMoreSettingsState extends State<SubMoreSettings> {
             "icon": Icons.shield_outlined,
             "sections": const AdvancedSetting(),
             "subtitles": [
+              L10n.of(context).chapterSplitting,
               L10n.of(context).settingsAdvancedLog,
               L10n.of(context).duplicateFile,
               L10n.of(context).settingsAdvancedJavascript,

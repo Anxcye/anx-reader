@@ -553,5 +553,6 @@
   "multiLine": "여러 줄",
   "samplesOnePerLine": "샘플(줄당 1개)",
   "testResults": "테스트 결과",
-  "noSamples": "샘플 없음"
+  "noSamples": "샘플 없음",
+  "hintBannerRestoreToast": "추가 설정 -> 고급에서 모든 힌트를 다시 활성화할 수 있습니다."
 }

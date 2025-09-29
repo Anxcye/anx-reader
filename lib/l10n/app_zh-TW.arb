@@ -553,5 +553,6 @@
   "multiLine": "跨行匹配",
   "samplesOnePerLine": "範例（每行一筆）",
   "testResults": "測試結果",
-  "noSamples": "無範例"
+  "noSamples": "無範例",
+  "hintBannerRestoreToast": "可在更多設定 -> 進階中重新顯示所有提示。"
 }

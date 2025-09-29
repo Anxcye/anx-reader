@@ -553,5 +553,6 @@
   "multiLine": "Çok satırlı",
   "samplesOnePerLine": "Örnekler (satır başına bir)",
   "testResults": "Test sonuçları",
-  "noSamples": "Örnek yok"
+  "noSamples": "Örnek yok",
+  "hintBannerRestoreToast": "Tüm ipuçlarını Daha Fazla Ayar -> Gelişmiş bölümünden yeniden etkinleştirebilirsiniz."
 }

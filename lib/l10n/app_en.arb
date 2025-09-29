@@ -553,5 +553,6 @@
   "multiLine": "Multi-line",
   "samplesOnePerLine": "Samples (one per line)",
   "testResults": "Test results",
-  "noSamples": "No samples"
+  "noSamples": "No samples",
+  "hintBannerRestoreToast": "You can re-enable all hints in More Settings -> Advanced."
 }

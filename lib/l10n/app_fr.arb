@@ -553,5 +553,6 @@
   "multiLine": "Multiligne",
   "samplesOnePerLine": "Échantillons (un par ligne)",
   "testResults": "Résultats du test",
-  "noSamples": "Aucun échantillon"
+  "noSamples": "Aucun échantillon",
+  "hintBannerRestoreToast": "Vous pouvez réactiver toutes les astuces dans Plus de réglages -> Avancé."
 }

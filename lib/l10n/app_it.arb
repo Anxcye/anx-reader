@@ -553,5 +553,6 @@
   "multiLine": "Multi-linea",
   "samplesOnePerLine": "Esempi (uno per riga)",
   "testResults": "Risultati del test",
-  "noSamples": "Nessun esempio"
+  "noSamples": "Nessun esempio",
+  "hintBannerRestoreToast": "Puoi riattivare tutti i suggerimenti in Altre impostazioni -> Avanzate."
 }

@@ -553,5 +553,6 @@
   "multiLine": "跨行",
   "samplesOnePerLine": "例（一行一則）",
   "testResults": "測試結果",
-  "noSamples": "無例"
+  "noSamples": "無例",
+  "hintBannerRestoreToast": "於更多設定 -> 高級中可復顯諸提示。"
 }

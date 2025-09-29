@@ -553,5 +553,6 @@
   "multiLine": "Mehrzeilig",
   "samplesOnePerLine": "Beispiele (eine pro Zeile)",
   "testResults": "Testergebnisse",
-  "noSamples": "Keine Beispiele"
+  "noSamples": "Keine Beispiele",
+  "hintBannerRestoreToast": "Du kannst alle Hinweise unter Weitere Einstellungen -> Erweitert wieder aktivieren."
 }
