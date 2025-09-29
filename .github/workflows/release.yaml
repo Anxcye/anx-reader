@@ -18,6 +18,10 @@ on:
     secrets:
       NOTIFICATION_URL:
         required: true
+      TELEGRAM_TO:
+        required: true
+      TELEGRAM_TOKEN:
+        required: true
 
 permissions:
   contents: write
@@ -72,6 +76,42 @@ jobs:
           body: ${{ inputs.release_notes }}
           generate_release_notes: false
           prerelease: ${{ inputs.is_beta == 'true' }}
+
+      - name: Send beta message
+        if: ${{ inputs.is_beta == 'true' }}
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          format: markdown
+          message: |
+            🧪 *Beta Version Released!*
+            
+            🧪 **Testing Version:** `${{ inputs.version }}`
+            
+            ⚠️ *This is a beta release for testing purposes. Please report any issues you encounter.*
+            
+            **What's New:**
+            ${{ inputs.release_notes }}
+            
+            📥 **Download:** https://github.com/Anxcye/anx-reader/releases/tag/${{ inputs.version }}
+
+      - name: Send release message
+        if: ${{ inputs.is_beta != 'true' && inputs.is_alpha != 'true' }}
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          format: markdown
+          message: |
+            🎉 *New Release Available!*
+            
+            🚀 **Version:** `${{ inputs.version }}`
+            
+            **What's New:**
+            ${{ inputs.release_notes }}
+            
+            📥 **Download:** https://github.com/Anxcye/anx-reader/releases/tag/${{ inputs.version }}
 
       - name: Send build completion notification
         shell: bash
