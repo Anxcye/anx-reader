@@ -235,6 +235,7 @@ class BookshelfPageState extends ConsumerState<BookshelfPage> {
               );
             },
             child: FilledContainer(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
               color: Theme.of(context).colorScheme.surface.withAlpha(80),
               child: Row(
                 children: [

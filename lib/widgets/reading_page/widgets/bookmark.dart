@@ -93,6 +93,7 @@ class BookmarkItem extends StatelessWidget {
     return GestureDetector(
       onTap: () => onTap(bookmark.cfi),
       child: FilledContainer(
+        padding: const EdgeInsets.all(12.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
