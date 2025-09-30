@@ -52,7 +52,9 @@ class _ProgressWidgetState extends State<ProgressWidget> {
               IconButton(
                 icon: const Icon(Icons.arrow_back),
                 onPressed: () {
-                  widget.epubPlayerKey.currentState!.prevChapter();
+                  setState(() {
+                    widget.epubPlayerKey.currentState!.prevChapter();
+                  });
                 },
               ),
               Expanded(
@@ -80,7 +82,9 @@ class _ProgressWidgetState extends State<ProgressWidget> {
               IconButton(
                 icon: const Icon(Icons.arrow_forward),
                 onPressed: () {
-                  widget.epubPlayerKey.currentState!.nextChapter();
+                  setState(() {
+                    widget.epubPlayerKey.currentState!.nextChapter();
+                  });
                 },
               ),
             ],
