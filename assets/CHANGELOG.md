@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.7.1
+## 1.8.0
 - Feat: Custom txt chaptering rules
 - Feat: Search books or notes
 - Feat: Menu bar does not close after jumping to chapter
