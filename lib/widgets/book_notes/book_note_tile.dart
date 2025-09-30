@@ -10,7 +10,6 @@ class BookNoteTile extends StatelessWidget {
     required this.note,
     this.onTap,
     this.onLongPress,
-    this.onSecondaryTap,
     this.trailing,
     this.backgroundColor,
     this.margin = const EdgeInsets.only(bottom: 8),
@@ -19,7 +18,6 @@ class BookNoteTile extends StatelessWidget {
   final BookNote note;
   final VoidCallback? onTap;
   final VoidCallback? onLongPress;
-  final VoidCallback? onSecondaryTap;
   final Widget? trailing;
   final Color? backgroundColor;
   final EdgeInsetsGeometry margin;
@@ -51,7 +49,7 @@ class BookNoteTile extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       onLongPress: onLongPress,
-      onSecondaryTap: onSecondaryTap,
+      onSecondaryTap: onLongPress,
       behavior: HitTestBehavior.opaque,
       child: FilledContainer(
         color: backgroundColor,

@@ -18,7 +18,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:cross_file/cross_file.dart';
 
 class BookBottomSheet extends ConsumerWidget {
   const BookBottomSheet({
@@ -153,10 +152,12 @@ class BookBottomSheet extends ConsumerWidget {
           bookCover(context, book, width: 40),
           const SizedBox(width: 10),
           Expanded(
-            child: Text(book.title,
-                style: Theme.of(context).textTheme.titleMedium,
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis),
+            child: SingleChildScrollView(
+              child: Text(book.title,
+                  style: Theme.of(context).textTheme.titleMedium,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis),
+            ),
           ),
           DeleteConfirm(
             delete: () {
