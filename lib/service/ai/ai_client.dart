@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:anx_reader/service/ai/ai_dio.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 
 abstract class AiClient {
   final Map<String, String> config;
@@ -30,14 +30,15 @@ abstract class AiClient {
   }
 
   FutureOr<String?> processLine(String line) async {
-    if (line.trim().isEmpty) return null;
+    final trimmed = line.trim();
+    if (trimmed.isEmpty) return null;
 
-    if (line.startsWith('data: ')) {
-      final data = line.substring(6);
-      if (isDone(data)) return null;
+    if (trimmed.startsWith('data:')) {
+      final data = trimmed.substring(5).trim();
+      if (isDone(data) || data.isEmpty) return null;
 
       try {
-        final json = jsonDecode(data);
+        final json = jsonDecode(data) as Map<String, dynamic>;
         final content = extractContent(json);
         return content;
       } catch (e) {
@@ -61,28 +62,25 @@ abstract class AiClient {
         data: generateRequestBody(messages),
       );
 
-      final stream = response.data.stream;
-      await for (final chunk in stream.transform(
-        StreamTransformer<Uint8List, String>.fromHandlers(
-          handleData: (Uint8List data, EventSink<String> sink) {
-            sink.add(utf8.decode(data));
-          },
-        ),
-      )) {
+      final byteStream = response.data.stream.cast<List<int>>();
+      final utf8Stream = utf8.decoder.bind(byteStream);
+      final lineStream = const LineSplitter().bind(utf8Stream);
+
+      await for (final line in lineStream) {
         if (response.statusCode != 200) {
-          yield* Stream.error('Error: ${response.statusCode} \n $chunk');
+          yield* Stream.error('Error: ${response.statusCode} \n $line');
           continue;
         }
 
-        final lines = chunk.split('\n');
-        for (final line in lines) {
-          final content = await processLine(line);
-          if (content != null) {
-            yield content;
-          }
+        final content = await processLine(line);
+        if (content != null) {
+          yield content;
         }
       }
-    } catch (e) {
+    } catch (e, s) {
+      if (kDebugMode) {
+        print('$e $s');
+      }
       yield* Stream.error('Request failed: $e');
     } finally {
       dio.close();
