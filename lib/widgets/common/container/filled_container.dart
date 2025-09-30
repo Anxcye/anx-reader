@@ -21,12 +21,12 @@ class FilledContainer extends BaseRoundedContainer {
   Widget build(BuildContext context) {
     if (Prefs().eInkMode) {
       return OutlinedContainer(
-        child: child,
         width: width,
         height: height,
         padding: padding,
         margin: margin,
         radius: radius,
+        child: child,
       );
     }
 
