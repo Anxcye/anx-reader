@@ -2,7 +2,7 @@ import 'package:anx_reader/enums/chart_mode.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/providers/statistic_data.dart';
 import 'package:anx_reader/utils/date/week_of_year.dart';
-import 'package:anx_reader/widgets/container/filled_container.dart';
+import 'package:anx_reader/widgets/common/container/filled_container.dart';
 import 'package:anx_reader/widgets/common/anx_segmented_button.dart';
 import 'package:anx_reader/widgets/statistic/heatmap_chart.dart';
 import 'package:anx_reader/widgets/statistic/statistic_chart.dart';

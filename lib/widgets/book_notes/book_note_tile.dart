@@ -1,7 +1,7 @@
 import 'package:anx_reader/models/book_note.dart';
 import 'package:anx_reader/utils/time_to_human.dart';
 import 'package:anx_reader/widgets/context_menu/excerpt_menu.dart';
-import 'package:anx_reader/widgets/container/filled_container.dart';
+import 'package:anx_reader/widgets/common/container/filled_container.dart';
 import 'package:flutter/material.dart';
 
 class BookNoteTile extends StatelessWidget {
