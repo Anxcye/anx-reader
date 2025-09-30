@@ -3,6 +3,7 @@ import 'package:anx_reader/enums/lang_list.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/service/translate/index.dart';
 import 'package:anx_reader/utils/toast/common.dart';
+import 'package:anx_reader/widgets/container/filled_container.dart';
 import 'package:anx_reader/widgets/settings/settings_tile.dart';
 import 'package:anx_reader/widgets/settings/settings_title.dart';
 import 'package:flutter/material.dart';
@@ -38,8 +39,10 @@ class _TranslateSettingState extends State<TranslateSetting> {
           title: Text(L10n.of(context).underlineTranslation),
           tiles: [
             CustomSettingsTile(
-              child: Card(
-                shadowColor: Colors.transparent,
+              child: FilledContainer(
+                margin: const EdgeInsets.all(2.0),
+                  color: Theme.of(context).cardColor,
+                  radius: 28,
                 child: Padding(
                   padding: EdgeInsets.all(8.0),
                   child: Column(
@@ -79,8 +82,10 @@ class _TranslateSettingState extends State<TranslateSetting> {
           title: Text(L10n.of(context).fullTextTranslation),
           tiles: [
             CustomSettingsTile(
-              child: Card(
-                shadowColor: Colors.transparent,
+              child: FilledContainer(
+                margin: const EdgeInsets.all(2.0),
+                  color: Theme.of(context).cardColor,
+                  radius: 28,
                 child: Padding(
                   padding: EdgeInsets.all(8.0),
                   child: Column(

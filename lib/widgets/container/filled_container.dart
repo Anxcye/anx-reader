@@ -26,6 +26,7 @@ class FilledContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     if (Prefs().eInkMode) {
       return OutlinedContainer(
+        radius: radius,
         padding: padding ,
         margin: margin,
         width: width,
