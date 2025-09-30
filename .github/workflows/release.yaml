@@ -3,6 +3,9 @@ name: Release
 on:
   workflow_call:
     inputs:
+      tag:
+        required: true
+        type: string
       version:
         required: true
         type: string
@@ -94,7 +97,7 @@ jobs:
             **What's New:**
             ${{ inputs.release_notes }}
             
-            📥 **Download:** https://github.com/Anxcye/anx-reader/releases/tag/${{ inputs.version }}
+            📥 **Download:** https://github.com/Anxcye/anx-reader/releases/tag/${{ inputs.tag }}
 
       - name: Send release message
         if: ${{ inputs.is_beta != 'true' && inputs.is_alpha != 'true' }}
@@ -111,7 +114,7 @@ jobs:
             **What's New:**
             ${{ inputs.release_notes }}
             
-            📥 **Download:** https://github.com/Anxcye/anx-reader/releases/tag/${{ inputs.version }}
+            📥 **Download:** https://github.com/Anxcye/anx-reader/releases/tag/${{ inputs.tag }}
 
       - name: Send build completion notification
         shell: bash

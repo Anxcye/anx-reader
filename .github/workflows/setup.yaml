@@ -23,6 +23,7 @@ jobs:
   setup:
     runs-on: ubuntu-latest
     outputs:
+      tag: ${{ steps.get_version.outputs.tag }}
       version: ${{ steps.get_version.outputs.version }}
       is_alpha: ${{ steps.get_version.outputs.is_alpha }}
       is_beta: ${{ steps.get_version.outputs.is_beta }}
@@ -43,6 +44,7 @@ jobs:
         id: get_version
         shell: bash
         run: |
+          echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
           VERSION=$( grep '^version:' pubspec.yaml | cut -d ' ' -f 2 | cut -d '+' -f 1 )
           if [[ ${{ github.ref }} == refs/tags/alpha-* ]]; then
             echo "is_alpha=true" >> $GITHUB_OUTPUT

@@ -68,6 +68,7 @@ jobs:
     needs: [setup, build-android, build-ios, build-windows, build-macos, build-appstore]
     uses: ./.github/workflows/release.yaml
     with:
+      tag: ${{ needs.setup.outputs.tag }}
       version: ${{ needs.setup.outputs.version }}
       is_alpha: ${{ needs.setup.outputs.is_alpha }}
       is_beta: ${{ needs.setup.outputs.is_beta }}
