@@ -5,6 +5,7 @@ import 'package:anx_reader/dao/database.dart';
 import 'package:anx_reader/enums/sync_direction.dart';
 import 'package:anx_reader/enums/sync_trigger.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
+import 'package:anx_reader/service/iap_service.dart';
 import 'package:anx_reader/service/initialization_check.dart';
 import 'package:anx_reader/page/home_page/bookshelf_page.dart';
 import 'package:anx_reader/page/home_page/notes_page.dart';
@@ -12,6 +13,7 @@ import 'package:anx_reader/page/home_page/settings_page.dart';
 import 'package:anx_reader/page/home_page/statistics_page.dart';
 import 'package:anx_reader/service/receive_file/receive_share.dart';
 import 'package:anx_reader/utils/check_update.dart';
+import 'package:anx_reader/utils/env_var.dart';
 import 'package:anx_reader/utils/get_path/get_temp_dir.dart';
 import 'package:anx_reader/utils/load_default_font.dart';
 import 'package:anx_reader/utils/log/common.dart';
@@ -98,6 +100,9 @@ class _HomePageState extends ConsumerState<HomePage> {
   }
 
   Future<void> initAnx() async {
+    if (EnvVar.isAppStore) {
+      IAPService().initialize();
+    }
     AnxToast.init(context);
     checkUpdate(false);
     InitializationCheck.check();

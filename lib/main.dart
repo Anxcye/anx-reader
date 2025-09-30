@@ -8,10 +8,8 @@ import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/models/window_info.dart';
 import 'package:anx_reader/page/home_page.dart';
 import 'package:anx_reader/service/book_player/book_player_server.dart';
-import 'package:anx_reader/service/iap_service.dart';
 import 'package:anx_reader/service/tts/tts_handler.dart';
 import 'package:anx_reader/utils/color_scheme.dart';
-import 'package:anx_reader/utils/env_var.dart';
 import 'package:anx_reader/utils/error/common.dart';
 import 'package:anx_reader/utils/get_path/get_base_path.dart';
 import 'package:anx_reader/utils/log/common.dart';
@@ -54,9 +52,7 @@ Future<void> main() async {
   AnxError.init();
 
   await DBHelper().initDB();
-  if (EnvVar.isAppStore) {
-    IAPService().initialize();
-  }
+
   Server().start();
 
   audioHandler = await AudioService.init(
