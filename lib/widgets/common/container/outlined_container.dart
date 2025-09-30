@@ -1,40 +1,28 @@
+import 'package:anx_reader/widgets/common/container/base_rounded_container.dart';
 import 'package:flutter/material.dart';
 
-class OutlinedContainer extends StatelessWidget {
+class OutlinedContainer extends BaseRoundedContainer {
   const OutlinedContainer({
     super.key,
-    required this.child,
-    this.width,
-    this.height,
-    this.padding,
-    this.margin,
-    this.radius,
+    required super.child,
+    super.width,
+    super.height,
+    super.padding,
+    super.margin,
+    super.radius,
   });
 
-  final Widget child;
-  final double? width;
-  final double? height;
-  final EdgeInsetsGeometry? padding;
-  final EdgeInsetsGeometry? margin;
-  final double? radius;
-
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: margin,
-      padding: padding,
-      width: width,
-      height: height,
-      decoration: ShapeDecoration(
-        shape: RoundedSuperellipseBorder(
-          borderRadius: BorderRadiusGeometry.circular(radius ?? 30),
-          side: BorderSide(
-            color: Theme.of(context).colorScheme.outline,
-            width: 1,
-          ),
-        ),
+  ShapeDecoration decoration(
+    BuildContext context,
+    BorderRadiusGeometry borderRadius,
+  ) {
+    return buildShapeDecoration(
+      borderSide: BorderSide(
+        color: Theme.of(context).colorScheme.outline,
+        width: 1,
       ),
-      child: child,
+      borderRadius: borderRadius,
     );
   }
 }
