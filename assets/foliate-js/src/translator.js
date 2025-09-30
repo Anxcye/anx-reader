@@ -176,7 +176,7 @@ export class Translator {
     if (this.#translationMode === TranslationMode.OFF) return
     if (this.#translatedElements.has(element)) return
     
-    const text = element.textContent?.trim()
+    const text = element.innerText?.trim()
     if (!text) return
     
     try {

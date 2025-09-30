@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.8.1
+- Fix: Fix some AI services not working issues
+- Fix: Optimize full-text translation effect
+
+- Fix: 修复部分 AI 服务无法使用的问题
+- Fix: 优化全文翻译的效果
+
 ## 1.8.0
 - Feat: Custom txt chaptering rules
 - Feat: Search books or notes
