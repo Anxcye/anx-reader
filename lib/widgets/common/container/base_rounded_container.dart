@@ -55,7 +55,7 @@ abstract class BaseRoundedContainer extends StatelessWidget {
       color: color,
       shape: RoundedSuperellipseBorder(
         borderRadius: borderRadius,
-        // side: borderSide,
+        side: borderSide,
       ),
     );
   }

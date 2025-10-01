@@ -102,7 +102,6 @@ class _BookDetailState extends ConsumerState<BookDetail> {
                   height: 120,
                   width: width,
                   child: FilledContainer(
-                    padding: EdgeInsetsGeometry.zero,
                     child: Row(
                       children: [
                         const Spacer(),
@@ -434,7 +433,6 @@ class _BookDetailState extends ConsumerState<BookDetail> {
         height: 130,
         width: MediaQuery.of(context).size.width,
         child: FilledContainer(
-          padding: EdgeInsetsGeometry.zero,
           child: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 10),
             scrollDirection: Axis.horizontal,
@@ -500,7 +498,6 @@ class _BookDetailState extends ConsumerState<BookDetail> {
             // height: 500,
             width: MediaQuery.of(context).size.width,
             child: FilledContainer(
-              padding: const EdgeInsets.all(15.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

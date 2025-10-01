@@ -79,12 +79,12 @@ class BookBottomSheet extends ConsumerWidget {
                   children: [
                     StatefulBuilder(builder: (context, setState) {
                       return Checkbox(
-                          value:
-                              !Prefs().shouldShowHint(HintKey.releaseLocalSpace),
+                          value: !Prefs()
+                              .shouldShowHint(HintKey.releaseLocalSpace),
                           onChanged: (value) {
                             value = !(value ?? false);
-                            Prefs().setShowHint(
-                                HintKey.releaseLocalSpace, value);
+                            Prefs()
+                                .setShowHint(HintKey.releaseLocalSpace, value);
                             setState(() {});
                           });
                     }),
@@ -154,9 +154,7 @@ class BookBottomSheet extends ConsumerWidget {
           Expanded(
             child: SingleChildScrollView(
               child: Text(book.title,
-                  style: Theme.of(context).textTheme.titleMedium,
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis),
+                  style: Theme.of(context).textTheme.titleMedium),
             ),
           ),
           DeleteConfirm(

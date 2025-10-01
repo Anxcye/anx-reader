@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.8.2
+- UI: Optimize part of the interface design
+
+- UI: 优化部分界面设计
+
 ## 1.8.1
 - Fix: Fix some AI services not working issues
 - Fix: Optimize full-text translation effect
