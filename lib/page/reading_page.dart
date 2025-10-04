@@ -13,7 +13,7 @@ import 'package:anx_reader/page/book_detail.dart';
 import 'package:anx_reader/page/book_player/epub_player.dart';
 import 'package:anx_reader/providers/ai_chat.dart';
 import 'package:anx_reader/providers/sync.dart';
-import 'package:anx_reader/service/ai/ai_dio.dart';
+import 'package:anx_reader/service/ai/index.dart';
 import 'package:anx_reader/service/ai/prompt_generate.dart';
 import 'package:anx_reader/utils/toast/common.dart';
 import 'package:anx_reader/utils/ui/status_bar.dart';
@@ -247,14 +247,16 @@ class ReadingPageState extends ConsumerState<ReadingPage>
     if (Prefs().autoSummaryPreviousContent) {
       final previousContent =
           await epubPlayerKey.currentState!.previousContent(2000);
+      final prompt = generatePromptSummaryThePreviousContent(previousContent);
       SmartDialog.show(
         builder: (context) => AlertDialog(
-            title: Text(L10n.of(context).readingPageSummaryPreviousContent),
-            content: AiStream(
-              prompt: generatePromptSummaryThePreviousContent(previousContent),
-            )),
+          title: Text(L10n.of(context).readingPageSummaryPreviousContent),
+          content: AiStream(
+            prompt: prompt,
+          ),
+        ),
         onDismiss: () {
-          AiDio.instance.cancel();
+          cancelActiveAiRequest();
         },
       );
     }
@@ -313,6 +315,14 @@ class ReadingPageState extends ConsumerState<ReadingPage>
     }
   }
 
+  String _extractPromptText(PromptTemplatePayload payload) {
+    final messages = payload.buildMessages();
+    if (messages.isEmpty) {
+      return '';
+    }
+    return messages.last.contentAsString;
+  }
+
   void updateState() {
     if (mounted) {
       setState(() {
@@ -337,10 +347,12 @@ class ReadingPageState extends ConsumerState<ReadingPage>
         final String chapterContent =
             await epubPlayerKey.currentState!.theChapterContent();
         final sendImmediate = (ref.read(aiChatProvider).value?.isEmpty ?? true);
-        final content = generatePromptSummaryTheChapter(chapterContent);
+        final promptPayload = generatePromptSummaryTheChapter(chapterContent);
+        final promptText = _extractPromptText(promptPayload);
         showAiChat(
-            content: sendImmediate ? content : null,
-            sendImmediate: sendImmediate);
+          content: sendImmediate ? promptText : null,
+          sendImmediate: sendImmediate,
+        );
       },
     );
     Offstage controller = Offstage(

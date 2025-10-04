@@ -1,40 +1,43 @@
-import 'package:anx_reader/enums/ai_role.dart';
-import 'package:anx_reader/models/ai_message.dart';
 import 'package:anx_reader/service/ai/index.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:langchain_core/chat_models.dart';
 
 part 'ai_chat.g.dart';
 
 @Riverpod(keepAlive: true)
 class AiChat extends _$AiChat {
   @override
-  FutureOr<List<AiMessage>> build() async {
-    return List<AiMessage>.empty();
+  FutureOr<List<ChatMessage>> build() async {
+    return List<ChatMessage>.empty();
   }
 
   Future<void> sendMessage(String message) async {
     state = AsyncData([
       ...state.whenOrNull(data: (data) => data) ?? [],
-      AiMessage(content: message, role: AiRole.user),
+      ChatMessage.humanText(message),
     ]);
   }
 
-  Stream<List<AiMessage>> sendMessageStream(
+  void restore(List<ChatMessage> history) {
+    state = AsyncData(history);
+  }
+
+  Stream<List<ChatMessage>> sendMessageStream(
     String message,
     WidgetRef widgetRef,
     bool isRegenerate,
   ) async* {
-    List<AiMessage> messages = [
+    List<ChatMessage> messages = [
       ...state.whenOrNull(data: (data) => data) ?? [],
-      AiMessage(content: message, role: AiRole.user),
+      ChatMessage.humanText(message),
     ];
 
     state = AsyncData(messages);
 
-    List<AiMessage> updatedMessages = [
+    List<ChatMessage> updatedMessages = [
       ...messages,
-      const AiMessage(content: "", role: AiRole.assistant),
+      ChatMessage.ai(''),
     ];
 
     yield updatedMessages;
@@ -47,9 +50,10 @@ class AiChat extends _$AiChat {
     )) {
       assistantResponse = chunk;
 
-      final updatedMessagesWithResponse = List<AiMessage>.from(updatedMessages);
+      final updatedMessagesWithResponse =
+          List<ChatMessage>.from(updatedMessages);
       updatedMessagesWithResponse[updatedMessagesWithResponse.length - 1] =
-          AiMessage(content: assistantResponse, role: AiRole.assistant);
+          ChatMessage.ai(assistantResponse);
 
       yield updatedMessagesWithResponse;
 
@@ -58,6 +62,6 @@ class AiChat extends _$AiChat {
   }
 
   void clear() {
-    state = AsyncData(List<AiMessage>.empty());
+    state = AsyncData(List<ChatMessage>.empty());
   }
 }

@@ -1,12 +1,11 @@
-import 'package:anx_reader/enums/ai_role.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
-import 'package:anx_reader/models/ai_message.dart';
 import 'package:anx_reader/providers/ai_chat.dart';
 import 'package:anx_reader/utils/toast/common.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter/services.dart';
+import 'package:langchain_core/chat_models.dart';
 
 class AiChatStream extends ConsumerStatefulWidget {
   const AiChatStream(
@@ -21,30 +20,30 @@ class AiChatStream extends ConsumerStatefulWidget {
 
 class AiChatStreamState extends ConsumerState<AiChatStream> {
   final TextEditingController inputController = TextEditingController();
-  Stream<List<AiMessage>>? _messageStream;
+  Stream<List<ChatMessage>>? _messageStream;
   final ScrollController _scrollController = ScrollController();
 
   List<Map<String, String>> _getQuickPrompts(BuildContext context) {
     return [
       {
         'label': L10n.of(context).aiQuickPromptExplain,
-        'prompt': L10n.of(context).aiQuickPromptExplainText
+        'prompt': L10n.of(context).aiQuickPromptExplainText,
       },
       {
         'label': L10n.of(context).aiQuickPromptOpinion,
-        'prompt': L10n.of(context).aiQuickPromptOpinionText
+        'prompt': L10n.of(context).aiQuickPromptOpinionText,
       },
       {
         'label': L10n.of(context).aiQuickPromptSummary,
-        'prompt': L10n.of(context).aiQuickPromptSummaryText
+        'prompt': L10n.of(context).aiQuickPromptSummaryText,
       },
       {
         'label': L10n.of(context).aiQuickPromptAnalyze,
-        'prompt': L10n.of(context).aiQuickPromptAnalyzeText
+        'prompt': L10n.of(context).aiQuickPromptAnalyzeText,
       },
       {
         'label': L10n.of(context).aiQuickPromptSuggest,
-        'prompt': L10n.of(context).aiQuickPromptSuggestText
+        'prompt': L10n.of(context).aiQuickPromptSuggestText,
       },
     ];
   }
@@ -80,7 +79,6 @@ class AiChatStreamState extends ConsumerState<AiChatStream> {
 
   void _sendMessage({bool isRegenerate = false}) {
     if (inputController.text.trim().isEmpty) return;
-
     final message = inputController.text.trim();
     inputController.clear();
 
@@ -107,20 +105,20 @@ class AiChatStreamState extends ConsumerState<AiChatStream> {
 
   void _regenerateLastMessage() {
     final messages = ref.read(aiChatProvider).value;
-    if (messages != null && messages.isNotEmpty) {
-      for (int i = messages.length - 1; i >= 0; i--) {
-        if (messages[i].role == AiRole.user) {
-          final userMessage = messages[i].content;
-          ref.read(aiChatProvider.notifier).clear();
-          for (int j = 0; j < i; j++) {
-            ref.read(aiChatProvider.notifier).sendMessage(messages[j].content);
-          }
-          setState(() {
-            inputController.text = userMessage;
-            _sendMessage(isRegenerate: true);
-          });
-          break;
-        }
+    if (messages == null || messages.isEmpty) {
+      return;
+    }
+
+    for (int i = messages.length - 1; i >= 0; i--) {
+      final message = messages[i];
+      if (message is HumanChatMessage) {
+        final history = messages.take(i).toList(growable: false);
+        ref.read(aiChatProvider.notifier).restore(history);
+        setState(() {
+          inputController.text = message.contentAsString;
+          _sendMessage(isRegenerate: true);
+        });
+        break;
       }
     }
   }
@@ -130,12 +128,14 @@ class AiChatStreamState extends ConsumerState<AiChatStream> {
     AnxToast.show(L10n.of(context).notesPageCopied);
   }
 
-  AiMessage? _getLastAssistantMessage() {
+  ChatMessage? _getLastAssistantMessage() {
     final messages = ref.watch(aiChatProvider).asData?.value;
-    if (messages == null || messages.isEmpty) return null;
+    if (messages == null || messages.isEmpty) {
+      return null;
+    }
 
     for (int i = messages.length - 1; i >= 0; i--) {
-      if (messages[i].role == AiRole.assistant) {
+      if (messages[i] is AIChatMessage) {
         return messages[i];
       }
     }
@@ -151,50 +151,36 @@ class AiChatStreamState extends ConsumerState<AiChatStream> {
       body: Column(
         children: [
           Expanded(
-              child: _messageStream != null
-                  ? StreamBuilder<List<AiMessage>>(
-                      stream: _messageStream,
-                      builder: (context, snapshot) {
-                        if (!snapshot.hasData) {
-                          return const Center(
-                              child: CircularProgressIndicator(color: Colors.red,));
+            child: _messageStream != null
+                ? StreamBuilder<List<ChatMessage>>(
+                    stream: _messageStream,
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) {
+                        return const Center(
+                          child: CircularProgressIndicator(color: Colors.red),
+                        );
+                      }
+
+                      final messages = snapshot.data!;
+                      return _buildMessageList(messages);
+                    },
+                  )
+                : ref.watch(aiChatProvider).when(
+                      data: (messages) {
+                        if (messages.isEmpty) {
+                          return Center(
+                            child: Text(L10n.of(context).aiHintText),
+                          );
                         }
 
-                        final messages = snapshot.data!;
-                        // _scrollToBottom();
-
-                        return ListView.builder(
-                          controller: _scrollController,
-                          itemCount: messages.length,
-                          itemBuilder: (context, index) {
-                            final message = messages[index];
-                            return _buildMessageItem(message);
-                          },
-                        );
+                        return _buildMessageList(messages);
                       },
-                    )
-                  : ref.watch(aiChatProvider).when(
-                        data: (messages) {
-                          if (messages.isEmpty) {
-                            return Center(
-                              child: Text(L10n.of(context).aiHintText),
-                            );
-                          }
-
-                          return ListView.builder(
-                            controller: _scrollController,
-                            itemCount: messages.length,
-                            itemBuilder: (context, index) {
-                              final message = messages[index];
-                              return _buildMessageItem(message);
-                            },
-                          );
-                        },
-                        loading: () =>
-                            const Center(child: CircularProgressIndicator()),
-                        error: (error, stack) =>
-                            Center(child: Text('error: $error')),
-                      )),
+                      loading: () =>
+                          const Center(child: CircularProgressIndicator()),
+                      error: (error, stack) =>
+                          Center(child: Text('error: $error')),
+                    ),
+          ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
             child: SingleChildScrollView(
@@ -247,9 +233,21 @@ class AiChatStreamState extends ConsumerState<AiChatStream> {
     );
   }
 
-  Widget _buildMessageItem(AiMessage message) {
-    final isUser = message.role == AiRole.user;
-    final isLongMessage = message.content.length > 300;
+  Widget _buildMessageList(List<ChatMessage> messages) {
+    return ListView.builder(
+      controller: _scrollController,
+      itemCount: messages.length,
+      itemBuilder: (context, index) {
+        final message = messages[index];
+        return _buildMessageItem(message);
+      },
+    );
+  }
+
+  Widget _buildMessageItem(ChatMessage message) {
+    final isUser = message is HumanChatMessage;
+    final content = message.contentAsString;
+    final isLongMessage = content.length > 300;
     final lastAssistantMessage = _getLastAssistantMessage();
 
     return Padding(
@@ -282,23 +280,19 @@ class AiChatStreamState extends ConsumerState<AiChatStream> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   isUser
-                      ? _buildCollapsibleText(
-                          message.content,
-                          isLongMessage,
-                        )
-                      : _buildCollapsibleMarkdown(
-                          message.content, false),
+                      ? _buildCollapsibleText(content, isLongMessage)
+                      : _buildCollapsibleMarkdown(content, false),
                   if (!isUser)
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        if (message == lastAssistantMessage)
+                        if (identical(message, lastAssistantMessage))
                           TextButton(
                             onPressed: _regenerateLastMessage,
                             child: Text(L10n.of(context).aiRegenerate),
                           ),
                         TextButton(
-                          onPressed: () => _copyMessageContent(message.content),
+                          onPressed: () => _copyMessageContent(content),
                           child: Text(L10n.of(context).commonCopy),
                         ),
                       ],
@@ -337,9 +331,9 @@ class AiChatStreamState extends ConsumerState<AiChatStream> {
 }
 
 class _CollapsibleText extends StatefulWidget {
-  final String text;
-
   const _CollapsibleText({required this.text});
+
+  final String text;
 
   @override
   State<_CollapsibleText> createState() => _CollapsibleTextState();
@@ -404,9 +398,9 @@ class _CollapsibleTextState extends State<_CollapsibleText> {
 }
 
 class _CollapsibleMarkdown extends StatefulWidget {
-  final String markdownText;
-
   const _CollapsibleMarkdown({required this.markdownText});
+
+  final String markdownText;
 
   @override
   State<_CollapsibleMarkdown> createState() => _CollapsibleMarkdownState();

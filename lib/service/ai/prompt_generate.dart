@@ -2,37 +2,98 @@ import 'dart:io';
 
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/enums/ai_prompts.dart';
+import 'package:langchain_core/chat_models.dart';
+import 'package:langchain_core/prompts.dart';
 
-String generatePromptTest() {
-  String prompt = Prefs().getAiPrompt(AiPrompts.test);
-  String currentLocale = Prefs().locale?.languageCode ?? Platform.localeName;
-  prompt = prompt.replaceAll('{{language_locale}}', currentLocale);
-  return prompt;
+class PromptTemplatePayload {
+  const PromptTemplatePayload({
+    required this.template,
+    required this.variables,
+  });
+
+  final ChatPromptTemplate template;
+  final Map<String, dynamic> variables;
+
+  List<ChatMessage> buildMessages() {
+    return template.formatPrompt(variables).toChatMessages();
+  }
 }
 
-String generatePromptSummaryTheChapter(String chapter) {
-  String prompt = Prefs().getAiPrompt(AiPrompts.summaryTheChapter);
-  prompt = prompt.replaceAll('{{chapter}}', chapter.trim());
-  return prompt;
+PromptTemplatePayload generatePromptTest() {
+  final prompt = Prefs().getAiPrompt(AiPrompts.test);
+  final normalized = _normalizePrompt(prompt);
+  final template = ChatPromptTemplate.fromPromptMessages([
+    HumanChatMessagePromptTemplate.fromTemplate(normalized),
+  ]);
+  final currentLocale = Prefs().locale?.languageCode ?? Platform.localeName;
+  return PromptTemplatePayload(
+    template: template,
+    variables: {'language_locale': currentLocale},
+  );
 }
 
-String generatePromptSummaryTheBook(String book, String author) {
-  String prompt = Prefs().getAiPrompt(AiPrompts.summaryTheBook);
-  prompt = prompt.replaceAll('{{book}}', book);
-  prompt = prompt.replaceAll('{{author}}', author);
-  return prompt;
+PromptTemplatePayload generatePromptSummaryTheChapter(String chapter) {
+  final prompt = Prefs().getAiPrompt(AiPrompts.summaryTheChapter);
+  final normalized = _normalizePrompt(prompt);
+  final template = ChatPromptTemplate.fromPromptMessages([
+    HumanChatMessagePromptTemplate.fromTemplate(normalized),
+  ]);
+  return PromptTemplatePayload(
+    template: template,
+    variables: {'chapter': chapter.trim()},
+  );
 }
 
-String generatePromptSummaryThePreviousContent(String previousContent) {
-  String prompt = Prefs().getAiPrompt(AiPrompts.summaryThePreviousContent);
-  prompt = prompt.replaceAll('{{previous_content}}', previousContent.trim());
-  return prompt;
+PromptTemplatePayload generatePromptSummaryTheBook(String book, String author) {
+  final prompt = Prefs().getAiPrompt(AiPrompts.summaryTheBook);
+  final normalized = _normalizePrompt(prompt);
+  final template = ChatPromptTemplate.fromPromptMessages([
+    HumanChatMessagePromptTemplate.fromTemplate(normalized),
+  ]);
+  return PromptTemplatePayload(
+    template: template,
+    variables: {
+      'book': book,
+      'author': author,
+    },
+  );
 }
 
-String generatePromptTranslate(String text, String toLocale, String fromLocale) {
-  String prompt = Prefs().getAiPrompt(AiPrompts.translate);
-  prompt = prompt.replaceAll('{{text}}', text.trim());
-  prompt = prompt.replaceAll('{{to_locale}}', toLocale);
-  prompt = prompt.replaceAll('{{from_locale}}', fromLocale);
-  return prompt;
+PromptTemplatePayload generatePromptSummaryThePreviousContent(
+    String previousContent) {
+  final prompt = Prefs().getAiPrompt(AiPrompts.summaryThePreviousContent);
+  final normalized = _normalizePrompt(prompt);
+  final template = ChatPromptTemplate.fromPromptMessages([
+    HumanChatMessagePromptTemplate.fromTemplate(normalized),
+  ]);
+  return PromptTemplatePayload(
+    template: template,
+    variables: {
+      'previous_content': previousContent.trim(),
+    },
+  );
+}
+
+PromptTemplatePayload generatePromptTranslate(
+  String text,
+  String toLocale,
+  String fromLocale,
+) {
+  final prompt = Prefs().getAiPrompt(AiPrompts.translate);
+  final normalized = _normalizePrompt(prompt);
+  final template = ChatPromptTemplate.fromPromptMessages([
+    HumanChatMessagePromptTemplate.fromTemplate(normalized),
+  ]);
+  return PromptTemplatePayload(
+    template: template,
+    variables: {
+      'text': text.trim(),
+      'to_locale': toLocale,
+      'from_locale': fromLocale,
+    },
+  );
+}
+
+String _normalizePrompt(String template) {
+  return template.replaceAll('{{', '{').replaceAll('}}', '}');
 }
