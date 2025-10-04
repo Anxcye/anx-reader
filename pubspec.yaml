@@ -111,6 +111,7 @@ dependencies:
       ref: 4155175fabd0b94a365fc06cb19b65962ca1cc90
       path: packages/langchain_openai
   langchain_core: ^0.3.9
+  skeletonizer: ^2.1.0+1
 
 dependency_overrides:
   openai_dart:
@@ -159,4 +160,3 @@ flutter:
           weight: 400
         - asset: assets/fonts/SourceHanSerifSC-Bold.otf
           weight: 700
-

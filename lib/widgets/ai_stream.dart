@@ -6,6 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:skeletonizer/skeletonizer.dart';
+import 'package:anx_reader/utils/ai_reasoning_parser.dart';
+import 'package:anx_reader/widgets/ai_reasoning_panel.dart';
 
 class AiStream extends ConsumerStatefulWidget {
   const AiStream({
@@ -29,6 +32,8 @@ class AiStream extends ConsumerStatefulWidget {
 
 class AiStreamState extends ConsumerState<AiStream> {
   late Stream<String> stream;
+  bool _reasoningExpanded = true;
+  bool _userControlled = false;
 
   @override
   void initState() {
@@ -67,15 +72,32 @@ class AiStreamState extends ConsumerState<AiStream> {
         }
 
         final data = snapshot.data!;
+        final parsed = parseReasoningContent(data);
+        _syncReasoningState(parsed);
+
         return SingleChildScrollView(
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Expanded(child: MarkdownBody(data: data)),
-                ],
-              ),
+              if (parsed.hasThink)
+                ReasoningPanel(
+                  think: parsed.think,
+                  expanded: _reasoningExpanded,
+                  streaming: !parsed.hasAnswer,
+                  onToggle: () {
+                    setState(() {
+                      _reasoningExpanded = !_reasoningExpanded;
+                      _userControlled = true;
+                    });
+                  },
+                ),
+              if (parsed.hasAnswer)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: MarkdownBody(data: parsed.answer),
+                )
+              else if (!parsed.hasThink)
+                Skeletonizer.zone(child: Bone.multiText()),
               if (widget.canCopy)
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -83,6 +105,8 @@ class AiStreamState extends ConsumerState<AiStream> {
                     TextButton(
                       onPressed: () {
                         setState(() {
+                          _userControlled = false;
+                          _reasoningExpanded = true;
                           stream = _createStream(true);
                         });
                       },
@@ -102,5 +126,18 @@ class AiStreamState extends ConsumerState<AiStream> {
         );
       },
     );
+  }
+
+  void _syncReasoningState(ParsedReasoning parsed) {
+    if (_userControlled) return;
+    final shouldExpand = !parsed.hasAnswer;
+    if (_reasoningExpanded != shouldExpand) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted || _userControlled) return;
+        setState(() {
+          _reasoningExpanded = shouldExpand;
+        });
+      });
+    }
   }
 }

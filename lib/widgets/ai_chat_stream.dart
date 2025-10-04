@@ -1,10 +1,13 @@
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/providers/ai_chat.dart';
 import 'package:anx_reader/utils/toast/common.dart';
+import 'package:anx_reader/utils/ai_reasoning_parser.dart';
+import 'package:anx_reader/widgets/ai_reasoning_panel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 import 'package:langchain_core/chat_models.dart';
 
 class AiChatStream extends ConsumerStatefulWidget {
@@ -22,6 +25,8 @@ class AiChatStreamState extends ConsumerState<AiChatStream> {
   final TextEditingController inputController = TextEditingController();
   Stream<List<ChatMessage>>? _messageStream;
   final ScrollController _scrollController = ScrollController();
+  final Map<int, bool> _expandedState = <int, bool>{};
+  final Set<int> _userControlled = <int>{};
 
   List<Map<String, String>> _getQuickPrompts(BuildContext context) {
     return [
@@ -239,16 +244,29 @@ class AiChatStreamState extends ConsumerState<AiChatStream> {
       itemCount: messages.length,
       itemBuilder: (context, index) {
         final message = messages[index];
-        return _buildMessageItem(message);
+        final isStreaming =
+            _messageStream != null && index == messages.length - 1;
+        return _buildMessageItem(message, index, isStreaming);
       },
     );
   }
 
-  Widget _buildMessageItem(ChatMessage message) {
+  Widget _buildMessageItem(
+    ChatMessage message,
+    int index,
+    bool isStreaming,
+  ) {
     final isUser = message is HumanChatMessage;
     final content = message.contentAsString;
+    final parsed = parseReasoningContent(content);
     final isLongMessage = content.length > 300;
     final lastAssistantMessage = _getLastAssistantMessage();
+
+    if (!isUser && parsed.hasThink) {
+      _syncMessageExpansion(index, parsed, isStreaming);
+    }
+
+    final expanded = _expandedState[index] ?? (!parsed.hasAnswer);
 
     return Padding(
       padding: EdgeInsets.only(
@@ -281,7 +299,11 @@ class AiChatStreamState extends ConsumerState<AiChatStream> {
                 children: [
                   isUser
                       ? _buildCollapsibleText(content, isLongMessage)
-                      : _buildCollapsibleMarkdown(content, false),
+                      : _buildAssistantBubble(
+                          parsed,
+                          expanded,
+                          () => _toggleMessageExpansion(index, !expanded),
+                        ),
                   if (!isUser)
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
@@ -307,6 +329,59 @@ class AiChatStreamState extends ConsumerState<AiChatStream> {
     );
   }
 
+  void _toggleMessageExpansion(int key, bool value) {
+    setState(() {
+      _expandedState[key] = value;
+      _userControlled.add(key);
+    });
+  }
+
+  void _syncMessageExpansion(
+    int key,
+    ParsedReasoning parsed,
+    bool isStreaming,
+  ) {
+    if (_userControlled.contains(key)) return;
+    final shouldExpand = !(parsed.hasAnswer && !isStreaming);
+    final current = _expandedState[key];
+    if (current == null) {
+      _expandedState[key] = shouldExpand;
+      return;
+    }
+    if (current != shouldExpand) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted || _userControlled.contains(key)) return;
+        setState(() {
+          _expandedState[key] = shouldExpand;
+        });
+      });
+    }
+  }
+
+  Widget _buildAssistantBubble(
+    ParsedReasoning parsed,
+    bool expanded,
+    VoidCallback onToggle,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (parsed.hasThink)
+          ReasoningPanel(
+            think: parsed.think,
+            expanded: expanded,
+            streaming: !parsed.hasAnswer,
+            onToggle: onToggle,
+            margin: const EdgeInsets.only(bottom: 8.0),
+          ),
+        if (parsed.hasAnswer)
+          MarkdownBody(data: parsed.answer)
+        else if (!parsed.hasThink)
+          Skeletonizer.zone(child: Bone.multiText()),
+      ],
+    );
+  }
+
   Widget _buildCollapsibleText(String text, bool isLongMessage) {
     if (!isLongMessage) {
       return SelectableText(
@@ -316,17 +391,6 @@ class AiChatStreamState extends ConsumerState<AiChatStream> {
     }
 
     return _CollapsibleText(text: text);
-  }
-
-  Widget _buildCollapsibleMarkdown(String markdownText, bool isLongMessage) {
-    if (!isLongMessage) {
-      return MarkdownBody(
-        data: markdownText,
-        selectable: true,
-      );
-    }
-
-    return _CollapsibleMarkdown(markdownText: markdownText);
   }
 }
 
@@ -375,73 +439,6 @@ class _CollapsibleTextState extends State<_CollapsibleText> {
                             .secondaryContainer
                             .withValues(alpha: 0),
                         Theme.of(context).colorScheme.secondaryContainer,
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        TextButton(
-          onPressed: () {
-            setState(() {
-              _isExpanded = !_isExpanded;
-            });
-          },
-          child: Text(_isExpanded
-              ? L10n.of(context).aiHintCollapse
-              : L10n.of(context).aiHintExpand),
-        ),
-      ],
-    );
-  }
-}
-
-class _CollapsibleMarkdown extends StatefulWidget {
-  const _CollapsibleMarkdown({required this.markdownText});
-
-  final String markdownText;
-
-  @override
-  State<_CollapsibleMarkdown> createState() => _CollapsibleMarkdownState();
-}
-
-class _CollapsibleMarkdownState extends State<_CollapsibleMarkdown> {
-  bool _isExpanded = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (_isExpanded)
-          MarkdownBody(
-            data: widget.markdownText,
-            selectable: true,
-          )
-        else
-          Stack(
-            children: [
-              MarkdownBody(
-                data: widget.markdownText.substring(0, 300),
-                selectable: true,
-              ),
-              Positioned(
-                bottom: 0,
-                left: 0,
-                right: 0,
-                child: Container(
-                  height: 40,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Theme.of(context)
-                            .colorScheme
-                            .surfaceContainer
-                            .withValues(alpha: 0),
-                        Theme.of(context).colorScheme.surfaceContainer,
                       ],
                     ),
                   ),
