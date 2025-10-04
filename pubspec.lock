@@ -1202,10 +1202,11 @@ packages:
   langchain_openai:
     dependency: "direct main"
     description:
-      name: langchain_openai
-      sha256: b5e00552d4764481f5623a79f12ed1075c46c4130f55aefb6c80d0f917b2de78
-      url: "https://pub.dev"
-    source: hosted
+      path: "packages/langchain_openai"
+      ref: "4155175fabd0b94a365fc06cb19b65962ca1cc90"
+      resolved-ref: "4155175fabd0b94a365fc06cb19b65962ca1cc90"
+      url: "https://github.com/Anxcye/langchain_dart.git"
+    source: git
     version: "0.7.6+2"
   langchain_tiktoken:
     dependency: transitive
@@ -1352,11 +1353,11 @@ packages:
     source: hosted
     version: "2.1.0"
   openai_dart:
-    dependency: "direct main"
+    dependency: "direct overridden"
     description:
       path: "packages/openai_dart"
-      ref: b6b0029
-      resolved-ref: b6b0029c298958caac1cd9c98eb4a1aee11cb91d
+      ref: "4155175fabd0b94a365fc06cb19b65962ca1cc90"
+      resolved-ref: "4155175fabd0b94a365fc06cb19b65962ca1cc90"
       url: "https://github.com/Anxcye/langchain_dart.git"
     source: git
     version: "0.5.5"

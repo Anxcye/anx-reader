@@ -4,6 +4,7 @@ import 'package:langchain_core/chat_models.dart';
 import 'package:langchain_core/prompts.dart';
 
 class CancelableLangchainRunner {
+  static const String thinkTag = '<think/>';
   StreamSubscription<ChatResult>? _subscription;
 
   void cancel() {
@@ -15,20 +16,47 @@ class CancelableLangchainRunner {
     required BaseChatModel model,
     required PromptValue prompt,
   }) {
-    String buffer = '';
+    String thinkBuffer = '';
+    String answerBuffer = '';
+    bool reasoningDetected = false;
+    bool answerPhaseStarted = false;
+
     late StreamController<String> controller;
     controller = StreamController<String>(
       onListen: () {
         final source = model.stream(prompt);
         _subscription = source.listen(
           (event) {
-            final chunk = event.output.content;
-            if (chunk.isEmpty) {
+            final rawChunk = event.output.content;
+            if (rawChunk.isEmpty) {
               return;
             }
-            buffer += chunk;
+
+            if (_isThinkChunk(rawChunk)) {
+              reasoningDetected = true;
+              final cleaned = _cleanThinkChunk(rawChunk);
+              if (cleaned.isNotEmpty) {
+                thinkBuffer += cleaned;
+              }
+            } else {
+              if (reasoningDetected && !answerPhaseStarted) {
+                if (rawChunk.trim().isEmpty) {
+                  thinkBuffer += rawChunk;
+                } else {
+                  answerPhaseStarted = true;
+                  answerBuffer += rawChunk;
+                }
+              } else {
+                answerBuffer += rawChunk;
+              }
+            }
+
+            final aggregated = reasoningDetected
+                ? '<think>${thinkBuffer.trim()}</think>\n$answerBuffer'
+                : answerBuffer;
+
             if (!controller.isClosed) {
-              controller.add(buffer);
+              controller.add(aggregated);
             }
           },
           onError: (Object error, StackTrace stackTrace) {
@@ -57,6 +85,14 @@ class CancelableLangchainRunner {
     );
 
     return controller.stream;
+  }
+
+  bool _isThinkChunk(String chunk) {
+    return chunk.startsWith(thinkTag);
+  }
+
+  String _cleanThinkChunk(String chunk) {
+    return chunk.substring(thinkTag.length);
   }
 
   Future<void> _closeModel(BaseChatModel model) async {
