@@ -554,5 +554,7 @@
   "samplesOnePerLine": "Amostras (uma por linha)",
   "testResults": "Resultados do teste",
   "noSamples": "Sem amostras",
-  "hintBannerRestoreToast": "Você pode reativar todas as dicas em Mais configurações -> Avançado."
+  "hintBannerRestoreToast": "Você pode reativar todas as dicas em Mais configurações -> Avançado.",
+  "aiReasoningThinking": "Pensando...",
+  "aiReasoningTitle": "Processo de raciocínio"
 }

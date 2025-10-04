@@ -554,5 +554,7 @@
   "samplesOnePerLine": "Esempi (uno per riga)",
   "testResults": "Risultati del test",
   "noSamples": "Nessun esempio",
-  "hintBannerRestoreToast": "Puoi riattivare tutti i suggerimenti in Altre impostazioni -> Avanzate."
+  "hintBannerRestoreToast": "Puoi riattivare tutti i suggerimenti in Altre impostazioni -> Avanzate.",
+  "aiReasoningThinking": "Sto pensando...",
+  "aiReasoningTitle": "Processo di ragionamento"
 }

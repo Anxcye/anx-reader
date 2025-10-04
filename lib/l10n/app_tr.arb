@@ -554,5 +554,7 @@
   "samplesOnePerLine": "Örnekler (satır başına bir)",
   "testResults": "Test sonuçları",
   "noSamples": "Örnek yok",
-  "hintBannerRestoreToast": "Tüm ipuçlarını Daha Fazla Ayar -> Gelişmiş bölümünden yeniden etkinleştirebilirsiniz."
+  "hintBannerRestoreToast": "Tüm ipuçlarını Daha Fazla Ayar -> Gelişmiş bölümünden yeniden etkinleştirebilirsiniz.",
+  "aiReasoningThinking": "Düşünülüyor...",
+  "aiReasoningTitle": "Düşünce süreci"
 }

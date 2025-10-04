@@ -554,5 +554,7 @@
   "samplesOnePerLine": "Samples (one per line)",
   "testResults": "Test results",
   "noSamples": "No samples",
-  "hintBannerRestoreToast": "You can re-enable all hints in More Settings -> Advanced."
+  "hintBannerRestoreToast": "You can re-enable all hints in More Settings -> Advanced.",
+  "aiReasoningThinking": "Thinking...",
+  "aiReasoningTitle": "Reasoning Process"
 }

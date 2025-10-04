@@ -554,5 +554,7 @@
   "samplesOnePerLine": "サンプル（1 行につき 1 件）",
   "testResults": "テスト結果",
   "noSamples": "サンプルがありません",
-  "hintBannerRestoreToast": "「その他の設定」→「詳細設定」で全てのヒントを再度有効にできます。"
+  "hintBannerRestoreToast": "「その他の設定」→「詳細設定」で全てのヒントを再度有効にできます。",
+  "aiReasoningThinking": "思考中...",
+  "aiReasoningTitle": "思考プロセス"
 }

@@ -554,5 +554,7 @@
   "samplesOnePerLine": "Échantillons (un par ligne)",
   "testResults": "Résultats du test",
   "noSamples": "Aucun échantillon",
-  "hintBannerRestoreToast": "Vous pouvez réactiver toutes les astuces dans Plus de réglages -> Avancé."
+  "hintBannerRestoreToast": "Vous pouvez réactiver toutes les astuces dans Plus de réglages -> Avancé.",
+  "aiReasoningThinking": "Réflexion...",
+  "aiReasoningTitle": "Processus de raisonnement"
 }

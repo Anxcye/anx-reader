@@ -554,5 +554,7 @@
   "samplesOnePerLine": "範例（每行一筆）",
   "testResults": "測試結果",
   "noSamples": "無範例",
-  "hintBannerRestoreToast": "可在更多設定 -> 進階中重新顯示所有提示。"
+  "hintBannerRestoreToast": "可在更多設定 -> 進階中重新顯示所有提示。",
+  "aiReasoningThinking": "思考中...",
+  "aiReasoningTitle": "思考過程"
 }

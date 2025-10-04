@@ -1,3 +1,4 @@
+import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:flutter/material.dart';
 
 class ReasoningPanel extends StatelessWidget {
@@ -38,7 +39,7 @@ class ReasoningPanel extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      streaming ? 'Thinking...' : 'Reasoning',
+                      streaming ? L10n.of(context).aiReasoningThinking : L10n.of(context).aiReasoningTitle,
                       style: theme.textTheme.titleSmall,
                     ),
                   ),

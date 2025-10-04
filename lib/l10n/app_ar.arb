@@ -554,5 +554,7 @@
   "samplesOnePerLine": "عينات (عينة لكل سطر)",
   "testResults": "نتائج الاختبار",
   "noSamples": "لا توجد عينات",
-  "hintBannerRestoreToast": "يمكنك إعادة تفعيل كل التلميحات من المزيد من الإعدادات -> المتقدمة."
+  "hintBannerRestoreToast": "يمكنك إعادة تفعيل كل التلميحات من المزيد من الإعدادات -> المتقدمة.",
+  "aiReasoningThinking": "جارٍ التفكير...",
+  "aiReasoningTitle": "عملية التفكير"
 }

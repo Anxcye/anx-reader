@@ -554,5 +554,7 @@
   "samplesOnePerLine": "Beispiele (eine pro Zeile)",
   "testResults": "Testergebnisse",
   "noSamples": "Keine Beispiele",
-  "hintBannerRestoreToast": "Du kannst alle Hinweise unter Weitere Einstellungen -> Erweitert wieder aktivieren."
+  "hintBannerRestoreToast": "Du kannst alle Hinweise unter Weitere Einstellungen -> Erweitert wieder aktivieren.",
+  "aiReasoningThinking": "Am Überlegen...",
+  "aiReasoningTitle": "Denkprozess"
 }
