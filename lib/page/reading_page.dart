@@ -532,6 +532,25 @@ class ReadingPageState extends ConsumerState<ReadingPage>
                   actions: [
                     aiButton,
                     IconButton(
+  icon: const Icon(Icons.copy),
+  tooltip: 'نسخ الفصل',
+  onPressed: () async {
+    try {
+      // نستخدم دالة previousContent برقم كبير لجلب كل النص المتاح في الفصل
+      var content = await epubPlayerKey.currentState?.previousContent(999999); 
+      
+      if (content != null && content.isNotEmpty) {
+        await Clipboard.setData(ClipboardData(text: content));
+        AnxToast.show("تم نسخ الفصل بنجاح");
+      } else {
+        AnxToast.show("لا يوجد نص لنسخه");
+      }
+    } catch (e) {
+      AnxToast.show("خطأ أثناء النسخ");
+    }
+  },
+),
+                    IconButton(
                         onPressed: () {
                           if (bookmarkExists) {
                             epubPlayerKey.currentState!.removeAnnotation(
