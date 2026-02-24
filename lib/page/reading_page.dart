@@ -229,6 +229,16 @@ class ReadingPageState extends ConsumerState<ReadingPage>
         epubPlayerKey.currentState?.nextPage();
         return KeyEventResult.handled;
       }
+      final bool isSimulatedCtrlLeft = event.character == '\u001b';
+      final bool isSimulatedCtrlRight = event.character == '\u001d';
+      if (isSimulatedCtrlLeft) {
+        epubPlayerKey.currentState?.prevPage();
+        return KeyEventResult.handled;
+      }
+      if (isSimulatedCtrlRight) {
+        epubPlayerKey.currentState?.nextPage();
+        return KeyEventResult.handled;
+      }
     }
 
     if (Prefs().volumeKeyTurnPage) {
