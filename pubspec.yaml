@@ -27,7 +27,7 @@ dependencies:
   html: ^0.15.4
   flutter_html: ^3.0.0-beta.2
   archive: ^3.6.1
-  flutter_inappwebview: 
+  flutter_inappwebview:
     git:
       url: https://github.com/Anxcye/flutter_inappwebview.git
       ref: 4a275c3
@@ -132,11 +132,13 @@ dependencies:
 
 # dependency_overrides:
 #   openai_dart:
-#     git:
+## git:
 #       url: https://github.com/Anxcye/langchain_dart.git
 #       ref: bb06c17ca667a906e3e37154b0bda95023d0c9bd
 #       path: packages/openai_dart
-  
+dependency_overrides:
+  analyzer: ^8.0.0
+
 
 dev_dependencies:
   flutter_test:

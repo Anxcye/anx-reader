@@ -133,6 +133,8 @@
   "readingPageAutoAdjustReadingTheme": "Auto Adjust Reading Theme",
   "readingPageAutoAdjustReadingThemeTips": "Use the 1st and 2nd colors in the color table as the day and night modes respectively",
   "readingPageVolumeKeyTurnPage": "Volume Key Turn Page",
+  "readingPageKeyboardShortcutTurnPage": "Keyboard Shortcut Turn Page",
+  "readingPageKeyboardShortcutTurnPageTips": "Use Ctrl+[ and Ctrl+] to turn pages",
   "readingPageFontSize": "Font Size",
   "readingPageLineSpacing": "Line Spacing",
   "readingPageParagraphSpacing": "Paragraph Spacing",

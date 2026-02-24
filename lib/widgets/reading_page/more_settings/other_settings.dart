@@ -301,6 +301,20 @@ class _OtherSettingsState extends State<OtherSettings> {
       );
     }
 
+  ListTile keyboardShortcutTurnPage() {
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      title: Text(L10n.of(context).readingPageKeyboardShortcutTurnPage),
+      subtitle: Text(L10n.of(context).readingPageKeyboardShortcutTurnPageTips),
+      trailing: Switch(
+        value: Prefs().keyboardShortcutTurnPage,
+        onChanged: (bool value) => setState(() {
+          Prefs().keyboardShortcutTurnPage = value;
+        }),
+      ),
+    );
+  }
+
     return Container(
       padding: const EdgeInsets.all(8.0),
       child: Column(
@@ -311,6 +325,7 @@ class _OtherSettingsState extends State<OtherSettings> {
           //     PageTurnMode.simple)
           swapPageTurnArea(),
           showMenuOnHover(),
+      if (AnxPlatform.isDesktop) keyboardShortcutTurnPage(),
           autoAdjustReadingTheme(),
           autoTranslateSelection(),
           autoMarkSelection(),

@@ -951,6 +951,15 @@ class Prefs extends ChangeNotifier {
     return prefs.getBool('volumeKeyTurnPage') ?? false;
   }
 
+  set keyboardShortcutTurnPage(bool status) {
+    prefs.setBool('keyboardShortcutTurnPage', status);
+    notifyListeners();
+  }
+
+  bool get keyboardShortcutTurnPage {
+    return prefs.getBool('keyboardShortcutTurnPage') ?? false;
+  }
+
   set swapPageTurnArea(bool status) {
     prefs.setBool('swapPageTurnArea', status);
   }

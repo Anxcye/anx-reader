@@ -1,1 +1,76 @@
-{}
+{
+  "ar": [
+    "readingPageKeyboardShortcutTurnPage",
+    "readingPageKeyboardShortcutTurnPageTips"
+  ],
+
+  "de": [
+    "readingPageKeyboardShortcutTurnPage",
+    "readingPageKeyboardShortcutTurnPageTips"
+  ],
+
+  "es": [
+    "readingPageKeyboardShortcutTurnPage",
+    "readingPageKeyboardShortcutTurnPageTips"
+  ],
+
+  "fr": [
+    "readingPageKeyboardShortcutTurnPage",
+    "readingPageKeyboardShortcutTurnPageTips"
+  ],
+
+  "it": [
+    "readingPageKeyboardShortcutTurnPage",
+    "readingPageKeyboardShortcutTurnPageTips"
+  ],
+
+  "ja": [
+    "readingPageKeyboardShortcutTurnPage",
+    "readingPageKeyboardShortcutTurnPageTips"
+  ],
+
+  "ko": [
+    "readingPageKeyboardShortcutTurnPage",
+    "readingPageKeyboardShortcutTurnPageTips"
+  ],
+
+  "pt": [
+    "readingPageKeyboardShortcutTurnPage",
+    "readingPageKeyboardShortcutTurnPageTips"
+  ],
+
+  "ro": [
+    "readingPageKeyboardShortcutTurnPage",
+    "readingPageKeyboardShortcutTurnPageTips"
+  ],
+
+  "ru": [
+    "readingPageKeyboardShortcutTurnPage",
+    "readingPageKeyboardShortcutTurnPageTips"
+  ],
+
+  "tr": [
+    "readingPageKeyboardShortcutTurnPage",
+    "readingPageKeyboardShortcutTurnPageTips"
+  ],
+
+  "zh": [
+    "readingPageKeyboardShortcutTurnPage",
+    "readingPageKeyboardShortcutTurnPageTips"
+  ],
+
+  "zh_CN": [
+    "readingPageKeyboardShortcutTurnPage",
+    "readingPageKeyboardShortcutTurnPageTips"
+  ],
+
+  "zh_LZH": [
+    "readingPageKeyboardShortcutTurnPage",
+    "readingPageKeyboardShortcutTurnPageTips"
+  ],
+
+  "zh_TW": [
+    "readingPageKeyboardShortcutTurnPage",
+    "readingPageKeyboardShortcutTurnPageTips"
+  ]
+}

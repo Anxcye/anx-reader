@@ -218,6 +218,19 @@ class ReadingPageState extends ConsumerState<ReadingPage>
       return KeyEventResult.handled;
     }
 
+    // Handle Ctrl+[ and Ctrl+] for page turning when keyboard shortcut is enabled
+    if (Prefs().keyboardShortcutTurnPage) {
+      final isControlPressed = HardwareKeyboard.instance.isControlPressed;
+      if (isControlPressed && logicalKey == LogicalKeyboardKey.bracketLeft) {
+        epubPlayerKey.currentState?.prevPage();
+        return KeyEventResult.handled;
+      }
+      if (isControlPressed && logicalKey == LogicalKeyboardKey.bracketRight) {
+        epubPlayerKey.currentState?.nextPage();
+        return KeyEventResult.handled;
+      }
+    }
+
     if (Prefs().volumeKeyTurnPage) {
       if (event.physicalKey == PhysicalKeyboardKey.audioVolumeUp) {
         epubPlayerKey.currentState?.prevPage();

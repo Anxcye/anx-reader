@@ -541,6 +541,14 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
       action = PageTurningType.values[customConfig[part]];
     }
 
+    // Disable mouse/touch page turning when keyboard shortcuts are enabled
+    if (Prefs().keyboardShortcutTurnPage) {
+      // Only allow menu action, disable prev/next page turning
+      if (action == PageTurningType.prev || action == PageTurningType.next) {
+        return;
+      }
+    }
+
     switch (action) {
       case PageTurningType.prev:
         prevPage();
@@ -846,6 +854,10 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
 
   Future<void> _handlePointerEvents(PointerEvent event) async {
     if (await isFootNoteOpen() || Prefs().pageTurnStyle == PageTurn.scroll) {
+      return;
+    }
+    // Disable scroll wheel page turning when keyboard shortcuts are enabled
+    if (Prefs().keyboardShortcutTurnPage) {
       return;
     }
     if (event is PointerScrollEvent) {
