@@ -53,6 +53,17 @@ class EdgeTtsProvider extends TtsServiceProvider {
         type: ConfigItemType.text,
         defaultValue: _defaultVoice,
       ),
+      ConfigItem(
+        key: 'rate',
+        label: L10n.of(context).settingsNarrateEdgeRateLabel,
+        description: L10n.of(context).settingsNarrateEdgeRateDescription,
+        type: ConfigItemType.range,
+        defaultValue: 0,
+        min: -100,
+        max: 100,
+        step: 10,
+        unit: '%',
+      ),
     ];
   }
 
@@ -63,11 +74,13 @@ class EdgeTtsProvider extends TtsServiceProvider {
       return {
         'url': _defaultUrl,
         'voice': _defaultVoice,
+        'rate': 0,
       };
     }
     return {
       'url': config['url'] ?? _defaultUrl,
       'voice': config['voice'] ?? _defaultVoice,
+      'rate': config['rate'] ?? 0,
     };
   }
 
@@ -81,6 +94,10 @@ class EdgeTtsProvider extends TtsServiceProvider {
     final config = getConfig();
     final String url = config['url']?.toString().trim() ?? _defaultUrl;
     final String resolvedVoice = resolveVoice(voice);
+    
+    // Use configured rate if available, otherwise use passed rate
+    final int rateConfig = config['rate'] is int ? config['rate'] as int : 0;
+    final double effectiveRate = rateConfig != 0 ? (1.0 + rateConfig / 100.0) : rate;
 
     if (url.isEmpty) {
       throw Exception('Edge TTS config missing (url)');
@@ -110,7 +127,7 @@ class EdgeTtsProvider extends TtsServiceProvider {
       final requestBody = {
         'text': text,
         'voice': resolvedVoice,
-        'rate': _formatRate(rate),
+        'rate': _formatRate(effectiveRate),
       };
 
       AnxLog.info('Edge TTS request to: $apiUrl');

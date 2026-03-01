@@ -128,6 +128,60 @@ class _ServiceConfigFormState extends State<ServiceConfigForm> {
               _updateConfig(item.key, int.tryParse(value) ?? 0),
         );
 
+      case ConfigItemType.range:
+        final double min = item.min ?? 0.0;
+        final double max = item.max ?? 100.0;
+        final double step = item.step ?? 1.0;
+        final double currentValue = (_currentConfig[item.key] ?? item.defaultValue ?? min).toDouble();
+        final String unit = item.unit ?? '';
+        
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    item.label,
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                  Text(
+                    '${currentValue.round()}$unit',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (item.description != null)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Text(
+                  item.description!,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ),
+            Slider(
+              value: currentValue.clamp(min, max),
+              min: min,
+              max: max,
+              divisions: ((max - min) / step).round(),
+              label: '${currentValue.round()}$unit',
+              onChanged: (value) {
+                _updateConfig(item.key, value.round());
+              },
+            ),
+          ],
+        );
+
       case ConfigItemType.toggle:
         return SwitchListTile(
           title: Text(item.label),

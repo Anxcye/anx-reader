@@ -836,5 +836,7 @@
   "settingsNarrateEdgeTts": "Edge TTS",
   "settingsNarrateEdgeHelpText": "Edge-TTS is a free text-to-speech service based on Microsoft Edge's online TTS. You need to set up an Edge-TTS server URL to use this service.",
   "settingsNarrateEdgeUrlDescription": "Edge-TTS server URL (e.g. http://localhost:8080)",
-  "settingsNarrateEdgeVoiceDescription": "Edge-TTS voice name (e.g. en-US-GuyNeural)"
+  "settingsNarrateEdgeVoiceDescription": "Edge-TTS voice name (e.g. en-US-GuyNeural)",
+  "settingsNarrateEdgeRateLabel": "Speech Rate",
+  "settingsNarrateEdgeRateDescription": "Speech rate adjustment (-100 to 100, 0 = normal)"
 }

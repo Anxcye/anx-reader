@@ -836,5 +836,7 @@
   "settingsNarrateEdgeTts": "Edge TTS",
   "settingsNarrateEdgeHelpText": "Edge-TTS 是基于微软 Edge 在线 TTS 的免费语音合成服务。您需要配置 Edge-TTS 服务器地址才能使用此服务。",
   "settingsNarrateEdgeUrlDescription": "Edge-TTS 服务器地址（例如 http://localhost:8080）",
-  "settingsNarrateEdgeVoiceDescription": "Edge-TTS 语音名称（例如 zh-CN-XiaoxiaoNeural）"
+  "settingsNarrateEdgeVoiceDescription": "Edge-TTS 语音名称（例如 zh-CN-XiaoxiaoNeural）",
+  "settingsNarrateEdgeRateLabel": "语速",
+  "settingsNarrateEdgeRateDescription": "语速调整（-100 到 100，0 = 正常）"
 }

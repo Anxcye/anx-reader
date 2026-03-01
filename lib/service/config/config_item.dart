@@ -4,6 +4,7 @@ enum ConfigItemType {
   text('text input'),
   password('password input'),
   number('number input'),
+  range('range slider'),
   select('select'),
   radio('radio'),
   checkbox('checkbox'),
@@ -24,6 +25,11 @@ class ConfigItem {
   final dynamic defaultValue;
   final List<Map<String, dynamic>>? options;
   final String? link;
+  // Range slider specific properties
+  final double? min;
+  final double? max;
+  final double? step;
+  final String? unit;
 
   ConfigItem({
     required this.key,
@@ -33,6 +39,10 @@ class ConfigItem {
     this.defaultValue,
     this.options,
     this.link,
+    this.min,
+    this.max,
+    this.step,
+    this.unit,
   });
 
   Map<String, dynamic> toJson() {
@@ -44,6 +54,10 @@ class ConfigItem {
       'defaultValue': defaultValue,
       'options': options,
       'link': link,
+      'min': min,
+      'max': max,
+      'step': step,
+      'unit': unit,
     };
   }
 }
