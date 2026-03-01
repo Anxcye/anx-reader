@@ -1,76 +1,121 @@
 {
   "ar": [
     "readingPageKeyboardShortcutTurnPage",
-    "readingPageKeyboardShortcutTurnPageTips"
+    "readingPageKeyboardShortcutTurnPageTips",
+    "settingsNarrateEdgeTts",
+    "settingsNarrateEdgeHelpText",
+    "settingsNarrateEdgeUrlDescription",
+    "settingsNarrateEdgeVoiceDescription"
   ],
 
   "de": [
     "readingPageKeyboardShortcutTurnPage",
-    "readingPageKeyboardShortcutTurnPageTips"
+    "readingPageKeyboardShortcutTurnPageTips",
+    "settingsNarrateEdgeTts",
+    "settingsNarrateEdgeHelpText",
+    "settingsNarrateEdgeUrlDescription",
+    "settingsNarrateEdgeVoiceDescription"
   ],
 
   "es": [
     "readingPageKeyboardShortcutTurnPage",
-    "readingPageKeyboardShortcutTurnPageTips"
+    "readingPageKeyboardShortcutTurnPageTips",
+    "settingsNarrateEdgeTts",
+    "settingsNarrateEdgeHelpText",
+    "settingsNarrateEdgeUrlDescription",
+    "settingsNarrateEdgeVoiceDescription"
   ],
 
   "fr": [
     "readingPageKeyboardShortcutTurnPage",
-    "readingPageKeyboardShortcutTurnPageTips"
+    "readingPageKeyboardShortcutTurnPageTips",
+    "settingsNarrateEdgeTts",
+    "settingsNarrateEdgeHelpText",
+    "settingsNarrateEdgeUrlDescription",
+    "settingsNarrateEdgeVoiceDescription"
   ],
 
   "it": [
     "readingPageKeyboardShortcutTurnPage",
-    "readingPageKeyboardShortcutTurnPageTips"
+    "readingPageKeyboardShortcutTurnPageTips",
+    "settingsNarrateEdgeTts",
+    "settingsNarrateEdgeHelpText",
+    "settingsNarrateEdgeUrlDescription",
+    "settingsNarrateEdgeVoiceDescription"
   ],
 
   "ja": [
     "readingPageKeyboardShortcutTurnPage",
-    "readingPageKeyboardShortcutTurnPageTips"
+    "readingPageKeyboardShortcutTurnPageTips",
+    "settingsNarrateEdgeTts",
+    "settingsNarrateEdgeHelpText",
+    "settingsNarrateEdgeUrlDescription",
+    "settingsNarrateEdgeVoiceDescription"
   ],
 
   "ko": [
     "readingPageKeyboardShortcutTurnPage",
-    "readingPageKeyboardShortcutTurnPageTips"
+    "readingPageKeyboardShortcutTurnPageTips",
+    "settingsNarrateEdgeTts",
+    "settingsNarrateEdgeHelpText",
+    "settingsNarrateEdgeUrlDescription",
+    "settingsNarrateEdgeVoiceDescription"
   ],
 
   "pt": [
     "readingPageKeyboardShortcutTurnPage",
-    "readingPageKeyboardShortcutTurnPageTips"
+    "readingPageKeyboardShortcutTurnPageTips",
+    "settingsNarrateEdgeTts",
+    "settingsNarrateEdgeHelpText",
+    "settingsNarrateEdgeUrlDescription",
+    "settingsNarrateEdgeVoiceDescription"
   ],
 
   "ro": [
     "readingPageKeyboardShortcutTurnPage",
-    "readingPageKeyboardShortcutTurnPageTips"
+    "readingPageKeyboardShortcutTurnPageTips",
+    "settingsNarrateEdgeTts",
+    "settingsNarrateEdgeHelpText",
+    "settingsNarrateEdgeUrlDescription",
+    "settingsNarrateEdgeVoiceDescription"
   ],
 
   "ru": [
     "readingPageKeyboardShortcutTurnPage",
-    "readingPageKeyboardShortcutTurnPageTips"
+    "readingPageKeyboardShortcutTurnPageTips",
+    "settingsNarrateEdgeTts",
+    "settingsNarrateEdgeHelpText",
+    "settingsNarrateEdgeUrlDescription",
+    "settingsNarrateEdgeVoiceDescription"
   ],
 
   "tr": [
     "readingPageKeyboardShortcutTurnPage",
-    "readingPageKeyboardShortcutTurnPageTips"
-  ],
-
-  "zh": [
-    "readingPageKeyboardShortcutTurnPage",
-    "readingPageKeyboardShortcutTurnPageTips"
+    "readingPageKeyboardShortcutTurnPageTips",
+    "settingsNarrateEdgeTts",
+    "settingsNarrateEdgeHelpText",
+    "settingsNarrateEdgeUrlDescription",
+    "settingsNarrateEdgeVoiceDescription"
   ],
 
   "zh_CN": [
-    "readingPageKeyboardShortcutTurnPage",
-    "readingPageKeyboardShortcutTurnPageTips"
+    "settingsNarrateEdgeTts",
+    "settingsNarrateEdgeHelpText",
+    "settingsNarrateEdgeUrlDescription",
+    "settingsNarrateEdgeVoiceDescription"
   ],
 
   "zh_LZH": [
-    "readingPageKeyboardShortcutTurnPage",
-    "readingPageKeyboardShortcutTurnPageTips"
+    "settingsNarrateEdgeTts",
+    "settingsNarrateEdgeHelpText",
+    "settingsNarrateEdgeUrlDescription",
+    "settingsNarrateEdgeVoiceDescription"
   ],
 
   "zh_TW": [
-    "readingPageKeyboardShortcutTurnPage",
-    "readingPageKeyboardShortcutTurnPageTips"
+    "settingsNarrateEdgeTts",
+    "settingsNarrateEdgeHelpText",
+    "settingsNarrateEdgeUrlDescription",
+    "settingsNarrateEdgeVoiceDescription"
   ]
 }

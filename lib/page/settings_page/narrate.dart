@@ -441,10 +441,13 @@ class _NarrateSettingsState extends ConsumerState<NarrateSettings>
           DropdownMenuItem(
               value: 'azure',
               child: Text(L10n.of(context).settingsNarrateAzureTts)),
-          DropdownMenuItem(
+            DropdownMenuItem(
               value: 'openai',
               child: Text(L10n.of(context).settingsNarrateOpenAiTts)),
-        ],
+            DropdownMenuItem(
+              value: 'edge',
+              child: Text(L10n.of(context).settingsNarrateEdgeTts)),
+            ],
         onChanged: (value) async {
           if (value != null && value != currentServiceId) {
             await TtsHandler().switchTtsType(value);
