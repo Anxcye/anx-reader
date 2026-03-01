@@ -27,7 +27,8 @@ class EdgeTtsProvider extends TtsServiceProvider {
   TtsService get service => TtsService.edge;
 
   @override
-  String getLabel(BuildContext context) => L10n.of(context).settingsNarrateEdgeTts;
+  String getLabel(BuildContext context) =>
+      L10n.of(context).settingsNarrateEdgeTts;
 
   @override
   List<ConfigItem> getConfigItems(BuildContext context) {
@@ -53,17 +54,6 @@ class EdgeTtsProvider extends TtsServiceProvider {
         type: ConfigItemType.text,
         defaultValue: _defaultVoice,
       ),
-      ConfigItem(
-        key: 'rate',
-        label: L10n.of(context).settingsNarrateEdgeRateLabel,
-        description: L10n.of(context).settingsNarrateEdgeRateDescription,
-        type: ConfigItemType.range,
-        defaultValue: 0,
-        min: -100,
-        max: 100,
-        step: 10,
-        unit: '%',
-      ),
     ];
   }
 
@@ -74,13 +64,11 @@ class EdgeTtsProvider extends TtsServiceProvider {
       return {
         'url': _defaultUrl,
         'voice': _defaultVoice,
-        'rate': 0,
       };
     }
     return {
       'url': config['url'] ?? _defaultUrl,
       'voice': config['voice'] ?? _defaultVoice,
-      'rate': config['rate'] ?? 0,
     };
   }
 
@@ -90,14 +78,11 @@ class EdgeTtsProvider extends TtsServiceProvider {
   }
 
   @override
-  Future<Uint8List> speak(String text, String? voice, double rate, double pitch) async {
+  Future<Uint8List> speak(
+      String text, String? voice, double rate, double pitch) async {
     final config = getConfig();
     final String url = config['url']?.toString().trim() ?? _defaultUrl;
     final String resolvedVoice = resolveVoice(voice);
-    
-    // Use configured rate if available, otherwise use passed rate
-    final int rateConfig = config['rate'] is int ? config['rate'] as int : 0;
-    final double effectiveRate = rateConfig != 0 ? (1.0 + rateConfig / 100.0) : rate;
 
     if (url.isEmpty) {
       throw Exception('Edge TTS config missing (url)');
@@ -123,11 +108,13 @@ class EdgeTtsProvider extends TtsServiceProvider {
       ..connectionTimeout = const Duration(seconds: 10);
 
     try {
-      // Try minimal request body first (like curl command)
+      // Build request body with rate and pitch from reading page narrator
       final requestBody = {
         'text': text,
         'voice': resolvedVoice,
-        'rate': _formatRate(effectiveRate),
+        'rate': _formatRate(rate),
+        'volume': '+0%',
+        'pitch': _formatPitch(pitch),
       };
 
       AnxLog.info('Edge TTS request to: $apiUrl');
@@ -155,7 +142,8 @@ class EdgeTtsProvider extends TtsServiceProvider {
       }
 
       // Handle specific error codes
-      final errorBody = bodyBytes.isNotEmpty ? utf8.decode(bodyBytes) : 'Empty response';
+      final errorBody =
+          bodyBytes.isNotEmpty ? utf8.decode(bodyBytes) : 'Empty response';
 
       if (response.statusCode == 502) {
         throw Exception(
@@ -224,33 +212,63 @@ class EdgeTtsProvider extends TtsServiceProvider {
   }
 
   /// Convert pitch (0.5 ~ 2.0) to Hz format
-  // String _formatPitch(double pitch) {
-  //   int pitchHz = ((pitch - 1.0) * 100).toInt();
-  //   if (pitchHz >= 0) {
-  //     return '+${pitchHz}Hz';
-  //   } else {
-  //     return '${pitchHz}Hz';
-  //   }
-  // }
+  String _formatPitch(double pitch) {
+    int pitchHz = ((pitch - 1.0) * 100).toInt();
+    if (pitchHz >= 0) {
+      return '+${pitchHz}Hz';
+    } else {
+      return '${pitchHz}Hz';
+    }
+  }
 
   @override
   Future<List<TtsVoice>> getVoices() async {
     return const [
       TtsVoice(shortName: 'en-US-GuyNeural', name: 'Guy (US)', locale: 'en-US'),
-      TtsVoice(shortName: 'en-US-JennyNeural', name: 'Jenny (US)', locale: 'en-US'),
-      TtsVoice(shortName: 'en-GB-RyanNeural', name: 'Ryan (UK)', locale: 'en-GB'),
-      TtsVoice(shortName: 'en-GB-SoniaNeural', name: 'Sonia (UK)', locale: 'en-GB'),
-      TtsVoice(shortName: 'zh-CN-XiaoxiaoNeural', name: '晓晓 (中文)', locale: 'zh-CN'),
-      TtsVoice(shortName: 'zh-CN-YunxiNeural', name: '云希 (中文)', locale: 'zh-CN'),
-      TtsVoice(shortName: 'zh-CN-YunjianNeural', name: '云健 (中文)', locale: 'zh-CN'),
-      TtsVoice(shortName: 'ja-JP-KeitaNeural', name: 'Keita (Japanese)', locale: 'ja-JP'),
-      TtsVoice(shortName: 'ja-JP-NanamiNeural', name: 'Nanami (Japanese)', locale: 'ja-JP'),
-      TtsVoice(shortName: 'de-DE-KatjaNeural', name: 'Katja (German)', locale: 'de-DE'),
-      TtsVoice(shortName: 'de-DE-ConradNeural', name: 'Conrad (German)', locale: 'de-DE'),
-      TtsVoice(shortName: 'fr-FR-DeniseNeural', name: 'Denise (French)', locale: 'fr-FR'),
-      TtsVoice(shortName: 'fr-FR-HenriNeural', name: 'Henri (French)', locale: 'fr-FR'),
-      TtsVoice(shortName: 'es-ES-ElviraNeural', name: 'Elvira (Spanish)', locale: 'es-ES'),
-      TtsVoice(shortName: 'es-ES-AlvaroNeural', name: 'Alvaro (Spanish)', locale: 'es-ES'),
+      TtsVoice(
+          shortName: 'en-US-JennyNeural', name: 'Jenny (US)', locale: 'en-US'),
+      TtsVoice(
+          shortName: 'en-GB-RyanNeural', name: 'Ryan (UK)', locale: 'en-GB'),
+      TtsVoice(
+          shortName: 'en-GB-SoniaNeural', name: 'Sonia (UK)', locale: 'en-GB'),
+      TtsVoice(
+          shortName: 'zh-CN-XiaoxiaoNeural', name: '晓晓 (中文)', locale: 'zh-CN'),
+      TtsVoice(
+          shortName: 'zh-CN-YunxiNeural', name: '云希 (中文)', locale: 'zh-CN'),
+      TtsVoice(
+          shortName: 'zh-CN-YunjianNeural', name: '云健 (中文)', locale: 'zh-CN'),
+      TtsVoice(
+          shortName: 'ja-JP-KeitaNeural',
+          name: 'Keita (Japanese)',
+          locale: 'ja-JP'),
+      TtsVoice(
+          shortName: 'ja-JP-NanamiNeural',
+          name: 'Nanami (Japanese)',
+          locale: 'ja-JP'),
+      TtsVoice(
+          shortName: 'de-DE-KatjaNeural',
+          name: 'Katja (German)',
+          locale: 'de-DE'),
+      TtsVoice(
+          shortName: 'de-DE-ConradNeural',
+          name: 'Conrad (German)',
+          locale: 'de-DE'),
+      TtsVoice(
+          shortName: 'fr-FR-DeniseNeural',
+          name: 'Denise (French)',
+          locale: 'fr-FR'),
+      TtsVoice(
+          shortName: 'fr-FR-HenriNeural',
+          name: 'Henri (French)',
+          locale: 'fr-FR'),
+      TtsVoice(
+          shortName: 'es-ES-ElviraNeural',
+          name: 'Elvira (Spanish)',
+          locale: 'es-ES'),
+      TtsVoice(
+          shortName: 'es-ES-AlvaroNeural',
+          name: 'Alvaro (Spanish)',
+          locale: 'es-ES'),
     ];
   }
 
