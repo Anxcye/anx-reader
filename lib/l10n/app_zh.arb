@@ -133,6 +133,8 @@
   "readingPageAutoAdjustReadingTheme": "自动调整日夜模式",
   "readingPageAutoAdjustReadingThemeTips": "使用配色表中的第1、2个配色分别作为日、夜模式",
   "readingPageVolumeKeyTurnPage": "音量键翻页",
+  "readingPageKeyboardShortcutTurnPage": "键盘快捷键翻页",
+  "readingPageKeyboardShortcutTurnPageTips": "使用 Ctrl+[ 和 Ctrl+] 翻页",
   "readingPageFontSize": "字体大小",
   "readingPageLineSpacing": "行间距",
   "readingPageParagraphSpacing": "段间距",
