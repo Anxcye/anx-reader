@@ -37,7 +37,7 @@ class OnlineTts extends BaseTts {
   final Set<String> _bufferKeys = {};
   TtsSegment? _currentSegment;
   String? _currentVoiceText;
-
+  int _audioFetchVersion = 0; // Version counter for audio fetches
   // ============ Prefetcher State ============
   bool _isPrefetcherRunning = false;
   Completer<void>? _prefetcherCompleter;
@@ -91,17 +91,20 @@ class OnlineTts extends BaseTts {
   @override
   set pitch(double pitch) {
     Prefs().ttsPitch = pitch;
-    restart();
+    // Clear pending audio so it will be re-fetched with new pitch
+    _clearPendingAudio();
   }
-
-  @override
-  double get rate => Prefs().ttsRate;
 
   @override
   set rate(double rate) {
     Prefs().ttsRate = rate;
-    restart();
+    // Clear pending audio so it will be re-fetched with new rate
+    _clearPendingAudio();
   }
+  @override
+  double get rate => Prefs().ttsRate;
+
+  @override
 
   @override
   bool get isPlaying => ttsStateNotifier.value == TtsStateEnum.playing;
@@ -163,6 +166,19 @@ class OnlineTts extends BaseTts {
     _currentVoiceText = null;
   }
 
+  /// Clear audio for all pending segments (not currently playing)
+  /// so they will be re-fetched with new settings
+  void _clearPendingAudio() {
+    _audioFetchVersion++; // Increment version to invalidate in-flight fetches
+    for (final segment in _buffer) {
+      // Clear audio so it will be re-fetched
+      segment.audio = null;
+      segment.isSilent = false;
+      segment.fetchVersion = _audioFetchVersion; // Mark with current version
+    }
+    AnxLog.info('Cleared pending audio buffer - will re-fetch with new settings (version: $_audioFetchVersion)');
+  }
+
   // ============ Producer: Prefetcher Loop ============
   Future<void> _startPrefetcher() async {
     if (_isPrefetcherRunning) return;
@@ -171,6 +187,21 @@ class OnlineTts extends BaseTts {
 
     try {
       while (!_shouldStop) {
+        // Check for segments that need audio re-fetch (after settings change)
+        final segmentsNeedingAudio = _buffer
+            .where((s) => !s.isReady && !s.isSilent)
+            .toList();
+        
+        if (segmentsNeedingAudio.isNotEmpty) {
+          // Re-fetch audio for segments that were cleared
+          for (var i = 0; i < segmentsNeedingAudio.length; i += _batchSize) {
+            if (_shouldStop) break;
+            final batch = segmentsNeedingAudio.skip(i).take(_batchSize).toList();
+            final futures = batch.map((segment) => _fetchAudioForSegment(segment));
+            await Future.wait(futures);
+          }
+        }
+
         final neededCount = _bufferCapacity - _buffer.length;
 
         if (neededCount <= 0) {
@@ -251,6 +282,9 @@ class OnlineTts extends BaseTts {
     if (_shouldStop) return;
     if (segment.isReady) return;
 
+    // Capture the version at the start of fetching
+    final targetVersion = segment.fetchVersion;
+
     for (var attempt = 0; attempt <= _maxRetries; attempt++) {
       if (_shouldStop) return;
       if (segment.isReady) return;
@@ -258,12 +292,18 @@ class OnlineTts extends BaseTts {
       try {
         final bytes = await backend
             .speak(
-              segment.sentence.text,
-              null,
-              rate,
-              pitch,
-            )
+          segment.sentence.text,
+          null,
+          rate,
+          pitch,
+        )
             .timeout(Duration(seconds: _fetchTimeoutSeconds));
+
+        // Check if version is still valid (settings haven't changed during fetch)
+        if (segment.fetchVersion != targetVersion) {
+          AnxLog.info('Audio fetch completed but version changed - discarding (segment version: ${segment.fetchVersion}, target: $targetVersion)');
+          return;
+        }
 
         if (bytes.isEmpty) {
           segment.isSilent = true;
@@ -275,12 +315,18 @@ class OnlineTts extends BaseTts {
         AnxLog.severe(
             'Fetch timeout (attempt ${attempt + 1}/$_maxRetries): "${segment.sentence.text.substring(0, segment.sentence.text.length.clamp(0, 20))}..."');
         if (attempt == _maxRetries) {
-          segment.isSilent = true; // Give up after max retries
+          // Check version before marking as silent
+          if (segment.fetchVersion == targetVersion) {
+            segment.isSilent = true;
+          }
         }
       } catch (e) {
         AnxLog.severe('Fetch error (attempt ${attempt + 1}): $e');
         if (attempt == _maxRetries) {
-          segment.isSilent = true;
+          // Check version before marking as silent
+          if (segment.fetchVersion == targetVersion) {
+            segment.isSilent = true;
+          }
         }
       }
     }
