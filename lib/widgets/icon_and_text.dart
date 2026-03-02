@@ -5,6 +5,7 @@ class IconAndText extends StatelessWidget {
   final String text;
   final Function()? onTap;
   final double? fontSize;
+  final bool useIconButton;
 
   const IconAndText({
     super.key,
@@ -12,10 +13,20 @@ class IconAndText extends StatelessWidget {
     required this.text,
     this.onTap,
     this.fontSize,
+    this.useIconButton = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    if (useIconButton) {
+      return IconButton(
+        onPressed: onTap,
+        icon: icon,
+        color: Colors.white,
+        tooltip: text,
+      );
+    }
+
     Widget content = SizedBox(
       width: 48,
       height: 60,

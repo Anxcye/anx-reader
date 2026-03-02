@@ -2,8 +2,10 @@ import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/constants/note_annotations.dart';
 import 'package:anx_reader/dao/book_note.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
+import 'package:anx_reader/main.dart';
 import 'package:anx_reader/models/book_note.dart';
 import 'package:anx_reader/page/reading_page.dart';
+import 'package:anx_reader/service/tts/tts_handler.dart';
 import 'package:anx_reader/utils/env_var.dart';
 import 'package:anx_reader/utils/toast/common.dart';
 import 'package:anx_reader/widgets/book_share/excerpt_share_service.dart';
@@ -80,9 +82,7 @@ class ExcerptMenuState extends State<ExcerptMenu> {
         annoType = note.type;
         annoColor = note.color;
       });
-      if (!widget.footnote &&
-          note.readerNote != null &&
-          note.readerNote!.isNotEmpty) {
+      if (!widget.footnote && note.readerNote != null && note.readerNote!.isNotEmpty) {
         await widget.openReaderNoteMenu(note.id!);
       }
     } catch (_) {
@@ -103,8 +103,7 @@ class ExcerptMenuState extends State<ExcerptMenu> {
     }
   }
 
-  Future<BookNote> _persistNote(
-      {String? color, String? type, String? content}) async {
+  Future<BookNote> _persistNote({String? color, String? type, String? content}) async {
     final existingNote = await _fetchLatestNote() ?? _currentNote;
     final now = DateTime.now();
 
@@ -116,12 +115,10 @@ class ExcerptMenuState extends State<ExcerptMenu> {
 
     final BookNote bookNote = BookNote(
       id: existingNote?.id ?? widget.id,
-      bookId:
-          existingNote?.bookId ?? epubPlayerKey.currentState!.widget.book.id,
+      bookId: existingNote?.bookId ?? epubPlayerKey.currentState!.widget.book.id,
       content: resolvedContent,
       cfi: existingNote?.cfi ?? widget.annoCfi,
-      chapter:
-          existingNote?.chapter ?? epubPlayerKey.currentState!.chapterTitle,
+      chapter: existingNote?.chapter ?? epubPlayerKey.currentState!.chapterTitle,
       type: resolvedType,
       color: resolvedColor,
       readerNote: existingNote?.readerNote,
@@ -228,8 +225,7 @@ class ExcerptMenuState extends State<ExcerptMenu> {
 
   Widget typeButton(String type, IconData icon) {
     return iconButton(
-      icon: Icon(icon,
-          color: annoType == type ? Color(int.parse('0xff$annoColor')) : null),
+      icon: Icon(icon, color: annoType == type ? Color(int.parse('0xff$annoColor')) : null),
       onPressed: () {
         onTypeSelected(type);
       },
@@ -263,43 +259,69 @@ class ExcerptMenuState extends State<ExcerptMenu> {
         mainAxisSize: MainAxisSize.min,
         children: [
           // copy
-          InkWell(
+          IconAndText(
+            useIconButton: true,
             onTap: () {
               Clipboard.setData(ClipboardData(text: widget.annoContent));
               AnxToast.show(L10n.of(context).notesPageCopied);
               widget.onClose();
             },
-            child: IconAndText(
-              icon: const Icon(EvaIcons.copy),
-              text: L10n.of(context).contextMenuCopy,
-            ),
+            icon: const Icon(EvaIcons.copy),
+            text: L10n.of(context).contextMenuCopy,
           ),
           // Web search
-          InkWell(
+          IconAndText(
+            useIconButton: true,
             onTap: () {
               widget.onClose();
               launchUrl(
-                Uri.parse(
-                    'https://www.bing.com/search?q=${widget.annoContent}'),
+                Uri.parse('https://www.bing.com/search?q=${widget.annoContent}'),
                 mode: LaunchMode.externalApplication,
               );
             },
-            child: IconAndText(
-              icon: const Icon(EvaIcons.globe),
-              text: L10n.of(context).contextMenuSearch,
-            ),
+            icon: const Icon(EvaIcons.globe),
+            text: L10n.of(context).contextMenuSearch,
           ),
           // toggle translation menu
-          InkWell(
+          IconAndText(
+            useIconButton: true,
             onTap: widget.toggleTranslationMenu,
-            child: IconAndText(
-              icon: const Icon(Icons.translate),
-              text: L10n.of(context).contextMenuTranslate,
-            ),
+            icon: const Icon(Icons.translate),
+            text: L10n.of(context).contextMenuTranslate,
           ),
+          // narrate
+          // IconAndText(
+          //   useIconButton: true,
+          //   onTap: () async {
+          //     widget.onClose();
+          //     final playerState = epubPlayerKey.currentState;
+          //     if (playerState == null) return;
+
+          //     // Navigate to the selected position first
+          //     // This updates the reader's current position for TTS collection
+          //     playerState.goToCfi(widget.annoCfi);
+
+          //     // Wait for page navigation and rendering to complete
+          //     // The WebView needs time to load the new chapter/position
+          //     await Future.delayed(const Duration(milliseconds: 500));
+
+          //     // Now initialize TTS - it will use the current (updated) position
+          //     await TtsHandler().init(
+          //       playerState.initTts,
+          //       playerState.ttsNext,
+          //       playerState.ttsPrev,
+          //     );
+
+          //     // Start TTS - audioHandler.play() will call TTS speak
+          //     await audioHandler.play();
+          //   },
+          //   icon: const Icon(Icons.headphones),
+          //   text: L10n.of(context).contextMenuNarrate,
+          // ),
           // edit note
           if (!widget.footnote)
-            InkWell(
+            IconAndText(
+              useIconButton: true,
               onTap: () async {
                 epubPlayerKey.currentState?.setSelectionClearLocked(true);
                 await onColorSelected(annoColor, close: false);
@@ -310,14 +332,13 @@ class ExcerptMenuState extends State<ExcerptMenu> {
                   widget.toggleReaderNoteMenu(show: true);
                 }
               },
-              child: IconAndText(
-                icon: const Icon(EvaIcons.edit_2_outline),
-                text: L10n.of(context).contextMenuWriteIdea,
-              ),
+              icon: const Icon(EvaIcons.edit_2_outline),
+              text: L10n.of(context).contextMenuWriteIdea,
             ),
           // AI chat
           if (EnvVar.enableAIFeature)
-            InkWell(
+            IconAndText(
+              useIconButton: true,
               onTap: () {
                 widget.onClose();
                 final key = readingPageKey.currentState;
@@ -326,17 +347,15 @@ class ExcerptMenuState extends State<ExcerptMenu> {
                     content: widget.annoContent,
                     sendImmediate: false,
                   );
-                  key.aiChatKey.currentState?.inputController.text =
-                      widget.annoContent;
+                  key.aiChatKey.currentState?.inputController.text = widget.annoContent;
                 }
               },
-              child: IconAndText(
-                icon: const Icon(EvaIcons.message_circle_outline),
-                text: L10n.of(context).navBarAI,
-              ),
+              icon: const Icon(EvaIcons.message_circle_outline),
+              text: L10n.of(context).navBarAI,
             ),
           // share
-          InkWell(
+          IconAndText(
+            useIconButton: true,
             onTap: () {
               widget.onClose();
               ExcerptShareService.showShareExcerpt(
@@ -347,10 +366,8 @@ class ExcerptMenuState extends State<ExcerptMenu> {
                 chapter: epubPlayerKey.currentState!.chapterTitle,
               );
             },
-            child: IconAndText(
-              icon: const Icon(EvaIcons.share_outline),
-              text: L10n.of(context).contextMenuShare,
-            ),
+            icon: const Icon(EvaIcons.share_outline),
+            text: L10n.of(context).contextMenuShare,
           ),
         ],
       ),
@@ -370,8 +387,7 @@ class ExcerptMenuState extends State<ExcerptMenu> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SingleChildScrollView(
-                  scrollDirection: widget.axis, child: operatorMenu),
+              SingleChildScrollView(scrollDirection: widget.axis, child: operatorMenu),
               const SizedBox.square(dimension: 10),
               if (!widget.footnote)
                 SingleChildScrollView(

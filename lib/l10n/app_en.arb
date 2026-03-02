@@ -95,6 +95,7 @@
   "contextMenuHighlight": "Highlight",
   "contextMenuUnderline": "Underline",
   "contextMenuShare": "Share",
+  "contextMenuNarrate": "Narrate",
   "readingPageFullScreen": "Full Screen",
   "readingPageScreenTimeout": "Screen Timeout",
   "readingPagePageTurningMethod": "Page Turning Method",
