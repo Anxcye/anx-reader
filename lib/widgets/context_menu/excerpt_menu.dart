@@ -82,7 +82,9 @@ class ExcerptMenuState extends State<ExcerptMenu> {
         annoType = note.type;
         annoColor = note.color;
       });
-      if (!widget.footnote && note.readerNote != null && note.readerNote!.isNotEmpty) {
+      if (!widget.footnote &&
+          note.readerNote != null &&
+          note.readerNote!.isNotEmpty) {
         await widget.openReaderNoteMenu(note.id!);
       }
     } catch (_) {
@@ -103,7 +105,8 @@ class ExcerptMenuState extends State<ExcerptMenu> {
     }
   }
 
-  Future<BookNote> _persistNote({String? color, String? type, String? content}) async {
+  Future<BookNote> _persistNote(
+      {String? color, String? type, String? content}) async {
     final existingNote = await _fetchLatestNote() ?? _currentNote;
     final now = DateTime.now();
 
@@ -115,10 +118,12 @@ class ExcerptMenuState extends State<ExcerptMenu> {
 
     final BookNote bookNote = BookNote(
       id: existingNote?.id ?? widget.id,
-      bookId: existingNote?.bookId ?? epubPlayerKey.currentState!.widget.book.id,
+      bookId:
+          existingNote?.bookId ?? epubPlayerKey.currentState!.widget.book.id,
       content: resolvedContent,
       cfi: existingNote?.cfi ?? widget.annoCfi,
-      chapter: existingNote?.chapter ?? epubPlayerKey.currentState!.chapterTitle,
+      chapter:
+          existingNote?.chapter ?? epubPlayerKey.currentState!.chapterTitle,
       type: resolvedType,
       color: resolvedColor,
       readerNote: existingNote?.readerNote,
@@ -225,7 +230,8 @@ class ExcerptMenuState extends State<ExcerptMenu> {
 
   Widget typeButton(String type, IconData icon) {
     return iconButton(
-      icon: Icon(icon, color: annoType == type ? Color(int.parse('0xff$annoColor')) : null),
+      icon: Icon(icon,
+          color: annoType == type ? Color(int.parse('0xff$annoColor')) : null),
       onPressed: () {
         onTypeSelected(type);
       },
@@ -275,7 +281,8 @@ class ExcerptMenuState extends State<ExcerptMenu> {
             onTap: () {
               widget.onClose();
               launchUrl(
-                Uri.parse('https://www.bing.com/search?q=${widget.annoContent}'),
+                Uri.parse(
+                    'https://www.bing.com/search?q=${widget.annoContent}'),
                 mode: LaunchMode.externalApplication,
               );
             },
@@ -290,34 +297,29 @@ class ExcerptMenuState extends State<ExcerptMenu> {
             text: L10n.of(context).contextMenuTranslate,
           ),
           // narrate
-          // IconAndText(
-          //   useIconButton: true,
-          //   onTap: () async {
-          //     widget.onClose();
-          //     final playerState = epubPlayerKey.currentState;
-          //     if (playerState == null) return;
+          IconAndText(
+            useIconButton: true,
+            onTap: () async {
+              widget.onClose();
+              final playerState = epubPlayerKey.currentState;
+              if (playerState == null) return;
 
-          //     // Navigate to the selected position first
-          //     // This updates the reader's current position for TTS collection
-          //     playerState.goToCfi(widget.annoCfi);
+              // Stop existing TTS playback if any
+              await audioHandler.stop();
 
-          //     // Wait for page navigation and rendering to complete
-          //     // The WebView needs time to load the new chapter/position
-          //     await Future.delayed(const Duration(milliseconds: 500));
+              // Now initialize TTS - it will use the current (updated) position
+              await TtsHandler().init(
+                () => playerState.initTts(fromCfi: widget.annoCfi),
+                playerState.ttsNext,
+                playerState.ttsPrev,
+              );
 
-          //     // Now initialize TTS - it will use the current (updated) position
-          //     await TtsHandler().init(
-          //       playerState.initTts,
-          //       playerState.ttsNext,
-          //       playerState.ttsPrev,
-          //     );
-
-          //     // Start TTS - audioHandler.play() will call TTS speak
-          //     await audioHandler.play();
-          //   },
-          //   icon: const Icon(Icons.headphones),
-          //   text: L10n.of(context).contextMenuNarrate,
-          // ),
+              // Start TTS - audioHandler.play() will call TTS speak
+              await audioHandler.play();
+            },
+            icon: const Icon(Icons.headphones),
+            text: L10n.of(context).contextMenuNarrate,
+          ),
           // edit note
           if (!widget.footnote)
             IconAndText(
@@ -347,7 +349,8 @@ class ExcerptMenuState extends State<ExcerptMenu> {
                     content: widget.annoContent,
                     sendImmediate: false,
                   );
-                  key.aiChatKey.currentState?.inputController.text = widget.annoContent;
+                  key.aiChatKey.currentState?.inputController.text =
+                      widget.annoContent;
                 }
               },
               icon: const Icon(EvaIcons.message_circle_outline),
@@ -387,7 +390,8 @@ class ExcerptMenuState extends State<ExcerptMenu> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SingleChildScrollView(scrollDirection: widget.axis, child: operatorMenu),
+              SingleChildScrollView(
+                  scrollDirection: widget.axis, child: operatorMenu),
               const SizedBox.square(dimension: 10),
               if (!widget.footnote)
                 SingleChildScrollView(

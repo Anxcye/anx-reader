@@ -294,8 +294,14 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
     webViewController.evaluateJavascript(source: "clearSearch()");
   }
 
-  Future<void> initTts() async =>
+  Future<void> initTts({String? fromCfi}) async {
+    if (fromCfi != null && fromCfi.isNotEmpty) {
+      await webViewController.evaluateJavascript(
+          source: "window.ttsFromCfi('$fromCfi')");
+    } else {
       await webViewController.evaluateJavascript(source: "window.ttsHere()");
+    }
+  }
 
   void ttsStop() => webViewController.evaluateJavascript(source: "ttsStop()");
 

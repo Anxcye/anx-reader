@@ -1688,6 +1688,24 @@ window.ttsHere = () => {
   return reader.view.tts.from(reader.view.lastLocation.range)
 }
 
+window.ttsFromCfi = async (cfi) => {
+  initTts()
+  try {
+    const resolved = await reader.view.resolveNavigation(cfi)
+    if (resolved && resolved.anchor) {
+      const contents = reader.view.renderer.getContents()
+      const content = contents.find(c => c.index === resolved.index) || contents[0]
+      if (content && content.doc) {
+        const range = resolved.anchor(content.doc)
+        return reader.view.tts.from(range)
+      }
+    }
+  } catch (e) {
+    console.error(e)
+  }
+  return reader.view.tts.from(reader.view.lastLocation.range)
+}
+
 window.ttsCurrentDetail = () => {
   initTts()
   return reader.view.tts.currentDetail()

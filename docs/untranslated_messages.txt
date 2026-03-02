@@ -1,5 +1,6 @@
 {
   "ar": [
+    "contextMenuNarrate",
     "readingPageKeyboardShortcutTurnPage",
     "readingPageKeyboardShortcutTurnPageTips",
     "settingsNarrateEdgeTts",
@@ -11,6 +12,7 @@
   ],
 
   "de": [
+    "contextMenuNarrate",
     "readingPageKeyboardShortcutTurnPage",
     "readingPageKeyboardShortcutTurnPageTips",
     "settingsNarrateEdgeTts",
@@ -22,6 +24,7 @@
   ],
 
   "es": [
+    "contextMenuNarrate",
     "readingPageKeyboardShortcutTurnPage",
     "readingPageKeyboardShortcutTurnPageTips",
     "settingsNarrateEdgeTts",
@@ -33,6 +36,7 @@
   ],
 
   "fr": [
+    "contextMenuNarrate",
     "readingPageKeyboardShortcutTurnPage",
     "readingPageKeyboardShortcutTurnPageTips",
     "settingsNarrateEdgeTts",
@@ -44,6 +48,7 @@
   ],
 
   "it": [
+    "contextMenuNarrate",
     "readingPageKeyboardShortcutTurnPage",
     "readingPageKeyboardShortcutTurnPageTips",
     "settingsNarrateEdgeTts",
@@ -55,6 +60,7 @@
   ],
 
   "ja": [
+    "contextMenuNarrate",
     "readingPageKeyboardShortcutTurnPage",
     "readingPageKeyboardShortcutTurnPageTips",
     "settingsNarrateEdgeTts",
@@ -66,6 +72,7 @@
   ],
 
   "ko": [
+    "contextMenuNarrate",
     "readingPageKeyboardShortcutTurnPage",
     "readingPageKeyboardShortcutTurnPageTips",
     "settingsNarrateEdgeTts",
@@ -77,6 +84,7 @@
   ],
 
   "pt": [
+    "contextMenuNarrate",
     "readingPageKeyboardShortcutTurnPage",
     "readingPageKeyboardShortcutTurnPageTips",
     "settingsNarrateEdgeTts",
@@ -88,6 +96,7 @@
   ],
 
   "ro": [
+    "contextMenuNarrate",
     "readingPageKeyboardShortcutTurnPage",
     "readingPageKeyboardShortcutTurnPageTips",
     "settingsNarrateEdgeTts",
@@ -99,6 +108,7 @@
   ],
 
   "ru": [
+    "contextMenuNarrate",
     "readingPageKeyboardShortcutTurnPage",
     "readingPageKeyboardShortcutTurnPageTips",
     "settingsNarrateEdgeTts",
@@ -110,6 +120,7 @@
   ],
 
   "tr": [
+    "contextMenuNarrate",
     "readingPageKeyboardShortcutTurnPage",
     "readingPageKeyboardShortcutTurnPageTips",
     "settingsNarrateEdgeTts",
@@ -121,6 +132,7 @@
   ],
 
   "zh_CN": [
+    "contextMenuNarrate",
     "settingsNarrateEdgeTts",
     "settingsNarrateEdgeHelpText",
     "settingsNarrateEdgeUrlDescription",
@@ -130,6 +142,7 @@
   ],
 
   "zh_LZH": [
+    "contextMenuNarrate",
     "settingsNarrateEdgeTts",
     "settingsNarrateEdgeHelpText",
     "settingsNarrateEdgeUrlDescription",
@@ -139,6 +152,7 @@
   ],
 
   "zh_TW": [
+    "contextMenuNarrate",
     "settingsNarrateEdgeTts",
     "settingsNarrateEdgeHelpText",
     "settingsNarrateEdgeUrlDescription",
