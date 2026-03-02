@@ -1,41 +1,5 @@
-<style>
-blockquote {
-  position: relative;
-  background-color: #f8f9fa;
-  border-left: 6px solid #6dc066;
-  padding: 20px 25px 20px 40px;
-  margin: 20px 0;
-  font-style: italic;
-  color: #2c3e50;
-  border-radius: 6px;
-  font-family: 'Roboto', sans-serif;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  quotes: "“" "”" "‘" "’";
-}
-
-blockquote::before {
-  content: open-quote;
-  font-size: 40px;
-  color: #6dc066;
-  position: absolute;
-  left: 10px;
-  top: 10px;
-  line-height: 1;
-}
-
-blockquote::after {
-  content: close-quote;
-  font-size: 40px;
-  color: #6dc066;
-  position: absolute;
-  right: 10px;
-  bottom: 10px;
-  line-height: 1;
-}
-</style>
-
 <blockquote>
-  <p><strong>Anx Reader:</strong><br />
+  <p><em><strong>Anx Reader:</strong></em><br />
   <em>Профессиональное приложение для чтения электронных книг, разработанное для требовательных пользователей. Благодаря интеграции передовых технологий искусственного интеллекта и поддержке широкого спектра форматов электронных изданий, программа обеспечивает максимально эффективное и концентрированное чтение. Современный дизайн интерфейса призван обеспечить комфортное взаимодействие с приложением.</em></p>
 </blockquote>
 <h3>📚 Форматы</h3>
