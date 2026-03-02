@@ -29,7 +29,9 @@ import 'package:anx_reader/providers/chapter_content_bridge.dart';
 import 'package:anx_reader/providers/current_reading.dart';
 import 'package:anx_reader/service/book_player/book_player_server.dart';
 import 'package:anx_reader/providers/toc_search.dart';
+import 'package:anx_reader/service/tts/base_tts.dart';
 import 'package:anx_reader/service/tts/models/tts_sentence.dart';
+import 'package:anx_reader/service/tts/tts_handler.dart';
 import 'package:anx_reader/utils/coordinates_to_part.dart';
 import 'package:anx_reader/utils/js/convert_dart_color_to_js.dart';
 import 'package:anx_reader/utils/platform_utils.dart';
@@ -699,6 +701,21 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
         handlerName: 'onAnnotationClick',
         callback: (args) {
           Map<String, dynamic> annotation = args[0];
+
+          if (annotation['annotation'] == null) {
+            // Check if TTS is active and the click is on the currently read text
+            final currentTtsState = TtsHandler().ttsStateNotifier.value;
+            if (currentTtsState == TtsStateEnum.playing ||
+                currentTtsState == TtsStateEnum.paused) {
+              if (currentTtsState == TtsStateEnum.playing) {
+                audioHandler.pause();
+              } else {
+                audioHandler.play();
+              }
+              return;
+            }
+          }
+
           int id = annotation['annotation']['id'];
           String cfi = annotation['annotation']['value'];
           String note = annotation['annotation']['note'];
