@@ -21,8 +21,8 @@ class TocItem {
   factory TocItem.fromJson(Map<String, dynamic> json) {
     return TocItem(
       id: json['id'].toString(),
-      href: json['href'],
-      label: json['label'],
+      href: json['href'] ?? '',
+      label: json['label'] ?? '',
       startPage: json['startPage'] ?? 0,
       startPercentage: (json['startPercentage'] ?? 0.0).toDouble(),
       level: json['level'] ?? 0,

@@ -247,7 +247,7 @@ const parseNCX = (doc, resolve = f => f) => {
         const $label = $(el, 'navLabel')
         const $content = $(el, 'content')
         const label = getElementText($label)
-        const href = resolveHref($content.getAttribute('src'))
+        const href = resolveHref($content?.getAttribute('src'))
         if (el.localName === 'navPoint') {
             const els = $$(el, 'navPoint')
             return { label, href, subitems: els.length ? els.map(parseItem) : null }

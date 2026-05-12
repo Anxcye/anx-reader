@@ -405,6 +405,12 @@ class _BookTocState extends ConsumerState<BookToc> {
                         ? null
                         : () => _toggleExpanded(tocItem),
                     onTap: () {
+                      if (tocItem.href.isEmpty) {
+                        if (tocItem.subitems.isNotEmpty) {
+                          _toggleExpanded(tocItem);
+                        }
+                        return;
+                      }
                       widget.hideAppBarAndBottomBar(false);
                       widget.epubPlayerKey.currentState!.goToHref(tocItem.href);
                       widget.closeDrawer();
