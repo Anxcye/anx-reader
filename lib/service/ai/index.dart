@@ -10,7 +10,7 @@ import 'package:anx_reader/service/ai/ai_key_rotator.dart';
 import 'package:anx_reader/service/ai/langchain_ai_config.dart';
 import 'package:anx_reader/service/ai/langchain_registry.dart';
 import 'package:anx_reader/service/ai/langchain_runner.dart';
-import 'package:anx_reader/utils/ai_reasoning_parser.dart';
+import 'package:anx_reader/service/ai/message_sanitizer.dart';
 import 'package:anx_reader/utils/log/common.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:langchain_core/chat_models.dart';
@@ -77,7 +77,7 @@ Stream<String> _generateStream({
   required LangchainAiRegistry registry,
 }) async* {
   AnxLog.info('aiGenerateStream called identifier: $identifier');
-  final sanitizedMessages = _sanitizeMessagesForPrompt(messages);
+  final sanitizedMessages = sanitizeMessagesForPrompt(messages);
 
   LangchainAiConfig config;
 
@@ -100,6 +100,7 @@ Stream<String> _generateStream({
             apiKey: apiKey,
             url: provider.url,
             reasoningEffort: provider.reasoningEffort,
+            thinkingMode: provider.thinkingMode,
           );
 
           AnxLog.info(
@@ -165,6 +166,7 @@ Stream<String> _generateStream({
               apiKey: apiKey,
               url: provider.url,
               reasoningEffort: provider.reasoningEffort,
+              thinkingMode: provider.thinkingMode,
             );
 
             AnxLog.info(
@@ -327,28 +329,6 @@ String _mapError(Object error) {
   }
 
   return '$base${error.toString()}';
-}
-
-List<ChatMessage> _sanitizeMessagesForPrompt(List<ChatMessage> messages) {
-  return messages.map((message) {
-    if (message is AIChatMessage) {
-      if (message.reasoningContent.isNotEmpty) {
-        return AIChatMessage(
-          content: message.content,
-          toolCalls: message.toolCalls,
-        );
-      }
-      final plainText = reasoningContentToPlainText(message.content);
-      if (plainText == message.content) {
-        return message;
-      }
-      return AIChatMessage(
-        content: plainText,
-        toolCalls: message.toolCalls,
-      );
-    }
-    return message;
-  }).toList(growable: false);
 }
 
 String? _latestUserMessage(List<ChatMessage> messages) {

@@ -884,5 +884,10 @@
    "aiModelSwitchTitle": "تغيير النموذج",
    "aiModelEnterManually": "أدخل اسم النموذج",
    "aiModelOrSelectBelow": "أو اختر من القائمة:",
+   "settingsAiProviderThinkingMode": "Thinking Mode",
+   "settingsAiProviderThinkingModeAuto": "Auto",
+   "settingsAiProviderThinkingModeEnabled": "Enabled",
+   "settingsAiProviderThinkingModeDisabled": "Disabled",
+   "settingsAiProviderThinkingModeHelp": "Only supported by DeepSeek V4. Auto does not send the thinking parameter; Enabled/Disabled sends thinking.type to the DeepSeek API.",
    "aiChatFontSize": "حجم الخط"
 }

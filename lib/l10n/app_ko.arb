@@ -884,5 +884,10 @@
    "aiModelSwitchTitle": "모델 변경",
    "aiModelEnterManually": "모델 이름 입력",
    "aiModelOrSelectBelow": "또는 목록에서 선택:",
+   "settingsAiProviderThinkingMode": "Thinking Mode",
+   "settingsAiProviderThinkingModeAuto": "Auto",
+   "settingsAiProviderThinkingModeEnabled": "Enabled",
+   "settingsAiProviderThinkingModeDisabled": "Disabled",
+   "settingsAiProviderThinkingModeHelp": "Only supported by DeepSeek V4. Auto does not send the thinking parameter; Enabled/Disabled sends thinking.type to the DeepSeek API.",
    "aiChatFontSize": "글꼴 크기"
 }

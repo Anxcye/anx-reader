@@ -884,5 +884,10 @@
    "aiModelSwitchTitle": "モデル切替",
    "aiModelEnterManually": "モデル名を入力",
    "aiModelOrSelectBelow": "またはリストから選択：",
+   "settingsAiProviderThinkingMode": "Thinking Mode",
+   "settingsAiProviderThinkingModeAuto": "Auto",
+   "settingsAiProviderThinkingModeEnabled": "Enabled",
+   "settingsAiProviderThinkingModeDisabled": "Disabled",
+   "settingsAiProviderThinkingModeHelp": "Only supported by DeepSeek V4. Auto does not send the thinking parameter; Enabled/Disabled sends thinking.type to the DeepSeek API.",
    "aiChatFontSize": "フォントサイズ"
 }

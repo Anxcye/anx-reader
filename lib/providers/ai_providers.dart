@@ -1,4 +1,5 @@
 import 'package:anx_reader/config/shared_preference_provider.dart';
+import 'package:anx_reader/enums/ai_thinking_mode.dart';
 import 'package:anx_reader/models/ai_provider.dart';
 import 'package:anx_reader/service/ai/ai_services.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -72,6 +73,7 @@ class AiProviders extends _$AiProviders {
               ]
             : [],
         model: model,
+        thinkingMode: AiThinkingMode.auto,
         keyIndex: 0,
         createdAt: now,
         updatedAt: now,

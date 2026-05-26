@@ -1,4 +1,5 @@
 import 'package:anx_reader/enums/ai_reasoning_effort.dart';
+import 'package:anx_reader/enums/ai_thinking_mode.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'ai_provider.freezed.dart';
@@ -38,6 +39,8 @@ abstract class AiProvider with _$AiProvider {
     @Default('') String model, // Current selected model
     @Default(AiReasoningEffort.auto)
     AiReasoningEffort reasoningEffort, // OpenAI reasoning effort
+    @Default(AiThinkingMode.auto)
+    AiThinkingMode thinkingMode, // DeepSeek thinking mode
     @Default(0) int keyIndex, // Current round-robin key index
     DateTime? createdAt, // Creation time
     DateTime? updatedAt, // Last update time

@@ -898,5 +898,10 @@
     "aiModelSwitchTitle": "切换模型",
     "aiModelEnterManually": "输入模型名称",
     "aiModelOrSelectBelow": "或从列表中选择：",
+    "settingsAiProviderThinkingMode": "思考模式",
+    "settingsAiProviderThinkingModeAuto": "自动",
+    "settingsAiProviderThinkingModeEnabled": "开启",
+    "settingsAiProviderThinkingModeDisabled": "关闭",
+    "settingsAiProviderThinkingModeHelp": "仅 DeepSeek V4 支持。自动模式不显式传递 thinking 参数；开启/关闭会向 DeepSeek API 传递 thinking.type。",
     "aiChatFontSize": "字体大小"
 }

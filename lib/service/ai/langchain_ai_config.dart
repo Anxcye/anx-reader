@@ -1,6 +1,9 @@
 import 'package:anx_reader/enums/ai_reasoning_effort.dart';
 import 'dart:convert';
 
+import 'package:anx_reader/enums/ai_thinking_mode.dart';
+import 'package:anx_reader/service/ai/deepseek_compatibility.dart';
+import 'package:anx_reader/service/ai/openai_url_utils.dart';
 import 'package:langchain_anthropic/langchain_anthropic.dart';
 import 'package:langchain_google/langchain_google.dart';
 import 'package:langchain_openai/langchain_openai.dart';
@@ -18,6 +21,7 @@ class LangchainAiConfig {
     this.maxTokens,
     this.maxOutputTokens,
     this.reasoningEffort = AiReasoningEffort.auto,
+    this.thinkingMode = AiThinkingMode.auto,
     this.additional,
   }) : headers = Map.unmodifiable(headers ?? const {});
 
@@ -31,15 +35,26 @@ class LangchainAiConfig {
   final int? maxTokens;
   final int? maxOutputTokens;
   final AiReasoningEffort reasoningEffort;
+  final AiThinkingMode thinkingMode;
   final Map<String, dynamic>? additional;
 
   ChatOpenAIOptions toOpenAIOptions() {
+    final isDeepSeek = isDeepSeekProvider(
+      identifier: identifier,
+      model: model,
+      baseUrl: baseUrl,
+    );
+    final extraBody = isDeepSeek
+        ? deepSeekThinkingExtraBody(thinkingMode) ?? const <String, dynamic>{}
+        : null;
+
     return ChatOpenAIOptions(
       model: model.isEmpty ? null : model,
       temperature: temperature,
       topP: topP,
       maxTokens: maxTokens,
       reasoningEffort: reasoningEffort.toOpenAiReasoningEffort(),
+      extraBody: extraBody,
     );
   }
 
@@ -80,13 +95,14 @@ class LangchainAiConfig {
       identifier: identifier,
       apiKey: apiKey,
       model: model,
-      baseUrl: _deriveBaseUrl(url),
+      baseUrl: deriveOpenAiBaseUrl(url),
       headers: headers,
       temperature: parseDouble(raw['temperature']),
       topP: parseDouble(raw['top_p']),
       maxTokens: parseInt(raw['max_tokens']),
       maxOutputTokens: parseInt(raw['max_output_tokens']),
       reasoningEffort: AiReasoningEffort.fromCode(raw['reasoning_effort']),
+      thinkingMode: AiThinkingMode.fromCode(raw['thinking_mode']),
       additional: additional,
     );
   }
@@ -98,13 +114,15 @@ class LangchainAiConfig {
     required String apiKey,
     required String url,
     AiReasoningEffort reasoningEffort = AiReasoningEffort.auto,
+    AiThinkingMode thinkingMode = AiThinkingMode.auto,
   }) {
     return LangchainAiConfig(
       identifier: providerId,
       apiKey: apiKey,
       model: model,
-      baseUrl: _deriveBaseUrl(url),
+      baseUrl: deriveOpenAiBaseUrl(url),
       reasoningEffort: reasoningEffort,
+      thinkingMode: thinkingMode,
     );
   }
 
@@ -118,6 +136,7 @@ class LangchainAiConfig {
     int? maxTokens,
     int? maxOutputTokens,
     AiReasoningEffort? reasoningEffort,
+    AiThinkingMode? thinkingMode,
     Map<String, dynamic>? additional,
   }) {
     return LangchainAiConfig(
@@ -131,6 +150,7 @@ class LangchainAiConfig {
       maxTokens: maxTokens ?? this.maxTokens,
       maxOutputTokens: maxOutputTokens ?? this.maxOutputTokens,
       reasoningEffort: reasoningEffort ?? this.reasoningEffort,
+      thinkingMode: thinkingMode ?? this.thinkingMode,
       additional: additional ?? this.additional,
     );
   }
@@ -178,39 +198,6 @@ Map<String, dynamic>? _parseJson(String? value) {
   return null;
 }
 
-String? _deriveBaseUrl(String? url) {
-  if (url == null || url.trim().isEmpty) {
-    return null;
-  }
-
-  final uri = Uri.tryParse(url.trim());
-  if (uri == null) {
-    return url.trim();
-  }
-
-  final removableSegments = {
-    'chat',
-    'messages',
-    'completions',
-    'responses',
-    'invoke',
-    'openai',
-  };
-
-  final segments = uri.pathSegments.toList(growable: true);
-  while (segments.isNotEmpty &&
-      removableSegments.contains(segments.last.toLowerCase())) {
-    segments.removeLast();
-  }
-
-  final cleaned = uri.replace(pathSegments: segments);
-  final base = cleaned.toString();
-  if (base.endsWith('/')) {
-    return base.substring(0, base.length - 1);
-  }
-  return base;
-}
-
 LangchainAiConfig mergeConfigs(
   LangchainAiConfig base,
   LangchainAiConfig override,
@@ -231,6 +218,9 @@ LangchainAiConfig mergeConfigs(
     reasoningEffort: override.reasoningEffort != AiReasoningEffort.auto
         ? override.reasoningEffort
         : base.reasoningEffort,
+    thinkingMode: override.thinkingMode != AiThinkingMode.auto
+        ? override.thinkingMode
+        : base.thinkingMode,
     additional: mergeMaps(base.additional, override.additional),
   );
 }

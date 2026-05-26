@@ -884,5 +884,10 @@
   "aiModelSwitchTitle": "Changer de modèle",
   "aiModelEnterManually": "Entrez le nom du modèle",
   "aiModelOrSelectBelow": "Ou sélectionner dans la liste :",
+  "settingsAiProviderThinkingMode": "Thinking Mode",
+  "settingsAiProviderThinkingModeAuto": "Auto",
+  "settingsAiProviderThinkingModeEnabled": "Enabled",
+  "settingsAiProviderThinkingModeDisabled": "Disabled",
+  "settingsAiProviderThinkingModeHelp": "Only supported by DeepSeek V4. Auto does not send the thinking parameter; Enabled/Disabled sends thinking.type to the DeepSeek API.",
   "aiChatFontSize": "Taille de police"
 }

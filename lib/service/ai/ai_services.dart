@@ -58,9 +58,9 @@ List<AiServiceOption> buildDefaultAiServices() {
       identifier: 'deepseek',
       title: 'DeepSeek',
       logo: 'assets/images/deepseek.png',
-      defaultUrl: 'https://api.deepseek.com/v1/chat/completions',
+      defaultUrl: 'https://api.deepseek.com',
       defaultApiKey: 'YOUR_API_KEY',
-      defaultModel: 'deepseek-chat',
+      defaultModel: 'deepseek-v4-flash',
     ),
     AiServiceOption(
       identifier: 'openrouter',

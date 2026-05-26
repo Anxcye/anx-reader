@@ -1,8 +1,10 @@
 import 'package:anx_reader/enums/ai_reasoning_effort.dart';
+import 'package:anx_reader/enums/ai_thinking_mode.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/models/ai_provider.dart';
 import 'package:anx_reader/providers/ai_providers.dart';
 import 'package:anx_reader/service/ai/ai_model_service.dart';
+import 'package:anx_reader/service/ai/deepseek_compatibility.dart';
 import 'package:anx_reader/service/ai/index.dart';
 import 'package:anx_reader/service/ai/prompt_generate.dart';
 import 'package:anx_reader/widgets/ai/ai_stream.dart';
@@ -34,6 +36,7 @@ class _AiProviderDetailPageState extends ConsumerState<AiProviderDetailPage> {
 
   AiProtocol _selectedProtocol = AiProtocol.openai;
   AiReasoningEffort _reasoningEffort = AiReasoningEffort.auto;
+  AiThinkingMode _thinkingMode = AiThinkingMode.auto;
   List<AiApiKey> _apiKeys = [];
   bool _isModified = false;
   bool _isFetchingModels = false;
@@ -54,12 +57,19 @@ class _AiProviderDetailPageState extends ConsumerState<AiProviderDetailPage> {
     _modelController = TextEditingController(text: provider?.model ?? '');
     _selectedProtocol = provider?.protocol ?? AiProtocol.openai;
     _reasoningEffort = provider?.reasoningEffort ?? AiReasoningEffort.auto;
+    _thinkingMode = provider?.thinkingMode ?? AiThinkingMode.auto;
     _apiKeys = provider?.apiKeys.toList() ?? [];
 
     _nameController.addListener(() => setState(() => _isModified = true));
     _urlController.addListener(() => setState(() => _isModified = true));
     _modelController.addListener(() => setState(() => _isModified = true));
   }
+
+  bool get _isDeepSeekLikeProvider => isDeepSeekProvider(
+        identifier: widget.providerId ?? '',
+        model: _modelController.text,
+        baseUrl: _urlController.text,
+      );
 
   @override
   void dispose() {
@@ -348,6 +358,58 @@ class _AiProviderDetailPageState extends ConsumerState<AiProviderDetailPage> {
               ),
             ],
           ),
+          if (_isDeepSeekLikeProvider) ...[
+            const SizedBox(height: 16),
+            DropdownButtonFormField<AiThinkingMode>(
+              initialValue: _thinkingMode,
+              decoration: InputDecoration(
+                labelText: l10n.settingsAiProviderThinkingMode,
+                border: const OutlineInputBorder(),
+              ),
+              items: [
+                DropdownMenuItem(
+                  value: AiThinkingMode.auto,
+                  child: Text(l10n.settingsAiProviderThinkingModeAuto),
+                ),
+                DropdownMenuItem(
+                  value: AiThinkingMode.enabled,
+                  child: Text(l10n.settingsAiProviderThinkingModeEnabled),
+                ),
+                DropdownMenuItem(
+                  value: AiThinkingMode.disabled,
+                  child: Text(l10n.settingsAiProviderThinkingModeDisabled),
+                ),
+              ],
+              onChanged: (value) {
+                if (value == null) return;
+                setState(() {
+                  _thinkingMode = value;
+                  _isModified = true;
+                });
+              },
+            ),
+            const SizedBox(height: 10),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  Icons.info_outline_rounded,
+                  size: 16,
+                  color: colorScheme.onSurfaceVariant,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    l10n.settingsAiProviderThinkingModeHelp,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                      height: 1.35,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
         ],
       ),
     );
@@ -623,6 +685,7 @@ class _AiProviderDetailPageState extends ConsumerState<AiProviderDetailPage> {
       apiKeys: _apiKeys,
       model: _modelController.text,
       reasoningEffort: _reasoningEffort,
+      thinkingMode: _thinkingMode,
       keyIndex: 0,
       createdAt: widget.providerId != null
           ? ref
@@ -669,6 +732,7 @@ class _AiProviderDetailPageState extends ConsumerState<AiProviderDetailPage> {
         apiKeys: _apiKeys,
         model: _modelController.text,
         reasoningEffort: _reasoningEffort,
+        thinkingMode: _thinkingMode,
         keyIndex: 0,
         createdAt: widget.providerId != null
             ? ref

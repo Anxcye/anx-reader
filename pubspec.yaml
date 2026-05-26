@@ -143,8 +143,8 @@ dependency_overrides:
       path: packages/langchain_core
   langchain_openai:
     git:
-      url: https://github.com/Anxcye/langchain_dart.git
-      ref: 310fb6b3
+      url: https://github.com/YD-233/langchain_dart.git
+      ref: fix/deepseek-v4
       path: packages/langchain_openai
   langchain_anthropic:
     git:

@@ -1230,9 +1230,9 @@ packages:
     dependency: "direct main"
     description:
       path: "packages/langchain_openai"
-      ref: "310fb6b3"
-      resolved-ref: "310fb6b3e9f7ff4f6b10b1a82838fa50a33f659f"
-      url: "https://github.com/Anxcye/langchain_dart.git"
+      ref: "fix/deepseek-v4"
+      resolved-ref: "12a2bda3c6fa295ba79bfc909ecb7924065496d7"
+      url: "https://github.com/YD-233/langchain_dart.git"
     source: git
     version: "0.8.1+1"
   langchain_tiktoken:
