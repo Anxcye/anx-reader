@@ -1231,7 +1231,7 @@ packages:
     description:
       path: "packages/langchain_openai"
       ref: "fix/deepseek-v4"
-      resolved-ref: "12a2bda3c6fa295ba79bfc909ecb7924065496d7"
+      resolved-ref: "da19db65f6df4c1d14c8006ad0e329cc749afa70"
       url: "https://github.com/YD-233/langchain_dart.git"
     source: git
     version: "0.8.1+1"
