@@ -288,7 +288,6 @@ class StyleWidgetState extends State<StyleWidget> {
   }
 
   Row fontSizeSlider() {
-    bool enabled = !Prefs().useBookStyles;
     return Row(
       children: [
         IconAndText(
@@ -298,15 +297,13 @@ class StyleWidgetState extends State<StyleWidget> {
         Expanded(
           child: Slider(
             value: bookStyle.fontSize,
-            onChanged: enabled
-                ? (double value) {
-                    setState(() {
-                      bookStyle.fontSize = value;
-                      widget.epubPlayerKey.currentState!.changeStyle(bookStyle);
-                      Prefs().saveBookStyleToPrefs(bookStyle);
-                    });
-                  }
-                : null,
+            onChanged: (double value) {
+              setState(() {
+                bookStyle.fontSize = value;
+                widget.epubPlayerKey.currentState!.changeStyle(bookStyle);
+                Prefs().saveBookStyleToPrefs(bookStyle);
+              });
+            },
             min: 0.5,
             max: 3.0,
             divisions: 25,

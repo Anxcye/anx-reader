@@ -693,7 +693,7 @@ const getCSS = ({ fontSize,
         ${backgroundImageCSS}
         background-color: transparent !important;
         ${useBookStyles ? '' : `letter-spacing: ${letterSpacing}px;`}
-        ${useBookStyles ? '' : `font-size: ${fontSize}em;`}
+        font-size: ${fontSize}em;
         orphans: 1;  
         widows: 1;
     }
