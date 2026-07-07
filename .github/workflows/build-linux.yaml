@@ -1,0 +1,61 @@
+name: Build Linux
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
+      flutter_version:
+        required: true
+        type: string
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ inputs.flutter_version }}
+
+      - name: Install Linux build dependencies
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            clang \
+            cmake \
+            curl \
+            fuse \
+            libfuse2 \
+            libgtk-3-dev \
+            ninja-build \
+            pkg-config \
+            xclip
+
+      - name: Get dependencies
+        shell: bash
+        run: |
+          flutter --version
+          flutter pub get
+
+      - name: Build AppImage
+        shell: bash
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          chmod +x scripts/build_linux_appimage.sh
+          scripts/build_linux_appimage.sh
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-artifacts
+          path: build/linux/appimage/*.AppImage
+          if-no-files-found: error

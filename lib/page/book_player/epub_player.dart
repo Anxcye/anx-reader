@@ -37,7 +37,10 @@ import 'package:anx_reader/utils/js/convert_dart_color_to_js.dart';
 import 'package:anx_reader/utils/platform_utils.dart';
 import 'package:anx_reader/models/book_note.dart';
 import 'package:anx_reader/utils/log/common.dart';
+import 'package:anx_reader/utils/webView/epub_webview_controller.dart';
 import 'package:anx_reader/utils/webView/gererate_url.dart';
+import 'package:anx_reader/utils/webView/in_app_epub_webview_controller.dart';
+import 'package:anx_reader/utils/webView/linux_epub_webview.dart';
 import 'package:anx_reader/utils/webView/webview_console_message.dart';
 import 'package:anx_reader/widgets/bookshelf/book_cover.dart';
 import 'package:anx_reader/widgets/context_menu/context_menu.dart';
@@ -79,7 +82,7 @@ class EpubPlayer extends ConsumerStatefulWidget {
 
 class EpubPlayerState extends ConsumerState<EpubPlayer>
     with TickerProviderStateMixin {
-  late InAppWebViewController webViewController;
+  late EpubWebViewController webViewController;
   late ContextMenu contextMenu;
   String cfi = '';
   double percentage = 0.0;
@@ -135,7 +138,7 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
 
   void setTranslationMode(TranslationModeEnum mode) {
     webViewController.evaluateJavascript(source: '''
-      if (typeof reader.view !== 'undefined' && reader.view.setTranslationMode) {
+      if (typeof reader !== 'undefined' && typeof reader.view !== 'undefined' && reader.view.setTranslationMode) {
         reader.view.setTranslationMode('${mode.code}');
       }
       ''');
@@ -332,21 +335,29 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
 
   void ttsStop() => webViewController.evaluateJavascript(source: "ttsStop()");
 
-  Future<String> ttsNext() async => (await webViewController
-          .callAsyncJavaScript(functionBody: "return await ttsNext()"))
-      ?.value;
+  Future<String> ttsNext() async => _jsString(
+        await webViewController.callAsyncJavaScript(
+          functionBody: "return await ttsNext()",
+        ),
+      );
 
-  Future<String> ttsPrev() async => (await webViewController
-          .callAsyncJavaScript(functionBody: "return await ttsPrev()"))
-      ?.value;
+  Future<String> ttsPrev() async => _jsString(
+        await webViewController.callAsyncJavaScript(
+          functionBody: "return await ttsPrev()",
+        ),
+      );
 
-  Future<String> ttsPrevSection() async => (await webViewController
-          .callAsyncJavaScript(functionBody: "return await ttsPrevSection()"))
-      ?.value;
+  Future<String> ttsPrevSection() async => _jsString(
+        await webViewController.callAsyncJavaScript(
+          functionBody: "return await ttsPrevSection()",
+        ),
+      );
 
-  Future<String> ttsNextSection() async => (await webViewController
-          .callAsyncJavaScript(functionBody: "return await ttsNextSection()"))
-      ?.value;
+  Future<String> ttsNextSection() async => _jsString(
+        await webViewController.callAsyncJavaScript(
+          functionBody: "return await ttsNextSection()",
+        ),
+      );
 
   Future<String> ttsPrepare() async =>
       (await webViewController.evaluateJavascript(source: "ttsPrepare()"));
@@ -379,7 +390,7 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
     final result = await webViewController.callAsyncJavaScript(
       functionBody: 'return ttsCurrentDetail()',
     );
-    return _parseTtsSentence(result?.value);
+    return _parseTtsSentence(result.value);
   }
 
   Future<List<TtsSentence>> ttsCollectDetails({
@@ -391,8 +402,11 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
       functionBody:
           'return ttsCollectDetails($count, ${includeCurrent ? 'true' : 'false'}, $offset)',
     );
-    return _parseTtsSentences(result?.value);
+    return _parseTtsSentences(result.value);
   }
+
+  String _jsString(EpubJavaScriptResult result) =>
+      result.value?.toString() ?? '';
 
   Future<void> ttsHighlightByCfi(String cfi) async {
     await webViewController.callAsyncJavaScript(
@@ -443,7 +457,7 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
           'return await getChapterContentByHref("${href.replaceAll('"', '\\"')}")',
     );
 
-    final value = result?.value;
+    final value = result.value;
     if (value is String) {
       return _normalizeChapterContent(value, maxCharacters);
     }
@@ -597,7 +611,7 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
     }
   }
 
-  Future<void> renderAnnotations(InAppWebViewController controller) async {
+  Future<void> renderAnnotations(EpubWebViewController controller) async {
     List<BookNote> annotationList =
         await bookNoteDao.selectBookNotesByBookId(widget.book.id);
     String allAnnotations =
@@ -623,7 +637,7 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
     }
   }
 
-  Future<void> setHandler(InAppWebViewController controller) async {
+  Future<void> setHandler(EpubWebViewController controller) async {
     controller.addJavaScriptHandler(
         handlerName: 'onLoadEnd',
         callback: (args) {
@@ -879,7 +893,7 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
     );
   }
 
-  Future<void> onWebViewCreated(InAppWebViewController controller) async {
+  Future<void> onWebViewCreated(EpubWebViewController controller) async {
     if (AnxPlatform.isAndroid) {
       await InAppWebViewController.setWebContentsDebuggingEnabled(true);
     }
@@ -1210,22 +1224,32 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
 
   Widget buildWebviewWithIOSWorkaround(
       BuildContext context, String url, String initialCfi) {
+    final generatedUrl = generateUrl(
+      url,
+      initialCfi,
+      backgroundColor: backgroundColor,
+      textColor: textColor,
+      isDarkMode: Theme.of(context).brightness == Brightness.dark,
+    );
+
+    if (AnxPlatform.isLinux) {
+      return SizedBox.expand(
+        child: LinuxEpubWebView(
+          url: generatedUrl,
+          onWebViewCreated: onWebViewCreated,
+        ),
+      );
+    }
+
     final webView = InAppWebView(
       webViewEnvironment: webViewEnvironment,
       initialUrlRequest: URLRequest(
-        url: WebUri(
-          generateUrl(
-            url,
-            initialCfi,
-            backgroundColor: backgroundColor,
-            textColor: textColor,
-            isDarkMode: Theme.of(context).brightness == Brightness.dark,
-          ),
-        ),
+        url: WebUri(generatedUrl),
       ),
       initialSettings: initialSettings,
       contextMenu: contextMenu,
-      onLoadStop: (controller, uri) => onWebViewCreated(controller),
+      onLoadStop: (controller, uri) =>
+          onWebViewCreated(InAppEpubWebViewController(controller)),
       onConsoleMessage: webviewConsoleMessage,
     );
 

@@ -132,6 +132,7 @@ class DBHelper {
         );
       case AnxPlatformEnum.ios:
       case AnxPlatformEnum.windows:
+      case AnxPlatformEnum.linux:
         sqfliteFfiInit();
         databaseFactory = databaseFactoryFfi;
 

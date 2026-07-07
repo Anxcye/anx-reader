@@ -24,7 +24,9 @@ import 'package:anx_reader/utils/env_var.dart';
 import 'package:anx_reader/utils/get_path/get_base_path.dart';
 import 'package:anx_reader/page/reading_page.dart';
 import 'package:anx_reader/utils/import_book.dart';
+import 'package:anx_reader/utils/book_metadata/epub_metadata.dart';
 import 'package:anx_reader/utils/log/common.dart';
+import 'package:anx_reader/utils/platform_utils.dart';
 import 'package:anx_reader/utils/toast/common.dart';
 import 'package:anx_reader/utils/webView/gererate_url.dart';
 import 'package:anx_reader/utils/webView/webview_console_message.dart';
@@ -561,6 +563,21 @@ Future<void> getBookMetadata(
   String? md5,
   WidgetRef? ref,
 }) async {
+  if (AnxPlatform.isLinux) {
+    final metadata = await readEpubMetadata(file);
+    await saveBook(
+      file,
+      metadata.title,
+      metadata.author,
+      metadata.description,
+      md5,
+      metadata.cover,
+      provideBook: book,
+    );
+    ref?.read(bookListProvider.notifier).refresh();
+    return;
+  }
+
   String serverFileName = Server().setTempFile(file);
 
   String cfi = '';
