@@ -115,4 +115,20 @@ QQ群：1042905699
 - 运行 `dart run build_runner build --delete-conflicting-outputs` 生成 Riverpod 代码。
 - 运行 `flutter run` 启动应用。
 
+### Linux
+
+Linux 桌面端依赖 GTK 3 和 CMake。请先安装发行版提供的 GTK 3 开发包、CMake、
+Ninja、pkg-config 以及 C/C++ 编译器；Flutter 版本请使用 `.github/flutter-version`
+中记录的版本。随后运行：
+
+```sh
+flutter config --enable-linux-desktop
+flutter pub get
+flutter gen-l10n
+dart run build_runner build --delete-conflicting-outputs
+flutter build linux --release
+```
+
+可运行的 bundle 位于 `build/linux/x64/release/bundle/`。
+
 您可能遇到 Flutter 版本不兼容的问题，请参考 [Flutter 文档](https://flutter.dev/docs/get-started/install)。

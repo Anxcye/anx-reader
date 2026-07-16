@@ -54,6 +54,13 @@ jobs:
       flutter_version: ${{ needs.setup.outputs.flutter_version }}
       xcode_version: ${{ needs.setup.outputs.xcode_version }}
 
+  build-linux:
+    needs: setup
+    uses: ./.github/workflows/build-linux.yaml
+    with:
+      version: ${{ needs.setup.outputs.version }}
+      flutter_version: ${{ needs.setup.outputs.flutter_version }}
+
   build-appstore:
     needs: setup
     uses: ./.github/workflows/build-appstore.yaml
@@ -85,8 +92,8 @@ jobs:
       KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
 
   release:
-    # needs: [setup, build-android, build-ios, build-windows, build-macos, build-appstore, build-playstore]
-    needs: [setup, build-android, build-ios, build-windows, build-macos, build-appstore]
+    # needs: [setup, build-android, build-ios, build-windows, build-macos, build-linux, build-appstore, build-playstore]
+    needs: [setup, build-android, build-ios, build-windows, build-macos, build-linux, build-appstore]
     uses: ./.github/workflows/release.yaml
     with:
       tag: ${{ needs.setup.outputs.tag }}

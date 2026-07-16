@@ -135,6 +135,22 @@ Want to build Anx Reader from source? Please follow these steps:
 - Run `dart run build_runner build --delete-conflicting-outputs` to generate the Riverpod code.
 - Run `flutter run` to launch the application.
 
+### Linux
+
+The Linux desktop build uses GTK 3 and CMake. Install your distribution's GTK 3
+development package, CMake, Ninja, pkg-config, and a C/C++ compiler first. Use
+the Flutter version recorded in `.github/flutter-version`, then run:
+
+```sh
+flutter config --enable-linux-desktop
+flutter pub get
+flutter gen-l10n
+dart run build_runner build --delete-conflicting-outputs
+flutter build linux --release
+```
+
+The runnable bundle is written to `build/linux/x64/release/bundle/`.
+
 You may encounter Flutter version incompatibility issues. Please refer to the [Flutter documentation](https://flutter.dev/docs/get-started/install).
 
 

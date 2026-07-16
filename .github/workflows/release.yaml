@@ -86,6 +86,7 @@ jobs:
             artifacts/windows-artifacts/*.exe
             artifacts/macos-artifacts/*.dmg
             artifacts/macos-artifacts/*.zip
+            artifacts/linux-artifacts/*.tar.xz
             artifacts/ios-artifacts/*.ipa
             artifacts/ios-artifacts/*.zip
           body: ${{ inputs.release_notes }}
