@@ -317,6 +317,16 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
     ''');
   }
 
+  Future<void> runAiBookSearch(String keyword) async {
+    ref.read(tocSearchProvider.notifier).start(keyword);
+    final escaped = jsonEncode(keyword);
+    await webViewController.evaluateJavascript(source: 'clearSearch()');
+    await webViewController.evaluateJavascript(
+      source:
+        'search($escaped, {"scope":"book","matchCase":false,"matchDiacritics":false,"matchWholeWords":false})',
+    );
+  }
+
   void _clearSearchHighlights() {
     webViewController.evaluateJavascript(source: "clearSearch()");
   }
