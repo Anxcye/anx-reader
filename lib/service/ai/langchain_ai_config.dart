@@ -1,4 +1,5 @@
 import 'package:anx_reader/enums/ai_reasoning_effort.dart';
+import 'package:anx_reader/enums/ai_reasoning_format.dart';
 import 'dart:convert';
 
 import 'package:langchain_anthropic/langchain_anthropic.dart';
@@ -18,6 +19,9 @@ class LangchainAiConfig {
     this.maxTokens,
     this.maxOutputTokens,
     this.reasoningEffort = AiReasoningEffort.auto,
+    this.reasoningEnabled = false,
+    this.reasoningFormat = AiReasoningFormat.auto,
+    this.reasoningBudgetTokens,
     this.additional,
   }) : headers = Map.unmodifiable(headers ?? const {});
 
@@ -31,6 +35,9 @@ class LangchainAiConfig {
   final int? maxTokens;
   final int? maxOutputTokens;
   final AiReasoningEffort reasoningEffort;
+  final bool reasoningEnabled;
+  final AiReasoningFormat reasoningFormat;
+  final int? reasoningBudgetTokens;
   final Map<String, dynamic>? additional;
 
   ChatOpenAIOptions toOpenAIOptions() {
@@ -39,8 +46,95 @@ class LangchainAiConfig {
       temperature: temperature,
       topP: topP,
       maxTokens: maxTokens,
-      reasoningEffort: reasoningEffort.toOpenAiReasoningEffort(),
+      reasoningEffort: _openAiReasoningEffort(),
     );
+  }
+
+  /// OpenAI `reasoning_effort` sent through options.
+  ///
+  /// - `openai` format: send the effort when reasoning is enabled; the
+  ///   explicit "off" (`none`) is injected by the body interceptor instead.
+  /// - `auto` format: legacy behavior — a non-auto effort is sent as-is.
+  /// - Other formats: reasoning is expressed through other parameters
+  ///   (`thinking` / `thinkingConfig`), so nothing is sent here.
+  ChatOpenAIReasoningEffort? _openAiReasoningEffort() {
+    switch (reasoningFormat) {
+      case AiReasoningFormat.openai:
+        if (!reasoningEnabled) return null;
+        return _effectiveReasoningEffort().toOpenAiReasoningEffort();
+      case AiReasoningFormat.auto:
+        return reasoningEffort.toOpenAiReasoningEffort();
+      case AiReasoningFormat.deepseek:
+      case AiReasoningFormat.claude:
+      case AiReasoningFormat.gemini:
+        return null;
+    }
+  }
+
+  /// Compute the extra body fields to inject for reasoning control.
+  ///
+  /// Returns an empty map when nothing needs to be injected. The `auto`
+  /// format sends nothing; OpenAI's `low`/`medium`/`high` are sent through
+  /// [toOpenAIOptions]; Claude's thinking through [toAnthropicOptions]. The
+  /// fields produced here cover what those options cannot express: OpenAI's
+  /// explicit `none`, DeepSeek's `thinking.type`, and Gemini's
+  /// `generationConfig.thinkingConfig`.
+  Map<String, dynamic> get reasoningBodyOverrides {
+    switch (reasoningFormat) {
+      case AiReasoningFormat.auto:
+        return const {};
+      case AiReasoningFormat.openai:
+        // Explicitly disable reasoning by sending `reasoning_effort: none`.
+        if (!reasoningEnabled) return {'reasoning_effort': 'none'};
+        return const {};
+      case AiReasoningFormat.deepseek:
+        return {
+          'thinking': {'type': reasoningEnabled ? 'enabled' : 'disabled'},
+          if (reasoningEnabled) 'reasoning_effort': _effectiveReasoningEffort().code,
+        };
+      case AiReasoningFormat.claude:
+        // Handled via ChatAnthropicThinking in toAnthropicOptions().
+        return const {};
+      case AiReasoningFormat.gemini:
+        return {
+          'generationConfig': {
+            'thinkingConfig': {
+              'thinkingBudget': reasoningEnabled
+                  ? (reasoningBudgetTokens ?? _defaultGeminiBudget())
+                  : 0,
+            },
+          },
+        };
+    }
+  }
+
+  /// Reasoning effort used when the user enabled reasoning but kept the
+  /// legacy `auto` value (auto maps to medium).
+  AiReasoningEffort _effectiveReasoningEffort() {
+    if (reasoningEffort == AiReasoningEffort.auto) {
+      return AiReasoningEffort.medium;
+    }
+    return reasoningEffort;
+  }
+
+  /// Default Gemini thinking budget by effort (when no custom budget set).
+  int _defaultGeminiBudget() {
+    return switch (_effectiveReasoningEffort()) {
+      AiReasoningEffort.low => 1024,
+      AiReasoningEffort.medium => 2048,
+      AiReasoningEffort.high => 4096,
+      AiReasoningEffort.auto => 2048,
+    };
+  }
+
+  /// Default Claude thinking budget by effort (when no custom budget set).
+  int _defaultClaudeBudget() {
+    return switch (_effectiveReasoningEffort()) {
+      AiReasoningEffort.low => 2048,
+      AiReasoningEffort.medium => 4096,
+      AiReasoningEffort.high => 8192,
+      AiReasoningEffort.auto => 4096,
+    };
   }
 
   ChatAnthropicOptions toAnthropicOptions() {
@@ -49,6 +143,20 @@ class LangchainAiConfig {
       temperature: temperature,
       topP: topP,
       maxTokens: maxTokens,
+      thinking: _anthropicThinking(),
+    );
+  }
+
+  /// Claude extended thinking configuration.
+  ///
+  /// Only applied when the reasoning format is `claude`. When reasoning is
+  /// disabled, `thinking.type: "disabled"` is sent explicitly; otherwise a
+  /// budget (custom or derived from the effort) is used.
+  ChatAnthropicThinking? _anthropicThinking() {
+    if (reasoningFormat != AiReasoningFormat.claude) return null;
+    if (!reasoningEnabled) return ChatAnthropicThinking.disabled();
+    return ChatAnthropicThinking.enabled(
+      budgetTokens: reasoningBudgetTokens ?? _defaultClaudeBudget(),
     );
   }
 
@@ -98,6 +206,9 @@ class LangchainAiConfig {
     required String apiKey,
     required String url,
     AiReasoningEffort reasoningEffort = AiReasoningEffort.auto,
+    bool reasoningEnabled = false,
+    AiReasoningFormat reasoningFormat = AiReasoningFormat.auto,
+    int? reasoningBudgetTokens,
   }) {
     return LangchainAiConfig(
       identifier: providerId,
@@ -105,6 +216,9 @@ class LangchainAiConfig {
       model: model,
       baseUrl: _deriveBaseUrl(url),
       reasoningEffort: reasoningEffort,
+      reasoningEnabled: reasoningEnabled,
+      reasoningFormat: reasoningFormat,
+      reasoningBudgetTokens: reasoningBudgetTokens,
     );
   }
 
@@ -118,6 +232,9 @@ class LangchainAiConfig {
     int? maxTokens,
     int? maxOutputTokens,
     AiReasoningEffort? reasoningEffort,
+    bool? reasoningEnabled,
+    AiReasoningFormat? reasoningFormat,
+    int? reasoningBudgetTokens,
     Map<String, dynamic>? additional,
   }) {
     return LangchainAiConfig(
@@ -131,6 +248,10 @@ class LangchainAiConfig {
       maxTokens: maxTokens ?? this.maxTokens,
       maxOutputTokens: maxOutputTokens ?? this.maxOutputTokens,
       reasoningEffort: reasoningEffort ?? this.reasoningEffort,
+      reasoningEnabled: reasoningEnabled ?? this.reasoningEnabled,
+      reasoningFormat: reasoningFormat ?? this.reasoningFormat,
+      reasoningBudgetTokens:
+          reasoningBudgetTokens ?? this.reasoningBudgetTokens,
       additional: additional ?? this.additional,
     );
   }

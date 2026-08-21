@@ -1,7 +1,6 @@
 {
   "ar": [
     "settingsAiProviderReasoningEffort",
-    "settingsAiProviderReasoningEffortHelp",
     "settingsAiProviderReasoningEffortAuto",
     "settingsAiProviderReasoningEffortLow",
     "settingsAiProviderReasoningEffortMedium",
@@ -24,7 +23,6 @@
 
   "de": [
     "settingsAiProviderReasoningEffort",
-    "settingsAiProviderReasoningEffortHelp",
     "settingsAiProviderReasoningEffortAuto",
     "settingsAiProviderReasoningEffortLow",
     "settingsAiProviderReasoningEffortMedium",
@@ -47,7 +45,6 @@
 
   "es": [
     "settingsAiProviderReasoningEffort",
-    "settingsAiProviderReasoningEffortHelp",
     "settingsAiProviderReasoningEffortAuto",
     "settingsAiProviderReasoningEffortLow",
     "settingsAiProviderReasoningEffortMedium",
@@ -70,7 +67,6 @@
 
   "fr": [
     "settingsAiProviderReasoningEffort",
-    "settingsAiProviderReasoningEffortHelp",
     "settingsAiProviderReasoningEffortAuto",
     "settingsAiProviderReasoningEffortLow",
     "settingsAiProviderReasoningEffortMedium",
@@ -93,7 +89,6 @@
 
   "it": [
     "settingsAiProviderReasoningEffort",
-    "settingsAiProviderReasoningEffortHelp",
     "settingsAiProviderReasoningEffortAuto",
     "settingsAiProviderReasoningEffortLow",
     "settingsAiProviderReasoningEffortMedium",
@@ -116,7 +111,6 @@
 
   "ja": [
     "settingsAiProviderReasoningEffort",
-    "settingsAiProviderReasoningEffortHelp",
     "settingsAiProviderReasoningEffortAuto",
     "settingsAiProviderReasoningEffortLow",
     "settingsAiProviderReasoningEffortMedium",
@@ -139,7 +133,6 @@
 
   "ko": [
     "settingsAiProviderReasoningEffort",
-    "settingsAiProviderReasoningEffortHelp",
     "settingsAiProviderReasoningEffortAuto",
     "settingsAiProviderReasoningEffortLow",
     "settingsAiProviderReasoningEffortMedium",
@@ -162,7 +155,6 @@
 
   "pt": [
     "settingsAiProviderReasoningEffort",
-    "settingsAiProviderReasoningEffortHelp",
     "settingsAiProviderReasoningEffortAuto",
     "settingsAiProviderReasoningEffortLow",
     "settingsAiProviderReasoningEffortMedium",
@@ -185,7 +177,6 @@
 
   "ro": [
     "settingsAiProviderReasoningEffort",
-    "settingsAiProviderReasoningEffortHelp",
     "settingsAiProviderReasoningEffortAuto",
     "settingsAiProviderReasoningEffortLow",
     "settingsAiProviderReasoningEffortMedium",
@@ -208,7 +199,6 @@
 
   "ru": [
     "settingsAiProviderReasoningEffort",
-    "settingsAiProviderReasoningEffortHelp",
     "settingsAiProviderReasoningEffortAuto",
     "settingsAiProviderReasoningEffortLow",
     "settingsAiProviderReasoningEffortMedium",
@@ -231,7 +221,6 @@
 
   "tr": [
     "settingsAiProviderReasoningEffort",
-    "settingsAiProviderReasoningEffortHelp",
     "settingsAiProviderReasoningEffortAuto",
     "settingsAiProviderReasoningEffortLow",
     "settingsAiProviderReasoningEffortMedium",
@@ -254,7 +243,6 @@
 
   "zh": [
     "settingsAiProviderReasoningEffort",
-    "settingsAiProviderReasoningEffortHelp",
     "settingsAiProviderReasoningEffortAuto",
     "settingsAiProviderReasoningEffortLow",
     "settingsAiProviderReasoningEffortMedium",
@@ -263,7 +251,6 @@
 
   "zh_LZH": [
     "settingsAiProviderReasoningEffort",
-    "settingsAiProviderReasoningEffortHelp",
     "settingsAiProviderReasoningEffortAuto",
     "settingsAiProviderReasoningEffortLow",
     "settingsAiProviderReasoningEffortMedium",
@@ -286,7 +273,6 @@
 
   "zh_TW": [
     "settingsAiProviderReasoningEffort",
-    "settingsAiProviderReasoningEffortHelp",
     "settingsAiProviderReasoningEffortAuto",
     "settingsAiProviderReasoningEffortLow",
     "settingsAiProviderReasoningEffortMedium",

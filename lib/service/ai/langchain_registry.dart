@@ -5,13 +5,20 @@ import 'package:anx_reader/models/ai_provider.dart';
 import 'package:anx_reader/providers/current_reading.dart';
 import 'package:anx_reader/service/ai/tools/ai_tool_registry.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:http/http.dart' as http;
 import 'package:langchain_anthropic/langchain_anthropic.dart';
 import 'package:langchain_core/chat_models.dart';
 import 'package:langchain_core/tools.dart';
 import 'package:langchain_google/langchain_google.dart';
 import 'package:langchain_openai/langchain_openai.dart';
 
+import 'ai_reasoning_body_interceptor.dart';
 import 'langchain_ai_config.dart';
+
+// Shared HTTP client used by every AI request interceptor. It is owned here
+// (process lifetime) because the LangChain models create a fresh client per
+// request but never close externally-injected clients.
+final http.Client _aiSharedHttpClient = http.Client();
 
 /// Factory responsible for building chat models based on user preferences.
 class LangchainAiRegistry {
@@ -80,6 +87,7 @@ class LangchainAiRegistry {
       apiKey: config.apiKey.isEmpty ? null : config.apiKey,
       baseUrl: config.baseUrl ?? 'https://api.openai.com/v1',
       headers: config.headers.isEmpty ? null : config.headers,
+      client: _buildReasoningClient(config),
       defaultOptions: config.toOpenAIOptions(),
     );
   }
@@ -98,7 +106,21 @@ class LangchainAiRegistry {
       apiKey: config.apiKey.isEmpty ? null : config.apiKey,
       baseUrl: config.baseUrl,
       headers: config.headers.isEmpty ? null : config.headers,
+      client: _buildReasoningClient(config),
       defaultOptions: config.toGoogleOptions(),
+    );
+  }
+
+  /// Wrap the shared HTTP client with the reasoning body interceptor so that
+  /// reasoning parameters the LangChain options cannot express (OpenAI
+  /// `none`, DeepSeek `thinking`, Gemini `thinkingConfig`) are injected into
+  /// the request body. Returns `null` when there is nothing to inject.
+  http.Client? _buildReasoningClient(LangchainAiConfig config) {
+    final overrides = config.reasoningBodyOverrides;
+    if (overrides.isEmpty) return null;
+    return AiReasoningBodyInterceptor(
+      inner: _aiSharedHttpClient,
+      overrides: () => config.reasoningBodyOverrides,
     );
   }
 

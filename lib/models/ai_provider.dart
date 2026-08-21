@@ -1,4 +1,5 @@
 import 'package:anx_reader/enums/ai_reasoning_effort.dart';
+import 'package:anx_reader/enums/ai_reasoning_format.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'ai_provider.freezed.dart';
@@ -38,6 +39,11 @@ abstract class AiProvider with _$AiProvider {
     @Default('') String model, // Current selected model
     @Default(AiReasoningEffort.auto)
     AiReasoningEffort reasoningEffort, // OpenAI reasoning effort
+    @Default(false)
+    bool reasoningEnabled, // Whether reasoning is enabled
+    @Default(AiReasoningFormat.auto)
+    AiReasoningFormat reasoningFormat, // Reasoning request format
+    int? reasoningBudgetTokens, // Custom reasoning budget (Claude/Gemini)
     @Default(0) int keyIndex, // Current round-robin key index
     DateTime? createdAt, // Creation time
     DateTime? updatedAt, // Last update time
@@ -45,6 +51,24 @@ abstract class AiProvider with _$AiProvider {
 
   factory AiProvider.fromJson(Map<String, dynamic> json) =>
       _$AiProviderFromJson(json);
+
+  /// Migrate legacy reasoning configs (created before the reasoning switch
+  /// existed). Users who previously set a non-auto [reasoningEffort] expect
+  /// reasoning to stay enabled, so translate that into the new switch plus
+  /// the OpenAI request format.
+  static AiProvider migrateLegacyReasoning(
+    AiProvider provider,
+    Map<String, dynamic> json,
+  ) {
+    if (!json.containsKey('reasoningFormat') &&
+        provider.reasoningEffort != AiReasoningEffort.auto) {
+      return provider.copyWith(
+        reasoningEnabled: true,
+        reasoningFormat: AiReasoningFormat.openai,
+      );
+    }
+    return provider;
+  }
 
   /// Get the current active API key (based on enabled keys and keyIndex)
   String? get currentApiKey {
