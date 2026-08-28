@@ -40,6 +40,36 @@ class ParsedReasoning {
       .toList(growable: false);
 }
 
+String cleanAiDisplayText(String content, {bool answerOnly = false}) {
+  final normalized = content.replaceAll(
+    RegExp(
+      r'<(?:think|thinking)>[\s\S]*?</(?:think|thinking)>',
+      caseSensitive: false,
+    ),
+    '',
+  );
+  final parsed = parseReasoningContent(normalized);
+  final entries = answerOnly ? parsed.answerTimeline : parsed.timeline;
+  final text = entries
+      .where((entry) => entry.type == ParsedReasoningEntryType.reply)
+      .map((entry) => entry.text ?? '')
+      .where((value) => value.trim().isNotEmpty)
+      .join('\n');
+  final source = text.trim().isEmpty ? normalized : text;
+  return source
+      .replaceAll(
+        RegExp(
+          r'</?(?:think|thinking|text|reply|answer|reasoning)[^>]*>',
+          caseSensitive: false,
+        ),
+        '',
+      )
+      .replaceAll(RegExp(r'<[^>]+>'), '')
+      .replaceAll(RegExp(r'^\s*#{1,6}\s*', multiLine: true), '')
+      .replaceAll(RegExp(r'\s+'), ' ')
+      .trim();
+}
+
 enum ParsedReasoningEntryType { reply, tool }
 
 enum ParsedReasoningSection { reasoning, answer }

@@ -2,14 +2,21 @@ import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/enums/ai_prompts.dart';
 import 'package:anx_reader/enums/ai_chat_display_mode.dart';
 import 'package:anx_reader/enums/ai_panel_position.dart';
+import 'package:anx_reader/enums/ai_panel_width_ratio.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
+import 'package:anx_reader/models/ai_provider.dart';
 import 'package:anx_reader/page/settings_page/ai_provider_list_page.dart';
+import 'package:anx_reader/page/reading_agent_help_page.dart';
 import 'package:anx_reader/providers/ai_cache_count.dart';
 import 'package:anx_reader/providers/ai_providers.dart';
 import 'package:anx_reader/providers/user_prompts.dart';
 import 'package:anx_reader/service/ai/tools/ai_tool_registry.dart';
+import 'package:anx_reader/service/ai/ai_token_usage_service.dart';
+import 'package:anx_reader/service/ai/reading_ai_models.dart';
+import 'package:anx_reader/service/ai/web_search.dart';
 import 'package:anx_reader/widgets/common/anx_button.dart';
 import 'package:anx_reader/widgets/common/anx_segmented_button.dart';
+import 'package:anx_reader/widgets/common/container/filled_container.dart';
 import 'package:anx_reader/widgets/delete_confirm.dart';
 import 'package:anx_reader/widgets/settings/settings_section.dart';
 import 'package:anx_reader/widgets/settings/settings_tile.dart';
@@ -211,43 +218,99 @@ class _AISettingsState extends ConsumerState<AISettings> {
     );
 
     return settingsSections(sections: [
-      SettingsSection(
-        title: Text(L10n.of(context).settingsAiServices),
-        tiles: [
-          SettingsTile.navigation(
-            title: Text(l10n.settingsAiProviders),
-            description: _buildProviderDescription(),
-            onPressed: (context) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const AiProviderListPage(),
-                ),
-              );
-            },
-          ),
-          CustomSettingsTile(
-              child: _AiRpmTile(setState: () => setState(() {}))),
-          // SettingsTile.navigation(
-          //   leading: const Icon(Icons.chat),
-          //   title: Text(L10n.of(context).aiChat),
-          //   onPressed: (context) {
-          //     Navigator.push(
-          //       context,
-          //       CupertinoPageRoute(
-          //         builder: (context) => const AiChatPage(),
-          //       ),
-          //     );
-          //   },
-          // ),
-        ],
+      CustomSettingsSection(
+        child: _AiProviderConfigurationSection(
+          rpmTile: _AiRpmTile(setState: () => setState(() {})),
+        ),
       ),
+      _tokenUsageSection(),
       SettingsSection(
         title: Text(L10n.of(context).settingsAiChatDisplay),
         tiles: [
           aiChatDisplayModeTile(),
           if (Prefs().aiChatDisplayMode != AiChatDisplayMode.popup)
             aiPanelPositionTile(),
+          if (Prefs().aiChatDisplayMode != AiChatDisplayMode.popup)
+            aiPanelWidthRatioTile(),
+        ],
+      ),
+      SettingsSection(
+        title: const Text('阅读 Agent Beta'),
+        tiles: [
+          SettingsTile.switchTile(
+            initialValue: Prefs().readingAgentBetaEnabled,
+            onToggle: (value) {
+              Prefs().readingAgentBetaEnabled = value;
+              setState(() {});
+            },
+            title: const Text('启用低打扰阅读 Agent'),
+            description: const Text(
+              '默认关闭。翻页和停留只在本地更新状态，不会调用模型；'
+              '主动建议需确认，明确要求的写入可撤销并保留 30 天记录。',
+            ),
+          ),
+          SettingsTile.navigation(
+            leading: const Icon(Icons.help_outline),
+            title: const Text('阅读 Agent 使用方法'),
+            description: const Text('了解阅读闭环、模型调用、写入权限和撤销'),
+            onPressed: (context) => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => const ReadingAgentHelpPage(),
+              ),
+            ),
+          ),
+        ],
+      ),
+      SettingsSection(
+        title: const Text('阅读模式'),
+        tiles: [
+          _readingModeTile(),
+          SettingsTile.navigation(
+            leading: const Icon(Icons.auto_stories_outlined),
+            title: const Text('Reading Skill 使用方法'),
+            description: const Text('了解自动匹配、渐进加载和全部阅读方法'),
+            onPressed: (context) => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => const ReadingSkillHelpPage(),
+              ),
+            ),
+          ),
+        ],
+      ),
+      SettingsSection(
+        title: const Text('深度阅读'),
+        tiles: [
+          _deepReadingTile(),
+        ],
+      ),
+      SettingsSection(
+        title: const Text('专家'),
+        tiles: [
+          SettingsTile.switchTile(
+            initialValue: Prefs().readingMultiAgentEnabled,
+            onToggle: (value) {
+              Prefs().readingMultiAgentEnabled = value;
+              setState(() {});
+            },
+            title: const Text('主助手调度专家'),
+            description: const Text('复杂问题最多并行调用两个专家；简单问题直接回答'),
+          ),
+        ],
+      ),
+      SettingsSection(
+        title: const Text('网络检索'),
+        tiles: [
+          _webSearchTile(),
+        ],
+      ),
+      SettingsSection(
+        title: const Text('可信来源'),
+        tiles: [
+          SettingsTile.navigation(
+            title: const Text('查看模式来源包'),
+            description: const Text('联网结果必须匹配对应模式的可信域名'),
+            onPressed: (_) => _showTrustedSources(),
+          ),
         ],
       ),
       SettingsSection(
@@ -336,15 +399,533 @@ class _AISettingsState extends ConsumerState<AISettings> {
     ]);
   }
 
-  // Build description showing current selected provider
-  Widget? _buildProviderDescription() {
-    final provider =
-        ref.read(aiProvidersProvider.notifier).getSelectedProvider();
-    if (provider == null) {
-      return null;
-    }
-    return Text(provider.title);
+  SettingsSection _tokenUsageSection() {
+    final usage = aiTokenUsageService.snapshot();
+    final since = DateTime.fromMillisecondsSinceEpoch(usage.startedAt);
+    final estimateText = usage.containsEstimates
+        ? '其中 ${usage.estimatedRequests} 次因供应商未返回 usage，使用本地估算'
+        : '当前记录均来自供应商返回的 usage';
+    return SettingsSection(
+      title: const Text('Token 用量'),
+      tiles: [
+        CustomSettingsTile(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '${usage.month} 本月累计',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                if (usage.byRole.isNotEmpty) ...[
+                  const SizedBox(height: 14),
+                  const Divider(),
+                  const SizedBox(height: 8),
+                  Text('按引擎用途', style: Theme.of(context).textTheme.titleSmall),
+                  const SizedBox(height: 8),
+                  for (final role in AiTokenUsageRole.values)
+                    if (usage.byRole[role] case final bucket?)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 5),
+                        child: Text(
+                          '${switch (role) {
+                            AiTokenUsageRole.general => '通用对话/总结',
+                            AiTokenUsageRole.localExtraction => '本地轻量提取',
+                            AiTokenUsageRole.cloudExtraction => '云端轻量提取',
+                            AiTokenUsageRole.cloudVerification => '线上疑难复核',
+                          }}：${_formatTokenCount(bucket.inputTokens)} 输入 / ${_formatTokenCount(bucket.outputTokens)} 输出'
+                          '${bucket.estimatedRequests == 0 ? '' : '（${bucket.estimatedRequests} 次估算）'}',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ),
+                ],
+                if (usage.storyCloudSavingRate case final rate?) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    '故事档案主模型输入避免约 ${(rate * 100).toStringAsFixed(1)}%'
+                    '（整章直传基线 ${_formatTokenCount(usage.storyBaselineInputTokens)} / 主模型实际输入 ${_formatTokenCount(usage.storyCloudInputTokens)}；云端轻量提取另计）',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                  ),
+                ],
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 24,
+                  runSpacing: 12,
+                  children: [
+                    _TokenUsageValue(
+                      label: '输入',
+                      value: _formatTokenCount(usage.inputTokens),
+                    ),
+                    _TokenUsageValue(
+                      label: '输出',
+                      value: _formatTokenCount(usage.outputTokens),
+                    ),
+                    _TokenUsageValue(
+                      label: '合计',
+                      value: _formatTokenCount(usage.totalTokens),
+                    ),
+                    _TokenUsageValue(
+                      label: '请求',
+                      value: '${usage.requests} 次',
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  '$estimateText。统计始于 ${since.year}-${since.month.toString().padLeft(2, '0')}-${since.day.toString().padLeft(2, '0')}，仅保存在本机。',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ],
+            ),
+          ),
+        ),
+        SettingsTile.navigation(
+          leading: const Icon(Icons.restart_alt),
+          title: const Text('重置本月统计'),
+          description: const Text('只清除本机 Token 计数，不影响 AI 配置和聊天记录'),
+          onPressed: (_) async {
+            final confirmed = await showDialog<bool>(
+              context: context,
+              builder: (context) => AlertDialog(
+                title: const Text('重置 Token 用量？'),
+                content: const Text('本机保存的本月输入、输出和请求次数将归零。'),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, false),
+                    child: Text(L10n.of(context).commonCancel),
+                  ),
+                  FilledButton(
+                    onPressed: () => Navigator.pop(context, true),
+                    child: Text(L10n.of(context).commonConfirm),
+                  ),
+                ],
+              ),
+            );
+            if (confirmed != true) return;
+            aiTokenUsageService.reset();
+            if (mounted) setState(() {});
+          },
+        ),
+      ],
+    );
   }
+
+  String _formatTokenCount(int value) {
+    final digits = value.toString();
+    final buffer = StringBuffer();
+    for (var index = 0; index < digits.length; index++) {
+      if (index > 0 && (digits.length - index) % 3 == 0) buffer.write(',');
+      buffer.write(digits[index]);
+    }
+    return buffer.toString();
+  }
+
+  AbstractSettingsTile _readingModeTile() {
+    return CustomSettingsTile(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: DropdownButtonFormField<ReadingAiMode>(
+          initialValue: Prefs().defaultReadingAiMode,
+          decoration: const InputDecoration(
+            labelText: '默认阅读模式',
+            helperText: '每本书可在 AI 阅读工作台中单独覆盖',
+          ),
+          items: ReadingAiMode.values
+              .map((mode) => DropdownMenuItem(
+                    value: mode,
+                    child: Text(_readingModeLabel(mode)),
+                  ))
+              .toList(growable: false),
+          onChanged: (mode) {
+            if (mode == null) return;
+            Prefs().defaultReadingAiMode = mode;
+            setState(() {});
+          },
+        ),
+      ),
+    );
+  }
+
+  AbstractSettingsTile _deepReadingTile() {
+    return CustomSettingsTile(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            DropdownButtonFormField<ReadingAnalysisDepth>(
+              initialValue: Prefs().defaultReadingAnalysisDepth,
+              decoration: const InputDecoration(
+                labelText: '默认分析深度',
+                helperText: '快读不调用专家；精读 1 个；深读与研究最多 2 个',
+              ),
+              items: ReadingAnalysisDepth.values
+                  .map((depth) => DropdownMenuItem(
+                        value: depth,
+                        child: Text(_analysisDepthLabel(depth)),
+                      ))
+                  .toList(growable: false),
+              onChanged: (depth) {
+                if (depth == null) return;
+                Prefs().defaultReadingAnalysisDepth = depth;
+                setState(() {});
+              },
+            ),
+            const SizedBox(height: 12),
+            DropdownButtonFormField<ReadingOutputTemplate>(
+              initialValue: Prefs().defaultReadingOutputTemplate,
+              decoration: const InputDecoration(labelText: '默认输出形式'),
+              items: ReadingOutputTemplate.values
+                  .map((output) => DropdownMenuItem(
+                        value: output,
+                        child: Text(_analysisOutputLabel(output)),
+                      ))
+                  .toList(growable: false),
+              onChanged: (output) {
+                if (output == null) return;
+                Prefs().defaultReadingOutputTemplate = output;
+                setState(() {});
+              },
+            ),
+            const SizedBox(height: 8),
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              value: Prefs().readingAnalysisAutoRecommend,
+              title: const Text('本地自动推荐框架'),
+              subtitle: const Text('根据深度、阅读模式和目标推荐，不调用 AI'),
+              onChanged: (value) {
+                Prefs().readingAnalysisAutoRecommend = value;
+                setState(() {});
+              },
+            ),
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              value: Prefs().readingAnalysisConfirmBeforeSend,
+              title: const Text('发送前确认'),
+              subtitle: const Text('在划线动作卡中确认深度、框架和输出形式'),
+              onChanged: (value) {
+                Prefs().readingAnalysisConfirmBeforeSend = value;
+                setState(() {});
+              },
+            ),
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              value: Prefs().readingResearchWebSearch,
+              title: const Text('研究档允许联网'),
+              subtitle: const Text('仅研究档生效，且仍需启用并配置下方网络检索'),
+              onChanged: (value) {
+                Prefs().readingResearchWebSearch = value;
+                setState(() {});
+              },
+            ),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              title: const Text('主要框架数量'),
+              subtitle: Slider(
+                value: Prefs().readingAnalysisMaxFrameworks.toDouble(),
+                min: 1,
+                max: 2,
+                divisions: 1,
+                label: '${Prefs().readingAnalysisMaxFrameworks}',
+                onChanged: (value) {
+                  Prefs().readingAnalysisMaxFrameworks = value.round();
+                  setState(() {});
+                },
+              ),
+              trailing: Text('${Prefs().readingAnalysisMaxFrameworks}'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  AbstractSettingsTile _webSearchTile() {
+    final config = Prefs().readingWebSearchConfig;
+    return CustomSettingsTile(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              value: config.enabled,
+              title: const Text('允许联网核查'),
+              subtitle: const Text('默认关闭；失败时自动退化到本书、笔记和内置词典'),
+              onChanged: (enabled) {
+                Prefs().readingWebSearchConfig = _copySearchConfig(
+                  config,
+                  enabled: enabled,
+                );
+                setState(() {});
+              },
+            ),
+            DropdownButtonFormField<WebSearchProvider>(
+              initialValue: config.provider,
+              decoration: const InputDecoration(labelText: '搜索供应商'),
+              items: WebSearchProvider.values
+                  .map((provider) => DropdownMenuItem(
+                        value: provider,
+                        child: Text(switch (provider) {
+                          WebSearchProvider.tavily => 'Tavily',
+                          WebSearchProvider.brave => 'Brave Search',
+                          WebSearchProvider.custom => '自定义兼容接口',
+                        }),
+                      ))
+                  .toList(growable: false),
+              onChanged: (provider) {
+                if (provider == null) return;
+                Prefs().readingWebSearchConfig = switch (provider) {
+                  WebSearchProvider.tavily => WebSearchProviderConfig.tavily(
+                      enabled: config.enabled,
+                      apiKey: config.apiKey,
+                      trustedSources: config.trustedSources,
+                    ),
+                  WebSearchProvider.brave => WebSearchProviderConfig.brave(
+                      enabled: config.enabled,
+                      apiKey: config.apiKey,
+                      trustedSources: config.trustedSources,
+                    ),
+                  WebSearchProvider.custom => WebSearchProviderConfig.custom(
+                      enabled: config.enabled,
+                      apiKey: config.apiKey,
+                      endpoint: config.provider == WebSearchProvider.custom
+                          ? config.endpoint
+                          : null,
+                      trustedSources: config.trustedSources,
+                    ),
+                };
+                setState(() {});
+              },
+            ),
+            const SizedBox(height: 8),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              title: const Text('Key 与接口'),
+              subtitle: Text(config.apiKey?.isNotEmpty == true
+                  ? '${config.endpoint ?? config.effectiveEndpoint} · Key 已配置'
+                  : '${config.endpoint ?? config.effectiveEndpoint} · 未配置 Key'),
+              trailing: const Icon(Icons.edit_outlined),
+              onTap: () => _editSearchCredentials(config),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  WebSearchProviderConfig _copySearchConfig(
+    WebSearchProviderConfig config, {
+    WebSearchProvider? provider,
+    bool? enabled,
+    String? apiKey,
+    Uri? endpoint,
+  }) {
+    return WebSearchProviderConfig(
+      provider: provider ?? config.provider,
+      enabled: enabled ?? config.enabled,
+      apiKey: apiKey ?? config.apiKey,
+      endpoint: endpoint ?? config.endpoint,
+      headers: config.headers,
+      queryParameter: config.queryParameter,
+      maxResults: config.maxResults,
+      timeout: config.timeout,
+      trustedSources: config.trustedSources,
+    );
+  }
+
+  Future<void> _editSearchCredentials(WebSearchProviderConfig config) async {
+    final keyController = TextEditingController(text: config.apiKey ?? '');
+    final endpointController = TextEditingController(
+      text: config.endpoint?.toString() ?? '',
+    );
+    final saved = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('网络检索配置'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: keyController,
+              obscureText: true,
+              decoration: const InputDecoration(labelText: 'API Key'),
+            ),
+            if (config.provider == WebSearchProvider.custom)
+              TextField(
+                controller: endpointController,
+                decoration: const InputDecoration(labelText: 'HTTPS 接口地址'),
+              ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(L10n.of(context).commonCancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(L10n.of(context).commonSave),
+          ),
+        ],
+      ),
+    );
+    if (saved == true) {
+      final endpointText = endpointController.text.trim();
+      Prefs().readingWebSearchConfig = WebSearchProviderConfig(
+        provider: config.provider,
+        enabled: config.enabled,
+        apiKey: keyController.text.trim(),
+        endpoint: endpointText.isEmpty ? null : Uri.tryParse(endpointText),
+        headers: config.headers,
+        queryParameter: config.queryParameter,
+        maxResults: config.maxResults,
+        timeout: config.timeout,
+        trustedSources: config.trustedSources,
+      );
+      if (mounted) setState(() {});
+    }
+    keyController.dispose();
+    endpointController.dispose();
+  }
+
+  Future<void> _showTrustedSources() async {
+    var selectedMode = ReadingAiMode.general;
+    final domains = {
+      for (final mode in ReadingAiMode.values)
+        mode: List<String>.from(Prefs().readingTrustedSourcePack(mode).domains),
+    };
+    final domainController = TextEditingController();
+    final saved = await showDialog<bool>(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: const Text('可信来源包'),
+          content: SizedBox(
+            width: 520,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                DropdownButtonFormField<ReadingAiMode>(
+                  initialValue: selectedMode,
+                  items: ReadingAiMode.values
+                      .map((mode) => DropdownMenuItem(
+                            value: mode,
+                            child: Text(_readingModeLabel(mode)),
+                          ))
+                      .toList(growable: false),
+                  onChanged: (mode) {
+                    if (mode != null) {
+                      setDialogState(() => selectedMode = mode);
+                    }
+                  },
+                ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: domainController,
+                        decoration: const InputDecoration(
+                          labelText: '域名，例如 who.int',
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.add),
+                      onPressed: () {
+                        final value = _normalizeTrustedDomain(
+                          domainController.text,
+                        );
+                        if (value == null ||
+                            domains[selectedMode]!.contains(value)) {
+                          return;
+                        }
+                        setDialogState(() {
+                          domains[selectedMode]!.add(value);
+                          domainController.clear();
+                        });
+                      },
+                    ),
+                  ],
+                ),
+                SizedBox(
+                  height: 300,
+                  child: ListView(
+                    shrinkWrap: true,
+                    children: domains[selectedMode]!
+                        .map((domain) => ListTile(
+                              dense: true,
+                              title: Text(domain),
+                              trailing: IconButton(
+                                icon: const Icon(Icons.delete_outline),
+                                onPressed: () => setDialogState(
+                                  () => domains[selectedMode]!.remove(domain),
+                                ),
+                              ),
+                            ))
+                        .toList(growable: false),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: Text(L10n.of(context).commonCancel),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: Text(L10n.of(context).commonSave),
+            ),
+          ],
+        ),
+      ),
+    );
+    domainController.dispose();
+    if (saved == true) {
+      for (final mode in ReadingAiMode.values) {
+        Prefs().setReadingTrustedSourceDomains(mode, domains[mode]!);
+      }
+      if (mounted) setState(() {});
+    }
+  }
+
+  String? _normalizeTrustedDomain(String input) {
+    final trimmed = input.trim().toLowerCase();
+    if (trimmed.isEmpty) return null;
+    final uri = Uri.tryParse(
+      trimmed.contains('://') ? trimmed : 'https://$trimmed',
+    );
+    if (uri == null || uri.host.isEmpty) return null;
+    return uri.host.replaceFirst(RegExp(r'^www\.'), '');
+  }
+
+  String _readingModeLabel(ReadingAiMode mode) => switch (mode) {
+        ReadingAiMode.general => '通用',
+        ReadingAiMode.history => '历史',
+        ReadingAiMode.psychology => '心理',
+        ReadingAiMode.finance => '理财',
+      };
+
+  String _analysisDepthLabel(ReadingAnalysisDepth depth) => switch (depth) {
+        ReadingAnalysisDepth.quick => '快读',
+        ReadingAnalysisDepth.standard => '精读',
+        ReadingAnalysisDepth.deep => '深读',
+        ReadingAnalysisDepth.research => '研究',
+      };
+
+  String _analysisOutputLabel(ReadingOutputTemplate output) => switch (output) {
+        ReadingOutputTemplate.learningNote => '学习笔记',
+        ReadingOutputTemplate.argumentAnalysis => '论证分析',
+        ReadingOutputTemplate.conceptMap => '概念图',
+        ReadingOutputTemplate.practicePlan => '实践计划',
+      };
 
   // AI chat display mode configuration
   AbstractSettingsTile aiChatDisplayModeTile() {
@@ -438,6 +1019,49 @@ class _AISettingsState extends ConsumerState<AISettings> {
                   ),
                 ),
               ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  AbstractSettingsTile aiPanelWidthRatioTile() {
+    return CustomSettingsTile(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '大屏 AI 窗口宽度',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              '手机始终使用独立页面；此设置用于平板和大屏设备。',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            const SizedBox(height: 12),
+            AnxSegmentedButton<AiPanelWidthRatio>(
+              segments: const [
+                SegmentButtonItem(
+                  value: AiPanelWidthRatio.half,
+                  label: '1/2 屏幕',
+                  icon: Icon(Icons.view_sidebar_outlined, size: 18),
+                ),
+                SegmentButtonItem(
+                  value: AiPanelWidthRatio.third,
+                  label: '1/3 屏幕',
+                  icon: Icon(Icons.vertical_split_outlined, size: 18),
+                ),
+              ],
+              selected: {Prefs().aiPanelWidthRatio},
+              onSelectionChanged: (selected) {
+                if (selected.isEmpty) return;
+                Prefs().aiPanelWidthRatio = selected.first;
+                setState(() {});
+              },
             ),
           ],
         ),
@@ -763,6 +1387,367 @@ class _AISettingsState extends ConsumerState<AISettings> {
   }
 }
 
+class _AiProviderConfigurationSection extends ConsumerWidget {
+  const _AiProviderConfigurationSection({required this.rpmTile});
+
+  final Widget rpmTile;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = L10n.of(context);
+    ref.watch(aiProvidersProvider);
+    final notifier = ref.read(aiProvidersProvider.notifier);
+    final primary = notifier.getRunnableSelectedProvider();
+    final dedicatedTranslation = notifier.getDedicatedTranslationProvider();
+    final effectiveTranslation = notifier.getRunnableTranslationProvider();
+    final extraction = notifier.getExtractionProvider();
+    final fallback = notifier.getFallbackProvider();
+    final fallbackCandidates = notifier.getRunnableFallbackCandidates(
+      primary?.id,
+    );
+
+    final cards = <Widget>[
+      _AiConfigurationCard(
+        key: const ValueKey('ai-general-provider-card'),
+        icon: Icons.auto_awesome_rounded,
+        title: l10n.settingsAiGeneralProviders,
+        description: l10n.settingsAiGeneralProvidersTip,
+        status: _providerStatus(context, primary),
+        ready: primary != null,
+        onTap: () => _openProviderList(
+          context,
+          AiProviderListMode.general,
+        ),
+      ),
+      _AiConfigurationCard(
+        key: const ValueKey('ai-extraction-provider-card'),
+        icon: Icons.compress_rounded,
+        title: '轻量提取与摘要引擎',
+        description: '本地候选提取器 + 证据筛选器：提取故事档案候选并保留原文证据，疑难项才交给通用模型复核。',
+        status: extraction == null
+            ? '未启用'
+            : '${extraction.title} · ${extraction.model} · ${extraction.deployment == AiProviderDeployment.localPrivate ? '本地/内网' : '云端'}',
+        ready: extraction != null,
+        onTap: () => _openProviderList(
+          context,
+          AiProviderListMode.extraction,
+        ),
+      ),
+      _AiConfigurationCard(
+        key: const ValueKey('ai-translation-provider-card'),
+        icon: Icons.translate_rounded,
+        title: l10n.aiTranslationProvider,
+        description: dedicatedTranslation == null
+            ? l10n.aiTranslationFollowsGeneral
+            : l10n.settingsAiTranslationProvidersTip,
+        status: effectiveTranslation == null
+            ? l10n.aiProviderNoRunnable
+            : dedicatedTranslation == null
+                ? l10n.aiTranslationProviderUsingGeneral(
+                    effectiveTranslation.model,
+                    effectiveTranslation.title,
+                  )
+                : _providerStatus(context, effectiveTranslation),
+        ready: effectiveTranslation != null,
+        onTap: () => _openProviderList(
+          context,
+          AiProviderListMode.translation,
+        ),
+      ),
+      _AiFallbackConfigurationCard(
+        key: const ValueKey('ai-fallback-provider-card'),
+        primary: primary,
+        fallback: fallback,
+        candidates: fallbackCandidates,
+        onChanged: notifier.setFallbackProvider,
+        onConfigure: () => _openProviderList(
+          context,
+          AiProviderListMode.general,
+        ),
+      ),
+    ];
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 16, 12, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Text(
+              l10n.settingsAiServices,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.primary,
+                    fontWeight: FontWeight.w700,
+                  ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final spacing = 12.0;
+              final isWide = constraints.maxWidth >= 900;
+              final isTwoColumn = constraints.maxWidth >= 620;
+              final cardWidth = isWide
+                  ? (constraints.maxWidth - spacing * 3) / 4
+                  : isTwoColumn
+                      ? (constraints.maxWidth - spacing) / 2
+                      : constraints.maxWidth;
+              return Wrap(
+                spacing: spacing,
+                runSpacing: spacing,
+                children: [
+                  for (var index = 0; index < cards.length; index++)
+                    SizedBox(
+                      width: cardWidth,
+                      child: cards[index],
+                    ),
+                ],
+              );
+            },
+          ),
+          const SizedBox(height: 12),
+          FilledContainer(radius: 20, child: rpmTile),
+        ],
+      ),
+    );
+  }
+
+  String _providerStatus(BuildContext context, AiProvider? provider) {
+    if (provider == null) return L10n.of(context).aiProviderNoRunnable;
+    final model = provider.model.trim();
+    return model.isEmpty ? provider.title : '${provider.title} · $model';
+  }
+
+  Future<void> _openProviderList(
+    BuildContext context,
+    AiProviderListMode mode,
+  ) async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AiProviderListPage(mode: mode),
+      ),
+    );
+  }
+}
+
+class _AiConfigurationCard extends StatelessWidget {
+  const _AiConfigurationCard({
+    super.key,
+    required this.icon,
+    required this.title,
+    required this.description,
+    required this.status,
+    required this.ready,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String title;
+  final String description;
+  final String status;
+  final bool ready;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return FilledContainer(
+      radius: 24,
+      child: InkWell(
+        onTap: onTap,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 188),
+          child: Padding(
+            padding: const EdgeInsets.all(18),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 42,
+                      height: 42,
+                      decoration: BoxDecoration(
+                        color: colorScheme.primaryContainer,
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Icon(icon, color: colorScheme.onPrimaryContainer),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        title,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                    const Icon(Icons.chevron_right_rounded),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                Text(
+                  description,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(top: 2),
+                      child: Icon(
+                        ready
+                            ? Icons.check_circle_outline
+                            : Icons.error_outline_rounded,
+                        size: 18,
+                        color: ready ? colorScheme.primary : colorScheme.error,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        status,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: ready ? null : colorScheme.error,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AiFallbackConfigurationCard extends StatelessWidget {
+  const _AiFallbackConfigurationCard({
+    super.key,
+    required this.primary,
+    required this.fallback,
+    required this.candidates,
+    required this.onChanged,
+    required this.onConfigure,
+  });
+
+  final AiProvider? primary;
+  final AiProvider? fallback;
+  final List<AiProvider> candidates;
+  final ValueChanged<String?> onChanged;
+  final VoidCallback onConfigure;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = L10n.of(context);
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final primaryName = primary?.title ?? l10n.aiProviderNoRunnable;
+
+    return FilledContainer(
+      radius: 24,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 188),
+        child: Padding(
+          padding: const EdgeInsets.all(18),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 42,
+                    height: 42,
+                    decoration: BoxDecoration(
+                      color: colorScheme.primaryContainer,
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Icon(
+                      Icons.alt_route_rounded,
+                      color: colorScheme.onPrimaryContainer,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      l10n.aiFallbackProvider,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+              Text(
+                fallback == null
+                    ? l10n.aiFallbackTip
+                    : l10n.aiFallbackChain(fallback!.title, primaryName),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 16),
+              if (primary == null || candidates.isEmpty)
+                SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: OutlinedButton.icon(
+                    onPressed: onConfigure,
+                    icon: const Icon(Icons.settings_outlined),
+                    label: Text(l10n.aiProviderConfigure),
+                  ),
+                )
+              else
+                DropdownButtonFormField<String?>(
+                  key: ValueKey(fallback?.id),
+                  initialValue: fallback?.id,
+                  isExpanded: true,
+                  decoration: InputDecoration(
+                    labelText: l10n.aiFallbackProvider,
+                    border: const OutlineInputBorder(),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 12,
+                    ),
+                  ),
+                  items: [
+                    DropdownMenuItem<String?>(
+                      value: null,
+                      child: Text(l10n.aiFallbackNone),
+                    ),
+                    for (final provider in candidates)
+                      DropdownMenuItem<String?>(
+                        value: provider.id,
+                        child: Text(
+                          provider.title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                  ],
+                  onChanged: onChanged,
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _AiRpmTile extends StatefulWidget {
   const _AiRpmTile({required this.setState});
 
@@ -818,4 +1803,24 @@ class _AiRpmTileState extends State<_AiRpmTile> {
       ),
     );
   }
+}
+
+class _TokenUsageValue extends StatelessWidget {
+  const _TokenUsageValue({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) => SizedBox(
+        width: 88,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(label, style: Theme.of(context).textTheme.bodySmall),
+            const SizedBox(height: 2),
+            Text(value, style: Theme.of(context).textTheme.titleMedium),
+          ],
+        ),
+      );
 }

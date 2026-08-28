@@ -17,6 +17,7 @@ String generateUrl(
   String? backgroundColor,
   bool? importing,
   bool isDarkMode = false,
+  Map<String, dynamic>? i18n,
 }) {
   String indexHtmlPath =
       "http://127.0.0.1:${Server().port}/foliate-js/index.html";
@@ -81,12 +82,12 @@ String generateUrl(
     'sideMargin': bookStyle.sideMargin,
     'justify': true,
     'hyphenate': false,
-    'pageTurnStyle': Prefs().pageTurnStyle.name,
+    'pageTurnStyle': Prefs().effectivePageTurnStyle.name,
     'maxColumnCount': bookStyle.maxColumnCount,
     'columnThreshold': bookStyle.columnThreshold,
     'writingMode': Prefs().writingMode.code,
     'textAlign': Prefs().textAlignment.code,
-    'backgroundImage': bgimgUrl,
+    'backgroundImage': Prefs().isEInkMode ? '' : bgimgUrl,
     'bgimgBlur': Prefs().bgimg.blur,
     'bgimgOpacity': Prefs().bgimg.opacity,
     'bgimgFit': Prefs().bgimgFit.code,
@@ -95,7 +96,8 @@ String generateUrl(
     'customCSSEnabled': Prefs().customCSSEnabled,
     'useBookStyles': Prefs().useBookStyles,
     'headingFontSize': bookStyle.headingFontSize,
-    'codeHighlightTheme': Prefs().codeHighlightTheme.code,
+    'codeHighlightTheme': Prefs().effectiveCodeHighlightTheme.code,
+    'eInkMode': Prefs().isEInkMode,
   };
 
   Map<String, dynamic> readingRules = {
@@ -109,6 +111,7 @@ String generateUrl(
     'initialCfi': cfi,
     'style': style,
     'readingRules': readingRules,
+    'i18n': i18n ?? {},
   };
 
   String query = '';

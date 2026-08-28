@@ -70,7 +70,7 @@ void _handleDeveloperUnlockTap(BuildContext context) {
   _developerUnlockTapCount = 0;
   if (!alreadyEnabled) {
     Prefs().developerOptionsEnabled = true;
-    AnxToast.show('Developer options enabled');
+    AnxToast.show(L10n.of(context).developerOptionsUnlocked);
   }
 
   final navigator = Navigator.of(context, rootNavigator: true);
@@ -143,6 +143,17 @@ Future<void> openAboutDialog() async {
                     title: Text(L10n.of(context).appDonate),
                     onTap: () {
                       showDonateDialog(context);
+                    },
+                  ),
+                if (Prefs().developerOptionsEnabled)
+                  ListTile(
+                    leading: const Icon(Icons.developer_mode_outlined),
+                    title: Text(L10n.of(context).developerOptions),
+                    subtitle: Text(L10n.of(context).developerOptionsAboutTip),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      Future.microtask(_openDeveloperOptionsPage);
                     },
                   ),
                 ListTile(

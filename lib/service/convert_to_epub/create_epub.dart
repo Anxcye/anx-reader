@@ -24,10 +24,7 @@ Future<File> createEpub(
 ) async {
   // create epub
   final cacheDir = await getAnxTempDir();
-  final epubDir = Directory('${cacheDir.path}/$titleString');
-  if (epubDir.existsSync()) {
-    epubDir.deleteSync(recursive: true);
-  }
+  final epubDir = Directory('${cacheDir.path}/anx_epub_${const Uuid().v4()}');
   epubDir.createSync();
 
   // mimetype
@@ -104,7 +101,34 @@ Future<File> createEpub(
   final styleFile = File('${oebpsDir.path}/style.css');
   styleFile.createSync();
   styleFile.writeAsStringSync('''body {
-
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}
+pre {
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+code {
+  font-family: monospace;
+}
+blockquote {
+  border-left: 0.2em solid currentColor;
+  margin-left: 0;
+  padding-left: 1em;
+}
+.table-wrap {
+  max-width: 100%;
+  overflow-x: auto;
+}
+table {
+  border-collapse: collapse;
+  max-width: 100%;
+}
+th, td {
+  border: 1px solid currentColor;
+  padding: 0.35em 0.55em;
+  text-align: left;
 }
 ''');
   // xhtml
@@ -122,19 +146,25 @@ Future<File> createEpub(
         ? ''
         : '    <h$level>${_escapeXml(rawTitle)}</h$level>';
 
-    final paragraphLines = content
-        .split('\n')
-        .map((e) => e.trim())
-        .where((line) => line.isNotEmpty)
-        .map((line) => '    <p>${_escapeXml(line)}</p>')
-        .toList();
+    final paragraphLines = sections[i].xhtmlContent == null
+        ? content
+            .split('\n')
+            .map((e) => e.trim())
+            .where((line) => line.isNotEmpty)
+            .map((line) => '    <p>${_escapeXml(line)}</p>')
+            .toList()
+        : <String>[];
 
     final bodyBuffer = StringBuffer();
     if (heading.isNotEmpty) {
       bodyBuffer.writeln(heading);
     }
-    for (final line in paragraphLines) {
-      bodyBuffer.writeln(line);
+    if (sections[i].xhtmlContent case final xhtml?) {
+      bodyBuffer.writeln(xhtml);
+    } else {
+      for (final line in paragraphLines) {
+        bodyBuffer.writeln(line);
+      }
     }
 
     final bodyContent = bodyBuffer.toString().trimRight();
@@ -143,6 +173,7 @@ Future<File> createEpub(
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
   <head>
     <title>${_escapeXml(rawTitle.isEmpty ? titleString : rawTitle)}</title>
+    <link rel="stylesheet" type="text/css" href="../style.css" />
   </head>
   <body>
 ${bodyContent.isEmpty ? '' : '$bodyContent\n'}
@@ -151,7 +182,10 @@ ${bodyContent.isEmpty ? '' : '$bodyContent\n'}
   }
 
   // zip
-  final zipFile = File('${cacheDir.path}/$titleString.epub');
+  final safeFileName =
+      titleString.replaceAll(RegExp(r'[<>:"/\\|?*\x00-\x1F]'), '_').trim();
+  final zipFile = File(
+      '${cacheDir.path}/${safeFileName.isEmpty ? 'document' : safeFileName}.epub');
   zipFile.createSync();
 
   try {

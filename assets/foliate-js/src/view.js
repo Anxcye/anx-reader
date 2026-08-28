@@ -115,6 +115,8 @@ export class View extends HTMLElement {
     this.renderer.addEventListener('relocate', e => this.#onRelocate(e.detail))
     this.renderer.addEventListener('create-overlayer', e =>
       e.detail.attach(this.#createOverlayer(e.detail)))
+    this.renderer.addEventListener('section-error', e =>
+      this.#emit('section-error', e.detail))
     this.renderer.open(book)
     this.#root.append(this.renderer)
 
@@ -131,7 +133,11 @@ export class View extends HTMLElement {
               .find(x => x.index = resolved.index)
             const el = resolved.anchor(doc)
             el.classList.add(activeClass)
-            lastActive = new WeakRef(el)
+            // WeakRef was introduced in Chrome 84. Keep a strong reference on
+            // older Android WebViews; it is replaced on every highlight.
+            lastActive = typeof WeakRef === 'function'
+              ? new WeakRef(el)
+              : { deref: () => el }
           })
       })
       this.mediaOverlay.addEventListener('unhighlight', () => {
@@ -140,12 +146,19 @@ export class View extends HTMLElement {
     }
   }
   close() {
-    this.renderer?.destroy()
-    this.renderer?.remove()
+    const renderer = this.renderer
+    const book = this.book
+    renderer?.destroy()
+    renderer?.remove()
+    book?.destroy?.()
+    this.renderer = null
+    this.book = null
     this.#sectionProgress = null
     this.#tocProgress = null
     this.#pageProgress = null
     this.#searchResults = new Map()
+    this.#index = null
+    this.#lastCfi = null
     this.lastLocation = null
     this.history.clear()
     this.tts = null
@@ -178,8 +191,12 @@ export class View extends HTMLElement {
     const tocItem = this.#tocProgress?.getProgress(index, range)
     const pageItem = this.#pageProgress?.getProgress(index, range)
     const cfi = this.getCFI(index, range)
-    const totalPages = this.renderer.pages ? this.renderer.pages - 2 : progress.section.total
-    const currentPage = this.renderer.page ?? progress.section.current
+    const totalPages = this.isFixedLayout
+      ? this.book.sections.length
+      : this.renderer.pages ? this.renderer.pages - 2 : progress.section.total
+    const currentPage = this.isFixedLayout
+      ? index + 1
+      : this.renderer.page ?? progress.section.current
     const chapterLocation = {
       current: currentPage,
       total: totalPages
@@ -334,6 +351,7 @@ export class View extends HTMLElement {
   }
   async addAnnotation(annotation, remove) {
     const { value } = annotation
+    const annotationKey = annotation.annotationKey ?? value
     if (value.startsWith(SEARCH_PREFIX)) {
       const cfi = value.replace(SEARCH_PREFIX, '')
       const { index, anchor } = await this.resolveNavigation(cfi)
@@ -341,11 +359,11 @@ export class View extends HTMLElement {
       if (obj) {
         const { overlayer, doc } = obj
         if (remove) {
-          overlayer.remove(value)
+          overlayer.remove(annotationKey)
           return
         }
         const range = doc ? anchor(doc) : anchor
-        overlayer.add(value, range, Overlayer.outline, { color: '#39c5bbaa' });
+        overlayer.add(annotationKey, range, Overlayer.outline, { color: '#39c5bbaa' });
       }
       return
     }
@@ -353,10 +371,10 @@ export class View extends HTMLElement {
     const obj = this.#getOverlayer(index)
     if (obj) {
       const { overlayer, doc } = obj
-      overlayer.remove(value)
+      overlayer.remove(annotationKey)
       if (!remove) {
         const range = doc ? anchor(doc) : anchor
-        const draw = (func, opts) => overlayer.add(value, range, func, opts)
+        const draw = (func, opts) => overlayer.add(annotationKey, range, func, opts)
         this.#emit('draw-annotation', { draw, annotation, doc, range })
       }
     }
@@ -373,11 +391,11 @@ export class View extends HTMLElement {
   #createOverlayer({ doc, index }) {
     const overlayer = new Overlayer(doc)
     doc.addEventListener('click', e => {
-      const [value, range] = overlayer.hitTest(e)
-      if (value && !value.startsWith(SEARCH_PREFIX)) {
+      const [annotationKey, range] = overlayer.hitTest(e)
+      if (annotationKey && !annotationKey.startsWith(SEARCH_PREFIX)) {
         e.preventDefault()
         e.stopPropagation()
-        this.#emit('show-annotation', { value, index, range })
+        this.#emit('show-annotation', { value: annotationKey, index, range })
       }
     }, true)
 
@@ -388,13 +406,13 @@ export class View extends HTMLElement {
     return overlayer
   }
   async showAnnotation(annotation) {
-    const { value } = annotation
+    const { value, annotationKey } = annotation
     const resolved = await this.goTo(value)
     if (resolved) {
       const { index, anchor } = resolved
       const { doc } = this.#getOverlayer(index)
       const range = anchor(doc)
-      this.#emit('show-annotation', { value, index, range })
+      this.#emit('show-annotation', { value: annotationKey ?? value, index, range })
     }
   }
   getCFI(index, range) {
@@ -592,13 +610,21 @@ export class View extends HTMLElement {
   setTranslationMode(mode) {
     this.#translator.setTranslationMode(mode)
   }
-  
+
   getTranslationMode() {
     return this.#translator.getTranslationMode()
   }
-  
+
   clearTranslations() {
     this.#translator.clearTranslations()
+  }
+
+  translateSelectedParagraph(cfi) {
+    return this.#translator.translateSelectedParagraph(cfi)
+  }
+
+  getTranslator() {
+    return this.#translator
   }
 }
 

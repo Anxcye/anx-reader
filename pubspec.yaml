@@ -2,7 +2,7 @@ name: anx_reader
 description: "An e-book reader."
 publish_to: 'none'
 
-version: 1.15.0+6324
+version: 1.15.0+6327
 
 environment:
   sdk: '>=3.5.2 <4.0.0'
@@ -42,6 +42,7 @@ dependencies:
       url: https://github.com/Anxcye/webdav_client.git
   fluttertoast: ^8.2.6
   dio: ^5.4.3+1
+  dict_reader: ^1.6.0
   pubspec_parse: ^1.2.3
   logging: ^1.2.0
   flutter_file_dialog: ^3.0.2
@@ -131,6 +132,8 @@ dependencies:
   in_app_purchase_android: ^0.4.0+8
 
 dependency_overrides:
+  share_handler_android:
+    path: third_party/share_handler_android
   langchain:
     git:
       url: https://github.com/Anxcye/langchain_dart.git
@@ -151,6 +154,7 @@ dependency_overrides:
       url: https://github.com/Anxcye/langchain_dart.git
       ref: 310fb6b3
       path: packages/langchain_anthropic
+  googleai_dart: 3.0.0
 #  analyzer: ^8.0.0
 
 
@@ -184,7 +188,9 @@ flutter:
     - assets/images/
     - assets/images/book_share/
     - assets/images/bgimg/
+    - assets/dictionaries/chinese/
     - assets/icon/
+    - assets/transfer/
     - assets/CHANGELOG.md
 
   fonts:

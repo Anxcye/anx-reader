@@ -11,6 +11,7 @@ import 'package:anx_reader/models/window_info.dart';
 import 'package:anx_reader/page/home_page.dart';
 import 'package:anx_reader/page/migration_page.dart';
 import 'package:anx_reader/service/book_player/book_player_server.dart';
+import 'package:anx_reader/service/ai/reading_task_scheduler.dart';
 import 'package:anx_reader/service/network/http_proxy_overrides.dart';
 import 'package:anx_reader/service/tts/tts_handler.dart';
 import 'package:anx_reader/utils/get_path/macos_migration.dart';
@@ -20,6 +21,7 @@ import 'package:anx_reader/utils/get_path/get_base_path.dart';
 import 'package:anx_reader/utils/log/common.dart';
 import 'package:anx_reader/utils/window_position_validator.dart';
 import 'package:anx_reader/providers/sync.dart';
+import 'package:anx_reader/providers/ai_providers.dart';
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -54,13 +56,14 @@ Future<void> main() async {
 
   // If no migration needed, initialize paths normally
   if (!_needsMigration) {
-    initBasePath();
-    AnxLog.init();
-    AnxError.init();
-    await DBHelper().initDB();
+    await initBasePath();
+    await AnxLog.init();
+    await AnxError.init();
+    await DBHelper().database;
+    await readingTaskScheduler.restore();
   }
 
-  Server().start();
+  await Server().ensureStarted();
 
   audioHandler = await AudioService.init(
     builder: () => TtsHandler(),
@@ -99,6 +102,9 @@ class _MyAppState extends ConsumerState<MyApp>
   @override
   void initState() {
     super.initState();
+    // Initialize and migrate provider records before any translation or AI
+    // action can run, even if the user never opens AI settings.
+    ref.read(aiProvidersProvider);
     WidgetsBinding.instance.addObserver(this);
     windowManager.addListener(this);
   }
@@ -159,14 +165,15 @@ class _MyAppState extends ConsumerState<MyApp>
   Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
     if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.hidden) {
-      if (Prefs().webdavStatus) {
+      await readingTaskScheduler.pauseAll(durableOnly: true);
+      if (Prefs().webdavStatus || Prefs().cloudBaseSyncEnabled) {
         ref
             .read(syncProvider.notifier)
             .syncData(SyncDirection.both, ref, trigger: SyncTrigger.auto);
       }
     } else if (state == AppLifecycleState.resumed) {
       if (AnxPlatform.isIOS) {
-        Server().start();
+        await Server().ensureStarted();
       }
     }
   }
@@ -181,10 +188,19 @@ class _MyAppState extends ConsumerState<MyApp>
       ],
       child: provider.Consumer<Prefs>(
         builder: (context, prefsNotifier, child) {
+          SmartDialog.config.custom = SmartConfigCustom(
+            maskColor: prefsNotifier.isEInkMode
+                ? Colors.white
+                : Colors.black.withAlpha(35),
+            useAnimation: !prefsNotifier.reduceMotion,
+            animationType: SmartAnimationType.centerFade_otherSlide,
+          );
           return MaterialApp(
             debugShowCheckedModeBanner: false,
             scrollBehavior: ScrollConfiguration.of(context).copyWith(
-              physics: const BouncingScrollPhysics(),
+              physics: prefsNotifier.isEInkMode
+                  ? const ClampingScrollPhysics()
+                  : const BouncingScrollPhysics(),
               // dragDevices: {
               //   PointerDeviceKind.touch,
               //   PointerDeviceKind.mouse,
@@ -194,14 +210,31 @@ class _MyAppState extends ConsumerState<MyApp>
               FlutterSmartDialog.observer,
               heroineController
             ],
-            builder: FlutterSmartDialog.init(),
+            builder: (context, child) {
+              final dialogBuilder = FlutterSmartDialog.init();
+              final dialogChild = dialogBuilder(context, child);
+              final mediaQuery = MediaQuery.maybeOf(context);
+              if (!prefsNotifier.reduceMotion || mediaQuery == null) {
+                return dialogChild;
+              }
+              return MediaQuery(
+                data: mediaQuery.copyWith(
+                  disableAnimations: true,
+                  accessibleNavigation: true,
+                ),
+                child: dialogChild,
+              );
+            },
             navigatorKey: navigatorKey,
             locale: prefsNotifier.locale,
             localeListResolutionCallback: _resolveLocale,
             localizationsDelegates: L10n.localizationsDelegates,
             supportedLocales: L10n.supportedLocales,
             title: 'Anx Reader',
-            themeMode: prefsNotifier.themeMode,
+            themeMode: prefsNotifier.effectiveThemeMode,
+            themeAnimationDuration: prefsNotifier.reduceMotion
+                ? Duration.zero
+                : const Duration(milliseconds: 200),
             theme: colorSchema(prefsNotifier, context, Brightness.light),
             darkTheme: colorSchema(prefsNotifier, context, Brightness.dark),
             home: _needsMigration

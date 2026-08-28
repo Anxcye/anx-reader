@@ -2,7 +2,7 @@ import 'package:anx_reader/dao/base_dao.dart';
 import 'package:anx_reader/models/book.dart';
 
 class BookDao extends BaseDao {
-  BookDao();
+  BookDao({super.databaseProvider});
 
   static const String table = 'tb_books';
 

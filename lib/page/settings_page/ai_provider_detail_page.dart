@@ -31,13 +31,19 @@ class _AiProviderDetailPageState extends ConsumerState<AiProviderDetailPage> {
   late TextEditingController _nameController;
   late TextEditingController _urlController;
   late TextEditingController _modelController;
+  late TextEditingController _timeoutController;
 
   AiProtocol _selectedProtocol = AiProtocol.openai;
+  AiProviderAuthMode _authMode = AiProviderAuthMode.bearer;
+  AiProviderDeployment _deployment = AiProviderDeployment.cloud;
   AiReasoningEffort _reasoningEffort = AiReasoningEffort.auto;
   List<AiApiKey> _apiKeys = [];
   bool _isModified = false;
   bool _isFetchingModels = false;
+  String? _createdProviderId;
   final GlobalKey _fetchButtonKey = GlobalKey();
+
+  String? get _providerId => widget.providerId ?? _createdProviderId;
 
   @override
   void initState() {
@@ -52,13 +58,19 @@ class _AiProviderDetailPageState extends ConsumerState<AiProviderDetailPage> {
     _nameController = TextEditingController(text: provider?.title ?? '');
     _urlController = TextEditingController(text: provider?.url ?? '');
     _modelController = TextEditingController(text: provider?.model ?? '');
+    _timeoutController = TextEditingController(
+      text: (provider?.requestTimeoutSeconds ?? 0).toString(),
+    );
     _selectedProtocol = provider?.protocol ?? AiProtocol.openai;
+    _authMode = provider?.authMode ?? AiProviderAuthMode.bearer;
+    _deployment = provider?.deployment ?? AiProviderDeployment.cloud;
     _reasoningEffort = provider?.reasoningEffort ?? AiReasoningEffort.auto;
     _apiKeys = provider?.apiKeys.toList() ?? [];
 
     _nameController.addListener(() => setState(() => _isModified = true));
     _urlController.addListener(() => setState(() => _isModified = true));
     _modelController.addListener(() => setState(() => _isModified = true));
+    _timeoutController.addListener(() => setState(() => _isModified = true));
   }
 
   @override
@@ -66,21 +78,21 @@ class _AiProviderDetailPageState extends ConsumerState<AiProviderDetailPage> {
     _nameController.dispose();
     _urlController.dispose();
     _modelController.dispose();
+    _timeoutController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = L10n.of(context);
-    final provider = widget.providerId != null
-        ? ref
-            .watch(aiProvidersProvider)
-            .firstWhere((p) => p.id == widget.providerId)
+    final providerId = _providerId;
+    final provider = providerId != null
+        ? ref.watch(aiProvidersProvider).firstWhere((p) => p.id == providerId)
         : null;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.providerId == null
+        title: Text(providerId == null
             ? l10n.settingsAiProvidersAdd
             : l10n.settingsAiProviderName),
         actions: [
@@ -129,6 +141,9 @@ class _AiProviderDetailPageState extends ConsumerState<AiProviderDetailPage> {
               onSelectionChanged: (Set<AiProtocol> selection) {
                 setState(() {
                   _selectedProtocol = selection.first;
+                  if (_selectedProtocol != AiProtocol.openai) {
+                    _authMode = AiProviderAuthMode.bearer;
+                  }
                   _isModified = true;
                 });
               },
@@ -177,21 +192,22 @@ class _AiProviderDetailPageState extends ConsumerState<AiProviderDetailPage> {
             const SizedBox(height: 16),
 
             // API Keys Section
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(l10n.settingsAiProviderApiKeys,
-                    style: Theme.of(context).textTheme.titleMedium),
-                IconButton(
-                  icon: const Icon(Icons.add),
-                  onPressed: _addApiKey,
-                  tooltip: l10n.settingsAiProviderAddKey,
-                ),
-              ],
-            ),
+            if (_authMode == AiProviderAuthMode.bearer)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(l10n.settingsAiProviderApiKeys,
+                      style: Theme.of(context).textTheme.titleMedium),
+                  IconButton(
+                    icon: const Icon(Icons.add),
+                    onPressed: _addApiKey,
+                    tooltip: l10n.settingsAiProviderAddKey,
+                  ),
+                ],
+              ),
             const SizedBox(height: 8),
 
-            if (_apiKeys.isEmpty)
+            if (_authMode == AiProviderAuthMode.bearer && _apiKeys.isEmpty)
               FilledContainer(
                 margin: const EdgeInsets.symmetric(vertical: 8),
                 child: Padding(
@@ -226,7 +242,7 @@ class _AiProviderDetailPageState extends ConsumerState<AiProviderDetailPage> {
                   ),
                 ),
               )
-            else
+            else if (_authMode == AiProviderAuthMode.bearer)
               ..._apiKeys.asMap().entries.map((entry) {
                 final index = entry.key;
                 final apiKey = entry.value;
@@ -239,9 +255,14 @@ class _AiProviderDetailPageState extends ConsumerState<AiProviderDetailPage> {
             if (provider != null)
               SizedBox(
                 width: double.infinity,
-                child: AnxButton.outlined(
-                  onPressed: _testConnection,
-                  child: Text(l10n.settingsAiProviderTestConnection),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    AnxButton.outlined(
+                      onPressed: _testConnection,
+                      child: Text(l10n.settingsAiProviderTestConnection),
+                    ),
+                  ],
                 ),
               ),
           ],
@@ -295,6 +316,60 @@ class _AiProviderDetailPageState extends ConsumerState<AiProviderDetailPage> {
           ],
         ),
         children: [
+          DropdownButtonFormField<AiProviderAuthMode>(
+            initialValue: _authMode,
+            decoration: const InputDecoration(
+              labelText: '认证方式',
+              border: OutlineInputBorder(),
+            ),
+            items: const [
+              DropdownMenuItem(
+                value: AiProviderAuthMode.bearer,
+                child: Text('API Key / Bearer'),
+              ),
+              DropdownMenuItem(
+                value: AiProviderAuthMode.none,
+                child: Text('无认证（本地 / 内网）'),
+              ),
+            ],
+            onChanged: (value) {
+              if (value == null) return;
+              setState(() {
+                _authMode = value;
+                if (value == AiProviderAuthMode.none) {
+                  _selectedProtocol = AiProtocol.openai;
+                  _deployment = AiProviderDeployment.localPrivate;
+                }
+                _isModified = true;
+              });
+            },
+          ),
+          const SizedBox(height: 16),
+          DropdownButtonFormField<AiProviderDeployment>(
+            initialValue: _deployment,
+            decoration: const InputDecoration(
+              labelText: '部署位置',
+              border: OutlineInputBorder(),
+            ),
+            items: const [
+              DropdownMenuItem(
+                value: AiProviderDeployment.cloud,
+                child: Text('云端'),
+              ),
+              DropdownMenuItem(
+                value: AiProviderDeployment.localPrivate,
+                child: Text('本机 / 局域网 / NAS'),
+              ),
+            ],
+            onChanged: (value) {
+              if (value == null) return;
+              setState(() {
+                _deployment = value;
+                _isModified = true;
+              });
+            },
+          ),
+          const SizedBox(height: 16),
           DropdownButtonFormField<AiReasoningEffort>(
             initialValue: _reasoningEffort,
             decoration: InputDecoration(
@@ -347,6 +422,16 @@ class _AiProviderDetailPageState extends ConsumerState<AiProviderDetailPage> {
                 ),
               ),
             ],
+          ),
+          const SizedBox(height: 16),
+          TextField(
+            controller: _timeoutController,
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(
+              labelText: _requestTimeoutLabel(context),
+              helperText: _requestTimeoutHelp(context),
+              border: const OutlineInputBorder(),
+            ),
           ),
         ],
       ),
@@ -528,7 +613,8 @@ class _AiProviderDetailPageState extends ConsumerState<AiProviderDetailPage> {
   Future<void> _fetchModels() async {
     final l10n = L10n.of(context);
     final enabledKeys = _apiKeys.where((k) => k.enabled && k.key.isNotEmpty);
-    if (enabledKeys.isEmpty || _urlController.text.isEmpty) {
+    if ((_authMode == AiProviderAuthMode.bearer && enabledKeys.isEmpty) ||
+        _urlController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.settingsAiProviderNoValidKeys)),
       );
@@ -538,9 +624,13 @@ class _AiProviderDetailPageState extends ConsumerState<AiProviderDetailPage> {
     setState(() => _isFetchingModels = true);
 
     try {
+      final timeout = _parseRequestTimeoutSeconds() <= 0
+          ? Duration.zero
+          : Duration(seconds: _parseRequestTimeoutSeconds());
       final models = await fetchAiModels(
         url: _urlController.text.trim(),
-        apiKey: enabledKeys.first.key,
+        apiKey: enabledKeys.isEmpty ? '' : enabledKeys.first.key,
+        timeout: timeout,
       );
 
       if (!mounted) return;
@@ -599,45 +689,8 @@ class _AiProviderDetailPageState extends ConsumerState<AiProviderDetailPage> {
   }
 
   void _saveProvider() {
-    final l10n = L10n.of(context);
-
-    if (_nameController.text.isEmpty || _urlController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.commonFailed)),
-      );
-      return;
-    }
-
-    final provider = AiProvider(
-      id: widget.providerId ?? const Uuid().v4(),
-      title: _nameController.text,
-      url: _urlController.text,
-      protocol: _selectedProtocol,
-      enabled: true,
-      isBuiltin: widget.providerId != null
-          ? ref
-              .read(aiProvidersProvider)
-              .firstWhere((p) => p.id == widget.providerId)
-              .isBuiltin
-          : false,
-      apiKeys: _apiKeys,
-      model: _modelController.text,
-      reasoningEffort: _reasoningEffort,
-      keyIndex: 0,
-      createdAt: widget.providerId != null
-          ? ref
-              .read(aiProvidersProvider)
-              .firstWhere((p) => p.id == widget.providerId)
-              .createdAt
-          : DateTime.now(),
-      updatedAt: DateTime.now(),
-    );
-
-    if (widget.providerId == null) {
-      ref.read(aiProvidersProvider.notifier).addProvider(provider);
-    } else {
-      ref.read(aiProvidersProvider.notifier).updateProvider(provider);
-    }
+    if (!_validateProviderForm()) return;
+    _persistProviderForm();
 
     setState(() => _isModified = false);
     Navigator.pop(context);
@@ -647,44 +700,12 @@ class _AiProviderDetailPageState extends ConsumerState<AiProviderDetailPage> {
     final l10n = L10n.of(context);
 
     // Save any pending changes before testing so the provider has the latest config
-    if (_isModified) {
-      if (_nameController.text.isEmpty || _urlController.text.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.commonFailed)),
-        );
-        return;
-      }
-      final provider = AiProvider(
-        id: widget.providerId ?? const Uuid().v4(),
-        title: _nameController.text,
-        url: _urlController.text,
-        protocol: _selectedProtocol,
-        enabled: true,
-        isBuiltin: widget.providerId != null
-            ? ref
-                .read(aiProvidersProvider)
-                .firstWhere((p) => p.id == widget.providerId)
-                .isBuiltin
-            : false,
-        apiKeys: _apiKeys,
-        model: _modelController.text,
-        reasoningEffort: _reasoningEffort,
-        keyIndex: 0,
-        createdAt: widget.providerId != null
-            ? ref
-                .read(aiProvidersProvider)
-                .firstWhere((p) => p.id == widget.providerId)
-                .createdAt
-            : DateTime.now(),
-        updatedAt: DateTime.now(),
-      );
-      if (widget.providerId == null) {
-        ref.read(aiProvidersProvider.notifier).addProvider(provider);
-      } else {
-        ref.read(aiProvidersProvider.notifier).updateProvider(provider);
-      }
+    if (_providerId == null || _isModified) {
+      if (!_validateProviderForm()) return;
+      _persistProviderForm();
       setState(() => _isModified = false);
     }
+    final providerId = _providerId;
 
     SmartDialog.show(
       onDismiss: () {
@@ -696,11 +717,88 @@ class _AiProviderDetailPageState extends ConsumerState<AiProviderDetailPage> {
           width: double.maxFinite,
           child: AiStream(
             prompt: generatePromptTest(),
-            identifier: widget.providerId,
+            identifier: providerId,
             regenerate: true,
+            allowFallback: false,
           ),
         ),
       ),
     );
+  }
+
+  bool _validateProviderForm() {
+    if (_nameController.text.trim().isNotEmpty &&
+        _urlController.text.trim().isNotEmpty &&
+        _modelController.text.trim().isNotEmpty &&
+        (_authMode == AiProviderAuthMode.none ||
+            _apiKeys.any((key) => key.enabled && key.key.trim().isNotEmpty))) {
+      return true;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(L10n.of(context).configurationInformationIsIncomplete),
+      ),
+    );
+    return false;
+  }
+
+  void _persistProviderForm() {
+    final currentId = _providerId;
+    final providers = ref.read(aiProvidersProvider);
+    AiProvider? existing;
+    if (currentId != null) {
+      try {
+        existing = providers.firstWhere((provider) => provider.id == currentId);
+      } catch (_) {}
+    }
+
+    final provider = AiProvider(
+      id: currentId ?? const Uuid().v4(),
+      title: _nameController.text.trim(),
+      url: _urlController.text.trim(),
+      protocol: _selectedProtocol,
+      enabled: existing?.enabled ?? true,
+      isBuiltin: existing?.isBuiltin ?? false,
+      apiKeys: _apiKeys,
+      model: _modelController.text.trim(),
+      authMode: _authMode,
+      deployment: _deployment,
+      reasoningEffort: _reasoningEffort,
+      requestTimeoutSeconds: _parseRequestTimeoutSeconds(),
+      keyIndex: existing?.keyIndex ?? 0,
+      createdAt: existing?.createdAt ?? DateTime.now(),
+      updatedAt: DateTime.now(),
+    );
+
+    final notifier = ref.read(aiProvidersProvider.notifier);
+    if (existing == null) {
+      _createdProviderId = notifier.addProvider(provider);
+    } else {
+      notifier.updateProvider(provider);
+    }
+  }
+
+  int _parseRequestTimeoutSeconds() {
+    final parsed = int.tryParse(_timeoutController.text.trim()) ?? 0;
+    return parsed < 0 ? 0 : parsed;
+  }
+
+  String _requestTimeoutLabel(BuildContext context) {
+    final isChinese = Localizations.localeOf(context)
+        .languageCode
+        .toLowerCase()
+        .startsWith('zh');
+    return isChinese ? '请求超时（秒）' : 'Request Timeout (seconds)';
+  }
+
+  String _requestTimeoutHelp(BuildContext context) {
+    final isChinese = Localizations.localeOf(context)
+        .languageCode
+        .toLowerCase()
+        .startsWith('zh');
+    return isChinese
+        ? '0 表示不主动超时，适合本地部署 LLM。仅对 OpenAI 兼容协议生效。'
+        : '0 disables app-level timeout. Useful for local LLMs. Applies to OpenAI-compatible providers only.';
   }
 }

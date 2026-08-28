@@ -51,7 +51,7 @@ Future<void> webviewInitialVariable(
           sideMargin: ${bookStyle.sideMargin},
           justify: true,
           hyphenate: true,
-          pageTurnStyle: '${Prefs().pageTurnStyle.name}',
+          pageTurnStyle: '${Prefs().effectivePageTurnStyle.name}',
           maxColumnCount: ${bookStyle.maxColumnCount},
       }
       let readingRules = {

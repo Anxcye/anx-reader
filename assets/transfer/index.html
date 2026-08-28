@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anx Reader - Wireless Transfer</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  color-scheme: light dark;
+  --bg: #eef3ec;
+  --panel: rgba(255, 255, 255, 0.9);
+  --text: #1d261f;
+  --muted: #667169;
+  --line: rgba(29, 38, 31, 0.14);
+  --primary: #2f7d46;
+  --primary-strong: #1f6534;
+  --danger: #c33832;
+  --success: #16803a;
+  --shadow: 0 18px 50px rgba(35, 54, 36, 0.12);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #111711;
+    --panel: rgba(28, 35, 29, 0.92);
+    --text: #eef5ee;
+    --muted: #a5b0a7;
+    --line: rgba(238, 245, 238, 0.16);
+    --shadow: 0 18px 50px rgba(0, 0, 0, 0.36);
+  }
+}
+body {
+  min-height: 100vh;
+  padding: 32px 18px;
+  font-family: ui-rounded, "SF Pro Rounded", "Nunito", "Segoe UI", sans-serif;
+  color: var(--text);
+  background:
+    radial-gradient(circle at 15% 0%, rgba(47, 125, 70, 0.22), transparent 34%),
+    radial-gradient(circle at 85% 10%, rgba(137, 176, 101, 0.24), transparent 30%),
+    linear-gradient(145deg, var(--bg), #f7f1df);
+}
+.shell {
+  width: min(720px, 100%);
+  margin: 0 auto;
+}
+.hero {
+  margin-bottom: 18px;
+  padding: 20px 4px;
+  text-align: center;
+}
+.eyebrow {
+  color: var(--primary);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+h1 {
+  margin-top: 8px;
+  font-size: clamp(30px, 7vw, 54px);
+  line-height: 1;
+  letter-spacing: -0.06em;
+}
+.subtitle {
+  max-width: 520px;
+  margin: 14px auto 0;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.6;
+}
+.panel {
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 26px;
+  background: var(--panel);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(18px);
+}
+.drop-zone {
+  display: grid;
+  min-height: 230px;
+  place-items: center;
+  padding: 32px 20px;
+  border: 2px dashed rgba(47, 125, 70, 0.35);
+  border-radius: 22px;
+  background:
+    linear-gradient(135deg, rgba(47, 125, 70, 0.08), rgba(250, 255, 238, 0.12)),
+    rgba(255, 255, 255, 0.28);
+  cursor: pointer;
+  transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+}
+.drop-zone:hover,
+.drop-zone.dragover {
+  border-color: var(--primary);
+  background: rgba(47, 125, 70, 0.12);
+  transform: translateY(-2px);
+}
+.drop-content { text-align: center; }
+.drop-icon {
+  display: inline-grid;
+  width: 72px;
+  height: 72px;
+  margin-bottom: 18px;
+  place-items: center;
+  border-radius: 24px;
+  background: var(--primary);
+  color: #fff;
+  font-size: 34px;
+  font-weight: 900;
+}
+.drop-title {
+  font-size: 20px;
+  font-weight: 850;
+}
+.drop-hint {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+input[type="file"] { display: none; }
+.upload-btn {
+  width: 100%;
+  margin-top: 18px;
+  padding: 15px 18px;
+  border: 0;
+  border-radius: 18px;
+  color: #fff;
+  background: linear-gradient(135deg, var(--primary), var(--primary-strong));
+  box-shadow: 0 14px 30px rgba(47, 125, 70, 0.24);
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 800;
+}
+.upload-btn:disabled {
+  cursor: not-allowed;
+  filter: grayscale(0.6);
+  opacity: 0.62;
+}
+.file-list {
+  display: grid;
+  gap: 12px;
+  margin-top: 20px;
+}
+.file-item {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.48);
+}
+.file-icon {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 14px;
+  color: var(--primary);
+  background: rgba(47, 125, 70, 0.12);
+  font-weight: 900;
+  text-transform: uppercase;
+}
+.file-info { min-width: 0; flex: 1; }
+.file-name {
+  overflow: hidden;
+  font-size: 14px;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.file-status {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.file-status.success { color: var(--success); }
+.file-status.error { color: var(--danger); }
+.file-status.uploading { color: var(--primary); }
+.progress {
+  height: 5px;
+  margin-top: 10px;
+  overflow: hidden;
+  border-radius: 99px;
+  background: rgba(102, 113, 105, 0.18);
+}
+.progress-fill {
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--primary);
+  transition: width 0.18s ease;
+}
+.status-bar {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 18px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.38);
+  font-size: 13px;
+}
+.status-dot {
+  width: 9px;
+  height: 9px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--success);
+}
+.status-dot.offline { background: var(--danger); }
+.tips {
+  margin-top: 14px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.7;
+}
+@media (max-width: 520px) {
+  body { padding: 20px 12px; }
+  .panel { padding: 14px; border-radius: 22px; }
+  .drop-zone { min-height: 210px; }
+}
+</style>
+</head>
+<body>
+<main class="shell">
+  <section class="hero">
+    <div class="eyebrow">Anx Reader</div>
+    <h1>无线传书</h1>
+    <p class="subtitle">把电脑或另一台手机里的书拖到这里。请保持两台设备在同一个 Wi-Fi 或局域网内。</p>
+  </section>
+
+  <section class="panel">
+    <div class="drop-zone" id="dropZone">
+      <div class="drop-content">
+        <div class="drop-icon">A</div>
+        <div class="drop-title">拖拽书籍到这里，或点击选择文件</div>
+        <div class="drop-hint">支持 EPUB、PDF、TXT、MOBI、AZW3、FB2，单文件最大 500MB</div>
+      </div>
+      <input type="file" id="fileInput" multiple accept=".epub,.pdf,.txt,.mobi,.azw3,.fb2">
+    </div>
+
+    <button class="upload-btn" id="uploadBtn" hidden>上传选中的书籍</button>
+    <div class="file-list" id="fileList"></div>
+
+    <div class="status-bar">
+      <span class="status-dot" id="statusDot"></span>
+      <span id="statusText">正在检查连接...</span>
+    </div>
+    <p class="tips">如果上传失败，请确认 Anx Reader 保持在前台，且浏览器地址栏仍是手机页面上显示的访问地址。</p>
+  </section>
+</main>
+
+<script>
+const supportedExtensions = new Set(['epub', 'pdf', 'txt', 'mobi', 'azw3', 'fb2']);
+const maxFileSize = 500 * 1024 * 1024;
+
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+const fileList = document.getElementById('fileList');
+const uploadBtn = document.getElementById('uploadBtn');
+const statusDot = document.getElementById('statusDot');
+const statusText = document.getElementById('statusText');
+
+let selectedFiles = [];
+
+dropZone.addEventListener('click', () => fileInput.click());
+dropZone.addEventListener('dragover', event => {
+  event.preventDefault();
+  dropZone.classList.add('dragover');
+});
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop', event => {
+  event.preventDefault();
+  dropZone.classList.remove('dragover');
+  handleFiles(event.dataTransfer.files);
+});
+fileInput.addEventListener('change', () => handleFiles(fileInput.files));
+uploadBtn.addEventListener('click', uploadSelectedFiles);
+
+function handleFiles(fileListInput) {
+  selectedFiles = Array.from(fileListInput);
+  uploadBtn.hidden = selectedFiles.length === 0;
+  renderFileList();
+}
+
+function renderFileList() {
+  fileList.replaceChildren();
+  selectedFiles.forEach((file, index) => {
+    const extension = fileExtension(file.name);
+    const validationError = validateFile(file);
+    const item = document.createElement('div');
+    item.className = 'file-item';
+    item.id = `file-${index}`;
+
+    const icon = document.createElement('div');
+    icon.className = 'file-icon';
+    icon.textContent = extension || 'file';
+
+    const info = document.createElement('div');
+    info.className = 'file-info';
+
+    const name = document.createElement('div');
+    name.className = 'file-name';
+    name.textContent = file.name;
+
+    const status = document.createElement('div');
+    status.className = validationError ? 'file-status error' : 'file-status';
+    status.id = `status-${index}`;
+    status.textContent = validationError || formatSize(file.size);
+
+    const progress = document.createElement('div');
+    progress.className = 'progress';
+    progress.hidden = true;
+    progress.id = `progress-${index}`;
+
+    const fill = document.createElement('div');
+    fill.className = 'progress-fill';
+    fill.id = `fill-${index}`;
+    progress.appendChild(fill);
+
+    info.append(name, status, progress);
+    item.append(icon, info);
+    fileList.appendChild(item);
+  });
+}
+
+async function uploadSelectedFiles() {
+  const filesToUpload = selectedFiles.filter(file => validateFile(file) === null);
+  if (filesToUpload.length === 0) return;
+
+  uploadBtn.disabled = true;
+  uploadBtn.textContent = '上传中...';
+
+  for (const file of filesToUpload) {
+    const index = selectedFiles.indexOf(file);
+    await uploadFile(file, index);
+  }
+
+  uploadBtn.disabled = false;
+  uploadBtn.textContent = '上传选中的书籍';
+  selectedFiles = [];
+  fileInput.value = '';
+  uploadBtn.hidden = true;
+  await checkStatus();
+}
+
+async function uploadFile(file, index) {
+  const statusEl = document.getElementById(`status-${index}`);
+  const progressEl = document.getElementById(`progress-${index}`);
+  const fillEl = document.getElementById(`fill-${index}`);
+
+  statusEl.textContent = '上传中...';
+  statusEl.className = 'file-status uploading';
+  progressEl.hidden = false;
+  fillEl.style.width = '0%';
+
+  try {
+    const result = await sendFile(file, progress => {
+      fillEl.style.width = `${progress}%`;
+    });
+    const first = result.results && result.results[0];
+    if (!first || first.success !== true) {
+      throw new Error(first?.error || '上传失败');
+    }
+    statusEl.textContent = '上传成功';
+    statusEl.className = 'file-status success';
+    fillEl.style.width = '100%';
+  } catch (error) {
+    statusEl.textContent = `失败：${error.message}`;
+    statusEl.className = 'file-status error';
+    fillEl.style.width = '100%';
+    fillEl.style.background = 'var(--danger)';
+  }
+}
+
+function sendFile(file, onProgress) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.upload.addEventListener('progress', event => {
+      if (event.lengthComputable) {
+        onProgress(Math.round((event.loaded / event.total) * 100));
+      }
+    });
+    xhr.addEventListener('load', () => {
+      try {
+        const data = JSON.parse(xhr.responseText || '{}');
+        if (xhr.status >= 200 && xhr.status < 300) {
+          resolve(data);
+        } else {
+          reject(new Error(data.error || `HTTP ${xhr.status}`));
+        }
+      } catch (error) {
+        reject(error);
+      }
+    });
+    xhr.addEventListener('error', () => reject(new Error('网络连接失败')));
+    xhr.addEventListener('abort', () => reject(new Error('上传已取消')));
+    xhr.open('POST', '/upload-file');
+    xhr.setRequestHeader('Content-Type', 'application/octet-stream');
+    xhr.setRequestHeader('X-File-Name', encodeURIComponent(file.name));
+    xhr.setRequestHeader('X-File-Size', String(file.size));
+    xhr.send(file);
+  });
+}
+
+async function checkStatus() {
+  try {
+    const response = await fetch('/status', { cache: 'no-store' });
+    const data = await response.json();
+    if (data.running) {
+      statusDot.className = 'status-dot';
+      statusText.textContent = `已连接，端口 ${data.port}`;
+    } else {
+      statusDot.className = 'status-dot offline';
+      statusText.textContent = '服务已停止';
+    }
+  } catch {
+    statusDot.className = 'status-dot offline';
+    statusText.textContent = '连接已断开';
+  }
+}
+
+function validateFile(file) {
+  const extension = fileExtension(file.name);
+  if (!supportedExtensions.has(extension)) {
+    return '不支持的格式';
+  }
+  if (file.size > maxFileSize) {
+    return '文件超过 500MB';
+  }
+  return null;
+}
+
+function fileExtension(name) {
+  const parts = name.split('.');
+  return parts.length > 1 ? parts.pop().toLowerCase() : '';
+}
+
+function formatSize(bytes) {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+}
+
+checkStatus();
+setInterval(checkStatus, 5000);
+</script>
+</body>
+</html>

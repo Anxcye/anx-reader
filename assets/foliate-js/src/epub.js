@@ -77,6 +77,8 @@ const resolveURL = (url, relativeTo) => {
 }
 
 const isExternal = uri => /^(?!blob)\w+:/i.test(uri)
+const isBlockedLocalResource = uri =>
+    /^(?:res|file|content|filesystem|chrome(?:-extension)?):/i.test(uri)
 
 // like `path.relative()` in Node.js
 const pathRelative = (from, to) => {
@@ -614,6 +616,7 @@ class Resources {
 
 class Loader {
     #cache = new Map()
+    #pending = new Map()
     #children = new Map()
     #refCount = new Map()
     eventTarget = new EventTarget()
@@ -652,6 +655,10 @@ class Loader {
         return url
     }
     ref(href, parent) {
+        // The initial reference is owned by the section itself. Repeated
+        // top-level requests must not create an anonymous reference that the
+        // section cannot later release.
+        if (!parent) return this.#cache.get(href)
         const childList = this.#children.get(parent)
         if (!childList?.includes(href)) {
             this.#refCount.set(href, this.#refCount.get(href) + 1)
@@ -693,16 +700,39 @@ class Loader {
         const parent = parents[parents.length - 1]
         if (this.#cache.has(href)) return this.ref(href, parent)
 
+        // Multiple references in one chapter often request the same CSS/font at
+        // once. Share the extraction without waiting on circular dependencies.
+        if (!parents.includes(href) && this.#pending.has(href)) {
+            await this.#pending.get(href)
+            if (!this.#cache.has(href)) return null
+            return this.ref(href, parent)
+        }
+
         const targetItem = mediaType === item.mediaType ? item : { ...item, mediaType }
         const shouldReplace =
             (isScript || [MIME.XHTML, MIME.HTML, MIME.CSS, MIME.SVG].includes(mediaType))
             // prevent circular references
             && parents.every(p => p !== href)
-        if (shouldReplace) return this.loadReplaced(targetItem, parents)
-        const dataSource = detail.data ?? Promise.resolve().then(() => this.loadBlob(href))
-        return this.createURL(href, dataSource, mediaType, parent)
+        const loadPromise = shouldReplace
+            ? this.loadReplaced(targetItem, parents)
+            : this.createURL(
+                href,
+                detail.data ?? Promise.resolve().then(() => this.loadBlob(href)),
+                mediaType,
+                parent)
+        if (parents.includes(href)) return loadPromise
+        this.#pending.set(href, loadPromise)
+        try {
+            return await loadPromise
+        } finally {
+            this.#pending.delete(href)
+        }
     }
     async loadHref(href, base, parents = []) {
+        // Legacy EPUBs often contain vendor-specific absolute font paths such
+        // as res:///sdcard/... . They are inaccessible from a WebView origin
+        // and can otherwise generate dozens of failed requests per chapter.
+        if (isBlockedLocalResource(href)) return null
         if (isExternal(href)) return href
         const path = resolveURL(href, base)
         const item = this.manifest.find(item => item.href === path)
@@ -728,7 +758,7 @@ class Loader {
             } catch (e) {
                 console.warn(`Failed to load resource not in manifest: ${path}`, e)
             }
-            return href
+            return null
         }
         return this.loadItem(item, parents.concat(base))
     }
@@ -776,8 +806,12 @@ class Loader {
             }
             // replace hrefs (excluding anchors)
             // TODO: srcset?
-            const replace = async (el, attr) => el.setAttribute(attr,
-                await this.loadHref(el.getAttribute(attr), href, parents))
+            const replace = async (el, attr) => {
+                const resolved = await this.loadHref(
+                    el.getAttribute(attr), href, parents)
+                if (resolved) el.setAttribute(attr, resolved)
+                else el.removeAttribute(attr)
+            }
             for (const el of doc.querySelectorAll('link[href]')) await replace(el, 'href')
             for (const el of doc.querySelectorAll('[src]')) await replace(el, 'src')
             for (const el of doc.querySelectorAll('[poster]')) await replace(el, 'poster')
@@ -806,12 +840,14 @@ class Loader {
         const replacedUrls = await replaceSeries(str,
             /url\(\s*["']?([^'"\n]*?)\s*["']?\s*\)/gi,
             (_, url) => this.loadHref(url, href, parents)
-                .then(url => `url("${url}")`))
+                .then(url => url
+                    ? `url("${url}")`
+                    : 'local("__anx_unavailable_resource__")'))
         // apart from `url()`, strings can be used for `@import` (but why?!)
         const replacedImports = await replaceSeries(replacedUrls,
             /@import\s*["']([^"'\n]*?)["']/gi,
             (_, url) => this.loadHref(url, href, parents)
-                .then(url => `@import "${url}"`))
+                .then(url => url ? `@import "${url}"` : ''))
         const w = window?.innerWidth ?? 800
         const h = window?.innerHeight ?? 600
         return replacedImports
@@ -874,6 +910,10 @@ class Loader {
     }
     destroy() {
         for (const url of this.#cache.values()) URL.revokeObjectURL(url)
+        this.#cache.clear()
+        this.#children.clear()
+        this.#refCount.clear()
+        this.#pending.clear()
     }
 }
 
@@ -902,34 +942,52 @@ export class EPUB {
     parser = new DOMParser()
     #loader
     #encryption
-    constructor({ loadText, loadBlob, getSize, sha1 }) {
+    constructor({ loadText, loadBlob, getSize, sha1, close }) {
         this.loadText = loadText
         this.loadBlob = loadBlob
         this.getSize = getSize
+        this.closeArchive = close
         this.#encryption = new Encryption(deobfuscators(sha1))
     }
     async #loadXML(uri) {
         const str = await this.loadText(uri)
         if (!str) return null
         const doc = this.parser.parseFromString(str, MIME.XML)
-        if (doc.querySelector('parsererror'))
-            throw new Error(`XML parsing error: ${uri}
+        if (doc.querySelector('parsererror')) {
+            const error = new Error(`XML parsing error: ${uri}
 ${doc.querySelector('parsererror').innerText}`)
+            error.code = uri === 'META-INF/container.xml'
+                ? 'invalid_epub_container'
+                : 'invalid_epub_xml'
+            throw error
+        }
         return doc
     }
     async init() {
         const $container = await this.#loadXML('META-INF/container.xml')
-        if (!$container) throw new Error('Failed to load container file')
+        if (!$container) {
+            const error = new Error('Failed to load META-INF/container.xml')
+            error.code = 'missing_epub_container'
+            throw error
+        }
 
         const opfs = Array.from(
             $container.getElementsByTagNameNS(NS.CONTAINER, 'rootfile'),
             getAttributes('full-path', 'media-type'))
             .filter(file => file.mediaType === 'application/oebps-package+xml')
 
-        if (!opfs.length) throw new Error('No package document defined in container')
+        if (!opfs.length) {
+            const error = new Error('No package document defined in container')
+            error.code = 'missing_epub_package'
+            throw error
+        }
         const opfPath = opfs[0].fullPath
         const opf = await this.#loadXML(opfPath)
-        if (!opf) throw new Error('Failed to load package document')
+        if (!opf) {
+            const error = new Error('Failed to load EPUB package document')
+            error.code = 'missing_epub_package'
+            throw error
+        }
 
         const $encryption = await this.#loadXML('META-INF/encryption.xml')
         await this.#encryption.init($encryption, opf)
@@ -968,22 +1026,40 @@ ${doc.querySelector('parsererror').innerText}`)
         }).filter(s => s)
 
         const { navPath, ncxPath } = this.resources
-        if (navPath) try {
+        const loadOptionalXML = async path => {
+            if (!path) return null
+            try {
+                return await this.#loadXML(path)
+            } catch (e) {
+                console.warn(e)
+                return null
+            }
+        }
+        const [navDoc, appleDisplayOptions, koboDisplayOptions] =
+            await Promise.all([
+                loadOptionalXML(navPath),
+                loadOptionalXML('META-INF/com.apple.ibooks.display-options.xml'),
+                loadOptionalXML('META-INF/com.kobobooks.display-options.xml'),
+            ])
+        if (navDoc) try {
             const resolve = url => resolveURL(url, navPath)
-            const nav = parseNav(await this.#loadXML(navPath), resolve)
+            const nav = parseNav(navDoc, resolve)
             this.toc = nav.toc
             this.pageList = nav.pageList
             this.landmarks = nav.landmarks
         } catch (e) {
             console.warn(e)
         }
-        if (!this.toc && ncxPath) try {
-            const resolve = url => resolveURL(url, ncxPath)
-            const ncx = parseNCX(await this.#loadXML(ncxPath), resolve)
-            this.toc = ncx.toc
-            this.pageList = ncx.pageList
-        } catch (e) {
-            console.warn(e)
+        if (!this.toc && ncxPath) {
+            const ncxDoc = await loadOptionalXML(ncxPath)
+            if (ncxDoc) try {
+                const resolve = url => resolveURL(url, ncxPath)
+                const ncx = parseNCX(ncxDoc, resolve)
+                this.toc = ncx.toc
+                this.pageList = ncx.pageList
+            } catch (e) {
+                console.warn(e)
+            }
         }
         this.landmarks ??= this.resources.guide
 
@@ -992,8 +1068,7 @@ ${doc.querySelector('parsererror').innerText}`)
         this.media = media
         this.dir = this.resources.pageProgressionDirection
         const displayOptions = getDisplayOptions(
-            await this.#loadXML('META-INF/com.apple.ibooks.display-options.xml')
-            ?? await this.#loadXML('META-INF/com.kobobooks.display-options.xml'))
+            appleDisplayOptions ?? koboDisplayOptions)
         if (displayOptions) {
             if (displayOptions.fixedLayout === 'true')
                 this.rendition.layout ??= 'pre-paginated'
@@ -1158,5 +1233,7 @@ ${doc.querySelector('parsererror').innerText}`)
     }
     destroy() {
         this.#loader?.destroy()
+        this.closeArchive?.().catch(error =>
+            console.warn('Failed to close EPUB archive', error))
     }
 }

@@ -15,8 +15,7 @@ class MD5Service {
         return null;
       }
 
-      final bytes = await file.readAsBytes();
-      final digest = md5.convert(bytes);
+      final digest = await md5.bind(file.openRead()).first;
       return digest.toString();
     } catch (e) {
       AnxLog.severe('Error calculating MD5 for $filePath: $e');

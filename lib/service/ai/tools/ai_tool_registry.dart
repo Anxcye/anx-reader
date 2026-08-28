@@ -1,4 +1,5 @@
 import 'package:anx_reader/l10n/generated/L10n.dart';
+import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/providers/current_reading.dart';
 import 'package:anx_reader/service/ai/tools/apply_book_tags_tool.dart';
 import 'package:anx_reader/service/ai/tools/book_content_search_tool.dart';
@@ -14,6 +15,7 @@ import 'package:anx_reader/service/ai/tools/current_time_tool.dart';
 import 'package:anx_reader/service/ai/tools/mindmap_tool.dart';
 import 'package:anx_reader/service/ai/tools/notes_search_tool.dart';
 import 'package:anx_reader/service/ai/tools/reading_history_tool.dart';
+import 'package:anx_reader/service/ai/tools/reading_agent_tools.dart';
 import 'package:anx_reader/service/ai/tools/tags_list_tool.dart';
 import 'package:anx_reader/service/ai/tools/repository/book_content_search_repository.dart';
 import 'package:anx_reader/service/ai/tools/repository/books_repository.dart';
@@ -83,6 +85,14 @@ class AiToolRegistry {
     tagsListToolDefinition,
     booksTagsListToolDefinition,
     applyBookTagsToolDefinition,
+    readerNavigateToolDefinition,
+    readingNoteCreateToolDefinition,
+    readingDifficultySaveToolDefinition,
+    readingGoalSetToolDefinition,
+    readingMemoryAppendToolDefinition,
+    readingMemoryRecallToolDefinition,
+    fictionArtifactSaveToolDefinition,
+    fictionCharacterRecallToolDefinition,
   ];
 
   static final Map<String, AiToolDefinition> _definitionMap = {
@@ -115,6 +125,9 @@ class AiToolRegistry {
     final enabled = enabledIds.toSet();
     return _definitions
         .where((def) => enabled.contains(def.id))
+        .where((def) =>
+            Prefs().readingAgentBetaEnabled ||
+            !readingAgentToolIds.contains(def.id))
         .map((def) => def.build(context))
         .toList(growable: false);
   }

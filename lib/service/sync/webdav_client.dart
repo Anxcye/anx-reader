@@ -36,7 +36,12 @@ class WebdavClient extends SyncClientBase {
         'accept-charset': 'utf-8',
         'Content-Type': 'application/octet-stream'
       })
-      ..setConnectTimeout(8000);
+      // Keep network operations bounded so a stalled server cannot hold the
+      // sync task (and its UI state) indefinitely. These are async Dio calls,
+      // so the timeout prevents hangs without blocking the Flutter isolate.
+      ..setConnectTimeout(8000)
+      ..setSendTimeout(120000)
+      ..setReceiveTimeout(120000);
   }
 
   @override

@@ -71,3 +71,4 @@ google_service_account.json
 # FVM Version Cache
 .fvm/
 .fvmrc
+/.codegraph/

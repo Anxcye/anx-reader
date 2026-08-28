@@ -191,7 +191,13 @@ const isElementNode = ({ nodeType }) => nodeType === 1
 const getChildNodes = (node, filter) => {
     const nodes = Array.from(node.childNodes)
         // "content other than element and character data is ignored"
-        .filter(node => isTextNode(node) || isElementNode(node))
+        .filter(node => {
+            // "content other than element and character data is ignored"
+            if (!isTextNode(node) && !isElementNode(node)) return false
+            // Skip translation wrapper elements (they modify DOM but should not affect CFI)
+            if (isElementNode(node) && node.classList?.contains('translated-text')) return false
+            return true
+        })
     return filter ? nodes.map(node => {
         const accept = filter(node)
         if (accept === NodeFilter.FILTER_REJECT) return null

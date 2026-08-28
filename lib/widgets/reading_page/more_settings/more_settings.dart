@@ -7,6 +7,7 @@ import 'package:anx_reader/widgets/reading_page/more_settings/style_settings.dar
 import 'package:contentsize_tabbarview/contentsize_tabbarview.dart';
 import 'package:flutter/material.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
+import 'package:anx_reader/config/shared_preference_provider.dart';
 
 enum ReadingSettings { theme, style }
 
@@ -55,7 +56,9 @@ void showMoreSettings(ReadingSettings settings) {
                   ),
                   child: SingleChildScrollView(
                     child: ContentSizeTabBarView(
-                      animationDuration: const Duration(milliseconds: 600),
+                      animationDuration: Prefs().reduceMotion
+                          ? Duration.zero
+                          : const Duration(milliseconds: 600),
                       controller: tabController,
                       children: children,
                     ),

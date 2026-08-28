@@ -11,9 +11,6 @@ Future<String?> saveFileToDownload(
     String? sourceFilePath,
     required String fileName,
     String? mimeType}) async {
-  String downloadPath = await getDownloadPath();
-  String fileSavePath = '$downloadPath/$fileName';
-
   switch (AnxPlatform.type) {
     case AnxPlatformEnum.android:
     case AnxPlatformEnum.ios:
@@ -38,6 +35,8 @@ Future<String?> saveFileToDownload(
       }
       return outputFile;
     case AnxPlatformEnum.windows:
+      String downloadPath = await getDownloadPath();
+      String fileSavePath = '$downloadPath/$fileName';
       final file = File(fileSavePath);
 
       if (!await file.exists()) {

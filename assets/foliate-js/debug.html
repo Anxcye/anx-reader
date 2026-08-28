@@ -64,6 +64,16 @@
   .translated-text.hidden {
     display: none !important;
   }
+
+  #cache-log {
+    margin-top: 8px;
+    max-width: 320px;
+    max-height: 180px;
+    overflow: auto;
+    font-size: 12px;
+    line-height: 1.4;
+    white-space: pre-wrap;
+  }
 </style>
 
 <div id="debug-controls">
@@ -72,6 +82,19 @@
     <button onclick="window.nextPage()">Next</button>
     <button onclick="window.goToPercent(0.5)">50%</button>
   </div>
+  <div style="margin-top: 10px;">
+    <label>Cache namespace:</label><br>
+    <input id="cache-namespace" value="debug-cache-a" style="width: 180px;" />
+    <button onclick="setCacheNamespace('debug-cache-a')">A</button>
+    <button onclick="setCacheNamespace('debug-cache-b')">B</button>
+    <button onclick="reloadTranslatorCache()">Reload Cache</button>
+  </div>
+  <div style="margin-top: 10px;">
+    <button onclick="seedCurrentCache()">Seed Cache</button>
+    <button onclick="showCurrentCache()">Show Cache</button>
+    <button onclick="clearCurrentCache()">Clear Cache</button>
+  </div>
+  <div id="cache-log"></div>
   <!-- <div style="margin-top: 10px;">
     <label>Translation:</label><br>
     <button onclick="setTranslationMode('off')">Off</button>
@@ -98,6 +121,74 @@
 </script>
 
 <script>
+  const mockTranslationCaches = {
+    'debug-cache-a': {},
+    'debug-cache-b': {},
+  };
+  let activeCacheNamespace = 'debug-cache-a';
+
+  const logCache = (message) => {
+    const el = document.getElementById('cache-log');
+    if (!el) return;
+    el.textContent = `${message}\n${el.textContent}`.trim();
+  };
+
+  const setCacheNamespace = (namespace) => {
+    activeCacheNamespace = namespace;
+    document.getElementById('cache-namespace').value = namespace;
+    logCache(`Switched namespace -> ${namespace}`);
+  };
+
+  const currentCacheNamespace = () => {
+    const input = document.getElementById('cache-namespace');
+    const namespace = input?.value?.trim() || activeCacheNamespace;
+    if (!mockTranslationCaches[namespace]) mockTranslationCaches[namespace] = {};
+    activeCacheNamespace = namespace;
+    return namespace;
+  };
+
+  const seedCurrentCache = () => {
+    const namespace = currentCacheNamespace();
+    const translator = reader?.view?.getTranslator?.();
+    const firstObserved = translator?.observedElements?.values?.().next?.().value;
+    if (!firstObserved) {
+      logCache('Seed failed: no observed element');
+      return;
+    }
+    const key = reader.view.getCFIFromDomElement?.(firstObserved);
+    const text = firstObserved.innerText?.trim();
+    if (!key || !text) {
+      logCache('Seed failed: missing CFI or text');
+      return;
+    }
+    mockTranslationCaches[namespace][key] = {
+      originalText: text,
+      translatedText: `[${namespace}] ${text}`,
+    };
+    logCache(`Seeded ${namespace} with key ${key}`);
+  };
+
+  const showCurrentCache = () => {
+    const namespace = currentCacheNamespace();
+    logCache(`${namespace}: ${JSON.stringify(mockTranslationCaches[namespace], null, 2)}`);
+  };
+
+  const clearCurrentCache = () => {
+    const namespace = currentCacheNamespace();
+    mockTranslationCaches[namespace] = {};
+    logCache(`Cleared ${namespace}`);
+  };
+
+  const reloadTranslatorCache = async () => {
+    const translator = reader?.view?.getTranslator?.();
+    if (!translator?.refreshCache) {
+      logCache('Reload failed: translator.refreshCache unavailable');
+      return;
+    }
+    await translator.refreshCache();
+    logCache(`Reloaded cache for ${currentCacheNamespace()}`);
+  };
+
   console.log("AnxUA", navigator.userAgent);
 
   const urlParams = new URLSearchParams(window.location.search);
@@ -156,6 +247,25 @@
       // Mock translation response for testing
       if (name === 'translateText') {
         return Promise.resolve(`TRANS: ${data}`);
+      }
+      if (name === 'loadTranslationCache') {
+        const namespace = currentCacheNamespace();
+        const payload = {
+          namespace,
+          cacheJson: JSON.stringify(mockTranslationCaches[namespace] || {}),
+        };
+        logCache(`loadTranslationCache -> ${namespace}`);
+        return Promise.resolve(payload);
+      }
+      if (name === 'saveTranslationCache') {
+        const namespace = data?.namespace || currentCacheNamespace();
+        try {
+          mockTranslationCaches[namespace] = JSON.parse(data?.cacheJson || '{}');
+        } catch (e) {
+          mockTranslationCaches[namespace] = {};
+        }
+        logCache(`saveTranslationCache -> ${namespace}`);
+        return Promise.resolve(true);
       }
       return Promise.resolve(null);
     }
@@ -226,6 +336,11 @@
   // Make functions globally available
   window.setTranslationMode = setTranslationMode;
   window.testCFIPreservation = testCFIPreservation;
+  window.setCacheNamespace = setCacheNamespace;
+  window.seedCurrentCache = seedCurrentCache;
+  window.showCurrentCache = showCurrentCache;
+  window.clearCurrentCache = clearCurrentCache;
+  window.reloadTranslatorCache = reloadTranslatorCache;
 </script>
 
 <script src="./src/book.js" type="module"></script>

@@ -8,6 +8,7 @@ import 'package:anx_reader/widgets/common/container/filled_container.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
+import 'package:anx_reader/config/shared_preference_provider.dart';
 
 class BookToc extends ConsumerStatefulWidget {
   const BookToc({
@@ -115,7 +116,7 @@ class _BookTocState extends ConsumerState<BookToc> {
         }
         _pendingScrollKey = null;
         _pendingScrollAnimated = false;
-        final duration = animated
+        final duration = animated && !Prefs().reduceMotion
             ? const Duration(milliseconds: 250)
             : const Duration(milliseconds: 1);
         _itemScrollController.scrollTo(
@@ -225,7 +226,7 @@ class _BookTocState extends ConsumerState<BookToc> {
         return;
       }
       _pendingScrollKey = null;
-      final duration = _pendingScrollAnimated
+      final duration = _pendingScrollAnimated && !Prefs().reduceMotion
           ? const Duration(milliseconds: 250)
           : const Duration(milliseconds: 1);
       _pendingScrollAnimated = false;

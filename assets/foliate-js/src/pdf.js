@@ -494,22 +494,42 @@ const annotationLayerBuilderCSS = `
 `
 
 const renderPage = async (page, getImageBlob) => {
-
-    const naturalPdfSize = page.getViewport({ scale: 1 })
-    const naturalPdfRatio = naturalPdfSize.width / naturalPdfSize.height
-    const appRatio = innerWidth / innerHeight
-    const pdfToAppResolutionRatio = appRatio / naturalPdfRatio
-
-    const scale = devicePixelRatio * pdfToAppResolutionRatio
-    const viewport = page.getViewport({ scale })
+    const naturalViewport = page.getViewport({ scale: 1 })
+    const availableWidth = Math.max(innerWidth, 1)
+    const availableHeight = Math.max(innerHeight, 1)
+    const displayScale = Math.min(
+        availableWidth / naturalViewport.width,
+        availableHeight / naturalViewport.height)
+    const viewport = page.getViewport({ scale: displayScale })
+    const outputScale = Math.min(Math.max(devicePixelRatio || 1, 1), 2)
 
     const canvas = document.createElement('canvas')
-    canvas.height = viewport.height
-    canvas.width = viewport.width
+    canvas.height = Math.ceil(viewport.height * outputScale)
+    canvas.width = Math.ceil(viewport.width * outputScale)
     const canvasContext = canvas.getContext('2d')
-    await page.render({ canvasContext, viewport }).promise
+    if (!canvasContext) {
+        const error = new Error('Unable to create PDF canvas context')
+        error.code = 'pdf_canvas_unavailable'
+        throw error
+    }
+    await page.render({
+        canvasContext,
+        viewport,
+        transform: outputScale === 1
+            ? null
+            : [outputScale, 0, 0, outputScale, 0, 0],
+    }).promise
     const blob = await new Promise(resolve => canvas.toBlob(resolve))
-    if (getImageBlob) return blob
+    canvas.width = 0
+    canvas.height = 0
+    if (!blob) {
+        const error = new Error('Failed to encode rendered PDF page')
+        error.code = 'pdf_page_encode_failed'
+        throw error
+    }
+    if (getImageBlob) {
+        return blob
+    }
 
     /*
     // with the SVG backend
@@ -541,9 +561,10 @@ const renderPage = async (page, getImageBlob) => {
     const url = URL.createObjectURL(new Blob([`
         <!DOCTYPE html>
         <meta charset="utf-8">
+        <meta name="viewport" content="width=${viewport.width},height=${viewport.height}">
         <style>
         :root {
-            --scale-factor: ${scale};
+            --scale-factor: ${displayScale};
         }
         html, body {
             margin: 0;
@@ -552,11 +573,11 @@ const renderPage = async (page, getImageBlob) => {
         ${textLayerBuilderCSS}
         ${annotationLayerBuilderCSS}
         </style>
-        <img src="${src}">
+        <img src="${src}" width="${viewport.width}" height="${viewport.height}">
         ${container.outerHTML}
         ${div.outerHTML}
     `], { type: 'text/html' }))
-    return url
+    return { url, resources: [url, src] }
 }
 
 const makeTOCItem = item => ({
@@ -565,34 +586,91 @@ const makeTOCItem = item => ({
     subitems: item.items.length ? item.items.map(makeTOCItem) : null,
 })
 
-export const makePDF = async file => {
-    const data = new Uint8Array(await file.arrayBuffer())
-    const pdf = await pdfjsLib.getDocument({ data }).promise
+export const makePDF = async source => {
+    const legacy = globalThis.__ANX_WEBVIEW_COMPAT__?.legacy
+    pdfjsLib.GlobalWorkerOptions.workerSrc = legacy
+        ? './dist/pdf-legacy.worker.js'
+        : './src/vendor/pdfjs/pdf.worker.js'
+    const loadingTask = typeof source === 'string'
+        ? pdfjsLib.getDocument({ url: source, disableRange: false, disableStream: false })
+        : pdfjsLib.getDocument({ data: new Uint8Array(await source.arrayBuffer()) })
+    let pdf
+    try {
+        pdf = await loadingTask.promise
+    } catch (error) {
+        if (!error.code) error.code = 'invalid_pdf'
+        await loadingTask.destroy().catch(() => {})
+        throw error
+    }
 
-    const book = { rendition: { layout: 'pre-paginated' } }
+    const book = { rendition: { layout: 'pre-paginated', spread: 'none' } }
 
-    const info = (await pdf.getMetadata())?.info
+    const optional = async (promise, label) => {
+        try {
+            return await promise
+        } catch (error) {
+            console.warn(`Failed to read PDF ${label}`, error)
+            return null
+        }
+    }
+    const [metadata, outline] = await Promise.all([
+        optional(pdf.getMetadata(), 'metadata'),
+        optional(pdf.getOutline(), 'outline'),
+    ])
+    const info = metadata?.info
     book.metadata = {
         title: info?.Title,
         author: info?.Author,
     }
 
-    const outline = await pdf.getOutline()
     book.toc = outline?.map(makeTOCItem)
 
     const cache = new Map()
+    const pending = new Map()
+    const touch = (index, value) => {
+        cache.delete(index)
+        cache.set(index, value)
+        while (cache.size > 8) {
+            const oldestIndex = cache.keys().next().value
+            const oldest = cache.get(oldestIndex)
+            oldest.resources.forEach(resource => URL.revokeObjectURL(resource))
+            cache.delete(oldestIndex)
+        }
+    }
     book.sections = Array.from({ length: pdf.numPages }).map((_, i) => ({
         id: i,
         load: async () => {
             const cached = cache.get(i)
-            if (cached) return cached
-            const url = await renderPage(await pdf.getPage(i + 1))
-            cache.set(i, url)
-            return url
+            if (cached) {
+                touch(i, cached)
+                return cached.url
+            }
+            if (pending.has(i)) return (await pending.get(i)).url
+            const renderPromise = Promise.resolve()
+                .then(() => pdf.getPage(i + 1))
+                .then(async page => {
+                    try {
+                        return await renderPage(page)
+                    } finally {
+                        page.cleanup()
+                    }
+                })
+                .catch(error => {
+                    if (!error.code) error.code = 'pdf_page_render_failed'
+                    throw error
+                })
+            pending.set(i, renderPromise)
+            try {
+                const rendered = await renderPromise
+                touch(i, rendered)
+                return rendered.url
+            } finally {
+                pending.delete(i)
+            }
         },
-        size: 1000,
+        unload: () => {},
+        size: 1500,
     }))
-    book.sections[0].pageSpread = 'right'
     book.isExternal = uri => /^\w+:/i.test(uri)
     book.resolveHref = async href => {
         const parsed = JSON.parse(href)
@@ -611,6 +689,20 @@ export const makePDF = async file => {
         return [index, null]
     }
     book.getTOCFragment = doc => doc.documentElement
-    book.getCover = async () => renderPage(await pdf.getPage(1), true)
+    book.getCover = async () => {
+        const page = await pdf.getPage(1)
+        try {
+            return await renderPage(page, true)
+        } finally {
+            page.cleanup()
+        }
+    }
+    book.destroy = () => {
+        cache.forEach(value => value.resources.forEach(
+            resource => URL.revokeObjectURL(resource)))
+        cache.clear()
+        pending.clear()
+        loadingTask.destroy()
+    }
     return book
 }

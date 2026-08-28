@@ -1,10 +1,58 @@
 console.log('book.js')
 console.log('AnxUA', navigator.userAgent)
 
+const bookLoadStartedAt = Date.now()
+const pendingFlutterEvents = []
+let currentBookLoadStage = 'bootstrap'
+let bookLoadReady = false
+
+const emitFlutter = (name, data) => {
+  const bridge = window.flutter_inappwebview
+  if (bridge && typeof bridge.callHandler === 'function') {
+    return bridge.callHandler(name, data)
+  }
+  pendingFlutterEvents.push([name, data])
+  return null
+}
+
+const flushFlutterEvents = () => {
+  const bridge = window.flutter_inappwebview
+  if (!bridge || typeof bridge.callHandler !== 'function') return false
+  while (pendingFlutterEvents.length) {
+    const [name, data] = pendingFlutterEvents.shift()
+    bridge.callHandler(name, data)
+  }
+  return true
+}
+
+const reportBookLoadStage = (stage, extra = {}) => {
+  currentBookLoadStage = stage
+  return emitFlutter('onBookLoadStage', {
+    stage,
+    elapsedMs: Date.now() - bookLoadStartedAt,
+    ...extra,
+  })
+}
+
+const reportBookLoadError = (error, stage, extra = {}) => {
+  const message = error && error.message ? error.message : String(error)
+  const failureStage = stage || currentBookLoadStage
+  emitFlutter('onBookLoadError', {
+    code: error && error.code ? error.code : `${failureStage}_failed`,
+    message,
+    details: error && error.stack ? error.stack : null,
+    stage: failureStage,
+    ...extra,
+  })
+}
+
+reportBookLoadStage('bootstrap')
+
 import './view.js'
 import { FootnoteHandler } from './footnotes.js'
 import { Overlayer } from './overlayer.js'
 import { collapse, compare, fromRange, toRange } from './epubcfi.js'
+import { SelectionRangeController } from './selection-range.js'
 const { configure, ZipReader, BlobReader, TextWriter, BlobWriter } =
   await import('./vendor/zip.js')
 const { EPUB } = await import('./epub.js')
@@ -140,11 +188,27 @@ const buildRangeContextText = (range) => {
   return contextText;
 };
 
-const handleSelection = (view, doc, index) => {
+const selectionControllers = new Map()
+let activeSelectionController = null
+let selectionConfiguration = {
+  longPressMode: 'sentence',
+  eInkMode: false,
+  platform: 'android',
+}
+
+const handleSelection = (view, doc, index, controller = selectionControllers.get(doc)) => {
   const selection = doc.getSelection();
   const range = getSelectionRange(selection);
 
-  if (!range) return;
+  if (!range) return false;
+
+  // On Android the native WebView selection callback can arrive while a
+  // long-press word/sentence expansion is still pending. Treat that callback
+  // as handled, but do not emit a menu for the temporary single-character
+  // range. The Android selection scheduler will emit the final range.
+  if (controller?.hasPendingNativeLongPress) return true;
+
+  if (controller?.shouldSkipDuplicateReport(range)) return true;
 
   const position = getPosition(range);
   const cfi = view.getCFI(index, range);
@@ -160,6 +224,17 @@ const handleSelection = (view, doc, index) => {
 
   const contextText = buildRangeContextText(range);
 
+  const selectionMeta = controller ? controller.snapshot() : {
+    sessionId: 0,
+    rangeType: 'custom',
+    trigger: 'manual',
+    canMovePrevious: false,
+    canMoveNext: false,
+    supportsRangeSelection: false,
+  }
+  controller?.recordSelectionReport(range)
+  activeSelectionController = controller || null
+
   onSelectionEnd({
     index,
     range,
@@ -167,8 +242,11 @@ const handleSelection = (view, doc, index) => {
     cfi,
     pos: position,
     text,
-    contextText
+    contextText,
+    ...selectionMeta,
+    supportsRangeSelection: selectionMeta.supportsRangeSelection && !doc.__isFootNote,
   });
+  return true;
 };
 
 const AUTO_PAGE_DELAY_MS = 1000;
@@ -243,10 +321,38 @@ const setSelectionHandler = (view, doc, index) => {
   doc.__anxSelectionClearedAt = 0;
   doc.__anxSuppressClick = false;
 
+  const rangeController = new SelectionRangeController({
+    doc,
+    index,
+    longPressMode: selectionConfiguration.longPressMode,
+    emitSelection: () => handleSelection(view, doc, index, rangeController),
+    requestWordBoundary: payload => {
+      activeSelectionController = rangeController
+      callFlutter('onWordBoundaryRequest', payload)
+    },
+  })
+  selectionControllers.set(doc, rangeController)
+  rangeController.install()
+
+  const isDesktop = navigator.platform.includes('Mac') || navigator.platform.includes('Win')
+  if (isDesktop) {
+    doc.addEventListener('contextmenu', event => {
+      event.preventDefault()
+      const selection = doc.getSelection()
+      if (selection && !selection.isCollapsed && selection.toString().trim()) {
+        rangeController.markManual()
+        handleSelection(view, doc, index, rangeController)
+        return
+      }
+      rangeController.selectAtPoint(event.clientX, event.clientY, 'sentence', 'contextMenu')
+    }, true)
+  }
+
   // Notify Flutter when the selection collapses so it can hide the context menu.
   const handleSelectionStateChange = () => {
     const selectionRange = getSelectionRange(doc.getSelection());
     if (selectionRange) {
+      rangeController.markManual()
       hasActiveSelection = true;
       doc.__anxSelectionClearedAt = 0;
       doc.__anxSuppressClick = false;
@@ -289,9 +395,10 @@ const setSelectionHandler = (view, doc, index) => {
     || navigator.platform.includes('iPhone')
     || navigator.platform.includes('iPad')
   ) {
-    doc.addEventListener('pointerup', () => {
+    doc.addEventListener('pointerup', event => {
       if (shouldSkipPointerUp()) return;
-      handleSelection(view, doc, index);
+      if (event.pointerType === 'touch' && rangeController.expandLongPressSelection()) return;
+      handleSelection(view, doc, index, rangeController);
     });
   }
   else if (navigator.platform.includes('Win')) {
@@ -316,7 +423,7 @@ const setSelectionHandler = (view, doc, index) => {
       doc.addEventListener('pointerup', (e) => {
         if (e.pointerType === 'touch') return;
         if (shouldSkipPointerUp()) return;
-        handleSelection(view, doc, index);
+        handleSelection(view, doc, index, rangeController);
       });
 
       // filter out selectionchange event cause by mouse
@@ -340,14 +447,14 @@ const setSelectionHandler = (view, doc, index) => {
         clearTimeout(debounceTimerId);
         let delay = 500;
         debounceTimerId = setTimeout(() => {
-          handleSelection(view, doc, index);
+          handleSelection(view, doc, index, rangeController);
         }, delay);
       });
 
     } else {
       doc.addEventListener('pointerup', () => {
         if (shouldSkipPointerUp()) return;
-        handleSelection(view, doc, index);
+        handleSelection(view, doc, index, rangeController);
       });
     }
   }
@@ -366,11 +473,29 @@ const setSelectionHandler = (view, doc, index) => {
       // Wait for selection to settle (e.g. 600ms after last change)
       // This handles the case where pointerup/touchend is swallowed by native handles
       debounceTimerId = setTimeout(() => {
-        handleSelection(view, doc, index);
+        handleSelection(view, doc, index, rangeController);
       }, 600);
     });
   } else { // Android
     let hasNativeSelectionStarted = false;
+    var androidDebounceTimerId = undefined;
+
+    const scheduleAndroidSelection = (delay = 600) => {
+      const selRange = getSelectionRange(doc.getSelection());
+      if (!selRange || selRange.toString().trim().length === 0) return;
+
+      clearTimeout(androidDebounceTimerId);
+      androidDebounceTimerId = setTimeout(() => {
+        const currentRange = getSelectionRange(doc.getSelection());
+        if (currentRange && currentRange.toString().trim().length > 0) {
+          if (hasNativeSelectionStarted && rangeController.expandLongPressSelection()) {
+            hasNativeSelectionStarted = false;
+            return;
+          }
+          handleSelection(view, doc, index, rangeController);
+        }
+      }, delay);
+    };
 
     doc.addEventListener('pointerdown', () => {
       hasNativeSelectionStarted = false;
@@ -380,12 +505,32 @@ const setSelectionHandler = (view, doc, index) => {
     // This event signals that the user has started dragging handles
     doc.addEventListener('pointercancel', () => {
       hasNativeSelectionStarted = true;
+      rangeController.markNativeSelectionStarted();
+      scheduleAndroidSelection(700);
+    });
+
+    doc.addEventListener('pointerup', (e) => {
+      if (e.pointerType === 'mouse') {
+        if (shouldSkipPointerUp()) return;
+        handleSelection(view, doc, index, rangeController)
+        return;
+      }
+
+      scheduleAndroidSelection(200);
     });
 
     doc.addEventListener('contextmenu', e => {
       // Allow mouse context menu (if any)
       if (e.pointerType === 'mouse') {
-        handleSelection(view, doc, index);
+        handleSelection(view, doc, index, rangeController);
+        return;
+      }
+
+      // If there's an active text selection, always handle it
+      const selRange = getSelectionRange(doc.getSelection());
+      if (selRange && selRange.toString().trim().length > 0) {
+        e.preventDefault();
+        scheduleAndroidSelection(0);
         return;
       }
 
@@ -400,7 +545,14 @@ const setSelectionHandler = (view, doc, index) => {
       // If we have entered native selection mode (pointercancel happened),
       // this contextmenu event is likely triggered by the system or user interaction
       // after the selection phase (e.g. on release). We handle it.
-      handleSelection(view, doc, index);
+      e.preventDefault();
+      scheduleAndroidSelection(0);
+    });
+
+    // Android WebView may swallow touchend/contextmenu once native handles appear.
+    // A debounced selectionchange is the most reliable signal for long-press word selection.
+    doc.addEventListener('selectionchange', () => {
+      scheduleAndroidSelection(hasNativeSelectionStarted ? 700 : 500);
     });
   }
   // doc.addEventListener('selectionchange', () => handleSelection(view, doc, index));
@@ -556,14 +708,43 @@ const isPDF = async file => {
 const makeZipLoader = async file => {
   configure({ useWebWorkers: false })
   const reader = new ZipReader(new BlobReader(file))
-  const entries = await reader.getEntries()
-  const map = new Map(entries.map(entry => [entry.filename, entry]))
+  let entries
+  try {
+    entries = await reader.getEntries()
+  } catch (error) {
+    error.code = 'invalid_epub_zip'
+    await reader.close().catch(() => {})
+    throw error
+  }
+  if (!entries.length) {
+    const error = new Error('EPUB archive is empty')
+    error.code = 'empty_epub_archive'
+    await reader.close().catch(() => {})
+    throw error
+  }
+  const normalizeEntryName = name => {
+    const normalized = name.replace(/\\/g, '/').replace(/^\.\//, '')
+    try {
+      return decodeURI(normalized)
+    } catch (_) {
+      return normalized
+    }
+  }
+  const map = new Map()
+  for (const entry of entries) {
+    const normalized = normalizeEntryName(entry.filename)
+    if (!map.has(normalized)) map.set(normalized, entry)
+  }
   const load = f => (name, ...args) =>
-    map.has(name) ? f(map.get(name), ...args) : null
+    map.has(normalizeEntryName(name))
+      ? f(map.get(normalizeEntryName(name)), ...args)
+      : null
   const loadText = load(entry => entry.getData(new TextWriter()))
   const loadBlob = load((entry, type) => entry.getData(new BlobWriter(type)))
-  const getSize = name => map.get(name)?.uncompressedSize ?? 0
-  return { entries, loadText, loadBlob, getSize }
+  const getSize = name =>
+    map.get(normalizeEntryName(name))?.uncompressedSize ?? 0
+  const close = () => reader.close()
+  return { entries, loadText, loadBlob, getSize, close }
 }
 
 const getFileEntries = async entry => entry.isFile ? entry
@@ -601,6 +782,8 @@ const isFBZ = ({ name, type }) =>
 
 const getView = async file => {
   let book
+  let format = null
+  reportBookLoadStage('detect')
   if (file.isDirectory) {
     const loader = await makeDirectoryLoader(file)
     const { EPUB } = await import('./epub.js')
@@ -610,19 +793,29 @@ const getView = async file => {
   else if (await isZip(file)) {
     const loader = await makeZipLoader(file)
     if (isCBZ(file)) {
+      format = 'cbz'
       const { makeComicBook } = await import('./comic-book.js')
       book = makeComicBook(loader, file)
     } else if (isFBZ(file)) {
+      format = 'fb2'
       const { makeFB2 } = await import('./fb2.js')
       const { entries } = loader
       const entry = entries.find(entry => entry.filename.endsWith('.fb2'))
       const blob = await loader.loadBlob((entry ?? entries[0]).filename)
       book = await makeFB2(blob)
     } else {
-      book = await new EPUB(loader).init()
+      format = 'epub'
+      try {
+        book = await new EPUB(loader).init()
+      } catch (error) {
+        await loader.close().catch(() => {})
+        if (!error.code) error.code = 'invalid_epub'
+        throw error
+      }
     }
   }
   else if (await isPDF(file)) {
+    format = 'pdf'
     isPdf = true;
     const { makePDF } = await import('./pdf.js')
     book = await makePDF(file)
@@ -630,17 +823,38 @@ const getView = async file => {
   else {
     const { isMOBI, MOBI } = await import('./mobi.js')
     if (await isMOBI(file)) {
+      format = 'mobi'
       const fflate = await import('./vendor/fflate.js')
       book = await new MOBI({ unzlib: fflate.unzlibSync }).open(file)
     } else if (isFB2(file)) {
+      format = 'fb2'
       const { makeFB2 } = await import('./fb2.js')
       book = await makeFB2(file)
     }
   }
-  if (!book) throw new Error('File type not supported')
+  if (!book) {
+    const error = new Error('File type not supported')
+    error.code = 'unsupported_format'
+    throw error
+  }
+  reportBookLoadStage('parse', { format })
   const view = document.createElement('foliate-view')
   document.body.append(view)
   await view.open(book)
+  reportBookLoadStage('render', { format })
+  return view
+}
+
+const getPdfView = async url => {
+  reportBookLoadStage('detect', { format: 'pdf' })
+  isPdf = true
+  const { makePDF } = await import('./pdf.js')
+  reportBookLoadStage('parse', { format: 'pdf' })
+  const book = await makePDF(url)
+  const view = document.createElement('foliate-view')
+  document.body.append(view)
+  await view.open(book)
+  reportBookLoadStage('render', { format: 'pdf' })
   return view
 }
 
@@ -664,7 +878,8 @@ const getCSS = ({ fontSize,
   customCSSEnabled,
   useBookStyles,
   headingFontSize,
-  codeHighlightTheme
+  codeHighlightTheme,
+  eInkMode
 }) => {
 
   const fontFamily = fontName === 'book' ? '' :
@@ -710,14 +925,10 @@ const getCSS = ({ fontSize,
     }
 
     img, svg {
-        // height: auto !important;
-        // width: auto !important;
         object-fit: contain !important;
         break-inside: avoid !important;
         box-sizing: border-box !important;
         font-size: initial !important;
-        // height: initial !important;
-        // width: initial !important;
     }
 
     a:link {
@@ -729,7 +940,6 @@ const getCSS = ({ fontSize,
     }
 
     * {
-        // line-height: ${spacing}em !important;
         ${fontFamily}
     }
 
@@ -760,7 +970,7 @@ const getCSS = ({ fontSize,
     }
     `}
 
-    p, li, blockquote, dd, div:not(:has(*:not(b, a, em, i, strong, u, span))), font {
+    p, li, blockquote, dd, div.anx-text-container, font {
         color: ${fontColor} !important;
         ${useBookStyles ? '' : `line-height: ${spacing} !important;`}
         ${useBookStyles ? '' : `font-weight: ${fontWeight} !important;`}
@@ -786,18 +996,55 @@ const getCSS = ({ fontSize,
 
 
     /*  Paragraphs containing only an image — don't change */
-    p:has(> img:only-child),
-    p:has(> span:only-child > img:only-child),
-    p:has(> img:not(.has-text-siblings)),
-    p:has(> a:first-child + img:last-child),
-    div:has(> img:only-child),
-    div:has(> span:only-child > img:only-child),
-    div:has(> img:not(.has-text-siblings)),
-    div:has(> a:first-child + img:last-child)  {
+    .anx-image-container {
         text-indent: initial !important;
         font-size: initial !important;
         height: initial !important;
         width: initial !important;
+    }
+
+    /* Keep headings with the content they introduce. */
+    h1, h2, h3, h4, h5, h6 {
+        break-after: avoid !important;
+        page-break-after: avoid !important;
+        -webkit-column-break-after: avoid !important;
+        orphans: 2;
+        widows: 2;
+    }
+
+    h1 + p, h2 + p, h3 + p, h4 + p, h5 + p, h6 + p {
+        break-before: avoid !important;
+        page-break-before: avoid !important;
+        -webkit-column-break-before: avoid !important;
+    }
+
+    /* Keep reflowable tables inside a page column on narrow WebViews. */
+    table {
+        border-collapse: collapse;
+        box-sizing: border-box !important;
+        inline-size: auto;
+        max-inline-size: 100% !important;
+        max-width: 100% !important;
+        overflow-wrap: break-word;
+        table-layout: auto;
+    }
+
+    th, td {
+        box-sizing: border-box !important;
+        max-width: 100% !important;
+        overflow-wrap: break-word;
+        word-break: break-word;
+    }
+
+    tr {
+        break-inside: avoid;
+        page-break-inside: avoid;
+        -webkit-column-break-inside: avoid;
+    }
+
+    table img, table svg, table video {
+        height: auto !important;
+        max-width: 100% !important;
     }
 
     /*  Paragraphs inside list items — prevent double indentation */
@@ -876,8 +1123,65 @@ const getCSS = ({ fontSize,
     aside[epub|type~="rearnote"] {
         display: none;
     }
-    
+
+    /* Translation styling for bilingual mode */
+    .translated-text {
+        display: block !important;
+        margin-top: 0.5em !important;
+        margin-bottom: 0.5em !important;
+        padding-top: 0.3em !important;
+        border-top: 1px dashed rgba(128, 128, 128, 0.3) !important;
+        font-size: 0.95em !important;
+        color: inherit !important;
+        opacity: 0.85 !important;
+        line-height: inherit !important;
+        text-align: inherit !important;
+    }
+
+    .translated-text:empty {
+        display: none !important;
+    }
+
+    .translated-paragraph {
+        display: block !important;
+        margin-bottom: 0.3em !important;
+    }
+
+    /* Hide original text in translation-only mode */
+    .translation-source-hidden {
+        visibility: hidden !important;
+    }
+
+    .translation-source-hidden .translated-text {
+        visibility: visible !important;
+    }
+
     ${customCSSEnabled && customCSS ? customCSS : ''}
+
+    ${eInkMode ? `
+      :root, html, body {
+        color: #000 !important;
+        background-color: #fff !important;
+      }
+      body *:not(img):not(svg):not(video):not(canvas) {
+        color: #000 !important;
+        background-color: transparent !important;
+        text-shadow: none !important;
+        box-shadow: none !important;
+      }
+      a { color: #000 !important; text-decoration: underline !important; }
+      mark, [epub\\|type~="highlight"] {
+        color: #000 !important;
+        background-color: #ddd !important;
+      }
+      .translated-text {
+        color: #000 !important;
+        opacity: 1 !important;
+        border-top: 1px solid #000 !important;
+        font-weight: 600 !important;
+      }
+      img, svg, video, canvas { filter: none !important; }
+    ` : ''}
 `}
 
 const fixHeadingColor = (themeColor) => {
@@ -934,7 +1238,28 @@ const bionicReadingHandler = (doc) => {
 };
 
 
+const markLayoutElements = (doc) => {
+  const inlineElements = new Set(['b', 'a', 'em', 'i', 'strong', 'u', 'span'])
+
+  doc.querySelectorAll('div').forEach(element => {
+    const descendants = Array.from(element.querySelectorAll('*'))
+    if (descendants.every(child => inlineElements.has(child.localName))) {
+      element.classList.add('anx-text-container')
+    }
+  })
+
+  doc.querySelectorAll('p, div').forEach(element => {
+    const hasMedia = element.querySelector('img, svg, video') !== null
+    if (hasMedia && element.textContent.trim() === '') {
+      element.classList.add('anx-image-container')
+    }
+  })
+}
+
+
 const readingFeaturesDocHandler = (doc) => {
+  markLayoutElements(doc)
+
   if (readingRules.convertChineseMode !== 'none') {
     convertChineseHandler(readingRules.convertChineseMode, doc)
   }
@@ -954,7 +1279,8 @@ const readingFeaturesDocHandler = (doc) => {
   }
 
   // handle vertical writing mode, replace “”‘’ with 『』「」
-  if (style.writingMode.startsWith('vertical') || reader.view.renderer.writingMode.startsWith('vertical')) {
+  if (style.writingMode?.startsWith('vertical')
+    || reader.view.renderer.writingMode?.startsWith('vertical')) {
     const replaceQuotes = (node) => {
       if (node.nodeType === Node.TEXT_NODE) {
         node.textContent = node.textContent
@@ -1082,7 +1408,9 @@ class Reader {
     this.#originalContent = null
   }
   async open(file, cfi) {
-    this.view = await getView(file, cfi)
+    this.view = typeof file === 'string'
+      ? await getPdfView(file)
+      : await getView(file, cfi)
 
     if (importing) return
 
@@ -1092,6 +1420,21 @@ class Reader {
     this.view.addEventListener('doctouchstart', this.#onTouchStart.bind(this))
     this.view.addEventListener('doctouchmove', this.#onTouchMove.bind(this))
     this.view.addEventListener('doctouchend', this.#onTouchEnd.bind(this))
+    this.view.addEventListener('section-error', ({ detail }) => {
+      const error = detail?.error ?? new Error('Failed to load EPUB section')
+      if (!error.code) error.code = 'epub_section_load_failed'
+      const payload = {
+        code: error.code,
+        message: error.message ?? String(error),
+        details: error.stack ?? null,
+        stage: 'render',
+        sectionIndex: detail?.index,
+      }
+      if (bookLoadReady) emitFlutter('onBookSectionError', payload)
+      else reportBookLoadError(error, 'render', {
+        sectionIndex: detail?.index,
+      })
+    })
 
     setStyle()
     if (!cfi)
@@ -1122,9 +1465,11 @@ class Reader {
 
     view.addEventListener('draw-annotation', e => {
       const { draw, annotation } = e.detail
-      const { color, type } = annotation
+      const { color, type, note } = annotation
       const opts = { color, writingMode: this.view.renderer.writingMode }
       if (type === 'highlight') draw(Overlayer.highlight, { ...opts })
+      else if (type === 'underline' && note === 'reading-difficulty')
+        draw(Overlayer.dashedUnderline, { ...opts })
       else if (type === 'underline') draw(Overlayer.underline, { ...opts })
     })
 
@@ -1169,13 +1514,14 @@ class Reader {
   renderAnnotation(annotations) {
     const annos = annotations ?? allAnnotations ?? []
     for (const anno of annos) {
-      const { value, type, color, note } = anno
+      const { value, type, color, note, annotationKey } = anno
       const annotation = {
         id: anno.id,
         value,
         type,
         color,
-        note
+        note,
+        annotationKey,
       }
 
       this.addAnnotation(annotation)
@@ -1184,18 +1530,29 @@ class Reader {
   }
 
   showContextMenu() {
-    return handleSelection(this.view, this.#doc, this.#index)
+    const controller = selectionControllers.get(this.#doc)
+    // The native Android context-menu callback may beat pointercancel and the
+    // debounced selectionchange handler. Apply the configured long-press range
+    // here first so Flutter only ever sees the final word/sentence selection.
+    if (controller?.expandLongPressSelection()) return true
+    return handleSelection(this.view, this.#doc, this.#index, controller)
   }
 
   addAnnotation(annotation) {
     const { value } = annotation
+    const annotationKey = annotation.annotationKey ?? value
     const spineCode = (value.split('/')[2].split('!')[0] - 2) / 2
 
     const list = this.annotations.get(spineCode)
-    if (list) list.push(annotation)
+    if (list) {
+      const existingIndex = list.findIndex(item =>
+        (item.annotationKey ?? item.value) === annotationKey)
+      if (existingIndex === -1) list.push(annotation)
+      else list[existingIndex] = annotation
+    }
     else this.annotations.set(spineCode, [annotation])
 
-    this.annotationsByValue.set(value, annotation)
+    this.annotationsByValue.set(annotationKey, annotation)
 
     if (annotation.type === 'bookmark') {
       if (this.#checkBookmark(annotation)) {
@@ -1254,19 +1611,20 @@ class Reader {
     }
   }
 
-  removeAnnotation(cfi) {
-    const annotation = this.annotationsByValue.get(cfi)
+  removeAnnotation(annotationKey) {
+    const annotation = this.annotationsByValue.get(annotationKey)
     if (!annotation) return
     const { value } = annotation
     const spineCode = (value.split('/')[2].split('!')[0] - 2) / 2
 
     const list = this.annotations.get(spineCode)
     if (list) {
-      const index = list.findIndex(a => a.id === annotation.id)
+      const index = list.findIndex(item =>
+        (item.annotationKey ?? item.value) === annotationKey)
       if (index !== -1) list.splice(index, 1)
     }
 
-    this.annotationsByValue.delete(value)
+    this.annotationsByValue.delete(annotation.annotationKey ?? value)
 
     this.view.addAnnotation(annotation, true)
 
@@ -1415,6 +1773,44 @@ class Reader {
     }
 
     return content
+  }
+
+  // Some EPUB2 collection books expose only volume-level NCX entries while
+  // keeping real chapter headings in the spine documents. Reading Agent may
+  // request this local manifest after an explicit organize action. It never
+  // returns body text and does not invoke a model.
+  getReadingAgentChapterManifest = async () => {
+    if (!this.view?.book?.sections) return []
+    const fractions = this.view.getSectionFractions?.() ?? []
+    const result = []
+    for (const [index, section] of this.view.book.sections.entries()) {
+      if (!section?.createDocument || section.linear === 'no') continue
+      try {
+        const doc = await section.createDocument()
+        const heading = doc?.querySelector?.('h1, h2, h3, h4, h5, h6')
+        const label = (heading?.textContent || doc?.title || '').replace(/\s+/g, ' ').trim()
+        const textLength = (doc?.body?.textContent || '').trim().length
+        const links = doc?.body?.querySelectorAll?.('a[href]')?.length ?? 0
+        const paragraphs = doc?.body?.querySelectorAll?.('p')?.length ?? 0
+        const isNavigation = Boolean(
+          doc?.querySelector?.('nav, .sgc-toc-title, [epub\\:type="toc"]') ||
+          (links >= 5 && links > paragraphs)
+        )
+        const fraction = fractions[index]?.fraction
+        result.push({
+          href: section.id,
+          title: label || `章节 ${index + 1}`,
+          startPercentage: Number.isFinite(fraction)
+            ? fraction
+            : index / this.view.book.sections.length,
+          textLength,
+          isNavigation,
+        })
+      } catch (error) {
+        console.warn('Reading Agent chapter manifest skipped a section', error)
+      }
+    }
+    return result
   }
 
   getPreviousContent = (count = 2000) => {
@@ -1635,6 +2031,8 @@ const open = async (file, cfi) => {
   }
   
   if (!importing) {
+    bookLoadReady = true
+    reportBookLoadStage('ready')
     callFlutter('onLoadEnd')
     onSetToc()
     callFlutter('renderAnnotations')
@@ -1644,9 +2042,21 @@ const open = async (file, cfi) => {
 
 
 const callFlutter = (name, data) => {
-  // console.log('callFlutter', name, data)
-  window.flutter_inappwebview.callHandler(name, data)
+  return emitFlutter(name, data)
 }
+
+let flutterEventFlushTimer = setInterval(() => {
+  if (flushFlutterEvents()) {
+    clearInterval(flutterEventFlushTimer)
+    flutterEventFlushTimer = null
+  }
+}, 50)
+window.addEventListener('flutterInAppWebViewPlatformReady', () => {
+  if (flushFlutterEvents() && flutterEventFlushTimer) {
+    clearInterval(flutterEventFlushTimer)
+    flutterEventFlushTimer = null
+  }
+})
 
 const setStyle = (oldStyle) => {
   const turn = {
@@ -1704,7 +2114,8 @@ const setStyle = (oldStyle) => {
     customCSS: style.customCSS,
     customCSSEnabled: style.customCSSEnabled,
     useBookStyles: style.useBookStyles,
-    headingFontSize: style.headingFontSize
+    headingFontSize: style.headingFontSize,
+    eInkMode: style.eInkMode
   }
   reader.view.renderer.setStyles?.(getCSS(newStyle))
 
@@ -1830,7 +2241,7 @@ window.setNoAnimation = () => {
 }
 
 const onSelectionEnd = (selection) => {
-  if (window.isFootNoteOpen() || isPdf) {
+  if (window.isFootNoteOpen()) {
     callFlutter('onSelectionEnd', { ...selection, footnote: true })
   } else {
     callFlutter('onSelectionEnd', { ...selection, footnote: false })
@@ -1839,15 +2250,46 @@ const onSelectionEnd = (selection) => {
 
 window.showContextMenu = () => {
   if (window.isFootNoteOpen()) {
-    footnoteSelection()
+    return footnoteSelection()
   } else {
-    reader.showContextMenu()
+    return reader.showContextMenu()
   }
 }
 
 window.getSelection = () => reader.getSelection()
 
 window.clearSelection = () => reader.view.deselect()
+
+window.configureSelection = config => {
+  selectionConfiguration = { ...selectionConfiguration, ...(config || {}) }
+  selectionControllers.forEach(controller => controller.configure(selectionConfiguration))
+  return true
+}
+
+window.selectAtPoint = config => {
+  if (!activeSelectionController || !config) return false
+  return activeSelectionController.selectAtPoint(
+    Number(config.x),
+    Number(config.y),
+    config.rangeType,
+    config.trigger || 'api',
+  )
+}
+
+window.changeSelectionRange = rangeType => {
+  if (!activeSelectionController) return false
+  return activeSelectionController.changeRange(rangeType)
+}
+
+window.moveSelectionSentence = direction => {
+  if (!activeSelectionController) return false
+  return activeSelectionController.moveSentence(Number(direction) < 0 ? -1 : 1)
+}
+
+window.applyResolvedWord = result => {
+  if (!activeSelectionController || !result) return false
+  return activeSelectionController.applyResolvedWord(result)
+}
 
 window.addAnnotation = (annotation) => reader.addAnnotation(annotation)
 
@@ -1965,6 +2407,9 @@ window.previousContent = (count = 2000) => reader.getPreviousContent(count)
 
 window.getChapterContentByHref = async (href, opts) =>
   reader.getChapterContentByHref(href, opts)
+
+window.getReadingAgentChapterManifest = async () =>
+  reader.getReadingAgentChapterManifest()
 
 // window.convertChinese = (mode) => reader.convertChinese(mode)
 
@@ -2355,8 +2800,47 @@ var url = JSON.parse(urlParams.get('url'))
 var initialCfi = JSON.parse(urlParams.get('initialCfi'))
 var style = JSON.parse(urlParams.get('style'))
 var readingRules = JSON.parse(urlParams.get('readingRules'))
+var i18n = JSON.parse(urlParams.get('i18n') || '{}')
+globalThis.i18n = i18n
 
-fetch(url)
-  .then(res => res.blob())
-  .then(blob => open(new File([blob], new URL(url, window.location.origin).pathname), initialCfi))
-  .catch(e => console.error(e))
+reportBookLoadStage('fetch')
+const isPdfUrl = (() => {
+  try {
+    return new URL(url, window.location.origin).pathname.toLowerCase().endsWith('.pdf')
+  } catch (_) {
+    return false
+  }
+})()
+
+const openPromise = isPdfUrl
+  ? open(url, initialCfi)
+  : fetch(url)
+  .then(res => {
+    if (!res.ok) {
+      const error = new Error(`Book request failed with HTTP ${res.status}`)
+      error.code = `http_${res.status}`
+      throw error
+    }
+    return res.blob()
+  })
+  .then(blob => {
+    if (!blob.size) {
+      const error = new Error('Book file is empty')
+      error.code = 'empty_file'
+      throw error
+    }
+    return open(new File([blob], new URL(url, window.location.origin).pathname), initialCfi)
+  })
+
+openPromise.catch(e => {
+  console.error(e)
+  reportBookLoadError(e)
+})
+
+window.disposeReader = () => {
+  try {
+    reader && reader.view && reader.view.close && reader.view.close()
+  } catch (error) {
+    console.warn('Failed to dispose reader', error)
+  }
+}

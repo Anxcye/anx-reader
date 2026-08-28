@@ -125,6 +125,32 @@ export class Overlayer {
         }
         return g
     }
+    static dashedUnderline(rects, options = {}) {
+        const { color = 'black', width: strokeWidth = 2, padding = 1, writingMode } = options
+        const g = createSVGElement('g')
+        g.setAttribute('fill', 'none')
+        g.setAttribute('stroke', color)
+        g.setAttribute('stroke-width', strokeWidth)
+        g.setAttribute('stroke-dasharray', '4 3')
+        if (writingMode === 'vertical-rl' || writingMode === 'vertical-lr')
+            for (const { right, top, bottom } of rects) {
+                const el = createSVGElement('line')
+                el.setAttribute('x1', right + padding)
+                el.setAttribute('x2', right + padding)
+                el.setAttribute('y1', top)
+                el.setAttribute('y2', bottom)
+                g.append(el)
+            }
+        else for (const { left, right, bottom } of rects) {
+            const el = createSVGElement('line')
+            el.setAttribute('x1', left)
+            el.setAttribute('x2', right)
+            el.setAttribute('y1', bottom + padding)
+            el.setAttribute('y2', bottom + padding)
+            g.append(el)
+        }
+        return g
+    }
     static strikethrough(rects, options = {}) {
         const { color = 'red', width: strokeWidth = 2, writingMode } = options
         const g = createSVGElement('g')

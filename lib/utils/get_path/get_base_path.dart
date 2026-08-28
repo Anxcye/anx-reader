@@ -60,7 +60,7 @@ Future<Directory> getAnxDocumentDir() async {
   return Directory(await getAnxDocumentsPath());
 }
 
-void initBasePath() async {
+Future<void> initBasePath() async {
   Directory appDocDir = await getAnxDocumentDir();
   documentPath = appDocDir.path;
   debugPrint('documentPath: $documentPath');

@@ -10,6 +10,8 @@ import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/models/reading_time.dart';
 import 'package:anx_reader/models/tag.dart';
+import 'package:anx_reader/page/reading_outcomes_page.dart';
+import 'package:anx_reader/page/book_wiki_page.dart';
 import 'package:anx_reader/providers/sync.dart';
 import 'package:anx_reader/providers/book_list.dart';
 import 'package:anx_reader/providers/tags.dart';
@@ -31,9 +33,16 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class BookDetail extends ConsumerStatefulWidget {
-  const BookDetail({super.key, required this.book});
+  const BookDetail({
+    super.key,
+    required this.book,
+    this.onOrganizeStoryArchive,
+    this.onOpenReadingLocation,
+  });
 
   final Book book;
+  final Future<void> Function()? onOrganizeStoryArchive;
+  final Future<void> Function(String target)? onOpenReadingLocation;
 
   @override
   ConsumerState<BookDetail> createState() => _BookDetailState();
@@ -62,6 +71,20 @@ class _BookDetailState extends ConsumerState<BookDetail> {
 
   @override
   Widget build(BuildContext context) {
+    Future<void> organizeStoryArchive() async {
+      final callback = widget.onOrganizeStoryArchive;
+      if (callback == null) return;
+      Navigator.of(context).pop();
+      await callback();
+    }
+
+    Future<void> openReadingLocation(String target) async {
+      final callback = widget.onOpenReadingLocation;
+      if (callback == null) return;
+      Navigator.of(context).pop();
+      await callback(target);
+    }
+
     Widget buildBackground() {
       var bg = ShaderMask(
         shaderCallback: (rect) {
@@ -482,6 +505,59 @@ class _BookDetailState extends ConsumerState<BookDetail> {
       );
     }
 
+    Widget buildReadingOutcomesEntry() {
+      return FilledContainer(
+        width: MediaQuery.of(context).size.width,
+        margin: const EdgeInsets.only(top: 10),
+        padding: const EdgeInsets.all(12),
+        child: ListTile(
+          contentPadding: EdgeInsets.zero,
+          leading: Icon(
+            Icons.auto_graph_outlined,
+            color: Theme.of(context).colorScheme.primary,
+          ),
+          title: const Text('本书阅读成果'),
+          subtitle: const Text('目标、章节掌握度、未解决问题、复习卡片与记忆'),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ReadingOutcomesPage(
+                book: _book,
+                onOrganizeStoryArchive: widget.onOrganizeStoryArchive == null
+                    ? null
+                    : organizeStoryArchive,
+                onOpenLocation: widget.onOpenReadingLocation == null
+                    ? null
+                    : openReadingLocation,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    Widget buildBookWikiEntry() {
+      return FilledContainer(
+        width: MediaQuery.of(context).size.width,
+        margin: const EdgeInsets.only(top: 10),
+        padding: const EdgeInsets.all(12),
+        child: ListTile(
+          contentPadding: EdgeInsets.zero,
+          leading: Icon(Icons.menu_book_outlined,
+              color: Theme.of(context).colorScheme.primary),
+          title: const Text('书籍 Wiki'),
+          subtitle: const Text('概念、方法、人物、事件与来源统一浏览'),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => BookWikiPage(book: _book),
+              )),
+        ),
+      );
+    }
+
     Widget buildTagEditor() {
       return FilledContainer(
         width: MediaQuery.of(context).size.width,
@@ -824,6 +900,8 @@ class _BookDetailState extends ConsumerState<BookDetail> {
                                     buildEditButton(),
                                     const SizedBox(height: 5),
                                     buildBookStatistics(),
+                                    buildReadingOutcomesEntry(),
+                                    buildBookWikiEntry(),
                                   ],
                                 ),
                               ),
@@ -846,6 +924,8 @@ class _BookDetailState extends ConsumerState<BookDetail> {
                               buildEditButton(),
                               const SizedBox(height: 5),
                               buildBookStatistics(),
+                              buildReadingOutcomesEntry(),
+                              buildBookWikiEntry(),
                               const SizedBox(height: 15),
                               buildMoreDetail(),
                             ],

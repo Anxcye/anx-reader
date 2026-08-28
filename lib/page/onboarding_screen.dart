@@ -4,6 +4,8 @@ import 'package:introduction_screen/introduction_screen.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:anx_reader/widgets/settings/theme_mode.dart';
+import 'package:anx_reader/widgets/settings/device_display_profile.dart';
 
 /// Onboarding screen for first-time users
 /// Shows introduction pages covering key features and settings
@@ -397,54 +399,25 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               const SizedBox(height: 24),
               buildLanguageSelector(),
               const SizedBox(height: 12),
-              Row(
-                children: [
-                  Icon(
-                    Icons.contrast,
-                    color: Theme.of(context).colorScheme.primary,
-                    size: 20,
+              const DeviceDisplayProfileCard(compact: true),
+              const SizedBox(height: 12),
+              const ChangeThemeMode(),
+              if (prefs.isEInkMode)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Text(
+                    L10n.of(context).optimizedForEInkDisplays,
+                    style: Theme.of(context).textTheme.bodySmall,
                   ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          L10n.of(context).eInkMode,
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: Theme.of(context).colorScheme.onSurface,
-                          ),
-                        ),
-                        Text(
-                          L10n.of(context).optimizedForEInkDisplays,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onSurface
-                                .withAlpha(150),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Switch(
-                    value: prefs.eInkMode,
-                    onChanged: (value) {
-                      setState(() {
-                        if (value) {
-                          prefs.saveThemeModeToPrefs('light');
-                        }
-                        prefs.eInkMode = value;
-                      });
-                    },
-                  ),
-                ],
-              ),
+                ),
               const SizedBox(height: 24),
-              buildThemeColorSelector(),
+              IgnorePointer(
+                ignoring: prefs.isEInkMode,
+                child: Opacity(
+                  opacity: prefs.isEInkMode ? 0.45 : 1,
+                  child: buildThemeColorSelector(),
+                ),
+              ),
               const SizedBox(height: 24),
               Container(
                 padding: const EdgeInsets.all(16),

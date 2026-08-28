@@ -304,6 +304,7 @@ class SyncStatusBottomSheet extends ConsumerWidget {
     WidgetRef ref,
     L10n l10n,
   ) {
+    final isSyncing = ref.watch(syncProvider).isSyncing;
     return Column(
       children: [
         Row(
@@ -330,18 +331,21 @@ class SyncStatusBottomSheet extends ConsumerWidget {
             const SizedBox(width: 16),
             Expanded(
               child: FilledButton.icon(
-                icon: const Icon(Icons.sync),
-                label: Text(L10n.of(context).syncNow),
-                onPressed: () {
-                  final isSyncing = ref.watch(syncProvider).isSyncing;
-                  if (isSyncing) {
-                    AnxToast.show(l10n.webdavSyncing);
-                  } else {
-                    ref.read(syncProvider.notifier).syncData(
-                        SyncDirection.both, ref,
-                        trigger: SyncTrigger.manual);
-                  }
-                },
+                icon: isSyncing
+                    ? const SizedBox.square(
+                        dimension: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.sync),
+                label: Text(
+                    isSyncing ? l10n.webdavSyncing : L10n.of(context).syncNow),
+                onPressed: isSyncing
+                    ? null
+                    : () => ref.read(syncProvider.notifier).syncData(
+                          SyncDirection.both,
+                          ref,
+                          trigger: SyncTrigger.manual,
+                        ),
               ),
             ),
           ],

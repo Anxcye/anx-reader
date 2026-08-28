@@ -18,6 +18,7 @@ class LangchainAiConfig {
     this.maxTokens,
     this.maxOutputTokens,
     this.reasoningEffort = AiReasoningEffort.auto,
+    this.requestTimeoutSeconds = 0,
     this.additional,
   }) : headers = Map.unmodifiable(headers ?? const {});
 
@@ -31,6 +32,7 @@ class LangchainAiConfig {
   final int? maxTokens;
   final int? maxOutputTokens;
   final AiReasoningEffort reasoningEffort;
+  final int requestTimeoutSeconds;
   final Map<String, dynamic>? additional;
 
   ChatOpenAIOptions toOpenAIOptions() {
@@ -44,11 +46,22 @@ class LangchainAiConfig {
   }
 
   ChatAnthropicOptions toAnthropicOptions() {
+    final thinking = reasoningEffort.toAnthropicThinking();
+    final thinkingBudget =
+        thinking is ChatAnthropicThinkingEnabled ? thinking.budgetTokens : null;
+    final configuredMaxTokens = maxTokens;
+    final effectiveMaxTokens = thinkingBudget == null
+        ? configuredMaxTokens
+        : (configuredMaxTokens == null || configuredMaxTokens <= thinkingBudget
+            ? thinkingBudget + 1024
+            : configuredMaxTokens);
+
     return ChatAnthropicOptions(
       model: model.isEmpty ? null : model,
-      temperature: temperature,
-      topP: topP,
-      maxTokens: maxTokens,
+      temperature: thinkingBudget == null ? temperature : null,
+      topP: thinkingBudget == null ? topP : (topP == null ? null : 0.95),
+      maxTokens: effectiveMaxTokens,
+      thinking: thinking,
     );
   }
 
@@ -87,6 +100,7 @@ class LangchainAiConfig {
       maxTokens: parseInt(raw['max_tokens']),
       maxOutputTokens: parseInt(raw['max_output_tokens']),
       reasoningEffort: AiReasoningEffort.fromCode(raw['reasoning_effort']),
+      requestTimeoutSeconds: parseInt(raw['request_timeout_seconds']) ?? 0,
       additional: additional,
     );
   }
@@ -98,6 +112,7 @@ class LangchainAiConfig {
     required String apiKey,
     required String url,
     AiReasoningEffort reasoningEffort = AiReasoningEffort.auto,
+    int requestTimeoutSeconds = 0,
   }) {
     return LangchainAiConfig(
       identifier: providerId,
@@ -105,6 +120,7 @@ class LangchainAiConfig {
       model: model,
       baseUrl: _deriveBaseUrl(url),
       reasoningEffort: reasoningEffort,
+      requestTimeoutSeconds: requestTimeoutSeconds,
     );
   }
 
@@ -118,6 +134,7 @@ class LangchainAiConfig {
     int? maxTokens,
     int? maxOutputTokens,
     AiReasoningEffort? reasoningEffort,
+    int? requestTimeoutSeconds,
     Map<String, dynamic>? additional,
   }) {
     return LangchainAiConfig(
@@ -131,6 +148,7 @@ class LangchainAiConfig {
       maxTokens: maxTokens ?? this.maxTokens,
       maxOutputTokens: maxOutputTokens ?? this.maxOutputTokens,
       reasoningEffort: reasoningEffort ?? this.reasoningEffort,
+      requestTimeoutSeconds: requestTimeoutSeconds ?? this.requestTimeoutSeconds,
       additional: additional ?? this.additional,
     );
   }
@@ -231,6 +249,9 @@ LangchainAiConfig mergeConfigs(
     reasoningEffort: override.reasoningEffort != AiReasoningEffort.auto
         ? override.reasoningEffort
         : base.reasoningEffort,
+    requestTimeoutSeconds: override.requestTimeoutSeconds != 0
+        ? override.requestTimeoutSeconds
+        : base.requestTimeoutSeconds,
     additional: mergeMaps(base.additional, override.additional),
   );
 }
@@ -239,9 +260,23 @@ extension on AiReasoningEffort {
   ChatOpenAIReasoningEffort? toOpenAiReasoningEffort() {
     return switch (this) {
       AiReasoningEffort.auto => null,
+      AiReasoningEffort.off => null,
       AiReasoningEffort.low => ChatOpenAIReasoningEffort.low,
       AiReasoningEffort.medium => ChatOpenAIReasoningEffort.medium,
       AiReasoningEffort.high => ChatOpenAIReasoningEffort.high,
+    };
+  }
+
+  ChatAnthropicThinking? toAnthropicThinking() {
+    return switch (this) {
+      AiReasoningEffort.auto => null,
+      AiReasoningEffort.off => const ChatAnthropicThinking.disabled(),
+      AiReasoningEffort.low =>
+        const ChatAnthropicThinking.enabled(budgetTokens: 1024),
+      AiReasoningEffort.medium =>
+        const ChatAnthropicThinking.enabled(budgetTokens: 4096),
+      AiReasoningEffort.high =>
+        const ChatAnthropicThinking.enabled(budgetTokens: 8192),
     };
   }
 }

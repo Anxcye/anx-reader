@@ -17,9 +17,14 @@ import 'package:anx_reader/enums/translation_mode.dart';
 import 'package:anx_reader/enums/writing_mode.dart';
 import 'package:anx_reader/enums/text_alignment.dart';
 import 'package:anx_reader/enums/ai_panel_position.dart';
+import 'package:anx_reader/enums/ai_panel_width_ratio.dart';
 import 'package:anx_reader/enums/ai_chat_display_mode.dart';
 import 'package:anx_reader/enums/bgimg_fit.dart';
 import 'package:anx_reader/enums/code_highlight_theme.dart';
+import 'package:anx_reader/enums/app_theme_mode.dart';
+import 'package:anx_reader/enums/device_display_profile.dart';
+import 'package:anx_reader/enums/long_press_selection_mode.dart';
+import 'package:anx_reader/enums/selection_menu_action.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/main.dart';
 import 'package:anx_reader/models/bgimg.dart';
@@ -35,6 +40,10 @@ import 'package:anx_reader/models/user_prompt.dart';
 import 'package:anx_reader/widgets/statistic/dashboard_tiles/dashboard_tile_registry.dart';
 import 'package:anx_reader/models/window_info.dart';
 import 'package:anx_reader/service/ai/tools/ai_tool_registry.dart';
+import 'package:anx_reader/service/ai/reading_ai_models.dart';
+import 'package:anx_reader/service/ai/reading_closure_policy.dart';
+import 'package:anx_reader/service/ai/reading_skills.dart';
+import 'package:anx_reader/service/ai/web_search.dart';
 import 'package:anx_reader/service/translate/index.dart';
 import 'package:anx_reader/utils/get_current_language_code.dart';
 import 'package:anx_reader/utils/log/common.dart';
@@ -46,10 +55,34 @@ const String prefsBackupVersionKey = '__prefsBackupVersion';
 const int prefsBackupSchemaVersion = 1;
 const String _prefsBackupEntryTypeKey = 'type';
 const String _prefsBackupEntryValueKey = 'value';
+const String defaultCloudBaseSyncEndpoint =
+    'https://mytripmap-d3gxxk1psd0b28d72-1257836777.ap-shanghai.app.tcloudbase.com/v1/anx-reading-sync';
 
 const Set<String> _prefsImportSkipKeys = {
   'iapPurchaseStatus',
   'iapLastCheckTime',
+  // Installation identity must never be cloned by backup restore; otherwise
+  // two physical devices would overwrite the same Reading Agent sync branch.
+  'readingAgentSyncDeviceId',
+  // The bearer token grants access to a private CloudBase sync space. Users
+  // authenticate each device directly, so a backup must never clone it.
+  'cloudBaseSyncAccountToken',
+  // This is deliberately device-local. It records where this installation's
+  // reader explicitly chose "from here" and must not be imported as another
+  // device's local reading history.
+  'readingAgentLocalBackfillStarts',
+  // Usage counters are device-local diagnostics. Importing them would merge
+  // unrelated devices and make the displayed monthly total misleading.
+  'aiTokenUsageMonthly',
+  // Local/NAS endpoints and the selected extraction engine are device-local.
+  'aiExtractionConfig',
+  // Display hardware and color choices are intentionally per-device. A
+  // WebDAV preferences restore must not turn an OLED phone into an E-ink
+  // device or replace either device's local appearance.
+  'deviceDisplayProfile',
+  'themeMode',
+  'themeColor',
+  'trueDarkMode',
 };
 
 class Prefs extends ChangeNotifier {
@@ -73,6 +106,18 @@ class Prefs extends ChangeNotifier {
 
   Future<void> initPrefs() async {
     prefs = await SharedPreferences.getInstance();
+    final legacyEInk = (prefs.getBool('eInkMode') ?? false) ||
+        prefs.getString('themeMode') == AppThemeMode.eInk.code;
+    if (legacyEInk) {
+      await prefs.setString(
+        'deviceDisplayProfile',
+        DeviceDisplayProfile.eInk.code,
+      );
+      if (prefs.getString('themeMode') == AppThemeMode.eInk.code) {
+        await prefs.setString('themeMode', AppThemeMode.light.code);
+      }
+    }
+    await prefs.remove('eInkMode');
     saveBeginDate();
     notifyListeners();
   }
@@ -121,6 +166,7 @@ class Prefs extends ChangeNotifier {
       prefsBackupVersionKey: prefsBackupSchemaVersion,
     };
     for (final String key in prefs.getKeys()) {
+      if (_prefsImportSkipKeys.contains(key)) continue;
       final Object? value = prefs.get(key);
       final Map<String, Object?>? encoded = encodePrefsBackupEntry(value);
       if (encoded != null) {
@@ -169,7 +215,7 @@ class Prefs extends ChangeNotifier {
   }
 
   Color get themeColor {
-    int colorValue = prefs.getInt('themeColor') ?? Colors.blue.value;
+    int colorValue = prefs.getInt('themeColor') ?? Colors.blue.toARGB32();
     return Color(colorValue);
   }
 
@@ -194,19 +240,39 @@ class Prefs extends ChangeNotifier {
   }
 
   ThemeMode get themeMode {
-    String themeMode = prefs.getString('themeMode') ?? 'system';
-    switch (themeMode) {
-      case 'dark':
-        return ThemeMode.dark;
-      case 'light':
-        return ThemeMode.light;
-      default:
-        return ThemeMode.system;
-    }
+    return effectiveThemeMode;
   }
 
+  AppThemeMode get appThemeMode =>
+      AppThemeMode.fromCode(prefs.getString('themeMode'));
+
+  ThemeMode get effectiveThemeMode =>
+      isEInkMode ? ThemeMode.light : appThemeMode.effectiveThemeMode;
+
+  DeviceDisplayProfile get deviceDisplayProfile =>
+      DeviceDisplayProfile.fromCode(prefs.getString('deviceDisplayProfile'));
+
+  bool get isEInkMode => deviceDisplayProfile == DeviceDisplayProfile.eInk;
+
+  bool get reduceMotion => isEInkMode;
+
   Future<void> saveThemeModeToPrefs(String themeMode) async {
-    await prefs.setString('themeMode', themeMode);
+    final mode = AppThemeMode.fromCode(themeMode);
+    if (mode == AppThemeMode.eInk) {
+      await saveDeviceDisplayProfile(DeviceDisplayProfile.eInk);
+      return;
+    }
+    await prefs.setString(
+      'themeMode',
+      mode.code,
+    );
+    notifyListeners();
+  }
+
+  Future<void> saveDeviceDisplayProfile(
+    DeviceDisplayProfile profile,
+  ) async {
+    await prefs.setString('deviceDisplayProfile', profile.code);
     notifyListeners();
   }
 
@@ -304,6 +370,44 @@ class Prefs extends ChangeNotifier {
 
   bool get webdavStatus {
     return prefs.getBool('webdavStatus') ?? false;
+  }
+
+  bool get cloudBaseSyncEnabled =>
+      prefs.getBool('cloudBaseSyncEnabled') ?? false;
+
+  set cloudBaseSyncEnabled(bool value) {
+    prefs.setBool('cloudBaseSyncEnabled', value);
+    notifyListeners();
+  }
+
+  String get cloudBaseSyncEndpoint =>
+      prefs.getString('cloudBaseSyncEndpoint') ?? defaultCloudBaseSyncEndpoint;
+
+  set cloudBaseSyncEndpoint(String value) {
+    prefs.setString('cloudBaseSyncEndpoint', value.trim());
+    notifyListeners();
+  }
+
+  String get cloudBaseSyncAccountUsername =>
+      prefs.getString('cloudBaseSyncAccountUsername') ?? '';
+
+  set cloudBaseSyncAccountUsername(String value) {
+    prefs.setString('cloudBaseSyncAccountUsername', value.trim());
+    notifyListeners();
+  }
+
+  String get cloudBaseSyncAccountToken =>
+      prefs.getString('cloudBaseSyncAccountToken') ?? '';
+
+  set cloudBaseSyncAccountToken(String value) {
+    prefs.setString('cloudBaseSyncAccountToken', value.trim());
+    notifyListeners();
+  }
+
+  void clearCloudBaseSyncAccount() {
+    prefs.remove('cloudBaseSyncAccountUsername');
+    prefs.remove('cloudBaseSyncAccountToken');
+    notifyListeners();
   }
 
   void saveClearLogWhenStart(bool status) {
@@ -531,6 +635,20 @@ class Prefs extends ChangeNotifier {
     return PageTurn.values.firstWhere((element) => element.name == style);
   }
 
+  PageTurn get effectivePageTurnStyle =>
+      isEInkMode ? PageTurn.noAnimation : pageTurnStyle;
+
+  ReadTheme get effectiveReadTheme => isEInkMode
+      ? ReadTheme(
+          backgroundColor: 'FFFFFFFF',
+          textColor: 'FF000000',
+          backgroundImagePath: '',
+        )
+      : readTheme;
+
+  CodeHighlightThemeEnum get effectiveCodeHighlightTheme =>
+      isEInkMode ? CodeHighlightThemeEnum.off : codeHighlightTheme;
+
   set font(FontModel font) {
     prefs.setString('font', font.toJson());
     notifyListeners();
@@ -555,13 +673,16 @@ class Prefs extends ChangeNotifier {
     return prefs.getBool('trueDarkMode') ?? false;
   }
 
+  bool get effectiveTrueDarkMode => !isEInkMode && trueDarkMode;
+
   set eInkMode(bool status) {
-    prefs.setBool('eInkMode', status);
-    notifyListeners();
+    saveDeviceDisplayProfile(
+      status ? DeviceDisplayProfile.eInk : DeviceDisplayProfile.standard,
+    );
   }
 
   bool get eInkMode {
-    return prefs.getBool('eInkMode') ?? false;
+    return isEInkMode;
   }
 
   set translateService(TranslateService service) {
@@ -608,6 +729,56 @@ class Prefs extends ChangeNotifier {
 
   bool get autoMarkSelection {
     return prefs.getBool('autoMarkSelection') ?? false;
+  }
+
+  set longPressSelectionMode(LongPressSelectionMode mode) {
+    prefs.setString('longPressSelectionMode', mode.name);
+    notifyListeners();
+  }
+
+  LongPressSelectionMode get longPressSelectionMode {
+    return LongPressSelectionMode.fromCode(
+      prefs.getString('longPressSelectionMode'),
+    );
+  }
+
+  set selectionMenuActionOrder(List<SelectionMenuAction> actions) {
+    prefs.setStringList(
+      'selectionMenuActionOrder',
+      actions.map((action) => action.name).toList(growable: false),
+    );
+    notifyListeners();
+  }
+
+  List<SelectionMenuAction> get selectionMenuActionOrder {
+    return SelectionMenuAction.decodeOrder(
+      prefs.getStringList('selectionMenuActionOrder'),
+    );
+  }
+
+  set enabledSelectionMenuActions(Set<SelectionMenuAction> actions) {
+    prefs.setStringList(
+      'enabledSelectionMenuActions',
+      SelectionMenuAction.values
+          .where(actions.contains)
+          .map((action) => action.name)
+          .toList(growable: false),
+    );
+    notifyListeners();
+  }
+
+  Set<SelectionMenuAction> get enabledSelectionMenuActions {
+    final stored = prefs.getStringList('enabledSelectionMenuActions');
+    if (stored == null) return SelectionMenuAction.values.toSet();
+    return SelectionMenuAction.values
+        .where((action) => stored.contains(action.name))
+        .toSet();
+  }
+
+  void resetSelectionMenuActions() {
+    prefs.remove('selectionMenuActionOrder');
+    prefs.remove('enabledSelectionMenuActions');
+    notifyListeners();
   }
 
   set fullTextTranslateService(TranslateService service) {
@@ -845,6 +1016,35 @@ class Prefs extends ChangeNotifier {
 
   String get selectedAiService {
     return prefs.getString('selectedAiService') ?? 'openai';
+  }
+
+  set translationAiProvider(String? providerId) {
+    final normalized = providerId?.trim();
+    if (normalized != null && normalized.isNotEmpty) {
+      prefs.setString('translationAiProvider', normalized);
+    } else {
+      prefs.remove('translationAiProvider');
+    }
+    notifyListeners();
+  }
+
+  String? get translationAiProvider {
+    return prefs.getString('translationAiProvider');
+  }
+
+  Map<String, dynamic> get aiExtractionConfig {
+    final raw = prefs.getString('aiExtractionConfig');
+    if (raw == null || raw.isEmpty) return const {};
+    try {
+      return Map<String, dynamic>.from(jsonDecode(raw) as Map);
+    } catch (_) {
+      return const {};
+    }
+  }
+
+  set aiExtractionConfig(Map<String, dynamic> value) {
+    prefs.setString('aiExtractionConfig', jsonEncode(value));
+    notifyListeners();
   }
 
   void deleteAiConfig(String identifier) {
@@ -1147,6 +1347,15 @@ class Prefs extends ChangeNotifier {
     return prefs.getBool('bottomNavigatorShowNote') ?? true;
   }
 
+  set bottomNavigatorShowVocabulary(bool status) {
+    prefs.setBool('bottomNavigatorShowVocabulary', status);
+    notifyListeners();
+  }
+
+  bool get bottomNavigatorShowVocabulary {
+    return prefs.getBool('bottomNavigatorShowVocabulary') ?? false;
+  }
+
   set bottomNavigatorShowStatistics(bool status) {
     prefs.setBool('bottomNavigatorShowStatistics', status);
     notifyListeners();
@@ -1266,6 +1475,23 @@ class Prefs extends ChangeNotifier {
       prefs.remove('lastUploadBookDate');
     } else {
       prefs.setString('lastUploadBookDate', date.toIso8601String());
+    }
+    notifyListeners();
+  }
+
+  /// Local database timestamp captured after the last successful WebDAV sync.
+  /// Used as a sync baseline so automatic checks can distinguish local edits
+  /// from a remote change without repeatedly interrupting reading.
+  DateTime? get lastSyncLocalDatabaseTime {
+    final value = prefs.getString('lastSyncLocalDatabaseTime');
+    return value == null ? null : DateTime.tryParse(value);
+  }
+
+  set lastSyncLocalDatabaseTime(DateTime? value) {
+    if (value == null) {
+      prefs.remove('lastSyncLocalDatabaseTime');
+    } else {
+      prefs.setString('lastSyncLocalDatabaseTime', value.toIso8601String());
     }
     notifyListeners();
   }
@@ -1589,6 +1815,62 @@ class Prefs extends ChangeNotifier {
     bookTranslationModes = modes;
   }
 
+  Map<String, dynamic> get bookTranslationProgresses {
+    final progressesJson = prefs.getString('bookTranslationProgresses');
+    if (progressesJson == null) return {};
+
+    try {
+      final decoded = jsonDecode(progressesJson);
+      return decoded is Map<String, dynamic> ? decoded : {};
+    } catch (e) {
+      AnxLog.warning('Failed to decode book translation progresses: $e');
+      return {};
+    }
+  }
+
+  set bookTranslationProgresses(Map<String, dynamic> progresses) {
+    prefs.setString('bookTranslationProgresses', jsonEncode(progresses));
+    notifyListeners();
+  }
+
+  ({String cfi, double percentage})? getBookTranslationProgress(
+    int bookId,
+    TranslationModeEnum mode,
+  ) {
+    final progress = bookTranslationProgresses[_bookProgressKey(bookId, mode)];
+    if (progress is! Map) return null;
+
+    final cfi = progress['cfi']?.toString() ?? '';
+    if (cfi.isEmpty) return null;
+
+    return (
+      cfi: cfi,
+      percentage:
+          double.tryParse(progress['percentage']?.toString() ?? '') ?? 0.0,
+    );
+  }
+
+  void setBookTranslationProgress(
+    int bookId,
+    TranslationModeEnum mode, {
+    required String cfi,
+    required double percentage,
+  }) {
+    if (cfi.isEmpty) return;
+
+    final progresses = bookTranslationProgresses;
+    progresses[_bookProgressKey(bookId, mode)] = {
+      'cfi': cfi,
+      'percentage': percentage,
+      'updatedAt': DateTime.now().toIso8601String(),
+    };
+    bookTranslationProgresses = progresses;
+  }
+
+  String _bookProgressKey(int bookId, TranslationModeEnum mode) {
+    return '$bookId:${mode.code}';
+  }
+
   bool get allowMixWithOtherAudio {
     return prefs.getBool('allowMixWithOtherAudio') ?? false;
   }
@@ -1648,6 +1930,374 @@ class Prefs extends ChangeNotifier {
     notifyListeners();
   }
 
+  ReadingAiMode get defaultReadingAiMode => ReadingAiMode.fromJson(
+        prefs.getString('defaultReadingAiMode'),
+      );
+
+  set defaultReadingAiMode(ReadingAiMode mode) {
+    prefs.setString('defaultReadingAiMode', mode.name);
+    notifyListeners();
+  }
+
+  ReadingAiMode readingAiModeForBook(int bookId) {
+    final raw = prefs.getString('readingAiModesByBook');
+    if (raw == null || raw.isEmpty) return defaultReadingAiMode;
+    try {
+      final values = jsonDecode(raw) as Map<String, dynamic>;
+      return ReadingAiMode.fromJson(values['$bookId']?.toString());
+    } catch (_) {
+      return defaultReadingAiMode;
+    }
+  }
+
+  bool hasReadingAiModeForBook(int bookId) {
+    final raw = prefs.getString('readingAiModesByBook');
+    if (raw == null || raw.isEmpty) return false;
+    try {
+      final values = jsonDecode(raw) as Map<String, dynamic>;
+      return values.containsKey('$bookId');
+    } catch (_) {
+      return false;
+    }
+  }
+
+  void setReadingAiModeForBook(int bookId, ReadingAiMode mode) {
+    final raw = prefs.getString('readingAiModesByBook');
+    Map<String, dynamic> values = {};
+    if (raw != null && raw.isNotEmpty) {
+      try {
+        values = Map<String, dynamic>.from(jsonDecode(raw) as Map);
+      } catch (_) {}
+    }
+    values['$bookId'] = mode.name;
+    prefs.setString('readingAiModesByBook', jsonEncode(values));
+    notifyListeners();
+  }
+
+  ReadingSkillId? readingSkillForBook(int bookId) {
+    final raw = prefs.getString('readingSkillsByBook');
+    if (raw == null || raw.isEmpty) return null;
+    try {
+      final values = jsonDecode(raw) as Map<String, dynamic>;
+      return ReadingSkillId.fromJson(values['$bookId']?.toString());
+    } catch (_) {
+      return null;
+    }
+  }
+
+  void setReadingSkillForBook(int bookId, ReadingSkillId? skill) {
+    final raw = prefs.getString('readingSkillsByBook');
+    Map<String, dynamic> values = {};
+    if (raw != null && raw.isNotEmpty) {
+      try {
+        values = Map<String, dynamic>.from(jsonDecode(raw) as Map);
+      } catch (_) {}
+    }
+    if (skill == null) {
+      values.remove('$bookId');
+    } else {
+      values['$bookId'] = skill.name;
+    }
+    prefs.setString('readingSkillsByBook', jsonEncode(values));
+    notifyListeners();
+  }
+
+  // ignore: deprecated_member_use_from_same_package
+  ReadingClosureType? readingClosureTypeForBook(int bookId) {
+    // ignore: deprecated_member_use_from_same_package
+    return ReadingClosureType.fromJson(readingClosureIdForBook(bookId));
+  }
+
+  /// Legacy v17 preference. New writes belong in tb_book_reading_profiles;
+  /// this getter is retained only for lazy migration on first book open.
+  String? readingClosureIdForBook(int bookId) {
+    final raw = prefs.getString('readingClosureTypesByBook');
+    if (raw == null || raw.isEmpty) return null;
+    try {
+      final values = jsonDecode(raw) as Map<String, dynamic>;
+      return ReadingClosureIds.normalize(values['$bookId']?.toString());
+    } catch (_) {
+      return null;
+    }
+  }
+
+  // ignore: deprecated_member_use_from_same_package
+  void setReadingClosureTypeForBook(int bookId, ReadingClosureType? type) {
+    final raw = prefs.getString('readingClosureTypesByBook');
+    Map<String, dynamic> values = {};
+    if (raw != null && raw.isNotEmpty) {
+      try {
+        values = Map<String, dynamic>.from(jsonDecode(raw) as Map);
+      } catch (_) {}
+    }
+    if (type == null) {
+      values.remove('$bookId');
+    } else {
+      values['$bookId'] = type.name;
+    }
+    prefs.setString('readingClosureTypesByBook', jsonEncode(values));
+    notifyListeners();
+  }
+
+  void removeLegacyReadingClosureForBook(int bookId) {
+    final raw = prefs.getString('readingClosureTypesByBook');
+    if (raw == null || raw.isEmpty) return;
+    try {
+      final values = Map<String, dynamic>.from(jsonDecode(raw) as Map);
+      if (values.remove('$bookId') != null) {
+        prefs.setString('readingClosureTypesByBook', jsonEncode(values));
+        notifyListeners();
+      }
+    } catch (_) {}
+  }
+
+  double localReadingBackfillStart(int bookId) {
+    final raw = prefs.getString('readingAgentLocalBackfillStarts');
+    if (raw == null || raw.isEmpty) return 0;
+    try {
+      final values = jsonDecode(raw) as Map<String, dynamic>;
+      final value = values['$bookId'];
+      return value is num ? value.toDouble().clamp(0, 1) : 0;
+    } catch (_) {
+      return 0;
+    }
+  }
+
+  void setLocalReadingBackfillStart(int bookId, double progress) {
+    final raw = prefs.getString('readingAgentLocalBackfillStarts');
+    Map<String, dynamic> values = {};
+    if (raw != null && raw.isNotEmpty) {
+      try {
+        values = Map<String, dynamic>.from(jsonDecode(raw) as Map);
+      } catch (_) {}
+    }
+    values['$bookId'] = progress.clamp(0, 1);
+    prefs.setString('readingAgentLocalBackfillStarts', jsonEncode(values));
+  }
+
+  /// Device-local presentation choice for the fiction character archive. It
+  /// intentionally is not part of the synchronized reading state because
+  /// compact/complete is a per-device display preference.
+  String? fictionCharacterArchiveMode(int bookId) {
+    final raw = prefs.getString('fictionCharacterArchiveModes');
+    if (raw == null || raw.isEmpty) return null;
+    try {
+      final values = Map<String, dynamic>.from(jsonDecode(raw) as Map);
+      return values['$bookId']?.toString();
+    } catch (_) {
+      return null;
+    }
+  }
+
+  void setFictionCharacterArchiveMode(int bookId, String mode) {
+    final raw = prefs.getString('fictionCharacterArchiveModes');
+    Map<String, dynamic> values = {};
+    if (raw != null && raw.isNotEmpty) {
+      try {
+        values = Map<String, dynamic>.from(jsonDecode(raw) as Map);
+      } catch (_) {}
+    }
+    values['$bookId'] = mode;
+    prefs.setString('fictionCharacterArchiveModes', jsonEncode(values));
+    notifyListeners();
+  }
+
+  ReadingAnalysisDepth get defaultReadingAnalysisDepth =>
+      ReadingAnalysisDepth.fromJson(
+        prefs.getString('defaultReadingAnalysisDepth'),
+      );
+
+  set defaultReadingAnalysisDepth(ReadingAnalysisDepth depth) {
+    prefs.setString('defaultReadingAnalysisDepth', depth.name);
+    notifyListeners();
+  }
+
+  ReadingOutputTemplate get defaultReadingOutputTemplate =>
+      ReadingOutputTemplate.fromJson(
+        prefs.getString('defaultReadingOutputTemplate'),
+      );
+
+  set defaultReadingOutputTemplate(ReadingOutputTemplate template) {
+    prefs.setString('defaultReadingOutputTemplate', template.name);
+    notifyListeners();
+  }
+
+  bool get readingAnalysisAutoRecommend =>
+      prefs.getBool('readingAnalysisAutoRecommend') ?? true;
+
+  set readingAnalysisAutoRecommend(bool value) {
+    prefs.setBool('readingAnalysisAutoRecommend', value);
+    notifyListeners();
+  }
+
+  bool get readingAnalysisConfirmBeforeSend =>
+      prefs.getBool('readingAnalysisConfirmBeforeSend') ?? true;
+
+  set readingAnalysisConfirmBeforeSend(bool value) {
+    prefs.setBool('readingAnalysisConfirmBeforeSend', value);
+    notifyListeners();
+  }
+
+  bool get readingResearchWebSearch =>
+      prefs.getBool('readingResearchWebSearch') ?? false;
+
+  set readingResearchWebSearch(bool value) {
+    prefs.setBool('readingResearchWebSearch', value);
+    notifyListeners();
+  }
+
+  int get readingAnalysisMaxFrameworks =>
+      (prefs.getInt('readingAnalysisMaxFrameworks') ?? 2).clamp(1, 2).toInt();
+
+  set readingAnalysisMaxFrameworks(int value) {
+    prefs.setInt(
+      'readingAnalysisMaxFrameworks',
+      value.clamp(1, 2).toInt(),
+    );
+    notifyListeners();
+  }
+
+  ReadingAnalysisDepth readingAnalysisDepthForBook(int bookId) {
+    final value = _readingAnalysisBookValue(bookId, 'depth');
+    return value == null
+        ? defaultReadingAnalysisDepth
+        : ReadingAnalysisDepth.fromJson(value);
+  }
+
+  ReadingOutputTemplate readingOutputTemplateForBook(int bookId) {
+    final value = _readingAnalysisBookValue(bookId, 'outputTemplate');
+    return value == null
+        ? defaultReadingOutputTemplate
+        : ReadingOutputTemplate.fromJson(value);
+  }
+
+  bool hasReadingAnalysisConfigForBook(int bookId) {
+    final raw = prefs.getString('readingAnalysisByBook');
+    if (raw == null || raw.isEmpty) return false;
+    try {
+      final values = jsonDecode(raw) as Map<String, dynamic>;
+      return values['$bookId'] is Map;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  void setReadingAnalysisConfigForBook(
+    int bookId, {
+    required ReadingAnalysisDepth depth,
+    required ReadingOutputTemplate outputTemplate,
+  }) {
+    final values = _readingAnalysisBookValues();
+    values['$bookId'] = <String, dynamic>{
+      'depth': depth.name,
+      'outputTemplate': outputTemplate.name,
+    };
+    prefs.setString('readingAnalysisByBook', jsonEncode(values));
+    notifyListeners();
+  }
+
+  void clearReadingAnalysisConfigForBook(int bookId) {
+    final values = _readingAnalysisBookValues();
+    if (values.remove('$bookId') == null) return;
+    prefs.setString('readingAnalysisByBook', jsonEncode(values));
+    notifyListeners();
+  }
+
+  Object? _readingAnalysisBookValue(int bookId, String key) {
+    final values = _readingAnalysisBookValues();
+    final config = values['$bookId'];
+    return config is Map ? config[key] : null;
+  }
+
+  Map<String, dynamic> _readingAnalysisBookValues() {
+    final raw = prefs.getString('readingAnalysisByBook');
+    if (raw == null || raw.isEmpty) return <String, dynamic>{};
+    try {
+      return Map<String, dynamic>.from(jsonDecode(raw) as Map);
+    } catch (_) {
+      return <String, dynamic>{};
+    }
+  }
+
+  WebSearchProviderConfig get readingWebSearchConfig {
+    final raw = prefs.getString('readingWebSearchConfig');
+    if (raw == null || raw.isEmpty) {
+      return const WebSearchProviderConfig.tavily();
+    }
+    try {
+      return WebSearchProviderConfig.fromJson(
+        Map<String, dynamic>.from(jsonDecode(raw) as Map),
+      );
+    } catch (_) {
+      return const WebSearchProviderConfig.tavily();
+    }
+  }
+
+  set readingWebSearchConfig(WebSearchProviderConfig config) {
+    prefs.setString('readingWebSearchConfig', jsonEncode(config.toJson()));
+    notifyListeners();
+  }
+
+  bool get readingMultiAgentEnabled =>
+      prefs.getBool('readingMultiAgentEnabled') ?? true;
+
+  set readingMultiAgentEnabled(bool value) {
+    prefs.setBool('readingMultiAgentEnabled', value);
+    notifyListeners();
+  }
+
+  /// Opt-in gate for the local Reading Agent runtime. This intentionally does
+  /// not enable the legacy reading coach.
+  bool get readingAgentBetaEnabled =>
+      prefs.getBool('readingAgentBetaEnabled') ?? false;
+
+  set readingAgentBetaEnabled(bool value) {
+    prefs.setBool('readingAgentBetaEnabled', value);
+    notifyListeners();
+  }
+
+  TrustedSourcePack readingTrustedSourcePack(ReadingAiMode mode) {
+    final builtin = TrustedSourcePack.forMode(mode);
+    final raw = prefs.getString('readingTrustedSourceDomains');
+    if (raw == null || raw.isEmpty) return builtin;
+    try {
+      final values = jsonDecode(raw) as Map<String, dynamic>;
+      final domains = (values[mode.name] as List?)
+          ?.map((value) => value.toString().trim().toLowerCase())
+          .where((value) => value.isNotEmpty)
+          .toSet()
+          .toList(growable: false);
+      if (domains == null) return builtin;
+      return TrustedSourcePack(
+        id: builtin.id,
+        mode: mode,
+        domains: domains,
+      );
+    } catch (_) {
+      return builtin;
+    }
+  }
+
+  void setReadingTrustedSourceDomains(
+    ReadingAiMode mode,
+    List<String> domains,
+  ) {
+    final raw = prefs.getString('readingTrustedSourceDomains');
+    Map<String, dynamic> values = {};
+    if (raw != null && raw.isNotEmpty) {
+      try {
+        values = Map<String, dynamic>.from(jsonDecode(raw) as Map);
+      } catch (_) {}
+    }
+    values[mode.name] = domains
+        .map((value) => value.trim().toLowerCase())
+        .where((value) => value.isNotEmpty)
+        .toSet()
+        .toList(growable: false);
+    prefs.setString('readingTrustedSourceDomains', jsonEncode(values));
+    notifyListeners();
+  }
+
   // AI panel width (for split mode)
   double get aiPanelWidth {
     return prefs.getDouble('aiPanelWidth') ?? 300;
@@ -1658,6 +2308,15 @@ class Prefs extends ChangeNotifier {
     notifyListeners();
   }
 
+  AiPanelWidthRatio get aiPanelWidthRatio => AiPanelWidthRatio.fromCode(
+        prefs.getString('aiPanelWidthRatio') ?? AiPanelWidthRatio.half.code,
+      );
+
+  set aiPanelWidthRatio(AiPanelWidthRatio ratio) {
+    prefs.setString('aiPanelWidthRatio', ratio.code);
+    notifyListeners();
+  }
+
   // AI panel height (for split mode)
   double get aiPanelHeight {
     return prefs.getDouble('aiPanelHeight') ?? 300;
@@ -1665,6 +2324,50 @@ class Prefs extends ChangeNotifier {
 
   set aiPanelHeight(double height) {
     prefs.setDouble('aiPanelHeight', height);
+    notifyListeners();
+  }
+
+  // Wireless Transfer settings
+  int get wirelessTransferAutoShutdown {
+    return prefs.getInt('wirelessTransferAutoShutdown') ?? 600; // 10 minutes
+  }
+
+  set wirelessTransferAutoShutdown(int seconds) {
+    prefs.setInt('wirelessTransferAutoShutdown', seconds);
+    notifyListeners();
+  }
+
+  int get wirelessTransferPort {
+    return prefs.getInt('wirelessTransferPort') ?? 8080;
+  }
+
+  set wirelessTransferPort(int port) {
+    prefs.setInt('wirelessTransferPort', port);
+    notifyListeners();
+  }
+
+  // Translation margin: how many pages ahead to pre-translate (in pixels)
+  // 800px ≈ 1.5 pages, 1600px ≈ 3 pages, 2400px ≈ 5 pages
+  int get translationMargin {
+    return prefs.getInt('translationMargin') ?? 1600; // 3 pages default
+  }
+
+  set translationMargin(int px) {
+    prefs.setInt('translationMargin', px);
+    notifyListeners();
+  }
+
+  // AI Fallback provider
+  String? get aiFallbackProvider {
+    return prefs.getString('aiFallbackProvider');
+  }
+
+  set aiFallbackProvider(String? providerId) {
+    if (providerId != null) {
+      prefs.setString('aiFallbackProvider', providerId);
+    } else {
+      prefs.remove('aiFallbackProvider');
+    }
     notifyListeners();
   }
 }

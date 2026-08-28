@@ -2,6 +2,9 @@ import 'dart:math' as math;
 
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/page/reading_page.dart';
+import 'package:anx_reader/service/dictionary/chinese_dictionary.dart';
+import 'package:anx_reader/service/dictionary/english_dictionary.dart';
+import 'package:anx_reader/utils/platform_utils.dart';
 import 'package:anx_reader/widgets/common/axis_flex.dart';
 import 'package:anx_reader/widgets/context_menu/excerpt_menu.dart';
 import 'package:anx_reader/widgets/context_menu/reader_note_menu.dart';
@@ -9,8 +12,7 @@ import 'package:anx_reader/widgets/context_menu/translation_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
 
-import 'package:anx_reader/dao/book_note.dart';
-import 'package:anx_reader/models/book_note.dart';
+import 'package:anx_reader/models/selection_snapshot.dart';
 
 Future<void> showContextMenu(
     BuildContext context,
@@ -23,39 +25,34 @@ Future<void> showContextMenu(
     int? annoId,
     bool footnote,
     Axis axis,
-    {String? contextText}) async {
+    {String? contextText,
+    SelectionSnapshot? selectionSnapshot,
+    bool Function()? isCurrentRequest}) async {
   final playerKey = epubPlayerKey.currentState;
   if (playerKey == null) return;
+  final mediaQuery = MediaQuery.of(context);
+  final overlay = Overlay.of(context);
+  final secondaryContainerColor =
+      Theme.of(context).colorScheme.secondaryContainer;
   bool isNewNote = false;
+  final isDictionaryLookup =
+      EnglishDictionaryService.isEnglishWord(annoContent) ||
+          ChineseDictionaryService.isLookupCandidate(annoContent);
 
-  if (Prefs().autoMarkSelection && annoId == null) {
-    // Auto-highlight logic
-    final String type = Prefs().annotationType;
-    final String color = Prefs().annotationColor;
-
-    final BookNote bookNote = BookNote(
-      bookId: playerKey.book.id,
-      content: annoContent,
-      cfi: annoCfi,
-      chapter: playerKey.chapterTitle,
-      type: type,
-      color: color,
-      createTime: DateTime.now(),
-      updateTime: DateTime.now(),
-    );
-
-    final id = await bookNoteDao.save(bookNote);
-    bookNote.setId(id);
-    playerKey.addAnnotation(bookNote);
-    annoId = id;
-    isNewNote = true;
+  if (annoId == null && selectionSnapshot != null) {
+    annoId = await playerKey.upsertSelectionAutoMark(selectionSnapshot);
+    isNewNote = annoId != null;
   }
+
+  // Auto-mark persistence and dictionary setup are asynchronous. A newer
+  // selection may have arrived while they were running; never let the older
+  // request replace the menu for the current selection.
+  if (isCurrentRequest?.call() == false || !context.mounted) return;
 
   final renderBox =
       epubPlayerKey.currentContext?.findRenderObject() as RenderBox?;
   final renderBoxSize = renderBox?.size;
 
-  final mediaQuery = MediaQuery.of(context);
   final double screenHeight = renderBoxSize?.height ?? mediaQuery.size.height;
   final double screenWidth = renderBoxSize?.width ?? mediaQuery.size.width;
   final double keyboardInset = mediaQuery.viewInsets.bottom;
@@ -110,22 +107,21 @@ Future<void> showContextMenu(
     bottomInset: keyboardInset,
   );
 
-  playerKey.removeOverlay();
+  playerKey.removeOverlay(preserveAutoMarkSession: true);
 
   void onClose() {
+    playerKey.finalizeSelectionAutoMark();
     playerKey.webViewController.evaluateJavascript(source: 'clearSelection()');
     playerKey.removeOverlay();
   }
 
   final decoration = BoxDecoration(
-    color: Prefs().eInkMode
-        ? Colors.white
-        : Theme.of(context).colorScheme.secondaryContainer,
+    color: Prefs().eInkMode ? Colors.white : secondaryContainerColor,
     borderRadius: BorderRadius.circular(10),
     boxShadow: [
       if (!Prefs().eInkMode)
         BoxShadow(
-          color: Colors.black.withOpacity(0.1),
+          color: Colors.black.withValues(alpha: 0.1),
           spreadRadius: 5,
           blurRadius: 7,
           offset: const Offset(0, 3),
@@ -149,11 +145,15 @@ Future<void> showContextMenu(
       annoId: annoId,
       footnote: footnote,
       contextText: contextText,
+      selectionSnapshot: selectionSnapshot,
       decoration: decoration,
       onClose: onClose,
       menuConstraints: menuConstraints,
       initialPlacement: initialPlacement,
-      showTranslationDefault: !isNewNote && Prefs().autoTranslateSelection,
+      showTranslationDefault: isDictionaryLookup ||
+          (!isNewNote &&
+              Prefs().autoTranslateSelection &&
+              !AnxPlatform.isAndroid),
       horizontalMargin: horizontalMargin,
       verticalMargin: verticalMargin,
       gap: gap,
@@ -161,7 +161,7 @@ Future<void> showContextMenu(
     );
   });
 
-  Overlay.of(context).insert(playerKey.contextMenuEntry!);
+  overlay.insert(playerKey.contextMenuEntry!);
 }
 
 class _MenuPlacement {
@@ -251,6 +251,7 @@ class _ContextMenuOverlay extends StatefulWidget {
     required this.annoId,
     required this.footnote,
     this.contextText,
+    this.selectionSnapshot,
     required this.decoration,
     required this.onClose,
     required this.menuConstraints,
@@ -270,6 +271,7 @@ class _ContextMenuOverlay extends StatefulWidget {
   final int? annoId;
   final bool footnote;
   final String? contextText;
+  final SelectionSnapshot? selectionSnapshot;
   final BoxDecoration decoration;
   final VoidCallback onClose;
   final BoxConstraints menuConstraints;
@@ -422,9 +424,10 @@ class _ContextMenuOverlayState extends State<_ContextMenuOverlay>
     }
   }
 
-  void _toggleTranslationMenu() {
+  void _showTranslationMenuPanel() {
+    if (_showTranslationMenu) return;
     setState(() {
-      _showTranslationMenu = !_showTranslationMenu;
+      _showTranslationMenu = true;
     });
     _scheduleRecalculate();
   }
@@ -514,12 +517,16 @@ class _ContextMenuOverlayState extends State<_ContextMenuOverlay>
                                   onClose: widget.onClose,
                                   footnote: widget.footnote,
                                   decoration: widget.decoration,
-                                  toggleTranslationMenu: _toggleTranslationMenu,
+                                  showTranslationMenu:
+                                      _showTranslationMenuPanel,
                                   toggleReaderNoteMenu: _toggleReaderNoteMenu,
                                   openReaderNoteMenu: _openReaderNoteMenu,
                                   onNoteCreated: _handleNoteCreated,
+                                  onLayoutChanged: _scheduleRecalculate,
                                   axis: widget.axis,
                                   reverse: _reverse,
+                                  contextText: widget.contextText,
+                                  selectionSnapshot: widget.selectionSnapshot,
                                 ),
                               ],
                             ),
@@ -552,6 +559,7 @@ class _ContextMenuOverlayState extends State<_ContextMenuOverlay>
                                 decoration: widget.decoration,
                                 axis: widget.axis,
                                 contextText: widget.contextText,
+                                position: widget.annoCfi,
                               ),
                             ],
                           ),

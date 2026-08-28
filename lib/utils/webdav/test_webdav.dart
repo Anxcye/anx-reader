@@ -35,37 +35,50 @@ Future<bool> testEnableWebdav() async {
   return false;
 }
 
-void chooseDirection(WidgetRef ref) {
-  // BuildContext context = navigatorKey.currentContext!;
-  showDialog(
-      context: navigatorKey.currentContext!,
-      builder: (context) {
-        return SimpleDialog(
-          title: Text(L10n.of(context).webdavChoose_Sources),
-          children: [
-            SimpleDialogOption(
-              onPressed: () async {
-                Navigator.pop(context);
-                await Sync().syncData(SyncDirection.upload, ref,
-                    trigger: SyncTrigger.manual);
-              },
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 6),
-                child: Text(L10n.of(context).webdavUpload),
+bool _isChoosingSyncDirection = false;
+
+Future<void> chooseDirection(WidgetRef ref) async {
+  final context = navigatorKey.currentContext;
+  if (context == null || _isChoosingSyncDirection) return;
+  if (ref.read(syncProvider).isSyncing) {
+    AnxToast.show(L10n.of(context).webdavSyncing);
+    return;
+  }
+
+  _isChoosingSyncDirection = true;
+  try {
+    await showDialog(
+        context: navigatorKey.currentContext!,
+        builder: (context) {
+          return SimpleDialog(
+            title: Text(L10n.of(context).webdavChoose_Sources),
+            children: [
+              SimpleDialogOption(
+                onPressed: () async {
+                  Navigator.pop(context);
+                  await Sync().syncData(SyncDirection.upload, ref,
+                      trigger: SyncTrigger.manual);
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 6),
+                  child: Text(L10n.of(context).webdavUpload),
+                ),
               ),
-            ),
-            SimpleDialogOption(
-              onPressed: () async {
-                Navigator.pop(context);
-                await Sync().syncData(SyncDirection.download, ref,
-                    trigger: SyncTrigger.manual);
-              },
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 6),
-                child: Text(L10n.of(context).webdavDownload),
+              SimpleDialogOption(
+                onPressed: () async {
+                  Navigator.pop(context);
+                  await Sync().syncData(SyncDirection.download, ref,
+                      trigger: SyncTrigger.manual);
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 6),
+                  child: Text(L10n.of(context).webdavDownload),
+                ),
               ),
-            ),
-          ],
-        );
-      });
+            ],
+          );
+        });
+  } finally {
+    _isChoosingSyncDirection = false;
+  }
 }

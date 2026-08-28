@@ -1,0 +1,27 @@
+name: share_handler_android
+description: An implementation for the Android platform of the Flutter share_handler plugin.
+repository: https://github.com/AboutShout/share_handler/tree/main/share_handler_android
+version: 0.0.11
+
+environment:
+  sdk: ">=2.14.0 <4.0.0"
+  flutter: ">=2.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  share_handler_platform_interface: ^0.0.6
+  # share_handler_platform_interface:
+  #   path: ../share_handler_platform_interface
+
+dev_dependencies:
+  flutter_lints:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: com.shoutsocial.share_handler
+        pluginClass: ShareHandlerPlugin

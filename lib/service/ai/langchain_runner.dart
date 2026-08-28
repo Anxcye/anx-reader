@@ -5,13 +5,39 @@ import 'package:anx_reader/utils/ai_reasoning_parser.dart';
 import 'package:anx_reader/utils/log/common.dart';
 import 'package:langchain/langchain.dart';
 
+typedef AiTokenUsageRecorder = void Function({
+  required int inputTokens,
+  required int outputTokens,
+  required bool estimated,
+});
+
 class CancelableLangchainRunner {
+  CancelableLangchainRunner({this.onTokenUsage});
+
   static const String thinkTag = '<think/>';
+  final AiTokenUsageRecorder? onTokenUsage;
   StreamSubscription<ChatResult>? _subscription;
+  StreamController<String>? _controller;
+  BaseChatModel? _activeModel;
+  Completer<void>? _activeIteration;
 
   void cancel() {
-    _subscription?.cancel();
+    final subscription = _subscription;
+    final controller = _controller;
+    final model = _activeModel;
+    final iteration = _activeIteration;
     _subscription = null;
+    _controller = null;
+    _activeModel = null;
+    _activeIteration = null;
+    if (iteration != null && !iteration.isCompleted) iteration.complete();
+    unawaited(() async {
+      await subscription?.cancel();
+      if (model != null) await _closeModel(model);
+      if (controller != null && !controller.isClosed) {
+        await controller.close();
+      }
+    }());
   }
 
   Stream<String> stream({
@@ -22,6 +48,7 @@ class CancelableLangchainRunner {
     String answerBuffer = '';
     bool reasoningDetected = false;
     bool answerPhaseStarted = false;
+    LanguageModelUsage? usage;
 
     late StreamController<String> controller;
     controller = StreamController<String>(
@@ -29,6 +56,7 @@ class CancelableLangchainRunner {
         final source = model.stream(prompt);
         _subscription = source.listen(
           (event) {
+            usage = _mergeUsage(usage, event.usage);
             final rawChunk = event.output.content;
             final reasoningChunk = event.output.reasoningContent;
             if (rawChunk.isEmpty && reasoningChunk.isEmpty) {
@@ -77,11 +105,18 @@ class CancelableLangchainRunner {
             }
           },
           onDone: () async {
+            _recordUsage(
+              usage,
+              prompt: prompt.toChatMessages(),
+              response: '$thinkBuffer$answerBuffer',
+            );
             await _closeModel(model);
             if (!controller.isClosed) {
               await controller.close();
             }
             _subscription = null;
+            if (identical(_controller, controller)) _controller = null;
+            if (identical(_activeModel, model)) _activeModel = null;
           },
           cancelOnError: false,
         );
@@ -93,8 +128,12 @@ class CancelableLangchainRunner {
         if (!controller.isClosed) {
           await controller.close();
         }
+        if (identical(_controller, controller)) _controller = null;
+        if (identical(_activeModel, model)) _activeModel = null;
       },
     );
+    _controller = controller;
+    _activeModel = model;
 
     return controller.stream;
   }
@@ -108,6 +147,8 @@ class CancelableLangchainRunner {
     int maxIterations = 120,
   }) {
     final controller = StreamController<String>();
+    _controller = controller;
+    _activeModel = model;
 
     Future<void>(() async {
       final parser = const ToolsAgentOutputParser();
@@ -194,6 +235,7 @@ class CancelableLangchainRunner {
 
           ChatResult? aggregated;
           final completer = Completer<void>();
+          _activeIteration = completer;
           _subscription = model.stream(prompt, options: options).listen(
             (chunk) {
               final normalizedChunk = _normalizeThinkChunk(chunk);
@@ -228,6 +270,9 @@ class CancelableLangchainRunner {
             },
             onDone: () {
               _subscription = null;
+              if (identical(_activeIteration, completer)) {
+                _activeIteration = null;
+              }
               if (!completer.isCompleted) {
                 completer.complete();
               }
@@ -242,6 +287,12 @@ class CancelableLangchainRunner {
           }
 
           final message = aggregated!.output;
+          _recordUsage(
+            aggregated!.usage,
+            prompt: promptMessages,
+            response:
+                '${message.reasoningContent}${message.content}${message.toolCalls}',
+          );
           final hydratedMessage = _hydrateToolArguments(message);
           final actions = await parser.parseChatMessage(hydratedMessage);
 
@@ -326,16 +377,87 @@ class CancelableLangchainRunner {
           controller.addError(error, stack);
         }
       } finally {
+        _activeIteration = null;
         await _subscription?.cancel();
         _subscription = null;
         await _closeModel(model);
         if (!controller.isClosed) {
           await controller.close();
         }
+        if (identical(_controller, controller)) _controller = null;
+        if (identical(_activeModel, model)) _activeModel = null;
       }
     });
 
     return controller.stream;
+  }
+
+  LanguageModelUsage? _mergeUsage(
+    LanguageModelUsage? current,
+    LanguageModelUsage next,
+  ) {
+    if (!_hasUsage(next)) return current;
+    return current == null ? next : current.concat(next);
+  }
+
+  bool _hasUsage(LanguageModelUsage usage) =>
+      (usage.promptTokens ?? 0) > 0 ||
+      (usage.responseTokens ?? 0) > 0 ||
+      (usage.totalTokens ?? 0) > 0;
+
+  void _recordUsage(
+    LanguageModelUsage? usage, {
+    required List<ChatMessage> prompt,
+    required String response,
+  }) {
+    final recorder = onTokenUsage;
+    if (recorder == null) return;
+    if (usage != null && _hasUsage(usage)) {
+      final reportedInput = usage.promptTokens;
+      final reportedOutput = usage.responseTokens;
+      if (reportedInput != null || reportedOutput != null) {
+        // A few providers expose only response_tokens, or expose a zero
+        // prompt_tokens value while streaming. Treat zero as missing here:
+        // otherwise the settings page permanently reports input usage as 0.
+        // The prompt is available locally, so estimate only the missing side.
+        final estimatedInput = _estimateTokens(
+          prompt.map((message) => message.contentAsString).join('\n'),
+        );
+        final estimatedOutput = _estimateTokens(response);
+        final hasReportedInput = reportedInput != null && reportedInput > 0;
+        final hasReportedOutput = reportedOutput != null && reportedOutput > 0;
+        final input = hasReportedInput ? reportedInput : estimatedInput;
+        final output = hasReportedOutput ? reportedOutput : estimatedOutput;
+        recorder(
+          inputTokens: input,
+          outputTokens: output,
+          estimated: !hasReportedInput || !hasReportedOutput,
+        );
+        return;
+      }
+    }
+    recorder(
+      inputTokens: _estimateTokens(
+        prompt.map((message) => message.contentAsString).join('\n'),
+      ),
+      outputTokens: _estimateTokens(response),
+      estimated: true,
+    );
+  }
+
+  int _estimateTokens(String text) {
+    if (text.isEmpty) return 0;
+    var cjk = 0;
+    var other = 0;
+    for (final rune in text.runes) {
+      if ((rune >= 0x3400 && rune <= 0x9fff) ||
+          (rune >= 0xf900 && rune <= 0xfaff)) {
+        cjk++;
+      } else {
+        other++;
+      }
+    }
+    return cjk + (other / 4).ceil();
   }
 
   ChatResult _normalizeThinkChunk(ChatResult chunk) {

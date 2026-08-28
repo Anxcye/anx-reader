@@ -97,6 +97,7 @@ class BookshelfPageState extends ConsumerState<BookshelfPage>
       fileList = files.map((file) => File(file.path!)).toList();
     }
 
+    if (!mounted) return;
     importBookList(fileList, context, ref);
   }
 
@@ -481,7 +482,10 @@ class BookshelfPageState extends ConsumerState<BookshelfPage>
                   fileName: file.name,
                 ));
               }
-              importBookList(files, context, ref);
+              if (!mounted) return;
+              final rootContext = navigatorKey.currentContext;
+              if (rootContext == null || !rootContext.mounted) return;
+              importBookList(files, rootContext, ref);
               setState(() {
                 _dragging = false;
               });

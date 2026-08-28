@@ -2,6 +2,7 @@ import 'package:anx_reader/utils/platform_utils.dart';
 
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/enums/page_turn_mode.dart';
+import 'package:anx_reader/enums/long_press_selection_mode.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/page/reading_page.dart';
 import 'package:anx_reader/utils/ui/status_bar.dart';
@@ -9,6 +10,7 @@ import 'package:anx_reader/widgets/common/anx_segmented_button.dart';
 import 'package:anx_reader/widgets/reading_page/more_settings/page_turning/diagram.dart';
 import 'package:anx_reader/widgets/reading_page/more_settings/page_turning/page_turn_dropdown.dart';
 import 'package:anx_reader/widgets/reading_page/more_settings/page_turning/types_and_icons.dart';
+import 'package:anx_reader/widgets/reading_page/more_settings/selection_menu_settings_dialog.dart';
 import 'package:flutter/material.dart';
 
 class OtherSettings extends StatefulWidget {
@@ -219,6 +221,41 @@ class _OtherSettingsState extends State<OtherSettings> {
       );
     }
 
+    Widget longPressSelectionMode() {
+      return ListTile(
+        contentPadding: EdgeInsets.zero,
+        title: Text(L10n.of(context).readingPageLongPressSelection),
+        subtitle: Text(L10n.of(context).readingPageLongPressSelectionTips),
+        trailing: SegmentedButton<LongPressSelectionMode>(
+          segments: [
+            ButtonSegment(
+              value: LongPressSelectionMode.word,
+              label: Text(L10n.of(context).selectionRangeWord),
+            ),
+            ButtonSegment(
+              value: LongPressSelectionMode.sentence,
+              label: Text(L10n.of(context).selectionRangeSentence),
+            ),
+          ],
+          selected: {Prefs().longPressSelectionMode},
+          onSelectionChanged: (selected) {
+            setState(() => Prefs().longPressSelectionMode = selected.first);
+            epubPlayerKey.currentState?.configureSelection();
+          },
+        ),
+      );
+    }
+
+    Widget selectionMenuSettings() {
+      return ListTile(
+        contentPadding: EdgeInsets.zero,
+        title: Text(L10n.of(context).selectionMenuSettingsTitle),
+        subtitle: Text(L10n.of(context).selectionMenuSettingsTips),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () => showSelectionMenuSettingsDialog(context),
+      );
+    }
+
     ListTile autoSummaryPreviousContent() {
       return ListTile(
         contentPadding: EdgeInsets.zero,
@@ -329,6 +366,8 @@ class _OtherSettingsState extends State<OtherSettings> {
           if (AnxPlatform.isDesktop) keyboardShortcutTurnPage(),
           autoAdjustReadingTheme(),
           autoTranslateSelection(),
+          longPressSelectionMode(),
+          selectionMenuSettings(),
           autoMarkSelection(),
           autoSummaryPreviousContent(),
           screenTimeout(),

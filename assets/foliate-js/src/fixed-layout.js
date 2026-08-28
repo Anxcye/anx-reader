@@ -44,20 +44,29 @@ export class FixedLayout extends HTMLElement {
     constructor() {
         super()
 
-        const sheet = new CSSStyleSheet()
-        this.#root.adoptedStyleSheets = [sheet]
-        sheet.replaceSync(`:host {
+        const css = `:host {
             width: 100%;
             height: 100%;
             display: flex;
             justify-content: center;
             align-items: center;
-        }`)
+        }`
+        if ('adoptedStyleSheets' in this.#root &&
+            typeof CSSStyleSheet.prototype.replaceSync === 'function') {
+            const sheet = new CSSStyleSheet()
+            sheet.replaceSync(css)
+            this.#root.adoptedStyleSheets = [sheet]
+        } else {
+            const style = document.createElement('style')
+            style.textContent = css
+            this.#root.append(style)
+        }
 
         this.#observer.observe(this)
     }
     async #createFrame(position, { index, src }) {
         const element = document.createElement('div')
+        element.__sectionIndex = index
         const iframe = document.createElement('iframe')
         element.append(iframe)
         Object.assign(iframe.style, {
@@ -80,7 +89,7 @@ export class FixedLayout extends HTMLElement {
                 this.dispatchEvent(new CustomEvent('load', { detail: { doc, index } }))
                 const { width, height } = getViewport(doc, this.defaultViewport)
                 resolve({
-                    element, iframe,
+                    element, iframe, index,
                     width: parseFloat(width),
                     height: parseFloat(height),
                 })
@@ -227,7 +236,7 @@ export class FixedLayout extends HTMLElement {
     }
     #reportLocation(reason) {
         this.dispatchEvent(new CustomEvent('relocate', { detail:
-            { reason, range: null, index: this.index, fraction: 0, size: 1 } }))
+            { reason, range: null, index: this.index, fraction: 0, size: 0 } }))
     }
     getSpreadOf(section) {
         const spreads = this.#spreads
@@ -244,21 +253,35 @@ export class FixedLayout extends HTMLElement {
             this.#render(side)
             return
         }
-        this.#index = index
+        const previousIndex = this.#index
         const spread = this.#spreads[index]
-        if (spread.center) {
-            const index = this.book.sections.indexOf(spread.center)
-            const src = await spread.center?.load?.()
-            await this.#showSpread({ center: { index, src } })
-        } else {
-            const indexL = this.book.sections.indexOf(spread.left)
-            const indexR = this.book.sections.indexOf(spread.right)
-            const srcL = await spread.left?.load?.()
-            const srcR = await spread.right?.load?.()
-            const left = { index: indexL, src: srcL }
-            const right = { index: indexR, src: srcR }
-            await this.#showSpread({ left, right, side })
+        try {
+            if (spread.center) {
+                const sectionIndex = this.book.sections.indexOf(spread.center)
+                const src = await spread.center?.load?.()
+                await this.#showSpread({
+                    center: { index: sectionIndex, src },
+                })
+            } else {
+                const indexL = this.book.sections.indexOf(spread.left)
+                const indexR = this.book.sections.indexOf(spread.right)
+                const [srcL, srcR] = await Promise.all([
+                    spread.left?.load?.(),
+                    spread.right?.load?.(),
+                ])
+                const left = { index: indexL, src: srcL }
+                const right = { index: indexR, src: srcR }
+                await this.#showSpread({ left, right, side })
+            }
+        } catch (error) {
+            if (!error.code) error.code = 'fixed_layout_page_load_failed'
+            if (previousIndex < 0) throw error
+            this.dispatchEvent(new CustomEvent('section-error', {
+                detail: { index, error },
+            }))
+            return false
         }
+        this.#index = index
         this.#reportLocation(reason)
     }
     async select(target) {
@@ -286,7 +309,8 @@ export class FixedLayout extends HTMLElement {
     getContents() {
         return Array.from(this.#root.querySelectorAll('iframe'), frame => ({
             doc: frame.contentDocument,
-            // TODO: index, overlayer
+            index: frame.parentElement?.__sectionIndex,
+            // TODO: overlayer
         }))
     }
     destroy() {

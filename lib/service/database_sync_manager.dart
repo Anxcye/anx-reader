@@ -114,11 +114,11 @@ class DatabaseSyncManager {
     try {
       // Check if file exists and is not empty
       final dbFile = io.File(dbPath);
-      if (!dbFile.existsSync()) {
+      if (!await dbFile.exists()) {
         return DatabaseValidationResult.invalid('Database file does not exist');
       }
 
-      final fileSize = dbFile.lengthSync();
+      final fileSize = await dbFile.length();
       if (fileSize < 1024) {
         // Database file should be at least 1KB
         return DatabaseValidationResult.invalid(
@@ -256,7 +256,7 @@ class DatabaseSyncManager {
   static Future<void> _cleanupTempFile(String tempDbPath) async {
     try {
       final tempFile = io.File(tempDbPath);
-      if (tempFile.existsSync()) {
+      if (await tempFile.exists()) {
         await tempFile.delete();
         AnxLog.info('DatabaseSync: Cleaned up temp file: $tempDbPath');
       }
@@ -269,15 +269,21 @@ class DatabaseSyncManager {
   static Future<void> _cleanupOldBackups() async {
     try {
       final cacheDir = await getAnxCacheDir();
-      final backupFiles = cacheDir
-          .listSync()
-          .where((file) => file.path.contains(_backupDbPrefix))
+      final backupFiles = await cacheDir
+          .list()
+          .where((entity) =>
+              entity is io.File && entity.path.contains(_backupDbPrefix))
           .cast<io.File>()
           .toList();
 
       // Sort by modification time, keep the latest ones
-      backupFiles
-          .sort((a, b) => b.lastModifiedSync().compareTo(a.lastModifiedSync()));
+      final modifiedTimes = <String, DateTime>{};
+      for (final file in backupFiles) {
+        modifiedTimes[file.path] = await file.lastModified();
+      }
+      backupFiles.sort(
+        (a, b) => modifiedTimes[b.path]!.compareTo(modifiedTimes[a.path]!),
+      );
 
       if (backupFiles.length > _maxBackupCount) {
         final filesToDelete = backupFiles.skip(_maxBackupCount);
@@ -350,11 +356,11 @@ class DatabaseSyncManager {
   static Future<List<String>> getAvailableBackups() async {
     try {
       final cacheDir = await getAnxCacheDir();
-      final backupFiles = cacheDir
-          .listSync()
-          .where((file) => file.path.contains(_backupDbPrefix))
-          .cast<io.File>()
-          .map((file) => file.path)
+      final backupFiles = await cacheDir
+          .list()
+          .where((entity) =>
+              entity is io.File && entity.path.contains(_backupDbPrefix))
+          .map((entity) => entity.path)
           .toList();
 
       backupFiles.sort((a, b) => b.compareTo(a));

@@ -3,7 +3,6 @@ import 'package:anx_reader/enums/lang_list.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/service/translate/index.dart';
 import 'package:anx_reader/utils/toast/common.dart';
-import 'package:anx_reader/widgets/common/container/filled_container.dart';
 import 'package:anx_reader/widgets/settings/service_config_form.dart';
 import 'package:anx_reader/widgets/settings/settings_section.dart';
 import 'package:anx_reader/widgets/settings/settings_tile.dart';
@@ -40,34 +39,16 @@ class _TranslateSettingState extends State<TranslateSetting> {
           title: Text(L10n.of(context).underlineTranslation),
           tiles: [
             CustomSettingsTile(
-              child: FilledContainer(
-                margin: const EdgeInsets.all(2.0),
-                color: Theme.of(context).cardColor,
-                radius: 28,
-                child: Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Column(
-                    children: [
-                      TranslationConfig(
-                        setState: () => setState(() {}),
-                      ),
-                      Row(
-                        children: [
-                          Icon(Icons.info_outline, color: Colors.blue),
-                          SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              L10n.of(context).underlineTranslationTip,
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey[600],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  children: [
+                    TranslationConfig(setState: () => setState(() {})),
+                    _TranslationHint(
+                      icon: Icons.touch_app_outlined,
+                      text: L10n.of(context).underlineTranslationTip,
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -83,49 +64,147 @@ class _TranslateSettingState extends State<TranslateSetting> {
           title: Text(L10n.of(context).fullTextTranslation),
           tiles: [
             CustomSettingsTile(
-              child: FilledContainer(
-                margin: const EdgeInsets.all(2.0),
-                color: Theme.of(context).cardColor,
-                radius: 28,
-                child: Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Column(
-                    children: [
-                      FullTextTranslationConfig(
-                        setState: () => setState(() {}),
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  children: [
+                    FullTextTranslationConfig(
+                      setState: () => setState(() {}),
+                    ),
+                    const Divider(),
+                    Row(
+                      children: [
+                        const Icon(Icons.panorama, size: 20),
+                        const SizedBox(width: 8),
+                        Text(
+                          L10n.of(context).translationMargin,
+                          style: const TextStyle(fontSize: 14),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    DropdownButtonFormField<int>(
+                      initialValue: Prefs().translationMargin,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
                       ),
-                      Row(
-                        children: [
-                          Icon(Icons.info_outline, color: Colors.orange),
-                          SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              L10n.of(context).fullTextTranslationTip,
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey[600],
-                              ),
-                            ),
+                      items: [
+                        DropdownMenuItem(
+                          value: 800,
+                          child: Text(
+                            L10n.of(context).translationMargin1Page,
                           ),
-                        ],
-                      ),
-                    ],
-                  ),
+                        ),
+                        DropdownMenuItem(
+                          value: 1600,
+                          child: Text(
+                            L10n.of(context).translationMargin2Pages,
+                          ),
+                        ),
+                        DropdownMenuItem(
+                          value: 2400,
+                          child: Text(
+                            L10n.of(context).translationMargin3Pages,
+                          ),
+                        ),
+                        DropdownMenuItem(
+                          value: 3200,
+                          child: Text(
+                            L10n.of(context).translationMargin5Pages,
+                          ),
+                        ),
+                      ],
+                      onChanged: (value) {
+                        if (value != null) {
+                          Prefs().translationMargin = value;
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      L10n.of(context).translationMarginTip,
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    _TranslationHint(
+                      icon: Icons.library_books_outlined,
+                      text: L10n.of(context).fullTextTranslationTip,
+                    ),
+                  ],
                 ),
               ),
             ),
           ],
         ),
         SettingsSection(
+          title: Text(L10n.of(context).translationFallbackTitle),
+          tiles: const [
+            CustomSettingsTile(child: _TranslationFallbackSummary()),
+          ],
+        ),
+        SettingsSection(
           title: Text(L10n.of(context).translationServiceConfiguration),
           tiles: [
-            for (var service in TranslateService.activeValues)
-              CustomSettingsTile(
-                child: TranslateSettingItem(service: service),
-              ),
+            for (final service in const [
+              TranslateService.microsoftApi,
+              TranslateService.googleApi,
+              TranslateService.deepl,
+            ])
+              CustomSettingsTile(child: TranslateSettingItem(service: service)),
           ],
         ),
       ],
+    );
+  }
+}
+
+class _TranslationHint extends StatelessWidget {
+  const _TranslationHint({required this.icon, required this.text});
+
+  final IconData icon;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 18),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(text, style: Theme.of(context).textTheme.bodySmall),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TranslationFallbackSummary extends StatelessWidget {
+  const _TranslationFallbackSummary();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.alt_route_rounded),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              L10n.of(context).translationFallbackTip,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -174,7 +253,9 @@ class TranslationConfig extends StatelessWidget {
                   showModalBottomSheet(
                     context: context,
                     builder: (context) => const TranslateLangPicker(
-                        isFrom: true, isWebView: false),
+                      isFrom: true,
+                      isWebView: false,
+                    ),
                   ).then((value) {
                     setState();
                   });
@@ -189,7 +270,9 @@ class TranslationConfig extends StatelessWidget {
                   showModalBottomSheet(
                     context: context,
                     builder: (context) => const TranslateLangPicker(
-                        isFrom: false, isWebView: false),
+                      isFrom: false,
+                      isWebView: false,
+                    ),
                   ).then((value) {
                     setState();
                   });
@@ -251,7 +334,9 @@ class FullTextTranslationConfig extends StatelessWidget {
                   showModalBottomSheet(
                     context: context,
                     builder: (context) => const TranslateLangPicker(
-                        isFrom: true, isWebView: true),
+                      isFrom: true,
+                      isWebView: true,
+                    ),
                   ).then((value) {
                     setState();
                   });
@@ -266,7 +351,9 @@ class FullTextTranslationConfig extends StatelessWidget {
                   showModalBottomSheet(
                     context: context,
                     builder: (context) => const TranslateLangPicker(
-                        isFrom: false, isWebView: true),
+                      isFrom: false,
+                      isWebView: true,
+                    ),
                   ).then((value) {
                     setState();
                   });
@@ -327,8 +414,11 @@ class FullTextTranslateServicePicker extends StatelessWidget {
 }
 
 class TranslateLangPicker extends StatelessWidget {
-  const TranslateLangPicker(
-      {super.key, required this.isFrom, this.isWebView = false});
+  const TranslateLangPicker({
+    super.key,
+    required this.isFrom,
+    this.isWebView = false,
+  });
 
   final bool isFrom;
   final bool isWebView;
@@ -339,8 +429,10 @@ class TranslateLangPicker extends StatelessWidget {
       itemCount: LangListEnum.values.length,
       itemBuilder: (context, index) => ListTile(
         title: Text(LangListEnum.values[index].getNative(context)),
-        subtitle: Text(LangListEnum.values[index].name[0].toUpperCase() +
-            LangListEnum.values[index].name.substring(1)),
+        subtitle: Text(
+          LangListEnum.values[index].name[0].toUpperCase() +
+              LangListEnum.values[index].name.substring(1),
+        ),
         onTap: () {
           if (isWebView) {
             if (isFrom) {
@@ -394,11 +486,7 @@ class _TranslateSettingItemState extends State<TranslateSettingItem> {
 
   Widget languageText(String text) {
     return Expanded(
-      child: Text(
-        text,
-        style: languageTextStyle,
-        textAlign: TextAlign.center,
-      ),
+      child: Text(text, style: languageTextStyle, textAlign: TextAlign.center),
     );
   }
 
@@ -473,23 +561,25 @@ class _TranslateSettingItemState extends State<TranslateSettingItem> {
                                               MainAxisAlignment.center,
                                           children: [
                                             languageText(
-                                              Prefs()
-                                                  .translateFrom
-                                                  .getNative(context),
+                                              Prefs().translateFrom.getNative(
+                                                    context,
+                                                  ),
                                             ),
                                             const Icon(Icons.arrow_forward_ios),
                                             languageText(
-                                              Prefs()
-                                                  .translateTo
-                                                  .getNative(context),
+                                              Prefs().translateTo.getNative(
+                                                    context,
+                                                  ),
                                             ),
                                           ],
                                         ),
                                         const Divider(),
                                         const Text(testText),
                                         const Icon(Icons.arrow_downward),
-                                        translateText(testText,
-                                            service: widget.service),
+                                        translateText(
+                                          testText,
+                                          service: widget.service,
+                                        ),
                                       ],
                                     ),
                                   ),

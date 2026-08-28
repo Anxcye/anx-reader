@@ -1,15 +1,55 @@
 # Changelog
 
 ## 1.15.0
+- Fix(android): Stop pre-requesting storage permission for picker-based imports, and only request direct storage access when reading or writing public directories
+- Fix(android): Unify Android storage permission handling for export and download-path flows to reduce false permission failures
+- Feat(ai): Add "Enable Thinking" toggle in AI provider advanced settings to disable reasoning mode for models like Qwen3, improving translation speed
+- 新增(ai): AI提供商高级设置中新增"启用思考"开关，可关闭Qwen3等模型的思考模式，提升翻译速度
+- Feat(ai): Add global fallback provider support - auto-switch to backup provider when primary fails
+- 新增: AI全局备用供应商功能，主供应商失败时自动切换到备用供应商
+- Feat(ai): Add translation progress indicator during reading
+- 新增: 翻译进度指示器，显示当前翻译中的段落数量
+- Feat(translation): Add persistent translation cache with stable CFI + DOM path keys
+- 新增: 翻译缓存持久化，重新进入章节无需重复翻译
+- Feat(translation): Batch translation for translation-only mode, reducing API calls by 60-80%
+- 优化: 纯译文模式下批量翻译，减少60-80%API调用
+- Feat(translation): Strict 1:1 paragraph pairing in bilingual mode
+- 优化: 双语模式下严格保证原文/译文逐段对应
+- Feat(translation): Add retry with exponential backoff for translation failures
+- 新增: 翻译失败自动重试（指数退避，最多3次）
+- Feat(wireless): Add wireless book transfer - upload books from browser via local network with auto-shutdown
+- 新增: 无线传书功能，通过局域网从浏览器上传书籍到设备，支持自动关闭
+- Fix(translation): Filter reasoning tags from translation output to prevent thinking content leaking
+- 修复: 过滤翻译结果中的思考标签，防止思考内容泄露到译文中
 - Feat(network): Add global HTTP proxy support in advanced settings (#838) Thanks @dddXzz
 - Feat(network): Add HTTP proxy connectivity test feature (#838) Thanks @dddXzz
 - Fix(reader): Fix Android selection auto-page turn — continuous turns and missed turns when dragging across pages (#875) Thanks @addtion99
 - Fix(l10n): Update Russian translation (#874) Thanks @Xapitonov
+- Feat(ai): Add Off option to AI provider reasoning effort for providers that support disabling thinking
+- Feat(ai): Add global fallback provider support - auto-switch to backup provider when primary fails
+- Feat(ai): Add translation progress indicator during reading
+- Feat(translation): Add persistent translation cache with stable CFI + DOM path keys
+- Feat(translation): Batch translation for translation-only mode, reducing API calls by 60-80%
+- Feat(translation): Strict 1:1 paragraph pairing in bilingual mode
+- Feat(translation): Add retry with exponential backoff for translation failures
+- Feat(wireless): Add wireless book transfer - upload books from browser via local network with auto-shutdown
+- Fix(translation): Filter reasoning tags from translation output to prevent thinking content leaking
 
+- 修复(android): 调整存储权限策略，导入书籍和图片这类系统选取流程不再预先申请存储权限
+- 修复(android): 统一导出与下载目录直连场景的存储权限处理，减少误报权限失败
 - Feat(network): 新增全局 HTTP 代理支持，可在高级设置中配置代理服务器地址和端口 (#838) 感谢 @dddXzz
 - Feat(network): 新增代理连接测试功能 (#838) 感谢 @dddXzz
 - Fix(reader): 修复 Android 选区跨页自动翻页的连续翻页与漏翻问题 (#875) 感谢 @addtion99
 - Fix(l10n): 更新俄语翻译 (#874) 感谢 @Xapitonov
+- 新增(ai): AI 提供商推理强度新增“关闭”选项，用于支持禁用思考模式的供应商
+- 新增: AI全局备用供应商功能，主供应商失败时自动切换到备用供应商
+- 新增: 翻译进度指示器，显示当前翻译中的段落数量
+- 新增: 翻译缓存持久化，重新进入章节无需重复翻译
+- 优化: 纯译文模式下批量翻译，减少60-80%API调用
+- 优化: 双语模式下严格保证原文/译文逐段对应
+- 新增: 翻译失败自动重试（指数退避，最多3次）
+- 新增: 无线传书功能，通过局域网从浏览器上传书籍到设备，支持自动关闭
+- 修复: 过滤翻译结果中的思考标签，防止思考内容泄露到译文中
 
 ## 1.14.0
 - Fix(translate): Remove legacy Microsoft reverse-engineered translation service and migrate saved full-text translation preference to Microsoft Azure API

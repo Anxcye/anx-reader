@@ -15,6 +15,7 @@
   "devDependencies": {
     "@babel/core": "^7.23.0",
     "@babel/plugin-transform-class-properties": "^7.27.1",
+    "@babel/plugin-transform-logical-assignment-operators": "^7.29.7",
     "@babel/plugin-transform-nullish-coalescing-operator": "^7.27.1",
     "@babel/plugin-transform-optional-chaining": "^7.27.1",
     "@babel/plugin-transform-private-methods": "^7.27.1",

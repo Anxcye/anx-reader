@@ -12,6 +12,7 @@ import 'package:anx_reader/widgets/ai/tool_step_tile.dart';
 import 'package:anx_reader/widgets/ai/tool_tiles/mindmap_step_tile.dart';
 import 'package:anx_reader/widgets/ai/tool_tiles/organize_bookshelf_step_tile.dart';
 import 'package:anx_reader/widgets/ai/tool_tiles/apply_book_tags_step_tile.dart';
+import 'package:anx_reader/widgets/ai/tool_tiles/reading_agent_step_tile.dart';
 
 class AiStream extends ConsumerStatefulWidget {
   const AiStream({
@@ -22,6 +23,7 @@ class AiStream extends ConsumerStatefulWidget {
     this.canCopy = true,
     this.regenerate = false,
     this.useAgent = false,
+    this.allowFallback = true,
   });
 
   final PromptTemplatePayload prompt;
@@ -30,6 +32,7 @@ class AiStream extends ConsumerStatefulWidget {
   final bool canCopy;
   final bool regenerate;
   final bool useAgent;
+  final bool allowFallback;
 
   @override
   AiStreamState createState() => AiStreamState();
@@ -53,6 +56,7 @@ class AiStreamState extends ConsumerState<AiStream> {
       regenerate: regenerate,
       useAgent: widget.useAgent,
       ref: ref,
+      allowFallback: widget.allowFallback,
     );
   }
 
@@ -228,6 +232,15 @@ class AiStreamState extends ConsumerState<AiStream> {
     }
     if (step.name == 'apply_book_tags') {
       return ApplyBookTagsStepTile(step: step);
+    }
+    if (const {
+      'reading_goal_set',
+      'reading_note_create',
+      'reading_difficulty_save',
+      'reading_memory_append',
+      'reader_navigate',
+    }.contains(step.name)) {
+      return ReadingAgentStepTile(step: step);
     }
     return ToolStepTile(step: step);
   }

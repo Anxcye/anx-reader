@@ -3,13 +3,16 @@ import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/page/settings_page/ai.dart';
 import 'package:anx_reader/page/settings_page/advanced.dart';
 import 'package:anx_reader/page/settings_page/appearance.dart';
+import 'package:anx_reader/page/settings_page/dictionary.dart';
 import 'package:anx_reader/page/settings_page/developer/developer_options_page.dart';
 import 'package:anx_reader/page/settings_page/narrate.dart';
 import 'package:anx_reader/page/settings_page/reading.dart';
 import 'package:anx_reader/page/settings_page/settings_page.dart';
 import 'package:anx_reader/page/settings_page/storege.dart';
 import 'package:anx_reader/page/settings_page/sync.dart';
+import 'package:anx_reader/page/settings_page/wireless_transfer.dart';
 import 'package:anx_reader/page/settings_page/translate.dart';
+import 'package:anx_reader/page/settings_page/vocabulary_page.dart';
 import 'package:anx_reader/utils/env_var.dart';
 import 'package:anx_reader/widgets/settings/about.dart';
 import 'package:flutter/cupertino.dart';
@@ -76,7 +79,8 @@ class _SubMoreSettingsState extends State<SubMoreSettings> {
                 "icon": Icons.color_lens_outlined,
                 "sections": const AppearanceSetting(),
                 "subtitles": [
-                  L10n.of(context).settingsAppearanceTheme,
+                  L10n.of(context).settingsDeviceDisplayProfile,
+                  L10n.of(context).settingsColorAppearance,
                   L10n.of(context).settingsAppearanceDisplay,
                   L10n.of(context).settingsBookshelfCover,
                 ],
@@ -102,6 +106,15 @@ class _SubMoreSettingsState extends State<SubMoreSettings> {
                 ],
               },
               {
+                "title": L10n.of(context).settingsWirelessTransfer,
+                "icon": Icons.wifi_outlined,
+                "sections": const WirelessTransferPage(),
+                "subtitles": [
+                  L10n.of(context).settingsWirelessTransferStatus,
+                  L10n.of(context).settingsWirelessTransferAddress,
+                ],
+              },
+              {
                 "title": L10n.of(context).settingsNarrate,
                 "icon": EvaIcons.headphones,
                 "sections": const NarrateSettings(),
@@ -118,6 +131,21 @@ class _SubMoreSettingsState extends State<SubMoreSettings> {
                   L10n.of(context).settingsTranslate,
                 ],
               },
+              {
+                "title": L10n.of(context).settingsDictionary,
+                "icon": Icons.auto_stories_outlined,
+                "sections": const DictionarySettings(),
+                "subtitles": [L10n.of(context).dictionaryImportHint],
+              },
+              if (Prefs().bottomNavigatorShowVocabulary)
+                {
+                  "title": L10n.of(context).vocabularyTitle,
+                  "icon": Icons.menu_book_outlined,
+                  "sections": const VocabularyPage(),
+                  "subtitles": [
+                    L10n.of(context).vocabularySubtitle,
+                  ],
+                },
               if (EnvVar.enableAIFeature)
                 {
                   "title": L10n.of(context).settingsAi,

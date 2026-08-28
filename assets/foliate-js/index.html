@@ -65,7 +65,14 @@
 
     const chromeMatch = ua.match(/Chrome\/(\d+)/);
     const chromeVersion = chromeMatch ? parseInt(chromeMatch[1], 10) : NaN;
+    const isChrome83WebView = chromeVersion === 83;
     const shouldUseModernBundle = isAppleDevice || (!Number.isNaN(chromeVersion) && chromeVersion >= 100);
+    window.__ANX_WEBVIEW_COMPAT__ = {
+      chromeVersion: Number.isNaN(chromeVersion) ? null : chromeVersion,
+      legacy: !shouldUseModernBundle,
+      chrome83: isChrome83WebView,
+    };
+    console.log('AnxWebViewCompat', JSON.stringify(window.__ANX_WEBVIEW_COMPAT__));
 
     const loadScript = (src, options = {}) => new Promise((resolve, reject) => {
       const script = document.createElement('script');
@@ -81,6 +88,22 @@
       document.head.appendChild(script);
     });
 
+    const reportBootstrapError = (error) => {
+      const payload = {
+        code: 'script_load_failed',
+        message: error && error.message ? error.message : String(error),
+        stage: 'bootstrap',
+      };
+      const bridge = window.flutter_inappwebview;
+      if (bridge && typeof bridge.callHandler === 'function') {
+        bridge.callHandler('onBookLoadError', payload);
+        return;
+      }
+      window.addEventListener('flutterInAppWebViewPlatformReady', () => {
+        window.flutter_inappwebview.callHandler('onBookLoadError', payload);
+      }, { once: true });
+    };
+
     (async () => {
       if (shouldUseModernBundle) {
         await loadScript('./src/vendor/pdfjs/pdf.js', { async: false, defer: false });
@@ -88,8 +111,8 @@
         return;
       }
 
-      await loadScript('./dist/bundle.js', { type: 'module' });
       await loadScript('./dist/pdf-legacy.js', { async: false, defer: false });
-    })();
+      await loadScript('./dist/bundle.js', { type: 'module' });
+    })().catch(reportBootstrapError);
   })();
 </script>

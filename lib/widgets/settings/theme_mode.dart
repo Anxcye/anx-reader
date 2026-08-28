@@ -1,5 +1,4 @@
 import 'package:anx_reader/l10n/generated/L10n.dart';
-import 'package:anx_reader/utils/theme_mode_to_string.dart';
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/widgets/common/anx_segmented_button.dart';
 import 'package:flutter/material.dart';
@@ -17,7 +16,7 @@ class ChangeThemeModeState extends State<ChangeThemeMode> {
   @override
   void initState() {
     super.initState();
-    _themeMode = themeModeToString(Prefs().themeMode);
+    _themeMode = Prefs().appThemeMode.code;
   }
 
   @override

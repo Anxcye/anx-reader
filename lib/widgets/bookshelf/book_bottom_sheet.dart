@@ -12,6 +12,7 @@ import 'package:anx_reader/providers/book_list.dart';
 import 'package:anx_reader/enums/sync_direction.dart';
 import 'package:anx_reader/providers/sync_status.dart';
 import 'package:anx_reader/service/convert_to_epub/txt/convert_from_txt.dart';
+import 'package:anx_reader/service/convert_to_epub/markdown/convert_from_markdown.dart';
 import 'package:anx_reader/service/md5_service.dart';
 import 'package:anx_reader/service/book.dart';
 import 'package:anx_reader/utils/get_path/get_base_path.dart';
@@ -204,9 +205,12 @@ class BookBottomSheet extends ConsumerWidget {
         String extension = p.extension(newFile.name);
         File fileToProcess = newFileObj;
 
-        // Convert TXT to EPUB if needed
+        // Text-based formats are normalized to EPUB for the reader pipeline.
         if (extension.toLowerCase() == '.txt') {
           fileToProcess = await convertFromTxt(newFileObj);
+          extension = '.epub';
+        } else if ({'.md', '.markdown'}.contains(extension.toLowerCase())) {
+          fileToProcess = await convertFromMarkdown(newFileObj);
           extension = '.epub';
         }
 

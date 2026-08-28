@@ -5,6 +5,7 @@ import 'package:anx_reader/widgets/common/container/filled_container.dart';
 import 'package:flutter/material.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
+import 'package:anx_reader/config/shared_preference_provider.dart';
 
 class TtsFab extends StatefulWidget {
   const TtsFab({super.key});
@@ -23,7 +24,9 @@ class _TtsFabState extends State<TtsFab> with SingleTickerProviderStateMixin {
     super.initState();
     _animationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 220),
+      duration: Prefs().reduceMotion
+          ? Duration.zero
+          : const Duration(milliseconds: 220),
     );
     _expandAnimation = CurvedAnimation(
       parent: _animationController,
@@ -75,7 +78,9 @@ class _TtsFabState extends State<TtsFab> with SingleTickerProviderStateMixin {
 
         return AnimatedOpacity(
           opacity: ttsActive ? 1.0 : 0.0,
-          duration: const Duration(milliseconds: 200),
+          duration: Prefs().reduceMotion
+              ? Duration.zero
+              : const Duration(milliseconds: 200),
           child: IgnorePointer(
             ignoring: !ttsActive,
             child: PointerInterceptor(
@@ -151,7 +156,9 @@ class _TtsFabState extends State<TtsFab> with SingleTickerProviderStateMixin {
                     onPressed: _toggleExpanded,
                     elevation: 4,
                     child: AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 200),
+                      duration: Prefs().reduceMotion
+                          ? Duration.zero
+                          : const Duration(milliseconds: 200),
                       child: _isExpanded
                           ? const Icon(
                               Icons.close,

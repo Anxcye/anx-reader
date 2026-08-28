@@ -129,6 +129,7 @@ class _HeadlessSearchSession {
   Completer<void>? _readyCompleter;
   _ActiveSearch? _activeSearch;
   Timer? _disposeTimer;
+  BookResourceHandle? _bookResource;
 
   bool get isActive => _webView != null;
 
@@ -148,20 +149,22 @@ class _HeadlessSearchSession {
       return;
     }
 
-    final url = _buildBookUrl();
+    _bookResource ??=
+        await Server().registerBookResource(File(book.fileFullPath));
+    final url = _buildBookUrl(_bookResource!);
 
     final loadCompleter = Completer<void>();
     _readyCompleter = Completer<void>();
 
     final headless = AnxHeadlessWebView(
       webViewEnvironment: webViewEnvironment,
-      initialUrlRequest: URLRequest(url: WebUri(url)),
+      initialUrlRequest: URLRequest(url: WebUri('about:blank')),
       initialSettings: InAppWebViewSettings(
         supportZoom: false,
         // transparentBackground: true,
         isInspectable: kDebugMode,
       ),
-      onWebViewCreated: (controller) {
+      onWebViewCreated: (controller) async {
         _controller = controller;
         controller.addJavaScriptHandler(
           handlerName: 'onSearch',
@@ -179,6 +182,21 @@ class _HeadlessSearchSession {
           },
         );
         controller.addJavaScriptHandler(
+          handlerName: 'onBookLoadError',
+          callback: (args) {
+            final ready = _readyCompleter;
+            if (ready != null && !ready.isCompleted) {
+              ready.completeError(
+                StateError(
+                  'Reader failed to load: '
+                  '${args.isEmpty ? 'unknown error' : args.first}',
+                ),
+              );
+            }
+            return null;
+          },
+        );
+        controller.addJavaScriptHandler(
           handlerName: 'onLoadEnd',
           callback: (args) {
             final ready = _readyCompleter;
@@ -188,6 +206,7 @@ class _HeadlessSearchSession {
             return null;
           },
         );
+        await controller.loadUrl(urlRequest: URLRequest(url: WebUri(url)));
       },
       onLoadStop: (controller, url) {
         if (!loadCompleter.isCompleted) {
@@ -219,6 +238,8 @@ class _HeadlessSearchSession {
       await headless.dispose();
       _webView = null;
       _controller = null;
+      _bookResource?.revoke();
+      _bookResource = null;
       throw TimeoutException('Timed out loading reader for book ${book.id}');
     });
 
@@ -230,6 +251,8 @@ class _HeadlessSearchSession {
           await headless.dispose();
           _webView = null;
           _controller = null;
+          _bookResource?.revoke();
+          _bookResource = null;
           throw TimeoutException(
             'Timed out waiting for reader initialization for book ${book.id}',
           );
@@ -319,6 +342,8 @@ class _HeadlessSearchSession {
     _webView = null;
     _controller = null;
     _readyCompleter = null;
+    _bookResource?.revoke();
+    _bookResource = null;
     if (webView != null) {
       try {
         await webView.dispose();
@@ -385,12 +410,10 @@ class _HeadlessSearchSession {
     await completer.future;
   }
 
-  String _buildBookUrl() {
-    final encodedPath = Uri.encodeComponent(book.fileFullPath);
-    final url = 'http://127.0.0.1:${Server().port}/book/$encodedPath';
+  String _buildBookUrl(BookResourceHandle resource) {
     final initialCfi = book.lastReadPosition;
     return generateUrl(
-      url,
+      resource.url,
       initialCfi,
       importing: false,
     );

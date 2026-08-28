@@ -1,0 +1,2 @@
+#!/bin/sh
+exec /var/lang/node18/bin/node index.js

@@ -14,8 +14,9 @@ class AnxLog {
   Level level;
   DateTime time;
   String message;
+  final String raw;
 
-  AnxLog(this.level, this.time, this.message);
+  AnxLog(this.level, this.time, this.message, {this.raw = ''});
 
   get color => level == Level.SEVERE
       ? Colors.red
@@ -25,13 +26,24 @@ class AnxLog {
 
   static AnxLog parse(String log) {
     try {
-      final logParts = log.split('^*^');
-      final level = stringToLevel(logParts[0]);
-      final time = DateTime.parse(logParts[1].trim());
-      final message = logParts[2];
-      return AnxLog(level, time, message);
+      final firstSeparator = log.indexOf('^*^');
+      final secondSeparator = log.indexOf('^*^', firstSeparator + 3);
+      if (firstSeparator < 1 || secondSeparator < 0) {
+        throw const FormatException('Missing log separators');
+      }
+      final level = stringToLevel(log.substring(0, firstSeparator));
+      final time = DateTime.parse(
+        log.substring(firstSeparator + 3, secondSeparator).trim(),
+      );
+      final message = log.substring(secondSeparator + 3).trim();
+      return AnxLog(level, time, message, raw: log);
     } catch (e) {
-      return AnxLog(Level.SEVERE, DateTime.now(), 'Parse log error: $e');
+      return AnxLog(
+        Level.SHOUT,
+        DateTime.now(),
+        'Unrecognized log entry: $log',
+        raw: log,
+      );
     }
   }
 

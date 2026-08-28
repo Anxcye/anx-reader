@@ -5,16 +5,17 @@ import 'package:anx_reader/enums/sync_direction.dart';
 import 'package:anx_reader/enums/sync_trigger.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/page/home_page/ai_page.dart';
+import 'package:anx_reader/service/book_player/reader_runtime.dart';
 import 'package:anx_reader/service/initialization_check.dart';
 import 'package:anx_reader/page/home_page/bookshelf_page.dart';
 import 'package:anx_reader/page/home_page/notes_page.dart';
 import 'package:anx_reader/page/home_page/settings_page.dart';
 import 'package:anx_reader/page/home_page/statistics_page.dart';
+import 'package:anx_reader/page/settings_page/vocabulary_page.dart';
 import 'package:anx_reader/service/receive_file/receive_share.dart';
 import 'package:anx_reader/service/vibration_service.dart';
 import 'package:anx_reader/utils/check_update.dart';
 import 'package:anx_reader/utils/env_var.dart';
-import 'package:anx_reader/utils/get_path/get_temp_dir.dart';
 import 'package:anx_reader/utils/load_default_font.dart';
 import 'package:anx_reader/utils/log/common.dart';
 import 'package:anx_reader/utils/platform_utils.dart';
@@ -77,10 +78,7 @@ class _HomePageState extends ConsumerState<HomePage> {
         ),
       );
     } else {
-      webViewEnvironment = await WebViewEnvironment.create(
-        settings: WebViewEnvironmentSettings(
-            userDataFolder: (await getAnxTempDir()).path),
-      );
+      await ReaderRuntime.ensureReady();
     }
   }
 
@@ -109,8 +107,8 @@ class _HomePageState extends ConsumerState<HomePage> {
     AnxToast.init(context);
     checkUpdate(false);
     InitializationCheck.check();
-    if (Prefs().webdavStatus) {
-      await Sync().init();
+    if (Prefs().webdavStatus || Prefs().cloudBaseSyncEnabled) {
+      if (Prefs().webdavStatus) await Sync().init();
       await Sync().syncData(SyncDirection.both, ref, trigger: SyncTrigger.auto);
     }
     loadDefaultFont();
@@ -141,6 +139,12 @@ class _HomePageState extends ConsumerState<HomePage> {
           'icon': Icons.show_chart,
           'label': L10n.of(context).navBarStatistics,
           'identifier': 'statistics'
+        },
+      if (Prefs().bottomNavigatorShowVocabulary)
+        {
+          'icon': Icons.menu_book,
+          'label': L10n.of(context).navBarVocabulary,
+          'identifier': 'vocabulary'
         },
       if (Prefs().bottomNavigatorShowAI && EnvVar.enableAIFeature)
         {
@@ -177,6 +181,7 @@ class _HomePageState extends ConsumerState<HomePage> {
         BookshelfPage(controller: controller),
         if (Prefs().bottomNavigatorShowStatistics)
           StatisticPage(controller: controller),
+        if (Prefs().bottomNavigatorShowVocabulary) const VocabularyPage(),
         if (Prefs().bottomNavigatorShowAI && EnvVar.enableAIFeature)
           AiChatStream(),
         if (Prefs().bottomNavigatorShowNote) NotesPage(controller: controller),

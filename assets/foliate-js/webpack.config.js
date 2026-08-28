@@ -60,26 +60,21 @@ module.exports = {
     rules: [
       {
         test: /\.js$/,
-        exclude: [
-          /node_modules/,
-          /src\/vendor\/pdfjs\/pdf\.js$/, // Exclude large PDF.js file from Babel processing
-          /src\/vendor\/pdfjs\/pdf\.worker\.js$/
-        ],
+        exclude: /node_modules/,
         use: {
           loader: 'babel-loader',
           options: {
             presets: [
               ['@babel/preset-env', {
                 targets: {
-                  // Target much older browser versions including Chrome 40
-                  chrome: '40',
-                  safari: '9',
-                  ios: '9',
-                  android: '4.4',
+                  // Android 11 e-ink devices can ship a fixed Chrome 83 WebView.
+                  chrome: '83',
+                  android: '11',
                 },
                 useBuiltIns: 'entry',
                 corejs: 3,
-                modules: 'auto'
+                modules: 'auto',
+                bugfixes: true
               }]
             ],
             plugins: [
@@ -92,6 +87,7 @@ module.exports = {
               '@babel/plugin-transform-class-properties',
               '@babel/plugin-transform-private-methods',
               '@babel/plugin-transform-nullish-coalescing-operator',
+              '@babel/plugin-transform-logical-assignment-operators',
               '@babel/plugin-transform-optional-chaining'
             ]
           }

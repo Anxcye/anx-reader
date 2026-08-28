@@ -2,11 +2,12 @@ import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/main.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/models/book_note.dart';
+import 'package:anx_reader/dao/reading_note.dart';
+import 'package:anx_reader/models/reading_note.dart';
 import 'package:anx_reader/utils/convert_string_to_uint8list.dart';
 import 'package:anx_reader/utils/save_file_to_download.dart';
 import 'package:csv/csv.dart';
 import 'package:fast_gbk/fast_gbk.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:anx_reader/utils/toast/common.dart';
 
@@ -18,12 +19,12 @@ Future<void> exportNotes(
   ExportType exportType, {
   bool mergeChapterHeadings = false,
 }) async {
-  BuildContext context = navigatorKey.currentContext!;
-  if (notesList.isEmpty) {
+  final exportItems = await _withFormalReadingNotes(book, notesList);
+  if (exportItems.isEmpty) {
     return;
   }
 
-  final groups = _groupNotesByChapter(notesList, mergeChapterHeadings);
+  final groups = _groupNotesByChapter(exportItems, mergeChapterHeadings);
 
   switch (exportType) {
     case ExportType.copy:
@@ -31,7 +32,7 @@ Future<void> exportNotes(
       notes += groups.map(_formatPlainGroup).join('\n\n');
 
       await Clipboard.setData(ClipboardData(text: notes));
-      AnxToast.show(L10n.of(context).notesPageCopied);
+      AnxToast.show(L10n.of(navigatorKey.currentContext!).notesPageCopied);
       break;
 
     case ExportType.md:
@@ -44,7 +45,8 @@ Future<void> exportNotes(
           mimeType: 'text/markdown');
 
       if (filePath != null) {
-        AnxToast.show('${L10n.of(context).notesPageExportedTo} $filePath');
+        AnxToast.show(
+            '${L10n.of(navigatorKey.currentContext!).notesPageExportedTo} $filePath');
       }
       break;
 
@@ -55,7 +57,8 @@ Future<void> exportNotes(
           fileName: '${book.title}.txt',
           mimeType: 'text/plain');
       if (filePath != null) {
-        AnxToast.show('${L10n.of(context).notesPageExportedTo} $filePath');
+        AnxToast.show(
+            '${L10n.of(navigatorKey.currentContext!).notesPageExportedTo} $filePath');
       }
       break;
 
@@ -72,7 +75,7 @@ Future<void> exportNotes(
           'Create Time',
           'Update Time'
         ],
-        ...notesList.map((note) {
+        ...exportItems.map((note) {
           return List.from([
             book.title,
             book.author,
@@ -94,10 +97,69 @@ Future<void> exportNotes(
           fileName: '${book.title}.csv',
           mimeType: 'text/csv');
       if (filePath != null) {
-        AnxToast.show('${L10n.of(context).notesPageExportedTo} $filePath');
+        AnxToast.show(
+            '${L10n.of(navigatorKey.currentContext!).notesPageExportedTo} $filePath');
       }
       break;
   }
+}
+
+Future<List<BookNote>> _withFormalReadingNotes(
+    Book book, List<BookNote> legacyNotes) async {
+  final result =
+      legacyNotes.map((note) => BookNote.fromDb(note.toMap())).toList();
+  final legacyById = {
+    for (final note in result)
+      if (note.id != null) note.id!.toString(): note
+  };
+  for (final note in await readingNoteDaoInstance.notes(bookId: book.id)) {
+    if (note.status == ReadingNoteStatus.trashed) continue;
+    final blocks = await readingNoteDaoInstance.blocks(note.id);
+    final sources = await readingNoteDaoInstance.sources(note.id);
+    final annotationId = sources
+        .where((source) => source.type == ReadingNoteSourceType.annotation)
+        .map((source) => source.sourceRef)
+        .firstOrNull;
+    final aiText = blocks
+        .where((block) => block.type == ReadingNoteBlockType.ai)
+        .map((block) {
+      final provenance = [
+        block.metadata['providerId']?.toString() ?? '',
+        block.metadata['model']?.toString() ?? '',
+      ].where((value) => value.isNotEmpty).join(' · ');
+      return '[AI organized${provenance.isEmpty ? '' : ' · $provenance'}]\n${block.content}';
+    }).join('\n\n');
+    final userText = blocks
+        .where((block) => block.type == ReadingNoteBlockType.text)
+        .map((block) => block.content)
+        .where((value) => value.trim().isNotEmpty)
+        .join('\n');
+    final exportedText = [userText, aiText]
+        .where((value) => value.trim().isNotEmpty)
+        .join('\n\n');
+    final existing = annotationId == null ? null : legacyById[annotationId];
+    if (existing != null) {
+      existing.readerNote = exportedText;
+      continue;
+    }
+    final quote = blocks
+        .where((block) => block.type == ReadingNoteBlockType.quote)
+        .map((block) => block.content)
+        .join('\n');
+    final source = sources.firstOrNull;
+    result.add(BookNote(
+      bookId: book.id,
+      content: quote,
+      cfi: source?.cfi ?? '',
+      chapter: source?.chapterTitle ?? '',
+      type: 'readingNote',
+      color: '',
+      readerNote: exportedText,
+      createTime: DateTime.fromMillisecondsSinceEpoch(note.createdAt),
+      updateTime: DateTime.fromMillisecondsSinceEpoch(note.updatedAt),
+    ));
+  }
+  return result;
 }
 
 class _ChapterGroup {
@@ -177,4 +239,8 @@ String _formatMarkdownGroup(_ChapterGroup group) {
     buffer.writeln();
   }
   return buffer.toString();
+}
+
+extension _FirstOrNull<T> on Iterable<T> {
+  T? get firstOrNull => isEmpty ? null : first;
 }
