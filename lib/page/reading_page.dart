@@ -449,6 +449,44 @@ class ReadingPageState extends ConsumerState<ReadingPage>
 
   Future<void> onLoadEnd() async {
     if (Prefs().autoSummaryPreviousContent) {
+      final delayLevel = Prefs().autoSummaryDelayLevel;
+      final now = DateTime.now();
+
+      if (delayLevel > 0) {
+        final lastTimestamp = Prefs().getLastAutoSummaryTimestamp(_book.id);
+        if (lastTimestamp != null) {
+          bool shouldTrigger;
+          switch (delayLevel) {
+            case 1: // 30 minutes
+              shouldTrigger =
+                  now.difference(lastTimestamp).inMinutes >= 30;
+              break;
+            case 2: // 3 hours
+              shouldTrigger =
+                  now.difference(lastTimestamp).inHours >= 3;
+              break;
+            case 3: // Next day (cross midnight)
+              shouldTrigger = now.year != lastTimestamp.year ||
+                  now.month != lastTimestamp.month ||
+                  now.day != lastTimestamp.day;
+              break;
+            case 4: // 3 days
+              shouldTrigger =
+                  now.difference(lastTimestamp).inDays >= 3;
+              break;
+            case 5: // 1 week
+              shouldTrigger =
+                  now.difference(lastTimestamp).inDays >= 7;
+              break;
+            default:
+              shouldTrigger = true;
+          }
+          if (!shouldTrigger) return;
+        }
+      }
+
+      Prefs().setLastAutoSummaryTimestamp(_book.id, now);
+
       final previousContent =
           await epubPlayerKey.currentState!.previousContent(2000);
       final prompt = generatePromptSummaryThePreviousContent(previousContent);

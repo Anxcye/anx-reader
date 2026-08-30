@@ -219,16 +219,66 @@ class _OtherSettingsState extends State<OtherSettings> {
       );
     }
 
-    ListTile autoSummaryPreviousContent() {
-      return ListTile(
-        contentPadding: EdgeInsets.zero,
-        title: Text(L10n.of(context).readingPageAutoSummaryPreviousContent),
-        trailing: Switch(
-          value: Prefs().autoSummaryPreviousContent,
-          onChanged: (bool value) => setState(() {
-            Prefs().autoSummaryPreviousContent = value;
-          }),
-        ),
+    Widget autoSummaryPreviousContent() {
+      final delayLabels = [
+        L10n.of(context).readingPageAutoSummaryDelayEveryTime,
+        L10n.of(context).readingPageAutoSummaryDelay30Minutes,
+        L10n.of(context).readingPageAutoSummaryDelay3Hours,
+        L10n.of(context).readingPageAutoSummaryDelayNextDay,
+        L10n.of(context).readingPageAutoSummaryDelay3Days,
+        L10n.of(context).readingPageAutoSummaryDelay1Week,
+      ];
+      return Column(
+        children: [
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            title: Text(L10n.of(context).readingPageAutoSummaryPreviousContent),
+            trailing: Switch(
+              value: Prefs().autoSummaryPreviousContent,
+              onChanged: (bool value) => setState(() {
+                Prefs().autoSummaryPreviousContent = value;
+              }),
+            ),
+          ),
+          if (Prefs().autoSummaryPreviousContent)
+            Padding(
+              padding: const EdgeInsets.only(left: 16.0),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      SizedBox(
+                        width: 56,
+                        child: Text(
+                          delayLabels[Prefs().autoSummaryDelayLevel],
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ),
+                      Expanded(
+                        child: Slider(
+                          min: 0,
+                          max: 5,
+                          divisions: 5,
+                          value: Prefs().autoSummaryDelayLevel.toDouble(),
+                          onChanged: (value) => setState(() {
+                            Prefs().autoSummaryDelayLevel = value.toInt();
+                          }),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8.0),
+                    child: Text(
+                      L10n.of(context).readingPageAutoSummaryDelaySubtitle(
+                          delayLabels[Prefs().autoSummaryDelayLevel]),
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ],
       );
     }
 

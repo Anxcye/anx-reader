@@ -29,6 +29,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:path/path.dart' as path;
 
 class BookDetail extends ConsumerStatefulWidget {
   const BookDetail({super.key, required this.book});
@@ -46,6 +47,14 @@ class _BookDetailState extends ConsumerState<BookDetail> {
   bool _isCollapsed = false;
   final TextEditingController _newTagController = TextEditingController();
   Color? _pendingTagColor;
+
+  String get _bookFileFormat {
+    final extension = path.extension(_book.filePath).replaceFirst('.', '');
+    if (extension.isEmpty) {
+      return '-';
+    }
+    return extension.toUpperCase();
+  }
 
   @override
   void initState() {
@@ -749,6 +758,10 @@ class _BookDetailState extends ConsumerState<BookDetail> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Text(
+                    '${L10n.of(context).bookDetailFileFormat}$_bookFileFormat',
+                    style: textStyle,
+                  ),
                   Text(
                     '${L10n.of(context).bookDetailImportDate}${widget.book.createTime.toString().substring(0, 10)}',
                     style: textStyle,

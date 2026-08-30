@@ -18,6 +18,8 @@ import 'package:anx_reader/enums/writing_mode.dart';
 import 'package:anx_reader/enums/text_alignment.dart';
 import 'package:anx_reader/enums/ai_panel_position.dart';
 import 'package:anx_reader/enums/ai_chat_display_mode.dart';
+import 'package:anx_reader/enums/search_display_mode.dart';
+import 'package:anx_reader/service/search/search_engine.dart';
 import 'package:anx_reader/enums/bgimg_fit.dart';
 import 'package:anx_reader/enums/code_highlight_theme.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
@@ -954,6 +956,25 @@ class Prefs extends ChangeNotifier {
     return prefs.getBool('autoSummaryPreviousContent') ?? false;
   }
 
+  set autoSummaryDelayLevel(int level) {
+    prefs.setInt('autoSummaryDelayLevel', level.clamp(0, 5));
+    notifyListeners();
+  }
+
+  int get autoSummaryDelayLevel {
+    return prefs.getInt('autoSummaryDelayLevel') ?? 0;
+  }
+
+  DateTime? getLastAutoSummaryTimestamp(int bookId) {
+    final str = prefs.getString('lastAutoSummaryTimestamp_$bookId');
+    if (str == null) return null;
+    return DateTime.tryParse(str);
+  }
+
+  void setLastAutoSummaryTimestamp(int bookId, DateTime time) {
+    prefs.setString('lastAutoSummaryTimestamp_$bookId', time.toIso8601String());
+  }
+
   set autoAdjustReadingTheme(bool status) {
     prefs.setBool('autoAdjustReadingTheme', status);
     notifyListeners();
@@ -1666,6 +1687,71 @@ class Prefs extends ChangeNotifier {
   set aiPanelHeight(double height) {
     prefs.setDouble('aiPanelHeight', height);
     notifyListeners();
+  }
+
+  // Search engine settings
+  static const String _searchEnginesKey = 'searchEngines';
+  static const String _selectedSearchEngineIdKey = 'selectedSearchEngineId';
+
+  SearchDisplayMode get searchDisplayMode {
+    return SearchDisplayMode.fromCode(
+        prefs.getString('searchDisplayMode') ?? 'popup');
+  }
+
+  set searchDisplayMode(SearchDisplayMode mode) {
+    prefs.setString('searchDisplayMode', mode.code);
+    notifyListeners();
+  }
+
+  String get selectedSearchEngineId {
+    return prefs.getString(_selectedSearchEngineIdKey) ?? 'bing';
+  }
+
+  set selectedSearchEngineId(String id) {
+    prefs.setString(_selectedSearchEngineIdKey, id);
+    notifyListeners();
+  }
+
+  SearchEngine get selectedSearchEngine {
+    final id = selectedSearchEngineId;
+    return allSearchEngines.firstWhere(
+      (e) => e.id == id,
+      orElse: () => SearchEngine.builtinEngines.first,
+    );
+  }
+
+  List<SearchEngine> get customSearchEngines {
+    final raw = prefs.getString(_searchEnginesKey);
+    if (raw == null || raw.isEmpty) return const [];
+    try {
+      return SearchEngine.decodeList(raw);
+    } catch (_) {
+      return const [];
+    }
+  }
+
+  set customSearchEngines(List<SearchEngine> engines) {
+    prefs.setString(_searchEnginesKey, SearchEngine.encodeList(engines));
+    notifyListeners();
+  }
+
+  List<SearchEngine> get allSearchEngines {
+    return [...SearchEngine.builtinEngines, ...customSearchEngines];
+  }
+
+  void addCustomSearchEngine(SearchEngine engine) {
+    final engines = List<SearchEngine>.from(customSearchEngines);
+    engines.add(engine);
+    customSearchEngines = engines;
+  }
+
+  void deleteCustomSearchEngine(String id) {
+    final engines =
+        customSearchEngines.where((e) => e.id != id).toList(growable: false);
+    customSearchEngines = engines;
+    if (selectedSearchEngineId == id) {
+      selectedSearchEngineId = SearchEngine.builtinEngines.first.id;
+    }
   }
 }
 

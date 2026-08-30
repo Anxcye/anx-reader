@@ -1,10 +1,12 @@
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/constants/note_annotations.dart';
 import 'package:anx_reader/dao/book_note.dart';
+import 'package:anx_reader/enums/search_display_mode.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/main.dart';
 import 'package:anx_reader/models/book_note.dart';
 import 'package:anx_reader/page/reading_page.dart';
+import 'package:anx_reader/service/search/search_engine.dart';
 import 'package:anx_reader/service/tts/tts_handler.dart';
 import 'package:anx_reader/utils/env_var.dart';
 import 'package:anx_reader/utils/toast/common.dart';
@@ -25,6 +27,7 @@ class ExcerptMenu extends StatefulWidget {
   final BoxDecoration decoration;
   final Function() toggleTranslationMenu;
   final void Function({bool? show}) toggleReaderNoteMenu;
+  final void Function({bool? show, String? query}) toggleSearchMenu;
   final Future<void> Function(int noteId) openReaderNoteMenu;
   final void Function(int noteId) onNoteCreated;
   final Axis axis;
@@ -40,6 +43,7 @@ class ExcerptMenu extends StatefulWidget {
     required this.decoration,
     required this.toggleTranslationMenu,
     required this.toggleReaderNoteMenu,
+    required this.toggleSearchMenu,
     required this.openReaderNoteMenu,
     required this.onNoteCreated,
     required this.axis,
@@ -279,12 +283,29 @@ class ExcerptMenuState extends State<ExcerptMenu> {
           IconAndText(
             compact: true,
             onTap: () {
-              widget.onClose();
-              launchUrl(
-                Uri.parse(
-                    'https://www.bing.com/search?q=${widget.annoContent}'),
-                mode: LaunchMode.externalApplication,
-              );
+              final displayMode = Prefs().searchDisplayMode;
+              final engine = Prefs().selectedSearchEngine;
+              final query = widget.annoContent;
+
+              switch (displayMode) {
+                case SearchDisplayMode.popup:
+                  widget.toggleSearchMenu(show: true, query: query);
+                  break;
+                case SearchDisplayMode.fullScreen:
+                  widget.onClose();
+                  launchUrl(
+                    Uri.parse(engine.buildUrl(query)),
+                    mode: LaunchMode.inAppWebView,
+                  );
+                  break;
+                case SearchDisplayMode.external:
+                  widget.onClose();
+                  launchUrl(
+                    Uri.parse(engine.buildUrl(query)),
+                    mode: LaunchMode.externalApplication,
+                  );
+                  break;
+              }
             },
             icon: const Icon(EvaIcons.globe),
             text: L10n.of(context).contextMenuSearch,

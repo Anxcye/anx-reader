@@ -5,6 +5,7 @@ import 'package:anx_reader/page/reading_page.dart';
 import 'package:anx_reader/widgets/common/axis_flex.dart';
 import 'package:anx_reader/widgets/context_menu/excerpt_menu.dart';
 import 'package:anx_reader/widgets/context_menu/reader_note_menu.dart';
+import 'package:anx_reader/widgets/context_menu/search_menu.dart';
 import 'package:anx_reader/widgets/context_menu/translation_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
@@ -294,6 +295,8 @@ class _ContextMenuOverlayState extends State<_ContextMenuOverlay>
   late bool _reverse;
   late bool _showTranslationMenu;
   bool _showReaderNoteMenu = false;
+  bool _showSearchMenu = false;
+  String _searchQuery = '';
   bool _waitingForFirstMeasurement = true;
   late BoxConstraints _menuConstraints;
   late double _bottomInset;
@@ -442,6 +445,20 @@ class _ContextMenuOverlayState extends State<_ContextMenuOverlay>
     );
   }
 
+  void _toggleSearchMenu({bool? show, String? query}) {
+    final target = show ?? !_showSearchMenu;
+    epubPlayerKey.currentState?.setSelectionClearLocked(target);
+    setState(() {
+      _showSearchMenu = target;
+      if (query != null) _searchQuery = query;
+    });
+    _scheduleRecalculate(
+      delay: _showSearchMenu
+          ? const Duration(milliseconds: 300)
+          : Duration.zero,
+    );
+  }
+
   Future<void> _openReaderNoteMenu(int noteId) async {
     _toggleReaderNoteMenu(show: true);
     if (_readerNoteMenuKey.currentState == null) {
@@ -516,6 +533,7 @@ class _ContextMenuOverlayState extends State<_ContextMenuOverlay>
                                   decoration: widget.decoration,
                                   toggleTranslationMenu: _toggleTranslationMenu,
                                   toggleReaderNoteMenu: _toggleReaderNoteMenu,
+                                  toggleSearchMenu: _toggleSearchMenu,
                                   openReaderNoteMenu: _openReaderNoteMenu,
                                   onNoteCreated: _handleNoteCreated,
                                   axis: widget.axis,
@@ -552,6 +570,19 @@ class _ContextMenuOverlayState extends State<_ContextMenuOverlay>
                                 decoration: widget.decoration,
                                 axis: widget.axis,
                                 contextText: widget.contextText,
+                              ),
+                            ],
+                          ),
+                        ],
+                        if (_showSearchMenu) ...[
+                          const SizedBox.square(dimension: 10),
+                          AxisFlex(
+                            axis: widget.axis,
+                            children: [
+                              SearchMenu(
+                                query: _searchQuery,
+                                decoration: widget.decoration,
+                                axis: widget.axis,
                               ),
                             ],
                           ),
