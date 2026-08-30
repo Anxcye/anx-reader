@@ -13,7 +13,7 @@ import 'package:anx_reader/widgets/icon_and_text.dart';
 import 'package:anx_reader/providers/book_notes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:icons_plus/icons_plus.dart';
+import 'package:iconsx_plus/iconsx_plus.dart';
 
 class BookNotesPage extends ConsumerStatefulWidget {
   const BookNotesPage({
