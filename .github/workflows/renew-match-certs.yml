@@ -1,0 +1,56 @@
+name: Renew match certificates
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - ci/renew-match-certs
+
+jobs:
+  renew-ios:
+    runs-on: macos-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install fastlane
+        run: |
+          cd ios
+          bundle install
+
+      - name: Renew iOS App Store certs
+        run: |
+          cd ios
+          bundle exec fastlane ios renew_certs
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_P8_BASE64: ${{ secrets.ASC_KEY_P8_BASE64 }}
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
+          APP_BUNDLE_ID: ${{ secrets.APP_BUNDLE_ID }}
+
+  renew-macos:
+    runs-on: macos-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install fastlane
+        run: |
+          cd macos
+          bundle install
+
+      - name: Renew macOS App Store certs
+        run: |
+          cd macos
+          bundle exec fastlane mac renew_certs
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_P8_BASE64: ${{ secrets.ASC_KEY_P8_BASE64 }}
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
+          APP_BUNDLE_ID: ${{ secrets.APP_BUNDLE_ID }}

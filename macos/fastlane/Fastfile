@@ -81,6 +81,42 @@ platform :mac do
   end
 
 
+  desc "Renew Mac App Store certificates and profiles (writes to match git repo)"
+  lane :renew_certs do
+    verify_env(envs: [
+      "ASC_KEY_ID",
+      "ASC_ISSUER_ID",
+      "ASC_KEY_P8_BASE64",
+      "APP_BUNDLE_ID",
+      "MATCH_PASSWORD",
+      "MATCH_GIT_BASIC_AUTHORIZATION",
+    ])
+
+    authenticate_apple_store
+
+    if is_ci
+      create_keychain(
+        name: "fastlane_tmp_keychain",
+        password: "temp_password",
+        default_keychain: true,
+        unlock: true,
+        timeout: 3600,
+        add_to_search_list: true
+      )
+    end
+
+    ENV["CERT_TYPE"] = "appstore"
+    sync_code_signing(
+      type: "appstore",
+      platform: "macos",
+      readonly: false,
+      keychain_name: is_ci ? "fastlane_tmp_keychain" : "login.keychain",
+      keychain_password: is_ci ? "temp_password" : nil,
+      additional_cert_types: ["mac_installer_distribution"]
+    )
+  end
+
+
   desc "Release a new build to Mac App Store"
   lane :release_app_store do |options|
     # Set environment for App Store build
