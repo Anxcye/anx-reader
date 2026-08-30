@@ -106,7 +106,7 @@ dependencies:
   langchain: ^0.8.1
   langchain_anthropic: ^0.3.1
   langchain_google: ^0.7.1+2
-  langchain_openai: 0.8.1+1
+  langchain_openai: ^0.8.1+1
     # git:
     #   url: https://github.com/Anxcye/langchain_dart.git
     #   ref: bb06c17ca667a906e3e37154b0bda95023d0c9bd
@@ -151,6 +151,11 @@ dependency_overrides:
       url: https://github.com/Anxcye/langchain_dart.git
       ref: 310fb6b3
       path: packages/langchain_anthropic
+  langchain_google:
+    git:
+      url: https://github.com/Anxcye/langchain_dart.git
+      ref: 310fb6b3
+      path: packages/langchain_google
 #  analyzer: ^8.0.0
 
 

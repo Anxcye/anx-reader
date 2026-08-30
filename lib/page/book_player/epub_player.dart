@@ -153,7 +153,12 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
       _selectionClearPending = false;
       _lastSelectionContextText = null;
       removeOverlay();
+      restoreReaderFocus();
     }
+  }
+
+  void restoreReaderFocus() {
+    readingPageKey.currentState?.requestReaderFocus();
   }
 
   void changeTheme(ReadTheme readTheme) {
@@ -731,6 +736,7 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
           }
           _lastSelectionContextText = null;
           removeOverlay();
+          restoreReaderFocus();
         });
     controller.addJavaScriptHandler(
         handlerName: 'onAnnotationClick',

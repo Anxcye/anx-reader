@@ -116,6 +116,7 @@ Future<void> showContextMenu(
   void onClose() {
     playerKey.webViewController.evaluateJavascript(source: 'clearSelection()');
     playerKey.removeOverlay();
+    playerKey.restoreReaderFocus();
   }
 
   final decoration = BoxDecoration(
