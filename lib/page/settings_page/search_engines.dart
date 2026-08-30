@@ -18,82 +18,87 @@ class SearchEnginesSetting extends StatefulWidget {
 class _SearchEnginesSettingState extends State<SearchEnginesSetting> {
   @override
   Widget build(BuildContext context) {
-    return settingsSections(
-      sections: [
-        SettingsSection(
-          title: Text(L10n.of(context).searchDisplayMode),
-          tiles: [
-            SettingsTile(
-              title: Column(
-                children: SearchDisplayMode.values.map((mode) {
-                  return RadioListTile<SearchDisplayMode>(
-                    title: Text(_displayModeLabel(context, mode)),
-                    value: mode,
-                    groupValue: Prefs().searchDisplayMode,
-                    onChanged: (value) {
-                      if (value != null) {
-                        setState(() {
-                          Prefs().searchDisplayMode = value;
-                        });
-                      }
-                    },
-                    contentPadding: EdgeInsets.zero,
-                  );
-                }).toList(),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(L10n.of(context).searchManageEngines),
+      ),
+      body: settingsSections(
+        sections: [
+          SettingsSection(
+            title: Text(L10n.of(context).searchDisplayMode),
+            tiles: [
+              SettingsTile(
+                title: Column(
+                  children: SearchDisplayMode.values.map((mode) {
+                    return RadioListTile<SearchDisplayMode>(
+                      title: Text(_displayModeLabel(context, mode)),
+                      value: mode,
+                      groupValue: Prefs().searchDisplayMode,
+                      onChanged: (value) {
+                        if (value != null) {
+                          setState(() {
+                            Prefs().searchDisplayMode = value;
+                          });
+                        }
+                      },
+                      contentPadding: EdgeInsets.zero,
+                    );
+                  }).toList(),
+                ),
               ),
-            ),
-          ],
-        ),
-        SettingsSection(
-          title: Text(L10n.of(context).searchDefaultEngine),
-          tiles: [
-            SettingsTile(
-              title: DropdownButton<String>(
-                isExpanded: true,
-                value: Prefs().selectedSearchEngineId,
-                items: Prefs().allSearchEngines.map((engine) {
-                  return DropdownMenuItem<String>(
-                    value: engine.id,
-                    child: Text(engine.name),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  if (value != null) {
-                    setState(() {
-                      Prefs().selectedSearchEngineId = value;
-                    });
-                  }
-                },
-              ),
-            ),
-          ],
-        ),
-        SettingsSection(
-          title: Text(L10n.of(context).searchManageEngines),
-          tiles: [
-            ...Prefs().customSearchEngines.map((engine) {
-              return SettingsTile(
-                leading: const Icon(Icons.language),
-                title: Text(engine.name),
-                description: Text(engine.urlTemplate),
-                trailing: IconButton(
-                  icon: const Icon(Icons.delete_outline),
-                  onPressed: () {
-                    setState(() {
-                      Prefs().deleteCustomSearchEngine(engine.id);
-                    });
+            ],
+          ),
+          SettingsSection(
+            title: Text(L10n.of(context).searchDefaultEngine),
+            tiles: [
+              SettingsTile(
+                title: DropdownButton<String>(
+                  isExpanded: true,
+                  value: Prefs().selectedSearchEngineId,
+                  items: Prefs().allSearchEngines.map((engine) {
+                    return DropdownMenuItem<String>(
+                      value: engine.id,
+                      child: Text(engine.name),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    if (value != null) {
+                      setState(() {
+                        Prefs().selectedSearchEngineId = value;
+                      });
+                    }
                   },
                 ),
-              );
-            }),
-            SettingsTile.navigation(
-              leading: const Icon(Icons.add),
-              title: Text(L10n.of(context).searchAddEngine),
-              onPressed: (_) => _showAddEngineDialog(),
-            ),
-          ],
-        ),
-      ],
+              ),
+            ],
+          ),
+          SettingsSection(
+            title: Text(L10n.of(context).searchManageEngines),
+            tiles: [
+              ...Prefs().customSearchEngines.map((engine) {
+                return SettingsTile(
+                  leading: const Icon(Icons.language),
+                  title: Text(engine.name),
+                  description: Text(engine.urlTemplate),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.delete_outline),
+                    onPressed: () {
+                      setState(() {
+                        Prefs().deleteCustomSearchEngine(engine.id);
+                      });
+                    },
+                  ),
+                );
+              }),
+              SettingsTile.navigation(
+                leading: const Icon(Icons.add),
+                title: Text(L10n.of(context).searchAddEngine),
+                onPressed: (_) => _showAddEngineDialog(),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
