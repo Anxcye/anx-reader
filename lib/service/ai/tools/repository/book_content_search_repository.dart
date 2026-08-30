@@ -3,7 +3,11 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:anx_reader/models/book.dart';
+import 'package:anx_reader/page/book_player/epub_player.dart';
 import 'package:anx_reader/page/home_page.dart';
+import 'package:anx_reader/page/reading_page.dart';
+import 'package:anx_reader/providers/current_reading.dart';
+import 'package:anx_reader/providers/toc_search.dart';
 import 'package:anx_reader/service/ai/tools/input/book_content_search_input.dart';
 import 'package:anx_reader/service/ai/tools/repository/books_repository.dart';
 import 'package:anx_reader/service/book_player/book_player_server.dart';
@@ -13,9 +17,11 @@ import 'package:anx_reader/utils/webView/webview_console_message.dart';
 import 'package:anx_reader/utils/webView/anx_headless_webview.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class BookContentSearchRepository {
   BookContentSearchRepository({
+    required this.ref,
     BooksRepository? booksRepository,
     Duration? searchTimeout,
     Duration? sessionIdleTimeout,
@@ -23,6 +29,7 @@ class BookContentSearchRepository {
         _searchTimeout = searchTimeout ?? const Duration(seconds: 15),
         _sessionIdleTimeout = sessionIdleTimeout ?? const Duration(minutes: 3);
 
+  final WidgetRef ref;
   final BooksRepository _booksRepository;
   final Duration _searchTimeout;
   final Duration _sessionIdleTimeout;
@@ -38,6 +45,28 @@ class BookContentSearchRepository {
     final book = await _resolveBook(input.bookId);
     AnxLog.info(
         'BookContentSearchRepository: Starting search for book=${book.id}, keyword="$keyword"');
+
+    if (Platform.isWindows) {
+      final playerState = epubPlayerKey.currentState;
+      final currentBookId = ref.read(currentReadingProvider).book?.id;
+      if (playerState != null && currentBookId == book.id) {
+        AnxLog.info('BookContentSearchRepository: using live reader search '
+            '(Windows, book=${book.id} is currently open)');
+        return _runLiveReaderSearch(
+          playerState: playerState,
+          book: book,
+          keyword: keyword,
+          maxResults: input.resolvedMaxResults(),
+          maxSnippets: input.resolvedMaxSnippets(),
+          maxCharacters: input.resolvedMaxCharacters(),
+        );
+      }
+      throw StateError(
+        'book_content_search is unavailable on Windows for books that are not '
+        'currently open in the reader (native WebView2 limitation). '
+        'Open book id=${book.id} ("${book.title}") and retry.',
+      );
+    }
 
     final session = await _getOrCreateSession(book);
 
@@ -76,6 +105,66 @@ class BookContentSearchRepository {
         _sessions.remove(book.id);
       }
     }
+  }
+
+  Future<Map<String, dynamic>> _runLiveReaderSearch({
+    required EpubPlayerState playerState,
+    required Book book,
+    required String keyword,
+    required int maxResults,
+    required int maxSnippets,
+    required int? maxCharacters,
+  }) async {
+    final stopwatch = Stopwatch()..start();
+    try {
+      await playerState.runAiBookSearch(keyword);
+      final completed =
+          await _waitForTocSearchComplete(timeout: _searchTimeout);
+      stopwatch.stop();
+
+      final results = ref.read(tocSearchProvider).results;
+      final mapped = results
+          .take(maxResults)
+          .map((result) => _SearchResult(
+                chapterTitle: result.label,
+                chapterCfi: result.cfi,
+                matches: result.subitems
+                    .take(maxSnippets)
+                    .map((sub) => _SearchMatch(
+                          cfi: sub.cfi,
+                          pre: _SearchMatch._sanitizeSnippet(
+                              sub.pre, maxCharacters),
+                          match: _SearchMatch._sanitizeSnippet(
+                              sub.match, maxCharacters),
+                          post: _SearchMatch._sanitizeSnippet(
+                              sub.post, maxCharacters),
+                        ))
+                    .toList(),
+              ))
+          .toList();
+
+      return {
+        'bookId': book.id,
+        'bookTitle': book.title,
+        'keyword': keyword,
+        'results': mapped.map((result) => result.toMap()).toList(),
+        'searchDurationMs': stopwatch.elapsed.inMilliseconds,
+        'completed': completed,
+      };
+    } finally {
+      playerState.clearSearch();
+    }
+  }
+
+  Future<bool> _waitForTocSearchComplete({required Duration timeout}) async {
+    final deadline = DateTime.now().add(timeout);
+    while (DateTime.now().isBefore(deadline)) {
+      if (ref.read(tocSearchProvider).progress >= 1.0) {
+        return true;
+      }
+      await Future.delayed(const Duration(milliseconds: 50));
+    }
+    return false;
   }
 
   Future<Book> _resolveBook(int bookId) async {
