@@ -100,6 +100,9 @@ Stream<String> _generateStream({
             apiKey: apiKey,
             url: provider.url,
             reasoningEffort: provider.reasoningEffort,
+            reasoningEnabled: provider.reasoningEnabled,
+            reasoningFormat: provider.reasoningFormat,
+            reasoningBudgetTokens: provider.reasoningBudgetTokens,
           );
 
           AnxLog.info(
@@ -165,6 +168,9 @@ Stream<String> _generateStream({
               apiKey: apiKey,
               url: provider.url,
               reasoningEffort: provider.reasoningEffort,
+              reasoningEnabled: provider.reasoningEnabled,
+              reasoningFormat: provider.reasoningFormat,
+              reasoningBudgetTokens: provider.reasoningBudgetTokens,
             );
 
             AnxLog.info(

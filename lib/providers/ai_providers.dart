@@ -19,9 +19,13 @@ class AiProviders extends _$AiProviders {
 
     // Convert from JSON
     try {
-      return rawProviders
-          .map((json) => AiProvider.fromJson(json as Map<String, dynamic>))
-          .toList();
+      return rawProviders.map((json) {
+        final map = json as Map<String, dynamic>;
+        return AiProvider.migrateLegacyReasoning(
+          AiProvider.fromJson(map),
+          map,
+        );
+      }).toList();
     } catch (e) {
       // If parsing fails, reinitialize
       return _initializeDefaultProviders();
@@ -237,8 +241,12 @@ class AiProviders extends _$AiProviders {
   /// Refresh providers (reload from storage)
   void refresh() {
     final providers = Prefs().getAiProviders();
-    state = providers
-        .map((json) => AiProvider.fromJson(json as Map<String, dynamic>))
-        .toList();
+    state = providers.map((json) {
+      final map = json as Map<String, dynamic>;
+      return AiProvider.migrateLegacyReasoning(
+        AiProvider.fromJson(map),
+        map,
+      );
+    }).toList();
   }
 }

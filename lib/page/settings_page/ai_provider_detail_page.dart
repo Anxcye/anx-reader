@@ -1,4 +1,5 @@
 import 'package:anx_reader/enums/ai_reasoning_effort.dart';
+import 'package:anx_reader/enums/ai_reasoning_format.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/models/ai_provider.dart';
 import 'package:anx_reader/providers/ai_providers.dart';
@@ -10,6 +11,7 @@ import 'package:anx_reader/widgets/common/anx_button.dart';
 import 'package:anx_reader/widgets/common/anx_segmented_button.dart';
 import 'package:anx_reader/widgets/common/container/filled_container.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:uuid/uuid.dart';
@@ -31,9 +33,12 @@ class _AiProviderDetailPageState extends ConsumerState<AiProviderDetailPage> {
   late TextEditingController _nameController;
   late TextEditingController _urlController;
   late TextEditingController _modelController;
+  late TextEditingController _budgetController;
 
   AiProtocol _selectedProtocol = AiProtocol.openai;
   AiReasoningEffort _reasoningEffort = AiReasoningEffort.auto;
+  AiReasoningFormat _reasoningFormat = AiReasoningFormat.auto;
+  bool _reasoningEnabled = false;
   List<AiApiKey> _apiKeys = [];
   bool _isModified = false;
   bool _isFetchingModels = false;
@@ -54,11 +59,17 @@ class _AiProviderDetailPageState extends ConsumerState<AiProviderDetailPage> {
     _modelController = TextEditingController(text: provider?.model ?? '');
     _selectedProtocol = provider?.protocol ?? AiProtocol.openai;
     _reasoningEffort = provider?.reasoningEffort ?? AiReasoningEffort.auto;
+    _reasoningFormat = provider?.reasoningFormat ?? AiReasoningFormat.auto;
+    _reasoningEnabled = provider?.reasoningEnabled ?? false;
+    _budgetController = TextEditingController(
+      text: provider?.reasoningBudgetTokens?.toString() ?? '',
+    );
     _apiKeys = provider?.apiKeys.toList() ?? [];
 
     _nameController.addListener(() => setState(() => _isModified = true));
     _urlController.addListener(() => setState(() => _isModified = true));
     _modelController.addListener(() => setState(() => _isModified = true));
+    _budgetController.addListener(() => setState(() => _isModified = true));
   }
 
   @override
@@ -66,6 +77,7 @@ class _AiProviderDetailPageState extends ConsumerState<AiProviderDetailPage> {
     _nameController.dispose();
     _urlController.dispose();
     _modelController.dispose();
+    _budgetController.dispose();
     super.dispose();
   }
 
@@ -295,38 +307,105 @@ class _AiProviderDetailPageState extends ConsumerState<AiProviderDetailPage> {
           ],
         ),
         children: [
-          DropdownButtonFormField<AiReasoningEffort>(
-            initialValue: _reasoningEffort,
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            title: Text(l10n.settingsAiProviderReasoning),
+            value: _reasoningEnabled,
+            onChanged: (value) {
+              setState(() {
+                _reasoningEnabled = value;
+                _isModified = true;
+              });
+            },
+          ),
+          const SizedBox(height: 10),
+          DropdownButtonFormField<AiReasoningFormat>(
+            key: ValueKey('format-${_reasoningFormat.code}'),
+            initialValue: _reasoningFormat,
             decoration: InputDecoration(
-              labelText: l10n.settingsAiProviderReasoningEffort,
+              labelText: l10n.settingsAiProviderReasoningFormat,
               border: const OutlineInputBorder(),
             ),
             items: [
               DropdownMenuItem(
-                value: AiReasoningEffort.auto,
-                child: Text(l10n.settingsAiProviderReasoningEffortAuto),
+                value: AiReasoningFormat.auto,
+                child: Text(l10n.settingsAiProviderReasoningFormatAuto),
               ),
               DropdownMenuItem(
-                value: AiReasoningEffort.low,
-                child: Text(l10n.settingsAiProviderReasoningEffortLow),
+                value: AiReasoningFormat.openai,
+                child: Text(l10n.settingsAiProviderReasoningFormatOpenai),
               ),
               DropdownMenuItem(
-                value: AiReasoningEffort.medium,
-                child: Text(l10n.settingsAiProviderReasoningEffortMedium),
+                value: AiReasoningFormat.deepseek,
+                child: Text(l10n.settingsAiProviderReasoningFormatDeepseek),
               ),
               DropdownMenuItem(
-                value: AiReasoningEffort.high,
-                child: Text(l10n.settingsAiProviderReasoningEffortHigh),
+                value: AiReasoningFormat.claude,
+                child: Text(l10n.settingsAiProviderReasoningFormatClaude),
+              ),
+              DropdownMenuItem(
+                value: AiReasoningFormat.gemini,
+                child: Text(l10n.settingsAiProviderReasoningFormatGemini),
               ),
             ],
             onChanged: (value) {
               if (value == null) return;
               setState(() {
-                _reasoningEffort = value;
+                _reasoningFormat = value;
                 _isModified = true;
               });
             },
           ),
+          if (_reasoningEnabled &&
+              _reasoningFormat != AiReasoningFormat.auto) ...[
+            const SizedBox(height: 10),
+            DropdownButtonFormField<AiReasoningEffort>(
+              key: ValueKey(_reasoningEffort),
+              initialValue: _reasoningEffort == AiReasoningEffort.auto
+                  ? AiReasoningEffort.medium
+                  : _reasoningEffort,
+              decoration: InputDecoration(
+                labelText: l10n.settingsAiProviderReasoningEffort,
+                border: const OutlineInputBorder(),
+              ),
+              items: [
+                DropdownMenuItem(
+                  value: AiReasoningEffort.low,
+                  child: Text(l10n.settingsAiProviderReasoningEffortLow),
+                ),
+                DropdownMenuItem(
+                  value: AiReasoningEffort.medium,
+                  child: Text(l10n.settingsAiProviderReasoningEffortMedium),
+                ),
+                DropdownMenuItem(
+                  value: AiReasoningEffort.high,
+                  child: Text(l10n.settingsAiProviderReasoningEffortHigh),
+                ),
+              ],
+              onChanged: (value) {
+                if (value == null) return;
+                setState(() {
+                  _reasoningEffort = value;
+                  _isModified = true;
+                });
+              },
+            ),
+          ],
+          if (_reasoningEnabled &&
+              (_reasoningFormat == AiReasoningFormat.claude ||
+                  _reasoningFormat == AiReasoningFormat.gemini)) ...[
+            const SizedBox(height: 10),
+            TextField(
+              controller: _budgetController,
+              keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              decoration: InputDecoration(
+                labelText: l10n.settingsAiProviderReasoningBudget,
+                helperText: l10n.settingsAiProviderReasoningBudgetHelp,
+                border: const OutlineInputBorder(),
+              ),
+            ),
+          ],
           const SizedBox(height: 10),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -339,7 +418,9 @@ class _AiProviderDetailPageState extends ConsumerState<AiProviderDetailPage> {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  l10n.settingsAiProviderReasoningEffortHelp,
+                  _reasoningFormat == AiReasoningFormat.auto
+                      ? l10n.settingsAiProviderReasoningFormatHelp
+                      : l10n.settingsAiProviderReasoningEffortHelp,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: colorScheme.onSurfaceVariant,
                     height: 1.35,
@@ -622,7 +703,10 @@ class _AiProviderDetailPageState extends ConsumerState<AiProviderDetailPage> {
           : false,
       apiKeys: _apiKeys,
       model: _modelController.text,
-      reasoningEffort: _reasoningEffort,
+      reasoningEffort: _effectiveReasoningEffort(),
+      reasoningEnabled: _reasoningEnabled,
+      reasoningFormat: _reasoningFormat,
+      reasoningBudgetTokens: _parseBudget(),
       keyIndex: 0,
       createdAt: widget.providerId != null
           ? ref
@@ -641,6 +725,25 @@ class _AiProviderDetailPageState extends ConsumerState<AiProviderDetailPage> {
 
     setState(() => _isModified = false);
     Navigator.pop(context);
+  }
+
+  /// Reasoning effort to persist: when reasoning is enabled but the legacy
+  /// `auto` value is kept, fall back to `medium`.
+  AiReasoningEffort _effectiveReasoningEffort() {
+    if (_reasoningEnabled && _reasoningEffort == AiReasoningEffort.auto) {
+      return AiReasoningEffort.medium;
+    }
+    return _reasoningEffort;
+  }
+
+  /// Parse the custom reasoning budget from the input field. Returns null
+  /// when empty or invalid (meaning "use the effort default").
+  int? _parseBudget() {
+    final text = _budgetController.text.trim();
+    if (text.isEmpty) return null;
+    final value = int.tryParse(text);
+    if (value == null || value <= 0) return null;
+    return value;
   }
 
   void _testConnection() {
@@ -668,7 +771,10 @@ class _AiProviderDetailPageState extends ConsumerState<AiProviderDetailPage> {
             : false,
         apiKeys: _apiKeys,
         model: _modelController.text,
-        reasoningEffort: _reasoningEffort,
+        reasoningEffort: _effectiveReasoningEffort(),
+        reasoningEnabled: _reasoningEnabled,
+        reasoningFormat: _reasoningFormat,
+        reasoningBudgetTokens: _parseBudget(),
         keyIndex: 0,
         createdAt: widget.providerId != null
             ? ref

@@ -2,7 +2,6 @@
   "ar": [
     "bookDetailFileFormat",
     "settingsAiProviderReasoningEffort",
-    "settingsAiProviderReasoningEffortHelp",
     "settingsAiProviderReasoningEffortAuto",
     "settingsAiProviderReasoningEffortLow",
     "settingsAiProviderReasoningEffortMedium",
@@ -25,7 +24,6 @@
   "de": [
     "bookDetailFileFormat",
     "settingsAiProviderReasoningEffort",
-    "settingsAiProviderReasoningEffortHelp",
     "settingsAiProviderReasoningEffortAuto",
     "settingsAiProviderReasoningEffortLow",
     "settingsAiProviderReasoningEffortMedium",
@@ -48,7 +46,6 @@
   "es": [
     "bookDetailFileFormat",
     "settingsAiProviderReasoningEffort",
-    "settingsAiProviderReasoningEffortHelp",
     "settingsAiProviderReasoningEffortAuto",
     "settingsAiProviderReasoningEffortLow",
     "settingsAiProviderReasoningEffortMedium",
@@ -71,7 +68,6 @@
   "fr": [
     "bookDetailFileFormat",
     "settingsAiProviderReasoningEffort",
-    "settingsAiProviderReasoningEffortHelp",
     "settingsAiProviderReasoningEffortAuto",
     "settingsAiProviderReasoningEffortLow",
     "settingsAiProviderReasoningEffortMedium",
@@ -94,7 +90,6 @@
   "it": [
     "bookDetailFileFormat",
     "settingsAiProviderReasoningEffort",
-    "settingsAiProviderReasoningEffortHelp",
     "settingsAiProviderReasoningEffortAuto",
     "settingsAiProviderReasoningEffortLow",
     "settingsAiProviderReasoningEffortMedium",
@@ -117,7 +112,6 @@
   "ja": [
     "bookDetailFileFormat",
     "settingsAiProviderReasoningEffort",
-    "settingsAiProviderReasoningEffortHelp",
     "settingsAiProviderReasoningEffortAuto",
     "settingsAiProviderReasoningEffortLow",
     "settingsAiProviderReasoningEffortMedium",
@@ -140,7 +134,6 @@
   "ko": [
     "bookDetailFileFormat",
     "settingsAiProviderReasoningEffort",
-    "settingsAiProviderReasoningEffortHelp",
     "settingsAiProviderReasoningEffortAuto",
     "settingsAiProviderReasoningEffortLow",
     "settingsAiProviderReasoningEffortMedium",
@@ -163,7 +156,6 @@
   "pt": [
     "bookDetailFileFormat",
     "settingsAiProviderReasoningEffort",
-    "settingsAiProviderReasoningEffortHelp",
     "settingsAiProviderReasoningEffortAuto",
     "settingsAiProviderReasoningEffortLow",
     "settingsAiProviderReasoningEffortMedium",
@@ -186,7 +178,6 @@
   "ro": [
     "bookDetailFileFormat",
     "settingsAiProviderReasoningEffort",
-    "settingsAiProviderReasoningEffortHelp",
     "settingsAiProviderReasoningEffortAuto",
     "settingsAiProviderReasoningEffortLow",
     "settingsAiProviderReasoningEffortMedium",
@@ -209,7 +200,6 @@
   "ru": [
     "bookDetailFileFormat",
     "settingsAiProviderReasoningEffort",
-    "settingsAiProviderReasoningEffortHelp",
     "settingsAiProviderReasoningEffortAuto",
     "settingsAiProviderReasoningEffortLow",
     "settingsAiProviderReasoningEffortMedium",
@@ -232,7 +222,6 @@
   "tr": [
     "bookDetailFileFormat",
     "settingsAiProviderReasoningEffort",
-    "settingsAiProviderReasoningEffortHelp",
     "settingsAiProviderReasoningEffortAuto",
     "settingsAiProviderReasoningEffortLow",
     "settingsAiProviderReasoningEffortMedium",
@@ -254,7 +243,6 @@
 
   "zh": [
     "settingsAiProviderReasoningEffort",
-    "settingsAiProviderReasoningEffortHelp",
     "settingsAiProviderReasoningEffortAuto",
     "settingsAiProviderReasoningEffortLow",
     "settingsAiProviderReasoningEffortMedium",
@@ -280,7 +268,6 @@
   "zh_LZH": [
     "bookDetailFileFormat",
     "settingsAiProviderReasoningEffort",
-    "settingsAiProviderReasoningEffortHelp",
     "settingsAiProviderReasoningEffortAuto",
     "settingsAiProviderReasoningEffortLow",
     "settingsAiProviderReasoningEffortMedium",
@@ -303,7 +290,6 @@
   "zh_TW": [
     "bookDetailFileFormat",
     "settingsAiProviderReasoningEffort",
-    "settingsAiProviderReasoningEffortHelp",
     "settingsAiProviderReasoningEffortAuto",
     "settingsAiProviderReasoningEffortLow",
     "settingsAiProviderReasoningEffortMedium",
