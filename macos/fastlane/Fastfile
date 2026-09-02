@@ -110,6 +110,7 @@ platform :mac do
       type: "appstore",
       platform: "macos",
       readonly: false,
+      renew_expired_certs: true,
       keychain_name: is_ci ? "fastlane_tmp_keychain" : "login.keychain",
       keychain_password: is_ci ? "temp_password" : nil,
       additional_cert_types: ["mac_installer_distribution"]

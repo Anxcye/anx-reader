@@ -128,6 +128,7 @@ platform :ios do
     sync_code_signing(
       type: "appstore",
       readonly: false,
+      renew_expired_certs: true,
       keychain_name: is_ci ? "fastlane_tmp_keychain" : "login.keychain",
       keychain_password: is_ci ? "temp_password" : nil,
     )

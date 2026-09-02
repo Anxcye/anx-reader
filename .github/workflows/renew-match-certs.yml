@@ -17,7 +17,7 @@ jobs:
       - name: Install fastlane
         run: |
           cd ios
-          bundle install
+          bundle update fastlane
 
       - name: Renew iOS App Store certs
         run: |
@@ -30,6 +30,7 @@ jobs:
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
           MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
           APP_BUNDLE_ID: ${{ secrets.APP_BUNDLE_ID }}
+          MATCH_RENEW_EXPIRED_CERTS: true
 
   renew-macos:
     runs-on: macos-latest
@@ -41,7 +42,7 @@ jobs:
       - name: Install fastlane
         run: |
           cd macos
-          bundle install
+          bundle update fastlane
 
       - name: Renew macOS App Store certs
         run: |
@@ -54,3 +55,4 @@ jobs:
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
           MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
           APP_BUNDLE_ID: ${{ secrets.APP_BUNDLE_ID }}
+          MATCH_RENEW_EXPIRED_CERTS: true
