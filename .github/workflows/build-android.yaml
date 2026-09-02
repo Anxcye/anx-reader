@@ -1,28 +1,27 @@
 name: Build Android
 
 on:
-  workflow_call:
+  workflow_dispatch:
     inputs:
       version:
+        description: '版本号 (例如 1.2.0)'
         required: true
         type: string
+        default: '1.0.0'
       flutter_version:
+        description: 'Flutter 版本'
         required: true
         type: string
-    secrets:
-      KEYSTORE_BASE64:
-        required: true
-      KEYSTORE_PASSWORD:
-        required: true
-      KEY_PASSWORD:
-        required: true
-      KEY_ALIAS:
-        required: true
+        default: '3.24.0'
+  # 如果想打 tag 自动触发，取消下面的注释
+  # push:
+  #   tags:
+  #     - 'v*'
 
 jobs:
   build-android:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -46,13 +45,24 @@ jobs:
           cache: 'gradle'
           check-latest: true
 
-      - name: Setup Android signing
+      # 现场生成一个测试 keystore，不需要任何 secrets
+      - name: Generate test keystore
         run: |
-          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/keystore.jks        
-          echo "storePassword=${{ secrets.KEYSTORE_PASSWORD }}" > android/key.properties    
-          echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> android/key.properties    
-          echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> android/key.properties    
-          echo "storeFile=keystore.jks" >> android/key.properties
+          keytool -genkeypair -v \
+            -keystore android/app/keystore.jks \
+            -storetype JKS \
+            -storepass android \
+            -keypass android \
+            -alias testkey \
+            -keyalg RSA -keysize 2048 -validity 10000 \
+            -dname "CN=Test, OU=Test, O=Test, L=Test, ST=Test, C=US"
+
+      - name: Setup Android signing (test key)
+        run: |
+          echo "storeFile=keystore.jks" > android/key.properties
+          echo "storePassword=android" >> android/key.properties
+          echo "keyAlias=testkey" >> android/key.properties
+          echo "keyPassword=android" >> android/key.properties
 
       - name: Build for Android
         run: |
@@ -72,6 +82,6 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: android-artifacts
+          name: android-artifacts-${{ inputs.version }}
           path: build/app/outputs/flutter-apk/*.apk
           if-no-files-found: error
