@@ -9,14 +9,13 @@ on:
         type: string
         default: '1.0.0'
       flutter_version:
-        description: 'Flutter 版本'
-        required: true
+        description: 'Flutter 版本 (留空 = 最新稳定版)'
+        required: false
         type: string
-        default: '3.24.0'
-  # 如果想打 tag 自动触发，取消下面的注释
-  # push:
-  #   tags:
-  #     - 'v*'
+        default: ''
+  push:
+      tags:
+        - 'v*'
 
 jobs:
   build-android:
@@ -45,7 +44,6 @@ jobs:
           cache: 'gradle'
           check-latest: true
 
-      # 现场生成一个测试 keystore，不需要任何 secrets
       - name: Generate test keystore
         run: |
           keytool -genkeypair -v \
@@ -85,3 +83,39 @@ jobs:
           name: android-artifacts-${{ inputs.version }}
           path: build/app/outputs/flutter-apk/*.apk
           if-no-files-found: error
+
+  release:
+    needs: build-android
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: android-artifacts-${{ inputs.version }}
+          path: apks
+
+      - name: Create tag and release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          SHORT_SHA=$(git rev-parse --short HEAD)
+          TAG="${SHORT_SHA}"
+          echo "Tag: ${TAG}"
+
+          # 同一个 commit 重复构建时，先删掉旧的 release 和 tag
+          gh release delete "${TAG}" --yes --cleanup-tag --repo "${GITHUB_REPOSITORY}" || true
+
+          gh release create "${TAG}" \
+            --repo "${GITHUB_REPOSITORY}" \
+            --target "${GITHUB_SHA}" \
+            --title "Anx Reader ${VERSION} (${TAG})" \
+            --notes "自动构建: commit ${GITHUB_SHA}" \
+            --latest \
+            apks/*.apk
