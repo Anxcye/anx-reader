@@ -41,6 +41,12 @@
 	<string>We need access to your photo library to save images.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>We need access to your photo library to save images.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>We need microphone access when a translation page in the in-app browser asks to use speech input.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>We need camera access when a translation page in the in-app browser asks to use the camera.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Some embedded web content may request location while you use in-app translation. Anx Reader does not use your location itself.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UIBackgroundModes</key>
