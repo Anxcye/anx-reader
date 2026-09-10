@@ -32,7 +32,6 @@ abstract class WebViewTranslateProvider extends TranslateServiceProvider {
               isInspectable: kDebugMode,
               mediaPlaybackRequiresUserGesture: false,
               allowsInlineMediaPlayback: true,
-              iframeAllow: "camera; microphone",
               iframeAllowFullscreen: true,
             ),
             gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
