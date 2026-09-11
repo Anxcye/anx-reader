@@ -264,6 +264,31 @@ const setSelectionHandler = (view, doc, index) => {
 
   doc.addEventListener('selectionchange', handleSelectionStateChange);
 
+  // Page-turn keys must turn pages even while text is selected.
+  // Without this, the WebView uses arrows to pan/extend selection (#966).
+  doc.addEventListener('keydown', (e) => {
+    const nextKeys = new Set(['ArrowRight', 'ArrowDown', 'PageDown', ' ']);
+    const prevKeys = new Set(['ArrowLeft', 'ArrowUp', 'PageUp']);
+    if (!nextKeys.has(e.key) && !prevKeys.has(e.key)) return;
+    // Allow shortcuts with modifiers other than Shift (e.g. Ctrl+Arrow)
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+    const selection = doc.getSelection();
+    if (selection && selection.rangeCount > 0) {
+      selection.removeAllRanges();
+    }
+    if (typeof window.clearSelection === 'function') {
+      try { window.clearSelection(); } catch (_) {}
+    }
+    if (nextKeys.has(e.key)) {
+      nextPage();
+    } else {
+      prevPage();
+    }
+  }, true);
+
   const rangesEqual = (a, b) => (
     a.startContainer === b.startContainer
     && a.startOffset === b.startOffset

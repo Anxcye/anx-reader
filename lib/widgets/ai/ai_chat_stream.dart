@@ -417,9 +417,16 @@ class AiChatStreamState extends ConsumerState<AiChatStream> {
     );
   }
 
-  void _useQuickPrompt(String prompt) {
-    inputController.text = '$prompt ${inputController.text}';
-    _sendMessage();
+  void _useQuickPrompt(String prompt, {bool sendImmediately = false}) {
+    final existing = inputController.text.trim();
+    inputController.text =
+        existing.isEmpty ? prompt : '$prompt $existing';
+    inputController.selection = TextSelection.collapsed(
+      offset: inputController.text.length,
+    );
+    if (sendImmediately) {
+      _sendMessage();
+    }
   }
 
   void _clearMessage() {
@@ -713,13 +720,14 @@ class AiChatStreamState extends ConsumerState<AiChatStream> {
           chips.add(
             Padding(
               padding: EdgeInsets.only(top: i == 0 ? 0 : 8.0),
-              child: ActionChip(
-                avatar: Icon(chip.icon, size: 18),
-                label: Text(chip.label),
-                onPressed: () {
-                  inputController.text = chip.prompt;
-                  _sendMessage();
-                },
+              child: GestureDetector(
+                onLongPress: () =>
+                    _useQuickPrompt(chip.prompt, sendImmediately: true),
+                child: ActionChip(
+                  avatar: Icon(chip.icon, size: 18),
+                  label: Text(chip.label),
+                  onPressed: () => _useQuickPrompt(chip.prompt),
+                ),
               ),
             ),
           );
@@ -759,12 +767,15 @@ class AiChatStreamState extends ConsumerState<AiChatStream> {
                     runSpacing: 8,
                     children: _suggestedPrompts
                         .map(
-                          (prompt) => ActionChip(
-                            label: Text(prompt),
-                            onPressed: () {
-                              inputController.text = prompt;
-                              _sendMessage();
-                            },
+                          (prompt) => GestureDetector(
+                            onLongPress: () => _useQuickPrompt(
+                              prompt,
+                              sendImmediately: true,
+                            ),
+                            child: ActionChip(
+                              label: Text(prompt),
+                              onPressed: () => _useQuickPrompt(prompt),
+                            ),
                           ),
                         )
                         .toList(growable: false),

@@ -114,11 +114,17 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
       ModalRoute.of(context)?.isCurrent ?? false;
 
   void prevPage() {
-    webViewController.evaluateJavascript(source: 'prevPage()');
+    webViewController.evaluateJavascript(source: '''
+      if (typeof clearSelection === 'function') { clearSelection(); }
+      prevPage();
+      ''');
   }
 
   void nextPage() {
-    webViewController.evaluateJavascript(source: 'nextPage()');
+    webViewController.evaluateJavascript(source: '''
+      if (typeof clearSelection === 'function') { clearSelection(); }
+      nextPage();
+      ''');
   }
 
   void prevChapter() {
