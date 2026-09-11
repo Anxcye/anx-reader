@@ -12,6 +12,10 @@
 - Fix(ai): Avoid native WebView2 crash when running book content search on Windows (#978) Thanks @bazzdug-arch
 - Perf(reader): Reduce Android reading-page scroll jank by deferring relocate during scroll (#914) Thanks @dddXzz
 - Fix(reader): Restore reader keyboard focus after clearing text selection / closing context menu (#967, #966) Thanks @zyx-31415
+- Fix(reader): Open selection menu on single-word long-press on Android (#990, #968, #900)
+- Fix(sync): Rename local book file when saving a new title so WebDAV uploads use the updated name (#989)
+- Feat(appearance): Disable open-book animation, page transitions, and dialog motion when e-ink mode is on (#986)
+- Fix(bookshelf): Make group rename obvious (edit icon) and seed new groups with the book title instead of "..." (#972)
 
 - Feat(search): 支持应用内搜索结果显示，可配置搜索引擎和显示方式 (#894)
 - Feat(ai): 新增自动摘要延迟阈值配置，可控制重新打开书籍时的摘要触发时机 (#922)
@@ -24,6 +28,10 @@
 - Fix(ai): 修复 Windows 上书籍内容搜索触发原生 WebView2 崩溃的问题 (#978) 感谢 @bazzdug-arch
 - Perf(reader): 优化 Android 阅读页滚动卡顿，滚动期间推迟 relocate (#914) 感谢 @dddXzz
 - Fix(reader): 修复清除选区/关闭上下文菜单后阅读器键盘焦点未恢复的问题 (#967, #966) 感谢 @zyx-31415
+- Fix(reader): 修复 Android 长按选中单字不弹出菜单的问题 (#990, #968, #900)
+- Fix(sync): 保存书名时同步重命名本地文件，避免 WebDAV 仍上传旧文件名 (#989)
+- Feat(appearance): 开启墨水屏模式时关闭开书动画、页面转场与弹窗动画 (#986)
+- Fix(bookshelf): 分组命名入口更明显，新建分组默认使用书名而非 "..." (#972)
 
 ## 1.14.0
 - Fix(translate): Remove legacy Microsoft reverse-engineered translation service and migrate saved full-text translation preference to Microsoft Azure API
