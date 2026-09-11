@@ -209,6 +209,7 @@ class ReadingPageState extends ConsumerState<ReadingPage>
         logicalKey == LogicalKeyboardKey.arrowDown ||
         logicalKey == LogicalKeyboardKey.pageDown ||
         logicalKey == LogicalKeyboardKey.space) {
+      // Clear any active text selection so keys turn pages instead of panning (#966).
       epubPlayerKey.currentState?.nextPage();
       return KeyEventResult.handled;
     }

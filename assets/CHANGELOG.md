@@ -16,6 +16,10 @@
 - Fix(sync): Rename local book file when saving a new title so WebDAV uploads use the updated name (#989)
 - Feat(appearance): Disable open-book animation, page transitions, and dialog motion when e-ink mode is on (#986)
 - Fix(bookshelf): Make group rename obvious (edit icon) and seed new groups with the book title instead of "..." (#972)
+- Fix(ai): Preserve Gemini thought_signature across tool-call round-trips so thinking models work with tools (#977)
+- Fix(reader): Page-turn keys clear selection and turn pages instead of panning while text is selected (#966)
+- Fix(ai): Null-safe custom provider config parsing and clearer errors when required fields or response shape are invalid (#868)
+- Fix(ai): Quick prompt chips insert into the composer for editing; long-press still sends immediately (#969)
 
 - Feat(search): 支持应用内搜索结果显示，可配置搜索引擎和显示方式 (#894)
 - Feat(ai): 新增自动摘要延迟阈值配置，可控制重新打开书籍时的摘要触发时机 (#922)
@@ -32,6 +36,10 @@
 - Fix(sync): 保存书名时同步重命名本地文件，避免 WebDAV 仍上传旧文件名 (#989)
 - Feat(appearance): 开启墨水屏模式时关闭开书动画、页面转场与弹窗动画 (#986)
 - Fix(bookshelf): 分组命名入口更明显，新建分组默认使用书名而非 "..." (#972)
+- Fix(ai): 修复 Gemini 工具调用时缺失 thought_signature 导致思考模型报错的问题 (#977)
+- Fix(reader): 选中文本时方向键/翻页键先清除选区再翻页，避免页面平移 (#966)
+- Fix(ai): 自定义供应商配置解析更空安全，并在必填项或响应格式异常时给出明确错误 (#868)
+- Fix(ai): 快捷提示词芯片点击写入输入框以便编辑，长按仍可立即发送 (#969)
 
 ## 1.14.0
 - Fix(translate): Remove legacy Microsoft reverse-engineered translation service and migrate saved full-text translation preference to Microsoft Azure API
