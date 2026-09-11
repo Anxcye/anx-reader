@@ -14,6 +14,7 @@ import 'package:anx_reader/service/book_player/book_player_server.dart';
 import 'package:anx_reader/service/network/http_proxy_overrides.dart';
 import 'package:anx_reader/service/tts/tts_handler.dart';
 import 'package:anx_reader/utils/get_path/macos_migration.dart';
+import 'package:anx_reader/theme/anx_theme.dart';
 import 'package:anx_reader/utils/color_scheme.dart';
 import 'package:anx_reader/utils/error/common.dart';
 import 'package:anx_reader/utils/get_path/get_base_path.dart';
@@ -22,6 +23,7 @@ import 'package:anx_reader/utils/window_position_validator.dart';
 import 'package:anx_reader/providers/sync.dart';
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:heroine/heroine.dart';
@@ -194,14 +196,31 @@ class _MyAppState extends ConsumerState<MyApp>
               FlutterSmartDialog.observer,
               heroineController
             ],
-            builder: FlutterSmartDialog.init(),
+            builder: (context, child) {
+              final brightness = Theme.brightnessOf(context);
+              final anxTheme = AnxTheme.fromPrefs(
+                prefsNotifier,
+                brightness: brightness,
+              );
+              final smartInit = FlutterSmartDialog.init();
+              return AnxThemeProvider(
+                theme: anxTheme,
+                child: FToaster(
+                  child: FTooltipGroup(
+                    child: smartInit(context, child),
+                  ),
+                ),
+              );
+            },
             navigatorKey: navigatorKey,
             locale: prefsNotifier.locale,
             localeListResolutionCallback: _resolveLocale,
             localizationsDelegates: L10n.localizationsDelegates,
             supportedLocales: L10n.supportedLocales,
             title: 'Anx Reader',
-            themeMode: prefsNotifier.themeMode,
+            themeMode: prefsNotifier.eInkMode
+                ? ThemeMode.light
+                : prefsNotifier.themeMode,
             theme: colorSchema(prefsNotifier, context, Brightness.light),
             darkTheme: colorSchema(prefsNotifier, context, Brightness.dark),
             home: _needsMigration

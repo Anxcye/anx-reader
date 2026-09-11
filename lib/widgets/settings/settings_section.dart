@@ -1,4 +1,4 @@
-import 'package:anx_reader/widgets/common/container/filled_container.dart';
+import 'package:anx_reader/widgets/common/anx_card.dart';
 import 'package:anx_reader/widgets/settings/settings_tile.dart';
 import 'package:flutter/material.dart';
 
@@ -50,8 +50,8 @@ class SettingsSection extends AbstractSettingsSection {
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8),
-          child: FilledContainer(
-            padding: EdgeInsetsGeometry.zero,
+          child: AnxCard(
+            padding: EdgeInsets.zero,
             child: tileList,
           ),
         ),
