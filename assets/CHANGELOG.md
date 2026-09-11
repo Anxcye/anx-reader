@@ -1,6 +1,9 @@
 # Changelog
 
 ## 1.15.0
+- Fix(reader): Honor writing-direction setting for EPUBs that set writing-mode on body (e.g. vertical Japanese books) (#867)
+- Fix(log): Silence Chromium iframe sandbox WebView warning that already had an ignore entry but failed exact match due to trailing period (#877)
+- Ci: Upgrade lock-threads to v6 and use github.token so lock-closed-issues stops failing daily on long GITHUB_TOKEN secrets
 - Feat(search): Add in-app search results with configurable search engine and display modes (#894)
 - Feat(ai): Add configurable delay threshold for auto-summary when reopening a book (#922)
 - Feat(ai): Make custom user prompts available in the Home AI tab for parity with reader AI (#853)
@@ -21,6 +24,9 @@
 - Fix(ai): Null-safe custom provider config parsing and clearer errors when required fields or response shape are invalid (#868)
 - Fix(ai): Quick prompt chips insert into the composer for editing; long-press still sends immediately (#969)
 
+- Fix(reader): 修复部分 EPUB（如在 body 上设置竖排 writing-mode）忽略写作方向设置的问题 (#867)
+- Fix(log): 修复因句末句点导致精确匹配失败、未能屏蔽 Chromium iframe sandbox WebView 警告的问题 (#877)
+- Ci: 升级 lock-threads 至 v6 并改用 github.token，避免 lock-closed-issues 因过长 GITHUB_TOKEN 每日失败
 - Feat(search): 支持应用内搜索结果显示，可配置搜索引擎和显示方式 (#894)
 - Feat(ai): 新增自动摘要延迟阈值配置，可控制重新打开书籍时的摘要触发时机 (#922)
 - Feat(ai): 让自定义用户提示词在首页 AI 标签页中可用，并与阅读器 AI 保持一致 (#853)

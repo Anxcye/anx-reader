@@ -64,7 +64,8 @@ void webviewConsoleMessage(
     'An iframe which has both allow-scripts and allow-same-origin for its sandbox attribute can escape its sandboxing',
     'JavaScript execution returned a result of an unsupported type'
   ];
-  if (ignoreMsg.contains(consoleMessage.message)) {
+  // Chromium appends a trailing period; match by substring so harmless WebView noise stays out of logs.
+  if (ignoreMsg.any((m) => consoleMessage.message.contains(m))) {
     return;
   }
 

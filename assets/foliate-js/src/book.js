@@ -738,6 +738,9 @@ const getCSS = ({ fontSize,
     }
 
     body {
+        /* Force user writing-mode over EPUB body rules (e.g. vertical-rl in template_rv.css).
+           html alone is not enough: body has its own writing-mode from the book stylesheet. */
+        ${writingModeCSS}
         background: none !important;
         background-color: transparent;
         padding: 0;
