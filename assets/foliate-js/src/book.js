@@ -371,6 +371,7 @@ const setSelectionHandler = (view, doc, index) => {
     });
   } else { // Android
     let hasNativeSelectionStarted = false;
+    let longPressSettleTimer;
 
     doc.addEventListener('pointerdown', () => {
       hasNativeSelectionStarted = false;
@@ -394,12 +395,25 @@ const setSelectionHandler = (view, doc, index) => {
       // We block it to prevent the custom menu from interfering with the drag.
       if (!hasNativeSelectionStarted) {
         e.preventDefault();
+        // A long-press released without dragging gets no second contextmenu, and the
+        // touch is cancelled so there is no pointerup either. Open the menu once the
+        // selection has stayed unchanged for a moment; a drag changes it and is
+        // handled by the release event below instead.
+        const pressed = getSelectionRange(doc.getSelection())?.cloneRange();
+        clearTimeout(longPressSettleTimer);
+        longPressSettleTimer = setTimeout(() => {
+          const current = getSelectionRange(doc.getSelection());
+          if (!pressed || !current || !rangesEqual(pressed, current)) return;
+          if (shouldSkipPointerUp()) return;
+          handleSelection(view, doc, index);
+        }, 600);
         return;
       }
 
       // If we have entered native selection mode (pointercancel happened),
       // this contextmenu event is likely triggered by the system or user interaction
       // after the selection phase (e.g. on release). We handle it.
+      if (shouldSkipPointerUp()) return;
       handleSelection(view, doc, index);
     });
   }

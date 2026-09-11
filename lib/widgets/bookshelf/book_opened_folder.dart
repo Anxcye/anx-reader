@@ -96,18 +96,30 @@ class _BookOpenedFolderState extends ConsumerState<BookOpenedFolder> {
                 ),
               ],
             )
-          : TextButton(
-              onPressed: () {
+          : InkWell(
+              onTap: () {
                 setState(() {
                   isEditingName = true;
                 });
               },
-              child: Text(
-                currentGroupName,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                ),
-                overflow: TextOverflow.ellipsis,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      currentGroupName,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Icon(
+                    Icons.edit_outlined,
+                    size: 18,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ],
               ),
             ),
       content: SizedBox(
