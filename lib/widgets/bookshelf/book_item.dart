@@ -4,6 +4,7 @@ import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/providers/sync_status.dart';
 import 'package:anx_reader/service/book.dart';
 import 'package:anx_reader/widgets/bookshelf/book_bottom_sheet.dart';
+import 'package:anx_reader/widgets/common/anx_bottom_sheet.dart';
 import 'package:anx_reader/widgets/bookshelf/book_cover.dart';
 import 'package:anx_reader/widgets/bookshelf/book_sync_status_icon.dart';
 import 'package:flutter/material.dart';
@@ -20,7 +21,7 @@ class BookItem extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     Future<void> handleLongPress(BuildContext context) async {
-      showModalBottomSheet(
+      showAnxBottomSheet(
           context: context,
           builder: (BuildContext context) {
             return BookBottomSheet(book: book);
