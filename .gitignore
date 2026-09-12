@@ -47,8 +47,11 @@ app.*.map.json
 # riverpod generated files
 lib/gen/
 release.sh
+# Commit lib codegen so CI can skip build_runner (forui + riverpod_generator hang)
 *.g.dart
 *.freezed.dart
+!lib/**/*.g.dart
+!lib/**/*.freezed.dart
 
 /.vscode/
 CLAUDE.md
