@@ -1,6 +1,7 @@
 # Changelog
 
 ## 1.15.0
+- Ci: Pin forui to 0.25.x (avoid material_ui) so riverpod build_runner completes in CI; revert committing generated freezed/g.dart sources
 - Ci: Add job timeouts for Android/iOS/macOS/Windows builds so hung runners fail fast instead of canceling after 6h
 - Feat(ui): Refresh shell with forui design system, AnxButton/Sheet/Scaffold/Card facades, and theme bridge (e-ink preserved)
 - Fix(reader): Honor writing-direction setting for EPUBs that set writing-mode on body (e.g. vertical Japanese books) (#867)
@@ -29,6 +30,7 @@
 - Feat(ui): 采用 forui 设计系统刷新界面壳层，新增 AnxButton/Sheet/Scaffold/Card 门面与主题桥接（保留墨水屏约束）
 - Fix(reader): 修复部分 EPUB（如在 body 上设置竖排 writing-mode）忽略写作方向设置的问题 (#867)
 - Fix(log): 修复因句末句点导致精确匹配失败、未能屏蔽 Chromium iframe sandbox WebView 警告的问题 (#877)
+- Ci: 将 forui 固定为 0.25.x（避开 material_ui）以恢复 CI 中 build_runner；回滚提交 freezed/g.dart 生成文件的做法
 - Ci: 为 Android/iOS/macOS/Windows 构建任务增加超时，避免卡住后拖满 6 小时才取消
 - Ci: 升级 lock-threads 至 v6 并改用 github.token，避免 lock-closed-issues 因过长 GITHUB_TOKEN 每日失败
 - Feat(search): 支持应用内搜索结果显示，可配置搜索引擎和显示方式 (#894)
