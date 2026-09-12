@@ -1,7 +1,6 @@
 # Changelog
 
 ## 1.15.0
-- Ci: Commit generated Riverpod/freezed sources and skip build_runner in CI (forui + riverpod_generator hang)
 - Ci: Add job timeouts for Android/iOS/macOS/Windows builds so hung runners fail fast instead of canceling after 6h
 - Feat(ui): Refresh shell with forui design system, AnxButton/Sheet/Scaffold/Card facades, and theme bridge (e-ink preserved)
 - Fix(reader): Honor writing-direction setting for EPUBs that set writing-mode on body (e.g. vertical Japanese books) (#867)
@@ -27,7 +26,6 @@
 - Fix(ai): Null-safe custom provider config parsing and clearer errors when required fields or response shape are invalid (#868)
 - Fix(ai): Quick prompt chips insert into the composer for editing; long-press still sends immediately (#969)
 
-- Ci: 提交 Riverpod/freezed 生成代码并在 CI 中跳过 build_runner（forui 与 riverpod_generator 会卡住）
 - Feat(ui): 采用 forui 设计系统刷新界面壳层，新增 AnxButton/Sheet/Scaffold/Card 门面与主题桥接（保留墨水屏约束）
 - Fix(reader): 修复部分 EPUB（如在 body 上设置竖排 writing-mode）忽略写作方向设置的问题 (#867)
 - Fix(log): 修复因句末句点导致精确匹配失败、未能屏蔽 Chromium iframe sandbox WebView 警告的问题 (#877)

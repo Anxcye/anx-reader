@@ -38,6 +38,7 @@ jobs:
           sudo xcode-select -switch /Applications/Xcode_${{ inputs.xcode_version }}.app/Contents/Developer
           # xcodebuild -downloadPlatform iOS -buildVersion 18.2
           flutter gen-l10n
+          dart run build_runner build --delete-conflicting-outputs
           flutter build ios --release --no-codesign
           cd build/ios/Release-iphoneos
           mkdir -p Payload
