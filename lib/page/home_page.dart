@@ -23,8 +23,7 @@ import 'package:anx_reader/providers/iap.dart';
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/utils/toast/common.dart';
 import 'package:anx_reader/widgets/ai/ai_chat_stream.dart';
-import 'package:anx_reader/widgets/common/anx_scaffold.dart';
-import 'package:anx_reader/widgets/common/anx_surface.dart';
+import 'package:anx_reader/widgets/common/container/filled_container.dart';
 import 'package:anx_reader/widgets/settings/about.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
@@ -216,16 +215,20 @@ class _HomePageState extends ConsumerState<HomePage> {
       builder: (context, constraints) {
         _expanded ??= constraints.maxWidth > 1000;
         if (constraints.maxWidth > 600) {
-          return AnxScaffold(
+          return Scaffold(
             extendBody: true,
             body: Row(
               children: [
                 SafeArea(
                   bottom: false,
-                  child: AnxSurface(
+                  child: FilledContainer(
                     margin: const EdgeInsets.all(16),
+                    color: ElevationOverlay.applySurfaceTint(
+                      Theme.of(context).colorScheme.surface,
+                      Theme.of(context).colorScheme.primary,
+                      3,
+                    ),
                     radius: 20,
-                    bordered: true,
                     child: SafeArea(
                       child: NavigationRail(
                         leading: InkWell(
@@ -261,7 +264,7 @@ class _HomePageState extends ConsumerState<HomePage> {
           if (navBarItems[currentIndex]['identifier'] == 'ai') {
             currentIndex = 0;
           }
-          return AnxScaffold(
+          return Scaffold(
             extendBody: true,
             body: BottomBar(
               width: 330,

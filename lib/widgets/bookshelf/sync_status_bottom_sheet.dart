@@ -13,8 +13,6 @@ import 'package:anx_reader/utils/get_path/databases_path.dart';
 import 'package:anx_reader/utils/toast/common.dart';
 import 'package:anx_reader/widgets/bookshelf/book_sync_status_icon.dart';
 import 'package:anx_reader/widgets/linear_proportion_bar.dart';
-import 'package:anx_reader/widgets/common/anx_bottom_sheet.dart';
-import 'package:anx_reader/widgets/common/anx_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -22,7 +20,7 @@ import 'package:path/path.dart';
 
 Future<void> showSyncStatusBottomSheet(BuildContext context) async {
   final dbPath = await getAnxDataBasesPath();
-  showAnxBottomSheet(
+  showModalBottomSheet(
     useSafeArea: true,
     context: navigatorKey.currentContext!,
     showDragHandle: true,
@@ -310,8 +308,7 @@ class SyncStatusBottomSheet extends ConsumerWidget {
       children: [
         Row(
           children: [
-            AnxButton.icon(
-              type: AnxButtonType.outlined,
+            OutlinedButton.icon(
               icon: const Icon(Icons.download_for_offline),
               label: Text(l10n.downloadAllBooks),
               onPressed: () {
@@ -332,7 +329,7 @@ class SyncStatusBottomSheet extends ConsumerWidget {
             ),
             const SizedBox(width: 16),
             Expanded(
-              child: AnxButton.icon(
+              child: FilledButton.icon(
                 icon: const Icon(Icons.sync),
                 label: Text(L10n.of(context).syncNow),
                 onPressed: () {

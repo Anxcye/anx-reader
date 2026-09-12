@@ -16,7 +16,6 @@ import 'package:anx_reader/widgets/statistic/statistic_card.dart';
 import 'package:anx_reader/widgets/statistic/statistics_dashboard_title.dart';
 import 'package:anx_reader/widgets/statistic/statistics_dashboard.dart';
 import 'package:anx_reader/widgets/tips/statistic_tips.dart';
-import 'package:anx_reader/widgets/common/anx_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
@@ -180,7 +179,7 @@ class _DateBooksState extends ConsumerState<DateBooks> {
                         ),
                       ],
                     ),
-                    AnxButton(
+                    FilledButton(
                         onPressed: () {
                           localSetState(() {
                             deleteBookIds.remove(bookId);

@@ -21,7 +21,6 @@ import 'package:anx_reader/widgets/bookshelf/book_cover.dart';
 import 'package:anx_reader/widgets/delete_confirm.dart';
 import 'package:anx_reader/widgets/icon_and_text.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:anx_reader/widgets/common/anx_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
@@ -103,13 +102,13 @@ class BookBottomSheet extends ConsumerWidget {
               ],
             ),
             actions: [
-              AnxButton.text(
+              TextButton(
                 onPressed: () {
                   SmartDialog.dismiss();
                 },
                 child: Text(L10n.of(context).commonCancel),
               ),
-              AnxButton.text(
+              TextButton(
                 onPressed: () {
                   SmartDialog.dismiss();
                   core();
@@ -183,13 +182,13 @@ class BookBottomSheet extends ConsumerWidget {
             ],
           ),
           actions: [
-            AnxButton.text(
+            TextButton(
               onPressed: () {
                 SmartDialog.dismiss(result: false);
               },
               child: Text(L10n.of(context).commonCancel),
             ),
-            AnxButton.text(
+            TextButton(
               onPressed: () {
                 SmartDialog.dismiss(result: true);
               },

@@ -7,8 +7,6 @@ import 'package:anx_reader/utils/env_var.dart';
 import 'package:anx_reader/widgets/settings/about.dart';
 import 'package:anx_reader/widgets/settings/theme_mode.dart';
 import 'package:anx_reader/widgets/settings/webdav_switch.dart';
-import 'package:anx_reader/widgets/common/anx_card.dart';
-import 'package:anx_reader/widgets/common/anx_scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -26,7 +24,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       widget.controller ?? ScrollController();
   @override
   Widget build(BuildContext context) {
-    return AnxScaffold(
+    return Scaffold(
       body: SingleChildScrollView(
         controller: _scrollController,
         child: Padding(
@@ -53,23 +51,17 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   ),
                 ),
               ),
-              const SizedBox(height: 8),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: AnxCard(
-                  padding: const EdgeInsets.fromLTRB(12, 8, 4, 8),
-                  child: const ChangeThemeMode(),
-                ),
+              const Divider(),
+              const Padding(
+                padding: EdgeInsets.fromLTRB(20, 8, 10, 8),
+                child: ChangeThemeMode(),
               ),
-              const SizedBox(height: 12),
+              const Divider(),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: AnxCard(
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  child: webdavSwitch(context, setState, ref),
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: webdavSwitch(context, setState, ref),
               ),
-              const SizedBox(height: 12),
+              const Divider(),
               const MoreSettings(),
               if (EnvVar.enableInAppPurchase)
                 ListTile(

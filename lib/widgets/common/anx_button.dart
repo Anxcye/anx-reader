@@ -1,34 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:forui/forui.dart';
 
-/// Visual variants for [AnxButton].
-///
-/// Existing values ([filled], [outlined], [text]) stay stable for call sites.
-/// Newer values map 1:1 onto Forui [FButtonVariant]s.
-enum AnxButtonType {
-  /// Forui primary (was Material [FilledButton]).
-  filled,
+enum AnxButtonType { filled, outlined, text }
 
-  /// Forui outline (was Material [OutlinedButton]).
-  outlined,
-
-  /// Forui ghost (was Material [TextButton]).
-  text,
-
-  /// Forui secondary.
-  secondary,
-
-  /// Forui destructive.
-  destructive,
-
-  /// Explicit ghost alias (same as [text]).
-  ghost,
-}
-
-/// App-facing button facade backed by Forui [FButton].
-///
-/// Keep using [AnxButton] at call sites — do not depend on raw Material or
-/// Forui button widgets so the visual system can be swapped later.
 class AnxButton extends StatelessWidget {
   const AnxButton({
     super.key,
@@ -102,13 +75,9 @@ class AnxButton extends StatelessWidget {
   final VoidCallback? onLongPress;
   final ValueChanged<bool>? onHover;
   final ValueChanged<bool>? onFocusChange;
-
-  /// Kept for API stability with older Material call sites. Unused by Forui.
   final ButtonStyle? style;
   final FocusNode? focusNode;
   final bool autofocus;
-
-  /// Kept for API stability. Unused by Forui [FButton].
   final Clip clipBehavior;
   final Widget? child;
   final Widget? icon;
@@ -117,52 +86,147 @@ class AnxButton extends StatelessWidget {
   final bool isLoading;
   final AnxButtonType type;
 
-  FButtonVariant get _variant => switch (type) {
-        AnxButtonType.filled => FButtonVariant.primary,
-        AnxButtonType.outlined => FButtonVariant.outline,
-        AnxButtonType.text || AnxButtonType.ghost => FButtonVariant.ghost,
-        AnxButtonType.secondary => FButtonVariant.secondary,
-        AnxButtonType.destructive => FButtonVariant.destructive,
-      };
-
   @override
   Widget build(BuildContext context) {
-    final effectiveOnPressed =
+    final VoidCallback? effectiveOnPressed =
         (disabled || isLoading) ? null : onPressed;
-    final effectiveOnLongPress =
+    final VoidCallback? effectiveOnLongPress =
         (disabled || isLoading) ? null : onLongPress;
 
-    final loading = SizedBox(
-      width: 18,
-      height: 18,
-      child: const FCircularProgress(size: FCircularProgressSizeVariant.sm),
-    );
+    Widget buttonContent;
 
-    if (icon != null && label != null) {
-      return FButton(
-        variant: _variant,
-        onPress: effectiveOnPressed,
-        onLongPress: effectiveOnLongPress,
-        onHoverChange: onHover,
-        onFocusChange: onFocusChange,
-        focusNode: focusNode,
-        autofocus: autofocus,
-        mainAxisSize: MainAxisSize.min,
-        prefix: isLoading ? loading : icon,
-        child: label!,
+    if (isLoading) {
+      buttonContent = SizedBox(
+        width: 24,
+        height: 24,
+        child: CircularProgressIndicator(
+          strokeWidth: 2.0,
+          color: type == AnxButtonType.filled
+              ? Theme.of(context).colorScheme.onPrimary
+              : Theme.of(context).colorScheme.primary,
+        ),
       );
+      // When loading, if it's an icon button or has child, we essentially want to replace content with spinner
+      // leveraging the button structure.
+      // But for Icon buttons, `icon` param expects a Widget.
+    } else {
+      buttonContent = child ?? const SizedBox();
     }
 
-    return FButton(
-      variant: _variant,
-      onPress: effectiveOnPressed,
-      onLongPress: effectiveOnLongPress,
-      onHoverChange: onHover,
-      onFocusChange: onFocusChange,
-      focusNode: focusNode,
-      autofocus: autofocus,
-      mainAxisSize: MainAxisSize.min,
-      child: isLoading ? loading : (child ?? const SizedBox.shrink()),
-    );
+    // Helper to build the specific button widget
+    Widget buildButton({required Widget child}) {
+      switch (type) {
+        case AnxButtonType.filled:
+          return FilledButton(
+            onPressed: effectiveOnPressed,
+            onLongPress: effectiveOnLongPress,
+            onHover: onHover,
+            onFocusChange: onFocusChange,
+            style: style,
+            focusNode: focusNode,
+            autofocus: autofocus,
+            clipBehavior: clipBehavior,
+            child: child,
+          );
+        case AnxButtonType.outlined:
+          return OutlinedButton(
+            onPressed: effectiveOnPressed,
+            onLongPress: effectiveOnLongPress,
+            onHover: onHover,
+            onFocusChange: onFocusChange,
+            style: style,
+            focusNode: focusNode,
+            autofocus: autofocus,
+            clipBehavior: clipBehavior,
+            child: child,
+          );
+        case AnxButtonType.text:
+          return TextButton(
+            onPressed: effectiveOnPressed,
+            onLongPress: effectiveOnLongPress,
+            onHover: onHover,
+            onFocusChange: onFocusChange,
+            style: style,
+            focusNode: focusNode,
+            autofocus: autofocus,
+            clipBehavior: clipBehavior,
+            child: child,
+          );
+      }
+    }
+
+    // Handle Icon constructors
+    if (icon != null && label != null) {
+      Widget iconToUse = isLoading
+          ? SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(
+                strokeWidth: 2.0,
+                color: type == AnxButtonType.filled
+                    ? Theme.of(context).colorScheme.onPrimary
+                    : Theme.of(context).colorScheme.primary,
+              ),
+            )
+          : icon!;
+
+      switch (type) {
+        case AnxButtonType.filled:
+          return FilledButton.icon(
+            onPressed: effectiveOnPressed,
+            onLongPress: effectiveOnLongPress,
+            onHover: onHover,
+            onFocusChange: onFocusChange,
+            style: style,
+            focusNode: focusNode,
+            autofocus: autofocus,
+            clipBehavior: clipBehavior,
+            icon: iconToUse,
+            label: label!,
+          );
+        case AnxButtonType.outlined:
+          return OutlinedButton.icon(
+            onPressed: effectiveOnPressed,
+            onLongPress: effectiveOnLongPress,
+            onHover: onHover,
+            onFocusChange: onFocusChange,
+            style: style,
+            focusNode: focusNode,
+            autofocus: autofocus,
+            clipBehavior: clipBehavior,
+            icon: iconToUse,
+            label: label!,
+          );
+        case AnxButtonType.text:
+          return TextButton.icon(
+            onPressed: effectiveOnPressed,
+            onLongPress: effectiveOnLongPress,
+            onHover: onHover,
+            onFocusChange: onFocusChange,
+            style: style,
+            focusNode: focusNode,
+            autofocus: autofocus,
+            clipBehavior: clipBehavior,
+            icon: iconToUse,
+            label: label!,
+          );
+      }
+    }
+
+    // Non-icon constructors
+    if (isLoading) {
+      return buildButton(
+          child: SizedBox(
+        height: 20,
+        width: 20,
+        child: CircularProgressIndicator(
+            strokeWidth: 2,
+            color: type == AnxButtonType.filled
+                ? Theme.of(context).colorScheme.onPrimary
+                : Theme.of(context).colorScheme.primary),
+      ));
+    }
+
+    return buildButton(child: buttonContent);
   }
 }
