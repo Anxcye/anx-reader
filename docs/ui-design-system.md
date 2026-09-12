@@ -91,3 +91,7 @@ When `Prefs().eInkMode` is on:
 ## Chinese fonts
 
 `useSystemChineseFont` is still applied on the Material `ThemeData` after the Forui approximate theme is built. Do not drop that step.
+
+## CI / codegen note
+
+Pin **forui 0.25.x** (not 0.26+). Forui 0.26 pulls in `material_ui`, which deadlocks `riverpod_generator` / `build_runner` in this repo. Generated `*.g.dart` / `*.freezed.dart` stay gitignored and are produced in CI.

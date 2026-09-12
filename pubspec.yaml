@@ -129,7 +129,7 @@ dependencies:
       ref: 2ac799a6eeb5da74bf5080a2ba2057272fa52b78
   haptic_feedback: ^0.6.4+2
   in_app_purchase_android: ^0.4.0+8
-  forui: ^0.26.0
+  forui: 0.25.0
 
 dependency_overrides:
   googleai_dart:
