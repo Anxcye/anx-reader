@@ -17,6 +17,7 @@ Future<String> getDownloadPath() async {
       return (await path.getApplicationDocumentsDirectory()).path;
     case AnxPlatformEnum.macos:
     case AnxPlatformEnum.windows:
+    case AnxPlatformEnum.linux:
     case AnxPlatformEnum.ohos:
       var downloadDir = await path.getDownloadsDirectory();
       if (downloadDir == null) {

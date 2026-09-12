@@ -129,6 +129,7 @@ dependencies:
       ref: 2ac799a6eeb5da74bf5080a2ba2057272fa52b78
   haptic_feedback: ^0.6.4+2
   in_app_purchase_android: ^0.4.0+8
+  webview_cef: ^0.5.1
 
 dependency_overrides:
   googleai_dart:
