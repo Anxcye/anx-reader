@@ -56,9 +56,6 @@ jobs:
       - name: Generate localization
         run: flutter gen-l10n
 
-      - name: Generate code
-        run: dart run build_runner build --delete-conflicting-outputs
-
       - name: Run analyzer
         run: flutter analyze --no-fatal-infos --no-fatal-warnings
 

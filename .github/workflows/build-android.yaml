@@ -58,7 +58,6 @@ jobs:
       - name: Build for Android
         run: |
           flutter gen-l10n
-          dart run build_runner build --delete-conflicting-outputs
           flutter build apk --release
           flutter build apk --split-per-abi
 

@@ -42,7 +42,6 @@ jobs:
         run: |
           sudo xcode-select -switch /Applications/Xcode_${{ inputs.xcode_version }}.app/Contents/Developer
           flutter gen-l10n
-          dart run build_runner build --delete-conflicting-outputs
           chmod +x ./scripts/macos_nosign.sh
           ./scripts/macos_nosign.sh
           flutter build macos
