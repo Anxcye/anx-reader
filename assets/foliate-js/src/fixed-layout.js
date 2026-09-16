@@ -173,6 +173,11 @@ export class FixedLayout extends HTMLElement {
             return true
         }
     }
+    // fixed layout pages are always laid out horizontally, but `book.js`
+    // expects every renderer to report a writing mode
+    get writingMode() {
+        return 'horizontal-tb'
+    }
     open(book) {
         this.book = book
         const { rendition } = book

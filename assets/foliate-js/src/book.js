@@ -1767,6 +1767,8 @@ const setStyle = (oldStyle) => {
 
 const refreshLayout = () => {
   const cfi = reader.view.lastLocation?.cfi
+  // only the reflowable paginator has `nextSection`
+  if (!reader.view.renderer.nextSection) return
   window.nextSection().then(() => {
     if (cfi) {
       setTimeout(() => {
@@ -1897,9 +1899,10 @@ window.addBookmarkHere = () => reader.handleBookmark(false)
 
 window.removeAnnotation = (cfi) => reader.removeAnnotation(cfi)
 
-window.prevSection = () => reader.view.renderer.prevSection()
+// fixed layout renderers have no chapters, so these are no-ops for them
+window.prevSection = () => reader.view.renderer.prevSection?.()
 
-window.nextSection = () => reader.view.renderer.nextSection()
+window.nextSection = () => reader.view.renderer.nextSection?.()
 
 window.initTts = () => reader.view.initTTS()
 
