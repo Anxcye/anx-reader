@@ -18,6 +18,7 @@ import 'package:anx_reader/service/ai/ai_history.dart';
 import 'package:anx_reader/service/ai/index.dart';
 import 'package:anx_reader/service/ai/reading_ai_models.dart';
 import 'package:anx_reader/service/ai/reading_frameworks.dart';
+import 'package:anx_reader/service/ai/reading_experts.dart';
 import 'package:anx_reader/service/ai/reading_skills.dart';
 import 'package:anx_reader/service/ai/reading_coach_policy.dart';
 import 'package:anx_reader/service/ai/reading_closure_policy.dart';
@@ -94,6 +95,7 @@ class _AiReadingWorkspaceState extends ConsumerState<AiReadingWorkspace> {
   bool _generatingSynthesis = false;
   bool _organizingMemory = false;
   bool _includeAiBlocksInMemory = true;
+  bool _rememberExpertSelection = false;
   final Set<String> _revealedCards = {};
   String? _reviewedCardAwaitingAdvance;
 
@@ -2146,6 +2148,57 @@ $correctionRule
                 .toList(growable: false),
             onChanged: (mode) {
               if (mode != null) _setMode(mode);
+            },
+          ),
+          const SizedBox(height: 20),
+          Text('本轮专家', style: Theme.of(context).textTheme.titleMedium),
+          const Text('自动模式由主助手推荐；手动选择会覆盖本轮自动推荐。'),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 6,
+            children: ReadingExpertRegistry()
+                .forMode(widget.controller.mode)
+                .map((expert) {
+              final selected =
+                  widget.controller.selectedExpertIds.contains(expert.id);
+              return FilterChip(
+                label: Text(expert.title),
+                selected: selected,
+                onSelected: (value) {
+                  final ids = [...widget.controller.selectedExpertIds];
+                  if (value) {
+                    final limit = widget.controller.analysisDepth ==
+                            ReadingAnalysisDepth.quick
+                        ? 1
+                        : 3;
+                    if (ids.length >= limit) ids.removeAt(0);
+                    ids.add(expert.id);
+                  } else {
+                    ids.remove(expert.id);
+                  }
+                  widget.controller.setExpertSelection(ids,
+                      persist: _rememberExpertSelection);
+                },
+              );
+            }).toList(growable: false),
+          ),
+          CheckboxListTile(
+            contentPadding: EdgeInsets.zero,
+            value: _rememberExpertSelection,
+            title: const Text('记住到本书'),
+            subtitle: const Text('仅保存专家 ID，不同步 Provider、地址或密钥'),
+            onChanged: (value) =>
+                setState(() => _rememberExpertSelection = value == true),
+          ),
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            value: widget.controller.allowExpertWebSearch,
+            title: const Text('允许本轮联网核查'),
+            subtitle: const Text('默认关闭；仅支持联网的专家可使用可信来源检索'),
+            onChanged: (value) {
+              widget.controller.allowExpertWebSearch = value;
+              setState(() {});
             },
           ),
           const SizedBox(height: 12),

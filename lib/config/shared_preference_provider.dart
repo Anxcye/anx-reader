@@ -2333,6 +2333,75 @@ class Prefs extends ChangeNotifier {
     notifyListeners();
   }
 
+  List<String> readingExpertIdsForBook(int bookId) {
+    final raw = prefs.getString('readingExpertsByBook');
+    if (raw == null || raw.isEmpty) return const <String>[];
+    try {
+      final values = jsonDecode(raw) as Map<String, dynamic>;
+      final list = values['$bookId'];
+      return list is List
+          ? list
+              .map((value) => value.toString())
+              .where((value) => value.isNotEmpty)
+              .toSet()
+              .toList(growable: false)
+          : const <String>[];
+    } catch (_) {
+      return const <String>[];
+    }
+  }
+
+  void setReadingExpertIdsForBook(int bookId, List<String> ids) {
+    final raw = prefs.getString('readingExpertsByBook');
+    Map<String, dynamic> values = {};
+    if (raw != null && raw.isNotEmpty) {
+      try {
+        values = Map<String, dynamic>.from(jsonDecode(raw) as Map);
+      } catch (_) {}
+    }
+    if (ids.isEmpty) {
+      values.remove('$bookId');
+    } else {
+      values['$bookId'] = ids.toSet().toList(growable: false);
+    }
+    prefs.setString('readingExpertsByBook', jsonEncode(values));
+    notifyListeners();
+  }
+
+  List<String> get activeReadingExpertIds {
+    final raw = prefs.getString('activeReadingExpertIds');
+    if (raw == null || raw.isEmpty) return const <String>[];
+    try {
+      final values = jsonDecode(raw);
+      return values is List
+          ? values
+              .map((value) => value.toString())
+              .toSet()
+              .toList(growable: false)
+          : const <String>[];
+    } catch (_) {
+      return const <String>[];
+    }
+  }
+
+  set activeReadingExpertIds(List<String> ids) {
+    if (ids.isEmpty) {
+      prefs.remove('activeReadingExpertIds');
+    } else {
+      prefs.setString('activeReadingExpertIds',
+          jsonEncode(ids.toSet().toList(growable: false)));
+    }
+    notifyListeners();
+  }
+
+  bool get activeReadingExpertWebSearch =>
+      prefs.getBool('activeReadingExpertWebSearch') ?? false;
+
+  set activeReadingExpertWebSearch(bool value) {
+    prefs.setBool('activeReadingExpertWebSearch', value);
+    notifyListeners();
+  }
+
   /// Opt-in gate for the local Reading Agent runtime. This intentionally does
   /// not enable the legacy reading coach.
   bool get readingAgentBetaEnabled =>
@@ -2392,8 +2461,8 @@ class Prefs extends ChangeNotifier {
   }
 
   AiPanelWidthRatio get aiPanelWidthRatio => AiPanelWidthRatio.fromCode(
-    prefs.getString('aiPanelWidthRatio') ?? AiPanelWidthRatio.half.code,
-  );
+        prefs.getString('aiPanelWidthRatio') ?? AiPanelWidthRatio.half.code,
+      );
 
   set aiPanelWidthRatio(AiPanelWidthRatio ratio) {
     prefs.setString('aiPanelWidthRatio', ratio.code);

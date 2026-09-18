@@ -49,7 +49,7 @@ namespaced string ID（`story.*`、`stage.*`、`relation.*`）；旧短 ID 在�
 |---|---|---|---|---|---|
 | AI 对话工作台 | 已实现 | 阅读页 AI 按钮、划线 AI | `lib/widgets/ai/ai_reading_workspace.dart`、`lib/providers/ai_workspace.dart` | `tb_ai_sessions`，随现有同步 | 页面不得创建 Provider/client |
 | 上下文预算 | 已实现 | 所有 AI 请求内部使用 | `lib/service/ai/ai_context_assembler.dart` | 摘要/缓存本地 | 不要在页面拼完整历史 |
-| 专家编排 | 已实现 | 深度分析/复杂任务 | `reading_agent_orchestrator.dart` | Agent trace/Evidence | 不要把专家长文直接拼回 prompt |
+| 专家编排 | 已实现 | 深度分析/复杂任务/本轮手动选择 | `reading_agent_orchestrator.dart`、`reading_experts.dart` | Agent trace/Evidence；专家 ID 设备本地 | 不要把专家长文直接拼回 prompt；联网需本轮授权 |
 | Reading Agent Runtime | 已实现 | 阅读 Agent Beta | `lib/service/ai/reading_agent_runtime.dart` | 目标、画像、动作、覆盖表 | 普通阅读事件不得调用模型 |
 | Reading Skill | 已实现 | AI 工作台 Skill、设置/帮助 | `lib/service/ai/reading_skills.dart` | 按书配置/数据库 | Skill 是方法，不是工具集合 |
 | 阅读闭环 | 已实现 | 阅读成果页/Agent | `reading_closure_policy.dart` | 目标、checkpoint、成果、mastery | 不按小说/心理硬编码页面 |

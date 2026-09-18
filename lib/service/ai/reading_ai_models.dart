@@ -103,6 +103,9 @@ class ReadingAnalysisRequest {
     this.readingGoal,
     this.allowWebSearch = false,
     this.recommendedAutomatically = true,
+    this.expertIds = const <String>[],
+    this.expertSelectionMode = 'automatic',
+    this.allowExpertWebSearch = false,
   });
 
   final ReadingAnalysisDepth depth;
@@ -111,6 +114,9 @@ class ReadingAnalysisRequest {
   final String? readingGoal;
   final bool allowWebSearch;
   final bool recommendedAutomatically;
+  final List<String> expertIds;
+  final String expertSelectionMode;
+  final bool allowExpertWebSearch;
 
   Map<String, dynamic> toJson() => <String, dynamic>{
         'depth': depth.name,
@@ -122,6 +128,9 @@ class ReadingAnalysisRequest {
           'readingGoal': readingGoal!.trim(),
         'allowWebSearch': allowWebSearch,
         'recommendedAutomatically': recommendedAutomatically,
+        if (expertIds.isNotEmpty) 'expertIds': expertIds,
+        'expertSelectionMode': expertSelectionMode,
+        'allowExpertWebSearch': allowExpertWebSearch,
       };
 
   factory ReadingAnalysisRequest.fromJson(Map<String, dynamic> json) {
@@ -138,6 +147,14 @@ class ReadingAnalysisRequest {
       readingGoal: _stringOrNull(json['readingGoal']),
       allowWebSearch: json['allowWebSearch'] == true,
       recommendedAutomatically: json['recommendedAutomatically'] != false,
+      expertIds: json['expertIds'] is List
+          ? (json['expertIds'] as List)
+              .map((value) => value.toString())
+              .toList(growable: false)
+          : const <String>[],
+      expertSelectionMode:
+          _stringOrNull(json['expertSelectionMode']) ?? 'automatic',
+      allowExpertWebSearch: json['allowExpertWebSearch'] == true,
     );
   }
 }

@@ -170,6 +170,16 @@ class AiChat extends _$AiChat {
               mode: readingMode,
               ref: widgetRef,
               analysisRequest: analysisRequest,
+              manualExpertIds: analysisRequest?.expertIds.isNotEmpty == true
+                  ? analysisRequest!.expertIds
+                  : Prefs().activeReadingExpertIds.isNotEmpty
+                      ? Prefs().activeReadingExpertIds
+                      : book == null
+                          ? const <String>[]
+                          : Prefs().readingExpertIdsForBook(book.id),
+              allowExpertWebSearch:
+                  analysisRequest?.allowExpertWebSearch == true ||
+                      Prefs().activeReadingExpertWebSearch,
             )
           : ReadingAgentTurn(messages: messages);
       agentTraces = turn.traces;

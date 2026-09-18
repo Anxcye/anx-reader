@@ -5,6 +5,7 @@ import 'package:anx_reader/service/ai/index.dart';
 import 'package:anx_reader/service/ai/ai_context_assembler.dart';
 import 'package:anx_reader/service/ai/reading_ai_models.dart';
 import 'package:anx_reader/service/ai/reading_frameworks.dart';
+import 'package:anx_reader/service/ai/reading_experts.dart';
 import 'package:anx_reader/service/ai/web_search.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:langchain_core/chat_models.dart';
@@ -120,7 +121,13 @@ class ReadingAgentOrchestrator {
     String query,
     ReadingAiMode mode, {
     ReadingAnalysisRequest? analysisRequest,
+    List<String> manualExpertIds = const <String>[],
   }) {
+    if (manualExpertIds.isNotEmpty) {
+      final limit = analysisRequest == null ? 1 : 3;
+      return ReadingAgentPlan(
+          manualExpertIds.take(limit).toList(growable: false));
+    }
     if (analysisRequest != null) {
       final expertCount =
           analysisRequest.depth.maxExperts < expertBudget.maxExperts
@@ -150,12 +157,23 @@ class ReadingAgentOrchestrator {
     required ReadingAiMode mode,
     required WidgetRef ref,
     ReadingAnalysisRequest? analysisRequest,
+    List<String> manualExpertIds = const <String>[],
+    bool allowExpertWebSearch = false,
   }) async {
     if (!Prefs().readingMultiAgentEnabled || messages.isEmpty) {
       return ReadingAgentTurn(messages: messages);
     }
     final query = _latestUserText(messages);
-    final agentPlan = plan(query, mode, analysisRequest: analysisRequest);
+    final selected = manualExpertIds.isNotEmpty
+        ? manualExpertIds
+        : (analysisRequest?.expertSelectionMode == 'manual'
+            ? analysisRequest!.expertIds
+            : const <String>[]);
+    final agentPlan = selected.isNotEmpty
+        ? ReadingAgentPlan(selected
+            .take(analysisRequest == null ? 1 : 3)
+            .toList(growable: false))
+        : plan(query, mode, analysisRequest: analysisRequest);
     if (!agentPlan.usesExperts) {
       return ReadingAgentTurn(messages: messages);
     }
@@ -165,6 +183,7 @@ class ReadingAgentOrchestrator {
       query,
       mode,
       analysisRequest: analysisRequest,
+      manualExpertIds: selected,
     ).where((task) => selectedIds.contains(task.id)).toList(growable: false);
     final snapshot = ReadingExpertContextSnapshot.capture(
       messages: messages,
@@ -172,7 +191,9 @@ class ReadingAgentOrchestrator {
       budget: expertBudget,
     );
     final results = await Future.wait(
-      tasks.map((task) => _runTask(task, snapshot, ref)),
+      tasks.map((task) => _runTask(task, snapshot, ref,
+          allowWebSearch: allowExpertWebSearch ||
+              analysisRequest?.allowExpertWebSearch == true)),
     );
     final traces =
         results.map((result) => result.trace).toList(growable: false);
@@ -225,28 +246,33 @@ $useful
     String query,
     ReadingAiMode mode, {
     ReadingAnalysisRequest? analysisRequest,
+    List<String> manualExpertIds = const <String>[],
   }) {
+    final registry = const ReadingExpertRegistry();
+    if (manualExpertIds.isNotEmpty) {
+      return manualExpertIds
+          .map(registry.get)
+          .whereType<ReadingExpertDefinition>()
+          .map(_taskFromDefinition)
+          .toList(growable: false);
+    }
     if (analysisRequest != null) {
       return _selectAnalysisTasks(analysisRequest);
     }
+    final candidates = registry.forMode(mode);
+    final matched = candidates
+        .where((item) => item.keywords.any(
+            (keyword) => query.toLowerCase().contains(keyword.toLowerCase())))
+        .toList(growable: false);
+    final definition = (matched.isNotEmpty ? matched : candidates).first;
+    final legacyId = switch (mode) {
+      ReadingAiMode.history => 'history-specialist',
+      ReadingAiMode.psychology => 'psychology-specialist',
+      ReadingAiMode.finance => 'finance-specialist',
+      ReadingAiMode.general => 'text-specialist',
+    };
     final tasks = <_AgentTask>[
-      _AgentTask(
-        id: switch (mode) {
-          ReadingAiMode.history => 'history-specialist',
-          ReadingAiMode.psychology => 'psychology-specialist',
-          ReadingAiMode.finance => 'finance-specialist',
-          ReadingAiMode.general => 'text-specialist',
-        },
-        label: switch (mode) {
-          ReadingAiMode.history => '史料专家',
-          ReadingAiMode.psychology => '心理概念专家',
-          ReadingAiMode.finance => '财务分析专家',
-          ReadingAiMode.general => '文本理解专家',
-        },
-        action: mode == ReadingAiMode.general
-            ? SelectionAiAction.analyze
-            : SelectionAiAction.explain,
-      ),
+      _taskFromDefinition(definition, id: legacyId),
     ];
     if (RegExp(
       r'核查|出处|来源|证据|时间|数字|verify|source|evidence|data',
@@ -266,6 +292,16 @@ $useful
     }
     return tasks;
   }
+
+  _AgentTask _taskFromDefinition(ReadingExpertDefinition definition,
+          {String? id}) =>
+      _AgentTask(
+        id: id ?? definition.id,
+        label: definition.title,
+        action: definition.action,
+        search: definition.supportsWebSearch,
+        instruction: definition.instruction,
+      );
 
   List<_AgentTask> _selectAnalysisTasks(ReadingAnalysisRequest request) {
     if (request.depth.maxExperts == 0) return const <_AgentTask>[];
@@ -299,15 +335,16 @@ $useful
   Future<_AgentResult> _runTask(
     _AgentTask task,
     ReadingExpertContextSnapshot snapshot,
-    WidgetRef ref,
-  ) async {
+    WidgetRef ref, {
+    bool allowWebSearch = false,
+  }) async {
     final startedAt = DateTime.now().millisecondsSinceEpoch;
     final sourceUrls = <String>[];
     final citations = <Map<String, dynamic>>[];
     var sourceContext = '';
     var degradedDetail = '';
     try {
-      if (task.search) {
+      if (task.search && allowWebSearch) {
         try {
           final configured = Prefs().readingWebSearchConfig;
           final modeConfig = WebSearchProviderConfig(

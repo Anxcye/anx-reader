@@ -13,6 +13,7 @@ import 'package:anx_reader/providers/user_prompts.dart';
 import 'package:anx_reader/service/ai/tools/ai_tool_registry.dart';
 import 'package:anx_reader/service/ai/ai_token_usage_service.dart';
 import 'package:anx_reader/service/ai/reading_ai_models.dart';
+import 'package:anx_reader/service/ai/reading_experts.dart';
 import 'package:anx_reader/service/ai/web_search.dart';
 import 'package:anx_reader/widgets/common/anx_button.dart';
 import 'package:anx_reader/widgets/common/anx_segmented_button.dart';
@@ -295,6 +296,7 @@ class _AISettingsState extends ConsumerState<AISettings> {
             title: const Text('主助手调度专家'),
             description: const Text('复杂问题最多并行调用两个专家；简单问题直接回答'),
           ),
+          _expertCatalogTile(),
         ],
       ),
       SettingsSection(
@@ -546,6 +548,27 @@ class _AISettingsState extends ConsumerState<AISettings> {
             setState(() {});
           },
         ),
+      ),
+    );
+  }
+
+  AbstractSettingsTile _expertCatalogTile() {
+    final experts = ReadingExpertRegistry.definitions;
+    return CustomSettingsTile(
+      child: ExpansionTile(
+        leading: const Icon(Icons.groups_2_outlined),
+        title: Text('专家目录（${experts.length} 类）'),
+        subtitle: const Text('在 AI 工作台中可按本轮任务手动选择；联网专家默认关闭'),
+        children: experts
+            .map((expert) => ListTile(
+                  dense: true,
+                  title: Text(expert.title),
+                  subtitle: Text(expert.description),
+                  trailing: expert.supportsWebSearch
+                      ? const Icon(Icons.public, size: 18)
+                      : null,
+                ))
+            .toList(growable: false),
       ),
     );
   }

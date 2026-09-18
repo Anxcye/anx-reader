@@ -17,7 +17,12 @@ class AiWorkspaceController extends ChangeNotifier {
   })  : mode = Prefs().readingAiModeForBook(bookId),
         analysisDepth = Prefs().readingAnalysisDepthForBook(bookId),
         outputTemplate = Prefs().readingOutputTemplateForBook(bookId),
-        readingProfile = readingExperienceProfileService.cached(bookId);
+        readingProfile = readingExperienceProfileService.cached(bookId) {
+    selectedExpertIds = Prefs().activeReadingExpertIds;
+    if (selectedExpertIds.isEmpty)
+      selectedExpertIds = Prefs().readingExpertIdsForBook(bookId);
+    expertSelectionManual = selectedExpertIds.isNotEmpty;
+  }
 
   final int bookId;
   final Future<void> Function(String? moduleId)? onClosureModuleChanged;
@@ -26,6 +31,11 @@ class AiWorkspaceController extends ChangeNotifier {
   ReadingAnalysisDepth analysisDepth;
   ReadingOutputTemplate outputTemplate;
   ReadingAiMode? suggestedMode;
+  List<String> selectedExpertIds = const <String>[];
+  bool expertSelectionManual = false;
+  bool get allowExpertWebSearch => Prefs().activeReadingExpertWebSearch;
+  set allowExpertWebSearch(bool value) =>
+      Prefs().activeReadingExpertWebSearch = value;
   ReadingSkillId? get pinnedReadingSkill => Prefs().readingSkillForBook(bookId);
   BookReadingProfile? readingProfile;
   String? get pinnedClosureId =>
@@ -49,6 +59,8 @@ class AiWorkspaceController extends ChangeNotifier {
     if (!visible) return;
     visible = false;
     mobileFullscreen = false;
+    Prefs().activeReadingExpertIds = const <String>[];
+    Prefs().activeReadingExpertWebSearch = false;
     notifyListeners();
   }
 
@@ -112,6 +124,30 @@ class AiWorkspaceController extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setExpertSelection(List<String> ids, {bool persist = false}) {
+    selectedExpertIds = ids.toSet().toList(growable: false);
+    expertSelectionManual = selectedExpertIds.isNotEmpty;
+    Prefs().activeReadingExpertIds = selectedExpertIds;
+    if (persist) Prefs().setReadingExpertIdsForBook(bookId, selectedExpertIds);
+    notifyListeners();
+  }
+
+  void clearExpertSelection() {
+    selectedExpertIds = const <String>[];
+    expertSelectionManual = false;
+    Prefs().activeReadingExpertIds = const <String>[];
+    Prefs().setReadingExpertIdsForBook(bookId, const <String>[]);
+    notifyListeners();
+  }
+
+  void endExpertSelectionSession() {
+    selectedExpertIds = Prefs().readingExpertIdsForBook(bookId);
+    expertSelectionManual = selectedExpertIds.isNotEmpty;
+    Prefs().activeReadingExpertIds = const <String>[];
+    Prefs().activeReadingExpertWebSearch = false;
+    notifyListeners();
+  }
+
   void setReadingProfile(BookReadingProfile value) {
     readingProfile = value;
     notifyListeners();
@@ -150,6 +186,9 @@ class AiWorkspaceController extends ChangeNotifier {
           Prefs().readingWebSearchConfig.enabled,
       recommendedAutomatically:
           recommendedAutomatically ?? (frameworks == null),
+      expertIds: selectedExpertIds,
+      expertSelectionMode: expertSelectionManual ? 'manual' : 'automatic',
+      allowExpertWebSearch: allowExpertWebSearch,
     );
   }
 

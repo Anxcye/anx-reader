@@ -45,6 +45,19 @@ void main() {
     expect(plan.agentIds, hasLength(1));
   });
 
+  test('manual expert ids override automatic routing with bounded fan-out', () {
+    const orchestrator = ReadingAgentOrchestrator();
+    final plan = orchestrator.plan(
+      '解释这段文字',
+      ReadingAiMode.general,
+      manualExpertIds: const [
+        'expert.scifi.worldbuilding',
+        'expert.fiction.narrative',
+      ],
+    );
+    expect(plan.agentIds, ['expert.scifi.worldbuilding']);
+  });
+
   test('analysis depth controls experts and research source task', () {
     const quick = ReadingAnalysisRequest(
       depth: ReadingAnalysisDepth.quick,
