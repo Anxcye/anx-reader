@@ -206,7 +206,7 @@ class ReadingSkillHelpPage extends StatelessWidget {
           title: '全部阅读方法',
           icon: Icons.library_books_outlined,
           children: [
-            for (final skill in ReadingSkillRegistry.definitions)
+            for (final skill in ReadingSkillRegistry().allDefinitions)
               _SkillItem(skill: skill),
           ],
         ),

@@ -116,8 +116,10 @@ class Prefs extends ChangeNotifier {
 
   Future<void> initPrefs() async {
     prefs = await SharedPreferences.getInstance();
-    final legacyEInk =
-        (prefs.getBool('eInkMode') ?? false) ||
+    for (final skill in customReadingSkills()) {
+      ReadingSkillRegistry.registerCustom(skill);
+    }
+    final legacyEInk = (prefs.getBool('eInkMode') ?? false) ||
         prefs.getString('themeMode') == AppThemeMode.eInk.code;
     if (legacyEInk) {
       await prefs.setString(
@@ -216,9 +218,8 @@ class Prefs extends ChangeNotifier {
           break;
         case 'stringList':
           if (value is List) {
-            final List<String> list = value
-                .map((dynamic v) => v as String)
-                .toList();
+            final List<String> list =
+                value.map((dynamic v) => v as String).toList();
             await prefs.setStringList(key, list);
           }
           break;
@@ -667,8 +668,7 @@ class Prefs extends ChangeNotifier {
     if (service != null) return service;
 
     // Migration/Fallback
-    bool isSystem =
-        prefs.getBool('isSystemTts') ??
+    bool isSystem = prefs.getBool('isSystemTts') ??
         true; // Default to system if nothing set
     if (!isSystem) {
       // Check if there was an online service set
@@ -1494,8 +1494,7 @@ class Prefs extends ChangeNotifier {
           json['headerRight'],
           ReadingInfoEnum.none,
         ),
-        verticalMargin:
-            prefs.getDouble('pageHeaderMargin') ??
+        verticalMargin: prefs.getDouble('pageHeaderMargin') ??
             MediaQuery.of(navigatorKey.currentContext!).padding.bottom,
         leftMargin: prefs.getDouble('pageHeaderLeftMargin') ?? 20,
         rightMargin: prefs.getDouble('pageHeaderRightMargin') ?? 20,
@@ -1514,8 +1513,7 @@ class Prefs extends ChangeNotifier {
           json['footerRight'],
           ReadingInfoEnum.bookProgress,
         ),
-        verticalMargin:
-            prefs.getDouble('pageFooterMargin') ??
+        verticalMargin: prefs.getDouble('pageFooterMargin') ??
             MediaQuery.of(navigatorKey.currentContext!).padding.bottom,
         leftMargin: prefs.getDouble('pageFooterLeftMargin') ?? 20,
         rightMargin: prefs.getDouble('pageFooterRightMargin') ?? 20,
@@ -2089,6 +2087,40 @@ class Prefs extends ChangeNotifier {
       values['$bookId'] = skill.name;
     }
     prefs.setString('readingSkillsByBook', jsonEncode(values));
+    notifyListeners();
+  }
+
+  List<ReadingSkillDefinition> customReadingSkills() {
+    final raw = prefs.getString('customReadingSkills');
+    if (raw == null || raw.isEmpty) return const <ReadingSkillDefinition>[];
+    try {
+      final values = jsonDecode(raw);
+      if (values is! List) return const <ReadingSkillDefinition>[];
+      return values
+          .whereType<Map>()
+          .map((value) =>
+              ReadingSkillDefinition.fromJson(Map<String, dynamic>.from(value)))
+          .whereType<ReadingSkillDefinition>()
+          .toList(growable: false);
+    } catch (_) {
+      return const <ReadingSkillDefinition>[];
+    }
+  }
+
+  void saveCustomReadingSkill(ReadingSkillDefinition skill) {
+    final skills =
+        customReadingSkills().where((item) => item.id != skill.id).toList();
+    skills.add(skill);
+    prefs.setString('customReadingSkills',
+        jsonEncode(skills.map((item) => item.toJson()).toList()));
+    notifyListeners();
+  }
+
+  void removeCustomReadingSkill(String id) {
+    final skills =
+        customReadingSkills().where((item) => item.id.name != id).toList();
+    prefs.setString('customReadingSkills',
+        jsonEncode(skills.map((item) => item.toJson()).toList()));
     notifyListeners();
   }
 

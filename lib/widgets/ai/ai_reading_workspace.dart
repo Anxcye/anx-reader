@@ -382,6 +382,16 @@ class _AiReadingWorkspaceState extends ConsumerState<AiReadingWorkspace> {
                   label: const Text('查看使用方法'),
                 ),
               ),
+              OutlinedButton.icon(
+                onPressed: () => _importReadingSkill(context),
+                icon: const Icon(Icons.upload_file),
+                label: const Text('导入自定义 Skill JSON'),
+              ),
+              OutlinedButton.icon(
+                onPressed: () => _createReadingSkill(context),
+                icon: const Icon(Icons.add),
+                label: const Text('新建自定义 Skill'),
+              ),
               const SizedBox(height: 12),
               ListTile(
                 leading: Icon(current == null
@@ -394,7 +404,7 @@ class _AiReadingWorkspaceState extends ConsumerState<AiReadingWorkspace> {
                   Navigator.pop(context);
                 },
               ),
-              for (final skill in ReadingSkillRegistry.definitions)
+              for (final skill in ReadingSkillRegistry().allDefinitions)
                 ListTile(
                   leading: Icon(current == skill.id
                       ? Icons.radio_button_checked
@@ -412,6 +422,104 @@ class _AiReadingWorkspaceState extends ConsumerState<AiReadingWorkspace> {
     if (selected != null) {
       widget.controller.setReadingSkill(selected);
     }
+  }
+
+  Future<void> _importReadingSkill(BuildContext sheetContext) async {
+    final controller = TextEditingController();
+    final imported = await showDialog<ReadingSkillDefinition>(
+      context: sheetContext,
+      builder: (context) => AlertDialog(
+        title: const Text('导入自定义 Skill'),
+        content: TextField(
+          controller: controller,
+          maxLines: 8,
+          decoration: const InputDecoration(
+            hintText: '{"id":"custom.my-skill","title":"..."}',
+            labelText: 'Skill JSON',
+          ),
+        ),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(context), child: const Text('取消')),
+          FilledButton(
+              onPressed: () {
+                final skill = readingSkillFromJsonText(controller.text);
+                if (skill != null) Navigator.pop(context, skill);
+              },
+              child: const Text('导入')),
+        ],
+      ),
+    );
+    controller.dispose();
+    if (!mounted || imported == null) return;
+    Prefs().saveCustomReadingSkill(imported);
+    ReadingSkillRegistry.registerCustom(imported);
+    setState(() {});
+  }
+
+  Future<void> _createReadingSkill(BuildContext sheetContext) async {
+    final title = TextEditingController();
+    final id = TextEditingController(text: 'custom.');
+    final summary = TextEditingController();
+    final full = TextEditingController();
+    final created = await showDialog<ReadingSkillDefinition>(
+      context: sheetContext,
+      builder: (context) => AlertDialog(
+        title: const Text('新建自定义 Skill'),
+        content: SingleChildScrollView(
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            TextField(
+                controller: title,
+                decoration: const InputDecoration(labelText: '名称')),
+            TextField(
+                controller: id,
+                decoration:
+                    const InputDecoration(labelText: '稳定 ID（custom. 开头）')),
+            TextField(
+                controller: summary,
+                decoration: const InputDecoration(labelText: '摘要指导'),
+                maxLines: 2),
+            TextField(
+                controller: full,
+                decoration: const InputDecoration(labelText: '完整指导'),
+                maxLines: 4),
+          ]),
+        ),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(context), child: const Text('取消')),
+          FilledButton(
+              onPressed: () {
+                final skill = ReadingSkillDefinition(
+                  id: ReadingSkillId.custom(id.text.trim()),
+                  title: title.text.trim(),
+                  description: summary.text.trim(),
+                  summaryInstruction: summary.text.trim(),
+                  fullInstruction: full.text.trim().isEmpty
+                      ? summary.text.trim()
+                      : full.text.trim(),
+                  supportedModes: {ReadingAiMode.general},
+                  triggerKeywords: const [],
+                  closureContributions: const [],
+                  isCustom: true,
+                );
+                if (skill.title.isNotEmpty &&
+                    skill.id.name.startsWith('custom.')) {
+                  Navigator.pop(context, skill);
+                }
+              },
+              child: const Text('保存')),
+        ],
+      ),
+    );
+    title.dispose();
+    id.dispose();
+    summary.dispose();
+    full.dispose();
+    if (!mounted || created == null) return;
+    Prefs().saveCustomReadingSkill(created);
+    ReadingSkillRegistry.registerCustom(created);
+    setState(() {});
   }
 
   Widget _buildCoach() {

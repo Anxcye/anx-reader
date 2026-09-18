@@ -3,6 +3,22 @@ import 'package:anx_reader/service/ai/reading_skills.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('custom skills use stable ids and can be imported from JSON', () {
+    final skill = readingSkillFromJsonText('''{
+      "id":"custom.case-law",
+      "title":"案例核查",
+      "description":"按案例阅读",
+      "summaryInstruction":"区分事实与判断",
+      "fullInstruction":"拆分事实、规则、适用和反例",
+      "supportedModes":["general"],
+      "triggerKeywords":["案例"],
+      "closureContributions":["difficulty"]
+    }''');
+    expect(skill, isNotNull);
+    expect(skill!.id.name, 'custom.case-law');
+    expect(skill.isCustom, isTrue);
+    expect(skill.toJson()['id'], 'custom.case-law');
+  });
   const registry = ReadingSkillRegistry();
   const matcher = ReadingSkillMatcher();
 

@@ -471,7 +471,7 @@ ReadingChunk 是短生命周期中间对象，不持久化完整 chunk 正文；
 
 | 概念 | 回答的问题 | 扩展方式 | 禁止事项 |
 |---|---|---|---|
-| Reading Skill | 用什么阅读方法？ | 注册 catalog/summary/full、匹配规则和文案 | 不能当工具集合、不能直接写库 |
+| Reading Skill | 用什么阅读方法？ | 注册 catalog/summary/full、匹配规则和文案；自定义使用 `custom.*` ID | 不能当工具集合、不能直接写库、不能含 Provider/密钥 |
 | Closure Policy | 什么算本书的阅读成果？ | 稳定 ID + 目标/checkpoint/mastery/Section/快捷问题声明 | 不直接发模型请求 |
 | Tool | Agent 能执行什么？ | registry 中注册 schema、权限、校验和 handler | 持久动作不能绕过 ActionService |
 | BookReadingProfile | 这本书适用什么主闭环和内容特征？ | 稳定 facet、置信度和用户固定 | 不替代 Skill，不在页面硬编码书类 |

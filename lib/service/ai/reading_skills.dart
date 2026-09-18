@@ -1,23 +1,50 @@
 import 'package:anx_reader/service/ai/reading_ai_models.dart';
+import 'dart:convert';
 
-enum ReadingSkillId {
-  socraticConcept,
-  argumentMapping,
-  historicalSourceCheck,
-  fictionCharacterTracking,
-  academicCriticalReading,
-  contextualLanguageLearning,
-  financialAssumptionValidation,
-  chapterClosure,
-  examReview,
-  readingToAction;
+class ReadingSkillId {
+  const ReadingSkillId._(this.name);
+  final String name;
+  static const socraticConcept = ReadingSkillId._('socraticConcept');
+  static const argumentMapping = ReadingSkillId._('argumentMapping');
+  static const historicalSourceCheck =
+      ReadingSkillId._('historicalSourceCheck');
+  static const fictionCharacterTracking =
+      ReadingSkillId._('fictionCharacterTracking');
+  static const academicCriticalReading =
+      ReadingSkillId._('academicCriticalReading');
+  static const contextualLanguageLearning =
+      ReadingSkillId._('contextualLanguageLearning');
+  static const financialAssumptionValidation =
+      ReadingSkillId._('financialAssumptionValidation');
+  static const chapterClosure = ReadingSkillId._('chapterClosure');
+  static const examReview = ReadingSkillId._('examReview');
+  static const readingToAction = ReadingSkillId._('readingToAction');
+  static const values = <ReadingSkillId>[
+    socraticConcept,
+    argumentMapping,
+    historicalSourceCheck,
+    fictionCharacterTracking,
+    academicCriticalReading,
+    contextualLanguageLearning,
+    financialAssumptionValidation,
+    chapterClosure,
+    examReview,
+    readingToAction,
+  ];
+  factory ReadingSkillId.custom(String value) => ReadingSkillId._(value);
 
   static ReadingSkillId? fromJson(Object? value) {
-    for (final item in values) {
-      if (item.name == value) return item;
-    }
-    return null;
+    final name = value?.toString().trim();
+    if (name == null || name.isEmpty) return null;
+    for (final item in values) if (item.name == name) return item;
+    return ReadingSkillId.custom(name);
   }
+
+  @override
+  bool operator ==(Object other) =>
+      other is ReadingSkillId && other.name == name;
+  @override
+  int get hashCode => name.hashCode;
 }
 
 enum ReadingSkillLoadLevel { catalog, summary, full }
@@ -32,6 +59,7 @@ class ReadingSkillDefinition {
     required this.supportedModes,
     required this.triggerKeywords,
     required this.closureContributions,
+    this.isCustom = false,
   });
 
   final ReadingSkillId id;
@@ -42,6 +70,60 @@ class ReadingSkillDefinition {
   final Set<ReadingAiMode> supportedModes;
   final List<String> triggerKeywords;
   final List<String> closureContributions;
+  final bool isCustom;
+
+  Map<String, dynamic> toJson() => {
+        'id': id.name,
+        'title': title,
+        'description': description,
+        'summaryInstruction': summaryInstruction,
+        'fullInstruction': fullInstruction,
+        'supportedModes': supportedModes.map((item) => item.name).toList(),
+        'triggerKeywords': triggerKeywords,
+        'closureContributions': closureContributions,
+        'isCustom': isCustom,
+      };
+
+  static ReadingSkillDefinition? fromJson(Map<String, dynamic> json) {
+    final id = json['id']?.toString().trim();
+    final title = json['title']?.toString().trim();
+    if (id == null ||
+        title == null ||
+        id.isEmpty ||
+        title.isEmpty ||
+        !id.startsWith('custom.')) return null;
+    final modes = (json['supportedModes'] is List)
+        ? (json['supportedModes'] as List).map(ReadingAiMode.fromJson).toSet()
+        : <ReadingAiMode>{ReadingAiMode.general};
+    return ReadingSkillDefinition(
+      id: ReadingSkillId.custom(id),
+      title: title,
+      description: json['description']?.toString() ?? '',
+      summaryInstruction: json['summaryInstruction']?.toString() ?? title,
+      fullInstruction: json['fullInstruction']?.toString() ?? title,
+      supportedModes: modes,
+      triggerKeywords: (json['triggerKeywords'] is List)
+          ? (json['triggerKeywords'] as List).map((v) => v.toString()).toList()
+          : const [],
+      closureContributions: (json['closureContributions'] is List)
+          ? (json['closureContributions'] as List)
+              .map((v) => v.toString())
+              .toList()
+          : const [],
+      isCustom: true,
+    );
+  }
+}
+
+ReadingSkillDefinition? readingSkillFromJsonText(String text) {
+  try {
+    final value = jsonDecode(text);
+    return value is Map
+        ? ReadingSkillDefinition.fromJson(Map<String, dynamic>.from(value))
+        : null;
+  } catch (_) {
+    return null;
+  }
 }
 
 class ReadingSkillSelection {
@@ -75,7 +157,19 @@ Method outputs are proposals, not proof of mastery or user facts. Any note, memo
 }
 
 class ReadingSkillRegistry {
-  const ReadingSkillRegistry();
+  const ReadingSkillRegistry({this.custom = const <ReadingSkillDefinition>[]});
+
+  final List<ReadingSkillDefinition> custom;
+  static final List<ReadingSkillDefinition> _registeredCustom = [];
+
+  static void registerCustom(ReadingSkillDefinition definition) {
+    _registeredCustom.removeWhere((item) => item.id == definition.id);
+    _registeredCustom.add(definition);
+  }
+
+  static void removeCustom(String id) {
+    _registeredCustom.removeWhere((item) => item.id.name == id);
+  }
 
   static const definitions = <ReadingSkillDefinition>[
     ReadingSkillDefinition(
@@ -217,8 +311,14 @@ class ReadingSkillRegistry {
     ),
   ];
 
+  List<ReadingSkillDefinition> get allDefinitions => [
+        ...definitions,
+        ..._registeredCustom,
+        ...custom,
+      ];
+
   ReadingSkillDefinition get(ReadingSkillId id) =>
-      definitions.firstWhere((item) => item.id == id);
+      allDefinitions.firstWhere((item) => item.id == id);
 }
 
 class ReadingSkillMatcher {
@@ -253,7 +353,7 @@ class ReadingSkillMatcher {
       primary = registry.get(ReadingSkillId.chapterClosure);
       reason = '正在进行章节结束回顾';
     } else {
-      final explicit = ReadingSkillRegistry.definitions.where(
+      final explicit = registry.allDefinitions.where(
         (skill) => _containsAny(queryText, skill.triggerKeywords),
       );
       if (explicit.isNotEmpty) {

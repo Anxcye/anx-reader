@@ -11,6 +11,13 @@
 调用可信来源搜索。专家选择可记住到本书，但仅保存在设备本地，不参与同步，也不
 保存 Provider 地址、密钥或 Prompt。
 
+### Reading Skill 扩展与备份
+
+Reading Skill 使用稳定字符串 ID。内置方法继续由注册表提供；用户可以在 AI
+工作台新建或导入 `custom.*` JSON。自定义 Skill 只描述阅读方法，不包含 Provider、
+API Key、工具执行或自动写库权限，并沿用摘要/完整两级渐进加载。自定义 Skill
+保存在偏好备份中，随现有 WebDAV 偏好备份恢复；不参与 CloudBase Agent 包同步。
+
 当前 AI 分层、调用链、持久化归属、同步边界、Token 用量统计和扩展契约见
 [`docs/architecture/ai-architecture.md`](docs/architecture/ai-architecture.md)。
 已实现功能、代码入口、复用边界和明确未实现项见

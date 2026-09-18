@@ -51,7 +51,7 @@ namespaced string ID（`story.*`、`stage.*`、`relation.*`）；旧短 ID 在�
 | 上下文预算 | 已实现 | 所有 AI 请求内部使用 | `lib/service/ai/ai_context_assembler.dart` | 摘要/缓存本地 | 不要在页面拼完整历史 |
 | 专家编排 | 已实现 | 深度分析/复杂任务/本轮手动选择 | `reading_agent_orchestrator.dart`、`reading_experts.dart` | Agent trace/Evidence；专家 ID 设备本地 | 不要把专家长文直接拼回 prompt；联网需本轮授权 |
 | Reading Agent Runtime | 已实现 | 阅读 Agent Beta | `lib/service/ai/reading_agent_runtime.dart` | 目标、画像、动作、覆盖表 | 普通阅读事件不得调用模型 |
-| Reading Skill | 已实现 | AI 工作台 Skill、设置/帮助 | `lib/service/ai/reading_skills.dart` | 按书配置/数据库 | Skill 是方法，不是工具集合 |
+| Reading Skill | 已实现 | AI 工作台 Skill、设置/帮助；支持自定义/导入 | `lib/service/ai/reading_skills.dart` | 按书配置 + 自定义 Skill 随 WebDAV 偏好备份 | Skill 是方法，不是工具集合；不得含 Provider/工具权限 |
 | 阅读闭环 | 已实现 | 阅读成果页/Agent | `reading_closure_policy.dart` | 目标、checkpoint、成果、mastery | 不按小说/心理硬编码页面 |
 | 小说档案 | 已实现 | 阅读成果 > 故事档案 | `fiction_backfill_service.dart`、`fiction_story_atlas_service.dart` | `tb_reading_artifacts` | 图谱/时间线不直接查 DAO |
 | 故事时间线 P0/P1 | 已实现 | 故事事件时间线 | `fiction_story_timeline_page.dart` | Artifact 投影 | 不新增独立时间线表 |
