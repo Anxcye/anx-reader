@@ -1,5 +1,6 @@
 import 'package:anx_reader/dao/base_dao.dart';
 import 'package:anx_reader/dao/book.dart';
+import 'package:anx_reader/dao/reading_round.dart';
 import 'package:anx_reader/enums/sync_direction.dart';
 import 'package:anx_reader/enums/sync_trigger.dart';
 import 'package:anx_reader/models/book.dart';
@@ -22,8 +23,9 @@ class ReadingTimeDao extends BaseDao {
 
     await db.transaction((txn) async {
       final existing = await txn.rawQuery(
-        'SELECT id, reading_time FROM $table WHERE book_id = ? AND DATE(date) = DATE(?) LIMIT 1',
-        [readingTime.bookId, resolvedDay],
+        'SELECT id, reading_time FROM $table '
+        'WHERE book_id = ? AND DATE(date) = DATE(?) AND round = ? LIMIT 1',
+        [readingTime.bookId, resolvedDay, readingTime.round],
       );
 
       if (existing.isNotEmpty) {
@@ -44,21 +46,33 @@ class ReadingTimeDao extends BaseDao {
             'book_id': readingTime.bookId,
             'date': resolvedDay,
             'reading_time': readingTime.readingTime,
+            'round': readingTime.round,
           },
         );
       }
     });
+
+    // 同步把本次时长累加到该书进行中的轮次（多刷统计）
+    if (readingTime.readingTime > 0) {
+      await readingRoundDao.accumulateReadingTime(
+        bookId: readingTime.bookId,
+        roundNumber: readingTime.round,
+        seconds: readingTime.readingTime,
+      );
+    }
   }
 
   Future<void> insertReadingSession({
     required int bookId,
     required int readingTime,
     DateTime? startedAt,
+    int round = 1,
   }) async {
     final session = ReadingTime(
       bookId: bookId,
       readingTime: readingTime,
       date: startedAt?.toIso8601String(),
+      round: round,
     );
 
     await insertReadingTime(session, startedAt: startedAt);
@@ -226,6 +240,29 @@ class ReadingTimeDao extends BaseDao {
     );
   }
 
+  /// 某本书**按日期汇总**的阅读时长（把该书当天的所有轮次合并成一条）。
+  ///
+  /// 多刷功能使 tb_reading_time 的聚合键变为 (书, 日期, 轮次)，同一天读过
+  /// 多轮就会有多条记录；书籍详情页的时长列表应按日期合并显示，避免出现
+  /// 重复日期。逐轮明细由 tb_reading_rounds / 轮次卡片负责展示。
+  Future<List<ReadingTime>> selectDailyTotalReadingTimeByBookId(int bookId) {
+    return rawQueryList(
+      '''
+      SELECT DATE(date) AS day, SUM(reading_time) AS total_time
+      FROM $table
+      WHERE book_id = ?
+      GROUP BY day
+      ORDER BY day DESC
+      ''',
+      arguments: [bookId],
+      mapper: (row) => ReadingTime(
+        bookId: bookId,
+        date: row['day'] as String?,
+        readingTime: row['total_time'] as int? ?? 0,
+      ),
+    );
+  }
+
   Future<List<ReadingTime>> queryReadingHistory({
     int? bookId,
     DateTime? from,
@@ -291,6 +328,30 @@ class ReadingTimeDao extends BaseDao {
       mapper: (row) => row['total_sum'] as int? ?? 0,
     );
     return total ?? 0;
+  }
+
+  /// 某本书某一轮次的累计阅读时长（秒）
+  Future<int> selectTotalReadingTimeByBookAndRound(
+      int bookId, int round) async {
+    final total = await rawQuerySingle(
+      'SELECT SUM(reading_time) AS total_sum FROM $table '
+      'WHERE book_id = ? AND round = ?',
+      arguments: [bookId, round],
+      mapper: (row) => row['total_sum'] as int? ?? 0,
+    );
+    return total ?? 0;
+  }
+
+  /// 某本书某一轮次的阅读记录明细
+  Future<List<ReadingTime>> selectReadingTimeByBookAndRound(
+      int bookId, int round) {
+    return queryList(
+      table,
+      mapper: ReadingTime.fromDb,
+      where: 'book_id = ? AND round = ?',
+      whereArgs: [bookId, round],
+      orderBy: 'datetime(date) DESC, id DESC',
+    );
   }
 
   Future<List<Map<Book, int>>> selectBookReadingTimeOfDay(DateTime date) async {

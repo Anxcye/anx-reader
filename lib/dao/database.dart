@@ -13,7 +13,8 @@ import 'package:path/path.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 // Current app database version
-const int currentDbVersion = 7;
+// v8: multiple reading rounds (tb_reading_rounds + tb_books.current_round + tb_reading_time.round)
+const int currentDbVersion = 8;
 
 const createBookSQL = '''
 CREATE TABLE tb_books (
@@ -82,6 +83,23 @@ CREATE TABLE tb_reading_time (
   book_id INTEGER,
   date TEXT,
   reading_time INTEGER
+)
+''';
+
+// 多刷阅读统计：每本书的每一轮阅读记录（v8 新增）
+const createReadingRoundSQL = '''
+CREATE TABLE tb_reading_rounds (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  book_id INTEGER,
+  round_number INTEGER NOT NULL DEFAULT 1,
+  status TEXT NOT NULL DEFAULT 'reading',
+  start_time TEXT,
+  end_time TEXT,
+  start_percentage REAL NOT NULL DEFAULT 0,
+  end_percentage REAL NOT NULL DEFAULT 0,
+  total_reading_time INTEGER NOT NULL DEFAULT 0,
+  create_time TEXT,
+  update_time TEXT
 )
 ''';
 
@@ -425,6 +443,15 @@ class DBHelper {
             VALUES (?, '...', 0, datetime('now'), datetime('now'))
           ''', [groupId]);
         }
+        continue case7;
+      case7:
+      case 7:
+        // 多刷阅读统计：新增 tb_reading_rounds 表，并为 tb_books / tb_reading_time 增加轮次字段
+        await db.execute(createReadingRoundSQL);
+        await db.execute(
+            "ALTER TABLE tb_books ADD COLUMN current_round INTEGER NOT NULL DEFAULT 1");
+        await db.execute(
+            "ALTER TABLE tb_reading_time ADD COLUMN round INTEGER NOT NULL DEFAULT 1");
     }
 
     if (oldVersion != 0 && Prefs().webdavStatus) {
