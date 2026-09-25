@@ -319,6 +319,43 @@ class _BookDetailState extends ConsumerState<BookDetail> {
       );
     }
 
+
+    Future<void> renameBookFileToMatchTitle() async {
+      final book = widget.book;
+      final oldRelative = book.filePath;
+      final extension = path.extension(oldRelative);
+      if (extension.isEmpty) return;
+
+      var base = book.title
+          .replaceAll(RegExp(r'[<>:"/\\|?*#@$%^&+=\[\]{}`~]'), '_')
+          .replaceAll(RegExp(r'[\n\r]+'), ' ')
+          .trim();
+      base = base.replaceAll(RegExp(r'\s+'), ' ');
+      if (base.isEmpty) base = 'book';
+      if (base.length > 80) base = base.substring(0, 80).trim();
+
+      var newRelative = 'file/$base$extension';
+      if (newRelative == oldRelative) return;
+
+      final oldFull = getBasePath(oldRelative);
+      var newFull = getBasePath(newRelative);
+      final oldFile = File(oldFull);
+      if (!await oldFile.exists()) return;
+
+      if (await File(newFull).exists()) {
+        newRelative =
+            'file/$base-${DateTime.now().millisecondsSinceEpoch}$extension';
+        newFull = getBasePath(newRelative);
+      }
+
+      try {
+        await oldFile.rename(newFull);
+        book.filePath = newRelative;
+      } catch (e) {
+        AnxLog.warning('Rename book file failed: $e');
+      }
+    }
+
     Widget buildEditButton() {
       return Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -340,14 +377,17 @@ class _BookDetailState extends ConsumerState<BookDetail> {
                       Text(L10n.of(context).bookDetailSave),
                     ],
                   ),
-                  onPressed: () {
+                  onPressed: () async {
                     setState(() {
                       isEditing = false;
-                      bookDao.updateBook(widget.book);
-                      Sync().syncData(SyncDirection.upload, ref,
-                          trigger: SyncTrigger.manual);
-                      ref.read(bookListProvider.notifier).refresh();
                     });
+                    // Keep local/WebDAV filename in sync with the displayed title (#989)
+                    await renameBookFileToMatchTitle();
+                    await bookDao.updateBook(widget.book);
+                    Sync().syncData(SyncDirection.upload, ref,
+                        trigger: SyncTrigger.manual);
+                    ref.read(bookListProvider.notifier).refresh();
+                    if (mounted) setState(() {});
                   },
                 )
               : OutlinedButton(

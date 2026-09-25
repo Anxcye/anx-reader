@@ -74,7 +74,7 @@ Future<void> main() async {
 
   SmartDialog.config.custom = SmartConfigCustom(
     maskColor: Colors.black.withAlpha(35),
-    useAnimation: true,
+    useAnimation: !Prefs().eInkMode,
     animationType: SmartAnimationType.centerFade_otherSlide,
   );
 

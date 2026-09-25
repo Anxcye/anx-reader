@@ -646,6 +646,16 @@ class _AiProviderDetailPageState extends ConsumerState<AiProviderDetailPage> {
   void _testConnection() {
     final l10n = L10n.of(context);
 
+    final enabledKeys = _apiKeys.where((k) => k.enabled && k.key.trim().isNotEmpty);
+    if (_urlController.text.trim().isEmpty ||
+        _modelController.text.trim().isEmpty ||
+        enabledKeys.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.settingsAiProviderNoValidKeys)),
+      );
+      return;
+    }
+
     // Save any pending changes before testing so the provider has the latest config
     if (_isModified) {
       if (_nameController.text.isEmpty || _urlController.text.isEmpty) {

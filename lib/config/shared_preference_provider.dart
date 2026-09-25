@@ -24,6 +24,8 @@ import 'package:anx_reader/enums/bgimg_fit.dart';
 import 'package:anx_reader/enums/code_highlight_theme.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/main.dart';
+import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
+import 'package:flutter/material.dart';
 import 'package:anx_reader/models/bgimg.dart';
 import 'package:anx_reader/models/book_style.dart';
 import 'package:anx_reader/models/chapter_split_presets.dart';
@@ -41,7 +43,6 @@ import 'package:anx_reader/service/translate/index.dart';
 import 'package:anx_reader/utils/get_current_language_code.dart';
 import 'package:anx_reader/utils/log/common.dart';
 import 'package:anx_reader/widgets/reading_page/style_widget.dart';
-import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 const String prefsBackupVersionKey = '__prefsBackupVersion';
@@ -559,6 +560,15 @@ class Prefs extends ChangeNotifier {
 
   set eInkMode(bool status) {
     prefs.setBool('eInkMode', status);
+    // E-ink refreshes poorly with motion; force open-book Hero off.
+    if (status) {
+      prefs.setBool('openBookAnimation', false);
+    }
+    SmartDialog.config.custom = SmartConfigCustom(
+      maskColor: Colors.black.withAlpha(35),
+      useAnimation: !status,
+      animationType: SmartAnimationType.centerFade_otherSlide,
+    );
     notifyListeners();
   }
 

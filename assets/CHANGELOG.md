@@ -1,6 +1,10 @@
 # Changelog
 
 ## 1.15.0
+- Chore(ui): Drop experimental forui redesign; keep Material shell and prior issue fixes
+- Fix(reader): Honor writing-direction setting for EPUBs that set writing-mode on body (e.g. vertical Japanese books) (#867)
+- Fix(log): Silence Chromium iframe sandbox WebView warning that already had an ignore entry but failed exact match due to trailing period (#877)
+- Ci: Upgrade lock-threads to v6 and use github.token so lock-closed-issues stops failing daily on long GITHUB_TOKEN secrets
 - Feat(search): Add in-app search results with configurable search engine and display modes (#894)
 - Feat(ai): Add configurable delay threshold for auto-summary when reopening a book (#922)
 - Feat(ai): Make custom user prompts available in the Home AI tab for parity with reader AI (#853)
@@ -9,7 +13,22 @@
 - Feat(network): Add HTTP proxy connectivity test feature (#838) Thanks @dddXzz
 - Fix(reader): Fix Android selection auto-page turn — continuous turns and missed turns when dragging across pages (#875) Thanks @addtion99
 - Fix(l10n): Update Russian translation (#874) Thanks @Xapitonov
+- Fix(ai): Avoid native WebView2 crash when running book content search on Windows (#978) Thanks @bazzdug-arch
+- Perf(reader): Reduce Android reading-page scroll jank by deferring relocate during scroll (#914) Thanks @dddXzz
+- Fix(reader): Restore reader keyboard focus after clearing text selection / closing context menu (#967, #966) Thanks @zyx-31415
+- Fix(reader): Open selection menu on single-word long-press on Android (#990, #968, #900)
+- Fix(sync): Rename local book file when saving a new title so WebDAV uploads use the updated name (#989)
+- Feat(appearance): Disable open-book animation, page transitions, and dialog motion when e-ink mode is on (#986)
+- Fix(bookshelf): Make group rename obvious (edit icon) and seed new groups with the book title instead of "..." (#972)
+- Fix(ai): Preserve Gemini thought_signature across tool-call round-trips so thinking models work with tools (#977)
+- Fix(reader): Page-turn keys clear selection and turn pages instead of panning while text is selected (#966)
+- Fix(ai): Null-safe custom provider config parsing and clearer errors when required fields or response shape are invalid (#868)
+- Fix(ai): Quick prompt chips insert into the composer for editing; long-press still sends immediately (#969)
 
+- Fix(reader): 修复部分 EPUB（如在 body 上设置竖排 writing-mode）忽略写作方向设置的问题 (#867)
+- Fix(log): 修复因句末句点导致精确匹配失败、未能屏蔽 Chromium iframe sandbox WebView 警告的问题 (#877)
+- Ci: 升级 lock-threads 至 v6 并改用 github.token，避免 lock-closed-issues 因过长 GITHUB_TOKEN 每日失败
+- Chore(ui): 撤销实验性 forui 界面改造，恢复 Material 壳层并保留此前 issue 修复
 - Feat(search): 支持应用内搜索结果显示，可配置搜索引擎和显示方式 (#894)
 - Feat(ai): 新增自动摘要延迟阈值配置，可控制重新打开书籍时的摘要触发时机 (#922)
 - Feat(ai): 让自定义用户提示词在首页 AI 标签页中可用，并与阅读器 AI 保持一致 (#853)
@@ -18,6 +37,17 @@
 - Feat(network): 新增代理连接测试功能 (#838) 感谢 @dddXzz
 - Fix(reader): 修复 Android 选区跨页自动翻页的连续翻页与漏翻问题 (#875) 感谢 @addtion99
 - Fix(l10n): 更新俄语翻译 (#874) 感谢 @Xapitonov
+- Fix(ai): 修复 Windows 上书籍内容搜索触发原生 WebView2 崩溃的问题 (#978) 感谢 @bazzdug-arch
+- Perf(reader): 优化 Android 阅读页滚动卡顿，滚动期间推迟 relocate (#914) 感谢 @dddXzz
+- Fix(reader): 修复清除选区/关闭上下文菜单后阅读器键盘焦点未恢复的问题 (#967, #966) 感谢 @zyx-31415
+- Fix(reader): 修复 Android 长按选中单字不弹出菜单的问题 (#990, #968, #900)
+- Fix(sync): 保存书名时同步重命名本地文件，避免 WebDAV 仍上传旧文件名 (#989)
+- Feat(appearance): 开启墨水屏模式时关闭开书动画、页面转场与弹窗动画 (#986)
+- Fix(bookshelf): 分组命名入口更明显，新建分组默认使用书名而非 "..." (#972)
+- Fix(ai): 修复 Gemini 工具调用时缺失 thought_signature 导致思考模型报错的问题 (#977)
+- Fix(reader): 选中文本时方向键/翻页键先清除选区再翻页，避免页面平移 (#966)
+- Fix(ai): 自定义供应商配置解析更空安全，并在必填项或响应格式异常时给出明确错误 (#868)
+- Fix(ai): 快捷提示词芯片点击写入输入框以便编辑，长按仍可立即发送 (#969)
 
 ## 1.14.0
 - Fix(translate): Remove legacy Microsoft reverse-engineered translation service and migrate saved full-text translation preference to Microsoft Azure API

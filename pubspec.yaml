@@ -2,7 +2,7 @@ name: anx_reader
 description: "An e-book reader."
 publish_to: 'none'
 
-version: 1.15.0+6333
+version: 1.15.0+6341
 
 environment:
   sdk: '>=3.5.2 <4.0.0'
@@ -131,6 +131,10 @@ dependencies:
   in_app_purchase_android: ^0.4.0+8
 
 dependency_overrides:
+  googleai_dart:
+    path: third_party/googleai_dart
+  langchain_google:
+    path: third_party/langchain_google
   langchain:
     git:
       url: https://github.com/Anxcye/langchain_dart.git

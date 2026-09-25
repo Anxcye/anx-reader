@@ -99,11 +99,23 @@ class LangchainAiConfig {
     required String url,
     AiReasoningEffort reasoningEffort = AiReasoningEffort.auto,
   }) {
+    final trimmedModel = model.trim();
+    final trimmedKey = apiKey.trim();
+    final trimmedUrl = url.trim();
+    if (trimmedUrl.isEmpty) {
+      throw ArgumentError('AI provider URL is required');
+    }
+    if (trimmedKey.isEmpty) {
+      throw ArgumentError('AI provider API key is required');
+    }
+    if (trimmedModel.isEmpty) {
+      throw ArgumentError('AI provider model is required');
+    }
     return LangchainAiConfig(
       identifier: providerId,
-      apiKey: apiKey,
-      model: model,
-      baseUrl: _deriveBaseUrl(url),
+      apiKey: trimmedKey,
+      model: trimmedModel,
+      baseUrl: _deriveBaseUrl(trimmedUrl),
       reasoningEffort: reasoningEffort,
     );
   }

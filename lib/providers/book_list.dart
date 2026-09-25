@@ -147,8 +147,8 @@ class BookList extends _$BookList {
 
   void moveBook(Book data, int groupId) {
     updateBook(data.copyWith(groupId: groupId));
-    // insert a new group if not exists
-    ref.read(groupDaoProvider.notifier).insertGroup(groupId);
+    // insert a new group if not exists; seed name from the dropped book title
+    ref.read(groupDaoProvider.notifier).insertGroup(groupId, name: data.title);
     refresh();
   }
 

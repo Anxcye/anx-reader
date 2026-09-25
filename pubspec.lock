@@ -976,12 +976,11 @@ packages:
     source: hosted
     version: "0.3.3+1"
   googleai_dart:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: googleai_dart
-      sha256: "22f8bb5e621067f4c9cd2f88db240bbd7f1ea54b960c55c348104c74794a97a7"
-      url: "https://pub.dev"
-    source: hosted
+      path: "third_party/googleai_dart"
+      relative: true
+    source: path
     version: "3.0.0"
   googleapis:
     dependency: transitive
@@ -1221,10 +1220,9 @@ packages:
   langchain_google:
     dependency: "direct main"
     description:
-      name: langchain_google
-      sha256: "37e4917c42361149b41fe883e7ff9b0fc136ec7b2c6e4545c6d886e22656ec94"
-      url: "https://pub.dev"
-    source: hosted
+      path: "third_party/langchain_google"
+      relative: true
+    source: path
     version: "0.7.1+2"
   langchain_openai:
     dependency: "direct main"

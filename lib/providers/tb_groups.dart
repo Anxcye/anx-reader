@@ -69,7 +69,7 @@ class GroupDao extends _$GroupDao {
     });
   }
 
-  Future<int> insertGroup(int groupId) async {
+  Future<int> insertGroup(int groupId, {String? name}) async {
     final db = await DBHelper().database;
     final now = DateTime.now().toIso8601String();
     // if not exists, insert a new group
@@ -78,7 +78,7 @@ class GroupDao extends _$GroupDao {
         'tb_groups',
         {
           'id': groupId,
-          'name': "...",
+          'name': (name == null || name.trim().isEmpty) ? 'New group' : name.trim(),
           'parent_id': 0,
           'is_deleted': 0,
           'create_time': now,
