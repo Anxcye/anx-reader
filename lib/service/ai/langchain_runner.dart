@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:anx_reader/utils/ai_reasoning_parser.dart';
 import 'package:anx_reader/utils/log/common.dart';
 import 'package:langchain/langchain.dart';
+import 'package:langchain_core/language_models.dart';
 
 typedef AiTokenUsageRecorder =
     void Function({

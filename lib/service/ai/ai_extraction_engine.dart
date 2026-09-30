@@ -5,6 +5,7 @@ import 'package:anx_reader/models/ai_extraction_config.dart';
 import 'package:anx_reader/models/ai_provider.dart';
 import 'package:anx_reader/providers/ai_providers.dart';
 import 'package:anx_reader/service/ai/ai_context_assembler.dart';
+import 'package:anx_reader/service/ai/ai_request.dart';
 import 'package:anx_reader/service/ai/ai_token_usage_service.dart';
 import 'package:anx_reader/service/ai/index.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
