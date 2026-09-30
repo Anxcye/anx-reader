@@ -1,7 +1,27 @@
 import 'package:anx_reader/service/ai/ai_context_assembler.dart';
 import 'package:anx_reader/service/ai/langchain_ai_config.dart';
+import 'package:anx_reader/models/reading_context_pack.dart';
+import 'package:anx_reader/service/ai/reading_context_pack_service.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:langchain_core/chat_models.dart';
+
+class _FakeContextPackService extends ReadingContextPackService {
+  _FakeContextPackService(this.pack);
+
+  final ReadingContextPack pack;
+  int loads = 0;
+
+  @override
+  Future<ReadingContextPack> load(
+    int bookId, {
+    required double visibleAtProgress,
+    String? chapterHref,
+    String? query,
+  }) async {
+    loads++;
+    return pack;
+  }
+}
 
 void main() {
   const compactBudget = AiContextBudget(
@@ -12,6 +32,67 @@ void main() {
   );
 
   group('AiContextAssembler', () {
+    test('book context cache avoids duplicate projection reads', () async {
+      final service = _FakeContextPackService(
+        const ReadingContextPack(bookId: 1),
+      );
+      final assembler = AiContextAssembler();
+      final source = <ChatMessage>[ChatMessage.humanText('问题')];
+
+      final first = await assembler.withBookContext(
+        source,
+        bookId: 1,
+        visibleAtProgress: .25,
+        contextService: service,
+      );
+      final second = await assembler.withBookContext(
+        source,
+        bookId: 1,
+        visibleAtProgress: .25,
+        contextService: service,
+      );
+
+      expect(first, source);
+      expect(second, source);
+      expect(service.loads, 1);
+    });
+
+    test('book context can be invalidated after a source update', () async {
+      final service = _FakeContextPackService(
+        const ReadingContextPack(
+          bookId: 1,
+          nodes: [
+            ReadingContextNode(
+              id: 'n1',
+              bookId: 1,
+              kind: ReadingContextNodeKinds.summary,
+              title: '已读摘要',
+            ),
+          ],
+        ),
+      );
+      final assembler = AiContextAssembler();
+      final source = <ChatMessage>[ChatMessage.humanText('问题')];
+
+      final first = await assembler.withBookContext(
+        source,
+        bookId: 1,
+        visibleAtProgress: .25,
+        contextService: service,
+      );
+      assembler.invalidateBookContext(1);
+      final second = await assembler.withBookContext(
+        source,
+        bookId: 1,
+        visibleAtProgress: .25,
+        contextService: service,
+      );
+
+      expect(first.length, 2);
+      expect(second.length, 2);
+      expect(service.loads, 2);
+    });
+
     test('keeps a short conversation unchanged', () {
       final assembler = AiContextAssembler();
       final source = <ChatMessage>[

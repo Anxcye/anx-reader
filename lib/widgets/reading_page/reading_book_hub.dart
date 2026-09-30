@@ -23,6 +23,7 @@ class ReadingBookHubContent extends StatelessWidget {
     required this.onNextAction,
     required this.onOpenOutcomes,
     required this.onOpenWiki,
+    this.onOpenContextPack,
     required this.onOpenStoryArchive,
     required this.onSync,
     required this.onOpenReadingSettings,
@@ -39,6 +40,7 @@ class ReadingBookHubContent extends StatelessWidget {
   final Future<void> Function() onNextAction;
   final Future<void> Function() onOpenOutcomes;
   final Future<void> Function() onOpenWiki;
+  final Future<void> Function()? onOpenContextPack;
   final Future<void> Function() onOpenStoryArchive;
   final Future<void> Function() onSync;
   final Future<void> Function() onOpenReadingSettings;
@@ -117,6 +119,13 @@ class ReadingBookHubContent extends StatelessWidget {
           subtitle: '按当前阅读边界浏览书籍百科',
           onTap: onOpenWiki,
         ),
+        if (onOpenContextPack != null)
+          _HubTile(
+            icon: Icons.memory_outlined,
+            title: 'AI 上下文',
+            subtitle: '按已读范围建立可复用的本书上下文包',
+            onTap: onOpenContextPack!,
+          ),
         if (closure.supports(ReadingClosureCapability.storyAtlas))
           _HubTile(
             icon: Icons.account_tree_outlined,

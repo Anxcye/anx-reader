@@ -66,6 +66,7 @@ namespaced string ID（`story.*`、`stage.*`、`relation.*`）；旧短 ID 在�
 | 轻量提取/摘要引擎 | 已实现 | 设置 > AI > 轻量提取与摘要引擎 | `ai_extraction_engine.dart`、`fiction_hybrid_extraction_service.dart` | Provider 角色设备本地；Artifact 正常同步 | 定位为本地候选提取器 + 证据筛选器；不在失败时静默上传整章 |
 | 阅读成果页 | 已实现 | 阅读页 > 本书阅读成果 | `reading_outcomes_page.dart` | 读取闭环/Atlas/记忆 | 不在成果页自动整理 |
 | 书籍 Wiki | 已实现（一期） | 阅读页 > 本书、书籍详情 | `book_wiki_page.dart`、`book_wiki_service.dart` | `tb_book_wikis`/entries/sources/revisions，进入 Agent 增量同步 | 打开页面不扫描正文；详情页不启动隐藏阅读器 |
+| 本书 AI 上下文 | 已实现（只读投影） | 阅读页 > 本书 > AI 上下文 | `reading_context_pack_service.dart`、`ai_context_assembler.dart` | 复用 Wiki/Artifact/Memory，不新增表 | 只在显式 AI 请求中注入；打开页面不调用模型 |
 | 阅读分块与证据解析 | 已实现 | 用户确认的 Wiki/Story Atlas 整理任务 | `reading_chunker.dart`、`reading_evidence_resolver.dart` | ReadingChunk 为任务中间产物；证据回到原文 offset | 不持久化完整 chunk；普通阅读不触发 |
 | 阅读查词路由 | 已实现 | 阅读页长按/选区菜单 | `reading_lookup_candidate_resolver.dart`、`reading_lookup_router.dart` | 词典缓存与用户导入 MDX | 页面不自行判断词类或决定联网；离线单字禁止上下文扩词 |
 | 本书统一面板 | 已实现 | 阅读页 > 本书 | `widgets/reading_page/reading_book_hub.dart` | 只读聚合现有成果 | 不为 Wiki/成果/同步恢复独立顶栏入口 |
@@ -247,7 +248,21 @@ E-INK 有效覆盖：浅色高对比、无翻页动画、无背景图、无代�
 | 区分墨水屏/OLED | 设置 > 外观 > 当前设备显示配置 |
 | 学习如何使用 Agent/Skill | 设置/AI 入口中的帮助与教学页 |
 
-## 10. 明确未实现 / 不要假设已经存在
+## 10. 本书 AI 上下文包
+
+`ReadingContextPackService` 是 AI 对话使用本书上下文的唯一只读投影层。它
+复用 Book Wiki、Story Atlas Artifact、Markdown 记忆和来源引用，输出稳定的
+`ReadingContextPack`/`ReadingContextNode`，按书籍、篇章、章节、实体和用户记忆
+分层。上下文节点保留 `visibleFromProgress`、来源和事实/推断标识；回到较早位置
+时自动隐藏后文。
+
+上下文包不替代 Wiki，也不保存完整正文。打开“本书 → AI 上下文”只读取本地
+投影，不调用模型；用户确认“从已读部分建立/更新”后复用现有 Wiki 增量任务，
+因此 checkpoint、证据校验、AgentAction、同步和撤销规则不再复制。明确发起 AI
+对话时，`AiContextAssembler.withBookContext` 按当前章节、查询和边界加入有上限的
+缓存摘要；普通翻页、停留、打开页面和同步不会触发上下文生成或模型请求。
+
+## 11. 明确未实现 / 不要假设已经存在
 
 以下不是当前能力，新增需求应先更新 TODO，再实现：
 

@@ -116,6 +116,7 @@ class AiRequest {
     AiContextTask.lightweightExtraction => 'extraction.lightweight',
     AiContextTask.cloudVerification => 'extraction.cloud_verification',
     AiContextTask.internalSummary => 'context.rolling_summary',
+    AiContextTask.bookContext => 'context.book_pack_generate',
     AiContextTask.general => 'ai.general',
   };
 }
@@ -232,6 +233,13 @@ abstract final class AiWorkloadDescriptorRegistry {
       contextTask: AiContextTask.internalSummary,
       providerRole: AiProviderRole.localExtraction,
       fallbackPolicy: AiFallbackPolicy.none,
+    ),
+    'context.book_pack_generate': AiWorkloadDescriptor(
+      id: 'context.book_pack_generate',
+      contextTask: AiContextTask.bookContext,
+      outputContract: AiOutputContract.json(),
+      fallbackPolicy: AiFallbackPolicy.confirmBeforeFullTextCloud,
+      pipelineVersion: 1,
     ),
     'reading_memory.topic_extraction': AiWorkloadDescriptor(
       id: 'reading_memory.topic_extraction',

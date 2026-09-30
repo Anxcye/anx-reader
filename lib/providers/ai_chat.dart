@@ -6,6 +6,7 @@ import 'package:anx_reader/providers/ai_providers.dart';
 import 'package:anx_reader/providers/current_reading.dart';
 import 'package:anx_reader/service/ai/ai_history.dart';
 import 'package:anx_reader/service/ai/ai_context_assembler.dart';
+import 'package:anx_reader/service/ai/ai_request.dart';
 import 'package:anx_reader/service/ai/index.dart';
 import 'package:anx_reader/service/ai/reading_agent_orchestrator.dart';
 import 'package:anx_reader/service/ai/reading_ai_models.dart';
@@ -194,6 +195,13 @@ class AiChat extends _$AiChat {
         task: analysisRequest == null
             ? AiContextTask.readingChat
             : AiContextTask.chapterReview,
+        sourceScope: book == null
+            ? null
+            : AiSourceScope(
+                bookId: book.id,
+                chapterHref: reading.chapterHref,
+                safeBoundary: reading.percentage,
+              ),
       )) {
         assistantResponse = chunk;
 

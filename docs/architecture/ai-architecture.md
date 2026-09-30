@@ -23,6 +23,15 @@ DAO，也不拼 Prompt。`BookWikiGenerationService` 只接受用户确认后由
 跳过。全书模式不改变本地默认可见边界。`BookWikiExportService` 只导出当前允许
 显示的投影，并附来源和事实/推断标识。
 
+### 本书 AI 上下文包
+
+`ReadingContextPackService` 复用上述 Wiki/Artifact/Memory 数据，生成只读的分层
+上下文节点。上下文包不读取章节正文、不创建模型请求；生成仍必须由用户在阅读器
+确认后启动已有的 Wiki 增量任务。`AiContextAssembler.withBookContext` 只在显式
+AI 请求中按 `bookId`、章节、查询和安全边界选择节点，经过 LRU 缓存并限制字符数，
+再交给统一 `AiRequestGateway`/runner。普通位置事件、翻页、同步和打开上下文页面
+都不会调用模型。
+
 ### ReadingChunk 与 Reading Evidence Resolver
 
 `ReadingChunker` 是用户确认后的整理任务使用的短生命周期分块层。它优先在段落、

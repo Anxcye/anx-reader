@@ -700,6 +700,20 @@ merge rules; the server only isolates and returns packages.
 
 ## Book Wiki
 
+### 本书 AI 上下文包
+
+AI 上下文包是 Wiki、Story Atlas Artifact、Markdown 记忆和阅读成果的 AI 专用
+只读压缩投影，不是另一份正文，也不是用户浏览 Wiki 的替代品。入口位于“本书”
+面板；打开页面只读取本地节点，不调用模型。用户确认“从已读部分建立/更新”后，
+复用现有 Wiki 增量任务的章节边界、checkpoint、证据校验、AgentAction、同步和
+撤销能力。
+
+上下文节点按书/篇章/章节/实体/用户记忆分层，并保留来源、`sourceProgress`、
+`visibleFromProgress` 和事实/推断状态。明确发起 AI 对话时，ContextAssembler 才
+按当前章节、查询和安全边界取一小段缓存投影；没有上下文包或读取失败时继续使用
+原有对话上下文，不静默上传完整正文。普通翻页、停留、同步和打开上下文页永远不
+触发模型。
+
 ### 整理输入与证据
 
 Wiki 与 Story Atlas 的长章节整理统一经过 `ReadingChunker`：先按段落、句末和换行

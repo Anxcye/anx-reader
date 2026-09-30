@@ -415,6 +415,10 @@ abstract final class ReadingArtifactKinds {
   static const scene = 'fiction.scene';
   static const resumeContext = 'fiction.resume_context';
   static const backfillCheckpoint = 'fiction.backfill_checkpoint';
+  static const contextChapter = 'context.chapter';
+  static const contextPart = 'context.part';
+  static const contextBook = 'context.book';
+  static const contextEntity = 'context.entity';
 }
 
 /// Versioned, source-traceable outcome used by genre modules.

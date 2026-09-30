@@ -2,6 +2,7 @@ import 'dart:collection';
 
 import 'package:anx_reader/service/ai/langchain_ai_config.dart';
 import 'package:langchain_core/chat_models.dart';
+import 'package:anx_reader/service/ai/reading_context_pack_service.dart';
 
 /// Stable request classes used to give different AI workloads explicit input
 /// and output budgets. The budget applies to the prompt sent to the provider;
@@ -17,6 +18,7 @@ enum AiContextTask {
   lightweightExtraction,
   cloudVerification,
   internalSummary,
+  bookContext,
 }
 
 class AiContextBudget {
@@ -119,6 +121,59 @@ class AiContextAssembler {
   final AiContextCache cache;
   final Map<AiContextTask, AiContextBudget> _budgets;
 
+  Future<List<ChatMessage>> withBookContext(
+    List<ChatMessage> source, {
+    required int bookId,
+    required double visibleAtProgress,
+    String? chapterHref,
+    String? query,
+    ReadingContextPackService? contextService,
+  }) async {
+    final service = contextService ?? readingContextPackService;
+    final progress = visibleAtProgress.clamp(0, 1).toDouble();
+    final fingerprint = [
+      bookId,
+      progress.toStringAsFixed(5),
+      chapterHref ?? '',
+      query ?? '',
+    ].join('|');
+    var context = cache.read(
+      scope: 'book-context:$bookId',
+      fingerprint: fingerprint,
+    );
+    if (context == null) {
+      final pack = await service.load(
+        bookId,
+        visibleAtProgress: progress,
+        chapterHref: chapterHref,
+        query: query,
+      );
+      context = pack.toPromptContext(
+        visibleAtProgress: progress,
+        chapterHref: chapterHref,
+        query: query,
+        maxCharacters: 6000,
+      );
+    }
+    cache.put(
+      scope: 'book-context:$bookId',
+      fingerprint: fingerprint,
+      value: context,
+    );
+    if (context.trim().isEmpty) return List.unmodifiable(source);
+    return List.unmodifiable([
+      ChatMessage.system(
+        '## Cached book context (read boundary $progress)\n$context\n'
+        'This is a local, source-traceable summary. Do not treat unsupported '
+        'inferences as facts or reveal content beyond the boundary.',
+      ),
+      ...source,
+    ]);
+  }
+
+  void invalidateBookContext(int bookId) =>
+      cache.invalidateScope('book-context:$bookId');
+
   static const _defaultBudgets = <AiContextTask, AiContextBudget>{
     AiContextTask.general: AiContextBudget(
       maxInputTokens: 12000,
@@ -178,6 +233,12 @@ class AiContextAssembler {
       maxInputTokens: 8000,
       reservedOutputTokens: 768,
       recentMessages: 8,
+      summaryTokens: 0,
+    ),
+    AiContextTask.bookContext: AiContextBudget(
+      maxInputTokens: 8000,
+      reservedOutputTokens: 1200,
+      recentMessages: 2,
       summaryTokens: 0,
     ),
   };

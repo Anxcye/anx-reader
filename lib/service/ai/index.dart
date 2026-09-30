@@ -139,6 +139,7 @@ Stream<String> aiGenerateStream(
   bool allowFallback = true,
   AiContextTask task = AiContextTask.general,
   AiOutputContract outputContract = const AiOutputContract.text(),
+  AiSourceScope? sourceScope,
 }) => executeAiRequestStream(
   AiRequest(
     messages: messages,
@@ -154,6 +155,7 @@ Stream<String> aiGenerateStream(
         : AiFallbackPolicy.none,
     contextTask: task,
     outputContract: outputContract,
+    sourceScope: sourceScope,
   ),
 );
 
@@ -178,14 +180,16 @@ Stream<String> executeAiRequestStream(
     readingSkillOverride: request.readingSkill,
   );
 
+  final requestMessages = await _addBookContext(request);
+
   await _prepareRollingSummary(
-    messages: request.messages,
+    messages: requestMessages,
     task: request.contextTask,
     ref: request.ref,
   );
 
   final primary = await _generateStream(
-    messages: request.messages,
+    messages: requestMessages,
     identifier: request.providerId,
     overrideConfig: request.overrideConfig,
     regenerate: request.regenerate,
@@ -237,7 +241,7 @@ Stream<String> executeAiRequestStream(
   usedFallback = true;
 
   final fallback = await _generateStream(
-    messages: request.messages,
+    messages: requestMessages,
     identifier: fallbackId,
     // A fallback must use its own stored URL, key and model. Passing the
     // primary override here can silently route it back through bad config.
@@ -264,6 +268,37 @@ Stream<String> executeAiRequestStream(
     usedFallback: usedFallback,
     finalValue: finalValue,
   );
+}
+
+Future<List<ChatMessage>> _addBookContext(AiRequest request) async {
+  final scope = request.sourceScope;
+  if (scope?.bookId == null ||
+      scope!.safeBoundary == null ||
+      request.contextTask == AiContextTask.translation ||
+      request.contextTask == AiContextTask.fictionBackfill ||
+      request.contextTask == AiContextTask.lightweightExtraction ||
+      request.contextTask == AiContextTask.cloudVerification ||
+      request.contextTask == AiContextTask.internalSummary ||
+      request.contextTask == AiContextTask.bookContext) {
+    return request.messages;
+  }
+  final humanMessages = request.messages.whereType<HumanChatMessage>().toList();
+  final query = humanMessages.isEmpty
+      ? null
+      : humanMessages.last.contentAsString;
+  try {
+    return await aiContextAssembler.withBookContext(
+      request.messages,
+      bookId: scope.bookId!,
+      visibleAtProgress: scope.safeBoundary!,
+      chapterHref: scope.chapterHref,
+      query: query,
+    );
+  } catch (error) {
+    // Context is an enhancement, never a reason to block an explicit chat.
+    AnxLog.warning('Unable to load book context pack: $error');
+    return request.messages;
+  }
 }
 
 void _completeRequestMetadata(
@@ -360,7 +395,8 @@ Future<void> _prepareRollingSummary({
       task == AiContextTask.fictionBackfill ||
       task == AiContextTask.lightweightExtraction ||
       task == AiContextTask.cloudVerification ||
-      task == AiContextTask.internalSummary) {
+      task == AiContextTask.internalSummary ||
+      task == AiContextTask.bookContext) {
     return;
   }
   final old = aiContextAssembler.rollingSummarySource(messages, task);

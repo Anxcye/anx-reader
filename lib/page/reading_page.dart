@@ -28,6 +28,7 @@ import 'package:anx_reader/page/book_player/epub_player.dart';
 import 'package:anx_reader/page/reading_outcomes_page.dart';
 import 'package:anx_reader/page/reading_agent_help_page.dart';
 import 'package:anx_reader/page/book_wiki_page.dart';
+import 'package:anx_reader/page/reading_context_pack_page.dart';
 import 'package:anx_reader/service/ai/book_wiki_generation_service.dart';
 import 'package:anx_reader/providers/sync.dart';
 import 'package:anx_reader/providers/book_toc.dart';
@@ -2760,6 +2761,10 @@ class ReadingPageState extends ConsumerState<ReadingPage>
                 Navigator.pop(overlayContext);
                 await _showBookWiki();
               },
+              onOpenContextPack: () async {
+                Navigator.pop(overlayContext);
+                await _showReadingContextPack();
+              },
               onOpenStoryArchive: () async {
                 Navigator.pop(overlayContext);
                 await _showReadingOutcomes();
@@ -2960,6 +2965,7 @@ class ReadingPageState extends ConsumerState<ReadingPage>
           },
         ),
       );
+      aiContextAssembler.invalidateBookContext(_book.id);
     } finally {
       SmartDialog.dismiss();
     }
@@ -2979,6 +2985,24 @@ class ReadingPageState extends ConsumerState<ReadingPage>
             epubPlayerKey.currentState?.goToHref(target);
           }
         },
+      ),
+    ),
+  );
+
+  Future<void> _showReadingContextPack() => Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (_) => ReadingContextPackPage(
+        book: _book,
+        visibleProgress: readingAgentRuntime.state.totalProgress > 0
+            ? readingAgentRuntime.state.totalProgress
+            : _book.readingPercentage,
+        chapterHref: readingAgentRuntime.state.chapterHref,
+        // Wiki generation already owns user confirmation, task
+        // checkpointing and validated writes. The context pack is a
+        // read-only projection of that same traceable source set.
+        onGenerate: () => _generateBookWiki(false),
+        onGenerateFullBook: () => _generateBookWiki(true),
       ),
     ),
   );

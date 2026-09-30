@@ -23,6 +23,19 @@
 
 本文中“已实现”表示可以在当前代码中找到对应入口和数据路径；“建议”表示目标架构，不应被当作已上线能力。
 
+## 0.1 本书 AI 上下文包
+
+`ReadingContextPackService` 将已有 Wiki 条目、Story Atlas Artifact 和 Markdown
+记忆投影为 `ReadingContextPack`/`ReadingContextNode`。这是给模型按需读取的压缩
+上下文，不是新的正文副本，也不替代用户浏览的 Wiki。节点带稳定 kind、来源、
+`sourceProgress`、`visibleFromProgress` 和事实/推断标识。
+
+“本书 → AI 上下文”是只读入口；打开它不生成内容。用户确认建立/更新后复用已存在
+的 Wiki 增量任务，因此仍由 `ReadingTaskScheduler`、`ReadingChunker`、证据校验和
+`AgentActionService` 负责任务、来源、撤销和同步。显式 AI 对话通过
+`AiContextAssembler.withBookContext` 加入有上限的本地缓存投影；没有包或读取失败时
+只保留原对话上下文，不自动把正文上传到其他 Provider。
+
 ## 1. 系统定位
 
 Anx Reader 的 AI 不是一个调用大模型的按钮，而是围绕阅读现场构建的本地优先系统：
@@ -722,6 +735,7 @@ requestId -> taskId -> sessionId -> bookId -> actionId -> artifact/entry IDs
 | 本书统一面板 | `lib/widgets/reading_page/reading_book_hub.dart` |
 | 下一阅读行动 | `lib/models/next_reading_action.dart`、`lib/service/ai/next_reading_action_resolver.dart` |
 | 阅读体验诊断 | `lib/service/reading_experience_diagnostics.dart`、`lib/page/settings_page/developer/reading_experience_diagnostics_page.dart` |
+| 本书 AI 上下文 | `lib/models/reading_context_pack.dart`、`lib/service/ai/reading_context_pack_service.dart`、`lib/page/reading_context_pack_page.dart` |
 
 ## 14. 开发检查清单
 
