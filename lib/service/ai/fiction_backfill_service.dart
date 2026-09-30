@@ -42,18 +42,19 @@ class FictionBackfillChapter {
 
 typedef FictionChapterLoader = Future<String> Function(String href);
 typedef FictionBackfillGenerator = Future<String> Function(String prompt);
-typedef FictionBackfillCandidateValidator = Future<Map<String, dynamic>?>
-    Function({
-  required String kind,
-  required Map<String, dynamic> payload,
-  required String chapterContent,
-});
-typedef FictionBackfillBatchWriter = Future<void> Function({
-  required List<ReadingArtifact> artifacts,
-  required List<ReadingArtifact> checkpoints,
-  required int completedChapters,
-  required int totalChapters,
-});
+typedef FictionBackfillCandidateValidator =
+    Future<Map<String, dynamic>?> Function({
+      required String kind,
+      required Map<String, dynamic> payload,
+      required String chapterContent,
+    });
+typedef FictionBackfillBatchWriter =
+    Future<void> Function({
+      required List<ReadingArtifact> artifacts,
+      required List<ReadingArtifact> checkpoints,
+      required int completedChapters,
+      required int totalChapters,
+    });
 
 typedef _PreparedChapter = ({
   FictionBackfillChapter chapter,
@@ -113,18 +114,21 @@ class FictionBackfillService {
 
     void flushOrdinary() {
       if (ordinary.isEmpty) return;
-      batches.addAll(_makeBatches(
-        List.of(ordinary),
-        batchSize: batchSize.clamp(1, 20),
-        maxInputCharacters: maxInputCharacters.clamp(4000, 100000),
-      ));
+      batches.addAll(
+        _makeBatches(
+          List.of(ordinary),
+          batchSize: batchSize.clamp(1, 20),
+          maxInputCharacters: maxInputCharacters.clamp(4000, 100000),
+        ),
+      );
       ordinary.clear();
     }
 
     for (final chapter in chapters.where(
       (item) => item.semanticKind == ReadingChapterSemanticKind.narrative,
     )) {
-      final content = contentByHref[chapter.href]?.trim() ??
+      final content =
+          contentByHref[chapter.href]?.trim() ??
           contentByHref[chapter.href.split('#').first]?.trim() ??
           '';
       if (content.isEmpty) continue;
@@ -159,7 +163,8 @@ class FictionBackfillService {
     const runnerEnvelopeTokens = 600;
     var baseline = 0;
     for (final batch in batches) {
-      baseline += aiContextAssembler.estimateTokens(
+      baseline +=
+          aiContextAssembler.estimateTokens(
             _batchPrompt(batch, knownCharacterNames),
           ) +
           runnerEnvelopeTokens;
@@ -212,24 +217,30 @@ class FictionBackfillService {
           artifact.chapterHref!.split('#').first:
               artifact.payload['contentHash']?.toString() ?? '',
     };
-    final eligible = chapters
-        .where((chapter) =>
-            chapter.semanticKind == ReadingChapterSemanticKind.narrative &&
-            chapter.startProgress >= lowerBound - .000001 &&
-            chapter.startProgress <= safeBoundary + .000001 &&
-            (chapter.endProgress ?? chapter.startProgress) <=
-                safeBoundary + .000001)
-        .toList()
-      ..sort((a, b) => a.startProgress.compareTo(b.startProgress));
+    final eligible =
+        chapters
+            .where(
+              (chapter) =>
+                  chapter.semanticKind ==
+                      ReadingChapterSemanticKind.narrative &&
+                  chapter.startProgress >= lowerBound - .000001 &&
+                  chapter.startProgress <= safeBoundary + .000001 &&
+                  (chapter.endProgress ?? chapter.startProgress) <=
+                      safeBoundary + .000001,
+            )
+            .toList()
+          ..sort((a, b) => a.startProgress.compareTo(b.startProgress));
     final result = <ReadingArtifact>[];
     final existingIds = existingArtifacts.map((item) => item.id).toSet();
     final knownCharacterNames = existingArtifacts
         .where((item) => item.kind == ReadingArtifactKinds.character)
-        .expand((item) => [
-              item.payload['name'],
-              if (item.payload['aliases'] is List)
-                ...(item.payload['aliases'] as List),
-            ])
+        .expand(
+          (item) => [
+            item.payload['name'],
+            if (item.payload['aliases'] is List)
+              ...(item.payload['aliases'] as List),
+          ],
+        )
         .map(_normalizeCharacterName)
         .where((name) => name.isNotEmpty)
         .toSet();
@@ -249,6 +260,9 @@ class FictionBackfillService {
     var completed = 0;
     final workerCount = concurrency.clamp(1, 3);
     for (var offset = 0; offset < batches.length; offset += workerCount) {
+      // Yield between provider windows so WebView input, E-INK refreshes and
+      // cancellation requests are serviced on slower devices.
+      await Future<void>.delayed(Duration.zero);
       final window = batches.skip(offset).take(workerCount);
       // A failed request must not discard successful requests in the same
       // concurrency window: their checkpoints are emitted before the error
@@ -268,9 +282,10 @@ class FictionBackfillService {
             knownCharacterNames: knownCharacterNames,
             validateCandidate: validateCandidate,
             artifactMetadata: artifactMetadata,
-            maxSegmentCharacters:
-                validateCandidate == null ? null : maxInputCharacters,
-          )
+            maxSegmentCharacters: validateCandidate == null
+                ? null
+                : maxInputCharacters,
+          ),
       ]);
       Object? firstError;
       for (final attempt in attempts) {
@@ -326,19 +341,20 @@ class FictionBackfillService {
     final attemptCharacterNames = Set<String>.of(knownCharacterNames);
     try {
       final results = await _processBatchWithFallback(
-          batch: batch,
-          bookId: bookId,
-          moduleId: moduleId,
-          lowerBound: lowerBound,
-          safeBoundary: safeBoundary,
-          sessionId: sessionId,
-          ingestedAt: ingestedAt,
-          generate: generate,
-          existingIds: attemptIds,
-          knownCharacterNames: attemptCharacterNames,
-          validateCandidate: validateCandidate,
-          artifactMetadata: artifactMetadata,
-          maxSegmentCharacters: maxSegmentCharacters);
+        batch: batch,
+        bookId: bookId,
+        moduleId: moduleId,
+        lowerBound: lowerBound,
+        safeBoundary: safeBoundary,
+        sessionId: sessionId,
+        ingestedAt: ingestedAt,
+        generate: generate,
+        existingIds: attemptIds,
+        knownCharacterNames: attemptCharacterNames,
+        validateCandidate: validateCandidate,
+        artifactMetadata: artifactMetadata,
+        maxSegmentCharacters: maxSegmentCharacters,
+      );
       for (final result in results) {
         existingIds.addAll(result.artifacts.map((artifact) => artifact.id));
       }
@@ -446,9 +462,7 @@ class FictionBackfillService {
             );
             artifacts.addAll(result.artifacts);
           }
-          return [
-            _BackfillBatchResult(artifacts: artifacts, chapters: batch),
-          ];
+          return [_BackfillBatchResult(artifacts: artifacts, chapters: batch)];
         }
         // Very short chapters have no safe split point. Retry the same small
         // request once so recovery cannot grow into an unbounded loop.
@@ -475,21 +489,23 @@ class FictionBackfillService {
       final middle = (batch.length / 2).ceil();
       final results = <_BackfillBatchResult>[];
       for (final part in [batch.sublist(0, middle), batch.sublist(middle)]) {
-        results.addAll(await _processBatchWithFallback(
-          batch: part,
-          bookId: bookId,
-          moduleId: moduleId,
-          lowerBound: lowerBound,
-          safeBoundary: safeBoundary,
-          sessionId: sessionId,
-          ingestedAt: ingestedAt,
-          generate: generate,
-          existingIds: existingIds,
-          knownCharacterNames: knownCharacterNames,
-          validateCandidate: validateCandidate,
-          artifactMetadata: artifactMetadata,
-          maxSegmentCharacters: maxSegmentCharacters,
-        ));
+        results.addAll(
+          await _processBatchWithFallback(
+            batch: part,
+            bookId: bookId,
+            moduleId: moduleId,
+            lowerBound: lowerBound,
+            safeBoundary: safeBoundary,
+            sessionId: sessionId,
+            ingestedAt: ingestedAt,
+            generate: generate,
+            existingIds: existingIds,
+            knownCharacterNames: knownCharacterNames,
+            validateCandidate: validateCandidate,
+            artifactMetadata: artifactMetadata,
+            maxSegmentCharacters: maxSegmentCharacters,
+          ),
+        );
       }
       return results;
     }
@@ -511,15 +527,17 @@ class FictionBackfillService {
   }) async {
     final response = await generate(_batchPrompt(batch, knownCharacterNames));
     final grouped = _decodeBatch(response, batch);
-    final expected =
-        batch.map((item) => item.chapter.href.split('#').first).toSet();
+    final expected = batch
+        .map((item) => item.chapter.href.split('#').first)
+        .toSet();
     if (!grouped.keys.toSet().containsAll(expected)) {
       throw const FormatException('模型未返回完整的章节批次');
     }
     final artifacts = <ReadingArtifact>[];
     for (final entry in grouped.entries) {
       final chapter = batch.firstWhere(
-          (item) => item.chapter.href.split('#').first == entry.key);
+        (item) => item.chapter.href.split('#').first == entry.key,
+      );
       final referencedPeople = <String>{};
       final referenceEvidence = <String, String>{};
       for (final value in entry.value) {
@@ -565,8 +583,9 @@ class FictionBackfillService {
             'role': _characterRole(normalizedPayload),
         });
         if (kind == ReadingArtifactKinds.character) {
-          final normalizedName =
-              _normalizeCharacterName(normalizedPayload['name']);
+          final normalizedName = _normalizeCharacterName(
+            normalizedPayload['name'],
+          );
           if (normalizedName.isEmpty ||
               knownCharacterNames.contains(normalizedName)) {
             continue;
@@ -610,42 +629,51 @@ class FictionBackfillService {
             }
           }
         }
-        final sourceProgress =
-            chapter.chapter.startProgress.clamp(lowerBound, safeBoundary);
-        final id =
-            _stableId(bookId, chapter.chapter.href, kind, normalizedPayload);
+        final sourceProgress = chapter.chapter.startProgress.clamp(
+          lowerBound,
+          safeBoundary,
+        );
+        final id = _stableId(
+          bookId,
+          chapter.chapter.href,
+          kind,
+          normalizedPayload,
+        );
         if (existingIds.contains(id)) continue;
         existingIds.add(id);
-        final confidenceSource =
-            normalizedPayload['confidenceSource']?.toString();
+        final confidenceSource = normalizedPayload['confidenceSource']
+            ?.toString();
         final sourceSnapshot =
             normalizedPayload['evidence']?.toString().trim() ?? '';
-        artifacts.add(ReadingArtifact(
-          id: id,
-          bookId: bookId,
-          moduleId: moduleId,
-          kind: kind,
-          payload: normalizedPayload,
-          epistemicStatus: confidenceSource == 'evidenceValidated' ||
-                  confidenceSource == 'explicitText'
-              ? ReadingArtifactEpistemicStatus.textFact
-              : ReadingArtifactEpistemicStatus.agentInference,
-          sourceTextSnapshot: sourceSnapshot.isNotEmpty
-              ? sourceSnapshot
-              : chapter.content.length > 500
-                  ? chapter.content.substring(0, 500)
-                  : chapter.content,
-          chapterHref: chapter.chapter.href,
-          chapterTitle: chapter.chapter.title,
-          sourceProgress: sourceProgress.toDouble(),
-          visibleFromProgress: sourceProgress.toDouble(),
-          ingestedAt: ingestedAt,
-          ingestionMode: ReadingArtifactIngestionMode.backfill,
-          sessionId: sessionId,
-          createdBy: 'agent',
-          createdAt: ingestedAt,
-          updatedAt: ingestedAt,
-        ));
+        artifacts.add(
+          ReadingArtifact(
+            id: id,
+            bookId: bookId,
+            moduleId: moduleId,
+            kind: kind,
+            payload: normalizedPayload,
+            epistemicStatus:
+                confidenceSource == 'evidenceValidated' ||
+                    confidenceSource == 'explicitText'
+                ? ReadingArtifactEpistemicStatus.textFact
+                : ReadingArtifactEpistemicStatus.agentInference,
+            sourceTextSnapshot: sourceSnapshot.isNotEmpty
+                ? sourceSnapshot
+                : chapter.content.length > 500
+                ? chapter.content.substring(0, 500)
+                : chapter.content,
+            chapterHref: chapter.chapter.href,
+            chapterTitle: chapter.chapter.title,
+            sourceProgress: sourceProgress.toDouble(),
+            visibleFromProgress: sourceProgress.toDouble(),
+            ingestedAt: ingestedAt,
+            ingestionMode: ReadingArtifactIngestionMode.backfill,
+            sessionId: sessionId,
+            createdBy: 'agent',
+            createdAt: ingestedAt,
+            updatedAt: ingestedAt,
+          ),
+        );
       }
       // Models occasionally emit a valid event/relationship participant but
       // omit the corresponding character item to save output tokens. Promote
@@ -653,19 +681,20 @@ class FictionBackfillService {
       // graph share the same durable identity. We never promote generic roles,
       // opaque IDs, or names absent from this chapter's exact text.
       for (final name in referencedPeople) {
-        final sourceBacked =
-            const FictionCandidateRuleValidator().sourceBackedCharacter(
-          reference: name,
-          chapterContent: chapter.content,
-          preferredEvidence: referenceEvidence[name],
-        );
+        final sourceBacked = const FictionCandidateRuleValidator()
+            .sourceBackedCharacter(
+              reference: name,
+              chapterContent: chapter.content,
+              preferredEvidence: referenceEvidence[name],
+            );
         if (sourceBacked == null) continue;
         final canonicalName = sourceBacked['name']!.toString();
         final normalizedName = _normalizeCharacterName(canonicalName);
         if (normalizedName.isEmpty ||
             knownCharacterNames.contains(normalizedName) ||
-            !const FictionCandidateRuleValidator()
-                .isStablePersonReference(canonicalName)) {
+            !const FictionCandidateRuleValidator().isStablePersonReference(
+              canonicalName,
+            )) {
           continue;
         }
         final payload = <String, dynamic>{
@@ -685,8 +714,10 @@ class FictionBackfillService {
             'sceneId': chapter.chapter.sceneId,
           'scope': chapter.chapter.arcId == null ? 'chapter' : 'case',
         };
-        final sourceProgress =
-            chapter.chapter.startProgress.clamp(lowerBound, safeBoundary);
+        final sourceProgress = chapter.chapter.startProgress.clamp(
+          lowerBound,
+          safeBoundary,
+        );
         final id = _stableId(
           bookId,
           chapter.chapter.href,
@@ -696,25 +727,27 @@ class FictionBackfillService {
         if (existingIds.contains(id)) continue;
         existingIds.add(id);
         knownCharacterNames.add(normalizedName);
-        artifacts.add(ReadingArtifact(
-          id: id,
-          bookId: bookId,
-          moduleId: moduleId,
-          kind: ReadingArtifactKinds.character,
-          payload: payload,
-          epistemicStatus: ReadingArtifactEpistemicStatus.textFact,
-          sourceTextSnapshot: sourceBacked['evidence']!.toString(),
-          chapterHref: chapter.chapter.href,
-          chapterTitle: chapter.chapter.title,
-          sourceProgress: sourceProgress.toDouble(),
-          visibleFromProgress: sourceProgress.toDouble(),
-          ingestedAt: ingestedAt,
-          ingestionMode: ReadingArtifactIngestionMode.backfill,
-          sessionId: sessionId,
-          createdBy: 'agent',
-          createdAt: ingestedAt,
-          updatedAt: ingestedAt,
-        ));
+        artifacts.add(
+          ReadingArtifact(
+            id: id,
+            bookId: bookId,
+            moduleId: moduleId,
+            kind: ReadingArtifactKinds.character,
+            payload: payload,
+            epistemicStatus: ReadingArtifactEpistemicStatus.textFact,
+            sourceTextSnapshot: sourceBacked['evidence']!.toString(),
+            chapterHref: chapter.chapter.href,
+            chapterTitle: chapter.chapter.title,
+            sourceProgress: sourceProgress.toDouble(),
+            visibleFromProgress: sourceProgress.toDouble(),
+            ingestedAt: ingestedAt,
+            ingestionMode: ReadingArtifactIngestionMode.backfill,
+            sessionId: sessionId,
+            createdBy: 'agent',
+            createdAt: ingestedAt,
+            updatedAt: ingestedAt,
+          ),
+        );
       }
     }
     return _BackfillBatchResult(artifacts: artifacts, chapters: batch);
@@ -742,7 +775,8 @@ class FictionBackfillService {
     var current = <_PreparedChapter>[];
     var characters = 0;
     for (final chapter in chapters) {
-      final wouldOverflow = current.isNotEmpty &&
+      final wouldOverflow =
+          current.isNotEmpty &&
           (current.length >= batchSize ||
               characters + chapter.content.length > maxInputCharacters);
       if (wouldOverflow) {
@@ -760,10 +794,7 @@ class FictionBackfillService {
   List<_PreparedChapter> _bisectChapter(_PreparedChapter item) {
     if (item.content.length < 2000) return [item];
     var middle = item.content.length ~/ 2;
-    final boundary = item.content.lastIndexOf(
-      RegExp(r'[\n。！？]'),
-      middle,
-    );
+    final boundary = item.content.lastIndexOf(RegExp(r'[\n。！？]'), middle);
     if (boundary >= item.content.length ~/ 4) middle = boundary + 1;
     final left = item.content.substring(0, middle).trim();
     final right = item.content.substring(middle).trim();
@@ -834,7 +865,9 @@ ${batch.map((item) => '章节 href：${item.chapter.href}\n章节：${item.chapt
       '';
 
   Map<String, List<Map<String, dynamic>>> _decodeBatch(
-      String raw, List<_PreparedChapter> batch) {
+    String raw,
+    List<_PreparedChapter> batch,
+  ) {
     final start = raw.indexOf('[');
     final end = raw.lastIndexOf(']');
     if (start < 0 || end <= start) return {};
@@ -869,27 +902,26 @@ ${batch.map((item) => '章节 href：${item.chapter.href}\n章节：${item.chapt
       sha256.convert(utf8.encode(content)).toString();
 
   String? _kind(String? value) => switch (value) {
-        'character' => ReadingArtifactKinds.character,
-        'relationship' => ReadingArtifactKinds.relationship,
-        'event' => ReadingArtifactKinds.event,
-        'mystery' => ReadingArtifactKinds.mystery,
-        'clue' => ReadingArtifactKinds.clue,
-        'scene' => ReadingArtifactKinds.scene,
-        _ => null,
-      };
+    'character' => ReadingArtifactKinds.character,
+    'relationship' => ReadingArtifactKinds.relationship,
+    'event' => ReadingArtifactKinds.event,
+    'mystery' => ReadingArtifactKinds.mystery,
+    'clue' => ReadingArtifactKinds.clue,
+    'scene' => ReadingArtifactKinds.scene,
+    _ => null,
+  };
 
   bool _isValid(String kind, Map<String, dynamic> payload) => switch (kind) {
-        ReadingArtifactKinds.character => _has(payload, 'name'),
-        ReadingArtifactKinds.relationship => _has(payload, 'from') &&
-            _has(payload, 'to') &&
-            _has(payload, 'relation'),
-        ReadingArtifactKinds.event => _has(payload, 'title'),
-        ReadingArtifactKinds.mystery => _has(payload, 'question'),
-        ReadingArtifactKinds.scene => _has(payload, 'summary'),
-        ReadingArtifactKinds.clue =>
-          _has(payload, 'summary') || _has(payload, 'title'),
-        _ => false,
-      };
+    ReadingArtifactKinds.character => _has(payload, 'name'),
+    ReadingArtifactKinds.relationship =>
+      _has(payload, 'from') && _has(payload, 'to') && _has(payload, 'relation'),
+    ReadingArtifactKinds.event => _has(payload, 'title'),
+    ReadingArtifactKinds.mystery => _has(payload, 'question'),
+    ReadingArtifactKinds.scene => _has(payload, 'summary'),
+    ReadingArtifactKinds.clue =>
+      _has(payload, 'summary') || _has(payload, 'title'),
+    _ => false,
+  };
 
   bool _has(Map<String, dynamic> payload, String key) =>
       payload[key]?.toString().trim().isNotEmpty == true;
@@ -901,9 +933,9 @@ ${batch.map((item) => '章节 href：${item.chapter.href}\n章节：${item.chapt
     Map<String, dynamic> payload,
   ) {
     final signature = jsonEncode(_canonical(payload));
-    final digest = sha256.convert(utf8.encode(
-      '$bookId|${href.split('#').first.trim()}|$kind|$signature',
-    ));
+    final digest = sha256.convert(
+      utf8.encode('$bookId|${href.split('#').first.trim()}|$kind|$signature'),
+    );
     return 'fiction-backfill-$digest';
   }
 

@@ -5,17 +5,20 @@ import 'package:anx_reader/utils/ai_reasoning_parser.dart';
 import 'package:anx_reader/utils/log/common.dart';
 import 'package:langchain/langchain.dart';
 
-typedef AiTokenUsageRecorder = void Function({
-  required int inputTokens,
-  required int outputTokens,
-  required bool estimated,
-});
+typedef AiTokenUsageRecorder =
+    void Function({
+      required int inputTokens,
+      required int outputTokens,
+      required bool estimated,
+    });
+typedef AiFinishReasonRecorder = void Function(FinishReason reason);
 
 class CancelableLangchainRunner {
-  CancelableLangchainRunner({this.onTokenUsage});
+  CancelableLangchainRunner({this.onTokenUsage, this.onFinishReason});
 
   static const String thinkTag = '<think/>';
   final AiTokenUsageRecorder? onTokenUsage;
+  final AiFinishReasonRecorder? onFinishReason;
   StreamSubscription<ChatResult>? _subscription;
   StreamController<String>? _controller;
   BaseChatModel? _activeModel;
@@ -49,6 +52,7 @@ class CancelableLangchainRunner {
     bool reasoningDetected = false;
     bool answerPhaseStarted = false;
     LanguageModelUsage? usage;
+    FinishReason finishReason = FinishReason.unspecified;
 
     late StreamController<String> controller;
     controller = StreamController<String>(
@@ -57,6 +61,10 @@ class CancelableLangchainRunner {
         _subscription = source.listen(
           (event) {
             usage = _mergeUsage(usage, event.usage);
+            if (event.finishReason != FinishReason.unspecified) {
+              finishReason = event.finishReason;
+              onFinishReason?.call(finishReason);
+            }
             final rawChunk = event.output.content;
             final reasoningChunk = event.output.reasoningContent;
             if (rawChunk.isEmpty && reasoningChunk.isEmpty) {
@@ -164,11 +172,7 @@ class CancelableLangchainRunner {
 
       void emit() {
         if (controller.isClosed) return;
-        controller.add(
-          _composeAgentPayload(
-            timeline: timeline,
-          ),
-        );
+        controller.add(_composeAgentPayload(timeline: timeline));
       }
 
       void appendThinkingChunk(String text) {
@@ -236,49 +240,55 @@ class CancelableLangchainRunner {
           ChatResult? aggregated;
           final completer = Completer<void>();
           _activeIteration = completer;
-          _subscription = model.stream(prompt, options: options).listen(
-            (chunk) {
-              final normalizedChunk = _normalizeThinkChunk(chunk);
+          _subscription = model
+              .stream(prompt, options: options)
+              .listen(
+                (chunk) {
+                  if (chunk.finishReason != FinishReason.unspecified) {
+                    onFinishReason?.call(chunk.finishReason);
+                  }
+                  final normalizedChunk = _normalizeThinkChunk(chunk);
 
-              aggregated = aggregated == null
-                  ? normalizedChunk
-                  : aggregated!.concat(normalizedChunk);
-              final output = aggregated!.output;
-              final reasoningChunk = normalizedChunk.output.reasoningContent;
+                  aggregated = aggregated == null
+                      ? normalizedChunk
+                      : aggregated!.concat(normalizedChunk);
+                  final output = aggregated!.output;
+                  final reasoningChunk =
+                      normalizedChunk.output.reasoningContent;
 
-              if (reasoningChunk.isNotEmpty) {
-                appendThinkingChunk(reasoningChunk);
-                emit();
-              }
+                  if (reasoningChunk.isNotEmpty) {
+                    appendThinkingChunk(reasoningChunk);
+                    emit();
+                  }
 
-              if (output.toolCalls.isEmpty) {
-                final textChunk = normalizedChunk.output.content;
-                if (textChunk.isNotEmpty) {
-                  appendReplyChunk(textChunk);
-                  emit();
-                }
-              }
-            },
-            onError: (Object error, StackTrace stack) {
-              streamFailed = true;
-              if (!controller.isClosed) {
-                controller.addError(error, stack);
-              }
-              if (!completer.isCompleted) {
-                completer.completeError(error, stack);
-              }
-            },
-            onDone: () {
-              _subscription = null;
-              if (identical(_activeIteration, completer)) {
-                _activeIteration = null;
-              }
-              if (!completer.isCompleted) {
-                completer.complete();
-              }
-            },
-            cancelOnError: true,
-          );
+                  if (output.toolCalls.isEmpty) {
+                    final textChunk = normalizedChunk.output.content;
+                    if (textChunk.isNotEmpty) {
+                      appendReplyChunk(textChunk);
+                      emit();
+                    }
+                  }
+                },
+                onError: (Object error, StackTrace stack) {
+                  streamFailed = true;
+                  if (!controller.isClosed) {
+                    controller.addError(error, stack);
+                  }
+                  if (!completer.isCompleted) {
+                    completer.completeError(error, stack);
+                  }
+                },
+                onDone: () {
+                  _subscription = null;
+                  if (identical(_activeIteration, completer)) {
+                    _activeIteration = null;
+                  }
+                  if (!completer.isCompleted) {
+                    completer.complete();
+                  }
+                },
+                cancelOnError: true,
+              );
 
           await completer.future;
 
@@ -339,14 +349,12 @@ class CancelableLangchainRunner {
               toolStep.observation = observationText;
               emit();
               steps.add(
-                AgentStep(
-                  action: agentAction,
-                  observation: observationText,
-                ),
+                AgentStep(action: agentAction, observation: observationText),
               );
             } catch (error) {
               AnxLog.severe(
-                  'Tool ${agentAction.tool} execution failed: $error');
+                'Tool ${agentAction.tool} execution failed: $error',
+              );
               final message = error.toString();
               toolStep.status = ToolStepStatus.failed;
               toolStep.error = message;
@@ -485,9 +493,7 @@ class CancelableLangchainRunner {
     return _cleanThinkChunk(text);
   }
 
-  String _composeAgentPayload({
-    required List<_ReasoningItem> timeline,
-  }) {
+  String _composeAgentPayload({required List<_ReasoningItem> timeline}) {
     final buffer = StringBuffer();
     for (final item in timeline) {
       final tag = item.toTag();
@@ -563,10 +569,7 @@ class CancelableLangchainRunner {
 }
 
 class _ToolStep {
-  _ToolStep({
-    required this.action,
-    required this.status,
-  }) : observation = '';
+  _ToolStep({required this.action, required this.status}) : observation = '';
 
   final AgentAction action;
   ToolStepStatus status;
@@ -617,18 +620,18 @@ enum _ReasoningItemType { think, reply, tool }
 
 class _ReasoningItem {
   _ReasoningItem.think(String text)
-      : reply = text,
-        toolStep = null,
-        type = _ReasoningItemType.think;
+    : reply = text,
+      toolStep = null,
+      type = _ReasoningItemType.think;
 
   _ReasoningItem.reply(String text)
-      : reply = text,
-        toolStep = null,
-        type = _ReasoningItemType.reply;
+    : reply = text,
+      toolStep = null,
+      type = _ReasoningItemType.reply;
 
   _ReasoningItem.tool(this.toolStep)
-      : reply = null,
-        type = _ReasoningItemType.tool;
+    : reply = null,
+      type = _ReasoningItemType.tool;
 
   String? reply;
   final _ToolStep? toolStep;

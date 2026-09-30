@@ -36,8 +36,8 @@ class _AiExecutionResult {
     this.deployment,
     DateTime? startedAt,
     AiRequestMetrics? metrics,
-  })  : startedAt = startedAt ?? DateTime.now(),
-        metrics = metrics ?? AiRequestMetrics();
+  }) : startedAt = startedAt ?? DateTime.now(),
+       metrics = metrics ?? AiRequestMetrics();
 
   final Stream<String> stream;
   final String? providerId;
@@ -76,8 +76,8 @@ const Duration defaultAiStreamTimeout = Duration(seconds: 60);
 
 Duration effectiveAiStreamTimeout(int configuredSeconds) =>
     configuredSeconds > 0
-        ? Duration(seconds: configuredSeconds)
-        : defaultAiStreamTimeout;
+    ? Duration(seconds: configuredSeconds)
+    : defaultAiStreamTimeout;
 
 // Global request timestamps list for RPM throttling
 final List<DateTime> _aiRequestTimestamps = [];
@@ -138,23 +138,24 @@ Stream<String> aiGenerateStream(
   ReadingSkillSelection? readingSkill,
   bool allowFallback = true,
   AiContextTask task = AiContextTask.general,
-}) =>
-    executeAiRequestStream(
-      AiRequest(
-        messages: messages,
-        providerId: identifier,
-        overrideConfig: config,
-        regenerate: regenerate,
-        useAgent: useAgent,
-        ref: ref,
-        readingMode: readingMode,
-        readingSkill: readingSkill,
-        fallbackPolicy: allowFallback
-            ? AiFallbackPolicy.configuredProvider
-            : AiFallbackPolicy.none,
-        contextTask: task,
-      ),
-    );
+  AiOutputContract outputContract = const AiOutputContract.text(),
+}) => executeAiRequestStream(
+  AiRequest(
+    messages: messages,
+    providerId: identifier,
+    overrideConfig: config,
+    regenerate: regenerate,
+    useAgent: useAgent,
+    ref: ref,
+    readingMode: readingMode,
+    readingSkill: readingSkill,
+    fallbackPolicy: allowFallback
+        ? AiFallbackPolicy.configuredProvider
+        : AiFallbackPolicy.none,
+    contextTask: task,
+    outputContract: outputContract,
+  ),
+);
 
 AiStreamResult executeAiRequest(AiRequest request) {
   final metadata = Completer<AiResponseMetadata>();
@@ -297,6 +298,10 @@ AiResponseMetadata _responseMetadata(
       !_isJsonResponse(finalValue ?? '')) {
     validationErrors.add('Response is not valid JSON');
   }
+  if (request.outputContract.kind == AiOutputKind.json &&
+      finalExecution.metrics.finishReason == FinishReason.length) {
+    validationErrors.add('Structured JSON response was truncated');
+  }
   final metadata = AiResponseMetadata(
     requestId: request.trace.requestId,
     workloadId: request.workloadId,
@@ -322,6 +327,7 @@ AiResponseMetadata _responseMetadata(
     ),
     usedFallback: usedFallback,
     validationErrors: validationErrors,
+    finishReason: finalExecution.metrics.finishReason,
   );
   readingExperienceDiagnostics.recordModelRequest(
     elapsed: metadata.elapsed,
@@ -363,15 +369,15 @@ Future<void> _prepareRollingSummary({
   if (!extraction.isConfigured) return;
   final provider = ref != null
       ? ref
-          .read(aiProvidersProvider.notifier)
-          .getRunnableProviderById(extraction.providerId!)
+            .read(aiProvidersProvider.notifier)
+            .getRunnableProviderById(extraction.providerId!)
       : Prefs()
-          .getAiProviders()
-          .map((item) => AiProvider.fromJson(item as Map<String, dynamic>))
-          .where(
-            (item) => item.id == extraction.providerId && item.isRunnable,
-          )
-          .firstOrNull;
+            .getAiProviders()
+            .map((item) => AiProvider.fromJson(item as Map<String, dynamic>))
+            .where(
+              (item) => item.id == extraction.providerId && item.isRunnable,
+            )
+            .firstOrNull;
   if (provider == null) return;
   final scope = 'ai:${task.name}:${provider.id}:${provider.model}:summary-v1';
   if (aiContextAssembler.cachedRollingSummary(
@@ -429,23 +435,24 @@ Future<String> aiGenerateText(
   ReadingSkillSelection? readingSkill,
   bool allowFallback = true,
   AiContextTask task = AiContextTask.general,
-}) =>
-    executeAiRequestText(
-      AiRequest(
-        messages: messages,
-        providerId: identifier,
-        overrideConfig: config,
-        regenerate: regenerate,
-        useAgent: useAgent,
-        ref: ref,
-        readingMode: readingMode,
-        readingSkill: readingSkill,
-        fallbackPolicy: allowFallback
-            ? AiFallbackPolicy.configuredProvider
-            : AiFallbackPolicy.none,
-        contextTask: task,
-      ),
-    );
+  AiOutputContract outputContract = const AiOutputContract.text(),
+}) => executeAiRequestText(
+  AiRequest(
+    messages: messages,
+    providerId: identifier,
+    overrideConfig: config,
+    regenerate: regenerate,
+    useAgent: useAgent,
+    ref: ref,
+    readingMode: readingMode,
+    readingSkill: readingSkill,
+    fallbackPolicy: allowFallback
+        ? AiFallbackPolicy.configuredProvider
+        : AiFallbackPolicy.none,
+    contextTask: task,
+    outputContract: outputContract,
+  ),
+);
 
 Future<String> executeAiRequestText(AiRequest request) async {
   String? lastResult;
@@ -463,20 +470,21 @@ Future<AiGenerationResult<String>> aiGenerateTextWithMetadata(
   WidgetRef? ref,
   AiContextTask task = AiContextTask.general,
   bool allowFallback = true,
-}) =>
-    executeAiRequestTextWithMetadata(
-      AiRequest(
-        messages: messages,
-        providerId: identifier,
-        overrideConfig: config,
-        regenerate: regenerate,
-        ref: ref,
-        fallbackPolicy: allowFallback
-            ? AiFallbackPolicy.configuredProvider
-            : AiFallbackPolicy.none,
-        contextTask: task,
-      ),
-    );
+  AiOutputContract outputContract = const AiOutputContract.text(),
+}) => executeAiRequestTextWithMetadata(
+  AiRequest(
+    messages: messages,
+    providerId: identifier,
+    overrideConfig: config,
+    regenerate: regenerate,
+    ref: ref,
+    fallbackPolicy: allowFallback
+        ? AiFallbackPolicy.configuredProvider
+        : AiFallbackPolicy.none,
+    contextTask: task,
+    outputContract: outputContract,
+  ),
+);
 
 Future<AiGenerationResult<String>> executeAiRequestTextWithMetadata(
   AiRequest request,
@@ -684,11 +692,12 @@ Future<_AiExecutionResult> _generateStream({
                 url: provider.url,
                 reasoningEffort: provider.reasoningEffort,
                 requestTimeoutSeconds: provider.requestTimeoutSeconds,
+                deployment: provider.deployment,
               ),
               task,
             ),
             provider.effectiveCapabilities,
-          );
+          ).copyWith(jsonOutput: outputContract?.kind == AiOutputKind.json);
 
           AnxLog.info(
             'aiGenerateStream (new): ${provider.id}, model: ${config.model}, baseUrl: ${config.baseUrl}',
@@ -782,11 +791,12 @@ Future<_AiExecutionResult> _generateStream({
                   url: provider.url,
                   reasoningEffort: provider.reasoningEffort,
                   requestTimeoutSeconds: provider.requestTimeoutSeconds,
+                  deployment: provider.deployment,
                 ),
                 task,
               ),
               provider.effectiveCapabilities,
-            );
+            ).copyWith(jsonOutput: outputContract?.kind == AiOutputKind.json);
 
             AnxLog.info(
               'aiGenerateStream (no-ref new): ${provider.id}, model: ${config.model}, baseUrl: ${config.baseUrl}',
@@ -888,6 +898,9 @@ Future<_AiExecutionResult> _generateStream({
     config = mergeConfigs(config, override);
   }
   config = aiContextAssembler.applyOutputBudget(config, task);
+  config = config.copyWith(
+    jsonOutput: outputContract?.kind == AiOutputKind.json,
+  );
 
   AnxLog.info(
     'aiGenerateStream (legacy): $selectedIdentifier, model: ${config.model}, baseUrl: ${config.baseUrl}',
@@ -948,6 +961,7 @@ Future<_AiExecutionResult> _executeStream({
             task: task,
             metrics: metrics,
             maxInputTokens: maxInputTokens,
+            outputContract: outputContract,
           ).timeout(timeout);
 
           await for (final chunk in stream) {
@@ -1015,21 +1029,23 @@ Stream<String> _createStream({
   required AiContextTask task,
   required AiRequestMetrics metrics,
   int? maxInputTokens,
+  AiOutputContract? outputContract,
 }) async* {
   final runner = CancelableLangchainRunner(
-    onTokenUsage: (
-        {required inputTokens, required outputTokens, required estimated}) {
-      aiTokenUsageService.record(
-        inputTokens: inputTokens,
-        outputTokens: outputTokens,
-        estimated: estimated,
-      );
-      metrics.addUsage(
-        inputTokens: inputTokens,
-        outputTokens: outputTokens,
-        estimated: estimated,
-      );
-    },
+    onTokenUsage:
+        ({required inputTokens, required outputTokens, required estimated}) {
+          aiTokenUsageService.record(
+            inputTokens: inputTokens,
+            outputTokens: outputTokens,
+            estimated: estimated,
+          );
+          metrics.addUsage(
+            inputTokens: inputTokens,
+            outputTokens: outputTokens,
+            estimated: estimated,
+          );
+        },
+    onFinishReason: (reason) => metrics.finishReason = reason,
   );
   _activeRunners.add(runner);
   try {
@@ -1089,6 +1105,10 @@ Stream<String> _createStream({
     await for (final chunk in stream) {
       yield chunk;
     }
+    if (outputContract?.kind == AiOutputKind.json &&
+        metrics.finishReason == FinishReason.length) {
+      throw const FormatException('Structured JSON response was truncated');
+    }
   } finally {
     _activeRunners.remove(runner);
     runner.cancel();
@@ -1132,25 +1152,27 @@ String _mapError(Object error) {
 }
 
 List<ChatMessage> _sanitizeMessagesForPrompt(List<ChatMessage> messages) {
-  return messages.map((message) {
-    if (message is AIChatMessage) {
-      if (message.reasoningContent.isNotEmpty) {
-        return AIChatMessage(
-          content: message.content,
-          toolCalls: message.toolCalls,
-        );
-      }
-      final plainText = reasoningContentToPlainText(message.content);
-      if (plainText == message.content) {
+  return messages
+      .map((message) {
+        if (message is AIChatMessage) {
+          if (message.reasoningContent.isNotEmpty) {
+            return AIChatMessage(
+              content: message.content,
+              toolCalls: message.toolCalls,
+            );
+          }
+          final plainText = reasoningContentToPlainText(message.content);
+          if (plainText == message.content) {
+            return message;
+          }
+          return AIChatMessage(
+            content: plainText,
+            toolCalls: message.toolCalls,
+          );
+        }
         return message;
-      }
-      return AIChatMessage(
-        content: plainText,
-        toolCalls: message.toolCalls,
-      );
-    }
-    return message;
-  }).toList(growable: false);
+      })
+      .toList(growable: false);
 }
 
 String? _latestUserMessage(List<ChatMessage> messages) {

@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/service/ai/index.dart';
+import 'package:anx_reader/service/ai/ai_request.dart';
 import 'package:anx_reader/service/ai/ai_context_assembler.dart';
 import 'package:anx_reader/service/ai/reading_ai_models.dart';
 import 'package:anx_reader/service/ai/reading_frameworks.dart';
@@ -126,26 +127,25 @@ class ReadingAgentOrchestrator {
     if (manualExpertIds.isNotEmpty) {
       final limit = analysisRequest == null ? 1 : 3;
       return ReadingAgentPlan(
-          manualExpertIds.take(limit).toList(growable: false));
+        manualExpertIds.take(limit).toList(growable: false),
+      );
     }
     if (analysisRequest != null) {
       final expertCount =
           analysisRequest.depth.maxExperts < expertBudget.maxExperts
-              ? analysisRequest.depth.maxExperts
-              : expertBudget.maxExperts;
+          ? analysisRequest.depth.maxExperts
+          : expertBudget.maxExperts;
       return ReadingAgentPlan(
-        _selectTasks(query, mode, analysisRequest: analysisRequest)
-            .take(expertCount)
-            .map((task) => task.id)
-            .toList(growable: false),
+        _selectTasks(
+          query,
+          mode,
+          analysisRequest: analysisRequest,
+        ).take(expertCount).map((task) => task.id).toList(growable: false),
       );
     }
     if (!_needsExperts(query)) return const ReadingAgentPlan([]);
     return ReadingAgentPlan(
-      _selectTasks(
-        query,
-        mode,
-      )
+      _selectTasks(query, mode)
           .take(expertBudget.maxExperts)
           .map((task) => task.id)
           .toList(growable: false),
@@ -167,12 +167,14 @@ class ReadingAgentOrchestrator {
     final selected = manualExpertIds.isNotEmpty
         ? manualExpertIds
         : (analysisRequest?.expertSelectionMode == 'manual'
-            ? analysisRequest!.expertIds
-            : const <String>[]);
+              ? analysisRequest!.expertIds
+              : const <String>[]);
     final agentPlan = selected.isNotEmpty
-        ? ReadingAgentPlan(selected
-            .take(analysisRequest == null ? 1 : 3)
-            .toList(growable: false))
+        ? ReadingAgentPlan(
+            selected
+                .take(analysisRequest == null ? 1 : 3)
+                .toList(growable: false),
+          )
         : plan(query, mode, analysisRequest: analysisRequest);
     if (!agentPlan.usesExperts) {
       return ReadingAgentTurn(messages: messages);
@@ -191,14 +193,23 @@ class ReadingAgentOrchestrator {
       budget: expertBudget,
     );
     final results = await Future.wait(
-      tasks.map((task) => _runTask(task, snapshot, ref,
-          allowWebSearch: allowExpertWebSearch ||
-              analysisRequest?.allowExpertWebSearch == true)),
+      tasks.map(
+        (task) => _runTask(
+          task,
+          snapshot,
+          ref,
+          allowWebSearch:
+              allowExpertWebSearch ||
+              analysisRequest?.allowExpertWebSearch == true,
+        ),
+      ),
     );
-    final traces =
-        results.map((result) => result.trace).toList(growable: false);
-    final citations =
-        results.expand((result) => result.citations).toList(growable: false);
+    final traces = results
+        .map((result) => result.trace)
+        .toList(growable: false);
+    final citations = results
+        .expand((result) => result.citations)
+        .toList(growable: false);
     final evidence = results
         .expand((result) => result.evidence)
         .take(expertBudget.maxEvidence * tasks.length)
@@ -261,8 +272,11 @@ $useful
     }
     final candidates = registry.forMode(mode);
     final matched = candidates
-        .where((item) => item.keywords.any(
-            (keyword) => query.toLowerCase().contains(keyword.toLowerCase())))
+        .where(
+          (item) => item.keywords.any(
+            (keyword) => query.toLowerCase().contains(keyword.toLowerCase()),
+          ),
+        )
         .toList(growable: false);
     final definition = (matched.isNotEmpty ? matched : candidates).first;
     final legacyId = switch (mode) {
@@ -271,9 +285,7 @@ $useful
       ReadingAiMode.finance => 'finance-specialist',
       ReadingAiMode.general => 'text-specialist',
     };
-    final tasks = <_AgentTask>[
-      _taskFromDefinition(definition, id: legacyId),
-    ];
+    final tasks = <_AgentTask>[_taskFromDefinition(definition, id: legacyId)];
     if (RegExp(
       r'核查|出处|来源|证据|时间|数字|verify|source|evidence|data',
       caseSensitive: false,
@@ -293,15 +305,16 @@ $useful
     return tasks;
   }
 
-  _AgentTask _taskFromDefinition(ReadingExpertDefinition definition,
-          {String? id}) =>
-      _AgentTask(
-        id: id ?? definition.id,
-        label: definition.title,
-        action: definition.action,
-        search: definition.supportsWebSearch,
-        instruction: definition.instruction,
-      );
+  _AgentTask _taskFromDefinition(
+    ReadingExpertDefinition definition, {
+    String? id,
+  }) => _AgentTask(
+    id: id ?? definition.id,
+    label: definition.title,
+    action: definition.action,
+    search: definition.supportsWebSearch,
+    instruction: definition.instruction,
+  );
 
   List<_AgentTask> _selectAnalysisTasks(ReadingAnalysisRequest request) {
     if (request.depth.maxExperts == 0) return const <_AgentTask>[];
@@ -358,26 +371,30 @@ $useful
             timeout: configured.timeout,
             trustedSources: Prefs().readingTrustedSourcePack(snapshot.mode),
           );
-          final response =
-              await WebSearchService(config: modeConfig).search(snapshot.query);
+          final response = await WebSearchService(
+            config: modeConfig,
+          ).search(snapshot.query);
           if (response.isSuccess) {
             sourceContext = _limitTokens(
-                response.results.map((result) {
-                  sourceUrls.add(result.url.toString());
-                  citations.add({
-                    'title': result.title,
-                    'url': result.url.toString(),
-                    'snippet': result.snippet,
-                    if (result.publishedAt != null)
-                      'publishedAt': result.publishedAt,
-                    'accessedAt': DateTime.fromMillisecondsSinceEpoch(
-                      result.accessedAt ??
-                          DateTime.now().millisecondsSinceEpoch,
-                    ).toIso8601String(),
-                  });
-                  return '- ${result.title}: ${result.snippet} (${result.url})';
-                }).join('\n'),
-                600);
+              response.results
+                  .map((result) {
+                    sourceUrls.add(result.url.toString());
+                    citations.add({
+                      'title': result.title,
+                      'url': result.url.toString(),
+                      'snippet': result.snippet,
+                      if (result.publishedAt != null)
+                        'publishedAt': result.publishedAt,
+                      'accessedAt': DateTime.fromMillisecondsSinceEpoch(
+                        result.accessedAt ??
+                            DateTime.now().millisecondsSinceEpoch,
+                      ).toIso8601String(),
+                    });
+                    return '- ${result.title}: ${result.snippet} (${result.url})';
+                  })
+                  .join('\n'),
+              600,
+            );
           } else {
             degradedDetail = response.detail ?? '未完成联网核查';
           }
@@ -386,7 +403,8 @@ $useful
         }
       }
 
-      final prompt = '''你是${task.label}，服务于阅读主助手。只完成一个有边界的专家任务。
+      final prompt =
+          '''你是${task.label}，服务于阅读主助手。只完成一个有边界的专家任务。
 以下是本轮所有专家共享的只读上下文快照，不要把其中的模型陈述当作已证实事实：
 <shared_context>
 ${snapshot.context}
@@ -404,6 +422,7 @@ ${expertBudget.maxOutputTokens} tokens，不直接对用户下最终结论。'''
         ref: ref,
         readingMode: snapshot.mode,
         task: AiContextTask.expertAnalysis,
+        outputContract: const AiOutputContract.json(),
       ).timeout(expertBudget.timeout);
       final failed = output.startsWith('Error:');
       final evidence = failed
@@ -423,8 +442,8 @@ ${expertBudget.maxOutputTokens} tokens，不直接对用户下最终结论。'''
           status: failed
               ? AgentRunStatus.failed
               : degradedDetail.isNotEmpty || evidence.isEmpty
-                  ? AgentRunStatus.degraded
-                  : AgentRunStatus.completed,
+              ? AgentRunStatus.degraded
+              : AgentRunStatus.completed,
           input: {
             'snapshotCapturedAt': snapshot.capturedAt,
             'snapshotTokens': snapshot.estimatedTokens,
@@ -475,24 +494,30 @@ ${expertBudget.maxOutputTokens} tokens，不直接对用户下最终结论。'''
       for (final item in values.whereType<Map>()) {
         final json = Map<String, dynamic>.from(item);
         final claim = _limit(
-            json['claim']?.toString() ?? '', expertBudget.maxClaimCharacters);
+          json['claim']?.toString() ?? '',
+          expertBudget.maxClaimCharacters,
+        );
         if (claim.isEmpty) continue;
         final urls = json['sourceUrls'] is List
             ? (json['sourceUrls'] as List)
-                .map((value) => value.toString())
-                .where((url) => fallbackUrls.contains(url))
-                .toList(growable: false)
+                  .map((value) => value.toString())
+                  .where((url) => fallbackUrls.contains(url))
+                  .toList(growable: false)
             : const <String>[];
-        result.add(EvidenceObject(
-          id: '$expertId-${result.length + 1}',
-          expertId: expertId,
-          claim: claim,
-          support: _limit(json['support']?.toString() ?? '',
-              expertBudget.maxSupportCharacters),
-          uncertainty: _limit(json['uncertainty']?.toString() ?? '', 240),
-          confidence: EvidenceConfidence.fromJson(json['confidence']),
-          sourceUrls: urls,
-        ));
+        result.add(
+          EvidenceObject(
+            id: '$expertId-${result.length + 1}',
+            expertId: expertId,
+            claim: claim,
+            support: _limit(
+              json['support']?.toString() ?? '',
+              expertBudget.maxSupportCharacters,
+            ),
+            uncertainty: _limit(json['uncertainty']?.toString() ?? '', 240),
+            confidence: EvidenceConfidence.fromJson(json['confidence']),
+            sourceUrls: urls,
+          ),
+        );
         if (result.length >= expertBudget.maxEvidence) break;
       }
       return result;

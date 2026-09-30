@@ -32,10 +32,7 @@ class LangchainAiRegistry {
   final ReadingAiMode? readingModeOverride;
   final ReadingSkillSelection? readingSkillOverride;
 
-  LangchainPipeline resolve(
-    LangchainAiConfig config, {
-    bool useAgent = false,
-  }) {
+  LangchainPipeline resolve(LangchainAiConfig config, {bool useAgent = false}) {
     switch (config.identifier) {
       case 'claude':
         return _buildPipeline(
@@ -44,20 +41,12 @@ class LangchainAiRegistry {
           useAgent: useAgent,
         );
       case 'gemini':
-        return _buildPipeline(
-          config,
-          _buildGoogle(config),
-          useAgent: useAgent,
-        );
+        return _buildPipeline(config, _buildGoogle(config), useAgent: useAgent);
       case 'deepseek':
       case 'openrouter':
       case 'openai':
       default:
-        return _buildPipeline(
-          config,
-          _buildOpenAi(config),
-          useAgent: useAgent,
-        );
+        return _buildPipeline(config, _buildOpenAi(config), useAgent: useAgent);
     }
   }
 
@@ -75,17 +64,9 @@ class LangchainAiRegistry {
           useAgent: useAgent,
         );
       case AiProtocol.gemini:
-        return _buildPipeline(
-          config,
-          _buildGoogle(config),
-          useAgent: useAgent,
-        );
+        return _buildPipeline(config, _buildGoogle(config), useAgent: useAgent);
       case AiProtocol.openai:
-        return _buildPipeline(
-          config,
-          _buildOpenAi(config),
-          useAgent: useAgent,
-        );
+        return _buildPipeline(config, _buildOpenAi(config), useAgent: useAgent);
     }
   }
 
@@ -94,8 +75,15 @@ class LangchainAiRegistry {
         ? TimeoutHttpClient(
             http.Client(),
             timeout: Duration(seconds: config.requestTimeoutSeconds),
+            requestBodyPatch: config.openAiRequestBodyPatch,
           )
-        : null;
+        : (config.openAiRequestBodyPatch.isEmpty
+              ? null
+              : TimeoutHttpClient(
+                  http.Client(),
+                  timeout: Duration.zero,
+                  requestBodyPatch: config.openAiRequestBodyPatch,
+                ));
 
     return ChatOpenAI(
       apiKey: config.apiKey.isEmpty ? null : config.apiKey,
@@ -143,9 +131,11 @@ class LangchainAiRegistry {
       final enabledIds = Prefs().enabledAiToolIds;
       final toolContext = AiToolContext(ref: ref!);
       tools = AiToolRegistry.buildTools(toolContext, enabledIds);
-      final currentBook =
-          isReading ? ref!.read(currentReadingProvider).book : null;
-      final resolvedMode = readingModeOverride ??
+      final currentBook = isReading
+          ? ref!.read(currentReadingProvider).book
+          : null;
+      final resolvedMode =
+          readingModeOverride ??
           (currentBook == null
               ? ReadingAiMode.general
               : Prefs().readingAiModeForBook(currentBook.id));
@@ -156,8 +146,9 @@ class LangchainAiRegistry {
               title: currentBook.title,
               author: currentBook.author,
               description: currentBook.description ?? '',
-              pinnedId: readingExperienceProfileService
-                  .pinnedModuleId(currentBook.id),
+              pinnedId: readingExperienceProfileService.pinnedModuleId(
+                currentBook.id,
+              ),
             );
       systemMessage = _buildAgentSystemMessage(
         isReading: isReading,
@@ -201,7 +192,8 @@ class LangchainAiRegistry {
       'tr': 'Türkçe',
     };
 
-    final languageName = languageMap[currentLanguageCode] ??
+    final languageName =
+        languageMap[currentLanguageCode] ??
         languageMap[currentLanguageCode.split('_').first] ??
         currentLanguageCode;
 
@@ -215,8 +207,8 @@ class LangchainAiRegistry {
     final closureContext = closurePolicy == null
         ? ''
         : '## Reading Closure Policy\n'
-            'Closure: ${closurePolicy.title}\n'
-            'Closure guidance: ${closurePolicy.systemGuidance}';
+              'Closure: ${closurePolicy.title}\n'
+              'Closure guidance: ${closurePolicy.systemGuidance}';
     final core = aiContextAssembler.cachedFragment(
       scope: 'agent-system-core',
       fingerprint:

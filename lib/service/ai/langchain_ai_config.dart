@@ -1,6 +1,7 @@
-import 'package:anx_reader/enums/ai_reasoning_effort.dart';
 import 'dart:convert';
 
+import 'package:anx_reader/enums/ai_reasoning_effort.dart';
+import 'package:anx_reader/models/ai_provider.dart';
 import 'package:langchain_anthropic/langchain_anthropic.dart';
 import 'package:langchain_google/langchain_google.dart';
 import 'package:langchain_openai/langchain_openai.dart';
@@ -20,6 +21,8 @@ class LangchainAiConfig {
     this.reasoningEffort = AiReasoningEffort.auto,
     this.requestTimeoutSeconds = 0,
     this.additional,
+    this.deployment = AiProviderDeployment.cloud,
+    this.jsonOutput = false,
   }) : headers = Map.unmodifiable(headers ?? const {});
 
   final String identifier;
@@ -34,6 +37,22 @@ class LangchainAiConfig {
   final AiReasoningEffort reasoningEffort;
   final int requestTimeoutSeconds;
   final Map<String, dynamic>? additional;
+  final AiProviderDeployment deployment;
+  final bool jsonOutput;
+
+  /// Extensions understood by OpenAI-compatible local servers (for example
+  /// llama.cpp/LM Studio). They are added by the shared HTTP transport so
+  /// regular cloud providers keep receiving the standard request body.
+  Map<String, dynamic> get openAiRequestBodyPatch {
+    final configured = additional?['chat_template_kwargs'];
+    final kwargs = <String, dynamic>{
+      if (configured is Map) ...Map<String, dynamic>.from(configured),
+      if (deployment == AiProviderDeployment.localPrivate &&
+          reasoningEffort == AiReasoningEffort.off)
+        'enable_thinking': false,
+    };
+    return kwargs.isEmpty ? const {} : {'chat_template_kwargs': kwargs};
+  }
 
   ChatOpenAIOptions toOpenAIOptions() {
     return ChatOpenAIOptions(
@@ -42,19 +61,21 @@ class LangchainAiConfig {
       topP: topP,
       maxTokens: maxTokens,
       reasoningEffort: reasoningEffort.toOpenAiReasoningEffort(),
+      responseFormat: jsonOutput ? ChatOpenAIResponseFormat.jsonObject : null,
     );
   }
 
   ChatAnthropicOptions toAnthropicOptions() {
     final thinking = reasoningEffort.toAnthropicThinking();
-    final thinkingBudget =
-        thinking is ChatAnthropicThinkingEnabled ? thinking.budgetTokens : null;
+    final thinkingBudget = thinking is ChatAnthropicThinkingEnabled
+        ? thinking.budgetTokens
+        : null;
     final configuredMaxTokens = maxTokens;
     final effectiveMaxTokens = thinkingBudget == null
         ? configuredMaxTokens
         : (configuredMaxTokens == null || configuredMaxTokens <= thinkingBudget
-            ? thinkingBudget + 1024
-            : configuredMaxTokens);
+              ? thinkingBudget + 1024
+              : configuredMaxTokens);
 
     return ChatAnthropicOptions(
       model: model.isEmpty ? null : model,
@@ -102,6 +123,7 @@ class LangchainAiConfig {
       reasoningEffort: AiReasoningEffort.fromCode(raw['reasoning_effort']),
       requestTimeoutSeconds: parseInt(raw['request_timeout_seconds']) ?? 0,
       additional: additional,
+      deployment: AiProviderDeployment.fromJson(raw['deployment']),
     );
   }
 
@@ -113,6 +135,7 @@ class LangchainAiConfig {
     required String url,
     AiReasoningEffort reasoningEffort = AiReasoningEffort.auto,
     int requestTimeoutSeconds = 0,
+    AiProviderDeployment deployment = AiProviderDeployment.cloud,
   }) {
     return LangchainAiConfig(
       identifier: providerId,
@@ -121,6 +144,7 @@ class LangchainAiConfig {
       baseUrl: _deriveBaseUrl(url),
       reasoningEffort: reasoningEffort,
       requestTimeoutSeconds: requestTimeoutSeconds,
+      deployment: deployment,
     );
   }
 
@@ -136,6 +160,8 @@ class LangchainAiConfig {
     AiReasoningEffort? reasoningEffort,
     int? requestTimeoutSeconds,
     Map<String, dynamic>? additional,
+    AiProviderDeployment? deployment,
+    bool? jsonOutput,
   }) {
     return LangchainAiConfig(
       identifier: identifier,
@@ -148,8 +174,11 @@ class LangchainAiConfig {
       maxTokens: maxTokens ?? this.maxTokens,
       maxOutputTokens: maxOutputTokens ?? this.maxOutputTokens,
       reasoningEffort: reasoningEffort ?? this.reasoningEffort,
-      requestTimeoutSeconds: requestTimeoutSeconds ?? this.requestTimeoutSeconds,
+      requestTimeoutSeconds:
+          requestTimeoutSeconds ?? this.requestTimeoutSeconds,
       additional: additional ?? this.additional,
+      deployment: deployment ?? this.deployment,
+      jsonOutput: jsonOutput ?? this.jsonOutput,
     );
   }
 }
@@ -253,6 +282,10 @@ LangchainAiConfig mergeConfigs(
         ? override.requestTimeoutSeconds
         : base.requestTimeoutSeconds,
     additional: mergeMaps(base.additional, override.additional),
+    deployment: override.deployment != AiProviderDeployment.cloud
+        ? override.deployment
+        : base.deployment,
+    jsonOutput: override.jsonOutput || base.jsonOutput,
   );
 }
 
@@ -271,12 +304,15 @@ extension on AiReasoningEffort {
     return switch (this) {
       AiReasoningEffort.auto => null,
       AiReasoningEffort.off => const ChatAnthropicThinking.disabled(),
-      AiReasoningEffort.low =>
-        const ChatAnthropicThinking.enabled(budgetTokens: 1024),
-      AiReasoningEffort.medium =>
-        const ChatAnthropicThinking.enabled(budgetTokens: 4096),
-      AiReasoningEffort.high =>
-        const ChatAnthropicThinking.enabled(budgetTokens: 8192),
+      AiReasoningEffort.low => const ChatAnthropicThinking.enabled(
+        budgetTokens: 1024,
+      ),
+      AiReasoningEffort.medium => const ChatAnthropicThinking.enabled(
+        budgetTokens: 4096,
+      ),
+      AiReasoningEffort.high => const ChatAnthropicThinking.enabled(
+        budgetTokens: 8192,
+      ),
     };
   }
 }

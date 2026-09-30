@@ -8,15 +8,12 @@ void main() {
     int? receivedOutput;
     bool? receivedEstimated;
     final runner = CancelableLangchainRunner(
-      onTokenUsage: ({
-        required inputTokens,
-        required outputTokens,
-        required estimated,
-      }) {
-        receivedInput = inputTokens;
-        receivedOutput = outputTokens;
-        receivedEstimated = estimated;
-      },
+      onTokenUsage:
+          ({required inputTokens, required outputTokens, required estimated}) {
+            receivedInput = inputTokens;
+            receivedOutput = outputTokens;
+            receivedEstimated = estimated;
+          },
     );
 
     final chunks = await runner
@@ -37,15 +34,12 @@ void main() {
     int? receivedOutput;
     bool? receivedEstimated;
     final runner = CancelableLangchainRunner(
-      onTokenUsage: ({
-        required inputTokens,
-        required outputTokens,
-        required estimated,
-      }) {
-        receivedInput = inputTokens;
-        receivedOutput = outputTokens;
-        receivedEstimated = estimated;
-      },
+      onTokenUsage:
+          ({required inputTokens, required outputTokens, required estimated}) {
+            receivedInput = inputTokens;
+            receivedOutput = outputTokens;
+            receivedEstimated = estimated;
+          },
     );
 
     await runner
@@ -58,6 +52,22 @@ void main() {
     expect(receivedInput, 4);
     expect(receivedOutput, 7);
     expect(receivedEstimated, isTrue);
+  });
+
+  test('runner forwards a length finish reason', () async {
+    FinishReason? finishReason;
+    final runner = CancelableLangchainRunner(
+      onFinishReason: (reason) => finishReason = reason,
+    );
+
+    await runner
+        .stream(
+          model: _LengthChatModel(),
+          prompt: PromptValue.chat([ChatMessage.humanText('JSON')]),
+        )
+        .drain<void>();
+
+    expect(finishReason, FinishReason.length);
   });
 }
 
@@ -79,6 +89,31 @@ class _OutputOnlyUsageChatModel extends FakeChatModel {
           promptTokens: 0,
           responseTokens: 7,
           totalTokens: 7,
+        ),
+        streaming: true,
+      ),
+    );
+  }
+}
+
+class _LengthChatModel extends FakeChatModel {
+  _LengthChatModel() : super(responses: const ['{"partial":']);
+
+  @override
+  Stream<ChatResult> stream(
+    PromptValue input, {
+    FakeChatModelOptions? options,
+  }) {
+    return Stream.value(
+      ChatResult(
+        id: 'length',
+        output: AIChatMessage(content: '{"partial":'),
+        finishReason: FinishReason.length,
+        metadata: const {},
+        usage: const LanguageModelUsage(
+          promptTokens: 1,
+          responseTokens: 2,
+          totalTokens: 3,
         ),
         streaming: true,
       ),

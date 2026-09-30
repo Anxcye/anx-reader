@@ -13,11 +13,7 @@ enum AiProviderRole {
   cloudVerification,
 }
 
-enum AiFallbackPolicy {
-  none,
-  configuredProvider,
-  confirmBeforeFullTextCloud,
-}
+enum AiFallbackPolicy { none, configuredProvider, confirmBeforeFullTextCloud }
 
 enum AiOutputKind { text, json }
 
@@ -30,7 +26,7 @@ class AiOutputContract {
   const AiOutputContract.text() : this();
 
   const AiOutputContract.json({int schemaVersion = 1})
-      : this(kind: AiOutputKind.json, schemaVersion: schemaVersion);
+    : this(kind: AiOutputKind.json, schemaVersion: schemaVersion);
 
   final AiOutputKind kind;
   final int schemaVersion;
@@ -83,12 +79,13 @@ class AiRequest {
     this.ref,
     this.readingMode,
     this.readingSkill,
-  })  : workloadId = workloadId ?? _defaultWorkload(contextTask),
-        trace = trace ??
-            AiTraceContext(
-              workloadId: workloadId ?? _defaultWorkload(contextTask),
-              bookId: sourceScope?.bookId,
-            );
+  }) : workloadId = workloadId ?? _defaultWorkload(contextTask),
+       trace =
+           trace ??
+           AiTraceContext(
+             workloadId: workloadId ?? _defaultWorkload(contextTask),
+             bookId: sourceScope?.bookId,
+           );
 
   final List<ChatMessage> messages;
   final String workloadId;
@@ -110,17 +107,17 @@ class AiRequest {
       fallbackPolicy == AiFallbackPolicy.configuredProvider;
 
   static String _defaultWorkload(AiContextTask task) => switch (task) {
-        AiContextTask.readingChat => 'reading.chat',
-        AiContextTask.translation => 'translation.selection',
-        AiContextTask.chapterReview => 'reading.chapter_review',
-        AiContextTask.fictionBackfill => 'fiction.story_atlas',
-        AiContextTask.noteOrganizer => 'reading_note.organize',
-        AiContextTask.expertAnalysis => 'reading.analysis',
-        AiContextTask.lightweightExtraction => 'extraction.lightweight',
-        AiContextTask.cloudVerification => 'extraction.cloud_verification',
-        AiContextTask.internalSummary => 'context.rolling_summary',
-        AiContextTask.general => 'ai.general',
-      };
+    AiContextTask.readingChat => 'reading.chat',
+    AiContextTask.translation => 'translation.selection',
+    AiContextTask.chapterReview => 'reading.chapter_review',
+    AiContextTask.fictionBackfill => 'fiction.story_atlas',
+    AiContextTask.noteOrganizer => 'reading_note.organize',
+    AiContextTask.expertAnalysis => 'reading.analysis',
+    AiContextTask.lightweightExtraction => 'extraction.lightweight',
+    AiContextTask.cloudVerification => 'extraction.cloud_verification',
+    AiContextTask.internalSummary => 'context.rolling_summary',
+    AiContextTask.general => 'ai.general',
+  };
 }
 
 class AiResponseMetadata {
@@ -137,6 +134,7 @@ class AiResponseMetadata {
     this.retryCount = 0,
     this.usedFallback = false,
     this.validationErrors = const [],
+    this.finishReason,
   });
 
   final String requestId;
@@ -151,6 +149,7 @@ class AiResponseMetadata {
   final int retryCount;
   final bool usedFallback;
   final List<String> validationErrors;
+  final FinishReason? finishReason;
 }
 
 class AiRequestMetrics {
@@ -158,6 +157,7 @@ class AiRequestMetrics {
   int outputTokens = 0;
   bool usageEstimated = false;
   int retryCount = 0;
+  FinishReason? finishReason;
 
   void addUsage({
     required int inputTokens,

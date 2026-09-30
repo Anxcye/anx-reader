@@ -4,6 +4,7 @@ import 'package:anx_reader/models/ai_provider.dart';
 import 'package:anx_reader/models/reading_agent.dart';
 import 'package:anx_reader/service/ai/ai_context_assembler.dart';
 import 'package:anx_reader/service/ai/ai_extraction_engine.dart';
+import 'package:anx_reader/service/ai/ai_request.dart';
 import 'package:anx_reader/service/ai/ai_token_usage_service.dart';
 import 'package:anx_reader/service/ai/index.dart';
 import 'package:anx_reader/service/ai/reading_evidence_resolver.dart';
@@ -32,13 +33,13 @@ class FictionHybridExtractionService {
   AiProvider? get provider => aiExtractionEngine.resolveProvider(ref);
 
   Map<String, dynamic> get artifactMetadata => {
-        'pipelineVersion': AiExtractionEngine.pipelineVersion,
-        if (provider case final value?) ...{
-          'extractorProvider': value.id,
-          'extractorModel': value.model,
-          'extractorDeployment': value.deployment.name,
-        },
-      };
+    'pipelineVersion': AiExtractionEngine.pipelineVersion,
+    if (provider case final value?) ...{
+      'extractorProvider': value.id,
+      'extractorModel': value.model,
+      'extractorDeployment': value.deployment.name,
+    },
+  };
 
   Future<String> generate(String prompt) async {
     final baseline = aiContextAssembler.estimateTokens(prompt);
@@ -110,7 +111,8 @@ class FictionHybridExtractionService {
     Map<String, dynamic> payload,
     String evidence,
   ) async {
-    final prompt = '''你只复核一条小说人物关系候选，不得使用证据之外的知识。
+    final prompt =
+        '''你只复核一条小说人物关系候选，不得使用证据之外的知识。
 候选：${jsonEncode(payload)}
 原文证据：${jsonEncode(evidence)}
 只返回 JSON：{"decision":"accept|reject|normalize","relation":"必要时的简短中文关系"}。
@@ -135,6 +137,8 @@ class FictionHybridExtractionService {
           [ChatMessage.humanText(prompt)],
           ref: ref,
           task: AiContextTask.cloudVerification,
+          outputContract: const AiOutputContract.json(),
+          allowFallback: false,
         ),
       );
       final decoded = _decodeObject(generated.value);
@@ -187,8 +191,9 @@ class FictionCandidateRuleValidator {
     Map<String, dynamic> payload,
   ) {
     final result = Map<String, dynamic>.from(payload);
-    final narrativeLayer =
-        FictionNarrativeLayerIds.normalize(result['narrativeLayer']);
+    final narrativeLayer = FictionNarrativeLayerIds.normalize(
+      result['narrativeLayer'],
+    );
     String normalizePerson(Object? value) {
       final text = value?.toString().trim() ?? '';
       if ({'我', '叙述者', 'narrator', '采歌人', '讲故事的人'}.contains(text)) {
@@ -202,7 +207,8 @@ class FictionCandidateRuleValidator {
         result['entityType'],
       );
       final name = normalizePerson(result['name']);
-      final aliases = (result['aliases'] as List?)
+      final aliases =
+          (result['aliases'] as List?)
               ?.map((e) => e.toString().trim())
               .where((e) => e.isNotEmpty)
               .toSet() ??
@@ -241,12 +247,14 @@ class FictionCandidateRuleValidator {
         result['relationType'] ?? _relationTypeFor(relation),
       );
       if (result['fromEntityType'] != null) {
-        result['fromEntityType'] =
-            FictionEntityTypeIds.normalize(result['fromEntityType']);
+        result['fromEntityType'] = FictionEntityTypeIds.normalize(
+          result['fromEntityType'],
+        );
       }
       if (result['toEntityType'] != null) {
-        result['toEntityType'] =
-            FictionEntityTypeIds.normalize(result['toEntityType']);
+        result['toEntityType'] = FictionEntityTypeIds.normalize(
+          result['toEntityType'],
+        );
       }
     } else if (kind == ReadingArtifactKinds.event) {
       final type = result['eventType']?.toString().trim() ?? '';
@@ -258,8 +266,10 @@ class FictionCandidateRuleValidator {
       if (participants is List) {
         result['participants'] = participants.map(normalizePerson).toList();
       }
-      final inferredTrack = RegExp(r'宇宙|文明|技术|科学|星际|外星|行星|物理规律')
-              .hasMatch('${result['title']} ${result['summary']} $type')
+      final inferredTrack =
+          RegExp(
+            r'宇宙|文明|技术|科学|星际|外星|行星|物理规律',
+          ).hasMatch('${result['title']} ${result['summary']} $type')
           ? FictionEventTrackIds.worldbuilding
           : FictionEventTrackIds.caseInvestigation;
       result['track'] = FictionEventTrackIds.normalize(
@@ -308,11 +318,11 @@ class FictionCandidateRuleValidator {
   }
 
   static String _stageForEvent(String eventType) => switch (eventType) {
-        '冲突' => FictionEventStageIds.conflict,
-        '揭示' => FictionEventStageIds.revelation,
-        '转折' => FictionEventStageIds.turningPoint,
-        _ => FictionEventStageIds.other,
-      };
+    '冲突' => FictionEventStageIds.conflict,
+    '揭示' => FictionEventStageIds.revelation,
+    '转折' => FictionEventStageIds.turningPoint,
+    _ => FictionEventStageIds.other,
+  };
 
   static String _normalizeStage(Object? value, String eventType) {
     final stage = value?.toString().trim() ?? '';
@@ -328,7 +338,9 @@ class FictionCandidateRuleValidator {
     required String chapterContent,
   }) {
     FictionCandidateRuleVerdict reject() => FictionCandidateRuleVerdict(
-        FictionCandidateRuleStatus.rejected, payload);
+      FictionCandidateRuleStatus.rejected,
+      payload,
+    );
     final evidence = payload['evidence']?.toString().trim() ?? '';
     if (evidence.isEmpty ||
         evidence.length > 80 ||
@@ -343,16 +355,16 @@ class FictionCandidateRuleValidator {
         return reject();
       }
       if (_looksLikeBackgroundReference(evidence)) return reject();
-      return FictionCandidateRuleVerdict(
-        FictionCandidateRuleStatus.accepted,
-        {...payload, 'confidenceSource': 'evidenceValidated'},
-      );
+      return FictionCandidateRuleVerdict(FictionCandidateRuleStatus.accepted, {
+        ...payload,
+        'confidenceSource': 'evidenceValidated',
+      });
     }
     if (kind == ReadingArtifactKinds.event) {
-      return FictionCandidateRuleVerdict(
-        FictionCandidateRuleStatus.accepted,
-        {...payload, 'confidenceSource': 'evidenceValidated'},
-      );
+      return FictionCandidateRuleVerdict(FictionCandidateRuleStatus.accepted, {
+        ...payload,
+        'confidenceSource': 'evidenceValidated',
+      });
     }
     if (kind != ReadingArtifactKinds.relationship) return reject();
     final relation = payload['relation']?.toString().trim() ?? '';
@@ -380,14 +392,11 @@ class FictionCandidateRuleValidator {
       return reject();
     }
     if (_explicitRelationTerms.any(evidence.contains)) {
-      return FictionCandidateRuleVerdict(
-        FictionCandidateRuleStatus.accepted,
-        {
-          ...payload,
-          'confidenceSource': 'explicitText',
-          'reviewStatus': 'ruleAccepted',
-        },
-      );
+      return FictionCandidateRuleVerdict(FictionCandidateRuleStatus.accepted, {
+        ...payload,
+        'confidenceSource': 'explicitText',
+        'reviewStatus': 'ruleAccepted',
+      });
     }
     return FictionCandidateRuleVerdict(
       FictionCandidateRuleStatus.ambiguous,
@@ -403,14 +412,8 @@ class FictionCandidateRuleValidator {
         null;
   }
 
-  bool _looksLikeBackgroundReference(String evidence) => const [
-        '曾言',
-        '两百年前',
-        '之后',
-        '被称为',
-        '典故',
-        '书中记载',
-      ].any(evidence.contains);
+  bool _looksLikeBackgroundReference(String evidence) =>
+      const ['曾言', '两百年前', '之后', '被称为', '典故', '书中记载'].any(evidence.contains);
 
   static const _genericNames = {
     '我',
@@ -450,12 +453,7 @@ class FictionCandidateRuleValidator {
     '侍从',
     '众人',
   };
-  static const _invalidRelationLabels = {
-    '检验对象',
-    '无明确持久关系',
-    '无明确关系',
-    '关系不明',
-  };
+  static const _invalidRelationLabels = {'检验对象', '无明确持久关系', '无明确关系', '关系不明'};
   static const _characterEntityTypes = {
     FictionEntityTypeIds.person,
     FictionEntityTypeIds.intelligentNonhuman,
@@ -474,14 +472,15 @@ class FictionCandidateRuleValidator {
     final normalized = value.trim();
     if (normalized.length < 2 || normalized.length > 40) return false;
     if (_isGenericPerson(normalized)) return false;
-    if (RegExp(r'^(character|person|char|role)[_:#-]?\d+$',
-            caseSensitive: false)
-        .hasMatch(normalized)) {
+    if (RegExp(
+      r'^(character|person|char|role)[_:#-]?\d+$',
+      caseSensitive: false,
+    ).hasMatch(normalized)) {
       return false;
     }
     return RegExp(
-            r"^[\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaffA-Za-zÀ-ÖØ-öø-ÿ'’·•. -]+$")
-        .hasMatch(normalized);
+      r"^[\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaffA-Za-zÀ-ÖØ-öø-ÿ'’·•. -]+$",
+    ).hasMatch(normalized);
   }
 
   /// Resolves a model reference to a canonical source-backed identity without
@@ -503,9 +502,11 @@ class FictionCandidateRuleValidator {
         r'([\u3400-\u9fff]{2,4})[，,\s]+字\s*([\u3400-\u9fff]{1,4})([^。！？\n]{0,24})',
       ),
     ];
-    for (var patternIndex = 0;
-        patternIndex < identityPatterns.length;
-        patternIndex++) {
+    for (
+      var patternIndex = 0;
+      patternIndex < identityPatterns.length;
+      patternIndex++
+    ) {
       final pattern = identityPatterns[patternIndex];
       for (final match in pattern.allMatches(chapterContent)) {
         late final String canonical;
@@ -514,8 +515,9 @@ class FictionCandidateRuleValidator {
         if (patternIndex == 0) {
           canonical = '${match.group(1)}${match.group(2)}';
           tail = match.group(3) ?? '';
-          final value =
-              RegExp(r'字\s*([\u3400-\u9fff]{1,4})').firstMatch(tail)?.group(1);
+          final value = RegExp(
+            r'字\s*([\u3400-\u9fff]{1,4})',
+          ).firstMatch(tail)?.group(1);
           if (value != null) courtesy.add(value);
         } else {
           canonical = match.group(1)!;
@@ -527,8 +529,9 @@ class FictionCandidateRuleValidator {
         ).firstMatch(tail)?.group(1);
         if (changedCourtesy != null) courtesy.add(changedCourtesy);
         final artNames = <String>{};
-        final artName =
-            RegExp(r'号\s*([\u3400-\u9fff]{1,6})').firstMatch(tail)?.group(1);
+        final artName = RegExp(
+          r'号\s*([\u3400-\u9fff]{1,6})',
+        ).firstMatch(tail)?.group(1);
         if (artName != null) artNames.add(artName);
         final identityNames = {
           _normalizeIdentityName(canonical),
@@ -543,8 +546,9 @@ class FictionCandidateRuleValidator {
           'aliases': const <String>[],
           if (courtesy.isNotEmpty) 'courtesyNames': courtesy.toList(),
           if (artNames.isNotEmpty) 'artNames': artNames.toList(),
-          'evidence':
-              evidence.length <= 80 ? evidence : evidence.substring(0, 80),
+          'evidence': evidence.length <= 80
+              ? evidence
+              : evidence.substring(0, 80),
         };
       }
     }

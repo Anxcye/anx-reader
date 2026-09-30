@@ -60,6 +60,7 @@ class AiExtractionEngine {
   const AiExtractionEngine();
 
   static const pipelineVersion = 1;
+  static final Map<String, Future<AiExtractionResult>> _inFlight = {};
 
   AiExtractionConfig config() =>
       AiExtractionConfig.fromJson(Prefs().aiExtractionConfig);
@@ -88,18 +89,51 @@ class AiExtractionEngine {
     required String prompt,
     WidgetRef? ref,
     bool requireJson = true,
-  }) async {
+  }) {
     final provider = resolveProvider(ref);
     if (provider == null) {
-      throw const AiExtractionUnavailable('轻量提取引擎未配置或不可用');
+      return Future.error(const AiExtractionUnavailable('轻量提取引擎未配置或不可用'));
     }
+    // A repeated tap, a duplicate checkpoint, or two projections requesting
+    // the same extraction must share one provider call. This is deliberately
+    // process-local: it does not persist prompts or model output.
+    final key = '${provider.id}|$taskId|$requireJson|${prompt.hashCode}';
+    final existing = _inFlight[key];
+    if (existing != null) return existing;
+    final future = _extract(
+      provider: provider,
+      taskId: taskId,
+      prompt: prompt,
+      ref: ref,
+      requireJson: requireJson,
+    );
+    _inFlight[key] = future;
+    future.then(
+      (_) {
+        if (identical(_inFlight[key], future)) _inFlight.remove(key);
+      },
+      onError: (Object _, StackTrace __) {
+        if (identical(_inFlight[key], future)) _inFlight.remove(key);
+      },
+    );
+    return future;
+  }
+
+  Future<AiExtractionResult> _extract({
+    required AiProvider provider,
+    required String taskId,
+    required String prompt,
+    required WidgetRef? ref,
+    required bool requireJson,
+  }) async {
     final started = DateTime.now();
     final role = provider.deployment == AiProviderDeployment.localPrivate
         ? AiTokenUsageRole.localExtraction
         : AiTokenUsageRole.cloudExtraction;
-    final before = aiTokenUsageService.snapshot().byRole[role] ??
+    final before =
+        aiTokenUsageService.snapshot().byRole[role] ??
         const AiTokenUsageBucket();
-    final generated = await aiTokenUsageService.runWithRole(
+    var generated = await aiTokenUsageService.runWithRole(
       role,
       () => aiGenerateTextWithMetadata(
         [ChatMessage.humanText(prompt)],
@@ -109,13 +143,42 @@ class AiExtractionEngine {
             ? AiContextTask.internalSummary
             : AiContextTask.lightweightExtraction,
         allowFallback: false,
+        outputContract: requireJson
+            ? const AiOutputContract.json()
+            : const AiOutputContract.text(),
       ),
     );
+    if (requireJson &&
+        generated.metadata?.validationErrors.isNotEmpty == true) {
+      // Retry only this extraction input once. The shorter instruction does
+      // not broaden the source scope and the explicit no-fallback request
+      // still prevents uploading the full text to a cloud provider.
+      generated = await aiTokenUsageService.runWithRole(
+        role,
+        () => aiGenerateTextWithMetadata(
+          [
+            ChatMessage.humanText(
+              '$prompt\n\n上一轮 JSON 不完整或被截断。请只输出一个更短的完整 JSON，减少条目和字段内容；不要解释、不要 Markdown 围栏。',
+            ),
+          ],
+          identifier: provider.id,
+          ref: ref,
+          task: taskId == AiExtractionTaskIds.rollingSummary
+              ? AiContextTask.internalSummary
+              : AiContextTask.lightweightExtraction,
+          allowFallback: false,
+          outputContract: requireJson
+              ? const AiOutputContract.json()
+              : const AiOutputContract.text(),
+        ),
+      );
+    }
     final raw = generated.value.trim();
-    final after = aiTokenUsageService.snapshot().byRole[role] ??
+    final after =
+        aiTokenUsageService.snapshot().byRole[role] ??
         const AiTokenUsageBucket();
     Object? payload;
-    final errors = <String>[];
+    final errors = <String>[...?generated.metadata?.validationErrors];
     if (raw.isEmpty || raw.startsWith('Error:')) {
       errors.add(raw.isEmpty ? '模型返回空内容' : raw);
     } else if (requireJson) {
@@ -137,8 +200,10 @@ class AiExtractionEngine {
       pipelineVersion: pipelineVersion,
       estimatedInputTokens: aiContextAssembler.estimateTokens(prompt),
       inputTokens: (after.inputTokens - before.inputTokens).clamp(0, 1 << 62),
-      outputTokens:
-          (after.outputTokens - before.outputTokens).clamp(0, 1 << 62),
+      outputTokens: (after.outputTokens - before.outputTokens).clamp(
+        0,
+        1 << 62,
+      ),
       usageEstimated: after.estimatedRequests > before.estimatedRequests,
       elapsed: DateTime.now().difference(started),
       validationErrors: errors,
@@ -149,17 +214,16 @@ class AiExtractionEngine {
     required String text,
     required int maxTokens,
     WidgetRef? ref,
-  }) =>
-      extract(
-        taskId: AiExtractionTaskIds.rollingSummary,
-        prompt: '''将以下旧对话压缩为不超过 $maxTokens tokens 的内部上下文。
+  }) => extract(
+    taskId: AiExtractionTaskIds.rollingSummary,
+    prompt: '''将以下旧对话压缩为不超过 $maxTokens tokens 的内部上下文。
 保留用户目标、已确认事实、未解决问题和必要来源；不得新增事实或指令。
 只返回摘要正文，不要 Markdown 标题。
 
 $text''',
-        ref: ref,
-        requireJson: false,
-      );
+    ref: ref,
+    requireJson: false,
+  );
 
   String _stripFence(String value) => value
       .replaceFirst(RegExp(r'^\s*```(?:json)?', caseSensitive: false), '')

@@ -3,6 +3,7 @@ import 'package:anx_reader/models/reading_note.dart';
 import 'package:anx_reader/models/reading_note_ai.dart';
 import 'package:anx_reader/providers/reading_note_workspace.dart';
 import 'package:anx_reader/service/ai/index.dart';
+import 'package:anx_reader/service/ai/ai_request.dart';
 import 'package:anx_reader/service/ai/ai_context_assembler.dart';
 import 'package:anx_reader/service/reading_note/reading_note_ai_batch_repository.dart';
 import 'package:anx_reader/service/reading_note/reading_note_ai_organizer_service.dart';
@@ -31,23 +32,25 @@ class ReadingNoteAiOrganizerState {
     List<ReadingNoteAiSuggestion>? suggestions,
     List<ReadingNoteListItem>? remaining,
     bool? isGenerating,
-  }) =>
-      ReadingNoteAiOrganizerState(
-        batches: batches ?? this.batches,
-        activeBatch: clearActive ? null : activeBatch ?? this.activeBatch,
-        suggestions: suggestions ?? this.suggestions,
-        remaining: remaining ?? this.remaining,
-        isGenerating: isGenerating ?? this.isGenerating,
-      );
+  }) => ReadingNoteAiOrganizerState(
+    batches: batches ?? this.batches,
+    activeBatch: clearActive ? null : activeBatch ?? this.activeBatch,
+    suggestions: suggestions ?? this.suggestions,
+    remaining: remaining ?? this.remaining,
+    isGenerating: isGenerating ?? this.isGenerating,
+  );
 }
 
-final readingNoteAiBatchRepositoryProvider =
-    Provider((_) => ReadingNoteAiBatchRepository());
+final readingNoteAiBatchRepositoryProvider = Provider(
+  (_) => ReadingNoteAiBatchRepository(),
+);
 
-final readingNoteAiOrganizerProvider = AsyncNotifierProviderFamily<
-    ReadingNoteAiOrganizerController,
-    ReadingNoteAiOrganizerState,
-    int>(ReadingNoteAiOrganizerController.new);
+final readingNoteAiOrganizerProvider =
+    AsyncNotifierProviderFamily<
+      ReadingNoteAiOrganizerController,
+      ReadingNoteAiOrganizerState,
+      int
+    >(ReadingNoteAiOrganizerController.new);
 
 class ReadingNoteAiOrganizerController
     extends FamilyAsyncNotifier<ReadingNoteAiOrganizerState, int> {
@@ -59,21 +62,26 @@ class ReadingNoteAiOrganizerController
     _repository = ref.read(readingNoteAiBatchRepositoryProvider);
     final batches = await _repository.batches(arg);
     final active = batches
-        .where((batch) => const {
-              ReadingNoteAiBatchStatus.reviewing,
-              ReadingNoteAiBatchStatus.failed,
-              ReadingNoteAiBatchStatus.running,
-              ReadingNoteAiBatchStatus.completed,
-            }.contains(batch.status))
-        .where((batch) =>
-            batch.status != ReadingNoteAiBatchStatus.completed ||
-            batch.remainingCount > 0)
+        .where(
+          (batch) => const {
+            ReadingNoteAiBatchStatus.reviewing,
+            ReadingNoteAiBatchStatus.failed,
+            ReadingNoteAiBatchStatus.running,
+            ReadingNoteAiBatchStatus.completed,
+          }.contains(batch.status),
+        )
+        .where(
+          (batch) =>
+              batch.status != ReadingNoteAiBatchStatus.completed ||
+              batch.remainingCount > 0,
+        )
         .firstOrNull;
     return ReadingNoteAiOrganizerState(
       batches: batches,
       activeBatch: active,
-      suggestions:
-          active == null ? const [] : await _repository.suggestions(active.id),
+      suggestions: active == null
+          ? const []
+          : await _repository.suggestions(active.id),
     );
   }
 
@@ -86,11 +94,13 @@ class ReadingNoteAiOrganizerController
     final notes = ref.read(readingNoteRepositoryProvider);
     final items = switch (scope) {
       ReadingNoteAiScope.inbox => await notes.list(
-          ReadingNoteQuery(bookId: book.id, status: ReadingNoteStatus.inbox)),
+        ReadingNoteQuery(bookId: book.id, status: ReadingNoteStatus.inbox),
+      ),
       ReadingNoteAiScope.filtered => visibleItems,
-      ReadingNoteAiScope.selected => visibleItems
-          .where((item) => selectedIdentities.contains(item.identity))
-          .toList(),
+      ReadingNoteAiScope.selected =>
+        visibleItems
+            .where((item) => selectedIdentities.contains(item.identity))
+            .toList(),
     };
     if (items.isEmpty) throw StateError('No notes selected');
     final prepared = await _repository.prepare(
@@ -99,12 +109,13 @@ class ReadingNoteAiOrganizerController
       items: items,
     );
     state = AsyncData(
-        (state.valueOrNull ?? const ReadingNoteAiOrganizerState()).copyWith(
-      activeBatch: prepared.batch,
-      suggestions: const [],
-      remaining: prepared.remaining,
-      isGenerating: true,
-    ));
+      (state.valueOrNull ?? const ReadingNoteAiOrganizerState()).copyWith(
+        activeBatch: prepared.batch,
+        suggestions: const [],
+        remaining: prepared.remaining,
+        isGenerating: true,
+      ),
+    );
     await _generate(book, prepared.batch, prepared.inputs);
   }
 
@@ -112,17 +123,20 @@ class ReadingNoteAiOrganizerController
     final current = state.valueOrNull;
     final batch = current?.activeBatch;
     if (batch == null) return;
-    final notes = await ref.read(readingNoteRepositoryProvider).list(
-          ReadingNoteQuery(bookId: book.id),
-        );
+    final notes = await ref
+        .read(readingNoteRepositoryProvider)
+        .list(ReadingNoteQuery(bookId: book.id));
     final inputs = await _repository.inputsForBatch(batch, items: notes);
     if (inputs.isEmpty) throw StateError('No source notes remain');
     state = AsyncData(current!.copyWith(isGenerating: true));
     await _generate(book, batch, inputs);
   }
 
-  Future<void> _generate(Book book, ReadingNoteAiBatch batch,
-      List<ReadingNoteAiInput> inputs) async {
+  Future<void> _generate(
+    Book book,
+    ReadingNoteAiBatch batch,
+    List<ReadingNoteAiInput> inputs,
+  ) async {
     await _repository.markRunning(batch);
     final keptTopics = await ref
         .read(readingNoteAiBatchRepositoryProvider)
@@ -139,6 +153,7 @@ class ReadingNoteAiOrganizerController
       var generated = await aiGenerateTextWithMetadata(
         [ChatMessage.humanText(prompt)],
         task: AiContextTask.noteOrganizer,
+        outputContract: const AiOutputContract.json(),
       );
       List<ReadingNoteAiParsedSuggestion> parsed;
       try {
@@ -148,10 +163,15 @@ class ReadingNoteAiOrganizerController
           allowedTopicIds: keptTopics.map((topic) => topic.id).toSet(),
         );
       } on FormatException {
-        generated = await aiGenerateTextWithMetadata([
-          ChatMessage.humanText(
-              _service.correctionPrompt(prompt, generated.value))
-        ], task: AiContextTask.noteOrganizer);
+        generated = await aiGenerateTextWithMetadata(
+          [
+            ChatMessage.humanText(
+              _service.correctionPrompt(prompt, generated.value),
+            ),
+          ],
+          task: AiContextTask.noteOrganizer,
+          outputContract: const AiOutputContract.json(),
+        );
         parsed = _service.parse(
           generated.value,
           allowedSourceIds: inputs.map((item) => item.sourceId).toSet(),
@@ -173,8 +193,11 @@ class ReadingNoteAiOrganizerController
     }
   }
 
-  Future<void> toggleField(ReadingNoteAiSuggestion suggestion,
-      ReadingNoteAiAdoptableField field, bool selected) async {
+  Future<void> toggleField(
+    ReadingNoteAiSuggestion suggestion,
+    ReadingNoteAiAdoptableField field,
+    bool selected,
+  ) async {
     final fields = {...suggestion.selectedFields};
     selected ? fields.add(field) : fields.remove(field);
     await _repository.updateSelection(suggestion, fields);
@@ -198,7 +221,8 @@ class ReadingNoteAiOrganizerController
     final batch = current?.activeBatch;
     if (batch == null) return;
     for (final suggestion in current!.suggestions.where(
-        (item) => item.status == ReadingNoteAiSuggestionStatus.pending)) {
+      (item) => item.status == ReadingNoteAiSuggestionStatus.pending,
+    )) {
       await _repository.apply(
         suggestion,
         providerId: batch.providerId,
@@ -226,14 +250,19 @@ class ReadingNoteAiOrganizerController
         .read(readingNoteRepositoryProvider)
         .list(ReadingNoteQuery(bookId: book.id));
     final prepared = await _repository.prepareNext(
-        book: book, previous: batch, items: items);
+      book: book,
+      previous: batch,
+      items: items,
+    );
     if (prepared == null) throw StateError('No source notes remain');
-    state = AsyncData(current!.copyWith(
-      activeBatch: prepared.batch,
-      suggestions: const [],
-      remaining: prepared.remaining,
-      isGenerating: true,
-    ));
+    state = AsyncData(
+      current!.copyWith(
+        activeBatch: prepared.batch,
+        suggestions: const [],
+        remaining: prepared.remaining,
+        isGenerating: true,
+      ),
+    );
     await _generate(book, prepared.batch, prepared.inputs);
   }
 
@@ -274,13 +303,15 @@ class ReadingNoteAiOrganizerController
     final batches = await _repository.batches(arg);
     final batch = batches.where((item) => item.id == batchId).firstOrNull;
     state = AsyncData(
-        (state.valueOrNull ?? const ReadingNoteAiOrganizerState()).copyWith(
-      batches: batches,
-      activeBatch: batch,
-      suggestions:
-          batch == null ? const [] : await _repository.suggestions(batch.id),
-      isGenerating: batch?.status == ReadingNoteAiBatchStatus.running,
-    ));
+      (state.valueOrNull ?? const ReadingNoteAiOrganizerState()).copyWith(
+        batches: batches,
+        activeBatch: batch,
+        suggestions: batch == null
+            ? const []
+            : await _repository.suggestions(batch.id),
+        isGenerating: batch?.status == ReadingNoteAiBatchStatus.running,
+      ),
+    );
   }
 }
 

@@ -16,6 +16,7 @@ import 'package:anx_reader/providers/reading_memory.dart';
 import 'package:anx_reader/providers/book_toc.dart';
 import 'package:anx_reader/service/ai/ai_history.dart';
 import 'package:anx_reader/service/ai/index.dart';
+import 'package:anx_reader/service/ai/ai_request.dart';
 import 'package:anx_reader/service/ai/reading_ai_models.dart';
 import 'package:anx_reader/service/ai/reading_frameworks.dart';
 import 'package:anx_reader/service/ai/reading_experts.dart';
@@ -70,7 +71,7 @@ class AiReadingWorkspace extends ConsumerStatefulWidget {
   final List<Widget>? trailing;
   final Future<void> Function(AiChatHistoryEntry entry)? onOpenBookSession;
   final Future<void> Function(AiChatHistoryEntry entry)?
-      onRestoreReadingContext;
+  onRestoreReadingContext;
   final Future<String> Function(String href)? onFetchChapter;
   final Future<String> Function(String href)? onFetchChapterSample;
   final ValueChanged<String>? onNavigateChapter;
@@ -287,9 +288,11 @@ class _AiReadingWorkspaceState extends ConsumerState<AiReadingWorkspace> {
             const Text('闭环决定目标、章节回顾、成果指标和介入强度；不会改变书籍内容。'),
             const SizedBox(height: 12),
             ListTile(
-              leading: Icon(widget.controller.pinnedClosureId == null
-                  ? Icons.radio_button_checked
-                  : Icons.radio_button_unchecked),
+              leading: Icon(
+                widget.controller.pinnedClosureId == null
+                    ? Icons.radio_button_checked
+                    : Icons.radio_button_unchecked,
+              ),
               title: const Text('自动匹配'),
               subtitle: const Text('根据阅读模式与书籍信息在本地选择'),
               onTap: () {
@@ -299,9 +302,11 @@ class _AiReadingWorkspaceState extends ConsumerState<AiReadingWorkspace> {
             ),
             for (final closure in widget.closureRegistry.definitions)
               ListTile(
-                leading: Icon(widget.controller.pinnedClosureId == closure.id
-                    ? Icons.radio_button_checked
-                    : Icons.radio_button_unchecked),
+                leading: Icon(
+                  widget.controller.pinnedClosureId == closure.id
+                      ? Icons.radio_button_checked
+                      : Icons.radio_button_unchecked,
+                ),
                 title: Text(closure.title),
                 subtitle: Text(closure.description),
                 onTap: () => Navigator.pop(context, closure.id),
@@ -394,9 +399,11 @@ class _AiReadingWorkspaceState extends ConsumerState<AiReadingWorkspace> {
               ),
               const SizedBox(height: 12),
               ListTile(
-                leading: Icon(current == null
-                    ? Icons.radio_button_checked
-                    : Icons.radio_button_unchecked),
+                leading: Icon(
+                  current == null
+                      ? Icons.radio_button_checked
+                      : Icons.radio_button_unchecked,
+                ),
                 title: const Text('自动匹配'),
                 subtitle: const Text('根据书籍主题和本次任务选择一个主方法'),
                 onTap: () {
@@ -406,9 +413,11 @@ class _AiReadingWorkspaceState extends ConsumerState<AiReadingWorkspace> {
               ),
               for (final skill in ReadingSkillRegistry().allDefinitions)
                 ListTile(
-                  leading: Icon(current == skill.id
-                      ? Icons.radio_button_checked
-                      : Icons.radio_button_unchecked),
+                  leading: Icon(
+                    current == skill.id
+                        ? Icons.radio_button_checked
+                        : Icons.radio_button_unchecked,
+                  ),
                   title: Text(skill.title),
                   subtitle: Text(skill.description),
                   onTap: () => Navigator.pop(context, skill.id),
@@ -440,13 +449,16 @@ class _AiReadingWorkspaceState extends ConsumerState<AiReadingWorkspace> {
         ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(context), child: const Text('取消')),
+            onPressed: () => Navigator.pop(context),
+            child: const Text('取消'),
+          ),
           FilledButton(
-              onPressed: () {
-                final skill = readingSkillFromJsonText(controller.text);
-                if (skill != null) Navigator.pop(context, skill);
-              },
-              child: const Text('导入')),
+            onPressed: () {
+              final skill = readingSkillFromJsonText(controller.text);
+              if (skill != null) Navigator.pop(context, skill);
+            },
+            child: const Text('导入'),
+          ),
         ],
       ),
     );
@@ -467,48 +479,59 @@ class _AiReadingWorkspaceState extends ConsumerState<AiReadingWorkspace> {
       builder: (context) => AlertDialog(
         title: const Text('新建自定义 Skill'),
         content: SingleChildScrollView(
-          child: Column(mainAxisSize: MainAxisSize.min, children: [
-            TextField(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
                 controller: title,
-                decoration: const InputDecoration(labelText: '名称')),
-            TextField(
+                decoration: const InputDecoration(labelText: '名称'),
+              ),
+              TextField(
                 controller: id,
-                decoration:
-                    const InputDecoration(labelText: '稳定 ID（custom. 开头）')),
-            TextField(
+                decoration: const InputDecoration(
+                  labelText: '稳定 ID（custom. 开头）',
+                ),
+              ),
+              TextField(
                 controller: summary,
                 decoration: const InputDecoration(labelText: '摘要指导'),
-                maxLines: 2),
-            TextField(
+                maxLines: 2,
+              ),
+              TextField(
                 controller: full,
                 decoration: const InputDecoration(labelText: '完整指导'),
-                maxLines: 4),
-          ]),
+                maxLines: 4,
+              ),
+            ],
+          ),
         ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(context), child: const Text('取消')),
+            onPressed: () => Navigator.pop(context),
+            child: const Text('取消'),
+          ),
           FilledButton(
-              onPressed: () {
-                final skill = ReadingSkillDefinition(
-                  id: ReadingSkillId.custom(id.text.trim()),
-                  title: title.text.trim(),
-                  description: summary.text.trim(),
-                  summaryInstruction: summary.text.trim(),
-                  fullInstruction: full.text.trim().isEmpty
-                      ? summary.text.trim()
-                      : full.text.trim(),
-                  supportedModes: {ReadingAiMode.general},
-                  triggerKeywords: const [],
-                  closureContributions: const [],
-                  isCustom: true,
-                );
-                if (skill.title.isNotEmpty &&
-                    skill.id.name.startsWith('custom.')) {
-                  Navigator.pop(context, skill);
-                }
-              },
-              child: const Text('保存')),
+            onPressed: () {
+              final skill = ReadingSkillDefinition(
+                id: ReadingSkillId.custom(id.text.trim()),
+                title: title.text.trim(),
+                description: summary.text.trim(),
+                summaryInstruction: summary.text.trim(),
+                fullInstruction: full.text.trim().isEmpty
+                    ? summary.text.trim()
+                    : full.text.trim(),
+                supportedModes: {ReadingAiMode.general},
+                triggerKeywords: const [],
+                closureContributions: const [],
+                isCustom: true,
+              );
+              if (skill.title.isNotEmpty &&
+                  skill.id.name.startsWith('custom.')) {
+                Navigator.pop(context, skill);
+              }
+            },
+            child: const Text('保存'),
+          ),
         ],
       ),
     );
@@ -641,10 +664,14 @@ class _AiReadingWorkspaceState extends ConsumerState<AiReadingWorkspace> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(title,
-                          style: Theme.of(context).textTheme.titleMedium),
-                      Text(subtitle,
-                          style: Theme.of(context).textTheme.bodySmall),
+                      Text(
+                        title,
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      Text(
+                        subtitle,
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
                     ],
                   ),
                 ),
@@ -663,13 +690,9 @@ class _AiReadingWorkspaceState extends ConsumerState<AiReadingWorkspace> {
     final generatedTopics = (report?['topics'] as List?)
         ?.map((value) => value.toString())
         .toList(growable: false);
-    final topics = generatedTopics ??
-        const [
-          '核心概念与知识体系',
-          '作者试图解决的问题',
-          '一套可实践的方法',
-          '我还不确定',
-        ];
+    final topics =
+        generatedTopics ??
+        const ['核心概念与知识体系', '作者试图解决的问题', '一套可实践的方法', '我还不确定'];
     const goals = ['了解全貌', '学习知识', '解决问题', '批判分析', '休闲阅读'];
     return _buildCoachSection(
       icon: Icons.travel_explore_outlined,
@@ -776,18 +799,18 @@ class _AiReadingWorkspaceState extends ConsumerState<AiReadingWorkspace> {
       'whole': (
         '整体来说，这本书在谈什么？',
         ['概念体系', '核心问题', '实践方法', '故事与经验', '暂不确定'],
-        false
+        false,
       ),
       'detail': (
         '作者主要怎么说？',
         ['定义概念', '故事或案例', '因果推理', '数据证据', '反驳其他观点', '暂不确定'],
-        true
+        true,
       ),
       'truth': ('这本书说得有道理吗？', ['基本同意', '部分同意', '暂不认同', '证据不足', '暂不确定'], false),
       'relation': (
         '这本书跟我有什么关系？',
         ['改变认识', '可以实践', '帮助决策', '引发反思', '暂时无关'],
-        true
+        true,
       ),
     };
     final personalized = guide.report?['questionOptions'];
@@ -825,7 +848,7 @@ class _AiReadingWorkspaceState extends ConsumerState<AiReadingWorkspace> {
                     label: option,
                     selected:
                         guide.answers[entry.key]?.selected.contains(option) ==
-                            true,
+                        true,
                     multiple: entry.value.$3,
                     onTap: () => _answerQuestion(
                       guide,
@@ -852,85 +875,106 @@ class _AiReadingWorkspaceState extends ConsumerState<AiReadingWorkspace> {
       icon: Icons.event_repeat_outlined,
       title: l10n.readingMemoryTodayReview,
       subtitle: l10n.readingMemoryReviewSubtitle,
-      child: Column(children: [
-        memory.when(
-          loading: () => Text(l10n.readingMemoryCardsLoading),
-          error: (error, _) => Text(l10n.readingMemoryCardsLoadFailed(error)),
-          data: (memoryState) {
-            final cards =
-                memoryState.due(DateTime.now().millisecondsSinceEpoch);
-            final awaitingAdvance = _reviewedCardAwaitingAdvance != null;
-            return Column(children: [
-              if (awaitingAdvance)
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: const Icon(Icons.check_circle_outline),
-                  title: Text(l10n.readingMemoryReviewRecorded),
-                  trailing: FilledButton(
-                    onPressed: () =>
-                        setState(() => _reviewedCardAwaitingAdvance = null),
-                    child: Text(l10n.readingMemoryNextCard),
-                  ),
-                ),
-              if (cards.isEmpty && !awaitingAdvance)
-                ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(l10n.readingMemoryKnowledgeCards),
-                    subtitle: Text(l10n.readingMemoryNoDueCards)),
-              if (cards.isNotEmpty && !awaitingAdvance)
-                _buildReviewCard(cards.first, memoryState),
-              if (memoryState.reviews.isNotEmpty)
-                ExpansionTile(
-                  tilePadding: EdgeInsets.zero,
-                  title: Text(l10n.readingMemoryReviewHistory),
-                  subtitle: Text(l10n
-                      .readingMemoryReviewCount(memoryState.reviews.length)),
-                  children: [
-                    Align(
-                        alignment: Alignment.centerRight,
-                        child: TextButton(
-                          onPressed: () => ref
-                              .read(readingMemoryProvider(
-                                      widget.controller.bookId)
-                                  .notifier)
-                              .undoLatest(),
-                          child: Text(l10n.readingMemoryUndoLatest),
-                        )),
-                    for (final group
-                        in _groupReviews(memoryState.reviews).entries.indexed)
-                      ExpansionTile(
-                        initiallyExpanded: group.$1 == 0,
-                        title: Text(group.$2.key),
-                        children: [
-                          for (final review in group.$2.value)
-                            ListTile(
-                              dense: true,
-                              title: Text(_reviewRatingLabel(review.rating)),
-                              subtitle: Text(l10n.readingMemoryStageChange(
-                                  review.previousStage, review.nextStage)),
-                            )
-                        ],
+      child: Column(
+        children: [
+          memory.when(
+            loading: () => Text(l10n.readingMemoryCardsLoading),
+            error: (error, _) => Text(l10n.readingMemoryCardsLoadFailed(error)),
+            data: (memoryState) {
+              final cards = memoryState.due(
+                DateTime.now().millisecondsSinceEpoch,
+              );
+              final awaitingAdvance = _reviewedCardAwaitingAdvance != null;
+              return Column(
+                children: [
+                  if (awaitingAdvance)
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: const Icon(Icons.check_circle_outline),
+                      title: Text(l10n.readingMemoryReviewRecorded),
+                      trailing: FilledButton(
+                        onPressed: () =>
+                            setState(() => _reviewedCardAwaitingAdvance = null),
+                        child: Text(l10n.readingMemoryNextCard),
                       ),
-                  ],
-                ),
-            ]);
-          },
-        ),
-        const Divider(),
-        if (due.isEmpty)
-          const ListTile(
+                    ),
+                  if (cards.isEmpty && !awaitingAdvance)
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: Text(l10n.readingMemoryKnowledgeCards),
+                      subtitle: Text(l10n.readingMemoryNoDueCards),
+                    ),
+                  if (cards.isNotEmpty && !awaitingAdvance)
+                    _buildReviewCard(cards.first, memoryState),
+                  if (memoryState.reviews.isNotEmpty)
+                    ExpansionTile(
+                      tilePadding: EdgeInsets.zero,
+                      title: Text(l10n.readingMemoryReviewHistory),
+                      subtitle: Text(
+                        l10n.readingMemoryReviewCount(
+                          memoryState.reviews.length,
+                        ),
+                      ),
+                      children: [
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton(
+                            onPressed: () => ref
+                                .read(
+                                  readingMemoryProvider(
+                                    widget.controller.bookId,
+                                  ).notifier,
+                                )
+                                .undoLatest(),
+                            child: Text(l10n.readingMemoryUndoLatest),
+                          ),
+                        ),
+                        for (final group in _groupReviews(
+                          memoryState.reviews,
+                        ).entries.indexed)
+                          ExpansionTile(
+                            initiallyExpanded: group.$1 == 0,
+                            title: Text(group.$2.key),
+                            children: [
+                              for (final review in group.$2.value)
+                                ListTile(
+                                  dense: true,
+                                  title: Text(
+                                    _reviewRatingLabel(review.rating),
+                                  ),
+                                  subtitle: Text(
+                                    l10n.readingMemoryStageChange(
+                                      review.previousStage,
+                                      review.nextStage,
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                      ],
+                    ),
+                ],
+              );
+            },
+          ),
+          const Divider(),
+          if (due.isEmpty)
+            const ListTile(
               contentPadding: EdgeInsets.zero,
               title: Text('章节自测'),
-              subtitle: Text('当前没有到期章节')),
-        for (final quiz in due.take(5))
-          ListTile(
+              subtitle: Text('当前没有到期章节'),
+            ),
+          for (final quiz in due.take(5))
+            ListTile(
               contentPadding: EdgeInsets.zero,
               leading: const Icon(Icons.replay_outlined),
               title: Text(quiz.chapterTitle ?? '未命名章节'),
               subtitle: Text(_masteryLabel(quiz.mastery)),
               trailing: const Text('重新自测'),
-              onTap: () => _showQuizSheet(quiz)),
-      ]),
+              onTap: () => _showQuizSheet(quiz),
+            ),
+        ],
+      ),
     );
   }
 
@@ -940,50 +984,61 @@ class _AiReadingWorkspaceState extends ConsumerState<AiReadingWorkspace> {
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(
-          side: BorderSide(color: Theme.of(context).dividerColor)),
+        side: BorderSide(color: Theme.of(context).dividerColor),
+      ),
       child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(card.question,
-                  style: Theme.of(context).textTheme.titleSmall),
-              if (revealed) ...[
-                const Divider(),
-                Text(card.answer),
-                TextButton(
-                    onPressed: () =>
-                        _showMemorySources(card.sourceIds, state.sources),
-                    child: Text(l10n.readingMemoryViewSources)),
-                Row(children: [
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(card.question, style: Theme.of(context).textTheme.titleSmall),
+            if (revealed) ...[
+              const Divider(),
+              Text(card.answer),
+              TextButton(
+                onPressed: () =>
+                    _showMemorySources(card.sourceIds, state.sources),
+                child: Text(l10n.readingMemoryViewSources),
+              ),
+              Row(
+                children: [
                   Expanded(
-                      child: OutlinedButton(
-                          onPressed: () =>
-                              _rateCard(card, ReadingReviewRating.hard),
-                          child: Text(l10n.readingMemoryHard))),
-                  const SizedBox(width: 6),
-                  Expanded(
-                      child: OutlinedButton(
-                          onPressed: () =>
-                              _rateCard(card, ReadingReviewRating.remembered),
-                          child: Text(l10n.readingMemoryRemembered))),
-                  const SizedBox(width: 6),
-                  Expanded(
-                      child: FilledButton(
-                          onPressed: () =>
-                              _rateCard(card, ReadingReviewRating.mastered),
-                          child: Text(l10n.readingMemoryMastered))),
-                ]),
-              ] else
-                SizedBox(
-                    width: double.infinity,
-                    height: 48,
                     child: OutlinedButton(
-                        onPressed: () =>
-                            setState(() => _revealedCards.add(card.id)),
-                        child: Text(l10n.readingMemoryRevealAnswer))),
-            ],
-          )),
+                      onPressed: () =>
+                          _rateCard(card, ReadingReviewRating.hard),
+                      child: Text(l10n.readingMemoryHard),
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () =>
+                          _rateCard(card, ReadingReviewRating.remembered),
+                      child: Text(l10n.readingMemoryRemembered),
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: FilledButton(
+                      onPressed: () =>
+                          _rateCard(card, ReadingReviewRating.mastered),
+                      child: Text(l10n.readingMemoryMastered),
+                    ),
+                  ),
+                ],
+              ),
+            ] else
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: OutlinedButton(
+                  onPressed: () => setState(() => _revealedCards.add(card.id)),
+                  child: Text(l10n.readingMemoryRevealAnswer),
+                ),
+              ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -1032,33 +1087,41 @@ class _AiReadingWorkspaceState extends ConsumerState<AiReadingWorkspace> {
         data: (state) => Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(children: [
-              Expanded(
+            Row(
+              children: [
+                Expanded(
                   child: SizedBox(
-                      height: 48,
-                      child: FilledButton.icon(
-                          onPressed: _organizingMemory
-                              ? null
-                              : () => _organizeMemory(includeUsed: false),
-                          icon: const Icon(Icons.auto_awesome, size: 18),
-                          label: Text(l10n.readingMemoryOrganizeNew)))),
-              PopupMenuButton<String>(
-                tooltip: l10n.readingMemoryMore,
-                onSelected: (value) {
-                  if (value == 'all') _organizeMemory(includeUsed: true);
-                },
-                itemBuilder: (_) => [
-                  PopupMenuItem(
-                      value: 'all', child: Text(l10n.readingMemoryReanalyzeAll))
-                ],
-              ),
-            ]),
+                    height: 48,
+                    child: FilledButton.icon(
+                      onPressed: _organizingMemory
+                          ? null
+                          : () => _organizeMemory(includeUsed: false),
+                      icon: const Icon(Icons.auto_awesome, size: 18),
+                      label: Text(l10n.readingMemoryOrganizeNew),
+                    ),
+                  ),
+                ),
+                PopupMenuButton<String>(
+                  tooltip: l10n.readingMemoryMore,
+                  onSelected: (value) {
+                    if (value == 'all') _organizeMemory(includeUsed: true);
+                  },
+                  itemBuilder: (_) => [
+                    PopupMenuItem(
+                      value: 'all',
+                      child: Text(l10n.readingMemoryReanalyzeAll),
+                    ),
+                  ],
+                ),
+              ],
+            ),
             CheckboxListTile(
               value: _includeAiBlocksInMemory,
               onChanged: _organizingMemory
                   ? null
-                  : (value) =>
-                      setState(() => _includeAiBlocksInMemory = value == true),
+                  : (value) => setState(
+                      () => _includeAiBlocksInMemory = value == true,
+                    ),
               contentPadding: EdgeInsets.zero,
               controlAffinity: ListTileControlAffinity.leading,
               title: Text(l10n.readingMemoryIncludeAiBlocks),
@@ -1066,51 +1129,66 @@ class _AiReadingWorkspaceState extends ConsumerState<AiReadingWorkspace> {
             ),
             if (state.topics.isEmpty)
               Padding(
-                  padding: EdgeInsets.only(top: 10),
-                  child: Text(l10n.readingMemoryNoTopics)),
+                padding: EdgeInsets.only(top: 10),
+                child: Text(l10n.readingMemoryNoTopics),
+              ),
             for (final topic in state.topics)
               Card(
-                  elevation: 0,
-                  child: Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(topic.title,
-                              style: Theme.of(context).textTheme.titleSmall),
-                          const SizedBox(height: 4),
-                          Text(topic.summary),
-                          TextButton(
-                              onPressed: () => _showMemorySources(
-                                  topic.sourceIds, state.sources),
-                              child: Text(l10n.readingMemoryViewSources)),
-                          if (topic.status == ReadingMemoryItemStatus.suggested)
-                            Row(children: [
-                              TextButton(
-                                  onPressed: () => _setTopicStatus(
-                                      topic, ReadingMemoryItemStatus.ignored),
-                                  child: Text(l10n.readingMemoryIgnore)),
-                              const Spacer(),
-                              FilledButton(
-                                  onPressed: () => _setTopicStatus(
-                                      topic, ReadingMemoryItemStatus.kept),
-                                  child: Text(l10n.readingMemoryKeep)),
-                            ]),
-                          if (topic.status == ReadingMemoryItemStatus.kept)
-                            SizedBox(
-                                width: double.infinity,
-                                height: 48,
-                                child: OutlinedButton.icon(
-                                    onPressed: () =>
-                                        _generateCards(topic, state),
-                                    icon: const Icon(Icons.style_outlined),
-                                    label:
-                                        Text(l10n.readingMemoryGenerateCards))),
-                          for (final card in state.cards
-                              .where((card) => card.topicId == topic.id))
-                            _buildSuggestedCard(card, state),
-                        ],
-                      ))),
+                elevation: 0,
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        topic.title,
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(topic.summary),
+                      TextButton(
+                        onPressed: () =>
+                            _showMemorySources(topic.sourceIds, state.sources),
+                        child: Text(l10n.readingMemoryViewSources),
+                      ),
+                      if (topic.status == ReadingMemoryItemStatus.suggested)
+                        Row(
+                          children: [
+                            TextButton(
+                              onPressed: () => _setTopicStatus(
+                                topic,
+                                ReadingMemoryItemStatus.ignored,
+                              ),
+                              child: Text(l10n.readingMemoryIgnore),
+                            ),
+                            const Spacer(),
+                            FilledButton(
+                              onPressed: () => _setTopicStatus(
+                                topic,
+                                ReadingMemoryItemStatus.kept,
+                              ),
+                              child: Text(l10n.readingMemoryKeep),
+                            ),
+                          ],
+                        ),
+                      if (topic.status == ReadingMemoryItemStatus.kept)
+                        SizedBox(
+                          width: double.infinity,
+                          height: 48,
+                          child: OutlinedButton.icon(
+                            onPressed: () => _generateCards(topic, state),
+                            icon: const Icon(Icons.style_outlined),
+                            label: Text(l10n.readingMemoryGenerateCards),
+                          ),
+                        ),
+                      for (final card in state.cards.where(
+                        (card) => card.topicId == topic.id,
+                      ))
+                        _buildSuggestedCard(card, state),
+                    ],
+                  ),
+                ),
+              ),
           ],
         ),
       ),
@@ -1118,7 +1196,9 @@ class _AiReadingWorkspaceState extends ConsumerState<AiReadingWorkspace> {
   }
 
   Widget _buildSuggestedCard(
-      ReadingKnowledgeCard card, ReadingMemoryState state) {
+    ReadingKnowledgeCard card,
+    ReadingMemoryState state,
+  ) {
     final l10n = L10n.of(context);
     if (card.status == ReadingMemoryItemStatus.ignored ||
         card.status == ReadingMemoryItemStatus.active) {
@@ -1130,16 +1210,21 @@ class _AiReadingWorkspaceState extends ConsumerState<AiReadingWorkspace> {
       title: Text(card.question),
       subtitle: Text(card.answer, maxLines: 2, overflow: TextOverflow.ellipsis),
       onTap: () => _showMemorySources(card.sourceIds, state.sources),
-      trailing: Wrap(spacing: 4, children: [
-        TextButton(
+      trailing: Wrap(
+        spacing: 4,
+        children: [
+          TextButton(
             onPressed: () =>
                 _setCardStatus(card, ReadingMemoryItemStatus.ignored),
-            child: Text(l10n.readingMemoryIgnore)),
-        FilledButton(
+            child: Text(l10n.readingMemoryIgnore),
+          ),
+          FilledButton(
             onPressed: () =>
                 _setCardStatus(card, ReadingMemoryItemStatus.active),
-            child: Text(l10n.readingMemoryKeep)),
-      ]),
+            child: Text(l10n.readingMemoryKeep),
+          ),
+        ],
+      ),
     );
   }
 
@@ -1147,10 +1232,13 @@ class _AiReadingWorkspaceState extends ConsumerState<AiReadingWorkspace> {
     final l10n = L10n.of(context);
     setState(() => _organizingMemory = true);
     try {
-      final notifier =
-          ref.read(readingMemoryProvider(widget.controller.bookId).notifier);
+      final notifier = ref.read(
+        readingMemoryProvider(widget.controller.bookId).notifier,
+      );
       final sources = await notifier.collect(
-          includeUsed: includeUsed, includeAiBlocks: _includeAiBlocksInMemory);
+        includeUsed: includeUsed,
+        includeAiBlocks: _includeAiBlocksInMemory,
+      );
       if (sources.length < 2) {
         AnxToast.show(l10n.readingMemoryNotEnoughSources);
         return;
@@ -1160,7 +1248,8 @@ class _AiReadingWorkspaceState extends ConsumerState<AiReadingWorkspace> {
       var useExtractionEngine = aiExtractionEngine.resolveProvider(ref) != null;
       if (!useExtractionEngine) {
         if (!mounted) return;
-        final allowCloud = await showDialog<bool>(
+        final allowCloud =
+            await showDialog<bool>(
               context: context,
               builder: (dialogContext) => AlertDialog(
                 title: const Text('轻量提取引擎不可用'),
@@ -1186,11 +1275,13 @@ class _AiReadingWorkspaceState extends ConsumerState<AiReadingWorkspace> {
       final topics = await _generateMemoryStructured(
         prompt: prompt,
         correction: '输出 2-8 个主题，每项必须包含 title、summary 和输入中的 sourceIds。',
-        parser: (response) => service.parseTopics(response,
-            bookId: widget.controller.bookId,
-            batchId: batchId,
-            allowedSourceIds: sources.map((s) => s.id).toSet(),
-            now: int.parse(batchId)),
+        parser: (response) => service.parseTopics(
+          response,
+          bookId: widget.controller.bookId,
+          batchId: batchId,
+          allowedSourceIds: sources.map((s) => s.id).toSet(),
+          now: int.parse(batchId),
+        ),
         useExtractionEngine: useExtractionEngine,
       );
       await notifier.saveTopics(topics);
@@ -1207,7 +1298,9 @@ class _AiReadingWorkspaceState extends ConsumerState<AiReadingWorkspace> {
   }
 
   Future<void> _generateCards(
-      ReadingMemoryTopic topic, ReadingMemoryState state) async {
+    ReadingMemoryTopic topic,
+    ReadingMemoryState state,
+  ) async {
     final l10n = L10n.of(context);
     try {
       final sources = state.sources
@@ -1218,11 +1311,13 @@ class _AiReadingWorkspaceState extends ConsumerState<AiReadingWorkspace> {
       final cards = await _generateMemoryStructured(
         prompt: prompt,
         correction: '输出 3-8 张卡片，每项必须包含 question、answer 和输入中的 sourceIds。',
-        parser: (response) => service.parseCards(response,
-            bookId: widget.controller.bookId,
-            topic: topic,
-            allowedSourceIds: topic.sourceIds.toSet(),
-            now: DateTime.now().millisecondsSinceEpoch),
+        parser: (response) => service.parseCards(
+          response,
+          bookId: widget.controller.bookId,
+          topic: topic,
+          allowedSourceIds: topic.sourceIds.toSet(),
+          now: DateTime.now().millisecondsSinceEpoch,
+        ),
       );
       await ref
           .read(readingMemoryProvider(widget.controller.bookId).notifier)
@@ -1233,15 +1328,20 @@ class _AiReadingWorkspaceState extends ConsumerState<AiReadingWorkspace> {
     }
   }
 
-  Future<List<T>> _generateMemoryStructured<T>(
-      {required String prompt,
-      required String correction,
-      required List<T> Function(String response) parser,
-      bool useExtractionEngine = false}) async {
+  Future<List<T>> _generateMemoryStructured<T>({
+    required String prompt,
+    required String correction,
+    required List<T> Function(String response) parser,
+    bool useExtractionEngine = false,
+  }) async {
     Future<String> generate(String value) async {
       if (!useExtractionEngine) {
-        return aiGenerateText([ChatMessage.humanText(value)],
-            useAgent: false, ref: ref);
+        return aiGenerateText(
+          [ChatMessage.humanText(value)],
+          useAgent: false,
+          ref: ref,
+          outputContract: const AiOutputContract.json(),
+        );
       }
       final extracted = await aiExtractionEngine.extract(
         taskId: AiExtractionTaskIds.readingMemoryTopics,
@@ -1267,8 +1367,9 @@ $correction
   }
 
   Widget _buildResultList(String title, Object? values) {
-    final items =
-        (values as List? ?? const []).map((value) => value.toString());
+    final items = (values as List? ?? const []).map(
+      (value) => value.toString(),
+    );
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Column(
@@ -1294,7 +1395,8 @@ $correction
         color: selected ? scheme.primaryContainer : Colors.transparent,
         shape: RoundedRectangleBorder(
           side: BorderSide(
-              color: selected ? scheme.primary : scheme.outlineVariant),
+            color: selected ? scheme.primary : scheme.outlineVariant,
+          ),
           borderRadius: BorderRadius.circular(8),
         ),
         child: InkWell(
@@ -1309,11 +1411,11 @@ $correction
                   Icon(
                     selected
                         ? (multiple
-                            ? Icons.check_box
-                            : Icons.radio_button_checked)
+                              ? Icons.check_box
+                              : Icons.radio_button_checked)
                         : (multiple
-                            ? Icons.check_box_outline_blank
-                            : Icons.radio_button_unchecked),
+                              ? Icons.check_box_outline_blank
+                              : Icons.radio_button_unchecked),
                     size: 20,
                   ),
                   const SizedBox(width: 10),
@@ -1323,8 +1425,10 @@ $correction
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                          fontWeight:
-                              selected ? FontWeight.w700 : FontWeight.w400),
+                        fontWeight: selected
+                            ? FontWeight.w700
+                            : FontWeight.w400,
+                      ),
                     ),
                   ),
                 ],
@@ -1336,12 +1440,10 @@ $correction
     );
   }
 
-  Future<void> _generatePersonalizedGuide(
-    InspectionReadingGuide guide,
-  ) async {
-    final chapters = _flattenToc(ref.read(bookTocProvider))
-        .where((item) => item.href.trim().isNotEmpty)
-        .toList(growable: false);
+  Future<void> _generatePersonalizedGuide(InspectionReadingGuide guide) async {
+    final chapters = _flattenToc(
+      ref.read(bookTocProvider),
+    ).where((item) => item.href.trim().isNotEmpty).toList(growable: false);
     if (chapters.isEmpty || widget.onFetchChapterSample == null) {
       AnxToast.show('目录尚未准备好');
       return;
@@ -1362,7 +1464,8 @@ $correction
       final toc = chapters
           .map((item) => {'title': item.label, 'href': item.href})
           .toList(growable: false);
-      final prompt = '''根据书籍元数据、目录和限量章节样本生成低输入检视阅读向导。
+      final prompt =
+          '''根据书籍元数据、目录和限量章节样本生成低输入检视阅读向导。
 只输出 JSON 对象，不要 Markdown。格式：
 {"bookType":"类型","coreQuestion":"核心问题","topics":["主题1","主题2","主题3"],"structure":["结构1","结构2"],"keyChapters":[{"title":"章节名","href":"目录中的原始href","reason":"原因"}],"plan":["步骤1","步骤2"],"questionOptions":{"whole":["选项1","选项2","选项3"],"detail":["选项1","选项2","选项3"],"truth":["选项1","选项2","选项3"],"relation":["选项1","选项2","选项3"]}}
 要求：选项必须具体对应本书、短且互不重复；不得编造目录 href；每组 3-5 项。
@@ -1426,18 +1529,22 @@ $correction
         'activeAnswers': answered,
         'quizzes': state.quizzes
             .take(30)
-            .map((quiz) => {
-                  'chapter': quiz.chapterTitle,
-                  'mastery': quiz.mastery?.name,
-                })
+            .map(
+              (quiz) => {
+                'chapter': quiz.chapterTitle,
+                'mastery': quiz.mastery?.name,
+              },
+            )
             .toList(growable: false),
         'difficulties': state.difficulties
             .take(30)
-            .map((item) => {
-                  'text': item.text,
-                  'type': item.type.name,
-                  'status': item.status.name,
-                })
+            .map(
+              (item) => {
+                'text': item.text,
+                'type': item.type.name,
+                'status': item.status.name,
+              },
+            )
             .toList(growable: false),
       };
       final prompt = '''根据用户已有阅读记录生成整本书成果，不补写用户没有表达的个人观点。
@@ -1478,6 +1585,7 @@ $correction
       [ChatMessage.humanText(prompt)],
       useAgent: false,
       ref: ref,
+      outputContract: const AiOutputContract.json(),
     );
     try {
       return parser(response);
@@ -1491,17 +1599,15 @@ $correctionRule
         ],
         useAgent: false,
         ref: ref,
+        outputContract: const AiOutputContract.json(),
       );
       return parser(response);
     }
   }
 
   List<TocItem> _flattenToc(List<TocItem> items) => [
-        for (final item in items) ...[
-          item,
-          ..._flattenToc(item.subitems),
-        ],
-      ];
+    for (final item in items) ...[item, ..._flattenToc(item.subitems)],
+  ];
 
   Future<void> _generateQuiz(ChapterQuiz quiz) async {
     final content = await widget.onFetchChapter?.call(quiz.chapterHref) ?? '';
@@ -1510,7 +1616,8 @@ $correctionRule
       return;
     }
     AnxToast.show('正在生成 3 道选择题');
-    final prompt = '''根据下面章节生成 3 道低输入阅读自测题。
+    final prompt =
+        '''根据下面章节生成 3 道低输入阅读自测题。
 只输出 JSON 数组，不要 Markdown。每项格式：
 {"id":"q1","question":"问题","options":["选项1","选项2","选项3","暂不确定"],"correct":["选项1"],"multiple":false}
 要求：问题依次覆盖主旨、论证路径、联系或批评；每题 3-5 个短选项；必须包含“暂不确定”；错误项来自常见误解。
@@ -1520,6 +1627,7 @@ $correctionRule
       [ChatMessage.humanText(prompt)],
       useAgent: false,
       ref: ref,
+      outputContract: const AiOutputContract.json(),
     );
     if (!mounted) return;
     try {
@@ -1536,10 +1644,13 @@ $correctionRule
           ],
           useAgent: false,
           ref: ref,
+          outputContract: const AiOutputContract.json(),
         );
         questions = parseChapterQuizResponse(response);
       }
-      await ref.read(readingCoachProvider(quiz.bookId).notifier).saveQuiz(
+      await ref
+          .read(readingCoachProvider(quiz.bookId).notifier)
+          .saveQuiz(
             ChapterQuiz(
               id: quiz.id,
               bookId: quiz.bookId,
@@ -1585,8 +1696,9 @@ $correctionRule
                       final id = question['id']?.toString() ?? 'q$index';
                       final multiple = question['multiple'] == true;
                       final selected = answers[id] ??= [];
-                      final options = (question['options'] as List)
-                          .map((value) => value.toString());
+                      final options = (question['options'] as List).map(
+                        (value) => value.toString(),
+                      );
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 20),
                         child: Column(
@@ -1621,7 +1733,8 @@ $correctionRule
                     width: double.infinity,
                     height: 48,
                     child: FilledButton(
-                      onPressed: answers.length < quiz.questions.length ||
+                      onPressed:
+                          answers.length < quiz.questions.length ||
                               answers.values.any((value) => value.isEmpty)
                           ? null
                           : () async {
@@ -1632,9 +1745,9 @@ $correctionRule
                                     (question['correct'] as List? ?? const [])
                                         .map((value) => value.toString())
                                         .toSet();
-                                if (answers[id]
-                                            ?.toSet()
-                                            .containsAll(expected) ==
+                                if (answers[id]?.toSet().containsAll(
+                                          expected,
+                                        ) ==
                                         true &&
                                     expected.containsAll(answers[id]!)) {
                                   correct++;
@@ -1643,11 +1756,12 @@ $correctionRule
                               final mastery = correct >= 3
                                   ? ReadingMasteryLevel.solid
                                   : correct >= 2
-                                      ? ReadingMasteryLevel.developing
-                                      : ReadingMasteryLevel.needsReview;
+                                  ? ReadingMasteryLevel.developing
+                                  : ReadingMasteryLevel.needsReview;
                               await ref
-                                  .read(readingCoachProvider(quiz.bookId)
-                                      .notifier)
+                                  .read(
+                                    readingCoachProvider(quiz.bookId).notifier,
+                                  )
                                   .saveQuiz(
                                     ChapterQuiz(
                                       id: quiz.id,
@@ -1695,12 +1809,14 @@ $correctionRule
             current.analysisDepth == null)) {
       return const SizedBox.shrink();
     }
-    final frameworkLabels = current.frameworks.map((value) {
-      final framework = ReadingFramework.fromJson(value);
-      return framework == null
-          ? value
-          : const ReadingFrameworkRegistry().get(framework).label;
-    }).join('、');
+    final frameworkLabels = current.frameworks
+        .map((value) {
+          final framework = ReadingFramework.fromJson(value);
+          return framework == null
+              ? value
+              : const ReadingFrameworkRegistry().get(framework).label;
+        })
+        .join('、');
     return ExpansionTile(
       initiallyExpanded: false,
       leading: const Icon(Icons.hub_outlined, size: 18),
@@ -1842,7 +1958,7 @@ $correctionRule
                       );
                       final started =
                           widget.chatKey.currentState?.sendPrompt(prompt) ??
-                              false;
+                          false;
                       if (started) {
                         widget.controller.clearPendingSelection();
                       }
@@ -1880,7 +1996,8 @@ $correctionRule
   Widget _buildAnalysisConfig(ReadingContextSnapshot snapshot) {
     const registry = ReadingFrameworkRegistry();
     final maxFrameworks = Prefs().readingAnalysisMaxFrameworks;
-    final researchEnabled = Prefs().readingResearchWebSearch &&
+    final researchEnabled =
+        Prefs().readingResearchWebSearch &&
         Prefs().readingWebSearchConfig.enabled;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -2114,8 +2231,8 @@ $correctionRule
           final visible = widget.controller.showAllHistory
               ? entries
               : entries
-                  .where((entry) => entry.bookId == widget.controller.bookId)
-                  .toList(growable: false);
+                    .where((entry) => entry.bookId == widget.controller.bookId)
+                    .toList(growable: false);
           if (visible.isEmpty) {
             return Center(child: Text(L10n.of(context).noConversationTip));
           }
@@ -2201,9 +2318,7 @@ $correctionRule
             Text(
               '框架：${entry.frameworks.map((value) {
                 final framework = ReadingFramework.fromJson(value);
-                return framework == null
-                    ? value
-                    : const ReadingFrameworkRegistry().get(framework).label;
+                return framework == null ? value : const ReadingFrameworkRegistry().get(framework).label;
               }).join('、')}',
             ),
           if (entry.outputTemplate != null)
@@ -2268,28 +2383,33 @@ $correctionRule
             children: ReadingExpertRegistry()
                 .forMode(widget.controller.mode)
                 .map((expert) {
-              final selected =
-                  widget.controller.selectedExpertIds.contains(expert.id);
-              return FilterChip(
-                label: Text(expert.title),
-                selected: selected,
-                onSelected: (value) {
-                  final ids = [...widget.controller.selectedExpertIds];
-                  if (value) {
-                    final limit = widget.controller.analysisDepth ==
-                            ReadingAnalysisDepth.quick
-                        ? 1
-                        : 3;
-                    if (ids.length >= limit) ids.removeAt(0);
-                    ids.add(expert.id);
-                  } else {
-                    ids.remove(expert.id);
-                  }
-                  widget.controller.setExpertSelection(ids,
-                      persist: _rememberExpertSelection);
-                },
-              );
-            }).toList(growable: false),
+                  final selected = widget.controller.selectedExpertIds.contains(
+                    expert.id,
+                  );
+                  return FilterChip(
+                    label: Text(expert.title),
+                    selected: selected,
+                    onSelected: (value) {
+                      final ids = [...widget.controller.selectedExpertIds];
+                      if (value) {
+                        final limit =
+                            widget.controller.analysisDepth ==
+                                ReadingAnalysisDepth.quick
+                            ? 1
+                            : 3;
+                        if (ids.length >= limit) ids.removeAt(0);
+                        ids.add(expert.id);
+                      } else {
+                        ids.remove(expert.id);
+                      }
+                      widget.controller.setExpertSelection(
+                        ids,
+                        persist: _rememberExpertSelection,
+                      );
+                    },
+                  );
+                })
+                .toList(growable: false),
           ),
           CheckboxListTile(
             contentPadding: EdgeInsets.zero,
@@ -2397,9 +2517,10 @@ $correctionRule
           ),
           const Divider(),
           Text('可信来源', style: Theme.of(context).textTheme.titleMedium),
-          for (final domain in Prefs()
-              .readingTrustedSourcePack(widget.controller.mode)
-              .domains)
+          for (final domain
+              in Prefs()
+                  .readingTrustedSourcePack(widget.controller.mode)
+                  .domains)
             ListTile(
               dense: true,
               contentPadding: EdgeInsets.zero,
@@ -2545,9 +2666,7 @@ $correctionRule
     final resolved = item.status == ReadingDifficultyStatus.resolved;
     return ListTile(
       contentPadding: EdgeInsets.zero,
-      leading: Icon(
-        resolved ? Icons.check_circle_outline : Icons.more_horiz,
-      ),
+      leading: Icon(resolved ? Icons.check_circle_outline : Icons.more_horiz),
       title: Text(item.text, maxLines: 2, overflow: TextOverflow.ellipsis),
       subtitle: Text(
         '${item.chapterTitle ?? '当前章节'} · ${_difficultyTypeLabel(item.type)}',
@@ -2583,10 +2702,7 @@ $correctionRule
             ),
           if (!resolved) const PopupMenuDivider(),
           if (!resolved)
-            const PopupMenuItem(
-              value: 'resolve',
-              child: Text('标记为已解决'),
-            ),
+            const PopupMenuItem(value: 'resolve', child: Text('标记为已解决')),
         ],
       ),
       onTap: () {
@@ -2614,34 +2730,38 @@ $correctionRule
   }
 
   String _difficultyTypeLabel(ReadingDifficultyType type) => switch (type) {
-        ReadingDifficultyType.concept => '概念不懂',
-        ReadingDifficultyType.argument => '论证没跟上',
-        ReadingDifficultyType.background => '背景缺失',
-        ReadingDifficultyType.question => '有疑问',
-        ReadingDifficultyType.later => '稍后再想',
-      };
+    ReadingDifficultyType.concept => '概念不懂',
+    ReadingDifficultyType.argument => '论证没跟上',
+    ReadingDifficultyType.background => '背景缺失',
+    ReadingDifficultyType.question => '有疑问',
+    ReadingDifficultyType.later => '稍后再想',
+  };
 
   String _masteryLabel(ReadingMasteryLevel? mastery) => switch (mastery) {
-        ReadingMasteryLevel.needsReview => '待复习',
-        ReadingMasteryLevel.developing => '基本掌握',
-        ReadingMasteryLevel.solid => '理解扎实',
-        null => '已完成',
-      };
+    ReadingMasteryLevel.needsReview => '待复习',
+    ReadingMasteryLevel.developing => '基本掌握',
+    ReadingMasteryLevel.solid => '理解扎实',
+    null => '已完成',
+  };
 
   Future<void> _setTopicStatus(
-          ReadingMemoryTopic item, ReadingMemoryItemStatus status) =>
-      ref
-          .read(readingMemoryProvider(widget.controller.bookId).notifier)
-          .setTopicStatus(item, status);
+    ReadingMemoryTopic item,
+    ReadingMemoryItemStatus status,
+  ) => ref
+      .read(readingMemoryProvider(widget.controller.bookId).notifier)
+      .setTopicStatus(item, status);
 
   Future<void> _setCardStatus(
-          ReadingKnowledgeCard item, ReadingMemoryItemStatus status) =>
-      ref
-          .read(readingMemoryProvider(widget.controller.bookId).notifier)
-          .setCardStatus(item, status);
+    ReadingKnowledgeCard item,
+    ReadingMemoryItemStatus status,
+  ) => ref
+      .read(readingMemoryProvider(widget.controller.bookId).notifier)
+      .setCardStatus(item, status);
 
   Future<void> _rateCard(
-      ReadingKnowledgeCard card, ReadingReviewRating rating) async {
+    ReadingKnowledgeCard card,
+    ReadingReviewRating rating,
+  ) async {
     await ref
         .read(readingMemoryProvider(widget.controller.bookId).notifier)
         .review(card, rating);
@@ -2654,53 +2774,68 @@ $correctionRule
   }
 
   Future<void> _showMemorySources(
-      List<String> ids, List<ReadingMemorySource> sources) async {
+    List<String> ids,
+    List<ReadingMemorySource> sources,
+  ) async {
     final l10n = L10n.of(context);
-    final selected =
-        sources.where((source) => ids.contains(source.id)).toList();
+    final selected = sources
+        .where((source) => ids.contains(source.id))
+        .toList();
     await showModalBottomSheet<void>(
       context: context,
       builder: (sheetContext) => SafeArea(
-          child: ListView(
-        shrinkWrap: true,
-        padding: const EdgeInsets.all(16),
-        children: [
-          Text(l10n.readingMemoryOriginalSources,
-              style: Theme.of(context).textTheme.titleLarge),
-          const SizedBox(height: 8),
-          for (final source in selected)
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              title: Text(source.chapterTitle ??
-                  ((source.isAvailable &&
-                          (source.cfi?.isNotEmpty == true ||
-                              source.chapterHref?.isNotEmpty == true))
-                      ? l10n.readingMemoryUntitledChapter
-                      : l10n.readingMemoryLocationUnavailable)),
-              subtitle: Text(source.text,
-                  maxLines: 4, overflow: TextOverflow.ellipsis),
-              trailing: source.isAvailable &&
-                      (source.cfi?.isNotEmpty == true ||
-                          source.chapterHref?.isNotEmpty == true)
-                  ? const Icon(Icons.chevron_right)
-                  : null,
-              onTap: source.isAvailable &&
-                      (source.cfi?.isNotEmpty == true ||
-                          source.chapterHref?.isNotEmpty == true)
-                  ? () {
-                      Navigator.pop(sheetContext);
-                      widget.onNavigateChapter
-                          ?.call(source.cfi ?? source.chapterHref!);
-                    }
-                  : null,
+        child: ListView(
+          shrinkWrap: true,
+          padding: const EdgeInsets.all(16),
+          children: [
+            Text(
+              l10n.readingMemoryOriginalSources,
+              style: Theme.of(context).textTheme.titleLarge,
             ),
-        ],
-      )),
+            const SizedBox(height: 8),
+            for (final source in selected)
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(
+                  source.chapterTitle ??
+                      ((source.isAvailable &&
+                              (source.cfi?.isNotEmpty == true ||
+                                  source.chapterHref?.isNotEmpty == true))
+                          ? l10n.readingMemoryUntitledChapter
+                          : l10n.readingMemoryLocationUnavailable),
+                ),
+                subtitle: Text(
+                  source.text,
+                  maxLines: 4,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                trailing:
+                    source.isAvailable &&
+                        (source.cfi?.isNotEmpty == true ||
+                            source.chapterHref?.isNotEmpty == true)
+                    ? const Icon(Icons.chevron_right)
+                    : null,
+                onTap:
+                    source.isAvailable &&
+                        (source.cfi?.isNotEmpty == true ||
+                            source.chapterHref?.isNotEmpty == true)
+                    ? () {
+                        Navigator.pop(sheetContext);
+                        widget.onNavigateChapter?.call(
+                          source.cfi ?? source.chapterHref!,
+                        );
+                      }
+                    : null,
+              ),
+          ],
+        ),
+      ),
     );
   }
 
   Map<String, List<ReadingCardReview>> _groupReviews(
-      List<ReadingCardReview> reviews) {
+    List<ReadingCardReview> reviews,
+  ) {
     final result = <String, List<ReadingCardReview>>{};
     for (final review in reviews) {
       result.putIfAbsent(_dateLabel(review.reviewedAt), () => []).add(review);
@@ -2714,11 +2849,10 @@ $correctionRule
   }
 
   String _reviewRatingLabel(ReadingReviewRating rating) => switch (rating) {
-        ReadingReviewRating.hard => L10n.of(context).readingMemoryHard,
-        ReadingReviewRating.remembered =>
-          L10n.of(context).readingMemoryRemembered,
-        ReadingReviewRating.mastered => L10n.of(context).readingMemoryMastered,
-      };
+    ReadingReviewRating.hard => L10n.of(context).readingMemoryHard,
+    ReadingReviewRating.remembered => L10n.of(context).readingMemoryRemembered,
+    ReadingReviewRating.mastered => L10n.of(context).readingMemoryMastered,
+  };
 
   void _setMode(ReadingAiMode mode) {
     widget.controller.setMode(mode);
@@ -2742,13 +2876,15 @@ $correctionRule
     );
     widget.controller.clearPendingSelection();
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(L10n.of(context).commonSaveSuccess),
-      action: SnackBarAction(
-        label: '撤销',
-        onPressed: () => ReadingNoteCaptureService().undo(document.note.id),
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(L10n.of(context).commonSaveSuccess),
+        action: SnackBarAction(
+          label: '撤销',
+          onPressed: () => ReadingNoteCaptureService().undo(document.note.id),
+        ),
       ),
-    ));
+    );
   }
 
   Future<void> _saveAnswerAsNote(String answer) async {
@@ -2764,7 +2900,8 @@ $correctionRule
         ?.value
         .where((item) => item.id == sessionId)
         .firstOrNull;
-    final sourceLines = entry?.citations
+    final sourceLines =
+        entry?.citations
             .map((source) => source['url']?.toString())
             .whereType<String>()
             .take(3)
@@ -2774,9 +2911,7 @@ $correctionRule
         ? ''
         : '深度分析：${_analysisDepthLabel(ReadingAnalysisDepth.fromJson(entry!.analysisDepth))} · ${entry.frameworks.map((value) {
             final framework = ReadingFramework.fromJson(value);
-            return framework == null
-                ? value
-                : const ReadingFrameworkRegistry().get(framework).label;
+            return framework == null ? value : const ReadingFrameworkRegistry().get(framework).label;
           }).join('、')}\n';
     final normalized = answer.replaceAll(RegExp(r'\s+'), ' ').trim();
     final summary = normalized.length <= 480
@@ -2796,7 +2931,8 @@ $correctionRule
         cfi: cfi,
         chapterTitle: snapshot.chapterTitle ?? '',
         chapterHref: snapshot.chapterHref,
-        body: 'AI 摘要：$summary\n'
+        body:
+            'AI 摘要：$summary\n'
             '$analysisLine'
             '${sourceLines.isEmpty ? '' : '来源：\n$sourceLines\n'}'
             '会话：anx-ai-session://${sessionId ?? ''}',
@@ -2813,7 +2949,8 @@ $correctionRule
         chapter: snapshot.chapterTitle ?? '',
         type: 'highlight',
         color: Prefs().annotationColor,
-        readerNote: 'AI 摘要：$summary\n'
+        readerNote:
+            'AI 摘要：$summary\n'
             '$analysisLine'
             '${sourceLines.isEmpty ? '' : '来源：\n$sourceLines\n'}'
             '会话：anx-ai-session://${sessionId ?? ''}',
@@ -2833,49 +2970,49 @@ $correctionRule
   }
 
   String _modeLabel(ReadingAiMode mode) => switch (mode) {
-        ReadingAiMode.general => '通用陪读',
-        ReadingAiMode.history => '历史陪读',
-        ReadingAiMode.psychology => '心理陪读',
-        ReadingAiMode.finance => '理财陪读',
-      };
+    ReadingAiMode.general => '通用陪读',
+    ReadingAiMode.history => '历史陪读',
+    ReadingAiMode.psychology => '心理陪读',
+    ReadingAiMode.finance => '理财陪读',
+  };
 
   String _actionLabel(SelectionAiAction action) => switch (action) {
-        SelectionAiAction.explain => '解释',
-        SelectionAiAction.summarize => '总结',
-        SelectionAiAction.contextualize =>
-          widget.controller.mode == ReadingAiMode.history ? '时间线/背景' : '联系全书',
-        SelectionAiAction.factCheck =>
-          widget.controller.mode == ReadingAiMode.history ? '史料核查' : '事实核查',
-        SelectionAiAction.analyze =>
-          widget.controller.mode == ReadingAiMode.psychology
-              ? '反思对话'
-              : widget.controller.mode == ReadingAiMode.finance
-                  ? '验证假设/风险'
-                  : '分析',
-        SelectionAiAction.translate => '翻译',
-        SelectionAiAction.connectToBook => '联系全书',
-        SelectionAiAction.addNote => '加入笔记',
-        SelectionAiAction.sourceLookup => '查典籍',
-        SelectionAiAction.timeline => '时间线',
-        SelectionAiAction.reflection => '反思对话',
-        SelectionAiAction.exercise => '生成练习',
-        SelectionAiAction.validateAssumption => '验证假设',
-        SelectionAiAction.calculate => '计算',
-        SelectionAiAction.riskCheck => '风险检查',
-        SelectionAiAction.deepAnalyze => '深度分析',
-      };
+    SelectionAiAction.explain => '解释',
+    SelectionAiAction.summarize => '总结',
+    SelectionAiAction.contextualize =>
+      widget.controller.mode == ReadingAiMode.history ? '时间线/背景' : '联系全书',
+    SelectionAiAction.factCheck =>
+      widget.controller.mode == ReadingAiMode.history ? '史料核查' : '事实核查',
+    SelectionAiAction.analyze =>
+      widget.controller.mode == ReadingAiMode.psychology
+          ? '反思对话'
+          : widget.controller.mode == ReadingAiMode.finance
+          ? '验证假设/风险'
+          : '分析',
+    SelectionAiAction.translate => '翻译',
+    SelectionAiAction.connectToBook => '联系全书',
+    SelectionAiAction.addNote => '加入笔记',
+    SelectionAiAction.sourceLookup => '查典籍',
+    SelectionAiAction.timeline => '时间线',
+    SelectionAiAction.reflection => '反思对话',
+    SelectionAiAction.exercise => '生成练习',
+    SelectionAiAction.validateAssumption => '验证假设',
+    SelectionAiAction.calculate => '计算',
+    SelectionAiAction.riskCheck => '风险检查',
+    SelectionAiAction.deepAnalyze => '深度分析',
+  };
 
   String _analysisDepthLabel(ReadingAnalysisDepth depth) => switch (depth) {
-        ReadingAnalysisDepth.quick => '快读',
-        ReadingAnalysisDepth.standard => '精读',
-        ReadingAnalysisDepth.deep => '深读',
-        ReadingAnalysisDepth.research => '研究',
-      };
+    ReadingAnalysisDepth.quick => '快读',
+    ReadingAnalysisDepth.standard => '精读',
+    ReadingAnalysisDepth.deep => '深读',
+    ReadingAnalysisDepth.research => '研究',
+  };
 
   String _analysisOutputLabel(ReadingOutputTemplate output) => switch (output) {
-        ReadingOutputTemplate.learningNote => '学习笔记',
-        ReadingOutputTemplate.argumentAnalysis => '论证分析',
-        ReadingOutputTemplate.conceptMap => '概念图',
-        ReadingOutputTemplate.practicePlan => '实践计划',
-      };
+    ReadingOutputTemplate.learningNote => '学习笔记',
+    ReadingOutputTemplate.argumentAnalysis => '论证分析',
+    ReadingOutputTemplate.conceptMap => '概念图',
+    ReadingOutputTemplate.practicePlan => '实践计划',
+  };
 }

@@ -33,6 +33,7 @@ import 'package:anx_reader/providers/sync.dart';
 import 'package:anx_reader/providers/book_toc.dart';
 import 'package:anx_reader/dao/reading_agent_sync.dart';
 import 'package:anx_reader/service/ai/index.dart';
+import 'package:anx_reader/service/ai/ai_request.dart';
 import 'package:anx_reader/service/ai/ai_history.dart';
 import 'package:anx_reader/service/ai/prompt_generate.dart';
 import 'package:anx_reader/service/ai/reading_ai_models.dart';
@@ -178,13 +179,13 @@ class ReadingPageState extends ConsumerState<ReadingPage>
     );
     final resumeArtifacts =
         closure.supports(ReadingClosureCapability.resumeContext)
-            ? await readingAgentRepository.artifacts(
-                _book.id,
-                kind: ReadingArtifactKinds.resumeContext,
-                status: ReadingArtifactStatus.active,
-                visibleAtProgress: _book.readingPercentage,
-              )
-            : const <ReadingArtifact>[];
+        ? await readingAgentRepository.artifacts(
+            _book.id,
+            kind: ReadingArtifactKinds.resumeContext,
+            status: ReadingArtifactStatus.active,
+            visibleAtProgress: _book.readingPercentage,
+          )
+        : const <ReadingArtifact>[];
     if (!mounted) return;
     aiWorkspaceController.setReadingProfile(profile);
     setState(() {
@@ -197,11 +198,11 @@ class ReadingPageState extends ConsumerState<ReadingPage>
   Future<void> _setClosureModule(String? moduleId) async {
     final detected =
         ReadingClosurePolicyMatcher(registry: widget.closureRegistry).detect(
-      mode: Prefs().readingAiModeForBook(_book.id),
-      title: _book.title,
-      author: _book.author,
-      description: _book.description ?? '',
-    );
+          mode: Prefs().readingAiModeForBook(_book.id),
+          title: _book.title,
+          author: _book.author,
+          description: _book.description ?? '',
+        );
     final profile = moduleId == null
         ? await readingExperienceProfileService.setAutomatic(
             bookId: _book.id,
@@ -308,7 +309,8 @@ class ReadingPageState extends ConsumerState<ReadingPage>
     WakelockPlus.disable();
     showStatusBar();
     WidgetsBinding.instance.removeObserver(this);
-    final progressSaved = epubPlayerKey.currentState?.saveReadingProgress() ??
+    final progressSaved =
+        epubPlayerKey.currentState?.saveReadingProgress() ??
         Future<void>.value();
     final readingStateSaved = Future.wait<void>([
       progressSaved,
@@ -691,8 +693,9 @@ class ReadingPageState extends ConsumerState<ReadingPage>
 
   void _applyAiChatResizeDelta(double delta, BuildContext context) {
     final maxWidth = _aiChatMaxWidth(context);
-    final updated =
-        (_aiChatWidth - delta).clamp(_aiChatMinWidth, maxWidth).toDouble();
+    final updated = (_aiChatWidth - delta)
+        .clamp(_aiChatMinWidth, maxWidth)
+        .toDouble();
     if (updated != _aiChatWidth) {
       setState(() {
         _aiChatWidth = updated;
@@ -719,8 +722,9 @@ class ReadingPageState extends ConsumerState<ReadingPage>
 
   void _applyAiChatResizeDeltaVertical(double delta, BuildContext context) {
     final maxHeight = _aiChatMaxHeight(context);
-    final updated =
-        (_aiChatHeight - delta).clamp(_aiChatMinHeight, maxHeight).toDouble();
+    final updated = (_aiChatHeight - delta)
+        .clamp(_aiChatMinHeight, maxHeight)
+        .toDouble();
     if (updated != _aiChatHeight) {
       setState(() {
         _aiChatHeight = updated;
@@ -811,7 +815,8 @@ class ReadingPageState extends ConsumerState<ReadingPage>
   Future<void> _offerRemoteProgressIfAvailable({bool manual = false}) async {
     if (!mounted || (!manual && widget.cfi != null)) return;
     if (_checkingRemoteProgress) return;
-    final syncEnabled = Prefs().cloudBaseSyncEnabled ||
+    final syncEnabled =
+        Prefs().cloudBaseSyncEnabled ||
         Prefs().selfHostedProgressSyncEnabled ||
         Prefs().webdavStatus;
     if (!syncEnabled) {
@@ -924,8 +929,8 @@ class ReadingPageState extends ConsumerState<ReadingPage>
           setState(() {
             Prefs().aiPanelPosition =
                 Prefs().aiPanelPosition == AiPanelPositionEnum.right
-                    ? AiPanelPositionEnum.bottom
-                    : AiPanelPositionEnum.right;
+                ? AiPanelPositionEnum.bottom
+                : AiPanelPositionEnum.right;
           });
         },
         icon: Icon(
@@ -993,28 +998,29 @@ class ReadingPageState extends ConsumerState<ReadingPage>
     final state = readingAgentRuntime.state;
     final closure = _closurePolicy;
     final goal = state.activeGoal;
-    final pending = state.pendingProfileCount +
+    final pending =
+        state.pendingProfileCount +
         (closure.checkpointTriggersCapsule ? state.pendingCheckpointCount : 0) +
         (closure.showKnowledgeCards ? state.dueKnowledgeCardCount : 0);
     final coveragePending = _readingCoverage?.setupPending == true;
-    final startPercent =
-        ((_readingCoverage?.initializedAtProgress ?? 0) * 100).round();
+    final startPercent = ((_readingCoverage?.initializedAtProgress ?? 0) * 100)
+        .round();
     final title = coveragePending
         ? '你从本书 $startPercent% 开始使用阅读 Agent，可选择建立前情档案'
         : goal?.title ??
-            (pending > 0
-                ? '有 $pending 项待处理'
-                : _resumeContextAvailable
-                    ? '可恢复上次阅读上下文'
-                    : state.unresolvedDifficultyCount > 0
-                        ? '${state.unresolvedDifficultyCount} 个问题待解决'
-                        : '最近动作可撤销');
+              (pending > 0
+                  ? '有 $pending 项待处理'
+                  : _resumeContextAvailable
+                  ? '可恢复上次阅读上下文'
+                  : state.unresolvedDifficultyCount > 0
+                  ? '${state.unresolvedDifficultyCount} 个问题待解决'
+                  : '最近动作可撤销');
     final semantics = coveragePending
         ? '阅读 Agent，$title'
         : goal == null
-            ? '阅读 Agent，$title'
-            : '阅读目标：${goal.title}，进度 ${(goal.progress * 100).round()}%'
-                '${pending > 0 ? '，$pending 项待处理' : ''}';
+        ? '阅读 Agent，$title'
+        : '阅读目标：${goal.title}，进度 ${(goal.progress * 100).round()}%'
+              '${pending > 0 ? '，$pending 项待处理' : ''}';
     return Align(
       alignment: Alignment.topCenter,
       child: Semantics(
@@ -1099,7 +1105,9 @@ class ReadingPageState extends ConsumerState<ReadingPage>
       return;
     }
     final now = DateTime.now().millisecondsSinceEpoch;
-    await ref.read(readingCoachProvider(_book.id).notifier).saveQuiz(
+    await ref
+        .read(readingCoachProvider(_book.id).notifier)
+        .saveQuiz(
           ChapterQuiz(
             id: '${_book.id}-${previousHref.hashCode}-$now',
             bookId: _book.id,
@@ -1130,7 +1138,9 @@ class ReadingPageState extends ConsumerState<ReadingPage>
         prompt: generatePromptMindmap().buildString(),
       ),
       // User custom prompts (enabled only)
-      ...Prefs().userPrompts.where((p) => p.enabled).map(
+      ...Prefs().userPrompts
+          .where((p) => p.enabled)
+          .map(
             (userPrompt) => AiQuickPromptChip(
               icon: Icons.person_outline,
               label: userPrompt.name,
@@ -1642,7 +1652,7 @@ class ReadingPageState extends ConsumerState<ReadingPage>
     if (result.length < 6) {
       final manifest =
           await epubPlayerKey.currentState?.readingAgentChapterManifest() ??
-              const <ReadingAgentChapterManifestItem>[];
+          const <ReadingAgentChapterManifestItem>[];
       if (manifest.length > result.length) {
         result
           ..clear()
@@ -1679,25 +1689,27 @@ class ReadingPageState extends ConsumerState<ReadingPage>
       for (final unit in structure.units) unit.chapter.href: unit,
     };
     return [
-      for (var index = 0; index < unique.length; index++)
-        FictionBackfillChapter(
-          href: unique[index].href,
-          title: unique[index].title,
-          startProgress: unique[index].startProgress,
-          // The current partial chapter is excluded because fetching its full
-          // text could cross the safe boundary.
-          endProgress:
-              index + 1 < unique.length ? unique[index + 1].startProgress : 1,
-          workId: unitsByHref[unique[index].href]?.workId,
-          workTitle: unitsByHref[unique[index].href]?.workTitle,
-          volumeId: unitsByHref[unique[index].href]?.volumeId,
-          arcId: unitsByHref[unique[index].href]?.arcId,
-          sceneId: unitsByHref[unique[index].href]?.sceneId,
-          semanticKind: unitsByHref[unique[index].href]?.semanticKind ??
-              ReadingChapterSemanticKind.narrative,
-          isNavigationDocument: unique[index].isNavigationDocument,
-        ),
-    ]
+          for (var index = 0; index < unique.length; index++)
+            FictionBackfillChapter(
+              href: unique[index].href,
+              title: unique[index].title,
+              startProgress: unique[index].startProgress,
+              // The current partial chapter is excluded because fetching its full
+              // text could cross the safe boundary.
+              endProgress: index + 1 < unique.length
+                  ? unique[index + 1].startProgress
+                  : 1,
+              workId: unitsByHref[unique[index].href]?.workId,
+              workTitle: unitsByHref[unique[index].href]?.workTitle,
+              volumeId: unitsByHref[unique[index].href]?.volumeId,
+              arcId: unitsByHref[unique[index].href]?.arcId,
+              sceneId: unitsByHref[unique[index].href]?.sceneId,
+              semanticKind:
+                  unitsByHref[unique[index].href]?.semanticKind ??
+                  ReadingChapterSemanticKind.narrative,
+              isNavigationDocument: unique[index].isNavigationDocument,
+            ),
+        ]
         .where(
           (chapter) =>
               !chapter.isNavigationDocument &&
@@ -1780,8 +1792,8 @@ class ReadingPageState extends ConsumerState<ReadingPage>
     final worldState = readingAgentRuntime.state;
     final currentProgress =
         worldState.bookId == _book.id && worldState.totalProgress > 0
-            ? worldState.totalProgress.clamp(0, 1).toDouble()
-            : _book.readingPercentage.clamp(0, 1).toDouble();
+        ? worldState.totalProgress.clamp(0, 1).toDouble()
+        : _book.readingPercentage.clamp(0, 1).toDouble();
     // This lower bound is installation-local. Synced Artifact coverage and a
     // remote device's farthest position must not silently redefine what this
     // device may scan. No local opt-out means the manual action starts at 0%.
@@ -1822,9 +1834,11 @@ class ReadingPageState extends ConsumerState<ReadingPage>
     var allowFullTextCloudFallback = false;
     final cloudPreviewContent = <String, String>{};
     if (extractionProvider == null) {
-      final estimate =
-          fictionBackfillService.estimateCloudPreview(chapters.length);
-      allowFullTextCloudFallback = await showDialog<bool>(
+      final estimate = fictionBackfillService.estimateCloudPreview(
+        chapters.length,
+      );
+      allowFullTextCloudFallback =
+          await showDialog<bool>(
             context: context,
             builder: (dialogContext) => AlertDialog(
               title: const Text('轻量提取引擎不可用'),
@@ -1869,15 +1883,15 @@ class ReadingPageState extends ConsumerState<ReadingPage>
       final effectiveFromProgress = restoredTask == null
           ? fromProgress
           : ((restoredTask.payload['fromProgress'] as num?)?.toDouble() ??
-                  fromProgress)
-              .clamp(0, currentProgress)
-              .toDouble();
+                    fromProgress)
+                .clamp(0, currentProgress)
+                .toDouble();
       final effectiveSafeBoundary = restoredTask == null
           ? currentProgress
           : ((restoredTask.payload['safeBoundary'] as num?)?.toDouble() ??
-                  currentProgress)
-              .clamp(effectiveFromProgress, currentProgress)
-              .toDouble();
+                    currentProgress)
+                .clamp(effectiveFromProgress, currentProgress)
+                .toDouble();
       final effectiveChapters = await _eligibleBackfillChapters(
         effectiveSafeBoundary,
         fromProgress: effectiveFromProgress,
@@ -1895,15 +1909,20 @@ class ReadingPageState extends ConsumerState<ReadingPage>
           loadChapter: (href) => cloudPreviewContent[href] != null
               ? Future.value(cloudPreviewContent[href]!)
               : epubPlayerKey.currentState?.chapterContentByHref(href) ??
-                  Future.value(''),
+                    Future.value(''),
           generate: useHybrid
               ? hybrid.generate
               : (prompt) => aiGenerateText(
-                    [ChatMessage.humanText(prompt)],
-                    ref: ref,
-                    readingMode: ReadingAiMode.general,
-                    task: AiContextTask.fictionBackfill,
-                  ),
+                  [ChatMessage.humanText(prompt)],
+                  ref: ref,
+                  readingMode: ReadingAiMode.general,
+                  task: AiContextTask.fictionBackfill,
+                  // The user has explicitly approved this full-text cloud
+                  // path after the extraction engine was unavailable. Do not
+                  // silently try another provider with the same chapter.
+                  allowFallback: false,
+                  outputContract: const AiOutputContract.json(),
+                ),
           sessionId: sessionId,
           ingestedAt: now,
           fromProgress: effectiveFromProgress,
@@ -1913,31 +1932,34 @@ class ReadingPageState extends ConsumerState<ReadingPage>
           // Both extraction routes require exact source evidence. The hybrid
           // route may additionally send only ambiguous short evidence to the
           // cloud verifier; the regular cloud route never accepts ambiguity.
-          validateCandidate:
-              useHybrid ? hybrid.validate : hybrid.validateDirect,
+          validateCandidate: useHybrid
+              ? hybrid.validate
+              : hybrid.validateDirect,
           artifactMetadata: useHybrid ? hybrid.artifactMetadata : const {},
-          onBatchCompleted: ({
-            required artifacts,
-            required checkpoints,
-            required completedChapters,
-            required totalChapters,
-          }) async {
-            execution.safePoint();
-            for (final artifact in artifacts) {
-              await agentActionService.saveArtifact(artifact);
-            }
-            for (final checkpoint in checkpoints) {
-              await readingAgentRepository.saveSystemArtifact(checkpoint);
-            }
-            await execution.update(
-              progress:
-                  totalChapters == 0 ? 1 : completedChapters / totalChapters,
-              checkpoint: {'completedChapters': completedChapters},
-            );
-            SmartDialog.showLoading(
-              msg: '正在整理已读章节 $completedChapters/$totalChapters…',
-            );
-          },
+          onBatchCompleted:
+              ({
+                required artifacts,
+                required checkpoints,
+                required completedChapters,
+                required totalChapters,
+              }) async {
+                execution.safePoint();
+                for (final artifact in artifacts) {
+                  await agentActionService.saveArtifact(artifact);
+                }
+                for (final checkpoint in checkpoints) {
+                  await readingAgentRepository.saveSystemArtifact(checkpoint);
+                }
+                await execution.update(
+                  progress: totalChapters == 0
+                      ? 1
+                      : completedChapters / totalChapters,
+                  checkpoint: {'completedChapters': completedChapters},
+                );
+                SmartDialog.showLoading(
+                  msg: '正在整理已读章节 $completedChapters/$totalChapters…',
+                );
+              },
           existingArtifacts: existingArtifacts,
         );
       }
@@ -2377,14 +2399,15 @@ class ReadingPageState extends ConsumerState<ReadingPage>
                       FutureBuilder<ReadingCoachState>(
                         future: ref.read(readingCoachProvider(_book.id).future),
                         builder: (context, snapshot) {
-                          final items = (snapshot.data?.difficulties ??
-                                  const <ReadingDifficulty>[])
-                              .where(
-                                (item) =>
-                                    item.status ==
-                                    ReadingDifficultyStatus.unresolved,
-                              )
-                              .take(5);
+                          final items =
+                              (snapshot.data?.difficulties ??
+                                      const <ReadingDifficulty>[])
+                                  .where(
+                                    (item) =>
+                                        item.status ==
+                                        ReadingDifficultyStatus.unresolved,
+                                  )
+                                  .take(5);
                           return Column(
                             children: [
                               for (final item in items)
@@ -2399,9 +2422,9 @@ class ReadingPageState extends ConsumerState<ReadingPage>
                                   subtitle: Text(item.chapterTitle ?? '未知章节'),
                                   onTap: () => ReaderCommandGateway.instance
                                       .navigateToCfi(
-                                    bookId: _book.id,
-                                    cfi: item.cfi,
-                                  ),
+                                        bookId: _book.id,
+                                        cfi: item.cfi,
+                                      ),
                                   trailing: IconButton(
                                     tooltip: '标记已解决',
                                     icon: const Icon(
@@ -2540,10 +2563,10 @@ class ReadingPageState extends ConsumerState<ReadingPage>
                                         onPressed: () async {
                                           await agentActionService
                                               .setProfileStatus(
-                                            key: item.key,
-                                            status:
-                                                ReaderProfileStatus.rejected,
-                                          );
+                                                key: item.key,
+                                                status: ReaderProfileStatus
+                                                    .rejected,
+                                              );
                                           readingAgentRuntime
                                               .profileCandidateResolved();
                                           setSheetState(() {});
@@ -2555,10 +2578,10 @@ class ReadingPageState extends ConsumerState<ReadingPage>
                                         onPressed: () async {
                                           await agentActionService
                                               .setProfileStatus(
-                                            key: item.key,
-                                            status:
-                                                ReaderProfileStatus.confirmed,
-                                          );
+                                                key: item.key,
+                                                status: ReaderProfileStatus
+                                                    .confirmed,
+                                              );
                                           readingAgentRuntime
                                               .profileCandidateResolved();
                                           setSheetState(() {});
@@ -2604,21 +2627,21 @@ class ReadingPageState extends ConsumerState<ReadingPage>
                                 ),
                                 trailing:
                                     action.status == AgentActionStatus.applied
-                                        ? TextButton(
-                                            onPressed: () async {
-                                              final result =
-                                                  await agentActionService.undo(
+                                    ? TextButton(
+                                        onPressed: () async {
+                                          final result =
+                                              await agentActionService.undo(
                                                 action,
                                               );
-                                              if (!context.mounted) return;
-                                              AnxToast.show(
-                                                _undoResultLabel(result),
-                                              );
-                                              setSheetState(() {});
-                                            },
-                                            child: const Text('撤销'),
-                                          )
-                                        : Text(action.status.name),
+                                          if (!context.mounted) return;
+                                          AnxToast.show(
+                                            _undoResultLabel(result),
+                                          );
+                                          setSheetState(() {});
+                                        },
+                                        child: const Text('撤销'),
+                                      )
+                                    : Text(action.status.name),
                               ),
                           ],
                         );
@@ -2772,8 +2795,9 @@ class ReadingPageState extends ConsumerState<ReadingPage>
       context: context,
       barrierDismissible: true,
       barrierLabel: '关闭本书面板',
-      transitionDuration:
-          disableAnimations ? Duration.zero : const Duration(milliseconds: 180),
+      transitionDuration: disableAnimations
+          ? Duration.zero
+          : const Duration(milliseconds: 180),
       pageBuilder: (dialogContext, _, __) => Align(
         alignment: Alignment.centerRight,
         child: SafeArea(
@@ -2879,11 +2903,12 @@ class ReadingPageState extends ConsumerState<ReadingPage>
     try {
       final inputs = <BookWikiChapter>[];
       for (final chapter in chapters) {
-        final content = await (epubPlayerKey.currentState?.chapterContentByHref(
-              chapter.href,
-              maxCharacters: 24000,
-            ) ??
-            Future.value(''));
+        final content =
+            await (epubPlayerKey.currentState?.chapterContentByHref(
+                  chapter.href,
+                  maxCharacters: 24000,
+                ) ??
+                Future.value(''));
         if (content.trim().isEmpty) continue;
         inputs.add(
           BookWikiChapter(
@@ -2923,6 +2948,8 @@ class ReadingPageState extends ConsumerState<ReadingPage>
             ref: ref,
             readingMode: ReadingAiMode.general,
             task: AiContextTask.fictionBackfill,
+            allowFallback: false,
+            outputContract: const AiOutputContract.json(),
           ),
           onProgress: (done, total, href) async {
             execution.safePoint();
@@ -2939,22 +2966,22 @@ class ReadingPageState extends ConsumerState<ReadingPage>
   }
 
   Future<void> _showBookWiki() => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => BookWikiPage(
-            book: _book,
-            visibleProgress: readingAgentRuntime.state.totalProgress,
-            onGenerate: _generateBookWiki,
-            onOpenLocation: (target) async {
-              if (target.startsWith('epubcfi(')) {
-                epubPlayerKey.currentState?.goToCfi(target);
-              } else if (target.isNotEmpty) {
-                epubPlayerKey.currentState?.goToHref(target);
-              }
-            },
-          ),
-        ),
-      );
+    context,
+    MaterialPageRoute(
+      builder: (_) => BookWikiPage(
+        book: _book,
+        visibleProgress: readingAgentRuntime.state.totalProgress,
+        onGenerate: _generateBookWiki,
+        onOpenLocation: (target) async {
+          if (target.startsWith('epubcfi(')) {
+            epubPlayerKey.currentState?.goToCfi(target);
+          } else if (target.isNotEmpty) {
+            epubPlayerKey.currentState?.goToHref(target);
+          }
+        },
+      ),
+    ),
+  );
 
   void _showAgentUndoSnackBar(AgentAction action) {
     if (!mounted) return;
@@ -2974,22 +3001,22 @@ class ReadingPageState extends ConsumerState<ReadingPage>
   }
 
   String _agentActionLabel(AgentActionType type) => switch (type) {
-        AgentActionType.goal => '阅读目标',
-        AgentActionType.profile => '阅读偏好',
-        AgentActionType.note => 'AI 笔记',
-        AgentActionType.difficulty => '阅读难点',
-        AgentActionType.memory => 'Markdown 记忆',
-        AgentActionType.artifact => '阅读档案',
-        AgentActionType.wiki => '书籍 Wiki',
-      };
+    AgentActionType.goal => '阅读目标',
+    AgentActionType.profile => '阅读偏好',
+    AgentActionType.note => 'AI 笔记',
+    AgentActionType.difficulty => '阅读难点',
+    AgentActionType.memory => 'Markdown 记忆',
+    AgentActionType.artifact => '阅读档案',
+    AgentActionType.wiki => '书籍 Wiki',
+  };
 
   String _undoResultLabel(UndoResult result) => switch (result) {
-        UndoResult.undone => '已撤销',
-        UndoResult.alreadyUndone => '该动作已撤销',
-        UndoResult.expired => '撤销期限已过',
-        UndoResult.conflict => '内容之后已被修改，未覆盖你的修改',
-        UndoResult.missing => '找不到该动作',
-      };
+    UndoResult.undone => '已撤销',
+    UndoResult.alreadyUndone => '该动作已撤销',
+    UndoResult.expired => '撤销期限已过',
+    UndoResult.conflict => '内容之后已被修改，未覆盖你的修改',
+    UndoResult.missing => '找不到该动作',
+  };
 
   void updateState() {
     if (mounted) {
@@ -3221,7 +3248,8 @@ class ReadingPageState extends ConsumerState<ReadingPage>
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         body: Hero(
-          tag: widget.heroTag ??
+          tag:
+              widget.heroTag ??
               (Prefs().openBookAnimation ? _book.coverFullPath : heroTag),
           child: FittedBox(
             fit: BoxFit.scaleDown,
@@ -3281,38 +3309,41 @@ class ReadingPageState extends ConsumerState<ReadingPage>
                                     initialThemes: widget.initialThemes,
                                     updateParent: updateState,
                                     onChapterChanged: _onChapterChanged,
-                                    onReadingLocationChanged: ({
-                                      required cfi,
-                                      required chapterHref,
-                                      required chapterTitle,
-                                      required totalProgress,
-                                      required chapterProgress,
-                                    }) {
-                                      if (!Prefs().readingAgentBetaEnabled) {
-                                        return;
-                                      }
-                                      readingAgentRuntime.observeLocation(
-                                        cfi: cfi,
-                                        chapterHref: chapterHref,
-                                        chapterTitle: chapterTitle,
-                                        totalProgress: totalProgress,
-                                        chapterProgress: chapterProgress,
-                                      );
-                                    },
+                                    onReadingLocationChanged:
+                                        ({
+                                          required cfi,
+                                          required chapterHref,
+                                          required chapterTitle,
+                                          required totalProgress,
+                                          required chapterProgress,
+                                        }) {
+                                          if (!Prefs()
+                                              .readingAgentBetaEnabled) {
+                                            return;
+                                          }
+                                          readingAgentRuntime.observeLocation(
+                                            cfi: cfi,
+                                            chapterHref: chapterHref,
+                                            chapterTitle: chapterTitle,
+                                            totalProgress: totalProgress,
+                                            chapterProgress: chapterProgress,
+                                          );
+                                        },
                                     onSelectionCreated:
                                         (SelectionSnapshot selection) {
-                                      if (!Prefs().readingAgentBetaEnabled) {
-                                        return;
-                                      }
-                                      readingAgentRuntime.selectionCreated(
-                                        ReadingSelectionState(
-                                          text: selection.text,
-                                          cfi: selection.cfi,
-                                          surroundingText:
-                                              selection.contextText,
-                                        ),
-                                      );
-                                    },
+                                          if (!Prefs()
+                                              .readingAgentBetaEnabled) {
+                                            return;
+                                          }
+                                          readingAgentRuntime.selectionCreated(
+                                            ReadingSelectionState(
+                                              text: selection.text,
+                                              cfi: selection.cfi,
+                                              surroundingText:
+                                                  selection.contextText,
+                                            ),
+                                          );
+                                        },
                                     onSelectionCleared: () {
                                       if (Prefs().readingAgentBetaEnabled) {
                                         readingAgentRuntime.selectionCleared();
@@ -3336,7 +3367,8 @@ class ReadingPageState extends ConsumerState<ReadingPage>
                             aiWorkspaceController.visible)
                           GestureDetector(
                             behavior: HitTestBehavior.translucent,
-                            onHorizontalDragStart: Prefs().aiPanelPosition ==
+                            onHorizontalDragStart:
+                                Prefs().aiPanelPosition ==
                                     AiPanelPositionEnum.right
                                 ? (details) {
                                     _beginAiChatResize(
@@ -3344,7 +3376,8 @@ class ReadingPageState extends ConsumerState<ReadingPage>
                                     );
                                   }
                                 : null,
-                            onHorizontalDragUpdate: Prefs().aiPanelPosition ==
+                            onHorizontalDragUpdate:
+                                Prefs().aiPanelPosition ==
                                     AiPanelPositionEnum.right
                                 ? (details) {
                                     _applyAiChatResizeDelta(
@@ -3353,19 +3386,22 @@ class ReadingPageState extends ConsumerState<ReadingPage>
                                     );
                                   }
                                 : null,
-                            onHorizontalDragEnd: Prefs().aiPanelPosition ==
+                            onHorizontalDragEnd:
+                                Prefs().aiPanelPosition ==
                                     AiPanelPositionEnum.right
                                 ? (_) {
                                     _endAiChatResize();
                                   }
                                 : null,
-                            onHorizontalDragCancel: Prefs().aiPanelPosition ==
+                            onHorizontalDragCancel:
+                                Prefs().aiPanelPosition ==
                                     AiPanelPositionEnum.right
                                 ? () {
                                     _endAiChatResize();
                                   }
                                 : null,
-                            onVerticalDragStart: Prefs().aiPanelPosition ==
+                            onVerticalDragStart:
+                                Prefs().aiPanelPosition ==
                                     AiPanelPositionEnum.bottom
                                 ? (details) {
                                     _beginAiChatResizeVertical(
@@ -3373,7 +3409,8 @@ class ReadingPageState extends ConsumerState<ReadingPage>
                                     );
                                   }
                                 : null,
-                            onVerticalDragUpdate: Prefs().aiPanelPosition ==
+                            onVerticalDragUpdate:
+                                Prefs().aiPanelPosition ==
                                     AiPanelPositionEnum.bottom
                                 ? (details) {
                                     _applyAiChatResizeDeltaVertical(
@@ -3382,24 +3419,28 @@ class ReadingPageState extends ConsumerState<ReadingPage>
                                     );
                                   }
                                 : null,
-                            onVerticalDragEnd: Prefs().aiPanelPosition ==
+                            onVerticalDragEnd:
+                                Prefs().aiPanelPosition ==
                                     AiPanelPositionEnum.bottom
                                 ? (_) {
                                     _endAiChatResize();
                                   }
                                 : null,
-                            onVerticalDragCancel: Prefs().aiPanelPosition ==
+                            onVerticalDragCancel:
+                                Prefs().aiPanelPosition ==
                                     AiPanelPositionEnum.bottom
                                 ? () {
                                     _endAiChatResize();
                                   }
                                 : null,
                             child: MouseRegion(
-                              cursor: Prefs().aiPanelPosition ==
+                              cursor:
+                                  Prefs().aiPanelPosition ==
                                       AiPanelPositionEnum.right
                                   ? SystemMouseCursors.resizeColumn
                                   : SystemMouseCursors.resizeRow,
-                              child: Prefs().aiPanelPosition ==
+                              child:
+                                  Prefs().aiPanelPosition ==
                                       AiPanelPositionEnum.right
                                   ? VerticalDivider(width: 2, thickness: 1)
                                   : Divider(height: 2, thickness: 1),
@@ -3410,11 +3451,13 @@ class ReadingPageState extends ConsumerState<ReadingPage>
                             offstage: !aiWorkspaceController.visible,
                             child: SizedBox(
                               key: const ValueKey('ai-chat-panel'),
-                              width: Prefs().aiPanelPosition ==
+                              width:
+                                  Prefs().aiPanelPosition ==
                                       AiPanelPositionEnum.right
                                   ? _effectiveAiPanelWidth(context)
                                   : null,
-                              height: Prefs().aiPanelPosition ==
+                              height:
+                                  Prefs().aiPanelPosition ==
                                       AiPanelPositionEnum.bottom
                                   ? _aiChatHeight
                                   : null,
