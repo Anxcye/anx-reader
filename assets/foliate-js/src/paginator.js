@@ -322,7 +322,8 @@ class View {
     const doc = this.document
     for (const el of doc.body.querySelectorAll('img, svg, video')) {
       // preserve max size if they are already set
-      const { maxHeight, maxWidth } = doc.defaultView.getComputedStyle(el)
+      const { maxHeight, maxWidth, width: imageWidth, height: imageHeight } =
+        doc.defaultView.getComputedStyle(el)
       // Cap max-width to the column width to prevent images from overflowing
       // into the next page when the EPUB embeds a large inline max-width value.
       const effectiveMaxWidth = vertical
@@ -330,16 +331,31 @@ class View {
         : columnWidth
           ? `${columnWidth}px`
           : (maxWidth !== 'none' && maxWidth !== '0px' ? maxWidth : '100%')
-      setStylesImportant(el, {
+      const sizeStyles = this.#column ? {
         'max-height': vertical
           ? (maxHeight !== 'none' && maxHeight !== '0px' ? maxHeight : '100%')
           : `${height - margin * 2}px`,
         'max-width': effectiveMaxWidth,
+      } : {
+        // Scrolled layout uses a size threshold, not the actual content width.
+        [vertical ? 'max-height' : 'max-width']: '100%',
+      }
+      setStylesImportant(el, {
+        ...sizeStyles,
         'object-fit': 'contain',
         'page-break-inside': 'avoid',
         'break-inside': 'avoid',
         'box-sizing': 'border-box',
       })
+      if (!this.#column) {
+        const inlineSize = vertical ? 'height' : 'width'
+        const originalSize = parseFloat(vertical ? imageHeight : imageWidth)
+        const constrainedSize = parseFloat(doc.defaultView.getComputedStyle(el)[inlineSize])
+        if (constrainedSize < originalSize) {
+          // Only reset the other dimension when shrinking, preserving inline images.
+          setStylesImportant(el, { [vertical ? 'width' : 'height']: 'auto' })
+        }
+      }
     }
   }
   expand() {
