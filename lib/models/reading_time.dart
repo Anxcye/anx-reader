@@ -3,12 +3,14 @@ class ReadingTime {
   int bookId;
   String? date;
   int readingTime;
+  int round;
 
   ReadingTime({
     this.id,
     required this.bookId,
     this.date,
     required this.readingTime,
+    this.round = 1,
   });
 
   /// Returns the stored date string as a [DateTime] if it can be parsed.
@@ -53,6 +55,7 @@ class ReadingTime {
       'book_id': bookId,
       'date': date,
       'reading_time': readingTime,
+      'round': round,
     };
   }
 
@@ -62,6 +65,7 @@ class ReadingTime {
       bookId: map['book_id'] as int,
       date: map['date'] as String?,
       readingTime: map['reading_time'] as int? ?? 0,
+      round: map['round'] as int? ?? 1,
     );
   }
 }

@@ -116,6 +116,21 @@ class BookDao extends BaseDao {
     );
   }
 
+  /// 仅更新轮次号（多刷功能专用）。
+  /// 单独维护可避免其他代码路径用较早加载的 Book 实例整行覆盖，
+  /// 导致轮次号被回退。
+  Future<void> updateCurrentRound(int bookId, int round) {
+    return update(
+      table,
+      {
+        'current_round': round,
+        'update_time': DateTime.now().toIso8601String(),
+      },
+      where: 'id = ?',
+      whereArgs: [bookId],
+    );
+  }
+
   Future<List<Book>> getBooksWithoutMd5() {
     return queryList(
       table,

@@ -912,5 +912,36 @@
   "aiChatFontSize": "字体大小",
   "aiModelSwitchTitle": "切换模型",
   "aiModelEnterManually": "输入模型名称",
-  "aiModelOrSelectBelow": "或从列表中选择："
+  "aiModelOrSelectBelow": "或从列表中选择：",
+  "readingRoundsSectionTitle": "阅读轮次",
+  "readingRoundsCurrentRound": "当前轮次",
+  "readingRoundsInProgress": "进行中",
+  "readingRoundsFinished": "已完成",
+  "readingRoundsNth": "第 {n} 刷",
+  "@readingRoundsNth": {
+    "placeholders": {
+      "n": {"type": "String"}
+    }
+  },
+  "readingRoundsDuration": "累计时长",
+  "readingRoundsProgress": "阅读进度",
+  "readingRoundsFinishAndStartNext": "完成本轮，开始下一刷",
+  "readingRoundsUndo": "撤销",
+  "readingRoundsConfirmTitle": "完成本轮？",
+  "readingRoundsConfirmContent": "完成本轮后：记录本轮阅读数据，阅读进度与位置将重置，从开头开始下一轮。",
+  "readingRoundsConfirmOk": "确认完成",
+  "readingRoundsFinishedToast": "第 {n} 刷已完成，第 {m} 刷开始",
+  "@readingRoundsFinishedToast": {
+    "placeholders": {
+      "n": {"type": "String"},
+      "m": {"type": "String"}
+    }
+  },
+  "readingRoundsUndoToast": "已撤销，回到第 {n} 刷",
+  "@readingRoundsUndoToast": {
+    "placeholders": {
+      "n": {"type": "String"}
+    }
+  },
+  "readingRoundsEmpty": "还没有已完成的轮次，读完首刷后即可开启二刷"
 }

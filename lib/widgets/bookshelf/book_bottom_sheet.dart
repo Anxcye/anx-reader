@@ -286,7 +286,9 @@ class BookBottomSheet extends ConsumerWidget {
 
     return Container(
       padding: const EdgeInsets.all(20),
-      height: 100,
+      // The action row needs at least 60px (IconAndText) plus the padding of
+      // the popup menu button; 100px overflows by 4.0 in debug builds.
+      height: 110,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.center,

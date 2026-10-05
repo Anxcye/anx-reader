@@ -144,6 +144,7 @@ class ReadingPageState extends ConsumerState<ReadingPage>
       ReadingTime(
         bookId: _book.id,
         readingTime: _readTimeWatch.elapsed.inSeconds,
+        round: _book.currentRound,
       ),
       startedAt: _sessionStart,
     );
@@ -290,6 +291,7 @@ class ReadingPageState extends ConsumerState<ReadingPage>
               ReadingTime(
                 bookId: _book.id,
                 readingTime: elapsedSeconds,
+                round: _book.currentRound,
               ),
               startedAt: _sessionStart,
             );

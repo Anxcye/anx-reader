@@ -925,5 +925,36 @@
   "searchEngineUrlTemplate": "URL Template",
   "searchEngineUrlRequired": "Please enter a URL template",
   "searchEngineUrlInvalid": "URL must contain a search query placeholder and use http/https",
-  "searchEngineAdded": "Search engine added"
+  "searchEngineAdded": "Search engine added",
+  "readingRoundsSectionTitle": "Reading Rounds",
+  "readingRoundsCurrentRound": "Current Round",
+  "readingRoundsInProgress": "In progress",
+  "readingRoundsFinished": "Finished",
+  "readingRoundsNth": "Round {n}",
+  "@readingRoundsNth": {
+    "placeholders": {
+      "n": {"type": "String"}
+    }
+  },
+  "readingRoundsDuration": "Duration",
+  "readingRoundsProgress": "Progress",
+  "readingRoundsFinishAndStartNext": "Finish this round & start the next",
+  "readingRoundsUndo": "Undo",
+  "readingRoundsConfirmTitle": "Finish this round?",
+  "readingRoundsConfirmContent": "This records the current round's stats, then resets the reading progress to start the next round.",
+  "readingRoundsConfirmOk": "Finish Round",
+  "readingRoundsFinishedToast": "Round {n} finished. Now starting round {m}.",
+  "@readingRoundsFinishedToast": {
+    "placeholders": {
+      "n": {"type": "String"},
+      "m": {"type": "String"}
+    }
+  },
+  "readingRoundsUndoToast": "Undone. Back to round {n}.",
+  "@readingRoundsUndoToast": {
+    "placeholders": {
+      "n": {"type": "String"}
+    }
+  },
+  "readingRoundsEmpty": "No finished rounds yet. Finish your first read to start round 2."
 }
