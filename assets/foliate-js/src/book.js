@@ -140,17 +140,60 @@ const buildRangeContextText = (range) => {
   return contextText;
 };
 
+const isWordChar = (ch) => !!ch && /[A-Za-z0-9\u00C0-\u024F\u3400-\u9FFF\uF900-\uFAFF]/.test(ch);
+
+/** CEF OSR hit-testing can place carets one glyph inside word edges. */
+const expandRangeForCefHitTest = (range) => {
+  const r = range.cloneRange();
+  try {
+    if (r.startContainer.nodeType === Node.TEXT_NODE && r.startOffset > 0) {
+      const text = r.startContainer.textContent || '';
+      const prev = text[r.startOffset - 1];
+      const curr = text[r.startOffset] ?? '';
+      if (isWordChar(prev) && isWordChar(curr)) {
+        r.setStart(r.startContainer, r.startOffset - 1);
+      }
+    }
+    if (r.endContainer.nodeType === Node.TEXT_NODE) {
+      const text = r.endContainer.textContent || '';
+      if (r.endOffset < text.length && r.endOffset > 0) {
+        const last = text[r.endOffset - 1];
+        const next = text[r.endOffset];
+        if (isWordChar(last) && isWordChar(next)) {
+          r.setEnd(r.endContainer, r.endOffset + 1);
+        }
+      }
+    }
+  } catch (_) {}
+  return r;
+};
+
 const handleSelection = (view, doc, index) => {
   const selection = doc.getSelection();
-  const range = getSelectionRange(selection);
+  let range = getSelectionRange(selection);
 
   if (!range) return;
+
+  // Linux CEF: nudge endpoints that landed one char inside a word.
+  const isLinuxDesktop = typeof navigator !== 'undefined'
+    && /Linux/i.test(navigator.platform || '')
+    && !/Android/i.test(navigator.userAgent || '');
+  if (isLinuxDesktop) {
+    range = expandRangeForCefHitTest(range);
+    try {
+      selection.removeAllRanges();
+      selection.addRange(range);
+    } catch (_) {}
+  }
 
   const position = getPosition(range);
   const cfi = view.getCFI(index, range);
   const lang = 'en-US'
 
-  let text = selection.toString();
+  let text = range.toString();
+  if (!text) {
+    text = selection.toString();
+  }
   if (!text) {
     const newSelection = range.startContainer.ownerDocument.getSelection();
     newSelection.removeAllRanges();
@@ -256,8 +299,15 @@ const setSelectionHandler = (view, doc, index) => {
     if (!hasActiveSelection) return;
     hasActiveSelection = false;
     lastPointerUpRange = null;
-    doc.__anxSelectionClearedAt = Date.now();
-    doc.__anxSuppressClick = true;
+    // Programmatic clearSelection (e.g. closing the menu) must not eat the
+    // next real center click for page-turn.
+    if (window.__anxProgrammaticClear) {
+      doc.__anxSelectionClearedAt = 0;
+      doc.__anxSuppressClick = false;
+    } else {
+      doc.__anxSelectionClearedAt = Date.now();
+      doc.__anxSuppressClick = true;
+    }
     stopAutoPageSession(view);
     callFlutter('onSelectionCleared');
   };
@@ -1901,7 +1951,10 @@ window.showContextMenu = () => {
 
 window.getSelection = () => reader.getSelection()
 
-window.clearSelection = () => reader.view.deselect()
+window.clearSelection = () => {
+  window.__anxProgrammaticClear = true
+  try { reader.view.deselect() } finally { window.__anxProgrammaticClear = false }
+}
 
 window.addAnnotation = (annotation) => reader.addAnnotation(annotation)
 
