@@ -1,7 +1,6 @@
 # Changelog
 
 ## 1.15.0
-- Chore(ui): Drop experimental forui redesign; keep Material shell and prior issue fixes
 - Fix(reader): Honor writing-direction setting for EPUBs that set writing-mode on body (e.g. vertical Japanese books) (#867)
 - Fix(log): Silence Chromium iframe sandbox WebView warning that already had an ignore entry but failed exact match due to trailing period (#877)
 - Ci: Upgrade lock-threads to v6 and use github.token so lock-closed-issues stops failing daily on long GITHUB_TOKEN secrets
@@ -24,7 +23,7 @@
 - Fix(reader): Page-turn keys clear selection and turn pages instead of panning while text is selected (#966)
 - Fix(ai): Null-safe custom provider config parsing and clearer errors when required fields or response shape are invalid (#868)
 - Fix(ai): Quick prompt chips insert into the composer for editing; long-press still sends immediately (#969)
-- Feat(linux): Add Linux AppImage support via CEF (#952)
+- Feat(linux): Add Linux AppImage and tar.gz packaging via CEF (#952)
 - Fix(ai): Make the Add Prompt button in AI settings full-width to match the surrounding rows
 - Fix(ai): Fix AI settings showing a grey error screen on fresh installs and provider edits failing to save, by restoring generated AiProvider JSON serialization with lenient converters
 - Chore(android): Target Android 16 (API 36) and upgrade to Google Play Billing Library 8 to meet Google Play requirements
@@ -32,7 +31,6 @@
 - Fix(reader): 修复部分 EPUB（如在 body 上设置竖排 writing-mode）忽略写作方向设置的问题 (#867)
 - Fix(log): 修复因句末句点导致精确匹配失败、未能屏蔽 Chromium iframe sandbox WebView 警告的问题 (#877)
 - Ci: 升级 lock-threads 至 v6 并改用 github.token，避免 lock-closed-issues 因过长 GITHUB_TOKEN 每日失败
-- Chore(ui): 撤销实验性 forui 界面改造，恢复 Material 壳层并保留此前 issue 修复
 - Feat(search): 支持应用内搜索结果显示，可配置搜索引擎和显示方式 (#894)
 - Feat(ai): 新增自动摘要延迟阈值配置，可控制重新打开书籍时的摘要触发时机 (#922)
 - Feat(ai): 让自定义用户提示词在首页 AI 标签页中可用，并与阅读器 AI 保持一致 (#853)
@@ -52,7 +50,7 @@
 - Fix(reader): 选中文本时方向键/翻页键先清除选区再翻页，避免页面平移 (#966)
 - Fix(ai): 自定义供应商配置解析更空安全，并在必填项或响应格式异常时给出明确错误 (#868)
 - Fix(ai): 快捷提示词芯片点击写入输入框以便编辑，长按仍可立即发送 (#969)
-- Feat(linux): 新增 Linux AppImage 支持（基于 CEF）(#952)
+- Feat(linux): 新增 Linux AppImage 与 tar.gz 打包支持（基于 CEF）(#952)
 - Fix(ai): AI 设置中“添加提示词”按钮改为占满整行，与上下设置项对齐
 - Fix(ai): 修复全新安装时 AI 设置页灰屏、供应商增删改无法保存的问题（恢复 AiProvider 生成式 JSON 序列化并保留宽松解析）
 - Chore(android): 目标 SDK 升级到 Android 16（API 36），并升级到 Google Play Billing Library 8，满足 Google Play 上架要求
