@@ -86,6 +86,33 @@ ThemeData colorSchema(
           drawerTheme: DrawerThemeData()
               .copyWith(backgroundColor: gropedBackgroundColor),
           dialogTheme: DialogThemeData()
-              .copyWith(backgroundColor: gropedBackgroundColor))
+              .copyWith(backgroundColor: gropedBackgroundColor),
+          // #986: strip Material motion on e-ink to avoid ghosting / extra refreshes
+          splashFactory: isEinkMode ? NoSplash.splashFactory : null,
+          highlightColor: isEinkMode ? Colors.transparent : null,
+          pageTransitionsTheme: isEinkMode
+              ? PageTransitionsTheme(
+                  builders: {
+                    for (final platform in TargetPlatform.values)
+                      platform: const _NoAnimationPageTransitionsBuilder(),
+                  },
+                )
+              : themeData.pageTransitionsTheme,
+        )
       .useSystemChineseFont(brightness);
+}
+
+class _NoAnimationPageTransitionsBuilder extends PageTransitionsBuilder {
+  const _NoAnimationPageTransitionsBuilder();
+
+  @override
+  Widget buildTransitions<T>(
+    PageRoute<T> route,
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    return child;
+  }
 }

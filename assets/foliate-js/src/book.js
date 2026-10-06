@@ -264,6 +264,31 @@ const setSelectionHandler = (view, doc, index) => {
 
   doc.addEventListener('selectionchange', handleSelectionStateChange);
 
+  // Page-turn keys must turn pages even while text is selected.
+  // Without this, the WebView uses arrows to pan/extend selection (#966).
+  doc.addEventListener('keydown', (e) => {
+    const nextKeys = new Set(['ArrowRight', 'ArrowDown', 'PageDown', ' ']);
+    const prevKeys = new Set(['ArrowLeft', 'ArrowUp', 'PageUp']);
+    if (!nextKeys.has(e.key) && !prevKeys.has(e.key)) return;
+    // Allow shortcuts with modifiers other than Shift (e.g. Ctrl+Arrow)
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+    const selection = doc.getSelection();
+    if (selection && selection.rangeCount > 0) {
+      selection.removeAllRanges();
+    }
+    if (typeof window.clearSelection === 'function') {
+      try { window.clearSelection(); } catch (_) {}
+    }
+    if (nextKeys.has(e.key)) {
+      nextPage();
+    } else {
+      prevPage();
+    }
+  }, true);
+
   const rangesEqual = (a, b) => (
     a.startContainer === b.startContainer
     && a.startOffset === b.startOffset
@@ -371,6 +396,7 @@ const setSelectionHandler = (view, doc, index) => {
     });
   } else { // Android
     let hasNativeSelectionStarted = false;
+    let longPressSettleTimer;
 
     doc.addEventListener('pointerdown', () => {
       hasNativeSelectionStarted = false;
@@ -394,12 +420,25 @@ const setSelectionHandler = (view, doc, index) => {
       // We block it to prevent the custom menu from interfering with the drag.
       if (!hasNativeSelectionStarted) {
         e.preventDefault();
+        // A long-press released without dragging gets no second contextmenu, and the
+        // touch is cancelled so there is no pointerup either. Open the menu once the
+        // selection has stayed unchanged for a moment; a drag changes it and is
+        // handled by the release event below instead.
+        const pressed = getSelectionRange(doc.getSelection())?.cloneRange();
+        clearTimeout(longPressSettleTimer);
+        longPressSettleTimer = setTimeout(() => {
+          const current = getSelectionRange(doc.getSelection());
+          if (!pressed || !current || !rangesEqual(pressed, current)) return;
+          if (shouldSkipPointerUp()) return;
+          handleSelection(view, doc, index);
+        }, 600);
         return;
       }
 
       // If we have entered native selection mode (pointercancel happened),
       // this contextmenu event is likely triggered by the system or user interaction
       // after the selection phase (e.g. on release). We handle it.
+      if (shouldSkipPointerUp()) return;
       handleSelection(view, doc, index);
     });
   }
@@ -699,6 +738,9 @@ const getCSS = ({ fontSize,
     }
 
     body {
+        /* Force user writing-mode over EPUB body rules (e.g. vertical-rl in template_rv.css).
+           html alone is not enough: body has its own writing-mode from the book stylesheet. */
+        ${writingModeCSS}
         background: none !important;
         background-color: transparent;
         padding: 0;

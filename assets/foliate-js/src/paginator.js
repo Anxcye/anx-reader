@@ -435,6 +435,7 @@ export class Paginator extends HTMLElement {
   #mediaQueryListener
   #ignoreNativeScroll = false
   #pendingScrollFrame = null
+  #scrollEndTimer = null
   #touchState
   #touchScrolled
   #loadingNext = false
@@ -977,6 +978,9 @@ export class Paginator extends HTMLElement {
     this.#touchScrolled = false
     if (this.scrolled) {
       this.#touchState = null
+      this.#touchScrolled = false
+      // Fire a final relocate after touch ends in scrolled mode
+      this.#afterScroll('scroll')
       return
     }
 
@@ -1133,6 +1137,27 @@ export class Paginator extends HTMLElement {
       this.start - size, this.end - size, this.#getRectMapper())
   }
   #afterScroll(reason) {
+    // During active touch scrolling, defer all relocation work
+    // to avoid expensive DOM traversal (getVisibleRange) per frame
+    if (reason === 'scroll' && (this.#touchState || this.#touchScrolled)) {
+      this.#pendingRelocate = null
+      return
+    }
+
+    // For scrolled mode, debounce relocate to also skip during momentum scroll
+    // Only compute after scrolling has stopped for 200ms
+    if (this.scrolled && reason === 'scroll') {
+      if (this.#scrollEndTimer) clearTimeout(this.#scrollEndTimer)
+      this.#scrollEndTimer = setTimeout(() => {
+        this.#scrollEndTimer = null
+        this.#doRelocate(reason)
+      }, 200)
+      return
+    }
+
+    this.#doRelocate(reason)
+  }
+  #doRelocate(reason) {
     const range = this.#getVisibleRange()
     // don't set new anchor if relocation was to scroll to anchor
     if (reason !== 'anchor') this.#anchor = range
@@ -1143,13 +1168,8 @@ export class Paginator extends HTMLElement {
     if (this.scrolled) detail.fraction = this.start / this.viewSize
     else if (this.pages > 0) {
       const { page, pages } = this
-      // this.#header.style.visibility = page > 1 ? 'visible' : 'hidden'
       detail.fraction = (page - 1) / (pages - 2)
       detail.size = 1 / (pages - 2)
-    }
-    if (!this.scrolled && reason === 'scroll' && (this.#touchState || this.#touchScrolled)) {
-      this.#pendingRelocate = detail
-      return
     }
 
     this.#pendingRelocate = null
@@ -1355,6 +1375,10 @@ export class Paginator extends HTMLElement {
     if (this.#pendingScrollFrame) {
       cancelAnimationFrame(this.#pendingScrollFrame)
       this.#pendingScrollFrame = null
+    }
+    if (this.#scrollEndTimer) {
+      clearTimeout(this.#scrollEndTimer)
+      this.#scrollEndTimer = null
     }
     this.#pendingRelocate = null
   }

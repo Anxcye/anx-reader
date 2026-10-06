@@ -38,7 +38,7 @@ import 'package:flutter/services.dart';
 // show debugPrint, defaultTargetPlatform, TargetPlatform;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
-import 'package:icons_plus/icons_plus.dart';
+import 'package:iconsx_plus/iconsx_plus.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
@@ -115,7 +115,7 @@ class ReadingPageState extends ConsumerState<ReadingPage>
     // _volumeKeyBoard = VolumeKeyBoard.instance;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        _requestReaderFocus();
+        requestReaderFocus();
         // _attachVolumeKeyListener();
       }
     });
@@ -156,7 +156,7 @@ class ReadingPageState extends ConsumerState<ReadingPage>
     super.dispose();
   }
 
-  void _requestReaderFocus() {
+  void requestReaderFocus() {
     if (bottomBarOffstage && !_readerFocusNode.hasFocus) {
       _readerFocusNode.requestFocus();
     }
@@ -209,6 +209,7 @@ class ReadingPageState extends ConsumerState<ReadingPage>
         logicalKey == LogicalKeyboardKey.arrowDown ||
         logicalKey == LogicalKeyboardKey.pageDown ||
         logicalKey == LogicalKeyboardKey.space) {
+      // Clear any active text selection so keys turn pages instead of panning (#966).
       epubPlayerKey.currentState?.nextPage();
       return KeyEventResult.handled;
     }
@@ -330,7 +331,7 @@ class ReadingPageState extends ConsumerState<ReadingPage>
       if (Prefs().hideStatusBar) {
         hideStatusBar();
       }
-      _requestReaderFocus();
+      requestReaderFocus();
     });
   }
 
@@ -449,6 +450,44 @@ class ReadingPageState extends ConsumerState<ReadingPage>
 
   Future<void> onLoadEnd() async {
     if (Prefs().autoSummaryPreviousContent) {
+      final delayLevel = Prefs().autoSummaryDelayLevel;
+      final now = DateTime.now();
+
+      if (delayLevel > 0) {
+        final lastTimestamp = Prefs().getLastAutoSummaryTimestamp(_book.id);
+        if (lastTimestamp != null) {
+          bool shouldTrigger;
+          switch (delayLevel) {
+            case 1: // 30 minutes
+              shouldTrigger =
+                  now.difference(lastTimestamp).inMinutes >= 30;
+              break;
+            case 2: // 3 hours
+              shouldTrigger =
+                  now.difference(lastTimestamp).inHours >= 3;
+              break;
+            case 3: // Next day (cross midnight)
+              shouldTrigger = now.year != lastTimestamp.year ||
+                  now.month != lastTimestamp.month ||
+                  now.day != lastTimestamp.day;
+              break;
+            case 4: // 3 days
+              shouldTrigger =
+                  now.difference(lastTimestamp).inDays >= 3;
+              break;
+            case 5: // 1 week
+              shouldTrigger =
+                  now.difference(lastTimestamp).inDays >= 7;
+              break;
+            default:
+              shouldTrigger = true;
+          }
+          if (!shouldTrigger) return;
+        }
+      }
+
+      Prefs().setLastAutoSummaryTimestamp(_book.id, now);
+
       final previousContent =
           await epubPlayerKey.currentState!.previousContent(2000);
       final prompt = generatePromptSummaryThePreviousContent(previousContent);

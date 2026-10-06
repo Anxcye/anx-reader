@@ -2,6 +2,7 @@ import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/dao/book.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/models/md5_statistics.dart';
+import 'package:anx_reader/page/settings_page/search_engines.dart';
 import 'package:anx_reader/page/settings_page/subpage/chapter_split_rules_page.dart';
 import 'package:anx_reader/page/settings_page/subpage/log_page.dart';
 import 'package:anx_reader/page/changelog_screen.dart';
@@ -188,6 +189,22 @@ class _AdvancedSettingState extends State<AdvancedSetting> {
                       ? '${Prefs().httpProxyHost}:${Prefs().httpProxyPort} (Test: ${Prefs().httpProxyTestUrl})'
                       : '${Prefs().httpProxyHost}:${Prefs().httpProxyPort}'),
               onPressed: _showHttpProxyDialog,
+            ),
+          ],
+        ),
+        SettingsSection(
+          title: Text(L10n.of(context).searchManageEngines),
+          tiles: [
+            SettingsTile.navigation(
+              leading: const Icon(Icons.search),
+              title: Text(L10n.of(context).searchManageEngines),
+              onPressed: (_) {
+                Navigator.of(context).push(
+                  CupertinoPageRoute(
+                    builder: (context) => const SearchEnginesSetting(),
+                  ),
+                );
+              },
             ),
           ],
         ),

@@ -177,9 +177,11 @@ jobs:
       issues: write
       pull-requests: write
     steps:
-      - uses: dessant/lock-threads@v5
+      # v5 validates github-token length <= 100 and fails when secrets.GITHUB_TOKEN
+      # is a long PAT; v6 defaults to github.token (short-lived Actions token).
+      - uses: dessant/lock-threads@v6
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ github.token }}
           issue-inactive-days: 30  # Lock issues 30 days after they're closed
           pr-inactive-days: 30     # Lock PRs 30 days after they're closed
           issue-lock-reason: 'resolved'

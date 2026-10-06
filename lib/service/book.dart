@@ -515,9 +515,9 @@ Future<void> saveBook(
 
   final newBookName =
       '${effectiveTitle.length > 20 ? effectiveTitle.substring(0, 20) : effectiveTitle}-${DateTime.now().millisecondsSinceEpoch}'
-          .replaceAll(RegExp(r'[<>:"/\\|?*]'), '_')
-          .replaceAll('\n', '')
-          .replaceAll('\r', '')
+          // Strip characters that some WebDAV servers (e.g. Jianguoyun) reject (#989)
+          .replaceAll(RegExp(r'[<>:"/\\|?*#%&@$^+=\[\]{}`~;!]'), '_')
+          .replaceAll(RegExp(r'[\x00-\x1F\x7F]'), '')
           .trim();
 
   final extension = file.path.split('.').last;

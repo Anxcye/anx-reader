@@ -53,7 +53,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:icons_plus/icons_plus.dart';
+import 'package:iconsx_plus/iconsx_plus.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -117,11 +117,17 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
       ModalRoute.of(context)?.isCurrent ?? false;
 
   void prevPage() {
-    webViewController.evaluateJavascript(source: 'prevPage()');
+    webViewController.evaluateJavascript(source: '''
+      if (typeof clearSelection === 'function') { clearSelection(); }
+      prevPage();
+      ''');
   }
 
   void nextPage() {
-    webViewController.evaluateJavascript(source: 'nextPage()');
+    webViewController.evaluateJavascript(source: '''
+      if (typeof clearSelection === 'function') { clearSelection(); }
+      nextPage();
+      ''');
   }
 
   void prevChapter() {
@@ -156,7 +162,12 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
       _selectionClearPending = false;
       _lastSelectionContextText = null;
       removeOverlay();
+      restoreReaderFocus();
     }
+  }
+
+  void restoreReaderFocus() {
+    readingPageKey.currentState?.requestReaderFocus();
   }
 
   void changeTheme(ReadTheme readTheme) {
@@ -318,6 +329,16 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
         'matchWholeWords': false,
       })
     ''');
+  }
+
+  Future<void> runAiBookSearch(String keyword) async {
+    ref.read(tocSearchProvider.notifier).start(keyword);
+    final escaped = jsonEncode(keyword);
+    await webViewController.evaluateJavascript(source: 'clearSearch()');
+    await webViewController.evaluateJavascript(
+      source:
+        'search($escaped, {"scope":"book","matchCase":false,"matchDiacritics":false,"matchWholeWords":false})',
+    );
   }
 
   void _clearSearchHighlights() {
@@ -735,6 +756,7 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
           }
           _lastSelectionContextText = null;
           removeOverlay();
+          restoreReaderFocus();
         });
     controller.addJavaScriptHandler(
         handlerName: 'onAnnotationClick',

@@ -15,7 +15,7 @@ import 'package:anx_reader/widgets/tips/notes_tips.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:icons_plus/icons_plus.dart';
+import 'package:iconsx_plus/iconsx_plus.dart';
 import 'package:sticky_headers/sticky_headers.dart';
 
 class BookNotesList extends ConsumerWidget {
