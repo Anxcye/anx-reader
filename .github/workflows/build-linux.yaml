@@ -61,6 +61,9 @@ jobs:
         shell: bash
         run: |
           sudo apt-get update
+          # libunwind-dev first: libgstreamer1.0-dev otherwise fails on
+          # ubuntu-22.04 runners with a held/broken libunwind conflict.
+          sudo apt-get install -y libunwind-dev
           sudo apt-get install -y \
             clang \
             cmake \
@@ -68,11 +71,11 @@ jobs:
             fuse \
             libfuse2 \
             libgtk-3-dev \
+            liblzma-dev \
             libgstreamer1.0-dev \
             libgstreamer-plugins-base1.0-dev \
             ninja-build \
             pkg-config \
-            xclip \
             binutils
 
       - name: Cache CEF prebuilt SDK
