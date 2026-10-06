@@ -50,11 +50,14 @@ rm -rf "$APPDIR"
 mkdir -p \
   "$APPDIR/usr/bin" \
   "$APPDIR/usr/share/applications" \
-  "$APPDIR/usr/share/icons/hicolor/256x256/apps"
+  "$APPDIR/usr/share/icons/hicolor/256x256/apps" \
+  "$APPDIR/usr/share/icons/hicolor/512x512/apps"
 
 cp -a "$BUNDLE_DIR/." "$APPDIR/usr/bin/"
-cp "assets/icon/Anx-logo.png" "$APPDIR/$ICON_NAME.png"
-cp "assets/icon/Anx-logo.png" "$APPDIR/usr/share/icons/hicolor/256x256/apps/$ICON_NAME.png"
+# Use properly sized RGBA icons (Anx-logo.png is 2000x2000 RGB and breaks hicolor).
+cp "assets/icon/anx-reader-256.png" "$APPDIR/$ICON_NAME.png"
+cp "assets/icon/anx-reader-256.png" "$APPDIR/usr/share/icons/hicolor/256x256/apps/$ICON_NAME.png"
+cp "assets/icon/anx-reader-512.png" "$APPDIR/usr/share/icons/hicolor/512x512/apps/$ICON_NAME.png"
 
 cat > "$APPDIR/AppRun" <<EOF
 #!/usr/bin/env bash

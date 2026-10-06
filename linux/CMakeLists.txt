@@ -114,6 +114,12 @@ install(TARGETS ${BINARY_NAME} RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}"
 install(FILES "${FLUTTER_ICU_DATA_FILE}" DESTINATION "${INSTALL_BUNDLE_DATA_DIR}"
   COMPONENT Runtime)
 
+# Window / taskbar icon (loaded by my_application.cc via gtk_window_set_icon_from_file).
+install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/../assets/icon/anx-reader-256.png"
+  DESTINATION "${INSTALL_BUNDLE_DATA_DIR}"
+  RENAME "anx-reader.png"
+  COMPONENT Runtime)
+
 install(FILES "${FLUTTER_LIBRARY}" DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
   COMPONENT Runtime)
 
