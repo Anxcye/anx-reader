@@ -299,14 +299,21 @@ const setSelectionHandler = (view, doc, index) => {
     if (!hasActiveSelection) return;
     hasActiveSelection = false;
     lastPointerUpRange = null;
-    // Programmatic clearSelection (e.g. closing the menu) must not eat the
-    // next real center click for page-turn.
+    // Programmatic clearSelection (menu onClose) must not suppress clicks.
     if (window.__anxProgrammaticClear) {
       doc.__anxSelectionClearedAt = 0;
       doc.__anxSuppressClick = false;
     } else {
+      // User dismiss click: suppress only for the remainder of this event turn
+      // (so the same click does not page-turn). Clear on the next macrotask —
+      // otherwise if click-view never ran (handler bailed while selection was
+      // still a Range), the *next* center click is wrongly eaten.
       doc.__anxSelectionClearedAt = Date.now();
       doc.__anxSuppressClick = true;
+      setTimeout(() => {
+        doc.__anxSuppressClick = false;
+        doc.__anxSelectionClearedAt = 0;
+      }, 0);
     }
     stopAutoPageSession(view);
     callFlutter('onSelectionCleared');
@@ -1434,12 +1441,14 @@ class Reader {
 
     if (this.#doc?.__anxSuppressClick) {
       this.#doc.__anxSuppressClick = false;
+      this.#doc.__anxSelectionClearedAt = 0;
       return
     }
 
-    // debounce for 200ms after selection cleared
+    // Same-turn debounce after selection cleared (setTimeout(0) clears this).
     const lastClearedAt = this.#doc?.__anxSelectionClearedAt ?? 0
-    if (lastClearedAt && Date.now() - lastClearedAt < 200) {
+    if (lastClearedAt && Date.now() - lastClearedAt < 50) {
+      this.#doc.__anxSelectionClearedAt = 0;
       return
     }
 
@@ -1954,6 +1963,18 @@ window.getSelection = () => reader.getSelection()
 window.clearSelection = () => {
   window.__anxProgrammaticClear = true
   try { reader.view.deselect() } finally { window.__anxProgrammaticClear = false }
+}
+window.__anxResetClickSuppress = () => {
+  try {
+    const docs = [document]
+    document.querySelectorAll('iframe').forEach((f) => {
+      try { if (f.contentDocument) docs.push(f.contentDocument) } catch (_) {}
+    })
+    for (const d of docs) {
+      d.__anxSuppressClick = false
+      d.__anxSelectionClearedAt = 0
+    }
+  } catch (_) {}
 }
 
 window.addAnnotation = (annotation) => reader.addAnnotation(annotation)
