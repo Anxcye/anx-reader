@@ -351,20 +351,33 @@ void WebviewHandler::changeSize(int browserId, float a_dpi, int w, int h)
     }
 }
 
-void WebviewHandler::cursorClick(int browserId, int x, int y, bool up)
+void WebviewHandler::cursorClick(int browserId, int x, int y, bool up, int buttons)
 {
     auto it = browser_map_.find(browserId);
     if (it != browser_map_.end()) {
         CefMouseEvent ev;
         ev.x = x;
         ev.y = y;
-        ev.modifiers = EVENTFLAG_LEFT_MOUSE_BUTTON;
+
+        // Flutter PointerEvent.buttons bitfield:
+        // 0x1 primary (left), 0x2 secondary (right), 0x4 middle.
+        auto btn = CefBrowserHost::MouseButtonType::MBT_LEFT;
+        uint32_t modifiers = EVENTFLAG_LEFT_MOUSE_BUTTON;
+        if (buttons & 0x2) {
+            btn = CefBrowserHost::MouseButtonType::MBT_RIGHT;
+            modifiers = EVENTFLAG_RIGHT_MOUSE_BUTTON;
+        } else if (buttons & 0x4) {
+            btn = CefBrowserHost::MouseButtonType::MBT_MIDDLE;
+            modifiers = EVENTFLAG_MIDDLE_MOUSE_BUTTON;
+        }
+        ev.modifiers = modifiers;
+
         if(up && it->second.is_dragging) {
             it->second.browser->GetHost()->DragTargetDrop(ev);
             it->second.browser->GetHost()->DragSourceSystemDragEnded();
             it->second.is_dragging = false;
         } else {
-            it->second.browser->GetHost()->SendMouseClickEvent(ev, CefBrowserHost::MouseButtonType::MBT_LEFT, up, 1);
+            it->second.browser->GetHost()->SendMouseClickEvent(ev, btn, up, 1);
         }
     }
 }
@@ -750,9 +763,19 @@ void WebviewHandler::GetViewRect(CefRefPtr<CefBrowser> browser, CefRect &rect) {
 }
 
 bool WebviewHandler::GetScreenInfo(CefRefPtr<CefBrowser> browser, CefScreenInfo& screen_info) {
-    //todo: hi dpi support
-    screen_info.device_scale_factor  = browser_map_[browser->GetIdentifier()].dpi;
-    return false;
+    auto it = browser_map_.find(browser->GetIdentifier());
+    if (it == browser_map_.end()) {
+        return false;
+    }
+    // Must return true or CEF ignores device_scale_factor (hit-testing drifts).
+    const float dpi = it->second.dpi > 0.f ? it->second.dpi : 1.f;
+    screen_info.device_scale_factor = dpi;
+    CefRect view(0, 0,
+                 it->second.width > 0 ? it->second.width : 1,
+                 it->second.height > 0 ? it->second.height : 1);
+    screen_info.rect = view;
+    screen_info.available_rect = view;
+    return true;
 }
 
 void WebviewHandler::OnPaint(CefRefPtr<CefBrowser> browser, CefRenderHandler::PaintElementType type,

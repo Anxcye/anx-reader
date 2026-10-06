@@ -613,20 +613,28 @@ namespace webview_cef {
 	}
 	
 	int WebviewPlugin::cursorAction(WValue *args, std::string name) {
-		if (!args || webview_value_get_len(args) != 3) {
+		const size_t len = args ? webview_value_get_len(args) : 0;
+		// click: [id, x, y] or [id, x, y, buttons]; move/drag: [id, x, y]
+		if (!args || len < 3) {
 			return 0;
 		}
 		int browserId = int(webview_value_get_int(webview_value_get_list_value(args, 0)));
 		int x = int(webview_value_get_int(webview_value_get_list_value(args, 1)));
 		int y = int(webview_value_get_int(webview_value_get_list_value(args, 2)));
+		// Flutter kPrimaryMouseButton = 1. Default to left when omitted.
+		int buttons = 1;
+		if (len >= 4) {
+			buttons = int(webview_value_get_int(webview_value_get_list_value(args, 3)));
+			if (buttons == 0) buttons = 1;
+		}
 		if (!x && !y) {
 			return 0;
 		}
 		if (name.compare("cursorClickDown") == 0) {
-			m_handler->cursorClick(browserId, x, y, false);
+			m_handler->cursorClick(browserId, x, y, false, buttons);
 		}
 		else if (name.compare("cursorClickUp") == 0) {
-			m_handler->cursorClick(browserId, x, y, true);
+			m_handler->cursorClick(browserId, x, y, true, buttons);
 		}
 		else if (name.compare("cursorMove") == 0) {
 			m_handler->cursorMove(browserId, x, y, false);

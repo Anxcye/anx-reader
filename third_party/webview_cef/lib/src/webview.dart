@@ -218,22 +218,22 @@ class WebViewController extends ValueNotifier<bool> {
         [_browserId, position.dx.round(), position.dy.round()]);
   }
 
-  Future<void> _cursorClickDown(Offset position) async {
+  Future<void> _cursorClickDown(Offset position, int buttons) async {
     if (_isDisposed) {
       return;
     }
     assert(value);
     return _pluginChannel.invokeMethod('cursorClickDown',
-        [_browserId, position.dx.round(), position.dy.round()]);
+        [_browserId, position.dx.round(), position.dy.round(), buttons]);
   }
 
-  Future<void> _cursorClickUp(Offset position) async {
+  Future<void> _cursorClickUp(Offset position, int buttons) async {
     if (_isDisposed) {
       return;
     }
     assert(value);
     return _pluginChannel.invokeMethod('cursorClickUp',
-        [_browserId, position.dx.round(), position.dy.round()]);
+        [_browserId, position.dx.round(), position.dy.round(), buttons]);
   }
 
   /// Sets the horizontal and vertical scroll delta.
@@ -292,6 +292,9 @@ class WebViewState extends State<WebView> with WebeViewTextInput {
   bool isPrimaryFocus = false;
   WebviewTooltip? _tooltip;
   MouseCursor _mouseType = SystemMouseCursors.basic;
+
+  /// Buttons from the last pointer-down (pointer-up reports buttons==0).
+  int _activeButtons = 0;
 
   WebViewController get _controller => widget.controller;
 
@@ -432,10 +435,15 @@ class WebViewState extends State<WebView> with WebeViewTextInput {
                 }
               });
             }
-            _controller._cursorClickDown(ev.localPosition);
+            // Remember buttons: PointerUpEvent.buttons is already cleared.
+            _activeButtons =
+                ev.buttons == 0 ? 1 /* kPrimaryMouseButton */ : ev.buttons;
+            _controller._cursorClickDown(ev.localPosition, _activeButtons);
           },
           onPointerUp: (ev) {
-            _controller._cursorClickUp(ev.localPosition);
+            final buttons = _activeButtons == 0 ? 1 : _activeButtons;
+            _activeButtons = 0;
+            _controller._cursorClickUp(ev.localPosition, buttons);
           },
           onPointerMove: (ev) {
             _controller._cursorDragging(ev.localPosition);
