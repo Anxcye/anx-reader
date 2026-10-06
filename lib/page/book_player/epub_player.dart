@@ -337,7 +337,7 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
     await webViewController.evaluateJavascript(source: 'clearSearch()');
     await webViewController.evaluateJavascript(
       source:
-        'search($escaped, {"scope":"book","matchCase":false,"matchDiacritics":false,"matchWholeWords":false})',
+          'search($escaped, {"scope":"book","matchCase":false,"matchDiacritics":false,"matchWholeWords":false})',
     );
   }
 
@@ -721,8 +721,6 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
     controller.addJavaScriptHandler(
         handlerName: 'onSelectionEnd',
         callback: (args) {
-          debugPrint(
-              'onSelectionEnd received: ${args.isNotEmpty ? args[0] : null}');
           removeOverlay();
           Map<String, dynamic> location = args[0];
           String cfi = location['cfi'];

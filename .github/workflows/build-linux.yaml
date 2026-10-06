@@ -1,4 +1,5 @@
 name: Build Linux
+# flutter_version input is sourced from .github/flutter-version by the setup job in build.yaml
 
 on:
   workflow_call:
@@ -35,9 +36,12 @@ jobs:
             fuse \
             libfuse2 \
             libgtk-3-dev \
+            libgstreamer1.0-dev \
+            libgstreamer-plugins-base1.0-dev \
             ninja-build \
             pkg-config \
-            xclip
+            xclip \
+            binutils
 
       - name: Get dependencies
         shell: bash
