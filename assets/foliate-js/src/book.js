@@ -394,6 +394,18 @@ const setSelectionHandler = (view, doc, index) => {
         handleSelection(view, doc, index);
       }, 600);
     });
+  } else if (!/Android/i.test(navigator.userAgent)) {
+    // Desktop Linux (CEF/Chromium) and other non-Android desktops.
+    // navigator.platform is like "Linux x86_64", so the Win/Mac branches miss it and
+    // it used to fall into the Android path — which only listens for contextmenu /
+    // pointercancel and never fires handleSelection on mouse drag pointerup.
+    doc.addEventListener('contextmenu', e => {
+      e.preventDefault();
+    });
+    doc.addEventListener('pointerup', () => {
+      if (shouldSkipPointerUp()) return;
+      handleSelection(view, doc, index);
+    });
   } else { // Android
     let hasNativeSelectionStarted = false;
     let longPressSettleTimer;

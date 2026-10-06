@@ -721,6 +721,8 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
     controller.addJavaScriptHandler(
         handlerName: 'onSelectionEnd',
         callback: (args) {
+          debugPrint(
+              'onSelectionEnd received: ${args.isNotEmpty ? args[0] : null}');
           removeOverlay();
           Map<String, dynamic> location = args[0];
           String cfi = location['cfi'];
