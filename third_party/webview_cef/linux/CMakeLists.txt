@@ -57,6 +57,12 @@ add_library(${PLUGIN_NAME} SHARED
 # application-level CMakeLists.txt. This can be removed for plugins that want
 # full control over build settings.
 apply_standard_settings(${PLUGIN_NAME})
+# Flutter apply_standard_settings pins cxx_std_14; CEF 149 headers need C++20.
+set_target_properties(${PLUGIN_NAME} PROPERTIES
+  CXX_STANDARD 20
+  CXX_STANDARD_REQUIRED ON
+  CXX_EXTENSIONS OFF)
+target_compile_features(${PLUGIN_NAME} PUBLIC cxx_std_20)
 
 # Symbols are hidden by default to reduce the chance of accidental conflicts
 # between plugins. This should not be removed; any symbols that should be
@@ -79,6 +85,11 @@ set(CEF_TARGET ${PLUGIN_NAME})
 ADD_LOGICAL_TARGET("libcef_lib" "${CEF_LIB_DEBUG}" "${CEF_LIB_RELEASE}")
 SET_CEF_TARGET_OUT_DIR()
 add_subdirectory(${CEF_LIBCEF_DLL_WRAPPER_PATH} libcef_dll_wrapper)
+# Ensure the CEF C++ wrapper (compiled in this project) also uses C++20.
+set_target_properties(libcef_dll_wrapper PROPERTIES
+  CXX_STANDARD 20
+  CXX_STANDARD_REQUIRED ON
+  CXX_EXTENSIONS OFF)
 
 # Find required libraries and update compiler/linker variables.
 FIND_LINUX_LIBRARIES("gmodule-2.0 gtk+-3.0 gthread-2.0 gtk+-unix-print-3.0 xi")

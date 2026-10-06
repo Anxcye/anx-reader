@@ -76,6 +76,7 @@ jobs:
             libgstreamer-plugins-base1.0-dev \
             ninja-build \
             pkg-config \
+            xclip \
             binutils
 
       - name: Cache CEF prebuilt SDK
