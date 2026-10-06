@@ -460,9 +460,12 @@ class _AISettingsState extends ConsumerState<AISettings> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                AnxButton(
-                  onPressed: _showAddPromptDialog,
-                  child: Text(L10n.of(context).settingsAiUserPromptsAdd),
+                SizedBox(
+                  width: double.infinity,
+                  child: AnxButton(
+                    onPressed: _showAddPromptDialog,
+                    child: Text(L10n.of(context).settingsAiUserPromptsAdd),
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Row(
