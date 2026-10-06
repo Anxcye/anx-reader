@@ -556,6 +556,7 @@ class _ContextMenuOverlayState extends State<_ContextMenuOverlay>
                                 onVisibilityChange:
                                     _handleReaderNoteVisibilityChange,
                                 onSizeChanged: _handleReaderNoteSizeChanged,
+                                onSaved: widget.onClose,
                               ),
                             ],
                           ),
