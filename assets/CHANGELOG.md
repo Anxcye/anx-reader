@@ -26,6 +26,7 @@
 - Fix(ai): Quick prompt chips insert into the composer for editing; long-press still sends immediately (#969)
 - Feat(linux): Add Linux AppImage support via CEF (#952)
 - Fix(ai): Make the Add Prompt button in AI settings full-width to match the surrounding rows
+- Fix(ai): Fix AI settings showing a grey error screen on fresh installs and provider edits failing to save, by restoring generated AiProvider JSON serialization with lenient converters
 - Chore(android): Target Android 16 (API 36) and upgrade to Google Play Billing Library 8 to meet Google Play requirements
 
 - Fix(reader): 修复部分 EPUB（如在 body 上设置竖排 writing-mode）忽略写作方向设置的问题 (#867)
@@ -53,6 +54,7 @@
 - Fix(ai): 快捷提示词芯片点击写入输入框以便编辑，长按仍可立即发送 (#969)
 - Feat(linux): 新增 Linux AppImage 支持（基于 CEF）(#952)
 - Fix(ai): AI 设置中“添加提示词”按钮改为占满整行，与上下设置项对齐
+- Fix(ai): 修复全新安装时 AI 设置页灰屏、供应商增删改无法保存的问题（恢复 AiProvider 生成式 JSON 序列化并保留宽松解析）
 - Chore(android): 目标 SDK 升级到 Android 16（API 36），并升级到 Google Play Billing Library 8，满足 Google Play 上架要求
 
 ## 1.14.0
