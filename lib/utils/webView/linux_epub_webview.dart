@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:anx_reader/utils/webView/epub_webview_controller.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:webview_cef/webview_cef.dart' as cef;
 
@@ -46,7 +47,9 @@ class LinuxEpubWebViewController implements EpubWebViewController {
         cef.WebviewEventsListener(
           onConsoleMessage: (level, message, source, line) {
             onConsoleMessage?.call(level, message, source, line);
-            debugPrint('CEF console[$level] $source:$line $message');
+            if (kDebugMode) {
+              debugPrint('CEF console[$level] $source:$line $message');
+            }
           },
           onLoadEnd: (controller, loadedUrl) {
             onLoadStop?.call(this, Uri.tryParse(loadedUrl));

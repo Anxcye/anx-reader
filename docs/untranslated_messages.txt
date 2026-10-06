@@ -415,32 +415,5 @@
     "searchEngineUrlRequired",
     "searchEngineUrlInvalid",
     "searchEngineAdded"
-  ],
-
-  "zh": [
-    "settingsAiProviderReasoningEffort",
-    "settingsAiProviderReasoningEffortHelp",
-    "settingsAiProviderReasoningEffortAuto",
-    "settingsAiProviderReasoningEffortLow",
-    "settingsAiProviderReasoningEffortMedium",
-    "settingsAiProviderReasoningEffortHigh"
-  ],
-
-  "zh_LZH": [
-    "settingsAiProviderReasoningEffort",
-    "settingsAiProviderReasoningEffortHelp",
-    "settingsAiProviderReasoningEffortAuto",
-    "settingsAiProviderReasoningEffortLow",
-    "settingsAiProviderReasoningEffortMedium",
-    "settingsAiProviderReasoningEffortHigh"
-  ],
-
-  "zh_TW": [
-    "settingsAiProviderReasoningEffort",
-    "settingsAiProviderReasoningEffortHelp",
-    "settingsAiProviderReasoningEffortAuto",
-    "settingsAiProviderReasoningEffortLow",
-    "settingsAiProviderReasoningEffortMedium",
-    "settingsAiProviderReasoningEffortHigh"
   ]
 }

@@ -920,5 +920,18 @@
   "aiChatFontSize": "字体大小",
   "aiModelSwitchTitle": "切换模型",
   "aiModelEnterManually": "输入模型名称",
-  "aiModelOrSelectBelow": "或从列表中选择："
+  "aiModelOrSelectBelow": "或从列表中选择：",
+  "searchDisplayMode": "搜索结果显示方式",
+  "searchDefaultEngine": "默认搜索引擎",
+  "searchDisplayModePopup": "弹窗（应用内覆盖层）",
+  "searchDisplayModeFullScreen": "全屏（应用内）",
+  "searchDisplayModeExternal": "外部浏览器",
+  "searchAddEngine": "添加自定义引擎",
+  "searchManageEngines": "自定义引擎",
+  "searchEngineName": "引擎名称",
+  "searchEngineNameRequired": "请输入引擎名称",
+  "searchEngineUrlTemplate": "URL 模板",
+  "searchEngineUrlRequired": "请输入 URL 模板",
+  "searchEngineUrlInvalid": "URL 必须包含搜索查询占位符且使用 http/https 协议",
+  "searchEngineAdded": "搜索引擎已添加"
 }
