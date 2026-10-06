@@ -1,6 +1,7 @@
 name: Build Linux
-# flutter_version is normally passed from setup (.github/flutter-version) via build.yaml.
-# workflow_dispatch allows testing packaging on a branch without cutting a release tag.
+# Called from build.yaml with version + flutter_version from setup.
+# workflow_dispatch: manual packaging test without a release tag (version /
+# flutter_version default from pubspec / .github/flutter-version).
 
 on:
   workflow_call:
@@ -51,12 +52,6 @@ jobs:
           echo "flutter_version=${FLUTTER_VERSION}" >> "$GITHUB_OUTPUT"
           echo "Resolved version=${VERSION} flutter=${FLUTTER_VERSION}"
 
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          flutter-version: ${{ steps.meta.outputs.flutter_version }}
-
       - name: Install Linux build dependencies
         shell: bash
         run: |
@@ -65,7 +60,6 @@ jobs:
           # ubuntu-22.04 runners with a held/broken libunwind conflict.
           sudo apt-get install -y libunwind-dev
           sudo apt-get install -y \
-            clang \
             cmake \
             curl \
             fuse \
@@ -76,21 +70,28 @@ jobs:
             libgstreamer-plugins-base1.0-dev \
             ninja-build \
             pkg-config \
+            wget \
             xclip \
             binutils
 
-      - name: Install Clang 19 (CEF 149 headers need a recent clang)
+      - name: Install Clang 19
         shell: bash
         run: |
-          # Ubuntu 22.04's default clang is too old for Chromium/CEF 149
-          # (cef_bind_internal.h pack/template syntax). Match local clang 19.
+          # CEF 149 headers need a recent clang (cef_bind_internal.h).
+          # Jammy's default clang is too old; match the local clang 19 toolchain.
+          # (System-wide llvm.sh install is not practical to cache reliably.)
           wget -qO- https://apt.llvm.org/llvm.sh | sudo bash -s -- 19
           sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-19 200
           sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-19 200
           sudo update-alternatives --set clang /usr/bin/clang-19
           sudo update-alternatives --set clang++ /usr/bin/clang++-19
-          clang --version
           clang++ --version
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ steps.meta.outputs.flutter_version }}
 
       - name: Cache CEF prebuilt SDK
         uses: actions/cache@v4
@@ -121,13 +122,8 @@ jobs:
         run: |
           chmod +x scripts/build_linux_appimage.sh
           scripts/build_linux_appimage.sh
-          echo "Artifacts:"
-          ls -lh build/linux/Anx-Reader-linux-*.AppImage build/linux/Anx-Reader-linux-*.tar.gz
-          # Confirm CEF was stripped (libcef should be well under ~400M)
-          CEF_SO="build/linux/x64/release/bundle/lib/libcef.so"
-          if [ -f "$CEF_SO" ]; then
-            ls -lh "$CEF_SO"
-          fi
+          ls -lh build/linux/Anx-Reader-linux-*.AppImage \
+                 build/linux/Anx-Reader-linux-*.tar.gz
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
