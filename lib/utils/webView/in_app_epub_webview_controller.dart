@@ -9,8 +9,13 @@ class InAppEpubWebViewController implements EpubWebViewController {
   InAppWebViewController get rawController => _controller;
 
   @override
-  Future<dynamic> evaluateJavascript({required String source}) {
+  Future<dynamic> evaluate(String source) {
     return _controller.evaluateJavascript(source: source);
+  }
+
+  @override
+  Future<void> execute(String source) async {
+    await _controller.evaluateJavascript(source: source);
   }
 
   @override

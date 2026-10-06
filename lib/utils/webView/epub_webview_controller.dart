@@ -8,8 +8,18 @@ class EpubJavaScriptResult {
   final dynamic value;
 }
 
+/// Platform-agnostic EPUB reader webview controller.
+///
+/// Prefer [evaluate] when a return value is needed (matches InAppWebView
+/// `evaluateJavascript`), and [execute] for fire-and-forget scripts (maps to
+/// CEF `executeJavaScript` on Linux; still uses evaluateJavascript on other
+/// platforms where that is the only API).
 abstract class EpubWebViewController {
-  Future<dynamic> evaluateJavascript({required String source});
+  /// Run [source] and return its completion value.
+  Future<dynamic> evaluate(String source);
+
+  /// Run [source] without using a return value.
+  Future<void> execute(String source);
 
   Future<EpubJavaScriptResult> callAsyncJavaScript({
     required String functionBody,

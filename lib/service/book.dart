@@ -24,15 +24,11 @@ import 'package:anx_reader/utils/env_var.dart';
 import 'package:anx_reader/utils/get_path/get_base_path.dart';
 import 'package:anx_reader/page/reading_page.dart';
 import 'package:anx_reader/utils/import_book.dart';
-import 'package:anx_reader/utils/book_metadata/epub_metadata.dart';
 import 'package:anx_reader/utils/log/common.dart';
-import 'package:anx_reader/utils/platform_utils.dart';
 import 'package:anx_reader/utils/toast/common.dart';
 import 'package:anx_reader/utils/webView/gererate_url.dart';
-import 'package:anx_reader/utils/webView/webview_console_message.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as path;
 
@@ -563,21 +559,6 @@ Future<void> getBookMetadata(
   String? md5,
   WidgetRef? ref,
 }) async {
-  if (AnxPlatform.isLinux) {
-    final metadata = await readEpubMetadata(file);
-    await saveBook(
-      file,
-      metadata.title,
-      metadata.author,
-      metadata.description,
-      md5,
-      metadata.cover,
-      provideBook: book,
-    );
-    ref?.read(bookListProvider.notifier).refresh();
-    return;
-  }
-
   String serverFileName = Server().setTempFile(file);
 
   String cfi = '';
@@ -585,14 +566,15 @@ Future<void> getBookMetadata(
   String bookUrl = "http://127.0.0.1:${Server().port}/$serverFileName";
   AnxLog.info("import start: book url: $bookUrl");
 
+  final importUrl = generateUrl(
+    bookUrl,
+    cfi,
+    importing: true,
+  );
+
   AnxHeadlessWebView webview = AnxHeadlessWebView(
     webViewEnvironment: webViewEnvironment,
-    initialUrlRequest: URLRequest(
-        url: WebUri(generateUrl(
-      bookUrl,
-      cfi,
-      importing: true,
-    ))),
+    initialUrl: importUrl,
     onLoadStop: (controller, url) async {
       controller.addJavaScriptHandler(
           handlerName: 'onMetadata',
@@ -621,16 +603,15 @@ Future<void> getBookMetadata(
               provideBook: book,
             );
             ref?.read(bookListProvider.notifier).refresh();
-            // return;
           });
     },
-    onConsoleMessage: (controller, consoleMessage) {
-      if (consoleMessage.messageLevel == ConsoleMessageLevel.ERROR) {
+    onConsoleMessage: (controller, message, {required isError}) {
+      if (isError) {
         headlessInAppWebView?.dispose();
         headlessInAppWebView = null;
-        throw Exception('Webview: ${consoleMessage.message}');
+        throw Exception('Webview: $message');
       }
-      webviewConsoleMessage(controller, consoleMessage);
+      AnxLog.info('Webview: $message');
     },
   );
 

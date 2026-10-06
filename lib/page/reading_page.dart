@@ -173,9 +173,8 @@ class ReadingPageState extends ConsumerState<ReadingPage>
     // key (e.g. first character in TOC search). Blur the web document when
     // Flutter chrome takes over.
     if (AnxPlatform.isLinux) {
-      epubPlayerKey.currentState?.webViewController.evaluateJavascript(
-        source:
-            "try { document.activeElement && document.activeElement.blur(); } catch (_) {}",
+      epubPlayerKey.currentState?.webViewController.execute(
+        "try { document.activeElement && document.activeElement.blur(); } catch (_) {}",
       );
     }
   }

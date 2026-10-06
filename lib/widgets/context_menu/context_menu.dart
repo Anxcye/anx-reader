@@ -114,7 +114,7 @@ Future<void> showContextMenu(
   playerKey.removeOverlay();
 
   void onClose() {
-    playerKey.webViewController.evaluateJavascript(source: 'clearSelection()');
+    playerKey.webViewController.execute('clearSelection()');
     playerKey.removeOverlay();
     playerKey.restoreReaderFocus();
   }
@@ -454,9 +454,8 @@ class _ContextMenuOverlayState extends State<_ContextMenuOverlay>
       if (query != null) _searchQuery = query;
     });
     _scheduleRecalculate(
-      delay: _showSearchMenu
-          ? const Duration(milliseconds: 300)
-          : Duration.zero,
+      delay:
+          _showSearchMenu ? const Duration(milliseconds: 300) : Duration.zero,
     );
   }
 

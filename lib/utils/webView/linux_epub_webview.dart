@@ -25,21 +25,36 @@ const _flutterInAppWebViewBridgeScript = r'''
 ''';
 
 class LinuxEpubWebViewController implements EpubWebViewController {
-  LinuxEpubWebViewController(this._controller);
+  LinuxEpubWebViewController(
+    this._controller, {
+    this.onLoadStop,
+    this.onConsoleMessage,
+  });
 
   final cef.WebViewController _controller;
+  final void Function(EpubWebViewController controller, Uri? url)? onLoadStop;
+  final void Function(int level, String message, String source, int line)?
+      onConsoleMessage;
   final Map<String, EpubJavaScriptHandler> _handlers = {};
   final Map<String, Completer<dynamic>> _asyncCalls = {};
   int _nextAsyncCallId = 0;
+  bool _listenerAttached = false;
 
   Future<void> initialize(String url) async {
-    _controller.setWebviewListener(
-      cef.WebviewEventsListener(
-        onConsoleMessage: (level, message, source, line) {
-          debugPrint('CEF console[$level] $source:$line $message');
-        },
-      ),
-    );
+    if (!_listenerAttached) {
+      _controller.setWebviewListener(
+        cef.WebviewEventsListener(
+          onConsoleMessage: (level, message, source, line) {
+            onConsoleMessage?.call(level, message, source, line);
+            debugPrint('CEF console[$level] $source:$line $message');
+          },
+          onLoadEnd: (controller, loadedUrl) {
+            onLoadStop?.call(this, Uri.tryParse(loadedUrl));
+          },
+        ),
+      );
+      _listenerAttached = true;
+    }
 
     await _controller.initialize('about:blank');
     await _controller.setJavaScriptChannels({
@@ -63,14 +78,17 @@ class LinuxEpubWebViewController implements EpubWebViewController {
 
   Future<void> dispose() => _controller.dispose();
 
-  Future<dynamic> evaluateJavascript({required String source}) async {
-    if (_isExpression(source)) {
-      return await _controller.evaluateJavascript(source);
-    }
-    await _controller.executeJavaScript(source);
-    return null;
+  @override
+  Future<dynamic> evaluate(String source) {
+    return _controller.evaluateJavascript(source);
   }
 
+  @override
+  Future<void> execute(String source) {
+    return _controller.executeJavaScript(source);
+  }
+
+  @override
   Future<EpubJavaScriptResult> callAsyncJavaScript({
     required String functionBody,
   }) async {
@@ -94,25 +112,12 @@ class LinuxEpubWebViewController implements EpubWebViewController {
     return EpubJavaScriptResult(value: await completer.future);
   }
 
+  @override
   void addJavaScriptHandler({
     required String handlerName,
     required EpubJavaScriptHandler callback,
   }) {
     _handlers[handlerName] = callback;
-  }
-
-  bool _isExpression(String source) {
-    final trimmed = source.trim();
-    if (trimmed.isEmpty) return false;
-    if (trimmed.contains('\n') || trimmed.contains(';')) return false;
-    if (trimmed.startsWith('if ') ||
-        trimmed.startsWith('if(') ||
-        trimmed.startsWith('const ') ||
-        trimmed.startsWith('let ') ||
-        trimmed.startsWith('var ')) {
-      return false;
-    }
-    return true;
   }
 
   Future<void> _handleBridgeMessage(cef.JavascriptMessage message) async {
@@ -159,11 +164,13 @@ class LinuxEpubWebView extends StatefulWidget {
     super.key,
     required this.url,
     required this.onWebViewCreated,
+    this.onLoadStop,
   });
 
   final String url;
   final FutureOr<void> Function(EpubWebViewController controller)
       onWebViewCreated;
+  final void Function(EpubWebViewController controller, Uri? url)? onLoadStop;
 
   @override
   State<LinuxEpubWebView> createState() => _LinuxEpubWebViewState();
@@ -186,6 +193,7 @@ class _LinuxEpubWebViewState extends State<LinuxEpubWebView> {
             ),
           ),
       ),
+      onLoadStop: widget.onLoadStop,
     );
     widget.onWebViewCreated(_controller);
     _controller.initialize(widget.url);

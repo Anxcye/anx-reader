@@ -2,28 +2,43 @@ import 'dart:io';
 
 import 'package:anx_reader/main.dart';
 import 'package:anx_reader/utils/log/common.dart';
+import 'package:anx_reader/utils/platform_utils.dart';
+import 'package:anx_reader/utils/webView/epub_webview_controller.dart';
+import 'package:anx_reader/utils/webView/in_app_epub_webview_controller.dart';
+import 'package:anx_reader/utils/webView/linux_epub_webview.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
+typedef AnxHeadlessCreatedCallback = void Function(
+    EpubWebViewController controller);
+typedef AnxHeadlessLoadStopCallback = void Function(
+    EpubWebViewController controller, Uri? url);
+typedef AnxHeadlessConsoleCallback = void Function(
+    EpubWebViewController controller, String message,
+    {required bool isError});
+typedef AnxHeadlessLoadErrorCallback = void Function(
+    EpubWebViewController controller, Uri? url, int code, String message);
+
+/// Headless (or offstage) webview for import/search.
+///
+/// Callers only see [EpubWebViewController] — Linux uses an offstage CEF
+/// view; other platforms use HeadlessInAppWebView (with overlay fallback).
 class AnxHeadlessWebView {
   HeadlessInAppWebView? _headlessWebView;
   OverlayEntry? _overlayEntry;
+  EpubWebViewController? _controller;
 
-  final URLRequest initialUrlRequest;
+  final String initialUrl;
   final InAppWebViewSettings? initialSettings;
-  final void Function(InAppWebViewController controller)? onWebViewCreated;
-  final void Function(InAppWebViewController controller, Uri? url)? onLoadStop;
-  final void Function(
-          InAppWebViewController controller, ConsoleMessage consoleMessage)?
-      onConsoleMessage;
-  final void Function(InAppWebViewController controller, Uri? url, int code,
-      String message)? onLoadError;
-  final void Function(InAppWebViewController controller, Uri? url,
-      int statusCode, String description)? onLoadHttpError;
+  final AnxHeadlessCreatedCallback? onWebViewCreated;
+  final AnxHeadlessLoadStopCallback? onLoadStop;
+  final AnxHeadlessConsoleCallback? onConsoleMessage;
+  final AnxHeadlessLoadErrorCallback? onLoadError;
+  final AnxHeadlessLoadErrorCallback? onLoadHttpError;
   final WebViewEnvironment? webViewEnvironment;
 
   AnxHeadlessWebView({
-    required this.initialUrlRequest,
+    required this.initialUrl,
     this.initialSettings,
     this.onWebViewCreated,
     this.onLoadStop,
@@ -34,47 +49,103 @@ class AnxHeadlessWebView {
   });
 
   Future<void> run() async {
+    if (AnxPlatform.isLinux) {
+      _runLinuxCefOverlay();
+      return;
+    }
+
     bool useOverlay = false;
     try {
       if (Platform.operatingSystem == 'ohos') {
         useOverlay = true;
       }
-    } catch (e) {
+    } catch (_) {
       // ignore
     }
 
     if (Platform.isWindows && webViewEnvironment == null) {
       AnxLog.severe(
           'AnxHeadlessWebView: webViewEnvironment is null on Windows, falling back to Overlay');
-      _runOverlay();
+      _runInAppOverlay();
       return;
     }
 
     if (useOverlay) {
-      _runOverlay();
-    } else {
-      _headlessWebView = HeadlessInAppWebView(
-        webViewEnvironment: webViewEnvironment,
-        initialUrlRequest: initialUrlRequest,
-        initialSettings: initialSettings,
-        onWebViewCreated: onWebViewCreated,
-        onLoadStop: onLoadStop,
-        onConsoleMessage: onConsoleMessage,
-        onLoadError: onLoadError,
-        onLoadHttpError: onLoadHttpError,
-      );
-      try {
-        await _headlessWebView?.run();
-      } catch (e) {
-        AnxLog.info(
-            "HeadlessInAppWebView failed to run, falling back to Overlay: $e");
-        _headlessWebView = null;
-        _runOverlay();
-      }
+      _runInAppOverlay();
+      return;
+    }
+
+    _headlessWebView = HeadlessInAppWebView(
+      webViewEnvironment: webViewEnvironment,
+      initialUrlRequest: URLRequest(url: WebUri(initialUrl)),
+      initialSettings: initialSettings,
+      onWebViewCreated: (controller) {
+        final wrapped = InAppEpubWebViewController(controller);
+        _controller = wrapped;
+        onWebViewCreated?.call(wrapped);
+      },
+      onLoadStop: (controller, url) {
+        final wrapped = _controller ?? InAppEpubWebViewController(controller);
+        onLoadStop?.call(wrapped, url);
+      },
+      onConsoleMessage: (controller, message) {
+        final wrapped = _controller ?? InAppEpubWebViewController(controller);
+        onConsoleMessage?.call(
+          wrapped,
+          message.message,
+          isError: message.messageLevel == ConsoleMessageLevel.ERROR,
+        );
+      },
+      onLoadError: (controller, url, code, message) {
+        final wrapped = _controller ?? InAppEpubWebViewController(controller);
+        onLoadError?.call(wrapped, url, code, message);
+      },
+      onLoadHttpError: (controller, url, statusCode, description) {
+        final wrapped = _controller ?? InAppEpubWebViewController(controller);
+        onLoadHttpError?.call(wrapped, url, statusCode, description);
+      },
+    );
+    try {
+      await _headlessWebView?.run();
+    } catch (e) {
+      AnxLog.info(
+          "HeadlessInAppWebView failed to run, falling back to Overlay: $e");
+      _headlessWebView = null;
+      _runInAppOverlay();
     }
   }
 
-  void _runOverlay() {
+  void _runLinuxCefOverlay() {
+    final context = navigatorKey.currentContext;
+    if (context == null) {
+      AnxLog.severe(
+          "No context available for AnxHeadlessWebView Linux overlay");
+      return;
+    }
+
+    _overlayEntry = OverlayEntry(
+      builder: (context) => Offstage(
+        offstage: true,
+        child: SizedBox(
+          width: 1,
+          height: 1,
+          child: LinuxEpubWebView(
+            url: initialUrl,
+            onWebViewCreated: (controller) {
+              _controller = controller;
+              onWebViewCreated?.call(controller);
+            },
+            onLoadStop: (controller, url) {
+              onLoadStop?.call(controller, url);
+            },
+          ),
+        ),
+      ),
+    );
+    Overlay.of(context).insert(_overlayEntry!);
+  }
+
+  void _runInAppOverlay() {
     final context = navigatorKey.currentContext;
     if (context == null) {
       AnxLog.severe("No context available for AnxHeadlessWebView overlay");
@@ -88,14 +159,36 @@ class AnxHeadlessWebView {
           width: 1,
           height: 1,
           child: InAppWebView(
-            initialUrlRequest: initialUrlRequest,
+            initialUrlRequest: URLRequest(url: WebUri(initialUrl)),
             initialSettings: initialSettings,
-            onLoadStop: onLoadStop,
-            onConsoleMessage: onConsoleMessage,
-            onLoadError: onLoadError,
-            onLoadHttpError: onLoadHttpError,
             onWebViewCreated: (controller) {
-              onWebViewCreated?.call(controller);
+              final wrapped = InAppEpubWebViewController(controller);
+              _controller = wrapped;
+              onWebViewCreated?.call(wrapped);
+            },
+            onLoadStop: (controller, url) {
+              final wrapped =
+                  _controller ?? InAppEpubWebViewController(controller);
+              onLoadStop?.call(wrapped, url);
+            },
+            onConsoleMessage: (controller, message) {
+              final wrapped =
+                  _controller ?? InAppEpubWebViewController(controller);
+              onConsoleMessage?.call(
+                wrapped,
+                message.message,
+                isError: message.messageLevel == ConsoleMessageLevel.ERROR,
+              );
+            },
+            onLoadError: (controller, url, code, message) {
+              final wrapped =
+                  _controller ?? InAppEpubWebViewController(controller);
+              onLoadError?.call(wrapped, url, code, message);
+            },
+            onLoadHttpError: (controller, url, statusCode, description) {
+              final wrapped =
+                  _controller ?? InAppEpubWebViewController(controller);
+              onLoadHttpError?.call(wrapped, url, statusCode, description);
             },
           ),
         ),
@@ -114,5 +207,6 @@ class AnxHeadlessWebView {
       _overlayEntry?.remove();
       _overlayEntry = null;
     }
+    _controller = null;
   }
 }

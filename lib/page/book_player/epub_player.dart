@@ -37,10 +37,9 @@ import 'package:anx_reader/utils/js/convert_dart_color_to_js.dart';
 import 'package:anx_reader/utils/platform_utils.dart';
 import 'package:anx_reader/models/book_note.dart';
 import 'package:anx_reader/utils/log/common.dart';
+import 'package:anx_reader/utils/webView/epub_webview.dart';
 import 'package:anx_reader/utils/webView/epub_webview_controller.dart';
 import 'package:anx_reader/utils/webView/gererate_url.dart';
-import 'package:anx_reader/utils/webView/in_app_epub_webview_controller.dart';
-import 'package:anx_reader/utils/webView/linux_epub_webview.dart';
 import 'package:anx_reader/utils/webView/webview_console_message.dart';
 import 'package:anx_reader/widgets/bookshelf/book_cover.dart';
 import 'package:anx_reader/widgets/context_menu/context_menu.dart';
@@ -117,33 +116,33 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
       ModalRoute.of(context)?.isCurrent ?? false;
 
   void prevPage() {
-    webViewController.evaluateJavascript(source: '''
+    webViewController.execute('''
       if (typeof clearSelection === 'function') { clearSelection(); }
       prevPage();
       ''');
   }
 
   void nextPage() {
-    webViewController.evaluateJavascript(source: '''
+    webViewController.execute('''
       if (typeof clearSelection === 'function') { clearSelection(); }
       nextPage();
       ''');
   }
 
   void prevChapter() {
-    webViewController.evaluateJavascript(source: '''
+    webViewController.execute('''
       prevSection()
       ''');
   }
 
   void nextChapter() {
-    webViewController.evaluateJavascript(source: '''
+    webViewController.execute('''
       nextSection()
       ''');
   }
 
   void setTranslationMode(TranslationModeEnum mode) {
-    webViewController.evaluateJavascript(source: '''
+    webViewController.execute('''
       if (typeof reader !== 'undefined' && typeof reader.view !== 'undefined' && reader.view.setTranslationMode) {
         reader.view.setTranslationMode('${mode.code}');
       }
@@ -151,7 +150,7 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
   }
 
   Future<void> goToPercentage(double value) async {
-    await webViewController.evaluateJavascript(source: '''
+    await webViewController.execute('''
       goToPercent($value); 
       ''');
   }
@@ -177,7 +176,7 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
     String bc = convertDartColorToJs(readTheme.backgroundColor);
     String tc = convertDartColorToJs(readTheme.textColor);
 
-    webViewController.evaluateJavascript(source: '''
+    webViewController.execute('''
       changeStyle({
         backgroundColor: '#$bc',
         fontColor: '#$tc',
@@ -195,7 +194,7 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
     styleTimer = Timer(const Duration(milliseconds: 300), () {
       if (!mounted) return;
       BookStyle style = bookStyle ?? Prefs().bookStyle;
-      webViewController.evaluateJavascript(source: '''
+      webViewController.execute('''
       changeStyle({
         fontSize: ${style.fontSize},
         spacing: ${style.lineHeight},
@@ -231,7 +230,7 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
       isDarkMode: isDarkMode,
       autoAdjust: Prefs().autoAdjustReadingTheme,
     );
-    webViewController.evaluateJavascript(source: '''
+    webViewController.execute('''
       changeStyle({
         backgroundImage: '$bgimgUrl',
         bgimgBlur: ${bgimg.blur},
@@ -242,7 +241,7 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
   }
 
   void changeReadingRules(ReadingRules readingRules) {
-    webViewController.evaluateJavascript(source: '''
+    webViewController.execute('''
       readingFeatures({
         convertChineseMode: '${readingRules.convertChineseMode.name}',
         bionicReadingMode: ${readingRules.bionicReading},
@@ -251,7 +250,7 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
   }
 
   void changeFont(FontModel font) {
-    webViewController.evaluateJavascript(source: '''
+    webViewController.execute('''
       changeStyle({
         fontName: '${font.name}',
         fontPath: '${font.path}',
@@ -260,23 +259,21 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
   }
 
   void changePageTurnStyle(PageTurn pageTurnStyle) {
-    webViewController.evaluateJavascript(source: '''
+    webViewController.execute('''
       changeStyle({
         pageTurnStyle: '${pageTurnStyle.name}',
       })
     ''');
   }
 
-  void goToHref(String href) =>
-      webViewController.evaluateJavascript(source: "goToHref('$href')");
+  void goToHref(String href) => webViewController.execute("goToHref('$href')");
 
-  void goToCfi(String cfi) =>
-      webViewController.evaluateJavascript(source: "goToCfi('$cfi')");
+  void goToCfi(String cfi) => webViewController.execute("goToCfi('$cfi')");
 
   void addAnnotation(BookNote bookNote) {
     final noteContent =
         (bookNote.content).replaceAll('\n', ' ').replaceAll("'", "\\'");
-    webViewController.evaluateJavascript(source: '''
+    webViewController.execute('''
       addAnnotation({
         id: ${bookNote.id},
         type: '${bookNote.type}',
@@ -288,7 +285,7 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
   }
 
   void addBookmark(BookmarkModel bookmark) {
-    webViewController.evaluateJavascript(source: '''
+    webViewController.execute('''
       addAnnotation({
         id: ${bookmark.id},
         type: 'bookmark',
@@ -300,13 +297,13 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
   }
 
   void addBookmarkHere() {
-    webViewController.evaluateJavascript(source: '''
+    webViewController.execute('''
       addBookmarkHere()
       ''');
   }
 
   void removeAnnotation(String cfi) =>
-      webViewController.evaluateJavascript(source: "removeAnnotation('$cfi')");
+      webViewController.execute("removeAnnotation('$cfi')");
 
   void clearSearch() {
     ref.read(tocSearchProvider.notifier).clear();
@@ -321,7 +318,7 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
     }
     _clearSearchHighlights();
     ref.read(tocSearchProvider.notifier).start(sanitized);
-    webViewController.evaluateJavascript(source: '''
+    webViewController.execute('''
       search('$sanitized', {
         'scope': 'book',
         'matchCase': false,
@@ -334,27 +331,24 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
   Future<void> runAiBookSearch(String keyword) async {
     ref.read(tocSearchProvider.notifier).start(keyword);
     final escaped = jsonEncode(keyword);
-    await webViewController.evaluateJavascript(source: 'clearSearch()');
-    await webViewController.evaluateJavascript(
-      source:
-          'search($escaped, {"scope":"book","matchCase":false,"matchDiacritics":false,"matchWholeWords":false})',
-    );
+    await webViewController.execute('clearSearch()');
+    await webViewController.execute(
+        'search($escaped, {"scope":"book","matchCase":false,"matchDiacritics":false,"matchWholeWords":false})');
   }
 
   void _clearSearchHighlights() {
-    webViewController.evaluateJavascript(source: "clearSearch()");
+    webViewController.execute("clearSearch()");
   }
 
   Future<void> initTts({String? fromCfi}) async {
     if (fromCfi != null && fromCfi.isNotEmpty) {
-      await webViewController.evaluateJavascript(
-          source: "window.ttsFromCfi('$fromCfi')");
+      await webViewController.execute("window.ttsFromCfi('$fromCfi')");
     } else {
-      await webViewController.evaluateJavascript(source: "window.ttsHere()");
+      await webViewController.execute("window.ttsHere()");
     }
   }
 
-  void ttsStop() => webViewController.evaluateJavascript(source: "ttsStop()");
+  void ttsStop() => webViewController.execute("ttsStop()");
 
   Future<String> ttsNext() async => _jsString(
         await webViewController.callAsyncJavaScript(
@@ -381,7 +375,7 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
       );
 
   Future<String> ttsPrepare() async =>
-      (await webViewController.evaluateJavascript(source: "ttsPrepare()"));
+      (await webViewController.evaluate("ttsPrepare()"));
 
   TtsSentence? _parseTtsSentence(dynamic value) {
     if (value is Map<dynamic, dynamic>) {
@@ -435,30 +429,26 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
     );
   }
 
-  Future<bool> isFootNoteOpen() async => (await webViewController
-      .evaluateJavascript(source: "window.isFootNoteOpen()"));
+  Future<bool> isFootNoteOpen() async =>
+      (await webViewController.evaluate("window.isFootNoteOpen()"));
 
   void backHistory() {
-    webViewController.evaluateJavascript(source: "back()");
+    webViewController.execute("back()");
   }
 
   void forwardHistory() {
-    webViewController.evaluateJavascript(source: "forward()");
+    webViewController.execute("forward()");
   }
 
   void refreshToc() {
-    webViewController.evaluateJavascript(source: "refreshToc()");
+    webViewController.execute("refreshToc()");
   }
 
   Future<String> theChapterContent() async =>
-      await webViewController.evaluateJavascript(
-        source: "theChapterContent()",
-      );
+      (await webViewController.evaluate("theChapterContent()")).toString();
 
   Future<String> previousContent(int count) async =>
-      await webViewController.evaluateJavascript(
-        source: "previousContent($count)",
-      );
+      (await webViewController.evaluate("previousContent($count)")).toString();
 
   Future<String> _getCurrentChapterContent({int? maxCharacters}) async {
     final raw = await theChapterContent();
@@ -638,7 +628,7 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
     String allAnnotations =
         jsonEncode(annotationList.map((e) => e.toJson()).toList())
             .replaceAll('\'', '\\\'');
-    controller.evaluateJavascript(source: '''
+    controller.execute('''
      const allAnnotations = $allAnnotations
      renderAnnotations()
     ''');
@@ -970,7 +960,7 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
     contextMenu = ContextMenu(
       settings: ContextMenuSettings(hideDefaultSystemContextMenuItems: true),
       onCreateContextMenu: (hitTestResult) async {
-        // webViewController.evaluateJavascript(source: "showContextMenu()");
+        // webViewController.execute("showContextMenu()");
       },
       onHideContextMenu: () {
         // removeOverlay();
@@ -1254,24 +1244,12 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
       isDarkMode: Theme.of(context).brightness == Brightness.dark,
     );
 
-    if (AnxPlatform.isLinux) {
-      return SizedBox.expand(
-        child: LinuxEpubWebView(
-          url: generatedUrl,
-          onWebViewCreated: onWebViewCreated,
-        ),
-      );
-    }
-
-    final webView = InAppWebView(
+    final webView = EpubWebView(
+      url: generatedUrl,
       webViewEnvironment: webViewEnvironment,
-      initialUrlRequest: URLRequest(
-        url: WebUri(generatedUrl),
-      ),
       initialSettings: initialSettings,
       contextMenu: contextMenu,
-      onLoadStop: (controller, uri) =>
-          onWebViewCreated(InAppEpubWebViewController(controller)),
+      onWebViewCreated: onWebViewCreated,
       onConsoleMessage: webviewConsoleMessage,
     );
 
