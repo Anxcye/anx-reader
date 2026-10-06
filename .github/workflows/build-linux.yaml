@@ -79,6 +79,19 @@ jobs:
             xclip \
             binutils
 
+      - name: Install Clang 19 (CEF 149 headers need a recent clang)
+        shell: bash
+        run: |
+          # Ubuntu 22.04's default clang is too old for Chromium/CEF 149
+          # (cef_bind_internal.h pack/template syntax). Match local clang 19.
+          wget -qO- https://apt.llvm.org/llvm.sh | sudo bash -s -- 19
+          sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-19 200
+          sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-19 200
+          sudo update-alternatives --set clang /usr/bin/clang-19
+          sudo update-alternatives --set clang++ /usr/bin/clang++-19
+          clang --version
+          clang++ --version
+
       - name: Cache CEF prebuilt SDK
         uses: actions/cache@v4
         with:
@@ -103,6 +116,8 @@ jobs:
         shell: bash
         env:
           VERSION: ${{ steps.meta.outputs.version }}
+          CC: clang-19
+          CXX: clang++-19
         run: |
           chmod +x scripts/build_linux_appimage.sh
           scripts/build_linux_appimage.sh
