@@ -166,6 +166,12 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
   }
 
   void restoreReaderFocus() {
+    // CEF may still hold GTK/browser focus after a page click dismissed the
+    // menu; release it so arrow keys reach Flutter again.
+    webViewController.setBrowserFocus(false);
+    webViewController.execute(
+      "try { window.__anxResetClickSuppress && window.__anxResetClickSuppress(); } catch (_) {}",
+    );
     readingPageKey.currentState?.requestReaderFocus();
   }
 

@@ -160,9 +160,9 @@ class ReadingPageState extends ConsumerState<ReadingPage>
   }
 
   void requestReaderFocus() {
-    if (bottomBarOffstage && !_readerFocusNode.hasFocus) {
-      _readerFocusNode.requestFocus();
-    }
+    if (!bottomBarOffstage) return;
+    // Always re-claim focus after overlays (selection menu / note field).
+    _readerFocusNode.requestFocus();
   }
 
   /// Public entry for overlays (note field, search) that need the keyboard.
