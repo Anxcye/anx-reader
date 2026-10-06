@@ -1122,10 +1122,10 @@ packages:
     dependency: "direct main"
     description:
       name: in_app_purchase_android
-      sha256: abb254ae159a5a9d4f867795ecb076864faeba59ce015ab81d4cca380f23df45
+      sha256: f7327b5fd70d8dc1b419fb4cd5c17520175c4059441afd985e8a9c3fa2cefed9
       url: "https://pub.dev"
     source: hosted
-    version: "0.4.0+8"
+    version: "0.5.3"
   in_app_purchase_platform_interface:
     dependency: transitive
     description:
