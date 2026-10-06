@@ -24,6 +24,7 @@
 - Fix(reader): Page-turn keys clear selection and turn pages instead of panning while text is selected (#966)
 - Fix(ai): Null-safe custom provider config parsing and clearer errors when required fields or response shape are invalid (#868)
 - Fix(ai): Quick prompt chips insert into the composer for editing; long-press still sends immediately (#969)
+- Feat(linux): Add Linux AppImage support via CEF (#952)
 
 - Fix(reader): 修复部分 EPUB（如在 body 上设置竖排 writing-mode）忽略写作方向设置的问题 (#867)
 - Fix(log): 修复因句末句点导致精确匹配失败、未能屏蔽 Chromium iframe sandbox WebView 警告的问题 (#877)
@@ -48,6 +49,7 @@
 - Fix(reader): 选中文本时方向键/翻页键先清除选区再翻页，避免页面平移 (#966)
 - Fix(ai): 自定义供应商配置解析更空安全，并在必填项或响应格式异常时给出明确错误 (#868)
 - Fix(ai): 快捷提示词芯片点击写入输入框以便编辑，长按仍可立即发送 (#969)
+- Feat(linux): 新增 Linux AppImage 支持（基于 CEF）(#952)
 
 ## 1.14.0
 - Fix(translate): Remove legacy Microsoft reverse-engineered translation service and migrate saved full-text translation preference to Microsoft Azure API
