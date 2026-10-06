@@ -17,7 +17,7 @@
 - Perf(reader): Reduce Android reading-page scroll jank by deferring relocate during scroll (#914) Thanks @dddXzz
 - Fix(reader): Restore reader keyboard focus after clearing text selection / closing context menu (#967, #966) Thanks @zyx-31415
 - Fix(reader): Open selection menu on single-word long-press on Android (#990, #968, #900)
-- Fix(sync): Rename local book file when saving a new title so WebDAV uploads use the updated name (#989)
+- Fix(sync): Strip special characters (e.g. # @ $ %) from file names on import so WebDAV servers like Jianguoyun accept uploads (#989)
 - Feat(appearance): Disable open-book animation, page transitions, and dialog motion when e-ink mode is on (#986)
 - Fix(bookshelf): Make group rename obvious (edit icon) and seed new groups with the book title instead of "..." (#972)
 - Fix(ai): Preserve Gemini thought_signature across tool-call round-trips so thinking models work with tools (#977)
@@ -41,7 +41,7 @@
 - Perf(reader): 优化 Android 阅读页滚动卡顿，滚动期间推迟 relocate (#914) 感谢 @dddXzz
 - Fix(reader): 修复清除选区/关闭上下文菜单后阅读器键盘焦点未恢复的问题 (#967, #966) 感谢 @zyx-31415
 - Fix(reader): 修复 Android 长按选中单字不弹出菜单的问题 (#990, #968, #900)
-- Fix(sync): 保存书名时同步重命名本地文件，避免 WebDAV 仍上传旧文件名 (#989)
+- Fix(sync): 导入时移除文件名中的特殊字符（如 # @ $ %），避免坚果云等 WebDAV 拒绝上传 (#989)
 - Feat(appearance): 开启墨水屏模式时关闭开书动画、页面转场与弹窗动画 (#986)
 - Fix(bookshelf): 分组命名入口更明显，新建分组默认使用书名而非 "..." (#972)
 - Fix(ai): 修复 Gemini 工具调用时缺失 thought_signature 导致思考模型报错的问题 (#977)
