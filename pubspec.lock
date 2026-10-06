@@ -2285,10 +2285,9 @@ packages:
   webview_cef:
     dependency: "direct main"
     description:
-      name: webview_cef
-      sha256: "83dd8616ee8bffc0008d226f8fb09de5e99b01041f4cb0b26a2314f9aba87556"
-      url: "https://pub.dev"
-    source: hosted
+      path: "third_party/webview_cef"
+      relative: true
+    source: path
     version: "0.5.1"
   win32:
     dependency: transitive

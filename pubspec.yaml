@@ -132,6 +132,8 @@ dependencies:
   webview_cef: ^0.5.1
 
 dependency_overrides:
+  webview_cef:
+    path: third_party/webview_cef
   googleai_dart:
     path: third_party/googleai_dart
   langchain_google:
