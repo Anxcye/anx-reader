@@ -28,6 +28,7 @@ import 'package:anx_reader/widgets/common/anx_segmented_button.dart';
 import 'package:anx_reader/widgets/tips/bookshelf_tips.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:anx_reader/utils/toast/common.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_reorderable_grid_view/widgets/custom_draggable.dart';
 import 'package:flutter_reorderable_grid_view/widgets/reorderable_builder.dart';
@@ -74,10 +75,17 @@ class BookshelfPageState extends ConsumerState<BookshelfPage>
   }
 
   Future<void> _importBook() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
-      type: FileType.any,
-      allowMultiple: true,
-    );
+    FilePickerResult? result;
+    try {
+      result = await FilePicker.platform.pickFiles(
+        type: FileType.any,
+        allowMultiple: true,
+      );
+    } catch (e) {
+      if (!mounted) return;
+      AnxToast.show(L10n.of(context).filePickerFailed(e.toString()));
+      return;
+    }
 
     if (result == null) {
       return;

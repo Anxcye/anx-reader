@@ -27,6 +27,7 @@ import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:heroine/heroine.dart';
 import 'package:provider/provider.dart' as provider;
 import 'package:window_manager/window_manager.dart';
+import 'package:webview_cef/webview_cef.dart' as cef;
 
 final navigatorKey = GlobalKey<NavigatorState>();
 late AudioHandler audioHandler;
@@ -42,8 +43,12 @@ Future<void> main() async {
   HttpOverrides.global = AnxHttpProxyOverrides();
 
   // Initialize desktop window with validated position
-  if (AnxPlatform.isWindows || AnxPlatform.isMacOS) {
+  if (AnxPlatform.isDesktop) {
     await initializeDesktopWindow();
+  }
+
+  if (AnxPlatform.isLinux) {
+    await cef.WebviewManager().initialize();
   }
 
   // Check if migration is needed before initializing paths
@@ -114,6 +119,9 @@ class _MyAppState extends ConsumerState<MyApp>
     await Server().stop();
     await webViewEnvironment?.dispose();
     webViewEnvironment = null;
+    if (AnxPlatform.isLinux) {
+      await cef.WebviewManager().quit();
+    }
     await DBHelper.close();
     await windowManager.destroy();
   }
@@ -139,7 +147,7 @@ class _MyAppState extends ConsumerState<MyApp>
   }
 
   Future<void> _updateWindowInfo() async {
-    if (!AnxPlatform.isWindows && !AnxPlatform.isMacOS) {
+    if (!AnxPlatform.isDesktop) {
       return;
     }
     final windowOffset = await windowManager.getPosition();

@@ -8,6 +8,7 @@ Future<Directory> getAnxTempDir() async {
     case AnxPlatformEnum.android:
     case AnxPlatformEnum.ohos:
     case AnxPlatformEnum.windows:
+    case AnxPlatformEnum.linux:
     case AnxPlatformEnum.macos:
     case AnxPlatformEnum.ios:
       return await getTemporaryDirectory();

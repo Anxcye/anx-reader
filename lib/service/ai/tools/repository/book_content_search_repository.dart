@@ -13,8 +13,8 @@ import 'package:anx_reader/service/ai/tools/repository/books_repository.dart';
 import 'package:anx_reader/service/book_player/book_player_server.dart';
 import 'package:anx_reader/utils/log/common.dart';
 import 'package:anx_reader/utils/webView/gererate_url.dart';
-import 'package:anx_reader/utils/webView/webview_console_message.dart';
 import 'package:anx_reader/utils/webView/anx_headless_webview.dart';
+import 'package:anx_reader/utils/webView/epub_webview_controller.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -213,7 +213,7 @@ class _HeadlessSearchSession {
   final VoidCallback idleCallback;
 
   AnxHeadlessWebView? _webView;
-  InAppWebViewController? _controller;
+  EpubWebViewController? _controller;
   final _AsyncLock _lock = _AsyncLock();
   Completer<void>? _readyCompleter;
   _ActiveSearch? _activeSearch;
@@ -244,10 +244,9 @@ class _HeadlessSearchSession {
 
     final headless = AnxHeadlessWebView(
       webViewEnvironment: webViewEnvironment,
-      initialUrlRequest: URLRequest(url: WebUri(url)),
+      initialUrl: url,
       initialSettings: InAppWebViewSettings(
         supportZoom: false,
-        // transparentBackground: true,
         isInspectable: kDebugMode,
       ),
       onWebViewCreated: (controller) {
@@ -283,7 +282,12 @@ class _HeadlessSearchSession {
           loadCompleter.complete();
         }
       },
-      onConsoleMessage: webviewConsoleMessage,
+      onConsoleMessage: (controller, message, {required isError}) {
+        AnxLog.info('Headless search webview: $message');
+        if (isError) {
+          AnxLog.severe('Headless search webview error: $message');
+        }
+      },
       onLoadError: (controller, url, code, message) {
         if (!loadCompleter.isCompleted) {
           loadCompleter.completeError(
@@ -361,10 +365,9 @@ class _HeadlessSearchSession {
       search.stopwatch = stopwatch;
 
       try {
-        await controller.evaluateJavascript(source: 'clearSearch()');
-        await controller.evaluateJavascript(
-          source:
-              'search($escapedKeyword, {"scope":"book","matchCase":false,"matchDiacritics":false,"matchWholeWords":false})',
+        await controller.execute('clearSearch()');
+        await controller.execute(
+          'search($escapedKeyword, {"scope":"book","matchCase":false,"matchDiacritics":false,"matchWholeWords":false})',
         );
       } on Object {
         _activeSearch = null;
@@ -383,7 +386,7 @@ class _HeadlessSearchSession {
         stopwatch.stop();
         return response.copyWith(duration: stopwatch.elapsed);
       } finally {
-        await controller.evaluateJavascript(source: 'clearSearch()');
+        await controller.execute('clearSearch()');
         _activeSearch = null;
       }
     });

@@ -6,6 +6,7 @@
 #endif
 
 #include "flutter/generated_plugin_registrant.h"
+#include <webview_cef/webview_cef_plugin.h>
 
 struct _MyApplication {
   GtkApplication parent_instance;
@@ -13,6 +14,37 @@ struct _MyApplication {
 };
 
 G_DEFINE_TYPE(MyApplication, my_application, GTK_TYPE_APPLICATION)
+
+// Load bundle icon (data/anx-reader.png next to the binary) onto a window.
+static void my_application_apply_window_icon(GtkWindow* window) {
+  g_autoptr(GError) icon_error = nullptr;
+  g_autofree gchar* exe_path = g_file_read_link("/proc/self/exe", nullptr);
+  if (exe_path == nullptr) {
+    return;
+  }
+  g_autofree gchar* exe_dir = g_path_get_dirname(exe_path);
+  g_autofree gchar* icon_path =
+      g_build_filename(exe_dir, "data", "anx-reader.png", nullptr);
+  if (!g_file_test(icon_path, G_FILE_TEST_IS_REGULAR)) {
+    g_warning("Window icon not found at %s", icon_path);
+    return;
+  }
+  gtk_window_set_default_icon_from_file(icon_path, &icon_error);
+  if (icon_error != nullptr) {
+    g_warning("Failed to set default window icon: %s", icon_error->message);
+    g_clear_error(&icon_error);
+  }
+  gtk_window_set_icon_from_file(window, icon_path, &icon_error);
+  if (icon_error != nullptr) {
+    g_warning("Failed to set window icon: %s", icon_error->message);
+  }
+}
+
+static gboolean my_application_reapply_window_icon(gpointer user_data) {
+  my_application_apply_window_icon(GTK_WINDOW(user_data));
+  return G_SOURCE_REMOVE;
+}
+
 
 // Implements GApplication::activate.
 static void my_application_activate(GApplication* application) {
@@ -40,26 +72,36 @@ static void my_application_activate(GApplication* application) {
   if (use_header_bar) {
     GtkHeaderBar* header_bar = GTK_HEADER_BAR(gtk_header_bar_new());
     gtk_widget_show(GTK_WIDGET(header_bar));
-    gtk_header_bar_set_title(header_bar, "anx_reader");
+    gtk_header_bar_set_title(header_bar, "Anx Reader");
     gtk_header_bar_set_show_close_button(header_bar, TRUE);
     gtk_window_set_titlebar(window, GTK_WIDGET(header_bar));
   } else {
-    gtk_window_set_title(window, "anx_reader");
+    gtk_window_set_title(window, "Anx Reader");
   }
 
   gtk_window_set_default_size(window, 1280, 720);
+  // Early apply; CEF/Flutter may clear _NET_WM_ICON during embed — reapply below.
+  my_application_apply_window_icon(window);
+
   gtk_widget_show(GTK_WIDGET(window));
 
   g_autoptr(FlDartProject) project = fl_dart_project_new();
   fl_dart_project_set_dart_entrypoint_arguments(project, self->dart_entrypoint_arguments);
 
   FlView* view = fl_view_new(project);
+  g_signal_connect(view, "key_press_event", G_CALLBACK(processKeyEventForCEF), nullptr);
+  g_signal_connect(view, "key_release_event", G_CALLBACK(processKeyEventForCEF), nullptr);
   gtk_widget_show(GTK_WIDGET(view));
   gtk_container_add(GTK_CONTAINER(window), GTK_WIDGET(view));
 
   fl_register_plugins(FL_PLUGIN_REGISTRY(view));
 
   gtk_widget_grab_focus(GTK_WIDGET(view));
+
+  // Re-apply after CEF/plugin init; also once more on idle in case embed is async.
+  my_application_apply_window_icon(window);
+  g_idle_add(my_application_reapply_window_icon, window);
+  g_timeout_add(500, my_application_reapply_window_icon, window);
 }
 
 // Implements GApplication::local_command_line.

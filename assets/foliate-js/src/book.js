@@ -140,17 +140,60 @@ const buildRangeContextText = (range) => {
   return contextText;
 };
 
+const isWordChar = (ch) => !!ch && /[A-Za-z0-9\u00C0-\u024F\u3400-\u9FFF\uF900-\uFAFF]/.test(ch);
+
+/** CEF OSR hit-testing can place carets one glyph inside word edges. */
+const expandRangeForCefHitTest = (range) => {
+  const r = range.cloneRange();
+  try {
+    if (r.startContainer.nodeType === Node.TEXT_NODE && r.startOffset > 0) {
+      const text = r.startContainer.textContent || '';
+      const prev = text[r.startOffset - 1];
+      const curr = text[r.startOffset] ?? '';
+      if (isWordChar(prev) && isWordChar(curr)) {
+        r.setStart(r.startContainer, r.startOffset - 1);
+      }
+    }
+    if (r.endContainer.nodeType === Node.TEXT_NODE) {
+      const text = r.endContainer.textContent || '';
+      if (r.endOffset < text.length && r.endOffset > 0) {
+        const last = text[r.endOffset - 1];
+        const next = text[r.endOffset];
+        if (isWordChar(last) && isWordChar(next)) {
+          r.setEnd(r.endContainer, r.endOffset + 1);
+        }
+      }
+    }
+  } catch (_) {}
+  return r;
+};
+
 const handleSelection = (view, doc, index) => {
   const selection = doc.getSelection();
-  const range = getSelectionRange(selection);
+  let range = getSelectionRange(selection);
 
   if (!range) return;
+
+  // Linux CEF: nudge endpoints that landed one char inside a word.
+  const isLinuxDesktop = typeof navigator !== 'undefined'
+    && /Linux/i.test(navigator.platform || '')
+    && !/Android/i.test(navigator.userAgent || '');
+  if (isLinuxDesktop) {
+    range = expandRangeForCefHitTest(range);
+    try {
+      selection.removeAllRanges();
+      selection.addRange(range);
+    } catch (_) {}
+  }
 
   const position = getPosition(range);
   const cfi = view.getCFI(index, range);
   const lang = 'en-US'
 
-  let text = selection.toString();
+  let text = range.toString();
+  if (!text) {
+    text = selection.toString();
+  }
   if (!text) {
     const newSelection = range.startContainer.ownerDocument.getSelection();
     newSelection.removeAllRanges();
@@ -256,8 +299,22 @@ const setSelectionHandler = (view, doc, index) => {
     if (!hasActiveSelection) return;
     hasActiveSelection = false;
     lastPointerUpRange = null;
-    doc.__anxSelectionClearedAt = Date.now();
-    doc.__anxSuppressClick = true;
+    // Programmatic clearSelection (menu onClose) must not suppress clicks.
+    if (window.__anxProgrammaticClear) {
+      doc.__anxSelectionClearedAt = 0;
+      doc.__anxSuppressClick = false;
+    } else {
+      // User dismiss click: suppress only for the remainder of this event turn
+      // (so the same click does not page-turn). Clear on the next macrotask —
+      // otherwise if click-view never ran (handler bailed while selection was
+      // still a Range), the *next* center click is wrongly eaten.
+      doc.__anxSelectionClearedAt = Date.now();
+      doc.__anxSuppressClick = true;
+      setTimeout(() => {
+        doc.__anxSuppressClick = false;
+        doc.__anxSelectionClearedAt = 0;
+      }, 0);
+    }
     stopAutoPageSession(view);
     callFlutter('onSelectionCleared');
   };
@@ -393,6 +450,18 @@ const setSelectionHandler = (view, doc, index) => {
       debounceTimerId = setTimeout(() => {
         handleSelection(view, doc, index);
       }, 600);
+    });
+  } else if (!/Android/i.test(navigator.userAgent)) {
+    // Desktop Linux (CEF/Chromium) and other non-Android desktops.
+    // navigator.platform is like "Linux x86_64", so the Win/Mac branches miss it and
+    // it used to fall into the Android path — which only listens for contextmenu /
+    // pointercancel and never fires handleSelection on mouse drag pointerup.
+    doc.addEventListener('contextmenu', e => {
+      e.preventDefault();
+    });
+    doc.addEventListener('pointerup', () => {
+      if (shouldSkipPointerUp()) return;
+      handleSelection(view, doc, index);
     });
   } else { // Android
     let hasNativeSelectionStarted = false;
@@ -1372,12 +1441,14 @@ class Reader {
 
     if (this.#doc?.__anxSuppressClick) {
       this.#doc.__anxSuppressClick = false;
+      this.#doc.__anxSelectionClearedAt = 0;
       return
     }
 
-    // debounce for 200ms after selection cleared
+    // Same-turn debounce after selection cleared (setTimeout(0) clears this).
     const lastClearedAt = this.#doc?.__anxSelectionClearedAt ?? 0
-    if (lastClearedAt && Date.now() - lastClearedAt < 200) {
+    if (lastClearedAt && Date.now() - lastClearedAt < 50) {
+      this.#doc.__anxSelectionClearedAt = 0;
       return
     }
 
@@ -1889,7 +1960,22 @@ window.showContextMenu = () => {
 
 window.getSelection = () => reader.getSelection()
 
-window.clearSelection = () => reader.view.deselect()
+window.clearSelection = () => {
+  window.__anxProgrammaticClear = true
+  try { reader.view.deselect() } finally { window.__anxProgrammaticClear = false }
+}
+window.__anxResetClickSuppress = () => {
+  try {
+    const docs = [document]
+    document.querySelectorAll('iframe').forEach((f) => {
+      try { if (f.contentDocument) docs.push(f.contentDocument) } catch (_) {}
+    })
+    for (const d of docs) {
+      d.__anxSuppressClick = false
+      d.__anxSelectionClearedAt = 0
+    }
+  } catch (_) {}
+}
 
 window.addAnnotation = (annotation) => reader.addAnnotation(annotation)
 

@@ -2282,6 +2282,13 @@ packages:
       url: "https://github.com/Anxcye/webdav_client.git"
     source: git
     version: "1.2.2"
+  webview_cef:
+    dependency: "direct main"
+    description:
+      path: "third_party/webview_cef"
+      relative: true
+    source: path
+    version: "0.5.1"
   win32:
     dependency: transitive
     description:

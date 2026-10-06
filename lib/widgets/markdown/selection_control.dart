@@ -10,6 +10,7 @@ TextSelectionControls selectionControls() {
     case AnxPlatformEnum.android:
     case AnxPlatformEnum.ohos:
     case AnxPlatformEnum.windows:
+    case AnxPlatformEnum.linux:
       return MaterialTextSelectionControls();
   }
 }

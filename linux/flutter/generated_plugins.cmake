@@ -8,6 +8,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   screen_retriever_linux
   sqlite3_flutter_libs
   url_launcher_linux
+  webview_cef
   window_manager
 )
 

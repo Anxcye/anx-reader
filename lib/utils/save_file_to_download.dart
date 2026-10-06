@@ -38,6 +38,7 @@ Future<String?> saveFileToDownload(
       }
       return outputFile;
     case AnxPlatformEnum.windows:
+    case AnxPlatformEnum.linux:
       final file = File(fileSavePath);
 
       if (!await file.exists()) {
