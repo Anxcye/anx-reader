@@ -266,6 +266,14 @@
   "importCannotGetFilePath": "Cannot get file path",
   "importSuccessRestartApp": "Import success, please restart the app",
   "importFailed": "Import failed: {error}",
+  "filePickerFailed": "Could not open the file picker. On Linux install zenity or kdialog.\n{error}",
+  "@filePickerFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "settingsSyncCompletedToast": "Show toast when sync completed",
   "settingsSyncAutoSync": "Auto sync",
   "settingsTranslate": "Translate",

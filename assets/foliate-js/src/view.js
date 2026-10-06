@@ -290,6 +290,9 @@ export class View extends HTMLElement {
 
   #handleClick(doc) {
     doc.addEventListener('click', e => {
+      // Desktop: ignore right/middle click so they do not trigger page-turn zones.
+      if (typeof e.button === 'number' && e.button !== 0) return
+
       if (window.isFootNoteOpen() && !e.currentTarget.__isFootNote) {
         window.closeFootNote()
         return
@@ -325,6 +328,7 @@ export class View extends HTMLElement {
       this.#emit('click-view', { x: clientX, y: clientY })
     })
     this.renderer.addEventListener('click', e => {
+      if (typeof e.button === 'number' && e.button !== 0) return
       const { clientX, clientY } = e
       while (clientX > window.innerWidth) {
         clientX -= window.innerWidth

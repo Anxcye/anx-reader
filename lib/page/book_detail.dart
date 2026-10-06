@@ -1,3 +1,4 @@
+import 'package:anx_reader/utils/toast/common.dart';
 import 'dart:io';
 import 'dart:ui';
 
@@ -175,11 +176,18 @@ class _BookDetailState extends ConsumerState<BookDetail> {
                     return;
                   }
 
-                  FilePickerResult? result =
-                      await FilePicker.platform.pickFiles(
-                    type: FileType.image,
-                    allowMultiple: false,
-                  );
+                  FilePickerResult? result;
+                  try {
+                    result = await FilePicker.platform.pickFiles(
+                      type: FileType.image,
+                      allowMultiple: false,
+                    );
+                  } catch (e) {
+                    if (!context.mounted) return;
+                    AnxToast.show(
+                        L10n.of(context).filePickerFailed(e.toString()));
+                    return;
+                  }
 
                   if (result == null) {
                     return;

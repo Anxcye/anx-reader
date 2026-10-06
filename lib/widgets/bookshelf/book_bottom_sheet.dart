@@ -138,10 +138,17 @@ class BookBottomSheet extends ConsumerWidget {
     }
 
     Future<void> handleReplace(BuildContext context) async {
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
-        type: FileType.any,
-        allowMultiple: false,
-      );
+      FilePickerResult? result;
+      try {
+        result = await FilePicker.platform.pickFiles(
+          type: FileType.any,
+          allowMultiple: false,
+        );
+      } catch (e) {
+        if (!context.mounted) return;
+        AnxToast.show(L10n.of(context).filePickerFailed(e.toString()));
+        return;
+      }
 
       if (result == null) return;
       PlatformFile newFile = result.files.first;
