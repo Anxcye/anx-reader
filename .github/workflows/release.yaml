@@ -87,6 +87,7 @@ jobs:
             artifacts/macos-artifacts/*.dmg
             artifacts/macos-artifacts/*.zip
             artifacts/linux-artifacts/*.AppImage
+            artifacts/linux-artifacts/*.tar.gz
             artifacts/ios-artifacts/*.ipa
             artifacts/ios-artifacts/*.zip
           body: ${{ inputs.release_notes }}

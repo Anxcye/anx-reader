@@ -1,5 +1,6 @@
 name: Build Linux
-# flutter_version input is sourced from .github/flutter-version by the setup job in build.yaml
+# flutter_version is normally passed from setup (.github/flutter-version) via build.yaml.
+# workflow_dispatch allows testing packaging on a branch without cutting a release tag.
 
 on:
   workflow_call:
@@ -10,20 +11,51 @@ on:
       flutter_version:
         required: true
         type: string
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Package version (empty = pubspec.yaml)"
+        required: false
+        type: string
+        default: ""
+      flutter_version:
+        description: "Flutter SDK version (empty = .github/flutter-version)"
+        required: false
+        type: string
+        default: ""
 
 jobs:
   build-linux:
     runs-on: ubuntu-22.04
+    timeout-minutes: 90
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Resolve version inputs
+        id: meta
+        shell: bash
+        run: |
+          if [ -n "${{ inputs.version }}" ]; then
+            VERSION="${{ inputs.version }}"
+          else
+            VERSION="$(grep '^version:' pubspec.yaml | awk '{print $2}' | cut -d '+' -f 1)"
+          fi
+          if [ -n "${{ inputs.flutter_version }}" ]; then
+            FLUTTER_VERSION="${{ inputs.flutter_version }}"
+          else
+            FLUTTER_VERSION="$(cat .github/flutter-version)"
+          fi
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "flutter_version=${FLUTTER_VERSION}" >> "$GITHUB_OUTPUT"
+          echo "Resolved version=${VERSION} flutter=${FLUTTER_VERSION}"
+
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version: ${{ inputs.flutter_version }}
+          flutter-version: ${{ steps.meta.outputs.flutter_version }}
 
       - name: Install Linux build dependencies
         shell: bash
@@ -43,23 +75,46 @@ jobs:
             xclip \
             binutils
 
+      - name: Cache CEF prebuilt SDK
+        uses: actions/cache@v4
+        with:
+          path: third_party/webview_cef/third/cef
+          key: cef-linux64-${{ hashFiles('third_party/webview_cef/third/download.cmake') }}
+          restore-keys: |
+            cef-linux64-
+
+      - name: Cache appimagetool
+        uses: actions/cache@v4
+        with:
+          path: build/linux/dist/appimagetool-x86_64.AppImage
+          key: appimagetool-x86_64-v1
+
       - name: Get dependencies
         shell: bash
         run: |
           flutter --version
           flutter pub get
 
-      - name: Build AppImage
+      - name: Build Linux packages (AppImage + tar.gz)
         shell: bash
         env:
-          VERSION: ${{ inputs.version }}
+          VERSION: ${{ steps.meta.outputs.version }}
         run: |
           chmod +x scripts/build_linux_appimage.sh
           scripts/build_linux_appimage.sh
+          echo "Artifacts:"
+          ls -lh build/linux/Anx-Reader-linux-*.AppImage build/linux/Anx-Reader-linux-*.tar.gz
+          # Confirm CEF was stripped (libcef should be well under ~400M)
+          CEF_SO="build/linux/x64/release/bundle/lib/libcef.so"
+          if [ -f "$CEF_SO" ]; then
+            ls -lh "$CEF_SO"
+          fi
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: linux-artifacts
-          path: build/linux/appimage/*.AppImage
+          path: |
+            build/linux/Anx-Reader-linux-*.AppImage
+            build/linux/Anx-Reader-linux-*.tar.gz
           if-no-files-found: error
