@@ -120,6 +120,11 @@ class LinuxEpubWebViewController implements EpubWebViewController {
     _handlers[handlerName] = callback;
   }
 
+  @override
+  Future<void> setBrowserFocus(bool focus) {
+    return _controller.setClientFocus(focus);
+  }
+
   Future<void> _handleBridgeMessage(cef.JavascriptMessage message) async {
     try {
       final payload = jsonDecode(message.message) as Map<String, dynamic>;

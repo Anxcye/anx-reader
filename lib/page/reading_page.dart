@@ -165,17 +165,21 @@ class ReadingPageState extends ConsumerState<ReadingPage>
     }
   }
 
+  /// Public entry for overlays (note field, search) that need the keyboard.
+  void releaseReaderFocusForChrome() => _releaseReaderFocus();
+
   void _releaseReaderFocus() {
     if (_readerFocusNode.hasFocus) {
       _readerFocusNode.unfocus();
     }
-    // Linux CEF keeps an internal "browser focused" flag and will eat the next
-    // key (e.g. first character in TOC search). Blur the web document when
-    // Flutter chrome takes over.
+    // Linux CEF keeps an internal "browser focused" flag and will eat keys
+    // (TOC search, Write Idea, etc.). Blur the document and clear CEF focus.
     if (AnxPlatform.isLinux) {
-      epubPlayerKey.currentState?.webViewController.execute(
+      final c = epubPlayerKey.currentState?.webViewController;
+      c?.execute(
         "try { document.activeElement && document.activeElement.blur(); } catch (_) {}",
       );
+      c?.setBrowserFocus(false);
     }
   }
 

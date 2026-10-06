@@ -38,4 +38,7 @@ class InAppEpubWebViewController implements EpubWebViewController {
       callback: callback,
     );
   }
+
+  @override
+  Future<void> setBrowserFocus(bool focus) async {}
 }

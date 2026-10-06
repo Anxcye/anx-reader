@@ -29,4 +29,7 @@ abstract class EpubWebViewController {
     required String handlerName,
     required EpubJavaScriptHandler callback,
   });
+
+  /// Release or claim native browser keyboard focus (CEF). No-op on InApp.
+  Future<void> setBrowserFocus(bool focus);
 }

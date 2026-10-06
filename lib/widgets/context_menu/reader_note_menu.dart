@@ -1,6 +1,7 @@
 import 'package:anx_reader/dao/book_note.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/models/book_note.dart';
+import 'package:anx_reader/page/reading_page.dart';
 import 'package:anx_reader/widgets/common/axis_flex.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsx_plus/iconsx_plus.dart';
@@ -29,6 +30,7 @@ class ReaderNoteMenuState extends State<ReaderNoteMenu> {
   BookNote? note;
   bool _showNoteDialog = false;
   final textFieldController = TextEditingController();
+  final FocusNode _noteFocusNode = FocusNode(debugLabel: 'reader_note');
   bool showSaveButton = false;
 
   @override
@@ -40,7 +42,17 @@ class ReaderNoteMenuState extends State<ReaderNoteMenu> {
   @override
   void dispose() {
     textFieldController.dispose();
+    _noteFocusNode.dispose();
     super.dispose();
+  }
+
+  void _focusNoteField() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      // Hand keyboard to Flutter; CEF otherwise keeps GTK/CEF focus.
+      readingPageKey.currentState?.releaseReaderFocusForChrome();
+      _noteFocusNode.requestFocus();
+    });
   }
 
   void _notifyVisibility(bool visible) {
@@ -68,6 +80,7 @@ class ReaderNoteMenuState extends State<ReaderNoteMenu> {
       setState(() {});
       _notifySizeChange();
       _notifyVisibility(value);
+      if (value) _focusNoteField();
       return;
     }
     setState(() {
@@ -75,6 +88,7 @@ class ReaderNoteMenuState extends State<ReaderNoteMenu> {
     });
     _notifyVisibility(value);
     _notifySizeChange();
+    if (value) _focusNoteField();
   }
 
   Future<void> getNoteDetail(int? id) async {
@@ -136,6 +150,8 @@ class ReaderNoteMenuState extends State<ReaderNoteMenu> {
                         // scrollDirection: widget.axis,
                         child: TextField(
                           controller: textFieldController,
+                          focusNode: _noteFocusNode,
+                          autofocus: true,
                           decoration: InputDecoration(
                             border: InputBorder.none,
                             hintText: L10n.of(context).contextMenuAddNoteTips,
