@@ -142,6 +142,93 @@ const buildRangeContextText = (range) => {
 
 const isWordChar = (ch) => !!ch && /[A-Za-z0-9\u00C0-\u024F\u3400-\u9FFF\uF900-\uFAFF]/.test(ch);
 
+
+/** CJK Unified Ideographs + compatibility ideographs (Chinese-focused). */
+const CJK_CHAR_RE = /[\u3400-\u9FFF\uF900-\uFAFF]/;
+const CJK_ONLY_RE = /^[\u3400-\u9FFF\uF900-\uFAFF]+$/;
+
+/**
+ * Android WebView long-press often selects a single CJK character.
+ * Expand that selection to the surrounding Chinese word via Intl.Segmenter.
+ * No-op when Segmenter is unavailable, selection is not a short CJK run,
+ * or the range crosses nodes. Does not touch Latin / multi-word selections.
+ */
+const expandCjkWordRange = (range, locale = 'zh') => {
+  if (!range || typeof Intl === 'undefined' || typeof Intl.Segmenter !== 'function') {
+    return range;
+  }
+
+  const selected = range.toString();
+  const trimmed = selected.trim();
+  if (!trimmed || !CJK_ONLY_RE.test(trimmed)) return range;
+
+  // Single CJK char, or a very short CJK run that is clearly the WebView default.
+  const codePoints = [...trimmed];
+  if (codePoints.length === 0 || codePoints.length > 2) return range;
+
+  if (range.startContainer !== range.endContainer) return range;
+  if (range.startContainer.nodeType !== Node.TEXT_NODE) return range;
+
+  const node = range.startContainer;
+  const fullText = node.textContent || '';
+  if (!fullText) return range;
+
+  let segmenter;
+  try {
+    segmenter = new Intl.Segmenter(locale || 'zh', { granularity: 'word' });
+  } catch (_) {
+    try {
+      segmenter = new Intl.Segmenter('zh', { granularity: 'word' });
+    } catch (_) {
+      return range;
+    }
+  }
+
+  const selStart = range.startOffset;
+  const selEnd = range.endOffset;
+
+  for (const { segment, index, isWordLike } of segmenter.segment(fullText)) {
+    const segEnd = index + segment.length;
+    if (selStart < index || selEnd > segEnd) continue;
+    // Only expand into word-like CJK segments; skip punctuation / spaces.
+    if (!isWordLike || !CJK_CHAR_RE.test(segment)) return range;
+    if (index === selStart && segEnd === selEnd) return range;
+    try {
+      const expanded = range.cloneRange();
+      expanded.setStart(node, index);
+      expanded.setEnd(node, segEnd);
+      return expanded;
+    } catch (_) {
+      return range;
+    }
+  }
+  return range;
+};
+
+const expandAndroidCjkSelection = (doc) => {
+  const selection = doc.getSelection();
+  const range = getSelectionRange(selection);
+  if (!range) return;
+  const locale =
+    doc.documentElement?.lang
+    || doc.body?.lang
+    || 'zh';
+  const expanded = expandCjkWordRange(range, locale);
+  if (
+    expanded.startContainer === range.startContainer
+    && expanded.startOffset === range.startOffset
+    && expanded.endContainer === range.endContainer
+    && expanded.endOffset === range.endOffset
+  ) {
+    return;
+  }
+  try {
+    selection.removeAllRanges();
+    selection.addRange(expanded);
+  } catch (_) {}
+};
+
+
 /** CEF OSR hit-testing can place carets one glyph inside word edges. */
 const expandRangeForCefHitTest = (range) => {
   const r = range.cloneRange();
@@ -498,6 +585,9 @@ const setSelectionHandler = (view, doc, index) => {
         longPressSettleTimer = setTimeout(() => {
           const current = getSelectionRange(doc.getSelection());
           if (!pressed || !current || !rangesEqual(pressed, current)) return;
+          // Expand single-CJK long-press to a word once before the menu.
+          // Do not re-expand on later selectionchange / handle drags.
+          expandAndroidCjkSelection(doc);
           if (shouldSkipPointerUp()) return;
           handleSelection(view, doc, index);
         }, 600);
