@@ -31,9 +31,9 @@ platform :android do
   # Internal=internal, Production=production.
   # Testing tracks (internal/alpha/beta) publish as completed; production stays draft.
   #
-  # A version code can only be uploaded once. For multiple tracks, upload the AAB to
-  # the first track, then promote that release to each additional track (leave the
-  # source track active via deactivate_on_promote: false).
+  # A version code can only be uploaded once. For multiple tracks we open one Play edit,
+  # upload the AAB once, then assign that version code to each track before committing.
+  # (Re-uploading or promote_track can fail with "already been used" / precondition errors.)
   desc "Release to Play Store"
   lane :release_play_store do |options|
     build_android
@@ -47,44 +47,80 @@ platform :android do
 
     testing_tracks = %w[internal alpha beta]
     aab_path = "../build/app/outputs/bundle/release/app-release.aab"
-    primary_track = tracks.first
-    skip_listing = {
-      json_key: google_service_account_json_path,
-      skip_upload_apk: true,
-      skip_upload_metadata: true,
-      skip_upload_changelogs: true,
-      skip_upload_images: true,
-      skip_upload_screenshots: true
-    }
 
-    tracks.each_with_index do |track, index|
+    if tracks.length == 1
+      track = tracks.first
       release_status = testing_tracks.include?(track) ? 'completed' : 'draft'
-
-      if index == 0
-        UI.message("Uploading to Play track=#{track} release_status=#{release_status}")
-        supply(
-          skip_listing.merge(
-            track: track,
-            release_status: release_status,
-            aab: aab_path
-          )
-        )
-      else
-        # Same AAB/version code cannot be uploaded again; promote from the primary track.
-        primary_status = testing_tracks.include?(primary_track) ? 'completed' : 'draft'
-        UI.message("Promoting Play track=#{primary_track} → #{track} release_status=#{release_status}")
-        supply(
-          skip_listing.merge(
-            track: primary_track,
-            release_status: primary_status, # select the release on the source track
-            track_promote_to: track,
-            track_promote_release_status: release_status,
-            skip_upload_aab: true,
-            deactivate_on_promote: false
-          )
-        )
-      end
+      UI.message("Uploading to Play track=#{track} release_status=#{release_status}")
+      supply(
+        track: track,
+        release_status: release_status,
+        aab: aab_path,
+        json_key: google_service_account_json_path,
+        skip_upload_apk: true,
+        skip_upload_metadata: true,
+        skip_upload_changelogs: true,
+        skip_upload_images: true,
+        skip_upload_screenshots: true
+      )
+    else
+      publish_play_tracks_one_edit(
+        tracks: tracks,
+        aab: aab_path,
+        testing_tracks: testing_tracks
+      )
     end
+  end
+
+  # Upload AAB once and assign the same version code to multiple tracks in one edit.
+  private_lane :publish_play_tracks_one_edit do |options|
+    require 'supply'
+    require 'supply/client'
+
+    tracks = options[:tracks]
+    aab_path = options[:aab]
+    testing_tracks = options[:testing_tracks] || %w[internal alpha beta]
+    package_name = CredentialsManager::AppfileConfig.try_fetch_value(:package_name)
+    json_key = File.expand_path(google_service_account_json_path)
+
+    UI.user_error!("package_name missing from Appfile") if package_name.to_s.empty?
+    UI.user_error!("AAB not found at #{aab_path}") unless File.exist?(aab_path)
+
+    Supply.config = FastlaneCore::Configuration.create(Supply::Options.available_options, {
+      json_key: json_key,
+      package_name: package_name,
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      skip_upload_changelogs: true,
+      timeout: 300
+    })
+
+    client = Supply::Client.make_from_config
+    client.begin_edit(package_name: package_name)
+
+    UI.message("Uploading AAB once for tracks=#{tracks.join(',')}")
+    version_code = client.upload_bundle(aab_path)
+    UI.success("Uploaded AAB version_code=#{version_code}")
+
+    tracks.each do |track_name|
+      release_status = testing_tracks.include?(track_name) ? 'completed' : 'draft'
+      UI.message("Assigning version_code=#{version_code} to track=#{track_name} release_status=#{release_status}")
+
+      track_release = AndroidPublisher::TrackRelease.new(
+        status: release_status,
+        version_codes: [version_code.to_s]
+      )
+      track_obj = AndroidPublisher::Track.new(
+        track: track_name,
+        releases: [track_release]
+      )
+      client.update_track(track_name, track_obj)
+    end
+
+    UI.message("Committing Play edit for version_code=#{version_code}")
+    client.commit_current_edit!
+    UI.success("Successfully published version_code=#{version_code} to tracks=#{tracks.join(',')} with completed testing releases")
   end
 
 end
