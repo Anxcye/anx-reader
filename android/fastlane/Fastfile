@@ -30,6 +30,10 @@ platform :android do
   # Track mapping (Play Console ↔ API): Closed testing=alpha, Open testing=beta,
   # Internal=internal, Production=production.
   # Testing tracks (internal/alpha/beta) publish as completed; production stays draft.
+  #
+  # A version code can only be uploaded once. For multiple tracks, upload the AAB to
+  # the first track, then promote that release to each additional track (leave the
+  # source track active via deactivate_on_promote: false).
   desc "Release to Play Store"
   lane :release_play_store do |options|
     build_android
@@ -43,22 +47,43 @@ platform :android do
 
     testing_tracks = %w[internal alpha beta]
     aab_path = "../build/app/outputs/bundle/release/app-release.aab"
+    primary_track = tracks.first
+    skip_listing = {
+      json_key: google_service_account_json_path,
+      skip_upload_apk: true,
+      skip_upload_metadata: true,
+      skip_upload_changelogs: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true
+    }
 
-    tracks.each do |track|
+    tracks.each_with_index do |track, index|
       release_status = testing_tracks.include?(track) ? 'completed' : 'draft'
-      UI.message("Uploading to Play track=#{track} release_status=#{release_status}")
 
-      supply(
-        track: track,
-        release_status: release_status,
-        aab: aab_path,
-        json_key: google_service_account_json_path,
-        skip_upload_apk: true, # Upload the aab instead of apk
-        skip_upload_metadata: true,
-        skip_upload_changelogs: true,
-        skip_upload_images: true,
-        skip_upload_screenshots: true
-      )
+      if index == 0
+        UI.message("Uploading to Play track=#{track} release_status=#{release_status}")
+        supply(
+          skip_listing.merge(
+            track: track,
+            release_status: release_status,
+            aab: aab_path
+          )
+        )
+      else
+        # Same AAB/version code cannot be uploaded again; promote from the primary track.
+        primary_status = testing_tracks.include?(primary_track) ? 'completed' : 'draft'
+        UI.message("Promoting Play track=#{primary_track} → #{track} release_status=#{release_status}")
+        supply(
+          skip_listing.merge(
+            track: primary_track,
+            release_status: primary_status, # select the release on the source track
+            track_promote_to: track,
+            track_promote_release_status: release_status,
+            skip_upload_aab: true,
+            deactivate_on_promote: false
+          )
+        )
+      end
     end
   end
 
