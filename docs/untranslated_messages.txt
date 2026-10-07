@@ -34,7 +34,20 @@
     "searchEngineUrlTemplate",
     "searchEngineUrlRequired",
     "searchEngineUrlInvalid",
-    "searchEngineAdded"
+    "searchEngineAdded",
+    "syncEmptyLibraryUploadRejected",
+    "notesJsonExportHint",
+    "notesJsonImport",
+    "notesJsonImportTitle",
+    "notesJsonImportRisk",
+    "notesJsonImportNoMatch",
+    "notesJsonImportFuzzyWarn",
+    "notesJsonImportSuccess",
+    "notesJsonImportFailed",
+    "notesJsonImportInvalid",
+    "settingsSyncWebdavUrlHint",
+    "settingsAdvancedTrustUserCertificates",
+    "settingsAdvancedTrustUserCertificatesDesc"
   ],
 
   "de": [
@@ -72,7 +85,20 @@
     "searchEngineUrlTemplate",
     "searchEngineUrlRequired",
     "searchEngineUrlInvalid",
-    "searchEngineAdded"
+    "searchEngineAdded",
+    "syncEmptyLibraryUploadRejected",
+    "notesJsonExportHint",
+    "notesJsonImport",
+    "notesJsonImportTitle",
+    "notesJsonImportRisk",
+    "notesJsonImportNoMatch",
+    "notesJsonImportFuzzyWarn",
+    "notesJsonImportSuccess",
+    "notesJsonImportFailed",
+    "notesJsonImportInvalid",
+    "settingsSyncWebdavUrlHint",
+    "settingsAdvancedTrustUserCertificates",
+    "settingsAdvancedTrustUserCertificatesDesc"
   ],
 
   "es": [
@@ -110,7 +136,20 @@
     "searchEngineUrlTemplate",
     "searchEngineUrlRequired",
     "searchEngineUrlInvalid",
-    "searchEngineAdded"
+    "searchEngineAdded",
+    "syncEmptyLibraryUploadRejected",
+    "notesJsonExportHint",
+    "notesJsonImport",
+    "notesJsonImportTitle",
+    "notesJsonImportRisk",
+    "notesJsonImportNoMatch",
+    "notesJsonImportFuzzyWarn",
+    "notesJsonImportSuccess",
+    "notesJsonImportFailed",
+    "notesJsonImportInvalid",
+    "settingsSyncWebdavUrlHint",
+    "settingsAdvancedTrustUserCertificates",
+    "settingsAdvancedTrustUserCertificatesDesc"
   ],
 
   "fr": [
@@ -148,7 +187,20 @@
     "searchEngineUrlTemplate",
     "searchEngineUrlRequired",
     "searchEngineUrlInvalid",
-    "searchEngineAdded"
+    "searchEngineAdded",
+    "syncEmptyLibraryUploadRejected",
+    "notesJsonExportHint",
+    "notesJsonImport",
+    "notesJsonImportTitle",
+    "notesJsonImportRisk",
+    "notesJsonImportNoMatch",
+    "notesJsonImportFuzzyWarn",
+    "notesJsonImportSuccess",
+    "notesJsonImportFailed",
+    "notesJsonImportInvalid",
+    "settingsSyncWebdavUrlHint",
+    "settingsAdvancedTrustUserCertificates",
+    "settingsAdvancedTrustUserCertificatesDesc"
   ],
 
   "it": [
@@ -186,7 +238,20 @@
     "searchEngineUrlTemplate",
     "searchEngineUrlRequired",
     "searchEngineUrlInvalid",
-    "searchEngineAdded"
+    "searchEngineAdded",
+    "syncEmptyLibraryUploadRejected",
+    "notesJsonExportHint",
+    "notesJsonImport",
+    "notesJsonImportTitle",
+    "notesJsonImportRisk",
+    "notesJsonImportNoMatch",
+    "notesJsonImportFuzzyWarn",
+    "notesJsonImportSuccess",
+    "notesJsonImportFailed",
+    "notesJsonImportInvalid",
+    "settingsSyncWebdavUrlHint",
+    "settingsAdvancedTrustUserCertificates",
+    "settingsAdvancedTrustUserCertificatesDesc"
   ],
 
   "ja": [
@@ -224,7 +289,20 @@
     "searchEngineUrlTemplate",
     "searchEngineUrlRequired",
     "searchEngineUrlInvalid",
-    "searchEngineAdded"
+    "searchEngineAdded",
+    "syncEmptyLibraryUploadRejected",
+    "notesJsonExportHint",
+    "notesJsonImport",
+    "notesJsonImportTitle",
+    "notesJsonImportRisk",
+    "notesJsonImportNoMatch",
+    "notesJsonImportFuzzyWarn",
+    "notesJsonImportSuccess",
+    "notesJsonImportFailed",
+    "notesJsonImportInvalid",
+    "settingsSyncWebdavUrlHint",
+    "settingsAdvancedTrustUserCertificates",
+    "settingsAdvancedTrustUserCertificatesDesc"
   ],
 
   "ko": [
@@ -262,7 +340,20 @@
     "searchEngineUrlTemplate",
     "searchEngineUrlRequired",
     "searchEngineUrlInvalid",
-    "searchEngineAdded"
+    "searchEngineAdded",
+    "syncEmptyLibraryUploadRejected",
+    "notesJsonExportHint",
+    "notesJsonImport",
+    "notesJsonImportTitle",
+    "notesJsonImportRisk",
+    "notesJsonImportNoMatch",
+    "notesJsonImportFuzzyWarn",
+    "notesJsonImportSuccess",
+    "notesJsonImportFailed",
+    "notesJsonImportInvalid",
+    "settingsSyncWebdavUrlHint",
+    "settingsAdvancedTrustUserCertificates",
+    "settingsAdvancedTrustUserCertificatesDesc"
   ],
 
   "pt": [
@@ -300,7 +391,20 @@
     "searchEngineUrlTemplate",
     "searchEngineUrlRequired",
     "searchEngineUrlInvalid",
-    "searchEngineAdded"
+    "searchEngineAdded",
+    "syncEmptyLibraryUploadRejected",
+    "notesJsonExportHint",
+    "notesJsonImport",
+    "notesJsonImportTitle",
+    "notesJsonImportRisk",
+    "notesJsonImportNoMatch",
+    "notesJsonImportFuzzyWarn",
+    "notesJsonImportSuccess",
+    "notesJsonImportFailed",
+    "notesJsonImportInvalid",
+    "settingsSyncWebdavUrlHint",
+    "settingsAdvancedTrustUserCertificates",
+    "settingsAdvancedTrustUserCertificatesDesc"
   ],
 
   "ro": [
@@ -338,7 +442,20 @@
     "searchEngineUrlTemplate",
     "searchEngineUrlRequired",
     "searchEngineUrlInvalid",
-    "searchEngineAdded"
+    "searchEngineAdded",
+    "syncEmptyLibraryUploadRejected",
+    "notesJsonExportHint",
+    "notesJsonImport",
+    "notesJsonImportTitle",
+    "notesJsonImportRisk",
+    "notesJsonImportNoMatch",
+    "notesJsonImportFuzzyWarn",
+    "notesJsonImportSuccess",
+    "notesJsonImportFailed",
+    "notesJsonImportInvalid",
+    "settingsSyncWebdavUrlHint",
+    "settingsAdvancedTrustUserCertificates",
+    "settingsAdvancedTrustUserCertificatesDesc"
   ],
 
   "ru": [
@@ -376,7 +493,20 @@
     "searchEngineUrlTemplate",
     "searchEngineUrlRequired",
     "searchEngineUrlInvalid",
-    "searchEngineAdded"
+    "searchEngineAdded",
+    "syncEmptyLibraryUploadRejected",
+    "notesJsonExportHint",
+    "notesJsonImport",
+    "notesJsonImportTitle",
+    "notesJsonImportRisk",
+    "notesJsonImportNoMatch",
+    "notesJsonImportFuzzyWarn",
+    "notesJsonImportSuccess",
+    "notesJsonImportFailed",
+    "notesJsonImportInvalid",
+    "settingsSyncWebdavUrlHint",
+    "settingsAdvancedTrustUserCertificates",
+    "settingsAdvancedTrustUserCertificatesDesc"
   ],
 
   "tr": [
@@ -414,6 +544,19 @@
     "searchEngineUrlTemplate",
     "searchEngineUrlRequired",
     "searchEngineUrlInvalid",
-    "searchEngineAdded"
+    "searchEngineAdded",
+    "syncEmptyLibraryUploadRejected",
+    "notesJsonExportHint",
+    "notesJsonImport",
+    "notesJsonImportTitle",
+    "notesJsonImportRisk",
+    "notesJsonImportNoMatch",
+    "notesJsonImportFuzzyWarn",
+    "notesJsonImportSuccess",
+    "notesJsonImportFailed",
+    "notesJsonImportInvalid",
+    "settingsSyncWebdavUrlHint",
+    "settingsAdvancedTrustUserCertificates",
+    "settingsAdvancedTrustUserCertificatesDesc"
   ]
 }

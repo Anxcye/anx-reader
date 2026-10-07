@@ -933,5 +933,25 @@
   "searchEngineUrlTemplate": "URL 模板",
   "searchEngineUrlRequired": "请输入 URL 模板",
   "searchEngineUrlInvalid": "URL 必须包含搜索查询占位符且使用 http/https 协议",
-  "searchEngineAdded": "搜索引擎已添加"
+  "searchEngineAdded": "搜索引擎已添加",
+  "syncEmptyLibraryUploadRejected": "已取消上传：本地书库没有书籍。请先下载云端数据或添加书籍，以免覆盖云端书库。",
+  "notesJsonExportHint": "JSON 导出包含笔记位置信息，可在其他设备导入，用于迁移本书批注。",
+  "notesJsonImport": "导入",
+  "notesJsonImportTitle": "导入笔记 JSON",
+  "notesJsonImportRisk": "导入可能更新相同位置（CFI）的已有批注。请确认文件无误后再继续。此功能不能替代 WebDAV 同步，也不会合并整个书库。",
+  "notesJsonImportNoMatch": "该 JSON 与当前书籍不匹配（MD5 / 书名+作者），已拒绝导入，以免写到错误的书。",
+  "notesJsonImportFuzzyWarn": "书籍 MD5 不一致，但书名与作者相同。若文件内容不同，笔记位置可能错位。仍要导入吗？",
+  "notesJsonImportSuccess": "已导入 {count} 条笔记",
+  "@notesJsonImportSuccess": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "notesJsonImportFailed": "读取笔记 JSON 失败",
+  "notesJsonImportInvalid": "笔记 JSON 格式无效",
+  "settingsSyncWebdavUrlHint": "请填写可写入的目录 URL。应用会在该目录下创建 anx/ 文件夹用于同步。",
+  "settingsAdvancedTrustUserCertificates": "信任用户/自定义 CA 证书",
+  "settingsAdvancedTrustUserCertificatesDesc": "允许使用用户安装或自签名证书的 HTTPS（如私有 Nextcloud）。默认关闭；在不可信网络请保持关闭。"
 }

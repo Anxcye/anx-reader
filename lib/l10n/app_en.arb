@@ -896,7 +896,7 @@
   "useBookStyles": "Use Book Styles",
   "useBookStylesDescription": "When enabled, the app will use the styling defined in the book instead of your custom settings for line height, font weight, text indent, letter spacing, and paragraph spacing",
   "historyBack": "Back",
-  "historyForward": "Forward", 
+  "historyForward": "Forward",
   "historyClose": "Close",
   "settingsAiUserPrompts": "User Prompts",
   "settingsAiUserPromptsAdd": "Add Prompt",
@@ -933,5 +933,25 @@
   "searchEngineUrlTemplate": "URL Template",
   "searchEngineUrlRequired": "Please enter a URL template",
   "searchEngineUrlInvalid": "URL must contain a search query placeholder and use http/https",
-  "searchEngineAdded": "Search engine added"
+  "searchEngineAdded": "Search engine added",
+  "syncEmptyLibraryUploadRejected": "Upload cancelled: local library has no books. Download remote data or add books first to avoid overwriting the cloud library.",
+  "notesJsonExportHint": "JSON export includes note positions and can be imported on another device to migrate annotations for this book.",
+  "notesJsonImport": "Import",
+  "notesJsonImportTitle": "Import notes JSON",
+  "notesJsonImportRisk": "Importing notes may update existing annotations that share the same position (CFI). Review the file before confirming. This does not replace WebDAV sync or merge entire libraries.",
+  "notesJsonImportNoMatch": "This JSON does not match the current book (MD5 / title+author). Import refused to avoid applying notes to the wrong book.",
+  "notesJsonImportFuzzyWarn": "Book MD5 does not match, but title and author do. Notes may be misaligned if the file content differs. Import anyway?",
+  "notesJsonImportSuccess": "Imported {count} notes",
+  "@notesJsonImportSuccess": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "notesJsonImportFailed": "Failed to read notes JSON file",
+  "notesJsonImportInvalid": "Invalid notes JSON format",
+  "settingsSyncWebdavUrlHint": "Enter a writable directory URL. The app creates an anx/ folder under it for sync data.",
+  "settingsAdvancedTrustUserCertificates": "Trust user / custom CA certificates",
+  "settingsAdvancedTrustUserCertificatesDesc": "Allow HTTPS with user-installed or self-signed certificates (e.g. private Nextcloud). Off by default; keep off on untrusted networks."
 }

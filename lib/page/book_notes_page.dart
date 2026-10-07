@@ -3,6 +3,7 @@ import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/models/book_note.dart';
 import 'package:anx_reader/models/book_notes_state.dart';
 import 'package:anx_reader/service/notes/export_notes.dart';
+import 'package:anx_reader/service/notes/import_notes.dart';
 import 'package:anx_reader/widgets/bookshelf/book_cover.dart';
 import 'package:anx_reader/widgets/book_notes/book_notes_list.dart';
 import 'package:anx_reader/models/book.dart';
@@ -189,7 +190,23 @@ class _BookNotesPageState extends ConsumerState<BookNotesPage> {
                                 icon: const Icon(Icons.table_chart),
                                 label: 'CSV',
                               ),
+                              _exportButton(
+                                context,
+                                ref,
+                                book,
+                                notes,
+                                ExportType.json,
+                                mergeChapters: false,
+                                icon: const Icon(Icons.data_object),
+                                label: 'JSON',
+                              ),
                             ],
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            L10n.of(context).notesJsonExportHint,
+                            style: Theme.of(context).textTheme.bodySmall,
+                            textAlign: TextAlign.center,
                           ),
                         ],
                       ),
@@ -373,6 +390,17 @@ class _BookNotesPageState extends ConsumerState<BookNotesPage> {
           text: L10n.of(context).notesPageExport,
           onTap: () {
             handleExportNotes(context, book);
+          }),
+      IconAndText(
+          icon: const Icon(Icons.file_download_outlined),
+          text: L10n.of(context).notesJsonImport,
+          onTap: () async {
+            final imported = await importNotesJsonForBook(context, book);
+            if (imported != null && imported > 0 && mounted) {
+              await ref
+                  .read(bookNotesControllerProvider(book).notifier)
+                  .refresh();
+            }
           }),
     ]);
   }

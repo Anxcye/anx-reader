@@ -9,8 +9,9 @@ import 'package:fast_gbk/fast_gbk.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:anx_reader/utils/toast/common.dart';
+import 'package:anx_reader/service/notes/notes_json.dart';
 
-enum ExportType { copy, md, txt, csv }
+enum ExportType { copy, md, txt, csv, json }
 
 Future<void> exportNotes(
   Book book,
@@ -93,6 +94,17 @@ Future<void> exportNotes(
           bytes: Uint8List.fromList(gbk.encode(string)),
           fileName: '${book.title}.csv',
           mimeType: 'text/csv');
+      if (filePath != null) {
+        AnxToast.show('${L10n.of(context).notesPageExportedTo} $filePath');
+      }
+      break;
+
+    case ExportType.json:
+      final payload = buildNotesJsonExport(book, notesList);
+      String? filePath = await saveFileToDownload(
+          bytes: convertStringToUint8List(payload.encodePretty()),
+          fileName: '${book.title.replaceAll('\n', ' ')}.notes.json',
+          mimeType: 'application/json');
       if (filePath != null) {
         AnxToast.show('${L10n.of(context).notesPageExportedTo} $filePath');
       }
