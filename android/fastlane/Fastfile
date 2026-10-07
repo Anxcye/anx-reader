@@ -32,9 +32,9 @@ platform :android do
     build_android
 
     track = options[:track] || 'internal'
-    # Set release_status based on track: completed for internal/beta, draft for production
-    # release_status = (track == 'production') ? 'draft' : 'completed'
-    release_status = 'draft'
+    # Alpha tags map to track internal; complete those so testers can download without Console roll-out.
+    # Keep draft for other tracks (alpha/production/etc.).
+    release_status = (track == 'internal') ? 'completed' : 'draft'
 
 
     supply(

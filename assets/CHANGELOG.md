@@ -1,4 +1,5 @@
 ## 1.15.0
+- Ci(android): Play Store alpha uploads to the internal track now publish as completed so testers can download without a Console roll-out
 - Fix(sync): Reject WebDAV database upload when the local library has no non-deleted books, to avoid wiping the cloud library with an empty DB (#911, #898 mitigation)
 - Feat(notes): Export/import book notes as JSON with book fingerprint (md5/title/author) for per-book migration across devices (#898, #911 escape hatch)
 - Fix(webdav): Follow 301/307/308 redirects (vendored webdav_client) so AList-style redirect strategies work (#345)
@@ -32,6 +33,7 @@
 - Fix(ai): Fix AI settings showing a grey error screen on fresh installs and provider edits failing to save, by restoring generated AiProvider JSON serialization with lenient converters
 - Chore(android): Target Android 16 (API 36) and upgrade to Google Play Billing Library 8 to meet Google Play requirements
 
+- Ci(android): Play 商店 alpha 上传至 internal 轨道时自动设为 completed，测试者无需在 Console 手动发布即可下载
 - Fix(sync): 本地书库无未删除书籍时拒绝上传 WebDAV 数据库，避免用空库覆盖云端 (#911, #898 缓解)
 - Feat(notes): 支持按书导出/导入笔记 JSON（含 md5/书名/作者指纹），便于跨设备迁移批注 (#898, #911 逃生舱)
 - Fix(webdav): 跟随 301/307/308 重定向（vendored webdav_client），兼容 AList 等 302 策略 (#345)
