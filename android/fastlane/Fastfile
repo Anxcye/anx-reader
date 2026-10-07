@@ -27,27 +27,39 @@ platform :android do
   end
 
   # Release to Play Store using Fastlane Supply (https://docs.fastlane.tools/actions/supply/)
+  # Track mapping (Play Console ↔ API): Closed testing=alpha, Open testing=beta,
+  # Internal=internal, Production=production.
+  # Testing tracks (internal/alpha/beta) publish as completed; production stays draft.
   desc "Release to Play Store"
   lane :release_play_store do |options|
     build_android
 
-    track = options[:track] || 'internal'
-    # Alpha tags map to track internal; complete those so testers can download without Console roll-out.
-    # Keep draft for other tracks (alpha/production/etc.).
-    release_status = (track == 'internal') ? 'completed' : 'draft'
+    # Accept tracks: "alpha,beta" (comma-separated) or a single track: "internal"
+    tracks = if options[:tracks]
+               options[:tracks].to_s.split(',').map(&:strip).reject(&:empty?)
+             else
+               [(options[:track] || 'internal').to_s]
+             end
 
+    testing_tracks = %w[internal alpha beta]
+    aab_path = "../build/app/outputs/bundle/release/app-release.aab"
 
-    supply(
-      track: track,
-      release_status: release_status,
-      aab: "../build/app/outputs/bundle/release/app-release.aab",
-      json_key: google_service_account_json_path,
-      skip_upload_apk: true, # Upload the aab instead of apk
-      skip_upload_metadata: true,
-      skip_upload_changelogs: true,
-      skip_upload_images: true,
-      skip_upload_screenshots: true
-    )
+    tracks.each do |track|
+      release_status = testing_tracks.include?(track) ? 'completed' : 'draft'
+      UI.message("Uploading to Play track=#{track} release_status=#{release_status}")
+
+      supply(
+        track: track,
+        release_status: release_status,
+        aab: aab_path,
+        json_key: google_service_account_json_path,
+        skip_upload_apk: true, # Upload the aab instead of apk
+        skip_upload_metadata: true,
+        skip_upload_changelogs: true,
+        skip_upload_images: true,
+        skip_upload_screenshots: true
+      )
+    end
   end
 
 end
