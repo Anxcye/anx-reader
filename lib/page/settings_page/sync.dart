@@ -422,6 +422,13 @@ void showWebdavDialog(BuildContext context) {
         children: [
           buildTextField(
               L10n.of(context).settingsSyncWebdavUrl, webdavUrlController),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: Text(
+              L10n.of(context).settingsSyncWebdavUrlHint,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ),
           buildTextField(L10n.of(context).settingsSyncWebdavUsername,
               webdavUsernameController),
           buildTextField(L10n.of(context).settingsSyncWebdavPassword,

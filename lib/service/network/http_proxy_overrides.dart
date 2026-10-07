@@ -24,6 +24,14 @@ class AnxHttpProxyOverrides extends HttpOverrides {
 
       return 'PROXY $proxyHost:$proxyPort; DIRECT';
     };
+
+    // Opt-in: trust user-installed / custom CAs and self-signed certs.
+    // Dart's BoringSSL store ignores Android user CA store (#719); default
+    // remains strict verification when this pref is off.
+    if (Prefs().trustUserCertificates) {
+      client.badCertificateCallback =
+          (X509Certificate cert, String host, int port) => true;
+    }
     return client;
   }
 

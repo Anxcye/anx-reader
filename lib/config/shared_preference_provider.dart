@@ -1521,6 +1521,18 @@ class Prefs extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// When true, HttpClient/Dio accept certificates that fail default verification
+  /// (needed on Android so user-installed / custom CAs work with Dart TLS).
+  /// Default remains secure (false).
+  bool get trustUserCertificates {
+    return prefs.getBool('trustUserCertificates') ?? false;
+  }
+
+  set trustUserCertificates(bool enabled) {
+    prefs.setBool('trustUserCertificates', enabled);
+    notifyListeners();
+  }
+
   bool get httpProxyEnabled {
     return prefs.getBool('httpProxyEnabled') ?? false;
   }

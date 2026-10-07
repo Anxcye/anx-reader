@@ -9,6 +9,7 @@ import 'package:anx_reader/page/changelog_screen.dart';
 import 'package:anx_reader/page/onboarding_screen.dart';
 import 'package:anx_reader/service/md5_service.dart';
 import 'package:anx_reader/service/network/http_proxy_overrides.dart';
+import 'package:anx_reader/service/sync/sync_client_factory.dart';
 import 'package:anx_reader/utils/app_version.dart';
 import 'package:anx_reader/utils/toast/common.dart';
 import 'package:anx_reader/widgets/settings/settings_section.dart';
@@ -177,6 +178,18 @@ class _AdvancedSettingState extends State<AdvancedSetting> {
               initialValue: Prefs().httpProxyEnabled,
               onToggle: (value) {
                 Prefs().httpProxyEnabled = value;
+                setState(() {});
+              },
+            ),
+            SettingsTile.switchTile(
+              title: Text(L10n.of(context).settingsAdvancedTrustUserCertificates),
+              description: Text(
+                  L10n.of(context).settingsAdvancedTrustUserCertificatesDesc),
+              leading: const Icon(Icons.security),
+              initialValue: Prefs().trustUserCertificates,
+              onToggle: (value) {
+                Prefs().trustUserCertificates = value;
+                SyncClientFactory.initializeCurrentClient();
                 setState(() {});
               },
             ),
