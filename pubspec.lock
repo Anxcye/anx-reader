@@ -2276,11 +2276,9 @@ packages:
   webdav_client:
     dependency: "direct main"
     description:
-      path: "."
-      ref: HEAD
-      resolved-ref: "3c6d0eb21baf593d8a0a10ba039b0b73ce891ad6"
-      url: "https://github.com/Anxcye/webdav_client.git"
-    source: git
+      path: "third_party/webdav_client"
+      relative: true
+    source: path
     version: "1.2.2"
   webview_cef:
     dependency: "direct main"
