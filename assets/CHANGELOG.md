@@ -1,4 +1,8 @@
 ## 1.15.0
+- Perf(reader): Page turns follow the finger frame by frame and animate on the compositor; a flick keeps its speed instead of stalling on release
+- Fix(reader): Swiping with page-turn animation off no longer stops between two pages (#899)
+- Fix(reader): Swiping in right-to-left books no longer jumps to the start of the chapter; rapid key/volume-key turns are no longer dropped; swiping past the first/last page of a book no longer lands on a blank page
+- Perf(reader): Save reading progress once page turns settle instead of on every turn
 - Ci(android): Play Store beta CI now completes Closed testing (alpha) and Open testing (beta) tracks so testers can download without a Console roll-out
 - Ci(android): Play Store alpha uploads to the internal track now publish as completed so testers can download without a Console roll-out
 - Fix(sync): Reject WebDAV database upload when the local library has no non-deleted books, to avoid wiping the cloud library with an empty DB (#911, #898 mitigation)
