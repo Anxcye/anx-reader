@@ -106,6 +106,10 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
   bool _selectionClearLocked = false;
   bool _selectionClearPending = false;
 
+  // Progress is persisted after page turns settle, not on every turn.
+  Timer? _saveProgressTimer;
+  static const Duration _saveProgressDelay = Duration(milliseconds: 800);
+
   // Scroll wheel debounce
   Timer? _scrollDebounceTimer;
   double _accumulatedScrollDelta = 0;
@@ -669,6 +673,7 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
           // if (chapterHref != location['chapterHref']) {
           //   refreshToc();
           // }
+          final previousBookmarkExists = bookmarkExists;
           setState(() {
             cfi = location['cfi'] ?? '';
             percentage =
@@ -690,8 +695,15 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
                 chapterCurrentPage: chapterCurrentPage,
                 chapterTotalPages: chapterTotalPages,
               );
-          widget.updateParent();
-          saveReadingProgress();
+          // The reading page only mirrors the bookmark state; avoid
+          // rebuilding it on every page turn.
+          if (previousBookmarkExists != bookmarkExists) {
+            widget.updateParent();
+          }
+          // Writing the book row and refreshing the bookshelf on every turn
+          // keeps the UI thread busy right when the next swipe starts (touch
+          // events reach the WebView through it), so batch it.
+          _scheduleSaveReadingProgress();
           readingPageKey.currentState?.resetAwakeTimer();
         });
     controller.addJavaScriptHandler(
@@ -991,7 +1003,18 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
     super.didChangeDependencies();
   }
 
+  void _scheduleSaveReadingProgress() {
+    _saveProgressTimer?.cancel();
+    _saveProgressTimer = Timer(_saveProgressDelay, saveReadingProgress);
+  }
+
+  Future<void> flushPendingReadingProgress() async {
+    if (_saveProgressTimer?.isActive ?? false) await saveReadingProgress();
+  }
+
   Future<void> saveReadingProgress() async {
+    _saveProgressTimer?.cancel();
+    _saveProgressTimer = null;
     if (cfi == '' || widget.cfi != null) return;
     Book book = widget.book;
     book.lastReadPosition = cfi;
