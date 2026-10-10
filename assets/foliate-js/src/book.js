@@ -1683,7 +1683,11 @@ class Reader {
 
   #onTouchEnd = ({ detail: e }) => {
     if (this.#ignoreTouch()) {
-      if (e.touchState.direction === 'vertical') {
+      // Scrolled mode: a swipe past the end of the section goes on to the
+      // adjacent one. Paginated vertical writing also pages along y, but there
+      // the paginator changes sections itself; a second turn from here would
+      // load the section twice or skip one.
+      if (e.touchState.direction === 'vertical' && this.view.renderer.scrolled) {
         const renderer = this.view.renderer;
         const scrollTop = renderer.shadowRoot.querySelector('#container').scrollTop;
         const deltaY = e.touchState.delta.y;

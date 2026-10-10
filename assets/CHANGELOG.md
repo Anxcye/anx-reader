@@ -2,6 +2,7 @@
 - Perf(reader): Page turns follow the finger frame by frame and animate on the compositor; a flick keeps its speed instead of stalling on release
 - Fix(reader): Swiping with page-turn animation off no longer stops between two pages (#899)
 - Fix(reader): Swiping in right-to-left books no longer jumps to the start of the chapter; rapid key/volume-key turns are no longer dropped; swiping past the first/last page of a book no longer lands on a blank page
+- Fix(reader): At chapter boundaries, a swipe no longer leaves the page frozen half-turned while the next chapter loads, the first swipe in a newly opened chapter no longer jumps back to its first page, and quick swipes/taps at a chapter end (also in vertical text) no longer load a chapter twice or skip one
 - Perf(reader): Save reading progress once page turns settle instead of on every turn
 - Ci(android): Play Store beta CI now completes Closed testing (alpha) and Open testing (beta) tracks so testers can download without a Console roll-out
 - Ci(android): Play Store alpha uploads to the internal track now publish as completed so testers can download without a Console roll-out
