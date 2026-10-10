@@ -227,7 +227,6 @@ class View {
   #column = true
   #size
   #layout = {}
-  #loaded = null
   constructor({ container, onExpand }) {
     this.container = container
     this.onExpand = onExpand
@@ -266,12 +265,7 @@ class View {
   async load(src, afterLoad, beforeRender) {
     if (typeof src !== 'string') throw new Error(`${src} is not string`)
     return new Promise(resolve => {
-      // a view replaced before its document loaded must not keep the
-      // navigation that created it waiting forever
-      this.#loaded = resolve
       this.#iframe.addEventListener('load', () => {
-        if (!this.#loaded) return
-        this.#loaded = null
         const doc = this.document
         afterLoad?.(doc)
 
@@ -454,10 +448,7 @@ class View {
     return this.#writingMode
   }
   destroy() {
-    if (this.document?.body) this.#observer.unobserve(this.document.body)
-    const loaded = this.#loaded
-    this.#loaded = null
-    loaded?.()
+    if (this.document) this.#observer.unobserve(this.document.body)
   }
 }
 
@@ -503,13 +494,7 @@ export class Paginator extends HTMLElement {
   #relocateReason = null
   #relocateScheduled = false
   #relocateWaiters = []
-  // number of turns in progress that end on a blank boundary page and then
-  // replace the view with the adjacent section; the old view must not be
-  // grabbed or dragged meanwhile
-  #sectionChange = 0
-  #sectionChangeWaiters = []
-  // the latest navigation; an older one that is still loading gives up
-  #displayToken = 0
+  #sectionLoading = false
   constructor() {
     super()
     this.#root.innerHTML = `<style>
@@ -711,7 +696,7 @@ export class Paginator extends HTMLElement {
     }
     this.#view = new View({
       container: this,
-      onExpand: () => this.#onExpand(),
+      onExpand: () => this.scrollToAnchor(this.#anchor),
     })
     this.#container.append(this.#view.element)
     return this.#view
@@ -812,12 +797,7 @@ export class Paginator extends HTMLElement {
   }
   render() {
     if (!this.#view) return
-    const stale = this.#anchorIsStale()
     this.#cancelTurn()
-    // a turn that has not been relocated yet: #anchor still points at the
-    // page that was left, so take the anchor from the committed page while
-    // the old layout is still there
-    if (stale) this.#anchor = this.#getVisibleRange()
     this.#view.render(this.#beforeRender({
       vertical: this.#vertical,
       rtl: this.#rtl,
@@ -1036,37 +1016,6 @@ export class Paginator extends HTMLElement {
     // rAF does not fire in a hidden document
     setTimeout(run, 150)
   }
-  #beginSectionChange() {
-    this.#sectionChange++
-  }
-  #endSectionChange() {
-    if (--this.#sectionChange > 0) return
-    this.#sectionChange = 0
-    for (const resolve of this.#sectionChangeWaiters.splice(0)) resolve()
-  }
-  async #waitSectionChange() {
-    while (this.#sectionChange > 0)
-      await new Promise(resolve => this.#sectionChangeWaiters.push(resolve))
-  }
-  // A page turn commits the scroll position at once but updates #anchor only
-  // when it relocates (after the animation and the next frame).
-  #anchorIsStale() {
-    return !this.scrolled && !!this.#view
-      && (!!this.#turnAnim || this.#relocatePending)
-  }
-  // The content was resized (late images, fonts, styles applied after load).
-  #onExpand() {
-    // Re-anchoring now would use the anchor of the page the reader just
-    // turned away from and cancel the turn, so e.g. the first swipe in a
-    // chapter whose images or fonts are still loading jumped back to its
-    // first page. Keep the committed page; the pending relocate takes the
-    // anchor from it.
-    if (this.#anchorIsStale()) {
-      this.#scheduleRelocate()
-      return
-    }
-    this.scrollToAnchor(this.#anchor)
-  }
   #isBoundaryPage(offset) {
     const size = this.size
     if (!size || this.scrolled) return 0
@@ -1129,7 +1078,7 @@ export class Paginator extends HTMLElement {
     const speed = Math.max(0, -velocity * towards)
     const animate = this.hasAttribute('animated')
     const boundary = target !== origin ? this.#isBoundaryPage(target) : 0
-    if (boundary) this.#beginSectionChange()
+    if (boundary) this.#sectionLoading = true
     const moved = target !== origin
     return this.#commitAndAnimate(target, { animate, velocity: speed })
       .then(() => {
@@ -1142,17 +1091,13 @@ export class Paginator extends HTMLElement {
       })
       .catch(e => console.warn(e))
       .finally(() => {
-        if (boundary) this.#endSectionChange()
+        if (boundary) this.#sectionLoading = false
       })
   }
   #onTouchStart(e) {
     const touch = e.changedTouches[0]
     const scrollProp = this.scrollProp
-    // A turn onto a blank boundary page is about to be replaced by the
-    // adjacent section: let it finish instead of freezing it mid-flight
-    // until the section has loaded (its view is going away anyway).
-    const changingSection = this.#sectionChange > 0
-    if (this.#turnAnim && !changingSection) {
+    if (this.#turnAnim) {
       // grab the page mid-flight; in scroll mode just finish the animation
       this.#stopTurnAnimation()
       if (this.scrolled) this.#setTranslate(0)
@@ -1174,7 +1119,7 @@ export class Paginator extends HTMLElement {
       lockedOffset: null,
       axis: scrollProp,
     }
-    if (!this.scrolled && this.#view && !changingSection && e.touches.length === 1) {
+    if (!this.scrolled && this.#view && !this.#sectionLoading && e.touches.length === 1) {
       const size = this.size
       this.#drag = {
         axis: this.#axis,
@@ -1520,10 +1465,7 @@ export class Paginator extends HTMLElement {
     // }
   }
   async #display(promise) {
-    const token = ++this.#displayToken
     const { index, src, anchor, onLoad, select } = await promise
-    // a later navigation started while this section was loading
-    if (token !== this.#displayToken) return
     this.#index = index
     if (src) {
       this.#cancelTurn()
@@ -1540,7 +1482,6 @@ export class Paginator extends HTMLElement {
       }
       const beforeRender = this.#beforeRender.bind(this)
       await view.load(src, afterLoad, beforeRender)
-      if (token !== this.#displayToken) return
       this.dispatchEvent(new CustomEvent('create-overlayer', {
         detail: {
           doc: view.document, index,
@@ -1614,29 +1555,15 @@ export class Paginator extends HTMLElement {
   async #turnPage(dir, distance) {
     // if (this.#locked) return
     this.#locked = true
-    // a turn requested while the view is being replaced by the adjacent
-    // section (e.g. a second tap at the end of a chapter) continues from the
-    // new section instead of from the blank page of the old one
-    await this.#waitSectionChange()
     const prev = dir === -1
-    // a paginated turn onto the blank page before/after the section goes on
-    // to the adjacent section
-    const crossing = !this.scrolled && !!this.#view && this.pages > 0
-      && (prev ? !this.atStart && this.page - 1 <= 0
-        : !this.atEnd && this.page + 1 >= this.pages - 1)
-    if (crossing) this.#beginSectionChange()
-    try {
-      const shouldGo = await (prev ? this.#scrollPrev(distance) : this.#scrollNext(distance))
-
-      if (shouldGo) await this.#goTo({
-        index: this.#adjacentIndex(dir),
-        anchor: prev ? () => 1 : () => 0,
-      })
-      if (shouldGo || !this.hasAttribute('animated')) await wait(100)
-    } finally {
-      if (crossing) this.#endSectionChange()
-      this.#locked = false
-    }
+    const shouldGo = await (prev ? this.#scrollPrev(distance) : this.#scrollNext(distance))
+    
+    if (shouldGo) await this.#goTo({
+      index: this.#adjacentIndex(dir),
+      anchor: prev ? () => 1 : () => 0,
+    })
+    if (shouldGo || !this.hasAttribute('animated')) await wait(100)
+    this.#locked = false
   }
   prev(distance) {
     return this.#turnPage(-1, distance)
@@ -1686,8 +1613,6 @@ export class Paginator extends HTMLElement {
     return this.#view?.writingMode
   }
   destroy() {
-    // a section still loading must not install its view afterwards
-    this.#displayToken++
     this.#cancelTurn()
     this.#observer.unobserve(this)
     this.#view.destroy()
