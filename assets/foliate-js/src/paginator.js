@@ -1,58 +1,19 @@
 const wait = ms => new Promise(resolve => setTimeout(resolve, ms))
 
-// Page turns are driven by a transform on the view element instead of native
-// scrolling, so the browser must not pan the paginated axis by itself.
-const TOUCH_ACTION_SUPPORTED = (() => {
-  try {
-    return !!globalThis.CSS?.supports?.('touch-action', 'pan-y pinch-zoom')
-  } catch {
-    return false
+const lerp = (min, max, x) => x * (max - min) + min
+const easeOutSine = x => Math.sin((x * Math.PI) / 2)
+// const easeOutSine = x => 1 - (1 - x) * (1 - x);
+const animate = (a, b, duration, ease, render) => new Promise(resolve => {
+  let start
+  const step = now => {
+    start ??= now
+    const fraction = Math.min(1, (now - start) / duration)
+    render(lerp(a, b, ease(fraction)))
+    if (fraction < 1) requestAnimationFrame(step)
+    else resolve()
   }
-})()
-const HAS_WAAPI = typeof Element !== 'undefined'
-  && typeof Element.prototype.animate === 'function'
-
-// approximation of `easeOutSine`, which page turns have always used
-const EASE_OUT_SINE_BEZIER = [0.61, 1, 0.88, 1]
-
-// cubic-bezier timing function, only used by the rAF fallback
-const cubicBezier = (x1, y1, x2, y2) => {
-  const f = (a, b, t) => 3 * a * t * (1 - t) * (1 - t) + 3 * b * t * t * (1 - t) + t * t * t
-  return x => {
-    if (x <= 0) return 0
-    if (x >= 1) return 1
-    let lo = 0, hi = 1, t = x
-    for (let i = 0; i < 24; i++) {
-      const v = f(x1, x2, t)
-      if (Math.abs(v - x) < 1e-4) break
-      if (v < x) lo = t
-      else hi = t
-      t = (lo + hi) / 2
-    }
-    return f(y1, y2, t)
-  }
-}
-
-const translateCss = (axis, px) => axis === 'x'
-  ? `translate3d(${px}px, 0, 0)` : `translate3d(0, ${px}px, 0)`
-
-// identifies a non-collapsed selection, to notice a touch that selects text
-const selectionKey = doc => {
-  const sel = doc?.getSelection?.()
-  if (!sel || sel.isCollapsed || !sel.rangeCount) return null
-  return [sel.anchorNode, sel.anchorOffset, sel.focusNode, sel.focusOffset]
-}
-const sameSelection = (a, b) => a === b
-  || (!!a && !!b && a.every((x, i) => x === b[i]))
-
-const parseTranslate = (transform, axis) => {
-  if (!transform || transform === 'none') return 0
-  const m = transform.match(/matrix(3d)?\(([^)]+)\)/)
-  if (!m) return 0
-  const v = m[2].split(',').map(Number)
-  const value = m[1] ? v[axis === 'x' ? 12 : 13] : v[axis === 'x' ? 4 : 5]
-  return Number.isFinite(value) ? value : 0
-}
+  requestAnimationFrame(step)
+})
 
 // collapsed range doesn't return client rects sometimes (or always?)
 // try make get a non-collapsed range or element
@@ -311,7 +272,6 @@ class View {
       'column-width': 'auto',
       'height': 'auto',
       'width': 'auto',
-      ...(TOUCH_ACTION_SUPPORTED ? { 'touch-action': 'auto' } : {}),
     })
     setStylesImportant(doc.body, {
       [vertical ? 'max-height' : 'max-width']: `${columnWidth}px`,
@@ -347,11 +307,6 @@ class View {
       'min-height': 'none', 'min-width': 'none',
       // fix glyph clipping in WebKit
       '-webkit-line-box-contain': 'block glyphs replaced',
-      // the paginator moves pages itself; only allow panning across the
-      // paginated axis (nothing scrolls there) so the browser never fights it
-      ...(TOUCH_ACTION_SUPPORTED
-        ? { 'touch-action': vertical ? 'pan-x pinch-zoom' : 'pan-y pinch-zoom' }
-        : {}),
     })
     setStylesImportant(doc.body, {
       'max-height': 'none',
@@ -482,19 +437,11 @@ export class Paginator extends HTMLElement {
   #pendingScrollFrame = null
   #scrollEndTimer = null
   #touchState
-  // paginated drag: { axis, origin, base, size, bounds, samples, cancelled }
-  #drag = null
-  // current inline translate of the view element along the paging axis
-  #translate = 0
-  // in-flight page turn animation (runs on the compositor when possible)
-  #turnAnim = null
-  // scroll offset we set ourselves; its scroll event must not relocate again
-  #ignoreScrollAt = null
-  #relocatePending = false
-  #relocateReason = null
-  #relocateScheduled = false
-  #relocateWaiters = []
-  #sectionLoading = false
+  #touchScrolled
+  #loadingNext = false
+  #loadingPrev = false
+  #pendingRelocate = null
+  #isSnapping = false
   constructor() {
     super()
     this.#root.innerHTML = `<style>
@@ -610,11 +557,6 @@ export class Paginator extends HTMLElement {
     this.#observer.observe(this.#container)
     this.#container.addEventListener('scroll', () => {
       if (this.#ignoreNativeScroll) return
-      if (this.#ignoreScrollAt != null) {
-        const at = this.#ignoreScrollAt
-        this.#ignoreScrollAt = null
-        if (Math.abs(this.#container[this.scrollProp] - at) < 1) return
-      }
       if (this.#justAnchored) {
         this.#justAnchored = false
         return
@@ -628,22 +570,15 @@ export class Paginator extends HTMLElement {
       })
     })
 
-    // Passive listeners never block native (scroll mode) scrolling. When
-    // `touch-action` is unsupported, touchmove has to stay cancelable so the
-    // paginated drag can stop the browser from panning.
-    const passive = { passive: true }
-    const moveOpts = { passive: TOUCH_ACTION_SUPPORTED }
-    const onTouchStart = this.#onTouchStart.bind(this)
-    const onTouchMove = this.#onTouchMove.bind(this)
-    const onTouchEnd = this.#onTouchEnd.bind(this)
-    const listen = target => {
-      target.addEventListener('touchstart', onTouchStart, passive)
-      target.addEventListener('touchmove', onTouchMove, moveOpts)
-      target.addEventListener('touchend', onTouchEnd, passive)
-      target.addEventListener('touchcancel', onTouchEnd, passive)
-    }
-    listen(this)
-    this.addEventListener('load', ({ detail: { doc } }) => listen(doc))
+    const opts = { passive: false }
+    this.addEventListener('touchstart', this.#onTouchStart.bind(this), opts)
+    this.addEventListener('touchmove', this.#onTouchMove.bind(this), opts)
+    this.addEventListener('touchend', this.#onTouchEnd.bind(this), opts)
+    this.addEventListener('load', ({ detail: { doc } }) => {
+      doc.addEventListener('touchstart', this.#onTouchStart.bind(this), opts)
+      doc.addEventListener('touchmove', this.#onTouchMove.bind(this), opts)
+      doc.addEventListener('touchend', this.#onTouchEnd.bind(this), opts)
+    })
 
     this.#mediaQueryListener = () => {
       if (!this.#view) return
@@ -743,8 +678,6 @@ export class Paginator extends HTMLElement {
     const bottomMargin = parseFloat(style.getPropertyValue('--_bottom-margin'))
 
     const flow = this.getAttribute('flow')
-    if (TOUCH_ACTION_SUPPORTED) this.#container.style.touchAction = flow === 'scrolled'
-      ? '' : vertical ? 'pan-x pinch-zoom' : 'pan-y pinch-zoom'
     if (flow === 'scrolled') {
       this.#container.style.overflowX = 'auto'
       this.#container.style.overflowY = 'auto'
@@ -797,7 +730,6 @@ export class Paginator extends HTMLElement {
   }
   render() {
     if (!this.#view) return
-    this.#cancelTurn()
     this.#view.render(this.#beforeRender({
       vertical: this.#vertical,
       rtl: this.#rtl,
@@ -846,263 +778,73 @@ export class Paginator extends HTMLElement {
     if (horizontal) element.scrollBy({ left: delta, top: 0, behavior: 'auto' })
     else element.scrollBy({ left: 0, top: delta, behavior: 'auto' })
   }
-  get #axis() {
-    return this.scrollProp === 'scrollLeft' ? 'x' : 'y'
-  }
-  #setTranslate(px) {
-    this.#translate = px
-    const el = this.#view?.element
-    if (!el) return
-    el.style.transform = px ? translateCss(this.#axis, px) : ''
-  }
-  // Stop the running turn animation, keeping the page where it currently is
-  // on screen (as an inline translate), so a new drag can pick it up.
-  #stopTurnAnimation() {
-    const turn = this.#turnAnim
-    if (!turn) return
-    this.#turnAnim = null
-    let current = 0
-    clearTimeout(turn.timer)
-    if (turn.anim) {
-      const el = this.#view?.element
-      if (el) current = parseTranslate(getComputedStyle(el).transform, turn.axis)
-      turn.anim.onfinish = null
-      turn.anim.cancel()
-    } else {
-      cancelAnimationFrame(turn.raf)
-      current = turn.current ?? 0
-    }
-    this.#setTranslate(current)
-    turn.done()
-  }
-  // Jump to the end state of any turn/drag (used before layout changes).
-  #cancelTurn() {
-    this.#stopTurnAnimation()
-    if (this.#translate) this.#setTranslate(0)
-    if (this.#drag) this.#drag.superseded = true
-  }
-  #isDragging() {
-    const drag = this.#drag
-    return !!drag && drag.samples.length > 0 && !drag.cancelled && !drag.superseded
-  }
-  #turnTiming(distance, velocity) {
-    const size = this.size || 1
-    let duration = Math.max(200, Math.min(300, 250 * (distance / size)))
-    let bezier = EASE_OUT_SINE_BEZIER
-    // Carry the finger's release speed into the animation instead of
-    // restarting from the default curve: the initial slope of
-    // cubic-bezier(x1, y1, ...) is y1 / x1.
-    const normalized = distance > 0 ? velocity * duration / distance : 0
-    if (normalized > 1.6) {
-      let s = normalized
-      if (s > 3) {
-        duration = Math.max(120, 3 * distance / velocity)
-        s = velocity * duration / distance
-      }
-      bezier = [0.33, Math.min(1, 0.33 * s), 0.6, 1]
-    }
-    return { duration, bezier }
-  }
-  // Animate the view element's translate from `from` to 0. With the Web
-  // Animations API the animation runs on the compositor, so it stays smooth
-  // even when the main thread is busy, and it ends at the committed scroll
-  // position without any final main-thread step.
-  #animateTranslate(from, duration, bezier) {
-    const el = this.#view?.element
-    const axis = this.#axis
-    this.#setTranslate(0)
-    if (!el || !from || !(duration > 0)) return Promise.resolve()
-    return new Promise(resolve => {
-      const turn = { axis, done: resolve }
-      this.#turnAnim = turn
-      if (HAS_WAAPI) {
-        const anim = el.animate([
-          { transform: translateCss(axis, from) },
-          { transform: translateCss(axis, 0) },
-        ], { duration, easing: `cubic-bezier(${bezier.join(',')})`, fill: 'none' })
-        turn.anim = anim
-        const end = () => {
-          clearTimeout(turn.timer)
-          anim.onfinish = null
-          if (this.#turnAnim === turn) this.#turnAnim = null
-          resolve()
-        }
-        anim.onfinish = end
-        // animations are not serviced in a hidden document; don't hang
-        turn.timer = setTimeout(() => {
-          if (this.#turnAnim !== turn) return
-          anim.cancel()
-          end()
-        }, duration + 250)
-      } else {
-        const ease = cubicBezier(...bezier)
-        let start
-        turn.current = from
-        const step = now => {
-          start ??= now
-          const fraction = Math.min(1, (now - start) / duration)
-          turn.current = from * (1 - ease(fraction))
-          el.style.transform = fraction < 1 ? translateCss(axis, turn.current) : ''
-          if (fraction < 1) turn.raf = requestAnimationFrame(step)
-          else {
-            clearTimeout(turn.timer)
-            if (this.#turnAnim === turn) this.#turnAnim = null
-            resolve()
-          }
-        }
-        turn.raf = requestAnimationFrame(step)
-        turn.timer = setTimeout(() => {
-          if (this.#turnAnim !== turn) return
-          cancelAnimationFrame(turn.raf)
-          el.style.transform = ''
-          this.#turnAnim = null
-          resolve()
-        }, duration + 250)
-      }
-    })
-  }
-  // Commit the scroll position right away and animate the visual offset to
-  // it. `velocity` (px/ms, towards the target) keeps a flick's momentum.
-  #commitAndAnimate(offset, { animate, velocity = 0, duration } = {}) {
+  snap(vx, vy, touchState) {
+    if (this.#isSnapping) return
+    
+    const state = touchState ?? this.#touchState
+    const velocity = this.#vertical ? vy : vx
+    const { pages, size } = this
+    if (!pages || size === 0) return
+
     const element = this.#container
-    const prop = this.scrollProp
-    this.#stopTurnAnimation()
-    if (this.#drag) this.#drag.superseded = true
-    const visual = element[prop] - this.#translate
-    this.#ignoreScrollAt = offset
-    element[prop] = offset
-    const committed = element[prop]
-    this.#ignoreScrollAt = committed
-    const from = committed - visual
-    if (!animate || Math.abs(from) < 0.5) {
-      this.#setTranslate(0)
-      return Promise.resolve()
+    const { scrollProp } = this
+    const isHorizontal = scrollProp === 'scrollLeft'
+    
+    // Stop native momentum scrolling immediately
+    const currentScrollPos = element[scrollProp]
+    const overflowProp = isHorizontal ? 'overflowX' : 'overflowY'
+    const prevOverflow = element.style[overflowProp]
+    element.style[overflowProp] = 'hidden'
+    element[scrollProp] = currentScrollPos
+    
+    // Calculate current position and target page
+    const currentOffset = Math.abs(currentScrollPos)
+    const currentPage = Math.round(currentOffset / size)
+    
+    // Determine target page based on velocity
+    const velocityThreshold = 0.3  // Higher threshold to reduce accidental triggers
+    let targetPage = currentPage
+    if (Math.abs(velocity) > velocityThreshold) {
+      targetPage += velocity > 0 ? 1 : -1
     }
-    const timing = this.#turnTiming(Math.abs(from), velocity)
-    return this.#animateTranslate(from, duration ?? timing.duration, timing.bezier)
-  }
-  // Relocation (visible range, CFI, progress, bridge call to Flutter) is
-  // expensive. Run it after the frame showing the new page has been produced,
-  // and never during a touch or a running turn animation.
-  #requestRelocate(reason) {
-    return new Promise(resolve => {
-      this.#relocatePending = true
-      this.#relocateReason = reason
-      this.#relocateWaiters.push(resolve)
-      this.#scheduleRelocate()
-    })
-  }
-  #scheduleRelocate() {
-    if (!this.#relocatePending || this.#relocateScheduled) return
-    if (this.#isDragging() || this.#turnAnim) return
-    this.#relocateScheduled = true
-    let ran = false
-    const run = () => {
-      if (ran) return
-      ran = true
-      this.#relocateScheduled = false
-      if (!this.#relocatePending) return
-      // rescheduled when the drag or animation ends
-      if (this.#isDragging() || this.#turnAnim) return
-      this.#relocatePending = false
-      const waiters = this.#relocateWaiters.splice(0)
-      try {
-        if (this.#view) this.#afterScroll(this.#relocateReason)
-      } finally {
-        for (const resolve of waiters) resolve()
-      }
+    
+    // Single page limit (keep existing feature)
+    const originPage = state?.startPage ?? currentPage
+    if (!this.scrolled) {
+      const delta = targetPage - originPage
+      if (delta > 1) targetPage = originPage + 1
+      else if (delta < -1) targetPage = originPage - 1
     }
-    requestAnimationFrame(() => setTimeout(run, 0))
-    // rAF does not fire in a hidden document
-    setTimeout(run, 150)
-  }
-  #isBoundaryPage(offset) {
-    const size = this.size
-    if (!size || this.scrolled) return 0
-    const index = Math.round(Math.abs(offset) / size)
-    const dir = index <= 0 ? -1 : index >= this.pages - 1 ? 1 : 0
-    return dir && this.#adjacentIndex(dir) != null ? dir : 0
-  }
-  // Allowed visual scroll range for a drag; the blank pages before/after the
-  // section are only reachable when there is a section to go to.
-  #dragBounds(size) {
-    const pages = this.pages
-    if (!size || !pages) return null
-    const sign = this.scrollProp === 'scrollLeft' && this.#rtl ? -1 : 1
-    const first = this.#adjacentIndex(-1) != null ? 0 : Math.min(1, pages - 1)
-    const last = Math.max(first, this.#adjacentIndex(1) != null ? pages - 1 : pages - 2)
-    const a = sign * first * size, b = sign * last * size
-    return { min: Math.min(a, b), max: Math.max(a, b) }
-  }
-  #resist(drag, translate) {
-    const { bounds, origin } = drag
-    if (!bounds) return translate
-    const visual = origin - translate
-    if (visual < bounds.min) return origin - (bounds.min - (bounds.min - visual) * 0.3)
-    if (visual > bounds.max) return origin - (bounds.max + (visual - bounds.max) * 0.3)
-    return translate
-  }
-  #releaseVelocity(drag, now) {
-    const samples = drag.samples
-    const last = samples[samples.length - 1]
-    if (!last || now - last.t > 80) return 0
-    const first = samples.find(s => last.t - s.t <= 100) ?? last
-    const dt = last.t - first.t
-    return dt >= 8 ? (last.p - first.p) / dt : 0
-  }
-  // Decide the target page after a drag and animate there.
-  #settleDrag(drag, velocity, allowTurn) {
-    const { size, origin, bounds } = drag
-    const translate = this.#translate
-    if (drag.superseded) {
-      this.#scheduleRelocate()
-      return
-    }
-    if (!size) {
-      this.#setTranslate(0)
-      this.#scheduleRelocate()
-      return
-    }
-    // a page further along the scroll axis is shown when the content moves
-    // towards negative translate; this holds for LTR, RTL and vertical alike
-    let step = 0
-    if (allowTurn) {
-      step = Math.round(-translate / size)
-      if (Math.abs(velocity) > 0.3) step += velocity < 0 ? 1 : -1
-      step = Math.max(-1, Math.min(1, step))
-    }
-    let target = origin + step * size
-    if (bounds) target = Math.max(bounds.min, Math.min(bounds.max, target))
-    const visual = origin - translate
-    const towards = Math.sign(target - visual)
-    const speed = Math.max(0, -velocity * towards)
-    const animate = this.hasAttribute('animated')
-    const boundary = target !== origin ? this.#isBoundaryPage(target) : 0
-    if (boundary) this.#sectionLoading = true
-    const moved = target !== origin
-    return this.#commitAndAnimate(target, { animate, velocity: speed })
+    
+    // Boundary limits
+    targetPage = Math.max(0, Math.min(pages - 1, targetPage))
+    
+    // Calculate animation duration based on distance
+    const targetOffset = targetPage * size
+    const distance = Math.abs(targetOffset - currentOffset)
+    const duration = Math.max(200, Math.min(300, 250 * (distance / (size || 1))))
+
+    const pageArg = this.#rtl ? -targetPage : targetPage
+    this.#isSnapping = true
+    
+    return this.#scrollToPage(pageArg, 'snap', { animate: true, duration })
       .then(() => {
-        if (boundary) return this.#goTo({
-          index: this.#adjacentIndex(boundary),
-          anchor: boundary < 0 ? () => 1 : () => 0,
+        // Handle chapter boundaries (keep existing feature)
+        const dir = targetPage <= 0 ? -1 : targetPage >= pages - 1 ? 1 : null
+        if (dir) return this.#goTo({
+          index: this.#adjacentIndex(dir),
+          anchor: dir < 0 ? () => 1 : () => 0,
         })
-        if (moved) return this.#requestRelocate('snap')
-        this.#scheduleRelocate()
       })
-      .catch(e => console.warn(e))
       .finally(() => {
-        if (boundary) this.#sectionLoading = false
+        this.#isSnapping = false
+        // Restore overflow after snap is complete
+        element.style[overflowProp] = prevOverflow
       })
   }
   #onTouchStart(e) {
     const touch = e.changedTouches[0]
     const scrollProp = this.scrollProp
-    if (this.#turnAnim) {
-      // grab the page mid-flight; in scroll mode just finish the animation
-      this.#stopTurnAnimation()
-      if (this.scrolled) this.#setTranslate(0)
-    }
-    if (this.#drag && e.touches.length > 1) this.#drag.cancelled = true
     this.#touchState = {
       x: touch?.screenX, y: touch?.screenY,
       t: e.timeStamp,
@@ -1119,21 +861,6 @@ export class Paginator extends HTMLElement {
       lockedOffset: null,
       axis: scrollProp,
     }
-    if (!this.scrolled && this.#view && !this.#sectionLoading && e.touches.length === 1) {
-      const size = this.size
-      this.#drag = {
-        axis: this.#axis,
-        origin: this.#container[scrollProp],
-        base: this.#translate,
-        size,
-        bounds: this.#dragBounds(size),
-        samples: [],
-        cancelled: false,
-        superseded: false,
-        doc: e.currentTarget?.nodeType === 9 ? e.currentTarget : null,
-      }
-      this.#drag.selection = selectionKey(this.#drag.doc)
-    } else if (e.touches.length === 1) this.#drag = null
     this.dispatchEvent(new CustomEvent('doctouchstart', {
       detail: {
         touch: e.changedTouches[0],
@@ -1144,10 +871,6 @@ export class Paginator extends HTMLElement {
     }))
   }
   #onTouchMove(e) {
-    // without `touch-action` support the browser would pan the paginated
-    // axis natively at the same time as the drag below
-    if (!TOUCH_ACTION_SUPPORTED && !this.scrolled && e.cancelable) e.preventDefault()
-
     if (window.getSelection()?.toString()) return
 
     const touch = e.changedTouches[0]
@@ -1157,19 +880,21 @@ export class Paginator extends HTMLElement {
     const deltaX = touch.screenX - state.startTouch.x
     const deltaY = touch.screenY - state.startTouch.y
 
-    const absDeltaX = Math.abs(deltaX)
-    const absDeltaY = Math.abs(deltaY)
+    const absDeltaX = Math.abs(deltaX);
+    const absDeltaY = Math.abs(deltaY);
 
     state.delta.x = deltaX
     state.delta.y = deltaY
 
+
+
     const threshold = 5
 
-    const notHorizontal = state.direction === 'horizontal' && absDeltaY > absDeltaX
-    const notVertical = state.direction === 'vertical' && absDeltaX > absDeltaY
+    const notHorizontal = state.direction === 'horizontal' && absDeltaY > absDeltaX;
+    const notVertical = state.direction === 'vertical' && absDeltaX > absDeltaY;
 
     if (state.direction !== 'none' || (notHorizontal && notVertical)) {
-      if (absDeltaX < threshold && absDeltaY < threshold) return
+      if (absDeltaX < threshold && absDeltaY < threshold) return;
     }
 
     if ((absDeltaX > threshold || absDeltaY > threshold) && state.direction === 'none') {
@@ -1182,21 +907,30 @@ export class Paginator extends HTMLElement {
       }
     }
 
-    state.axis = this.scrollProp
+    const axisProp = this.scrollProp
+    state.axis = axisProp
+    const horizontalAxis = axisProp === 'scrollLeft'
+    const verticalAxis = axisProp === 'scrollTop'
+    const horizontalDrag = state.direction === 'horizontal'
+    const verticalDrag = state.direction === 'vertical'
 
-    this.dispatchEvent(new CustomEvent('doctouchmove', {
+    const forwarded = new CustomEvent('doctouchmove', {
       detail: {
         touch,
         touchState: state,
       },
+      preventDefault: () => e.preventDefault(),
       bubbles: true,
       composed: true
-    }))
+    })
+    this.dispatchEvent(forwarded)
 
     if (state.pinched) return
-    state.pinched = globalThis.visualViewport?.scale > 1
-    if (state.pinched || e.touches.length > 1) {
-      if (this.#drag) this.#drag.cancelled = true
+    state.pinched = globalThis.visualViewport.scale > 1
+    if (state.pinched) return
+
+    if (e.touches.length > 1) {
+      if (this.#touchScrolled) e.preventDefault()
       return
     }
 
@@ -1211,30 +945,28 @@ export class Paginator extends HTMLElement {
 
     if (this.scrolled) return
 
-    // Paginated: the page follows the finger through a compositor-only
-    // transform; nothing is laid out or scrolled until the finger lifts.
-    const drag = this.#drag
-    if (!drag || drag.cancelled || drag.superseded) return
-    // the touch is selecting text (e.g. touch selection on desktop WebViews)
-    if (drag.doc && !sameSelection(drag.selection, selectionKey(drag.doc))) {
-      drag.cancelled = true
-      if (this.#translate) this.#settleDrag(drag, 0, false)
+    if (verticalDrag && horizontalAxis) {
+      e.preventDefault()
+      // Lock horizontal position during vertical drag (direction locking)
+      if (state.lockedOffset == null)
+        state.lockedOffset = state.startScroll ?? this.#container.scrollLeft
+      this.#container.scrollLeft = state.lockedOffset
       return
     }
-    const along = drag.axis === 'x' ? 'horizontal' : 'vertical'
-    // a perpendicular gesture (e.g. the bookmark pull-down) leaves the page
-    if (state.direction !== along) return
-    const pos = drag.axis === 'x' ? touch.screenX : touch.screenY
-    const start = drag.axis === 'x' ? state.startTouch.x : state.startTouch.y
-    const samples = drag.samples
-    samples.push({ t: e.timeStamp, p: pos })
-    while (samples.length > 2 && e.timeStamp - samples[0].t > 120) samples.shift()
-    this.#setTranslate(this.#resist(drag, drag.base + pos - start))
+
+    if (verticalDrag && verticalAxis) {
+      this.#touchScrolled = true
+      return
+    }
+
+    if (horizontalDrag && horizontalAxis) {
+      this.#touchScrolled = true
+      // rely on native scrolling for horizontal paging
+    }
   }
   #onTouchEnd(e) {
     const state = this.#touchState
-    const cancelled = e.type === 'touchcancel'
-    if (!cancelled) this.dispatchEvent(new CustomEvent('doctouchend', {
+    this.dispatchEvent(new CustomEvent('doctouchend', {
       detail: {
         touch: e.changedTouches[0],
         touchState: state,
@@ -1242,29 +974,42 @@ export class Paginator extends HTMLElement {
       bubbles: true,
       composed: true
     }))
-    // wait for the last finger
-    if (e.touches?.length) return
 
-    const drag = this.#drag
-    this.#touchState = null
-    this.#drag = null
-
+    this.#touchScrolled = false
     if (this.scrolled) {
+      this.#touchState = null
+      this.#touchScrolled = false
       // Fire a final relocate after touch ends in scrolled mode
       this.#afterScroll('scroll')
-      this.#scheduleRelocate()
       return
     }
 
-    if (!drag || (!drag.samples.length && !drag.base)) {
-      this.#scheduleRelocate()
+    const verticalLocked = state?.direction === 'vertical'
+      && state.axis === 'scrollLeft'
+      && state.lockedOffset != null
+
+    if (verticalLocked) {
+      // Restore original horizontal position and skip snapping to avoid accidental page turns
+      this.#container.scrollLeft = state.lockedOffset
+      this.#touchState = null
+      if (this.#pendingRelocate) {
+        const detail = this.#pendingRelocate
+        this.#pendingRelocate = null
+        this.dispatchEvent(new CustomEvent('relocate', { detail }))
+      }
       return
     }
-    const pinched = state?.pinched || globalThis.visualViewport?.scale > 1
-    const allowTurn = !cancelled && !pinched && !drag.cancelled && !drag.superseded
-      && state?.direction === (drag.axis === 'x' ? 'horizontal' : 'vertical')
-    const velocity = allowTurn ? this.#releaseVelocity(drag, e.timeStamp) : 0
-    this.#settleDrag(drag, velocity, allowTurn)
+
+
+    // XXX: Firefox seems to report scale as 1... sometimes...?
+    // at this point I'm basically throwing `requestAnimationFrame` at
+    // anything that doesn't work
+    requestAnimationFrame(() => {
+      if (globalThis.visualViewport.scale === 1 && state)
+        Promise.resolve(this.snap(state.vx, state.vy, state))
+          .finally(() => { this.#touchState = null })
+      else this.#touchState = null
+    })
   }
   // allows one to process rects as if they were LTR and horizontal
   #getRectMapper() {
@@ -1300,19 +1045,20 @@ export class Paginator extends HTMLElement {
   }
   async #scrollTo(offset, reason, smooth) {
     const element = this.#container
-    const { scrollProp } = this
-
+    const { scrollProp, size } = this
+    this.#ignoreNativeScroll = true
+    
     const opts = typeof smooth === 'object' ? smooth ?? {} : {}
     const shouldAnimate = opts.animate ?? (reason === 'snap' || smooth === true)
-
+    const easing = opts.easing ?? easeOutSine
+    
     const finish = () => {
       this.#afterScroll(reason)
       this.#ignoreNativeScroll = false
     }
 
     // If already at target position
-    if (Math.abs(element[scrollProp] - offset) < 1 && !this.#translate && !this.#turnAnim) {
-      this.#ignoreNativeScroll = true
+    if (Math.abs(element[scrollProp] - offset) < 1) {
       finish()
       return
     }
@@ -1320,26 +1066,31 @@ export class Paginator extends HTMLElement {
     // FIXME: vertical-rl only, not -lr
     if (this.scrolled && this.#vertical) offset = -offset
 
-    if (reason === 'anchor') {
-      // layout-driven repositioning: jump there; an active drag continues
-      // from the new position
-      this.#stopTurnAnimation()
-      if (!this.#drag) this.#setTranslate(0)
-      this.#ignoreNativeScroll = true
-      element[scrollProp] = offset
-      if (this.#drag) this.#drag.origin = element[scrollProp]
-      finish()
-      return
-    }
-
-    // Page turn: commit the scroll position at once, animate the visual
-    // offset on the compositor, and relocate after the page has settled.
     const useAnimation = shouldAnimate && this.hasAttribute('animated')
-    // a boundary page is replaced by the adjacent section right away, which
-    // relocates by itself
-    const boundary = this.#isBoundaryPage(offset)
-    await this.#commitAndAnimate(offset, { animate: useAnimation, duration: opts.duration })
-    if (!boundary) await this.#requestRelocate(reason)
+
+    if (useAnimation) {
+      const distance = Math.abs(element[scrollProp] - offset)
+      const duration = opts.duration ?? Math.max(200, Math.min(300, 250 * (distance / (size || 1))))
+
+      this.#justAnchored = true
+
+      return animate(
+        element[scrollProp],
+        offset,
+        duration,
+        easing,
+        x => element[scrollProp] = x,
+      ).then(() => {
+        // Ensure exact position
+        element[scrollProp] = offset
+        finish()
+      }).catch(() => {
+        this.#ignoreNativeScroll = false
+      })
+    } else {
+      element[scrollProp] = offset
+      finish()
+    }
   }
   async #scrollToPage(page, reason, smooth) {
     const offset = this.size * (this.#rtl ? -page : page)
@@ -1388,7 +1139,10 @@ export class Paginator extends HTMLElement {
   #afterScroll(reason) {
     // During active touch scrolling, defer all relocation work
     // to avoid expensive DOM traversal (getVisibleRange) per frame
-    if (reason === 'scroll' && this.#touchState) return
+    if (reason === 'scroll' && (this.#touchState || this.#touchScrolled)) {
+      this.#pendingRelocate = null
+      return
+    }
 
     // For scrolled mode, debounce relocate to also skip during momentum scroll
     // Only compute after scrolling has stopped for 200ms
@@ -1418,6 +1172,7 @@ export class Paginator extends HTMLElement {
       detail.size = 1 / (pages - 2)
     }
 
+    this.#pendingRelocate = null
     this.dispatchEvent(new CustomEvent('relocate', { detail }))
   }
   #handleScrollBoundaries() {
@@ -1468,7 +1223,6 @@ export class Paginator extends HTMLElement {
     const { index, src, anchor, onLoad, select } = await promise
     this.#index = index
     if (src) {
-      this.#cancelTurn()
       const view = this.#createView()
       const afterLoad = doc => {
         if (doc.head) {
@@ -1613,7 +1367,6 @@ export class Paginator extends HTMLElement {
     return this.#view?.writingMode
   }
   destroy() {
-    this.#cancelTurn()
     this.#observer.unobserve(this)
     this.#view.destroy()
     this.#view = null
@@ -1627,8 +1380,7 @@ export class Paginator extends HTMLElement {
       clearTimeout(this.#scrollEndTimer)
       this.#scrollEndTimer = null
     }
-    this.#relocatePending = false
-    for (const resolve of this.#relocateWaiters.splice(0)) resolve()
+    this.#pendingRelocate = null
   }
 }
 

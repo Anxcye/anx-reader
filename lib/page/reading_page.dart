@@ -322,8 +322,6 @@ class ReadingPageState extends ConsumerState<ReadingPage>
         if (state == AppLifecycleState.paused ||
             state == AppLifecycleState.hidden ||
             state == AppLifecycleState.detached) {
-          // Persist a progress save that is still waiting for turns to settle.
-          epubPlayerKey.currentState?.flushPendingReadingProgress();
           final elapsedSeconds = _readTimeWatch.elapsed.inSeconds;
           if (elapsedSeconds > 5) {
             epubPlayerKey.currentState?.saveReadingProgress();
