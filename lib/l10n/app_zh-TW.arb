@@ -358,7 +358,7 @@
   "statisticJustNow": "剛剛",
   "statisticMinutesAgo": "{count, plural, other{{count} 分鐘前}}",
   "statisticHoursAgo": "{count, plural, other{{count} 小時前}}",
-  "statisticYesterday": "昨天",
+  "statisticYesterday": "{count, plural, =1{昨天} other{{count}天前}}",
   "statisticDaysAgo": "{count, plural, other{{count} 天前}}",
   "statisticMonthsAgo": "{count, plural, other{{count} 個月前}}",
   "statisticYearsAgo": "{count, plural, other{{count} 年前}}",
