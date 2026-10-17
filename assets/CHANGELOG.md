@@ -1,4 +1,10 @@
 ## 1.15.0
+- Fix(reader): Keep oversized images within the content area in continuous scroll mode while preserving their aspect ratio (#1001) Thanks @mattuylee
+- Fix(desktop): Hide the window immediately on close and bound resource cleanup with timeouts to avoid shutdown freezes (#1000) Thanks @1Cookie2gavh
+- Fix(log): Keep the app usable when log files cannot be created, written, read, or exported (#999) Thanks @1Cookie2gavh
+- Feat(ai): Add Requesty as a built-in OpenAI-compatible AI service (#994) Thanks @1Cookie2gavh
+- Fix(l10n): Restore day-count plurals in Traditional Chinese reading statistics (#993) Thanks @owgreen-dev
+- Feat(reader): Add single/double-page selection, continuous scrolling, and zoom for PDF and other fixed-layout books; fix renderer errors and restore saved page positions (#991) Thanks @Serprogramming
 - Ci(android): Play Store beta CI now completes Closed testing (alpha) and Open testing (beta) tracks so testers can download without a Console roll-out
 - Ci(android): Play Store alpha uploads to the internal track now publish as completed so testers can download without a Console roll-out
 - Fix(sync): Reject WebDAV database upload when the local library has no non-deleted books, to avoid wiping the cloud library with an empty DB (#911, #898 mitigation)
@@ -21,7 +27,7 @@
 - Fix(ai): Avoid native WebView2 crash when running book content search on Windows (#978) Thanks @bazzdug-arch
 - Perf(reader): Reduce Android reading-page scroll jank by deferring relocate during scroll (#914) Thanks @dddXzz
 - Fix(reader): Restore reader keyboard focus after clearing text selection / closing context menu (#967, #966) Thanks @zyx-31415
-- Fix(reader): Open selection menu on single-word long-press on Android (#990, #968, #900)
+- Fix(reader): Open selection menu on single-word long-press on Android (#990, #968, #900) Thanks @tobernguyen
 - Fix(sync): Strip special characters (e.g. # @ $ %) from file names on import so WebDAV servers like Jianguoyun accept uploads (#989)
 - Feat(appearance): Disable open-book animation, page transitions, and dialog motion when e-ink mode is on (#986)
 - Fix(bookshelf): Make group rename more obvious with an edit icon (#972)
@@ -34,6 +40,12 @@
 - Fix(ai): Fix AI settings showing a grey error screen on fresh installs and provider edits failing to save, by restoring generated AiProvider JSON serialization with lenient converters
 - Chore(android): Target Android 16 (API 36) and upgrade to Google Play Billing Library 8 to meet Google Play requirements
 
+- Fix(reader): 连续滚动模式下将过大图片限制在内容区域内，并保持图片比例 (#1001) 感谢 @mattuylee
+- Fix(desktop): 关闭时立即隐藏窗口，并为资源清理设置超时，避免退出卡顿 (#1000) 感谢 @1Cookie2gavh
+- Fix(log): 日志文件无法创建、写入、读取或导出时安全降级，避免应用卡死或异常 (#999) 感谢 @1Cookie2gavh
+- Feat(ai): 新增内置 Requesty AI 服务，支持 OpenAI 兼容接口 (#994) 感谢 @1Cookie2gavh
+- Fix(l10n): 修复繁体中文阅读统计中的天数复数显示 (#993) 感谢 @owgreen-dev
+- Feat(reader): PDF 等固定版式书籍支持单/双页选择、连续滚动和缩放，并修复渲染器错误及阅读位置恢复 (#991) 感谢 @Serprogramming
 - Ci(android): Play 商店 beta CI 现会将版本同步发布到 Closed testing（alpha）与 Open testing（beta）并设为 completed，测试者无需在 Console 手动发布即可下载
 - Ci(android): Play 商店 alpha 上传至 internal 轨道时自动设为 completed，测试者无需在 Console 手动发布即可下载
 - Fix(sync): 本地书库无未删除书籍时拒绝上传 WebDAV 数据库，避免用空库覆盖云端 (#911, #898 缓解)
@@ -57,7 +69,7 @@
 - Fix(ai): 修复 Windows 上书籍内容搜索触发原生 WebView2 崩溃的问题 (#978) 感谢 @bazzdug-arch
 - Perf(reader): 优化 Android 阅读页滚动卡顿，滚动期间推迟 relocate (#914) 感谢 @dddXzz
 - Fix(reader): 修复清除选区/关闭上下文菜单后阅读器键盘焦点未恢复的问题 (#967, #966) 感谢 @zyx-31415
-- Fix(reader): 修复 Android 长按选中单字不弹出菜单的问题 (#990, #968, #900)
+- Fix(reader): 修复 Android 长按选中单字不弹出菜单的问题 (#990, #968, #900) 感谢 @tobernguyen
 - Fix(sync): 导入时移除文件名中的特殊字符（如 # @ $ %），避免坚果云等 WebDAV 拒绝上传 (#989)
 - Feat(appearance): 开启墨水屏模式时关闭开书动画、页面转场与弹窗动画 (#986)
 - Fix(bookshelf): 分组重命名入口增加编辑图标，更加明显 (#972)
