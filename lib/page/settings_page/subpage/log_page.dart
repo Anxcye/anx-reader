@@ -25,9 +25,17 @@ class _LogPageState extends State<LogPage> {
   }
 
   Future<void> initData() async {
-    File logFile = await getLogFile();
+    // 日志文件可能被另一个实例独占/不可读，读取失败不应把异常抛给全局错误处理
+    List<String> loaded = [];
+    try {
+      final File logFile = await getLogFile();
+      loaded = logFile.readAsLinesSync().reversed.toList();
+    } catch (e) {
+      AnxLog.info('LogPage: failed to read log file: $e');
+    }
+    if (!mounted) return;
     setState(() {
-      logs = logFile.readAsLinesSync().reversed.toList();
+      logs = loaded;
     });
   }
 
@@ -89,19 +97,25 @@ class _LogPageState extends State<LogPage> {
 
   Future<void> exportLog() async {
     Navigator.pop(context);
-    File logFile = await getLogFile();
-    // SaveFileDialogParams params = SaveFileDialogParams(
-    //   sourceFilePath: logFile.path,
-    // );
-    // await FlutterFileDialog.saveFile(params: params);
-    String fileName =
-        'AnxReader-Log-${DateTime.now().year}-${DateTime.now().month}-${DateTime.now().day}.txt';
-    String? filePath = await saveFileToDownload(
-        bytes: await logFile.readAsBytes(),
-        fileName: fileName,
-        mimeType: 'text/plain');
+    try {
+      File logFile = await getLogFile();
+      // SaveFileDialogParams params = SaveFileDialogParams(
+      //   sourceFilePath: logFile.path,
+      // );
+      // await FlutterFileDialog.saveFile(params: params);
+      String fileName =
+          'AnxReader-Log-${DateTime.now().year}-${DateTime.now().month}-${DateTime.now().day}.txt';
+      String? filePath = await saveFileToDownload(
+          bytes: await logFile.readAsBytes(),
+          fileName: fileName,
+          mimeType: 'text/plain');
 
-    AnxToast.show("saved $filePath");
+      AnxToast.show("saved $filePath");
+    } catch (e) {
+      // 日志文件不可读（被占用/无权限）时给出提示即可，不要抛出异常
+      AnxLog.info('LogPage: failed to export log file: $e');
+      AnxToast.show('Failed to export log: $e');
+    }
   }
 }
 
