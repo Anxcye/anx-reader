@@ -37,6 +37,7 @@ class LangchainAiRegistry {
         );
       case 'deepseek':
       case 'openrouter':
+      case 'requesty':
       case 'openai':
       default:
         return _buildPipeline(

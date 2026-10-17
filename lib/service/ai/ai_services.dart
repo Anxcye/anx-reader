@@ -70,5 +70,13 @@ List<AiServiceOption> buildDefaultAiServices() {
       defaultApiKey: 'YOUR_API_KEY',
       defaultModel: 'gpt-4o-mini',
     ),
+    AiServiceOption(
+      identifier: 'requesty',
+      title: 'Requesty',
+      logo: 'assets/images/requesty.png',
+      defaultUrl: 'https://router.requesty.ai/v1/chat/completions',
+      defaultApiKey: 'YOUR_API_KEY',
+      defaultModel: 'openai/gpt-4o-mini',
+    ),
   ];
 }
