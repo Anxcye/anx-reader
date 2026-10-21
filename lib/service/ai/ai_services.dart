@@ -78,5 +78,13 @@ List<AiServiceOption> buildDefaultAiServices() {
       defaultApiKey: 'YOUR_API_KEY',
       defaultModel: 'openai/gpt-4o-mini',
     ),
+    AiServiceOption(
+      identifier: 'cheaperinference',
+      title: 'Cheaper Inference',
+      logo: 'assets/images/cheaperinference.png',
+      defaultUrl: 'https://api.cheaperinference.com/v1/chat/completions',
+      defaultApiKey: 'YOUR_API_KEY',
+      defaultModel: 'gpt-5.4-mini',
+    ),
   ];
 }
