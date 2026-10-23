@@ -78,5 +78,13 @@ List<AiServiceOption> buildDefaultAiServices() {
       defaultApiKey: 'YOUR_API_KEY',
       defaultModel: 'openai/gpt-4o-mini',
     ),
+    AiServiceOption(
+      identifier: 'opper',
+      title: 'Opper',
+      logo: 'assets/images/opper.png',
+      defaultUrl: 'https://api.opper.ai/v3/compat/chat/completions',
+      defaultApiKey: 'YOUR_API_KEY',
+      defaultModel: 'claude-sonnet-4-6',
+    ),
   ];
 }
