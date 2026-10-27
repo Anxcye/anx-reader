@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:anx_reader/utils/platform_utils.dart';
@@ -114,8 +115,17 @@ class _MyAppState extends ConsumerState<MyApp>
     super.dispose();
   }
 
+  /// Guards against re-entering the shutdown flow: handing the close back to the
+  /// OS makes the native side emit another `close` event.
+  bool _closing = false;
+
   @override
   Future<void> onWindowClose() async {
+    if (_closing) {
+      return;
+    }
+    _closing = true;
+
     // 关闭窗口时先立即隐藏窗口：原先要等 Server/WebView2/数据库全部释放完
     // 才真正关闭窗口，期间窗口会长时间「无响应」（实测十几秒）。
     // 现在每一步都带超时兜底，任何一步卡住都不再拖住关闭流程。
@@ -140,13 +150,25 @@ class _MyAppState extends ConsumerState<MyApp>
     await _shutdownStep(
         'close database', () => DBHelper.close(), const Duration(seconds: 3));
 
-    final destroyed = await _shutdownStep('destroy window',
-        () => windowManager.destroy(), const Duration(seconds: 3));
-    if (!destroyed) {
-      // 兜底：连窗口销毁都超时的话，直接结束进程，避免应用关不掉
-      AnxLog.warning('onWindowClose: forcing exit');
+    // 兜底：正常情况下窗口交还给系统后进程自己就会退出；万一没退干净就把进程结束掉，
+    // 保证应用一定关得掉。
+    Timer(const Duration(seconds: 3), () {
+      AnxLog.warning('onWindowClose: graceful exit timed out, forcing exit');
       exit(0);
-    }
+    });
+
+    // 关键：不要把 windowManager.destroy() 当作退出手段。
+    // 它在 Windows 上只是 PostQuitMessage(0)：窗口不销毁、引擎也不销毁，
+    // 消息循环先停，之后才在 main() 返回时去销毁引擎；此时已经没有任何消息泵，
+    // 引擎收尾必然空指针崩溃（0xc0000005 @ flutter_windows.dll+0x1e220），
+    // 接着 WerFault 收集转储把进程再吊住约 10 秒，窗口一直是「无响应」。
+    // 正确做法：取消关闭拦截，再 close() 把销毁交还给系统默认路径
+    // （WM_CLOSE → DestroyWindow → WM_DESTROY），引擎在消息循环仍在运行时干净退役。
+    AnxLog.info('onWindowClose: handing over to default close path');
+    await _shutdownStep('hand over to default close path', () async {
+      await windowManager.setPreventClose(false);
+      await windowManager.close();
+    }, const Duration(seconds: 2));
   }
 
   /// 执行一步关闭清理：记录耗时、设置超时；返回是否在超时内完成。
