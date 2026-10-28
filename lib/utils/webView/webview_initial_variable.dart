@@ -2,10 +2,10 @@ import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/models/book_style.dart';
 import 'package:anx_reader/models/read_theme.dart';
 import 'package:anx_reader/utils/js/convert_dart_color_to_js.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:anx_reader/utils/webView/epub_webview_controller.dart';
 
 Future<void> webviewInitialVariable(
-  InAppWebViewController controller,
+  EpubWebViewController controller,
   String url,
   String cfi, {
   BookStyle? bookStyle,
@@ -62,5 +62,5 @@ Future<void> webviewInitialVariable(
       window.loadBook()
   ''';
 
-  await controller.evaluateJavascript(source: script);
+  await controller.execute(script);
 }

@@ -322,7 +322,8 @@ class View {
     const doc = this.document
     for (const el of doc.body.querySelectorAll('img, svg, video')) {
       // preserve max size if they are already set
-      const { maxHeight, maxWidth } = doc.defaultView.getComputedStyle(el)
+      const { maxHeight, maxWidth, width: imageWidth, height: imageHeight } =
+        doc.defaultView.getComputedStyle(el)
       // Cap max-width to the column width to prevent images from overflowing
       // into the next page when the EPUB embeds a large inline max-width value.
       const effectiveMaxWidth = vertical
@@ -330,16 +331,31 @@ class View {
         : columnWidth
           ? `${columnWidth}px`
           : (maxWidth !== 'none' && maxWidth !== '0px' ? maxWidth : '100%')
-      setStylesImportant(el, {
+      const sizeStyles = this.#column ? {
         'max-height': vertical
           ? (maxHeight !== 'none' && maxHeight !== '0px' ? maxHeight : '100%')
           : `${height - margin * 2}px`,
         'max-width': effectiveMaxWidth,
+      } : {
+        // Scrolled layout uses a size threshold, not the actual content width.
+        [vertical ? 'max-height' : 'max-width']: '100%',
+      }
+      setStylesImportant(el, {
+        ...sizeStyles,
         'object-fit': 'contain',
         'page-break-inside': 'avoid',
         'break-inside': 'avoid',
         'box-sizing': 'border-box',
       })
+      if (!this.#column) {
+        const inlineSize = vertical ? 'height' : 'width'
+        const originalSize = parseFloat(vertical ? imageHeight : imageWidth)
+        const constrainedSize = parseFloat(doc.defaultView.getComputedStyle(el)[inlineSize])
+        if (constrainedSize < originalSize) {
+          // Only reset the other dimension when shrinking, preserving inline images.
+          setStylesImportant(el, { [vertical ? 'width' : 'height']: 'auto' })
+        }
+      }
     }
   }
   expand() {
@@ -435,6 +451,7 @@ export class Paginator extends HTMLElement {
   #mediaQueryListener
   #ignoreNativeScroll = false
   #pendingScrollFrame = null
+  #scrollEndTimer = null
   #touchState
   #touchScrolled
   #loadingNext = false
@@ -977,6 +994,9 @@ export class Paginator extends HTMLElement {
     this.#touchScrolled = false
     if (this.scrolled) {
       this.#touchState = null
+      this.#touchScrolled = false
+      // Fire a final relocate after touch ends in scrolled mode
+      this.#afterScroll('scroll')
       return
     }
 
@@ -1133,6 +1153,27 @@ export class Paginator extends HTMLElement {
       this.start - size, this.end - size, this.#getRectMapper())
   }
   #afterScroll(reason) {
+    // During active touch scrolling, defer all relocation work
+    // to avoid expensive DOM traversal (getVisibleRange) per frame
+    if (reason === 'scroll' && (this.#touchState || this.#touchScrolled)) {
+      this.#pendingRelocate = null
+      return
+    }
+
+    // For scrolled mode, debounce relocate to also skip during momentum scroll
+    // Only compute after scrolling has stopped for 200ms
+    if (this.scrolled && reason === 'scroll') {
+      if (this.#scrollEndTimer) clearTimeout(this.#scrollEndTimer)
+      this.#scrollEndTimer = setTimeout(() => {
+        this.#scrollEndTimer = null
+        this.#doRelocate(reason)
+      }, 200)
+      return
+    }
+
+    this.#doRelocate(reason)
+  }
+  #doRelocate(reason) {
     const range = this.#getVisibleRange()
     // don't set new anchor if relocation was to scroll to anchor
     if (reason !== 'anchor') this.#anchor = range
@@ -1143,13 +1184,8 @@ export class Paginator extends HTMLElement {
     if (this.scrolled) detail.fraction = this.start / this.viewSize
     else if (this.pages > 0) {
       const { page, pages } = this
-      // this.#header.style.visibility = page > 1 ? 'visible' : 'hidden'
       detail.fraction = (page - 1) / (pages - 2)
       detail.size = 1 / (pages - 2)
-    }
-    if (!this.scrolled && reason === 'scroll' && (this.#touchState || this.#touchScrolled)) {
-      this.#pendingRelocate = detail
-      return
     }
 
     this.#pendingRelocate = null
@@ -1355,6 +1391,10 @@ export class Paginator extends HTMLElement {
     if (this.#pendingScrollFrame) {
       cancelAnimationFrame(this.#pendingScrollFrame)
       this.#pendingScrollFrame = null
+    }
+    if (this.#scrollEndTimer) {
+      clearTimeout(this.#scrollEndTimer)
+      this.#scrollEndTimer = null
     }
     this.#pendingRelocate = null
   }

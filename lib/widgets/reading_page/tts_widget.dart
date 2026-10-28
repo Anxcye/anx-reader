@@ -9,7 +9,7 @@ import 'package:anx_reader/page/book_player/epub_player.dart';
 import 'package:anx_reader/page/settings_page/narrate.dart';
 import 'package:anx_reader/widgets/reading_page/more_settings/more_settings.dart';
 import 'package:flutter/material.dart';
-import 'package:icons_plus/icons_plus.dart';
+import 'package:iconsx_plus/iconsx_plus.dart';
 import 'dart:async';
 
 class TtsWidget extends StatefulWidget {

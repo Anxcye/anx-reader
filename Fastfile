@@ -105,14 +105,37 @@ def get_version_from_pubspec
   # Parse the pubspec.yaml file
   pubspec_content = File.read(pubspec_path)
 
-  # Use regex to find the version number line and extract both version number and build number
-  version_line = pubspec_content.match(/version:\s*(\d+\.\d+\.\d+)\+(\d+)/)
-  if version_line
-    version_number = version_line[1]
-  else
+  # Extract the full version string (e.g. "1.15.0-alpha.7+6326")
+  version_match = pubspec_content.match(/version:\s*(.+)/)
+  unless version_match
     UI.error("Version number not found in pubspec.yaml")
     return nil
   end
 
-  return version_number
+  full_version = version_match[1].strip
+
+  # Split at '+' to get version name and build number
+  parts = full_version.split('+')
+  version_name = parts[0]   # e.g. "1.15.0-alpha.7"
+  build_number = parts[1]   # e.g. "6326"
+
+  # Strip pre-release suffix to get clean base version for Apple platforms
+  # e.g. "1.15.0-alpha.7" -> "1.15.0"
+  base_version = version_name.sub(/-.*$/, '')
+
+  # Store build_number as an instance variable for callers that need it
+  @build_number = build_number
+
+  return base_version
+end
+
+# Return the raw version name (may include pre-release suffix like -alpha.7)
+def get_full_version_from_pubspec
+  require 'yaml'
+  pubspec_path = File.expand_path("#{root_path}/pubspec.yaml")
+  pubspec_content = File.read(pubspec_path)
+  version_match = pubspec_content.match(/version:\s*(.+)/)
+  return nil unless version_match
+  full_version = version_match[1].strip
+  full_version.split('+')[0]
 end

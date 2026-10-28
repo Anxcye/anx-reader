@@ -9,10 +9,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Read Flutter version
+        id: flutter_version
+        run: echo "version=$(cat .github/flutter-version)" >> $env:GITHUB_OUTPUT
+
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version: '3.35.3'
+          flutter-version: ${{ steps.flutter_version.outputs.version }}
 
       - run: flutter pub get
       - run: flutter gen-l10n

@@ -255,13 +255,6 @@ class _AiProviderDetailPageState extends ConsumerState<AiProviderDetailPage> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final accent = colorScheme.secondary;
-    final summary = switch (_reasoningEffort) {
-      AiReasoningEffort.auto => l10n.settingsAiProviderReasoningEffortAuto,
-      AiReasoningEffort.low => l10n.settingsAiProviderReasoningEffortLow,
-      AiReasoningEffort.medium => l10n.settingsAiProviderReasoningEffortMedium,
-      AiReasoningEffort.high => l10n.settingsAiProviderReasoningEffortHigh,
-    };
-
     return FilledContainer(
       child: ExpansionTile(
         tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -652,6 +645,16 @@ class _AiProviderDetailPageState extends ConsumerState<AiProviderDetailPage> {
 
   void _testConnection() {
     final l10n = L10n.of(context);
+
+    final enabledKeys = _apiKeys.where((k) => k.enabled && k.key.trim().isNotEmpty);
+    if (_urlController.text.trim().isEmpty ||
+        _modelController.text.trim().isEmpty ||
+        enabledKeys.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.settingsAiProviderNoValidKeys)),
+      );
+      return;
+    }
 
     // Save any pending changes before testing so the provider has the latest config
     if (_isModified) {

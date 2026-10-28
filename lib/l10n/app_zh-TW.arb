@@ -130,6 +130,13 @@
   "readingPageSummaryTheChapter": "總結本章",
   "readingPageSummaryPreviousContent": "總結前文",
   "readingPageAutoSummaryPreviousContent": "自動總結前文",
+  "readingPageAutoSummaryDelayEveryTime": "每次觸發",
+  "readingPageAutoSummaryDelay30Minutes": "30 分鐘",
+  "readingPageAutoSummaryDelay3Hours": "3 小時",
+  "readingPageAutoSummaryDelayNextDay": "隔天",
+  "readingPageAutoSummaryDelay3Days": "3 天",
+  "readingPageAutoSummaryDelay1Week": "一週",
+  "readingPageAutoSummaryDelaySubtitle": "離開超過 {delay} 後自動總結",
   "readingPageAtLeastTwoThemes": "至少需保留 2 個主題",
   "readingPageAutoAdjustReadingTheme": "自動調整日夜模式",
   "readingPageAutoAdjustReadingThemeTips": "將使用主題列表中的第一、二個主題，分別作為日間與夜間模式",
@@ -258,6 +265,14 @@
   "importCannotGetFilePath": "無法取得檔案路徑",
   "importSuccessRestartApp": "匯入成功，請重新啟動 App。",
   "importFailed": "匯入失敗：{error}",
+  "filePickerFailed": "無法開啟檔案選擇器。Linux 請安裝 zenity 或 kdialog。\n{error}",
+  "@filePickerFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "settingsSyncCompletedToast": "同步完成時顯示浮動通知",
   "settingsSyncAutoSync": "自動同步",
   "settingsTranslate": "翻譯",
@@ -343,7 +358,7 @@
   "statisticJustNow": "剛剛",
   "statisticMinutesAgo": "{count, plural, other{{count} 分鐘前}}",
   "statisticHoursAgo": "{count, plural, other{{count} 小時前}}",
-  "statisticYesterday": "昨天",
+  "statisticYesterday": "{count, plural, =1{昨天} other{{count}天前}}",
   "statisticDaysAgo": "{count, plural, other{{count} 天前}}",
   "statisticMonthsAgo": "{count, plural, other{{count} 個月前}}",
   "statisticYearsAgo": "{count, plural, other{{count} 年前}}",

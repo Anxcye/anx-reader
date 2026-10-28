@@ -593,6 +593,12 @@ export const makePDF = async file => {
         size: 1000,
     }))
     book.sections[0].pageSpread = 'right'
+    // size of a page at scale 1, used to reserve space before it is rendered
+    book.getPageSize = async index => {
+        const page = await pdf.getPage(index + 1)
+        const { width, height } = page.getViewport({ scale: 1 })
+        return { width, height }
+    }
     book.isExternal = uri => /^\w+:/i.test(uri)
     book.resolveHref = async href => {
         const parsed = JSON.parse(href)

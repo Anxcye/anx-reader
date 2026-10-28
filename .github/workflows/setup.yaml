@@ -54,7 +54,7 @@ jobs:
       - name: Read Flutter version
         id: get_flutter_version
         run: |
-          FLUTTER_VERSION=3.35.3
+          FLUTTER_VERSION=$(cat .github/flutter-version)
           echo "flutter_version=${FLUTTER_VERSION}" >> $GITHUB_OUTPUT
 
       - name: Read Xcode version

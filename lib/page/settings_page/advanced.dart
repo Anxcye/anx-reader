@@ -2,18 +2,22 @@ import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/dao/book.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/models/md5_statistics.dart';
+import 'package:anx_reader/page/settings_page/search_engines.dart';
 import 'package:anx_reader/page/settings_page/subpage/chapter_split_rules_page.dart';
 import 'package:anx_reader/page/settings_page/subpage/log_page.dart';
 import 'package:anx_reader/page/changelog_screen.dart';
 import 'package:anx_reader/page/onboarding_screen.dart';
-import 'package:anx_reader/utils/app_version.dart';
 import 'package:anx_reader/service/md5_service.dart';
+import 'package:anx_reader/service/network/http_proxy_overrides.dart';
+import 'package:anx_reader/service/sync/sync_client_factory.dart';
+import 'package:anx_reader/utils/app_version.dart';
 import 'package:anx_reader/utils/toast/common.dart';
 import 'package:anx_reader/widgets/settings/settings_section.dart';
 import 'package:anx_reader/widgets/settings/settings_tile.dart';
 import 'package:anx_reader/widgets/settings/settings_title.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:anx_reader/main.dart';
 
 class AdvancedSetting extends StatefulWidget {
@@ -161,6 +165,58 @@ class _AdvancedSettingState extends State<AdvancedSetting> {
               onToggle: (value) {
                 Prefs().enableJsForEpub = value;
                 setState(() {});
+              },
+            ),
+          ],
+        ),
+        SettingsSection(
+          title: Text(L10n.of(context).settingsAdvancedNetwork),
+          tiles: [
+            SettingsTile.switchTile(
+              title: Text(L10n.of(context).settingsAdvancedHttpProxyEnabled),
+              leading: const Icon(Icons.wifi_tethering),
+              initialValue: Prefs().httpProxyEnabled,
+              onToggle: (value) {
+                Prefs().httpProxyEnabled = value;
+                setState(() {});
+              },
+            ),
+            SettingsTile.switchTile(
+              title: Text(L10n.of(context).settingsAdvancedTrustUserCertificates),
+              description: Text(
+                  L10n.of(context).settingsAdvancedTrustUserCertificatesDesc),
+              leading: const Icon(Icons.security),
+              initialValue: Prefs().trustUserCertificates,
+              onToggle: (value) {
+                Prefs().trustUserCertificates = value;
+                SyncClientFactory.initializeCurrentClient();
+                setState(() {});
+              },
+            ),
+            SettingsTile.navigation(
+              title: Text(L10n.of(context).settingsAdvancedHttpProxyConfig),
+              leading: const Icon(Icons.http),
+              value: Text(Prefs().httpProxyHost.isEmpty
+                  ? L10n.of(context).settingsAdvancedHttpProxyNotConfigured
+                  : Prefs().httpProxyEnabled
+                      ? '${Prefs().httpProxyHost}:${Prefs().httpProxyPort} (Test: ${Prefs().httpProxyTestUrl})'
+                      : '${Prefs().httpProxyHost}:${Prefs().httpProxyPort}'),
+              onPressed: _showHttpProxyDialog,
+            ),
+          ],
+        ),
+        SettingsSection(
+          title: Text(L10n.of(context).searchManageEngines),
+          tiles: [
+            SettingsTile.navigation(
+              leading: const Icon(Icons.search),
+              title: Text(L10n.of(context).searchManageEngines),
+              onPressed: (_) {
+                Navigator.of(context).push(
+                  CupertinoPageRoute(
+                    builder: (context) => const SearchEnginesSetting(),
+                  ),
+                );
               },
             ),
           ],
@@ -323,6 +379,175 @@ class _AdvancedSettingState extends State<AdvancedSetting> {
         AnxToast.show(L10n.of(context).md5CalculationError(e.toString()));
       }
     }
+  }
+
+  Future<void> _showHttpProxyDialog(BuildContext context) async {
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) {
+        return _HttpProxyDialog(
+          onSaved: () {
+            setState(() {});
+          },
+        );
+      },
+    );
+  }
+}
+
+class _HttpProxyDialog extends StatefulWidget {
+  final VoidCallback onSaved;
+
+  const _HttpProxyDialog({required this.onSaved});
+
+  @override
+  State<_HttpProxyDialog> createState() => _HttpProxyDialogState();
+}
+
+class _HttpProxyDialogState extends State<_HttpProxyDialog> {
+  late final TextEditingController hostController;
+  late final TextEditingController portController;
+  late final TextEditingController testUrlController;
+
+  @override
+  void initState() {
+    super.initState();
+    hostController = TextEditingController(text: Prefs().httpProxyHost);
+    portController =
+        TextEditingController(text: Prefs().httpProxyPort.toString());
+    testUrlController = TextEditingController(text: Prefs().httpProxyTestUrl);
+  }
+
+  @override
+  void dispose() {
+    hostController.dispose();
+    portController.dispose();
+    testUrlController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _testConnection() async {
+    var host = hostController.text.trim();
+    final port = int.tryParse(portController.text.trim());
+    final testUrl = testUrlController.text.trim();
+
+    if (host.isEmpty || port == null || port <= 0 || port > 65535) {
+      AnxToast.show(L10n.of(context).settingsAdvancedHttpProxyInvalidInput);
+      return;
+    }
+
+    final hostLower = host.toLowerCase();
+    if (hostLower.startsWith('https://') ||
+        hostLower.startsWith('socks5://') ||
+        hostLower.startsWith('socks4://') ||
+        hostLower.startsWith('socks://')) {
+      AnxToast.show(L10n.of(context).settingsAdvancedHttpProxyInvalidInput);
+      return;
+    }
+
+    if (hostLower.startsWith('http://')) {
+      host = host.substring(7);
+    }
+
+    if (testUrl.isEmpty) {
+      AnxToast.show(L10n.of(context).commonInputCannotBeEmpty);
+      return;
+    }
+
+    AnxToast.show(L10n.of(context).settingsAdvancedHttpProxyTesting);
+
+    final success = await AnxHttpProxyOverrides.testProxy(host, port, testUrl);
+
+    if (!mounted) return;
+
+    if (success) {
+      AnxToast.show(L10n.of(context).settingsAdvancedHttpProxyTestSuccess);
+    } else {
+      AnxToast.show(L10n.of(context).settingsAdvancedHttpProxyTestFailed);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(L10n.of(context).settingsAdvancedHttpProxyConfig),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextField(
+            controller: hostController,
+            decoration: InputDecoration(
+              border: const OutlineInputBorder(),
+              labelText: L10n.of(context).settingsAdvancedHttpProxyHost,
+              hintText: L10n.of(context).settingsAdvancedHttpProxyHostHint,
+            ),
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: portController,
+            keyboardType: TextInputType.number,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            decoration: InputDecoration(
+              border: const OutlineInputBorder(),
+              labelText: L10n.of(context).settingsAdvancedHttpProxyPort,
+              hintText: L10n.of(context).settingsAdvancedHttpProxyPortHint,
+            ),
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: testUrlController,
+            decoration: InputDecoration(
+              border: const OutlineInputBorder(),
+              labelText: L10n.of(context).settingsAdvancedHttpProxyTestUrl,
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: _testConnection,
+          child: Text(L10n.of(context).settingsAdvancedHttpProxyTest),
+        ),
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(L10n.of(context).commonCancel),
+        ),
+        TextButton(
+          onPressed: () {
+            var host = hostController.text.trim();
+            final port = int.tryParse(portController.text.trim());
+            final testUrl = testUrlController.text.trim();
+            if (host.isEmpty || port == null || port <= 0 || port > 65535) {
+              AnxToast.show(
+                  L10n.of(context).settingsAdvancedHttpProxyInvalidInput);
+              return;
+            }
+
+            final hostLower = host.toLowerCase();
+            if (hostLower.startsWith('https://') ||
+                hostLower.startsWith('socks5://') ||
+                hostLower.startsWith('socks4://') ||
+                hostLower.startsWith('socks://')) {
+              AnxToast.show(
+                  L10n.of(context).settingsAdvancedHttpProxyInvalidInput);
+              return;
+            }
+
+            if (hostLower.startsWith('http://')) {
+              host = host.substring(7);
+            }
+
+            Prefs().httpProxyHost = host;
+            Prefs().httpProxyPort = port;
+            Prefs().httpProxyTestUrl =
+                testUrl.isEmpty ? 'https://google.com' : testUrl;
+            widget.onSaved();
+            Navigator.of(context).pop();
+          },
+          child: Text(L10n.of(context).commonSave),
+        ),
+      ],
+    );
   }
 }
 

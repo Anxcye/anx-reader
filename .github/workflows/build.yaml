@@ -54,6 +54,13 @@ jobs:
       flutter_version: ${{ needs.setup.outputs.flutter_version }}
       xcode_version: ${{ needs.setup.outputs.xcode_version }}
 
+  build-linux:
+    needs: setup
+    uses: ./.github/workflows/build-linux.yaml
+    with:
+      version: ${{ needs.setup.outputs.version }}
+      flutter_version: ${{ needs.setup.outputs.flutter_version }}
+
   build-appstore:
     needs: setup
     uses: ./.github/workflows/build-appstore.yaml
@@ -69,24 +76,24 @@ jobs:
       MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
       APP_BUNDLE_ID: ${{ secrets.APP_BUNDLE_ID }}
 
-  # build-playstore:
-  #   needs: setup
-  #   uses: ./.github/workflows/build-playstore.yaml
-  #   with:
-  #     version: ${{ needs.setup.outputs.version }}
-  #     flutter_version: ${{ needs.setup.outputs.flutter_version }}
-  #     is_alpha: ${{ needs.setup.outputs.is_alpha }}
-  #     is_beta: ${{ needs.setup.outputs.is_beta }}
-  #   secrets:
-  #     PLAY_STORE_JSON_KEY: ${{ secrets.PLAY_STORE_JSON_KEY }}
-  #     KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
-  #     KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-  #     KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-  #     KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+  build-playstore:
+    needs: setup
+    uses: ./.github/workflows/build-playstore.yaml
+    with:
+      version: ${{ needs.setup.outputs.version }}
+      flutter_version: ${{ needs.setup.outputs.flutter_version }}
+      is_alpha: ${{ needs.setup.outputs.is_alpha }}
+      is_beta: ${{ needs.setup.outputs.is_beta }}
+    secrets:
+      PLAY_STORE_JSON_KEY: ${{ secrets.PLAY_STORE_JSON_KEY }}
+      KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+      KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+      KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+      KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
 
   release:
     # needs: [setup, build-android, build-ios, build-windows, build-macos, build-appstore, build-playstore]
-    needs: [setup, build-android, build-ios, build-windows, build-macos, build-appstore]
+    needs: [setup, build-android, build-ios, build-windows, build-macos, build-linux, build-appstore]
     uses: ./.github/workflows/release.yaml
     with:
       tag: ${{ needs.setup.outputs.tag }}

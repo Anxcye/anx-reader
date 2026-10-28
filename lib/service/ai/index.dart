@@ -326,6 +326,18 @@ String _mapError(Object error) {
     return '${base}Network error: ${error.toString()}';
   }
 
+  if (error is TypeError ||
+      message.contains("is not a subtype of type 'string'") ||
+      (message.contains('null') && message.contains('string'))) {
+    return '${base}Provider returned an unexpected response. '
+        'Check that the URL, protocol, and model match the API '
+        '(Claude-compatible endpoints must return Anthropic-shaped messages).';
+  }
+
+  if (error is ArgumentError) {
+    return '$base${error.message}';
+  }
+
   return '$base${error.toString()}';
 }
 

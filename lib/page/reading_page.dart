@@ -10,6 +10,7 @@ import 'package:anx_reader/enums/sync_direction.dart';
 import 'package:anx_reader/enums/sync_trigger.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/main.dart';
+import 'package:anx_reader/utils/platform_utils.dart';
 import 'package:anx_reader/models/ai_quick_prompt_chip.dart';
 import 'package:anx_reader/models/book.dart';
 import 'package:anx_reader/models/read_theme.dart';
@@ -38,7 +39,7 @@ import 'package:flutter/services.dart';
 // show debugPrint, defaultTargetPlatform, TargetPlatform;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
-import 'package:icons_plus/icons_plus.dart';
+import 'package:iconsx_plus/iconsx_plus.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
@@ -91,6 +92,7 @@ class ReadingPageState extends ConsumerState<ReadingPage>
   @override
   void initState() {
     _readerFocusNode = FocusNode(debugLabel: 'reading_page_focus');
+    HardwareKeyboard.instance.addHandler(_globalReaderKeyHandler);
 
     // Initialize AI panel sizes from persistent storage
     _aiChatWidth = Prefs().aiPanelWidth;
@@ -115,7 +117,7 @@ class ReadingPageState extends ConsumerState<ReadingPage>
     // _volumeKeyBoard = VolumeKeyBoard.instance;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        _requestReaderFocus();
+        requestReaderFocus();
         // _attachVolumeKeyListener();
       }
     });
@@ -152,19 +154,32 @@ class ReadingPageState extends ConsumerState<ReadingPage>
     // if (_volumeKeyListenerAttached) {
     //   unawaited(_volumeKeyBoard.removeListener());
     // }
+    HardwareKeyboard.instance.removeHandler(_globalReaderKeyHandler);
     _readerFocusNode.dispose();
     super.dispose();
   }
 
-  void _requestReaderFocus() {
-    if (bottomBarOffstage && !_readerFocusNode.hasFocus) {
-      _readerFocusNode.requestFocus();
-    }
+  void requestReaderFocus() {
+    if (!bottomBarOffstage) return;
+    // Always re-claim focus after overlays (selection menu / note field).
+    _readerFocusNode.requestFocus();
   }
+
+  /// Public entry for overlays (note field, search) that need the keyboard.
+  void releaseReaderFocusForChrome() => _releaseReaderFocus();
 
   void _releaseReaderFocus() {
     if (_readerFocusNode.hasFocus) {
       _readerFocusNode.unfocus();
+    }
+    // Linux CEF keeps an internal "browser focused" flag and will eat keys
+    // (TOC search, Write Idea, etc.). Blur the document and clear CEF focus.
+    if (AnxPlatform.isLinux) {
+      final c = epubPlayerKey.currentState?.webViewController;
+      c?.execute(
+        "try { document.activeElement && document.activeElement.blur(); } catch (_) {}",
+      );
+      c?.setBrowserFocus(false);
     }
   }
 
@@ -194,8 +209,32 @@ class ReadingPageState extends ConsumerState<ReadingPage>
   //   }
   // }
 
-  KeyEventResult _handleReaderKeyEvent(FocusNode node, KeyEvent event) {
-    if (!_readerFocusNode.hasFocus) {
+  bool _isEditingText() {
+    final focus = FocusManager.instance.primaryFocus;
+    final ctx = focus?.context;
+    if (ctx == null) return false;
+    return ctx.findAncestorWidgetOfExactType<EditableText>() != null;
+  }
+
+  /// CEF steals GTK focus after clicks into the reader, so Flutter [Focus]
+  /// page-turn shortcuts stop after the first key. Handle them globally while
+  /// chrome is hidden, but never when a text field is focused (search, etc.).
+  bool _globalReaderKeyHandler(KeyEvent event) {
+    // Only needed on Linux CEF; other desktops keep focus on the Flutter view.
+    if (!AnxPlatform.isLinux) return false;
+    if (!mounted || !bottomBarOffstage) return false;
+    if (_isEditingText()) return false;
+    // When Flutter still has focus, the Focus widget handles keys.
+    if (_readerFocusNode.hasFocus) return false;
+    if (event is! KeyDownEvent) return false;
+    final result =
+        _handleReaderKeyEvent(_readerFocusNode, event, requireFocus: false);
+    return result == KeyEventResult.handled;
+  }
+
+  KeyEventResult _handleReaderKeyEvent(FocusNode node, KeyEvent event,
+      {bool requireFocus = true}) {
+    if (requireFocus && !_readerFocusNode.hasFocus) {
       return KeyEventResult.ignored;
     }
 
@@ -209,6 +248,7 @@ class ReadingPageState extends ConsumerState<ReadingPage>
         logicalKey == LogicalKeyboardKey.arrowDown ||
         logicalKey == LogicalKeyboardKey.pageDown ||
         logicalKey == LogicalKeyboardKey.space) {
+      // Clear any active text selection so keys turn pages instead of panning (#966).
       epubPlayerKey.currentState?.nextPage();
       return KeyEventResult.handled;
     }
@@ -330,7 +370,7 @@ class ReadingPageState extends ConsumerState<ReadingPage>
       if (Prefs().hideStatusBar) {
         hideStatusBar();
       }
-      _requestReaderFocus();
+      requestReaderFocus();
     });
   }
 
@@ -449,6 +489,40 @@ class ReadingPageState extends ConsumerState<ReadingPage>
 
   Future<void> onLoadEnd() async {
     if (Prefs().autoSummaryPreviousContent) {
+      final delayLevel = Prefs().autoSummaryDelayLevel;
+      final now = DateTime.now();
+
+      if (delayLevel > 0) {
+        final lastTimestamp = Prefs().getLastAutoSummaryTimestamp(_book.id);
+        if (lastTimestamp != null) {
+          bool shouldTrigger;
+          switch (delayLevel) {
+            case 1: // 30 minutes
+              shouldTrigger = now.difference(lastTimestamp).inMinutes >= 30;
+              break;
+            case 2: // 3 hours
+              shouldTrigger = now.difference(lastTimestamp).inHours >= 3;
+              break;
+            case 3: // Next day (cross midnight)
+              shouldTrigger = now.year != lastTimestamp.year ||
+                  now.month != lastTimestamp.month ||
+                  now.day != lastTimestamp.day;
+              break;
+            case 4: // 3 days
+              shouldTrigger = now.difference(lastTimestamp).inDays >= 3;
+              break;
+            case 5: // 1 week
+              shouldTrigger = now.difference(lastTimestamp).inDays >= 7;
+              break;
+            default:
+              shouldTrigger = true;
+          }
+          if (!shouldTrigger) return;
+        }
+      }
+
+      Prefs().setLastAutoSummaryTimestamp(_book.id, now);
+
       final previousContent =
           await epubPlayerKey.currentState!.previousContent(2000);
       final prompt = generatePromptSummaryThePreviousContent(previousContent);

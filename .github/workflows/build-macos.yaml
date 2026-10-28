@@ -16,6 +16,7 @@ on:
 jobs:
   build-macos:
     runs-on: macos-latest
+    timeout-minutes: 45
     
     steps:
       - name: Checkout repository

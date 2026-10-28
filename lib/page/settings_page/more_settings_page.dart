@@ -14,7 +14,7 @@ import 'package:anx_reader/utils/env_var.dart';
 import 'package:anx_reader/widgets/settings/about.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:icons_plus/icons_plus.dart';
+import 'package:iconsx_plus/iconsx_plus.dart';
 
 class MoreSettings extends StatelessWidget {
   const MoreSettings({super.key});
@@ -146,6 +146,7 @@ class _SubMoreSettingsState extends State<SubMoreSettings> {
                   L10n.of(context).settingsAdvancedLog,
                   L10n.of(context).duplicateFile,
                   L10n.of(context).settingsAdvancedJavascript,
+                  L10n.of(context).settingsAdvancedNetwork,
                 ],
               },
             ];

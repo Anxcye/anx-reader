@@ -33,7 +33,7 @@ class AiToolContext {
   late final NotesRepository notesRepository = NotesRepository();
   late final BooksRepository booksRepository = BooksRepository();
   late final BookContentSearchRepository bookContentSearchRepository =
-      BookContentSearchRepository(booksRepository: booksRepository);
+      BookContentSearchRepository(booksRepository: booksRepository, ref: ref);
   late final GroupsRepository groupsRepository = GroupsRepository();
   late final ReadingHistoryRepository readingHistoryRepository =
       ReadingHistoryRepository();

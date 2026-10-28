@@ -1,0 +1,135 @@
+name: Build Linux
+# Called from build.yaml with version + flutter_version from setup.
+# workflow_dispatch: manual packaging test without a release tag (version /
+# flutter_version default from pubspec / .github/flutter-version).
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
+      flutter_version:
+        required: true
+        type: string
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Package version (empty = pubspec.yaml)"
+        required: false
+        type: string
+        default: ""
+      flutter_version:
+        description: "Flutter SDK version (empty = .github/flutter-version)"
+        required: false
+        type: string
+        default: ""
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 90
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Resolve version inputs
+        id: meta
+        shell: bash
+        run: |
+          if [ -n "${{ inputs.version }}" ]; then
+            VERSION="${{ inputs.version }}"
+          else
+            VERSION="$(grep '^version:' pubspec.yaml | awk '{print $2}' | cut -d '+' -f 1)"
+          fi
+          if [ -n "${{ inputs.flutter_version }}" ]; then
+            FLUTTER_VERSION="${{ inputs.flutter_version }}"
+          else
+            FLUTTER_VERSION="$(cat .github/flutter-version)"
+          fi
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "flutter_version=${FLUTTER_VERSION}" >> "$GITHUB_OUTPUT"
+          echo "Resolved version=${VERSION} flutter=${FLUTTER_VERSION}"
+
+      - name: Install Linux build dependencies
+        shell: bash
+        run: |
+          sudo apt-get update
+          # libunwind-dev first: libgstreamer1.0-dev otherwise fails on
+          # ubuntu-22.04 runners with a held/broken libunwind conflict.
+          sudo apt-get install -y libunwind-dev
+          sudo apt-get install -y \
+            cmake \
+            curl \
+            fuse \
+            libfuse2 \
+            libgtk-3-dev \
+            liblzma-dev \
+            libgstreamer1.0-dev \
+            libgstreamer-plugins-base1.0-dev \
+            ninja-build \
+            pkg-config \
+            wget \
+            xclip \
+            binutils
+
+      - name: Install Clang 19
+        shell: bash
+        run: |
+          # CEF 149 headers need a recent clang (cef_bind_internal.h).
+          # Jammy's default clang is too old; match the local clang 19 toolchain.
+          # (System-wide llvm.sh install is not practical to cache reliably.)
+          wget -qO- https://apt.llvm.org/llvm.sh | sudo bash -s -- 19
+          sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-19 200
+          sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-19 200
+          sudo update-alternatives --set clang /usr/bin/clang-19
+          sudo update-alternatives --set clang++ /usr/bin/clang++-19
+          clang++ --version
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ steps.meta.outputs.flutter_version }}
+
+      - name: Cache CEF prebuilt SDK
+        uses: actions/cache@v4
+        with:
+          path: third_party/webview_cef/third/cef
+          key: cef-linux64-${{ hashFiles('third_party/webview_cef/third/download.cmake') }}
+          restore-keys: |
+            cef-linux64-
+
+      - name: Cache appimagetool
+        uses: actions/cache@v4
+        with:
+          path: build/linux/dist/appimagetool-x86_64.AppImage
+          key: appimagetool-x86_64-v1
+
+      - name: Get dependencies
+        shell: bash
+        run: |
+          flutter --version
+          flutter pub get
+
+      - name: Build Linux packages (AppImage + tar.gz)
+        shell: bash
+        env:
+          VERSION: ${{ steps.meta.outputs.version }}
+          CC: clang-19
+          CXX: clang++-19
+        run: |
+          chmod +x scripts/build_linux_appimage.sh
+          scripts/build_linux_appimage.sh
+          ls -lh build/linux/Anx-Reader-linux-*.AppImage \
+                 build/linux/Anx-Reader-linux-*.tar.gz
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-artifacts
+          path: |
+            build/linux/Anx-Reader-linux-*.AppImage
+            build/linux/Anx-Reader-linux-*.tar.gz
+          if-no-files-found: error

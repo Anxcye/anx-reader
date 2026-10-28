@@ -59,9 +59,15 @@ platform :mac do
     puts "*** Starting macOS release for commit(#{commit[:abbreviated_commit_hash]}) ***"
 
     fetch_dependencies
-    
-    # Build macOS app
-    sh_on_root(command: "flutter build macos --release --dart-define=isAppStore=true")
+
+    # Get clean base version (strip pre-release suffix for Apple platforms)
+    # e.g. "1.15.0-alpha.7" -> "1.15.0"
+    version_number = get_version_from_pubspec()
+
+    # Build macOS app with clean version name
+    build_cmd = "flutter build macos --release --dart-define=isAppStore=true"
+    build_cmd += " --build-name=#{version_number}" if version_number
+    sh_on_root(command: build_cmd)
     
     # Package for Mac App Store
     build_mac_app(

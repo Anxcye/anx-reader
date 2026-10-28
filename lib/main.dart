@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:anx_reader/utils/platform_utils.dart';
 
 import 'package:anx_reader/config/shared_preference_provider.dart';
@@ -9,6 +11,7 @@ import 'package:anx_reader/models/window_info.dart';
 import 'package:anx_reader/page/home_page.dart';
 import 'package:anx_reader/page/migration_page.dart';
 import 'package:anx_reader/service/book_player/book_player_server.dart';
+import 'package:anx_reader/service/network/http_proxy_overrides.dart';
 import 'package:anx_reader/service/tts/tts_handler.dart';
 import 'package:anx_reader/utils/get_path/macos_migration.dart';
 import 'package:anx_reader/utils/color_scheme.dart';
@@ -24,6 +27,7 @@ import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:heroine/heroine.dart';
 import 'package:provider/provider.dart' as provider;
 import 'package:window_manager/window_manager.dart';
+import 'package:webview_cef/webview_cef.dart' as cef;
 
 final navigatorKey = GlobalKey<NavigatorState>();
 late AudioHandler audioHandler;
@@ -36,10 +40,15 @@ MigrationCheckResult? _migrationCheckResult;
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Prefs().initPrefs();
+  HttpOverrides.global = AnxHttpProxyOverrides();
 
   // Initialize desktop window with validated position
-  if (AnxPlatform.isWindows || AnxPlatform.isMacOS) {
+  if (AnxPlatform.isDesktop) {
     await initializeDesktopWindow();
+  }
+
+  if (AnxPlatform.isLinux) {
+    await cef.WebviewManager().initialize();
   }
 
   // Check if migration is needed before initializing paths
@@ -70,7 +79,7 @@ Future<void> main() async {
 
   SmartDialog.config.custom = SmartConfigCustom(
     maskColor: Colors.black.withAlpha(35),
-    useAnimation: true,
+    useAnimation: !Prefs().eInkMode,
     animationType: SmartAnimationType.centerFade_otherSlide,
   );
 
@@ -107,11 +116,56 @@ class _MyAppState extends ConsumerState<MyApp>
 
   @override
   Future<void> onWindowClose() async {
-    await Server().stop();
-    await webViewEnvironment?.dispose();
+    // 关闭窗口时先立即隐藏窗口：原先要等 Server/WebView2/数据库全部释放完
+    // 才真正关闭窗口，期间窗口会长时间「无响应」（实测十几秒）。
+    // 现在每一步都带超时兜底，任何一步卡住都不再拖住关闭流程。
+    await _shutdownStep('hide window',
+        () => windowManager.hide(), const Duration(seconds: 2));
+
+    await _shutdownStep(
+        'stop local server', () => Server().stop(), const Duration(seconds: 3));
+
+    final environment = webViewEnvironment;
     webViewEnvironment = null;
-    await DBHelper.close();
-    await windowManager.destroy();
+    if (environment != null) {
+      await _shutdownStep('dispose webview environment',
+          () => environment.dispose(), const Duration(seconds: 5));
+    }
+
+    if (AnxPlatform.isLinux) {
+      await _shutdownStep('quit CEF webview manager',
+          () => cef.WebviewManager().quit(), const Duration(seconds: 5));
+    }
+
+    await _shutdownStep(
+        'close database', () => DBHelper.close(), const Duration(seconds: 3));
+
+    final destroyed = await _shutdownStep('destroy window',
+        () => windowManager.destroy(), const Duration(seconds: 3));
+    if (!destroyed) {
+      // 兜底：连窗口销毁都超时的话，直接结束进程，避免应用关不掉
+      AnxLog.warning('onWindowClose: forcing exit');
+      exit(0);
+    }
+  }
+
+  /// 执行一步关闭清理：记录耗时、设置超时；返回是否在超时内完成。
+  Future<bool> _shutdownStep(
+    String name,
+    Future<void> Function() action,
+    Duration timeout,
+  ) async {
+    final stopwatch = Stopwatch()..start();
+    try {
+      await action().timeout(timeout);
+      AnxLog.info(
+          'onWindowClose: $name done in ${stopwatch.elapsedMilliseconds}ms');
+      return true;
+    } catch (e) {
+      AnxLog.warning('onWindowClose: $name failed or timed out after '
+          '${stopwatch.elapsedMilliseconds}ms: $e');
+      return false;
+    }
   }
 
   @override
@@ -135,7 +189,7 @@ class _MyAppState extends ConsumerState<MyApp>
   }
 
   Future<void> _updateWindowInfo() async {
-    if (!AnxPlatform.isWindows && !AnxPlatform.isMacOS) {
+    if (!AnxPlatform.isDesktop) {
       return;
     }
     final windowOffset = await windowManager.getPosition();

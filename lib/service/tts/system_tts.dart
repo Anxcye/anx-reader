@@ -8,6 +8,7 @@ import 'package:anx_reader/service/tts/models/tts_voice.dart';
 import 'package:anx_reader/service/tts/tts_service.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
 class SystemTts extends BaseTts {
@@ -42,6 +43,7 @@ class SystemTts extends BaseTts {
   bool get isIOS => AnxPlatform.isIOS;
   bool get isAndroid => AnxPlatform.isAndroid;
   bool get isWindows => AnxPlatform.isWindows;
+  bool get isLinux => AnxPlatform.isLinux;
   bool get isWeb => kIsWeb;
 
   @override
@@ -84,6 +86,10 @@ class SystemTts extends BaseTts {
     getNextTextFunction = getNextText;
     getPrevTextFunction = getPrevText;
 
+    if (isLinux) {
+      return;
+    }
+
     await setAwaitOptions();
 
     if (isAndroid) {
@@ -119,6 +125,9 @@ class SystemTts extends BaseTts {
   }
 
   Future<void> setAwaitOptions() async {
+    if (isLinux) {
+      return;
+    }
     await flutterTts.awaitSpeakCompletion(true);
     if (isAndroid) {
       await flutterTts.awaitSynthCompletion(true);
@@ -166,6 +175,9 @@ class SystemTts extends BaseTts {
 
   /// For testing a specific voice in settings (matching OnlineTts API)
   Future<void> speakWithVoice(String content, String voiceShortName) async {
+    if (isLinux) {
+      return;
+    }
     await stop();
     await flutterTts.setVolume(volume);
     await flutterTts.setSpeechRate(rate);
@@ -176,6 +188,9 @@ class SystemTts extends BaseTts {
 
   @override
   Future<void> speak({String? content}) async {
+    if (isLinux) {
+      return;
+    }
     await setAwaitOptions();
     if (content != null) {
       _currentVoiceText = content;
@@ -211,14 +226,22 @@ class SystemTts extends BaseTts {
   @override
   Future<dynamic> stop() async {
     updateTtsState(TtsStateEnum.stopped);
-    final result = await flutterTts.stop();
+    if (isLinux) {
+      _currentVoiceText = null;
+      return null;
+    }
+    final result = await _ignoreMissingPlugin(() => flutterTts.stop());
     _currentVoiceText = null;
     return result;
   }
 
   @override
   Future<void> pause() async {
-    final result = await flutterTts.stop();
+    if (isLinux) {
+      updateTtsState(TtsStateEnum.paused);
+      return;
+    }
+    final result = await _ignoreMissingPlugin(() => flutterTts.stop());
     if (result == 1) {
       updateTtsState(TtsStateEnum.paused);
     }
@@ -226,6 +249,9 @@ class SystemTts extends BaseTts {
 
   @override
   Future<void> resume() async {
+    if (isLinux) {
+      return;
+    }
     if (isAndroid) {
       speak(content: _prevVoiceText);
       return;
@@ -270,6 +296,9 @@ class SystemTts extends BaseTts {
 
   @override
   Future<List<TtsVoice>> getVoices() async {
+    if (isLinux) {
+      return [];
+    }
     try {
       dynamic voices = await flutterTts.getVoices;
       if (voices is List) {
@@ -291,6 +320,14 @@ class SystemTts extends BaseTts {
 
   @override
   Future<void> dispose() async {
-    await flutterTts.stop();
+    await stop();
+  }
+
+  Future<T?> _ignoreMissingPlugin<T>(Future<T> Function() call) async {
+    try {
+      return await call();
+    } on MissingPluginException {
+      return null;
+    }
   }
 }

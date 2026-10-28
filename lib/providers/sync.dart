@@ -24,6 +24,7 @@ import 'package:anx_reader/utils/toast/common.dart';
 import 'package:anx_reader/utils/get_path/get_base_path.dart';
 import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/dao/book.dart';
+import 'package:anx_reader/service/notes/notes_json.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -102,6 +103,29 @@ class Sync extends _$Sync {
     return true;
   }
 
+
+  Future<int> _nonDeletedBookCount() async {
+    final books = await bookDao.selectNotDeleteBooks();
+    return books.length;
+  }
+
+  Future<bool> _rejectEmptyLibraryUploadIfNeeded() async {
+    final count = await _nonDeletedBookCount();
+    if (!shouldRejectEmptyLibraryUpload(
+      nonDeletedBookCount: count,
+      isUploadDirection: true,
+    )) {
+      return false;
+    }
+    final context = navigatorKey.currentContext;
+    if (context != null) {
+      AnxToast.show(L10n.of(context).syncEmptyLibraryUploadRejected);
+    } else {
+      AnxLog.info('Rejected upload: local library has no non-deleted books');
+    }
+    return true;
+  }
+
   Future<SyncDirection?> determineSyncDirection(
       SyncDirection requestedDirection) async {
     final client = _syncClient;
@@ -148,6 +172,9 @@ class Sync extends _$Sync {
     }
 
     if (remoteDb == null) {
+      if (await _rejectEmptyLibraryUploadIfNeeded()) {
+        return null;
+      }
       return SyncDirection.upload;
     }
 
@@ -163,6 +190,11 @@ class Sync extends _$Sync {
       }
     }
 
+    if (requestedDirection == SyncDirection.upload) {
+      if (await _rejectEmptyLibraryUploadIfNeeded()) {
+        return null;
+      }
+    }
     return requestedDirection;
   }
 
@@ -414,6 +446,9 @@ class Sync extends _$Sync {
     try {
       switch (direction) {
         case SyncDirection.upload:
+          if (await _rejectEmptyLibraryUploadIfNeeded()) {
+            return;
+          }
           // Use VACUUM INTO to create a snapshot, avoiding database locking/closing
           final snapshotPath = await DBHelper.prepareUploadSnapshot();
           try {
@@ -459,6 +494,9 @@ class Sync extends _$Sync {
         case SyncDirection.both:
           if (remoteDb == null ||
               remoteDb.mTime!.isBefore(localDb.lastModifiedSync())) {
+            if (await _rejectEmptyLibraryUploadIfNeeded()) {
+              return;
+            }
             // Use VACUUM INTO to create a snapshot, avoiding database locking/closing
             final snapshotPath = await DBHelper.prepareUploadSnapshot();
             try {

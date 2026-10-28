@@ -6,6 +6,8 @@ import 'package:anx_reader/utils/get_path/get_temp_dir.dart';
 import 'package:anx_reader/utils/log/common.dart';
 import 'package:anx_reader/utils/platform_utils.dart';
 import 'package:dio/dio.dart';
+import 'package:dio/io.dart';
+import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:webdav_client/webdav_client.dart';
 
 class WebdavClient extends SyncClientBase {
@@ -37,6 +39,19 @@ class WebdavClient extends SyncClientBase {
         'Content-Type': 'application/octet-stream'
       })
       ..setConnectTimeout(8000);
+
+    // Apply opt-in custom CA / self-signed trust to the WebDAV Dio client.
+    // HttpOverrides covers most HttpClient usage; set adapter explicitly too.
+    if (Prefs().trustUserCertificates) {
+      _client.c.httpClientAdapter = IOHttpClientAdapter(
+        createHttpClient: () {
+          final client = io.HttpClient();
+          client.badCertificateCallback =
+              (io.X509Certificate cert, String host, int port) => true;
+          return client;
+        },
+      );
+    }
   }
 
   @override

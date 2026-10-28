@@ -11,6 +11,15 @@ class AnxLog {
   static final log = Logger('AnxReader');
   static late File? logFile;
 
+  /// 文件日志连续写入失败的次数。
+  ///
+  /// 日志写入失败**绝不能向外抛异常**：`AnxError` 的全局错误处理器会再次写日志，
+  /// 一旦写入失败就会形成「写日志失败 → 记录该异常 → 又写日志失败」的死循环，
+  /// 把事件循环占死，启动阶段永远等不到首帧（表现为进程在跑但没有任何窗口）。
+  /// 因此这里失败即降级：连续失败 [_maxFileLogWriteFailures] 次后彻底停用文件日志。
+  static int _fileLogWriteFailures = 0;
+  static const int _maxFileLogWriteFailures = 3;
+
   Level level;
   DateTime time;
   String message;
@@ -36,7 +45,15 @@ class AnxLog {
   }
 
   static init() async {
-    logFile = await getLogFile();
+    try {
+      logFile = await getLogFile();
+    } catch (e) {
+      // 例如文件被另一个实例独占、或所在目录不可写
+      logFile = null;
+      if (kDebugMode) {
+        print('AnxLog: cannot open log file, file logging disabled: $e');
+      }
+    }
 
     Logger.root.level = Level.ALL;
     Logger.root.onRecord.listen((record) {
@@ -59,18 +76,45 @@ class AnxLog {
         }
       }
       String error = record.error == null ? '' : ' : ${record.error}';
-      logFile!.writeAsStringSync(
-          '${'${record.level.name}^*^ ${record.time}^*^ [${record.message}]$error,${record.stackTrace}'.replaceAll('\n', ' ')}\n',
-          mode: FileMode.append);
+      writeToFile(
+          '${'${record.level.name}^*^ ${record.time}^*^ [${record.message}]$error,${record.stackTrace}'.replaceAll('\n', ' ')}\n');
     });
     if (Prefs().clearLogWhenStart) {
       clear();
     }
-    info('Log file: ${logFile!.path}');
+    info('Log file: ${logFile?.path ?? '(unavailable)'}');
+  }
+
+  /// 安全地把一行日志追加到日志文件；任何失败都只降级，不抛出。
+  static void writeToFile(String line) {
+    final file = logFile;
+    if (file == null || _fileLogWriteFailures >= _maxFileLogWriteFailures) {
+      return;
+    }
+    try {
+      file.writeAsStringSync(line, mode: FileMode.append);
+      _fileLogWriteFailures = 0;
+    } catch (e) {
+      _fileLogWriteFailures++;
+      if (kDebugMode) {
+        print('AnxLog: failed to write log file '
+            '($_fileLogWriteFailures/$_maxFileLogWriteFailures): $e');
+        if (_fileLogWriteFailures >= _maxFileLogWriteFailures) {
+          print('AnxLog: file logging disabled for this session');
+        }
+      }
+    }
   }
 
   static void clear() {
-    logFile!.writeAsStringSync('');
+    try {
+      logFile?.writeAsStringSync('');
+      _fileLogWriteFailures = 0;
+    } catch (e) {
+      if (kDebugMode) {
+        print('AnxLog: failed to clear log file: $e');
+      }
+    }
   }
 
   static info(String message, [Object? error, StackTrace? stackTrace]) {

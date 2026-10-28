@@ -33,8 +33,19 @@ Future<List<String>> fetchAiModels({
     return [];
   }
 
-  final ids =
-      models.map<String>((m) => (m['id'] ?? m.toString()) as String).toList();
+  final ids = models.map<String>((m) {
+    if (m is Map) {
+      final id = m['id'];
+      if (id != null && id.toString().trim().isNotEmpty) {
+        return id.toString();
+      }
+    }
+    final fallback = m.toString();
+    if (fallback.isEmpty || fallback == 'null') {
+      throw FormatException('Model entry is missing a usable id');
+    }
+    return fallback;
+  }).toList();
   ids.sort();
   return ids;
 }

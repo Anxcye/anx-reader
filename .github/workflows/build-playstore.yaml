@@ -32,20 +32,23 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     env:
-      TRACK: internal
+      TRACKS: internal
     
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Decide Play track
+      - name: Decide Play tracks
         run: |
+          # API tracks: Closed testing=alpha, Open testing=beta, Internal=internal.
+          # Alpha tags → internal (completed). Beta tags → Closed + Open (both completed).
+          # Fallback → Closed testing only (same track as before; completed via Fastfile rule).
           if [[ "${{ inputs.is_alpha }}" == "true" ]]; then
-            echo "TRACK=internal" >> $GITHUB_ENV
+            echo "TRACKS=internal" >> $GITHUB_ENV
           elif [[ "${{ inputs.is_beta }}" == "true" ]]; then
-            echo "TRACK=alpha" >> $GITHUB_ENV
+            echo "TRACKS=alpha,beta" >> $GITHUB_ENV
           else
-            echo "TRACK=alpha" >> $GITHUB_ENV
+            echo "TRACKS=alpha" >> $GITHUB_ENV
           fi
 
       - name: Set up Java
@@ -89,6 +92,6 @@ jobs:
         run: |
           cd android
           bundle install --path vendor/bundle
-          bundle exec fastlane android release_play_store track:${TRACK}
+          bundle exec fastlane android release_play_store tracks:${TRACKS}
         env:
           GOOGLE_SERVICE_ACCOUNT_JSON_PATH: google_service_account.json

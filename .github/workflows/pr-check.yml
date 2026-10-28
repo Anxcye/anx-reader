@@ -1,0 +1,66 @@
+name: PR Check
+
+on:
+  pull_request: {}
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: Pull request number to test
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-check-${{ github.event.pull_request.number || inputs.pr_number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Flutter Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Read Flutter version
+        id: flutter_version
+        run: |
+          VERSION=$(tr -d '[:space:]' < .github/flutter-version)
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "Flutter version: ${VERSION}"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ steps.flutter_version.outputs.version }}
+          cache: true
+
+      - name: Verify Flutter version
+        run: flutter --version | grep "Flutter ${{ steps.flutter_version.outputs.version }}"
+
+      - name: Checkout pull request
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.pr_number != '' }}
+        uses: actions/checkout@v4
+        with:
+          ref: refs/pull/${{ inputs.pr_number }}/merge
+
+      - name: Get dependencies
+        run: |
+          flutter --version
+          flutter pub get
+
+      - name: Generate localization
+        run: flutter gen-l10n
+
+      - name: Generate code
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: Run analyzer
+        run: flutter analyze --no-fatal-infos --no-fatal-warnings
+
+      - name: Run tests
+        run: flutter test

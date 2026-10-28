@@ -140,17 +140,147 @@ const buildRangeContextText = (range) => {
   return contextText;
 };
 
-const handleSelection = (view, doc, index) => {
+const isWordChar = (ch) => !!ch && /[A-Za-z0-9\u00C0-\u024F\u3400-\u9FFF\uF900-\uFAFF]/.test(ch);
+
+
+/** CJK Unified Ideographs + compatibility ideographs (Chinese-focused). */
+const CJK_CHAR_RE = /[\u3400-\u9FFF\uF900-\uFAFF]/;
+const CJK_ONLY_RE = /^[\u3400-\u9FFF\uF900-\uFAFF]+$/;
+
+/**
+ * Android WebView long-press often selects a single CJK character.
+ * Expand that selection to the surrounding Chinese word via Intl.Segmenter.
+ * No-op when Segmenter is unavailable, selection is not a short CJK run,
+ * or the range crosses nodes. Does not touch Latin / multi-word selections.
+ */
+const expandCjkWordRange = (range, locale = 'zh') => {
+  if (!range || typeof Intl === 'undefined' || typeof Intl.Segmenter !== 'function') {
+    return range;
+  }
+
+  const selected = range.toString();
+  const trimmed = selected.trim();
+  if (!trimmed || !CJK_ONLY_RE.test(trimmed)) return range;
+
+  // Single CJK char, or a very short CJK run that is clearly the WebView default.
+  const codePoints = [...trimmed];
+  if (codePoints.length === 0 || codePoints.length > 2) return range;
+
+  if (range.startContainer !== range.endContainer) return range;
+  if (range.startContainer.nodeType !== Node.TEXT_NODE) return range;
+
+  const node = range.startContainer;
+  const fullText = node.textContent || '';
+  if (!fullText) return range;
+
+  let segmenter;
+  try {
+    segmenter = new Intl.Segmenter(locale || 'zh', { granularity: 'word' });
+  } catch (_) {
+    try {
+      segmenter = new Intl.Segmenter('zh', { granularity: 'word' });
+    } catch (_) {
+      return range;
+    }
+  }
+
+  const selStart = range.startOffset;
+  const selEnd = range.endOffset;
+
+  for (const { segment, index, isWordLike } of segmenter.segment(fullText)) {
+    const segEnd = index + segment.length;
+    if (selStart < index || selEnd > segEnd) continue;
+    // Only expand into word-like CJK segments; skip punctuation / spaces.
+    if (!isWordLike || !CJK_CHAR_RE.test(segment)) return range;
+    if (index === selStart && segEnd === selEnd) return range;
+    try {
+      const expanded = range.cloneRange();
+      expanded.setStart(node, index);
+      expanded.setEnd(node, segEnd);
+      return expanded;
+    } catch (_) {
+      return range;
+    }
+  }
+  return range;
+};
+
+const expandAndroidCjkSelection = (doc) => {
   const selection = doc.getSelection();
   const range = getSelectionRange(selection);
+  if (!range) return;
+  const locale =
+    doc.documentElement?.lang
+    || doc.body?.lang
+    || 'zh';
+  const expanded = expandCjkWordRange(range, locale);
+  if (
+    expanded.startContainer === range.startContainer
+    && expanded.startOffset === range.startOffset
+    && expanded.endContainer === range.endContainer
+    && expanded.endOffset === range.endOffset
+  ) {
+    return;
+  }
+  try {
+    selection.removeAllRanges();
+    selection.addRange(expanded);
+  } catch (_) {}
+};
+
+
+/** CEF OSR hit-testing can place carets one glyph inside word edges. */
+const expandRangeForCefHitTest = (range) => {
+  const r = range.cloneRange();
+  try {
+    if (r.startContainer.nodeType === Node.TEXT_NODE && r.startOffset > 0) {
+      const text = r.startContainer.textContent || '';
+      const prev = text[r.startOffset - 1];
+      const curr = text[r.startOffset] ?? '';
+      if (isWordChar(prev) && isWordChar(curr)) {
+        r.setStart(r.startContainer, r.startOffset - 1);
+      }
+    }
+    if (r.endContainer.nodeType === Node.TEXT_NODE) {
+      const text = r.endContainer.textContent || '';
+      if (r.endOffset < text.length && r.endOffset > 0) {
+        const last = text[r.endOffset - 1];
+        const next = text[r.endOffset];
+        if (isWordChar(last) && isWordChar(next)) {
+          r.setEnd(r.endContainer, r.endOffset + 1);
+        }
+      }
+    }
+  } catch (_) {}
+  return r;
+};
+
+const handleSelection = (view, doc, index) => {
+  const selection = doc.getSelection();
+  let range = getSelectionRange(selection);
 
   if (!range) return;
+
+  // Linux CEF: nudge endpoints that landed one char inside a word.
+  const isLinuxDesktop = typeof navigator !== 'undefined'
+    && /Linux/i.test(navigator.platform || '')
+    && !/Android/i.test(navigator.userAgent || '');
+  if (isLinuxDesktop) {
+    range = expandRangeForCefHitTest(range);
+    try {
+      selection.removeAllRanges();
+      selection.addRange(range);
+    } catch (_) {}
+  }
 
   const position = getPosition(range);
   const cfi = view.getCFI(index, range);
   const lang = 'en-US'
 
-  let text = selection.toString();
+  let text = range.toString();
+  if (!text) {
+    text = selection.toString();
+  }
   if (!text) {
     const newSelection = range.startContainer.ownerDocument.getSelection();
     newSelection.removeAllRanges();
@@ -169,6 +299,72 @@ const handleSelection = (view, doc, index) => {
     text,
     contextText
   });
+};
+
+const AUTO_PAGE_DELAY_MS = 1000;
+const AUTO_PAGE_SCREEN_BOTTOM_THRESHOLD = 0.9;
+const AUTO_PAGE_POST_NEXT_RECHECK_INTERVAL_MS = 120;
+const AUTO_PAGE_POST_NEXT_RECHECK_MAX_ATTEMPTS = 12;
+const AUTO_PAGE_POST_NEXT_RECHECK_INITIAL_DELAY_MS = 80;
+
+const getAutoPageState = (view) => {
+  if (!view.__anxAutoPageState) {
+    view.__anxAutoPageState = {
+      sessionId: 0,
+      currentPageKey: null,
+      triggeredPages: new Set(),
+      pendingFromPageKey: null,
+      pendingTimer: null,
+      postNextRecheckTimer: null,
+      postNextRecheckAttempts: 0,
+      awaitingPageAdvanceFromKey: null,
+    };
+  }
+  return view.__anxAutoPageState;
+};
+
+const clearAutoPageTimer = (state) => {
+  if (!state.pendingTimer) return;
+  clearTimeout(state.pendingTimer);
+  state.pendingTimer = null;
+};
+
+const clearAutoPagePostNextRecheck = (state) => {
+  if (!state.postNextRecheckTimer) return;
+  clearTimeout(state.postNextRecheckTimer);
+  state.postNextRecheckTimer = null;
+};
+
+const resetAutoPageSessionState = (state) => {
+  state.currentPageKey = null;
+  state.triggeredPages.clear();
+  state.pendingFromPageKey = null;
+  state.postNextRecheckAttempts = 0;
+  state.awaitingPageAdvanceFromKey = null;
+};
+
+const startAutoPageSession = (view) => {
+  const state = getAutoPageState(view);
+  clearAutoPageTimer(state);
+  clearAutoPagePostNextRecheck(state);
+  state.sessionId += 1;
+  resetAutoPageSessionState(state);
+  return state;
+};
+
+const stopAutoPageSession = (view) => {
+  const state = getAutoPageState(view);
+  clearAutoPageTimer(state);
+  clearAutoPagePostNextRecheck(state);
+  resetAutoPageSessionState(state);
+};
+
+const getAutoPageLocationKey = (lastLocation, index) => {
+  if (!lastLocation) return `index:${index}:none`;
+  const cfi = lastLocation.cfi ?? '';
+  const current = lastLocation.location?.current ?? '';
+  const chapter = lastLocation.chapterLocation?.current ?? '';
+  return `index:${index}|cfi:${cfi}|loc:${current}|chapter:${chapter}`;
 };
 
 const setSelectionHandler = (view, doc, index) => {
@@ -190,12 +386,52 @@ const setSelectionHandler = (view, doc, index) => {
     if (!hasActiveSelection) return;
     hasActiveSelection = false;
     lastPointerUpRange = null;
-    doc.__anxSelectionClearedAt = Date.now();
-    doc.__anxSuppressClick = true;
+    // Programmatic clearSelection (menu onClose) must not suppress clicks.
+    if (window.__anxProgrammaticClear) {
+      doc.__anxSelectionClearedAt = 0;
+      doc.__anxSuppressClick = false;
+    } else {
+      // User dismiss click: suppress only for the remainder of this event turn
+      // (so the same click does not page-turn). Clear on the next macrotask —
+      // otherwise if click-view never ran (handler bailed while selection was
+      // still a Range), the *next* center click is wrongly eaten.
+      doc.__anxSelectionClearedAt = Date.now();
+      doc.__anxSuppressClick = true;
+      setTimeout(() => {
+        doc.__anxSuppressClick = false;
+        doc.__anxSelectionClearedAt = 0;
+      }, 0);
+    }
+    stopAutoPageSession(view);
     callFlutter('onSelectionCleared');
   };
 
   doc.addEventListener('selectionchange', handleSelectionStateChange);
+
+  // Page-turn keys must turn pages even while text is selected.
+  // Without this, the WebView uses arrows to pan/extend selection (#966).
+  doc.addEventListener('keydown', (e) => {
+    const nextKeys = new Set(['ArrowRight', 'ArrowDown', 'PageDown', ' ']);
+    const prevKeys = new Set(['ArrowLeft', 'ArrowUp', 'PageUp']);
+    if (!nextKeys.has(e.key) && !prevKeys.has(e.key)) return;
+    // Allow shortcuts with modifiers other than Shift (e.g. Ctrl+Arrow)
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+    const selection = doc.getSelection();
+    if (selection && selection.rangeCount > 0) {
+      selection.removeAllRanges();
+    }
+    if (typeof window.clearSelection === 'function') {
+      try { window.clearSelection(); } catch (_) {}
+    }
+    if (nextKeys.has(e.key)) {
+      nextPage();
+    } else {
+      prevPage();
+    }
+  }, true);
 
   const rangesEqual = (a, b) => (
     a.startContainer === b.startContainer
@@ -302,8 +538,21 @@ const setSelectionHandler = (view, doc, index) => {
         handleSelection(view, doc, index);
       }, 600);
     });
+  } else if (!/Android/i.test(navigator.userAgent)) {
+    // Desktop Linux (CEF/Chromium) and other non-Android desktops.
+    // navigator.platform is like "Linux x86_64", so the Win/Mac branches miss it and
+    // it used to fall into the Android path — which only listens for contextmenu /
+    // pointercancel and never fires handleSelection on mouse drag pointerup.
+    doc.addEventListener('contextmenu', e => {
+      e.preventDefault();
+    });
+    doc.addEventListener('pointerup', () => {
+      if (shouldSkipPointerUp()) return;
+      handleSelection(view, doc, index);
+    });
   } else { // Android
     let hasNativeSelectionStarted = false;
+    let longPressSettleTimer;
 
     doc.addEventListener('pointerdown', () => {
       hasNativeSelectionStarted = false;
@@ -327,12 +576,28 @@ const setSelectionHandler = (view, doc, index) => {
       // We block it to prevent the custom menu from interfering with the drag.
       if (!hasNativeSelectionStarted) {
         e.preventDefault();
+        // A long-press released without dragging gets no second contextmenu, and the
+        // touch is cancelled so there is no pointerup either. Open the menu once the
+        // selection has stayed unchanged for a moment; a drag changes it and is
+        // handled by the release event below instead.
+        const pressed = getSelectionRange(doc.getSelection())?.cloneRange();
+        clearTimeout(longPressSettleTimer);
+        longPressSettleTimer = setTimeout(() => {
+          const current = getSelectionRange(doc.getSelection());
+          if (!pressed || !current || !rangesEqual(pressed, current)) return;
+          // Expand single-CJK long-press to a word once before the menu.
+          // Do not re-expand on later selectionchange / handle drags.
+          expandAndroidCjkSelection(doc);
+          if (shouldSkipPointerUp()) return;
+          handleSelection(view, doc, index);
+        }, 600);
         return;
       }
 
       // If we have entered native selection mode (pointercancel happened),
       // this contextmenu event is likely triggered by the system or user interaction
       // after the selection phase (e.g. on release). We handle it.
+      if (shouldSkipPointerUp()) return;
       handleSelection(view, doc, index);
     });
   }
@@ -346,6 +611,7 @@ const setSelectionHandler = (view, doc, index) => {
       const container = view.shadowRoot.querySelector('foliate-paginator').shadowRoot.querySelector("#container");
       if (!container) return;
       globalThis.originalScrollLeft = container.scrollLeft;
+      startAutoPageSession(view);
     });
 
 
@@ -356,21 +622,103 @@ const setSelectionHandler = (view, doc, index) => {
 
       const selRange = getSelectionRange(doc.getSelection())
       if (!selRange) return
-
-      if (globalThis.pageDebounceTimer) {
-        clearTimeout(globalThis.pageDebounceTimer);
-        globalThis.pageDebounceTimer = null;
-      }
+      if (!lastLocation.range) return;
 
       const container = view.shadowRoot.querySelector('foliate-paginator').shadowRoot.querySelector("#container");
+      if (!container) return;
 
-      if (selRange.compareBoundaryPoints(Range.END_TO_END, lastLocation.range) >= 0) {
-        globalThis.pageDebounceTimer = setTimeout(async () => {
-          await view.next();
-          globalThis.originalScrollLeft = container.scrollLeft;
-          globalThis.pageDebounceTimer = null;
-        }, 1000);
-        return
+      const state = getAutoPageState(view);
+      if (state.sessionId === 0) {
+        startAutoPageSession(view);
+      }
+
+      const pageKey = getAutoPageLocationKey(lastLocation, index);
+      if (state.currentPageKey !== pageKey) {
+        if (
+          state.awaitingPageAdvanceFromKey
+          && state.awaitingPageAdvanceFromKey !== pageKey
+        ) {
+          state.awaitingPageAdvanceFromKey = null;
+          state.postNextRecheckAttempts = 0;
+          clearAutoPagePostNextRecheck(state);
+        }
+        state.currentPageKey = pageKey;
+      }
+
+      if (state.pendingFromPageKey && state.pendingFromPageKey !== pageKey) {
+        clearAutoPageTimer(state);
+        state.pendingFromPageKey = null;
+      }
+
+      let compareToPageEnd;
+      try {
+        compareToPageEnd = selRange.compareBoundaryPoints(Range.END_TO_END, lastLocation.range);
+      } catch {
+        return;
+      }
+      const rangeReachedPageEnd = compareToPageEnd >= 0;
+      const selectionPos = getPosition(selRange);
+      const nearScreenBottom = selectionPos.bottom >= AUTO_PAGE_SCREEN_BOTTOM_THRESHOLD;
+      const reachedCurrentPageBottom = rangeReachedPageEnd && nearScreenBottom;
+
+      if (!reachedCurrentPageBottom && state.pendingFromPageKey === pageKey) {
+        clearAutoPageTimer(state);
+        state.pendingFromPageKey = null;
+      }
+
+      if (reachedCurrentPageBottom) {
+        if (state.pendingFromPageKey === pageKey) {
+          if (state.pendingTimer) return;
+          state.pendingFromPageKey = null;
+        }
+        if (state.triggeredPages.has(pageKey)) return;
+
+        state.pendingFromPageKey = pageKey;
+        clearAutoPagePostNextRecheck(state);
+        state.awaitingPageAdvanceFromKey = null;
+        state.postNextRecheckAttempts = 0;
+        clearAutoPageTimer(state);
+        const scheduledSessionId = state.sessionId;
+        state.pendingTimer = setTimeout(async () => {
+          state.pendingTimer = null;
+          if (scheduledSessionId !== state.sessionId) return;
+          state.triggeredPages.add(pageKey);
+          try {
+            await view.next();
+            const latestContainer = view.shadowRoot.querySelector('foliate-paginator').shadowRoot.querySelector("#container");
+            if (latestContainer) {
+              globalThis.originalScrollLeft = latestContainer.scrollLeft;
+            }
+          } finally {
+            if (state.pendingFromPageKey === pageKey) {
+              state.pendingFromPageKey = null;
+            }
+            state.awaitingPageAdvanceFromKey = pageKey;
+            state.postNextRecheckAttempts = 0;
+            clearAutoPagePostNextRecheck(state);
+            const runPostNextSelectionRecheck = () => {
+              state.postNextRecheckTimer = null;
+              if (scheduledSessionId !== state.sessionId) return;
+              if (state.awaitingPageAdvanceFromKey !== pageKey) return;
+              state.postNextRecheckAttempts += 1;
+              try {
+                doc.dispatchEvent(new Event('selectionchange'));
+              } catch {
+                return;
+              }
+              if (state.postNextRecheckAttempts >= AUTO_PAGE_POST_NEXT_RECHECK_MAX_ATTEMPTS) return;
+              state.postNextRecheckTimer = setTimeout(
+                runPostNextSelectionRecheck,
+                AUTO_PAGE_POST_NEXT_RECHECK_INTERVAL_MS,
+              );
+            };
+            state.postNextRecheckTimer = setTimeout(
+              runPostNextSelectionRecheck,
+              AUTO_PAGE_POST_NEXT_RECHECK_INITIAL_DELAY_MS,
+            );
+          }
+        }, AUTO_PAGE_DELAY_MS);
+        return;
       }
 
       const preventScroll = () => {
@@ -549,6 +897,9 @@ const getCSS = ({ fontSize,
     }
 
     body {
+        /* Force user writing-mode over EPUB body rules (e.g. vertical-rl in template_rv.css).
+           html alone is not enough: body has its own writing-mode from the book stylesheet. */
+        ${writingModeCSS}
         background: none !important;
         background-color: transparent;
         padding: 0;
@@ -1180,12 +1531,14 @@ class Reader {
 
     if (this.#doc?.__anxSuppressClick) {
       this.#doc.__anxSuppressClick = false;
+      this.#doc.__anxSelectionClearedAt = 0;
       return
     }
 
-    // debounce for 200ms after selection cleared
+    // Same-turn debounce after selection cleared (setTimeout(0) clears this).
     const lastClearedAt = this.#doc?.__anxSelectionClearedAt ?? 0
-    if (lastClearedAt && Date.now() - lastClearedAt < 200) {
+    if (lastClearedAt && Date.now() - lastClearedAt < 50) {
+      this.#doc.__anxSelectionClearedAt = 0;
       return
     }
 
@@ -1575,6 +1928,8 @@ const setStyle = (oldStyle) => {
 
 const refreshLayout = () => {
   const cfi = reader.view.lastLocation?.cfi
+  // only the reflowable paginator has `nextSection`
+  if (!reader.view.renderer.nextSection) return
   window.nextSection().then(() => {
     if (cfi) {
       setTimeout(() => {
@@ -1697,7 +2052,22 @@ window.showContextMenu = () => {
 
 window.getSelection = () => reader.getSelection()
 
-window.clearSelection = () => reader.view.deselect()
+window.clearSelection = () => {
+  window.__anxProgrammaticClear = true
+  try { reader.view.deselect() } finally { window.__anxProgrammaticClear = false }
+}
+window.__anxResetClickSuppress = () => {
+  try {
+    const docs = [document]
+    document.querySelectorAll('iframe').forEach((f) => {
+      try { if (f.contentDocument) docs.push(f.contentDocument) } catch (_) {}
+    })
+    for (const d of docs) {
+      d.__anxSuppressClick = false
+      d.__anxSelectionClearedAt = 0
+    }
+  } catch (_) {}
+}
 
 window.addAnnotation = (annotation) => reader.addAnnotation(annotation)
 
@@ -1705,9 +2075,10 @@ window.addBookmarkHere = () => reader.handleBookmark(false)
 
 window.removeAnnotation = (cfi) => reader.removeAnnotation(cfi)
 
-window.prevSection = () => reader.view.renderer.prevSection()
+// fixed layout renderers have no chapters, so these are no-ops for them
+window.prevSection = () => reader.view.renderer.prevSection?.()
 
-window.nextSection = () => reader.view.renderer.nextSection()
+window.nextSection = () => reader.view.renderer.nextSection?.()
 
 window.initTts = () => reader.view.initTTS()
 

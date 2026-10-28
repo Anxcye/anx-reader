@@ -27,10 +27,8 @@ import 'package:anx_reader/utils/import_book.dart';
 import 'package:anx_reader/utils/log/common.dart';
 import 'package:anx_reader/utils/toast/common.dart';
 import 'package:anx_reader/utils/webView/gererate_url.dart';
-import 'package:anx_reader/utils/webView/webview_console_message.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as path;
 
@@ -513,9 +511,9 @@ Future<void> saveBook(
 
   final newBookName =
       '${effectiveTitle.length > 20 ? effectiveTitle.substring(0, 20) : effectiveTitle}-${DateTime.now().millisecondsSinceEpoch}'
-          .replaceAll(RegExp(r'[<>:"/\\|?*]'), '_')
-          .replaceAll('\n', '')
-          .replaceAll('\r', '')
+          // Strip characters that some WebDAV servers (e.g. Jianguoyun) reject (#989)
+          .replaceAll(RegExp(r'[<>:"/\\|?*#%&@$^+=\[\]{}`~;!]'), '_')
+          .replaceAll(RegExp(r'[\x00-\x1F\x7F]'), '')
           .trim();
 
   final extension = file.path.split('.').last;
@@ -568,14 +566,15 @@ Future<void> getBookMetadata(
   String bookUrl = "http://127.0.0.1:${Server().port}/$serverFileName";
   AnxLog.info("import start: book url: $bookUrl");
 
+  final importUrl = generateUrl(
+    bookUrl,
+    cfi,
+    importing: true,
+  );
+
   AnxHeadlessWebView webview = AnxHeadlessWebView(
     webViewEnvironment: webViewEnvironment,
-    initialUrlRequest: URLRequest(
-        url: WebUri(generateUrl(
-      bookUrl,
-      cfi,
-      importing: true,
-    ))),
+    initialUrl: importUrl,
     onLoadStop: (controller, url) async {
       controller.addJavaScriptHandler(
           handlerName: 'onMetadata',
@@ -604,16 +603,15 @@ Future<void> getBookMetadata(
               provideBook: book,
             );
             ref?.read(bookListProvider.notifier).refresh();
-            // return;
           });
     },
-    onConsoleMessage: (controller, consoleMessage) {
-      if (consoleMessage.messageLevel == ConsoleMessageLevel.ERROR) {
+    onConsoleMessage: (controller, message, {required isError}) {
+      if (isError) {
         headlessInAppWebView?.dispose();
         headlessInAppWebView = null;
-        throw Exception('Webview: ${consoleMessage.message}');
+        throw Exception('Webview: $message');
       }
-      webviewConsoleMessage(controller, consoleMessage);
+      AnxLog.info('Webview: $message');
     },
   );
 
