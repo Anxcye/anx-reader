@@ -1,6 +1,7 @@
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/page/iap_page.dart';
 import 'package:anx_reader/page/settings_page/more_settings_page.dart';
+import 'package:anx_reader/page/weread/weread_page.dart';
 import 'package:anx_reader/providers/iap.dart';
 import 'package:anx_reader/service/iap/iap_service.dart';
 import 'package:anx_reader/utils/env_var.dart';
@@ -60,6 +61,19 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 child: webdavSwitch(context, setState, ref),
+              ),
+              const Divider(),
+              ListTile(
+                leading: const Icon(Icons.menu_book_outlined),
+                title: const Text('微信读书'),
+                subtitle: const Text('网页版增强阅读（可点边缘翻页 / 沉浸模式）'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const WeReadPage()),
+                  );
+                },
               ),
               const Divider(),
               const MoreSettings(),
