@@ -7,10 +7,12 @@ import 'package:anx_reader/providers/current_reading.dart';
 import 'package:anx_reader/service/ai/ai_history.dart';
 import 'package:anx_reader/service/ai/ai_context_assembler.dart';
 import 'package:anx_reader/service/ai/ai_request.dart';
+import 'package:anx_reader/service/ai/ai_request_gateway.dart';
 import 'package:anx_reader/service/ai/index.dart';
 import 'package:anx_reader/service/ai/reading_agent_orchestrator.dart';
 import 'package:anx_reader/service/ai/reading_ai_models.dart';
 import 'package:anx_reader/service/ai/reading_skills.dart';
+import 'package:anx_reader/service/ai/reading_closure_policy.dart';
 import 'package:anx_reader/utils/ai_reasoning_parser.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -21,12 +23,14 @@ part 'ai_chat.g.dart';
 @Riverpod(keepAlive: true)
 class AiChat extends _$AiChat {
   String? _currentSessionId;
+  int? _conversationBookId;
   ReadingAiMode? _readingModeOverride;
   ReadingAnalysisRequest? _analysisRequestOverride;
 
   @override
   FutureOr<List<ChatMessage>> build() async {
     _currentSessionId = null;
+    _conversationBookId = null;
     _readingModeOverride = null;
     _analysisRequestOverride = null;
     return List<ChatMessage>.empty();
@@ -51,6 +55,9 @@ class AiChat extends _$AiChat {
     WidgetRef widgetRef,
     bool isRegenerate,
   ) async* {
+    final reading = widgetRef.read(currentReadingProvider);
+    final book = reading.book;
+    ensureBookScope(book?.id);
     final sessionId = _ensureSessionId();
     final selectedProvider = widgetRef
         .read(aiProvidersProvider.notifier)
@@ -71,8 +78,6 @@ class AiChat extends _$AiChat {
       }
     }
     final now = DateTime.now().millisecondsSinceEpoch;
-    final reading = widgetRef.read(currentReadingProvider);
-    final book = reading.book;
     final readingMode = _readingModeOverride ??
         (book == null
             ? ReadingAiMode.general
@@ -167,7 +172,11 @@ class AiChat extends _$AiChat {
     try {
       final turn = reading.isReading
           ? await const ReadingAgentOrchestrator().prepare(
-              messages: messages,
+              messages: [
+                if (analysisRequest == null)
+                  ChatMessage.system(ReadingQuickPromptSpec.concisePrompt('')),
+                ...messages,
+              ],
               mode: readingMode,
               ref: widgetRef,
               analysisRequest: analysisRequest,
@@ -185,14 +194,22 @@ class AiChat extends _$AiChat {
           : ReadingAgentTurn(messages: messages);
       agentTraces = turn.traces;
       citations = turn.citations;
-      await for (final chunk in aiGenerateStream(
-        turn.messages,
+      await for (final chunk in aiRequestGateway.executeStream(AiRequest(
+        messages: turn.messages,
+        trace: AiTraceContext(
+          workloadId: analysisRequest == null
+              ? 'reading.chat'
+              : 'reading.chapter_review',
+          sessionId: sessionId,
+          bookId: book?.id,
+        ),
+        failureDelivery: AiFailureDelivery.streamError,
         regenerate: isRegenerate,
         useAgent: true,
         ref: widgetRef,
         readingMode: readingMode,
         readingSkill: readingSkill,
-        task: analysisRequest == null
+        contextTask: analysisRequest == null
             ? AiContextTask.readingChat
             : AiContextTask.chapterReview,
         sourceScope: book == null
@@ -202,7 +219,7 @@ class AiChat extends _$AiChat {
                 chapterHref: reading.chapterHref,
                 safeBoundary: reading.percentage,
               ),
-      )) {
+      ))) {
         assistantResponse = chunk;
 
         final updatedMessagesWithResponse =
@@ -266,7 +283,16 @@ class AiChat extends _$AiChat {
     _analysisRequestOverride = null;
   }
 
+  /// Called when entering an assistant destination, never from ordinary reading
+  /// events. A conversation must not become context for a different book.
+  void ensureBookScope(int? bookId) {
+    if (_conversationBookId == bookId) return;
+    clear();
+    _conversationBookId = bookId;
+  }
+
   void loadHistoryEntry(AiChatHistoryEntry entry) {
+    _conversationBookId = entry.bookId;
     _currentSessionId = entry.id;
     _readingModeOverride = ReadingAiMode.fromJson(entry.readingMode);
     _analysisRequestOverride = null;

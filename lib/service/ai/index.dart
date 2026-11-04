@@ -205,6 +205,10 @@ Stream<String> executeAiRequestStream(
   String? finalValue;
 
   await for (final chunk in primary.stream) {
+    if (primary.isError &&
+        request.failureDelivery == AiFailureDelivery.streamError) {
+      continue;
+    }
     finalValue = chunk;
     yield chunk;
   }
@@ -219,6 +223,10 @@ Stream<String> executeAiRequestStream(
       usedFallback: false,
       finalValue: finalValue,
     );
+    if (primary.isError &&
+        request.failureDelivery == AiFailureDelivery.streamError) {
+      throw const AiGenerationFailure();
+    }
     return;
   }
 
@@ -235,6 +243,9 @@ Stream<String> executeAiRequestStream(
       usedFallback: false,
       finalValue: finalValue,
     );
+    if (request.failureDelivery == AiFailureDelivery.streamError) {
+      throw const AiGenerationFailure();
+    }
     return;
   }
 
@@ -257,6 +268,10 @@ Stream<String> executeAiRequestStream(
   executions.add(fallback);
 
   await for (final chunk in fallback.stream) {
+    if (fallback.isError &&
+        request.failureDelivery == AiFailureDelivery.streamError) {
+      continue;
+    }
     finalValue = chunk;
     yield chunk;
   }
@@ -269,6 +284,10 @@ Stream<String> executeAiRequestStream(
     usedFallback: usedFallback,
     finalValue: finalValue,
   );
+  if (fallback.isError &&
+      request.failureDelivery == AiFailureDelivery.streamError) {
+    throw const AiGenerationFailure();
+  }
 }
 
 Future<List<ChatMessage>> _addBookContext(AiRequest request) async {

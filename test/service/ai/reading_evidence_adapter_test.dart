@@ -86,6 +86,23 @@ void main() {
     expect(values.every((item) => item.isTraceable), isTrue);
   });
 
+  test('stored note boundaries cannot be relaxed by a lower caller boundary',
+      () {
+    const source = ReadingNoteSource(
+        noteId: 'note',
+        type: ReadingNoteSourceType.aiSession,
+        sourceRef: 'session',
+        cfi: 'epubcfi(/6/2)',
+        textSnapshot: 'Original evidence',
+        metadata: {'sourceProgress': .5, 'visibleFromProgress': .7},
+        createdAt: 1);
+    final evidence = ReadingEvidenceAdapter.fromNoteSource(source,
+        bookId: 1, visibleFromProgress: .2);
+    expect(evidence?.sourceProgress, .5);
+    expect(evidence?.visibleFromProgress, .7);
+    expect(evidence?.isVisibleAtProgress(.6), isFalse);
+  });
+
   test('formal note source becomes book-scoped traceable evidence', () {
     const source = ReadingNoteSource(
       noteId: 'note',
@@ -107,5 +124,19 @@ void main() {
     expect(value?.exactText, '笔记原文');
     expect(value?.isTraceable, isTrue);
     expect(value?.isVisibleAtProgress(.39), isFalse);
+  });
+
+  test('unknown synchronized boundary metadata is conservatively rejected', () {
+    for (final invalid in ['0.4', double.nan, double.infinity, -1, 2]) {
+      final source = ReadingNoteSource(
+          noteId: 'note',
+          type: ReadingNoteSourceType.aiSession,
+          sourceRef: 'session',
+          cfi: 'epubcfi(/6/2)',
+          textSnapshot: 'Quote',
+          metadata: {'visibleFromProgress': invalid},
+          createdAt: 1);
+      expect(ReadingEvidenceAdapter.fromNoteSource(source, bookId: 1), isNull);
+    }
   });
 }

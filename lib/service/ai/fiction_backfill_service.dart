@@ -1,12 +1,18 @@
+import 'package:anx_reader/models/ai_provider.dart';
 import 'dart:convert';
 
 import 'package:anx_reader/models/reading_agent.dart';
 import 'package:anx_reader/service/ai/fiction_hybrid_extraction_service.dart';
 import 'package:anx_reader/service/ai/ai_context_assembler.dart';
+import 'package:anx_reader/service/ai/ai_request.dart';
+import 'package:anx_reader/service/ai/ai_request_gateway.dart';
+import 'package:anx_reader/service/ai/reading_ai_models.dart';
 import 'package:anx_reader/service/ai/reading_chunker.dart';
 import 'package:anx_reader/service/ai/reading_evidence_resolver.dart';
 import 'package:anx_reader/service/ai/reading_structure_parser.dart';
 import 'package:crypto/crypto.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:langchain_core/chat_models.dart';
 
 class FictionBackfillChapter {
   const FictionBackfillChapter({
@@ -42,19 +48,18 @@ class FictionBackfillChapter {
 
 typedef FictionChapterLoader = Future<String> Function(String href);
 typedef FictionBackfillGenerator = Future<String> Function(String prompt);
-typedef FictionBackfillCandidateValidator =
-    Future<Map<String, dynamic>?> Function({
-      required String kind,
-      required Map<String, dynamic> payload,
-      required String chapterContent,
-    });
-typedef FictionBackfillBatchWriter =
-    Future<void> Function({
-      required List<ReadingArtifact> artifacts,
-      required List<ReadingArtifact> checkpoints,
-      required int completedChapters,
-      required int totalChapters,
-    });
+typedef FictionBackfillCandidateValidator = Future<Map<String, dynamic>?>
+    Function({
+  required String kind,
+  required Map<String, dynamic> payload,
+  required String chapterContent,
+});
+typedef FictionBackfillBatchWriter = Future<void> Function({
+  required List<ReadingArtifact> artifacts,
+  required List<ReadingArtifact> checkpoints,
+  required int completedChapters,
+  required int totalChapters,
+});
 
 typedef _PreparedChapter = ({
   FictionBackfillChapter chapter,
@@ -93,9 +98,19 @@ class FictionBackfillTokenEstimate {
 /// beyond [safeBoundary], and it does no work until the caller invokes it after
 /// user confirmation.
 class FictionBackfillService {
-  const FictionBackfillService();
+  const FictionBackfillService({
+    AiRequestGateway gateway = aiRequestGateway,
+    AiContextAssembler? assembler,
+  })  : _gateway = gateway,
+        _assembler = assembler;
+
+  final AiRequestGateway _gateway;
+  final AiContextAssembler? _assembler;
 
   static const extractorVersion = 8;
+  AiProvider? previewProvider([WidgetRef? ref]) =>
+      _gateway.generalProvider(ref);
+
   static const _chunker = ReadingChunker();
   static const _evidenceResolver = ReadingEvidenceResolver();
 
@@ -127,8 +142,7 @@ class FictionBackfillService {
     for (final chapter in chapters.where(
       (item) => item.semanticKind == ReadingChapterSemanticKind.narrative,
     )) {
-      final content =
-          contentByHref[chapter.href]?.trim() ??
+      final content = contentByHref[chapter.href]?.trim() ??
           contentByHref[chapter.href.split('#').first]?.trim() ??
           '';
       if (content.isEmpty) continue;
@@ -163,8 +177,7 @@ class FictionBackfillService {
     const runnerEnvelopeTokens = 600;
     var baseline = 0;
     for (final batch in batches) {
-      baseline +=
-          aiContextAssembler.estimateTokens(
+      baseline += aiContextAssembler.estimateTokens(
             _batchPrompt(batch, knownCharacterNames),
           ) +
           runnerEnvelopeTokens;
@@ -194,8 +207,11 @@ class FictionBackfillService {
     required double safeBoundary,
     required List<FictionBackfillChapter> chapters,
     required FictionChapterLoader loadChapter,
-    required FictionBackfillGenerator generate,
+    FictionBackfillGenerator? generate,
     required String sessionId,
+    String? taskId,
+    String? providerId,
+    WidgetRef? ref,
     required int ingestedAt,
     double fromProgress = 0,
     int batchSize = 1,
@@ -217,19 +233,17 @@ class FictionBackfillService {
           artifact.chapterHref!.split('#').first:
               artifact.payload['contentHash']?.toString() ?? '',
     };
-    final eligible =
-        chapters
-            .where(
-              (chapter) =>
-                  chapter.semanticKind ==
-                      ReadingChapterSemanticKind.narrative &&
-                  chapter.startProgress >= lowerBound - .000001 &&
-                  chapter.startProgress <= safeBoundary + .000001 &&
-                  (chapter.endProgress ?? chapter.startProgress) <=
-                      safeBoundary + .000001,
-            )
-            .toList()
-          ..sort((a, b) => a.startProgress.compareTo(b.startProgress));
+    final eligible = chapters
+        .where(
+          (chapter) =>
+              chapter.semanticKind == ReadingChapterSemanticKind.narrative &&
+              chapter.startProgress >= lowerBound - .000001 &&
+              chapter.startProgress <= safeBoundary + .000001 &&
+              (chapter.endProgress ?? chapter.startProgress) <=
+                  safeBoundary + .000001,
+        )
+        .toList()
+      ..sort((a, b) => a.startProgress.compareTo(b.startProgress));
     final result = <ReadingArtifact>[];
     final existingIds = existingArtifacts.map((item) => item.id).toSet();
     final knownCharacterNames = existingArtifacts
@@ -277,14 +291,26 @@ class FictionBackfillService {
             safeBoundary: safeBoundary,
             sessionId: sessionId,
             ingestedAt: ingestedAt,
-            generate: generate,
+            generate: generate ??
+                (prompt) => _generateText(
+                      prompt,
+                      bookId: bookId,
+                      sessionId: sessionId,
+                      taskId: taskId,
+                      providerId: providerId,
+                      safeBoundary: safeBoundary,
+                      chapterRefs: batch
+                          .map((item) => item.chapter.href)
+                          .toSet()
+                          .toList(growable: false),
+                      ref: ref,
+                    ),
             existingIds: existingIds,
             knownCharacterNames: knownCharacterNames,
             validateCandidate: validateCandidate,
             artifactMetadata: artifactMetadata,
-            maxSegmentCharacters: validateCandidate == null
-                ? null
-                : maxInputCharacters,
+            maxSegmentCharacters:
+                validateCandidate == null ? null : maxInputCharacters,
           ),
       ]);
       Object? firstError;
@@ -320,6 +346,48 @@ class FictionBackfillService {
       if (firstError != null) throw firstError;
     }
     return result;
+  }
+
+  Future<String> _generateText(
+    String prompt, {
+    required int bookId,
+    required String sessionId,
+    required String? taskId,
+    String? providerId,
+    required double safeBoundary,
+    required List<String> chapterRefs,
+    WidgetRef? ref,
+  }) {
+    const workload = 'fiction.story_atlas';
+    final descriptor = AiWorkloadDescriptorRegistry.find(workload)!;
+    final messages = (_assembler ?? aiContextAssembler).assemble(
+        [ChatMessage.humanText(prompt)],
+        task: descriptor.contextTask,
+        cacheScope: 'fiction:$bookId:${taskId ?? sessionId}').messages;
+    return _gateway.executeText(AiRequest(
+      messages: messages,
+      workloadId: workload,
+      trace: AiTraceContext(
+          workloadId: workload,
+          taskId: taskId,
+          sessionId: sessionId,
+          bookId: bookId),
+      contextTask: descriptor.contextTask,
+      providerId: providerId,
+      providerRole: descriptor.providerRole,
+      outputContract: descriptor.outputContract,
+      // This is the explicitly confirmed full-text path; retries may split
+      // the input but may never choose another provider automatically.
+      fallbackPolicy: AiFallbackPolicy.none,
+      failureDelivery: AiFailureDelivery.streamError,
+      sourceScope: AiSourceScope(
+          bookId: bookId,
+          chapterHref: chapterRefs.length == 1 ? chapterRefs.single : null,
+          chapterRefs: chapterRefs,
+          safeBoundary: safeBoundary),
+      readingMode: ReadingAiMode.general,
+      ref: ref,
+    ));
   }
 
   Future<_BackfillBatchAttempt> _attemptBatch({
@@ -527,9 +595,8 @@ class FictionBackfillService {
   }) async {
     final response = await generate(_batchPrompt(batch, knownCharacterNames));
     final grouped = _decodeBatch(response, batch);
-    final expected = batch
-        .map((item) => item.chapter.href.split('#').first)
-        .toSet();
+    final expected =
+        batch.map((item) => item.chapter.href.split('#').first).toSet();
     if (!grouped.keys.toSet().containsAll(expected)) {
       throw const FormatException('模型未返回完整的章节批次');
     }
@@ -641,8 +708,8 @@ class FictionBackfillService {
         );
         if (existingIds.contains(id)) continue;
         existingIds.add(id);
-        final confidenceSource = normalizedPayload['confidenceSource']
-            ?.toString();
+        final confidenceSource =
+            normalizedPayload['confidenceSource']?.toString();
         final sourceSnapshot =
             normalizedPayload['evidence']?.toString().trim() ?? '';
         artifacts.add(
@@ -652,16 +719,15 @@ class FictionBackfillService {
             moduleId: moduleId,
             kind: kind,
             payload: normalizedPayload,
-            epistemicStatus:
-                confidenceSource == 'evidenceValidated' ||
+            epistemicStatus: confidenceSource == 'evidenceValidated' ||
                     confidenceSource == 'explicitText'
                 ? ReadingArtifactEpistemicStatus.textFact
                 : ReadingArtifactEpistemicStatus.agentInference,
             sourceTextSnapshot: sourceSnapshot.isNotEmpty
                 ? sourceSnapshot
                 : chapter.content.length > 500
-                ? chapter.content.substring(0, 500)
-                : chapter.content,
+                    ? chapter.content.substring(0, 500)
+                    : chapter.content,
             chapterHref: chapter.chapter.href,
             chapterTitle: chapter.chapter.title,
             sourceProgress: sourceProgress.toDouble(),
@@ -681,12 +747,12 @@ class FictionBackfillService {
       // graph share the same durable identity. We never promote generic roles,
       // opaque IDs, or names absent from this chapter's exact text.
       for (final name in referencedPeople) {
-        final sourceBacked = const FictionCandidateRuleValidator()
-            .sourceBackedCharacter(
-              reference: name,
-              chapterContent: chapter.content,
-              preferredEvidence: referenceEvidence[name],
-            );
+        final sourceBacked =
+            const FictionCandidateRuleValidator().sourceBackedCharacter(
+          reference: name,
+          chapterContent: chapter.content,
+          preferredEvidence: referenceEvidence[name],
+        );
         if (sourceBacked == null) continue;
         final canonicalName = sourceBacked['name']!.toString();
         final normalizedName = _normalizeCharacterName(canonicalName);
@@ -775,8 +841,7 @@ class FictionBackfillService {
     var current = <_PreparedChapter>[];
     var characters = 0;
     for (final chapter in chapters) {
-      final wouldOverflow =
-          current.isNotEmpty &&
+      final wouldOverflow = current.isNotEmpty &&
           (current.length >= batchSize ||
               characters + chapter.content.length > maxInputCharacters);
       if (wouldOverflow) {
@@ -902,26 +967,27 @@ ${batch.map((item) => '章节 href：${item.chapter.href}\n章节：${item.chapt
       sha256.convert(utf8.encode(content)).toString();
 
   String? _kind(String? value) => switch (value) {
-    'character' => ReadingArtifactKinds.character,
-    'relationship' => ReadingArtifactKinds.relationship,
-    'event' => ReadingArtifactKinds.event,
-    'mystery' => ReadingArtifactKinds.mystery,
-    'clue' => ReadingArtifactKinds.clue,
-    'scene' => ReadingArtifactKinds.scene,
-    _ => null,
-  };
+        'character' => ReadingArtifactKinds.character,
+        'relationship' => ReadingArtifactKinds.relationship,
+        'event' => ReadingArtifactKinds.event,
+        'mystery' => ReadingArtifactKinds.mystery,
+        'clue' => ReadingArtifactKinds.clue,
+        'scene' => ReadingArtifactKinds.scene,
+        _ => null,
+      };
 
   bool _isValid(String kind, Map<String, dynamic> payload) => switch (kind) {
-    ReadingArtifactKinds.character => _has(payload, 'name'),
-    ReadingArtifactKinds.relationship =>
-      _has(payload, 'from') && _has(payload, 'to') && _has(payload, 'relation'),
-    ReadingArtifactKinds.event => _has(payload, 'title'),
-    ReadingArtifactKinds.mystery => _has(payload, 'question'),
-    ReadingArtifactKinds.scene => _has(payload, 'summary'),
-    ReadingArtifactKinds.clue =>
-      _has(payload, 'summary') || _has(payload, 'title'),
-    _ => false,
-  };
+        ReadingArtifactKinds.character => _has(payload, 'name'),
+        ReadingArtifactKinds.relationship => _has(payload, 'from') &&
+            _has(payload, 'to') &&
+            _has(payload, 'relation'),
+        ReadingArtifactKinds.event => _has(payload, 'title'),
+        ReadingArtifactKinds.mystery => _has(payload, 'question'),
+        ReadingArtifactKinds.scene => _has(payload, 'summary'),
+        ReadingArtifactKinds.clue =>
+          _has(payload, 'summary') || _has(payload, 'title'),
+        _ => false,
+      };
 
   bool _has(Map<String, dynamic> payload, String key) =>
       payload[key]?.toString().trim().isNotEmpty == true;

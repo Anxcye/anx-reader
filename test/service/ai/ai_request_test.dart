@@ -1,9 +1,40 @@
+import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/service/ai/ai_context_assembler.dart';
 import 'package:anx_reader/service/ai/ai_request.dart';
+import 'package:anx_reader/service/ai/ai_request_gateway.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:langchain_core/chat_models.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+  test('stream failure delivery preserves legacy text and supports retry UI',
+      () async {
+    SharedPreferences.setMockInitialValues({});
+    await Prefs().initPrefs();
+    final legacy = await aiRequestGateway
+        .executeStream(AiRequest(
+          messages: [ChatMessage.humanText('question')],
+          providerId: 'unconfigured',
+          fallbackPolicy: AiFallbackPolicy.none,
+        ))
+        .toList();
+    expect(legacy, ['AI service not configured']);
+
+    final chunks = <String>[];
+    await expectLater(() async {
+      await for (final chunk in aiRequestGateway.executeStream(AiRequest(
+        messages: [ChatMessage.humanText('question')],
+        providerId: 'unconfigured',
+        fallbackPolicy: AiFallbackPolicy.none,
+        failureDelivery: AiFailureDelivery.streamError,
+      ))) {
+        chunks.add(chunk);
+      }
+    }(), throwsA(isA<AiGenerationFailure>()));
+    expect(chunks, isEmpty);
+  });
+
   test('request derives stable workload and a unique trace id', () {
     final first = AiRequest(
       messages: [ChatMessage.humanText('hello')],

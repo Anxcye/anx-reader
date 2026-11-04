@@ -14,6 +14,24 @@ namespaced string ID（`story.*`、`stage.*`、`relation.*`）；旧短 ID 在�
 按书籍特征选择案件线、家庭线、历史线、科幻世界观线或人物成长线；对应轨道尚无数据时，
 时间线安全回退为全部故事线。
 
+## 阅读内 AI 交互收敛（2026-11）
+
+- `ReadingWorkspaceHost` 保持 reader/panel 的 Element 身份，840dp 切换并排与 56%
+  半屏；`AiWorkspaceController` 扩展 assistant/book 目的地与展开/搜索状态。
+- `ReadingQuickPromptSpec` 与 Closure 的 contextual/selection 声明提供最多三个
+  就地动作；工作台仅在明确发送时进入已有 Gateway/ContextAssembler/runner。
+- `BookWikiService.loadMaterials` → `BookMaterialsSnapshot` 组合 Wiki、Atlas、
+  成果与来源笔记。稳定 source ID 去重、当前进度过滤和本地搜索均在投影边界；
+  未知 kind 不进入目录，不删除原同步数据。旧成果页复用同一过滤边界。
+- `ReadingBookHubContent` 渲染五类目录，练习/关系图/时间线为次级入口，资料包
+  位于本书设置；Wiki 导出、修订和历史仍可访问。
+- `captureRequestLocation` 在明确操作前同步捕获位置；普通位置/选区仍只是本地
+  事件。`ReaderCommandGateway` 保留连续来源跳转的最初返回点。
+- `AgentActionService` 为来源笔记保存保留 source/visible progress 元数据；
+  笔记与暂存问题显式授权并可撤销。会话按书隔离，失败保留部分内容。
+- `ReadingTaskScheduler.canResume` 仅声明当前已具备 executor 的暂停任务；未知
+  任务保持可见但不展示无效恢复。故事任务恢复仍走原范围/云端隐私确认。
+
 ## 0. AI 开发前的强制检查顺序
 
 1. 先查本地图对应的“代码入口”和“已有服务”，不要在页面直接访问数据库、直接创建模型客户端或新增平行状态。
@@ -51,7 +69,7 @@ namespaced string ID（`story.*`、`stage.*`、`relation.*`）；旧短 ID 在�
 | 上下文预算 | 已实现 | 所有 AI 请求内部使用 | `lib/service/ai/ai_context_assembler.dart` | 摘要/缓存本地 | 不要在页面拼完整历史 |
 | 专家编排 | 已实现 | 深度分析/复杂任务/本轮手动选择 | `reading_agent_orchestrator.dart`、`reading_experts.dart` | Agent trace/Evidence；专家 ID 设备本地 | 不要把专家长文直接拼回 prompt；联网需本轮授权 |
 | Reading Agent Runtime | 已实现 | 阅读 Agent Beta | `lib/service/ai/reading_agent_runtime.dart` | 目标、画像、动作、覆盖表 | 普通阅读事件不得调用模型 |
-| Reading Skill | 已实现 | AI 工作台 Skill、设置/帮助；支持自定义/导入 | `lib/service/ai/reading_skills.dart` | 按书配置 + 自定义 Skill 随 WebDAV 偏好备份 | Skill 是方法，不是工具集合；不得含 Provider/工具权限 |
+| Reading Skill | 已实现 | AI > 回答方式、设置/帮助；支持自定义/导入 | `lib/service/ai/reading_skills.dart` | 按书配置 + 自定义 Skill 随 WebDAV 偏好备份 | Skill 是方法，不是工具集合；不得含 Provider/工具权限 |
 | 阅读闭环 | 已实现 | 阅读成果页/Agent | `reading_closure_policy.dart` | 目标、checkpoint、成果、mastery | 不按小说/心理硬编码页面 |
 | 小说档案 | 已实现 | 阅读成果 > 故事档案 | `fiction_backfill_service.dart`、`fiction_story_atlas_service.dart` | `tb_reading_artifacts` | 图谱/时间线不直接查 DAO |
 | 故事时间线 P0/P1 | 已实现 | 故事事件时间线 | `fiction_story_timeline_page.dart` | Artifact 投影 | 不新增独立时间线表 |
@@ -66,10 +84,10 @@ namespaced string ID（`story.*`、`stage.*`、`relation.*`）；旧短 ID 在�
 | 轻量提取/摘要引擎 | 已实现 | 设置 > AI > 轻量提取与摘要引擎 | `ai_extraction_engine.dart`、`fiction_hybrid_extraction_service.dart` | Provider 角色设备本地；Artifact 正常同步 | 定位为本地候选提取器 + 证据筛选器；不在失败时静默上传整章 |
 | 阅读成果页 | 已实现 | 阅读页 > 本书阅读成果 | `reading_outcomes_page.dart` | 读取闭环/Atlas/记忆 | 不在成果页自动整理 |
 | 书籍 Wiki | 已实现（一期） | 阅读页 > 本书、书籍详情 | `book_wiki_page.dart`、`book_wiki_service.dart` | `tb_book_wikis`/entries/sources/revisions，进入 Agent 增量同步 | 打开页面不扫描正文；详情页不启动隐藏阅读器 |
-| 本书 AI 上下文 | 已实现（只读投影） | 阅读页 > 本书 > AI 上下文 | `reading_context_pack_service.dart`、`ai_context_assembler.dart` | 复用 Wiki/Artifact/Memory，不新增表 | 只在显式 AI 请求中注入；打开页面不调用模型 |
+| 本书 AI 上下文 | 已实现（只读投影） | 阅读页 > 本书 > 本书设置 > AI 使用的资料 | `reading_context_pack_service.dart`、`ai_context_assembler.dart`、`reading_task_progress_card.dart` | 复用 Wiki/Artifact/Memory，不新增表；长任务使用 `wiki.book_generate` checkpoint | 只在显式 AI 请求中注入；打开页面不调用模型；Wiki/上下文共用任务进度和暂停/恢复 |
 | 阅读分块与证据解析 | 已实现 | 用户确认的 Wiki/Story Atlas 整理任务 | `reading_chunker.dart`、`reading_evidence_resolver.dart` | ReadingChunk 为任务中间产物；证据回到原文 offset | 不持久化完整 chunk；普通阅读不触发 |
 | 阅读查词路由 | 已实现 | 阅读页长按/选区菜单 | `reading_lookup_candidate_resolver.dart`、`reading_lookup_router.dart` | 词典缓存与用户导入 MDX | 页面不自行判断词类或决定联网；离线单字禁止上下文扩词 |
-| 本书统一面板 | 已实现 | 阅读页 > 本书 | `widgets/reading_page/reading_book_hub.dart` | 只读聚合现有成果 | 不为 Wiki/成果/同步恢复独立顶栏入口 |
+| 本书统一面板 | 已实现 | 阅读页 > 本书 | `widgets/reading_page/reading_book_hub.dart`、`book_wiki_service.dart`、`book_materials.dart` | 只读统一目录，保留来源身份 | 不为 Wiki/成果/同步恢复独立顶栏入口 |
 | 下一阅读行动 | 已实现 | 本书面板、阅读成果页 | `next_reading_action.dart`、`next_reading_action_resolver.dart` | 不持久化、不参与同步 | 排序由 Closure `nextActionOrder` 声明，页面不按书类分支 |
 | 阅读活动协调 | 已实现 | 同步和生命周期内部 | `service/sync/reading_activity_coordinator.dart` | 内存 pending intent | 阅读中自动同步不得直接执行；手动请求复用 single-flight |
 | 阅读体验诊断 | 已实现 | 开发者设置 | `service/reading_experience_diagnostics.dart` | 本机偏好，30 天/100 会话 | 不保存正文，不备份、同步或上传遥测 |
@@ -256,7 +274,7 @@ E-INK 有效覆盖：浅色高对比、无翻页动画、无背景图、无代�
 分层。上下文节点保留 `visibleFromProgress`、来源和事实/推断标识；回到较早位置
 时自动隐藏后文。
 
-上下文包不替代 Wiki，也不保存完整正文。打开“本书 → AI 上下文”只读取本地
+上下文包不替代 Wiki，也不保存完整正文。打开“本书 → 本书设置 → AI 使用的资料”只读取本地
 投影，不调用模型；用户确认“从已读部分建立/更新”后复用现有 Wiki 增量任务，
 因此 checkpoint、证据校验、AgentAction、同步和撤销规则不再复制。明确发起 AI
 对话时，`AiContextAssembler.withBookContext` 按当前章节、查询和边界加入有上限的

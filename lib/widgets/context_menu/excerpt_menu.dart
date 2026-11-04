@@ -201,10 +201,12 @@ class ExcerptMenuState extends State<ExcerptMenu> {
       chapterHref: player.chapterHref,
       selectedText: widget.annoContent.trim(),
       surroundingText: widget.contextText?.trim(),
+      progress: player.percentage,
       capturedAt: DateTime.now().millisecondsSinceEpoch,
       metadata: {'cfi': widget.annoCfi},
     );
-    widget.onClose();
+    // Dismiss the menu while retaining the selected range in the reader.
+    player.removeOverlay(preserveAutoMarkSession: true);
     readingPage.showAiChat(sendImmediate: false, selection: snapshot);
   }
 
@@ -588,6 +590,7 @@ class ExcerptMenuState extends State<ExcerptMenu> {
               chapterHref: player.chapterHref,
               selectedText: widget.annoContent.trim(),
               surroundingText: widget.contextText?.trim(),
+              progress: player.percentage,
               capturedAt: DateTime.now().millisecondsSinceEpoch,
               metadata: {'cfi': widget.annoCfi},
             );

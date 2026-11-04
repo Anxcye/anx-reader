@@ -12,10 +12,20 @@ import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/main.dart';
 import 'package:anx_reader/models/ai_quick_prompt_chip.dart';
 import 'package:anx_reader/models/book.dart';
+import 'package:anx_reader/models/ai_provider.dart';
 import 'package:anx_reader/models/book_wiki.dart';
+import 'package:anx_reader/models/book_materials.dart';
+import 'package:anx_reader/service/ai/book_wiki_service.dart';
+import 'package:anx_reader/page/book_wiki_entry_page.dart';
+import 'package:anx_reader/page/home_page/notes_page.dart'
+    show ReadingNoteDetail;
+import 'package:anx_reader/page/fiction_character_graph_page.dart';
+import 'package:anx_reader/page/fiction_story_timeline_page.dart';
+import 'package:anx_reader/widgets/reading_page/reading_workspace_host.dart';
 import 'package:anx_reader/models/next_reading_action.dart';
 import 'package:anx_reader/models/read_theme.dart';
 import 'package:anx_reader/providers/ai_workspace.dart';
+import 'package:anx_reader/providers/ai_chat.dart';
 import 'package:anx_reader/providers/reading_coach.dart';
 import 'package:anx_reader/service/ai/reading_coach_policy.dart';
 import 'package:anx_reader/models/reading_coach.dart';
@@ -33,8 +43,6 @@ import 'package:anx_reader/service/ai/book_wiki_generation_service.dart';
 import 'package:anx_reader/providers/sync.dart';
 import 'package:anx_reader/providers/book_toc.dart';
 import 'package:anx_reader/dao/reading_agent_sync.dart';
-import 'package:anx_reader/service/ai/index.dart';
-import 'package:anx_reader/service/ai/ai_request.dart';
 import 'package:anx_reader/service/ai/ai_history.dart';
 import 'package:anx_reader/service/ai/prompt_generate.dart';
 import 'package:anx_reader/service/ai/reading_ai_models.dart';
@@ -58,13 +66,11 @@ import 'package:anx_reader/service/ai/reading_device_identity.dart';
 import 'package:anx_reader/service/reading_experience_diagnostics.dart';
 import 'package:anx_reader/service/sync/reading_activity_coordinator.dart';
 import 'package:anx_reader/dao/book_note.dart';
-import 'package:langchain_core/chat_models.dart';
 import 'package:anx_reader/utils/env_var.dart';
 import 'package:anx_reader/utils/toast/common.dart';
 import 'package:anx_reader/utils/ui/status_bar.dart';
 import 'package:anx_reader/widgets/ai/ai_chat_stream.dart';
 import 'package:anx_reader/widgets/ai/ai_reading_workspace.dart';
-import 'package:anx_reader/widgets/ai/ai_stream.dart';
 import 'package:anx_reader/widgets/reading_page/notes_widget.dart';
 import 'package:anx_reader/widgets/reading_page/reading_book_hub.dart';
 import 'package:anx_reader/models/reading_time.dart';
@@ -73,14 +79,12 @@ import 'package:anx_reader/widgets/reading_page/tts_fab.dart';
 import 'package:anx_reader/widgets/reading_page/tts_widget.dart';
 import 'package:anx_reader/widgets/reading_page/style_widget.dart';
 import 'package:anx_reader/widgets/reading_page/toc_widget.dart';
-import 'package:anx_reader/widgets/common/axis_flex.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 // import 'package:flutter/foundation.dart'
 // show debugPrint, defaultTargetPlatform, TargetPlatform;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:iconsx_plus/iconsx_plus.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
@@ -124,12 +128,10 @@ class ReadingPageState extends ConsumerState<ReadingPage>
   late String heroTag;
   final aiChatKey = GlobalKey<AiChatStreamState>();
   late final AiWorkspaceController aiWorkspaceController;
-  static const double _aiChatMinWidth = 240;
+  static const double _aiChatMinWidth = 360;
   late double _aiChatWidth;
   static const double _aiChatMinHeight = 200;
   late double _aiChatHeight;
-  bool _isResizingAiChat = false;
-  bool _inspectionReminderShown = false;
   bool bookmarkExists = false;
   bool _readingAgentCapsuleDismissed = false;
   static const _readingInterventionPolicy = ReadingInterventionPolicy();
@@ -140,6 +142,17 @@ class ReadingPageState extends ConsumerState<ReadingPage>
   String? _lastRemoteProgressPromptFingerprint;
   bool _syncingRemoteProgress = false;
   bool _checkingRemoteProgress = false;
+  Future<(ReadingOutcomesSnapshot, BookMaterialsSnapshot)>? _bookMaterials;
+  Future<void>? _startingReadingSession;
+  AiWorkspaceSurface _lastWorkspaceSurface = AiWorkspaceSurface.assistant;
+  bool _workspaceWasVisible = false;
+  final PageStorageBucket _workspaceStorage = PageStorageBucket();
+  StreamSubscription<List<ReadingTask>>? _workspaceTaskSubscription;
+  StreamSubscription<ReadingEvent>? _workspaceActionSubscription;
+  String _completedTaskFingerprint = '';
+
+  double get _visibleReadingProgress =>
+      epubPlayerKey.currentState?.percentage ?? _book.readingPercentage;
 
   ReadingClosurePolicyDefinition get _closurePolicy =>
       ReadingClosurePolicyMatcher(registry: widget.closureRegistry).match(
@@ -180,13 +193,13 @@ class ReadingPageState extends ConsumerState<ReadingPage>
     );
     final resumeArtifacts =
         closure.supports(ReadingClosureCapability.resumeContext)
-        ? await readingAgentRepository.artifacts(
-            _book.id,
-            kind: ReadingArtifactKinds.resumeContext,
-            status: ReadingArtifactStatus.active,
-            visibleAtProgress: _book.readingPercentage,
-          )
-        : const <ReadingArtifact>[];
+            ? await readingAgentRepository.artifacts(
+                _book.id,
+                kind: ReadingArtifactKinds.resumeContext,
+                status: ReadingArtifactStatus.active,
+                visibleAtProgress: _book.readingPercentage,
+              )
+            : const <ReadingArtifact>[];
     if (!mounted) return;
     aiWorkspaceController.setReadingProfile(profile);
     setState(() {
@@ -199,11 +212,11 @@ class ReadingPageState extends ConsumerState<ReadingPage>
   Future<void> _setClosureModule(String? moduleId) async {
     final detected =
         ReadingClosurePolicyMatcher(registry: widget.closureRegistry).detect(
-          mode: Prefs().readingAiModeForBook(_book.id),
-          title: _book.title,
-          author: _book.author,
-          description: _book.description ?? '',
-        );
+      mode: Prefs().readingAiModeForBook(_book.id),
+      title: _book.title,
+      author: _book.author,
+      description: _book.description ?? '',
+    );
     final profile = moduleId == null
         ? await readingExperienceProfileService.setAutomatic(
             bookId: _book.id,
@@ -227,11 +240,14 @@ class ReadingPageState extends ConsumerState<ReadingPage>
   }
 
   bool _usesAiSplitLayout(BuildContext context) {
-    return MediaQuery.sizeOf(context).shortestSide >= 600;
+    return ReadingWorkspaceHost.usesSplit(MediaQuery.sizeOf(context).width);
   }
 
   double _effectiveAiPanelWidth(BuildContext context) {
-    return MediaQuery.sizeOf(context).width * Prefs().aiPanelWidthRatio.factor;
+    return ReadingWorkspaceHost.effectiveWidth(
+      MediaQuery.sizeOf(context).width,
+      _aiChatWidth,
+    );
   }
 
   late final FocusNode _readerFocusNode;
@@ -243,7 +259,7 @@ class ReadingPageState extends ConsumerState<ReadingPage>
     _readerFocusNode = FocusNode(debugLabel: 'reading_page_focus');
 
     // Initialize AI panel sizes from persistent storage
-    _aiChatWidth = Prefs().aiPanelWidth;
+    _aiChatWidth = Prefs().aiPanelWidth >= 360 ? Prefs().aiPanelWidth : 0;
     _aiChatHeight = Prefs().aiPanelHeight;
 
     if (widget.book.isDeleted) {
@@ -262,8 +278,35 @@ class ReadingPageState extends ConsumerState<ReadingPage>
     setAwakeTimer(Prefs().awakeTime);
 
     _book = widget.book;
+    // Register the page-owned EPUB executor as soon as the book page exists.
+    // Durable tasks restored after process death are paused by the scheduler;
+    // this registration makes their checkpoint resumable from Wiki/Context
+    // pages instead of leaving a permanently disabled "continue" button.
+    readingTaskScheduler.registerExecutor<int>(
+      'wiki.book_generate',
+      _executeBookWikiTask,
+    );
     unawaited(readingExperienceDiagnostics.beginSession(bookId: _book.id));
     readingAgentRuntime.addListener(_onReadingAgentChanged);
+    _workspaceActionSubscription = readingAgentRuntime.events.listen((event) {
+      if ((event.type == ReadingEventType.agentActionApplied ||
+              event.type == ReadingEventType.agentActionUndone) &&
+          mounted &&
+          _bookMaterials != null) {
+        setState(() => _bookMaterials = _loadBookMaterials());
+      }
+    });
+    _workspaceTaskSubscription = readingTaskScheduler.changes.listen((tasks) {
+      final fingerprint = tasks
+          .where((task) => task.bookId == _book.id && task.isTerminal)
+          .map((task) => '${task.id}:${task.status.name}:${task.updatedAt}')
+          .join('|');
+      if (fingerprint == _completedTaskFingerprint) return;
+      _completedTaskFingerprint = fingerprint;
+      if (mounted && _bookMaterials != null) {
+        setState(() => _bookMaterials = _loadBookMaterials());
+      }
+    });
     aiWorkspaceController = AiWorkspaceController(
       bookId: _book.id,
       onClosureModuleChanged: _setClosureModule,
@@ -276,11 +319,11 @@ class ReadingPageState extends ConsumerState<ReadingPage>
       if (mounted) {
         _requestReaderFocus();
         if (Prefs().readingAgentBetaEnabled) {
-          unawaited(
-            readingAgentRuntime.start(bookId: _book.id, bookTitle: _book.title),
-          );
-          _registerReaderCommandGateway();
+          _startingReadingSession = readingAgentRuntime
+              .start(bookId: _book.id, bookTitle: _book.title)
+              .whenComplete(() => _startingReadingSession = null);
         }
+        _registerReaderCommandGateway();
         if (FeatureFlags.readingCoach && widget.initialShowCoach) {
           showReadingCoach();
         }
@@ -302,16 +345,21 @@ class ReadingPageState extends ConsumerState<ReadingPage>
 
   @override
   void dispose() {
+    // The executor reads from this page's WebView. Pause before disposing it;
+    // the durable checkpoint remains visible and can be resumed next time the
+    // same book is opened.
+    unawaited(_pauseBookWikiTasks());
     ReaderCommandGateway.instance.unregister(_book.id);
     readingAgentRuntime.removeListener(_onReadingAgentChanged);
+    unawaited(_workspaceTaskSubscription?.cancel());
+    unawaited(_workspaceActionSubscription?.cancel());
     unawaited(readingExperienceDiagnostics.endSession());
     _readTimeWatch.stop();
     _awakeTimer?.cancel();
     WakelockPlus.disable();
     showStatusBar();
     WidgetsBinding.instance.removeObserver(this);
-    final progressSaved =
-        epubPlayerKey.currentState?.saveReadingProgress() ??
+    final progressSaved = epubPlayerKey.currentState?.saveReadingProgress() ??
         Future<void>.value();
     final readingStateSaved = Future.wait<void>([
       progressSaved,
@@ -344,6 +392,17 @@ class ReadingPageState extends ConsumerState<ReadingPage>
     aiWorkspaceController.removeListener(_onAiWorkspaceChanged);
     aiWorkspaceController.dispose();
     super.dispose();
+  }
+
+  Future<void> _pauseBookWikiTasks() async {
+    await readingTaskScheduler.restore();
+    for (final task in readingTaskScheduler.tasks) {
+      if (task.bookId == _book.id &&
+          task.type == 'wiki.book_generate' &&
+          !task.isTerminal) {
+        await readingTaskScheduler.pause(task.id);
+      }
+    }
   }
 
   Future<void> _saveFictionResumeMarker() async {
@@ -402,6 +461,10 @@ class ReadingPageState extends ConsumerState<ReadingPage>
     final action = readingAgentRuntime.state.lastAgentAction;
     if (action == null || action.id == _lastReadingAgentSnackActionId) return;
     _lastReadingAgentSnackActionId = action.id;
+    if (aiWorkspaceController.visible &&
+        aiWorkspaceController.surface == AiWorkspaceSurface.assistant) {
+      return;
+    }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _showAgentUndoSnackBar(action);
     });
@@ -670,13 +733,8 @@ class ReadingPageState extends ConsumerState<ReadingPage>
     });
   }
 
-  double _aiChatMaxWidth(BuildContext context) {
-    final totalWidth = MediaQuery.of(context).size.width;
-    final maxByPercentage = totalWidth * 0.65;
-    final maxByRemaining = totalWidth - 320;
-    final maxWidth = math.min(maxByPercentage, maxByRemaining);
-    return math.max(_aiChatMinWidth, maxWidth);
-  }
+  double _aiChatMaxWidth(BuildContext context) => math.max(
+      _aiChatMinWidth, math.min(520, MediaQuery.sizeOf(context).width - 400));
 
   double _aiChatMaxHeight(BuildContext context) {
     final totalHeight = MediaQuery.of(context).size.height;
@@ -684,53 +742,6 @@ class ReadingPageState extends ConsumerState<ReadingPage>
     final maxByRemaining = totalHeight - 320;
     final maxHeight = math.min(maxByPercentage, maxByRemaining);
     return math.max(_aiChatMinHeight, maxHeight);
-  }
-
-  void _beginAiChatResize(double globalDx) {
-    setState(() {
-      _isResizingAiChat = true;
-    });
-  }
-
-  void _applyAiChatResizeDelta(double delta, BuildContext context) {
-    final maxWidth = _aiChatMaxWidth(context);
-    final updated = (_aiChatWidth - delta)
-        .clamp(_aiChatMinWidth, maxWidth)
-        .toDouble();
-    if (updated != _aiChatWidth) {
-      setState(() {
-        _aiChatWidth = updated;
-      });
-    }
-  }
-
-  void _endAiChatResize() {
-    if (_isResizingAiChat) {
-      setState(() {
-        _isResizingAiChat = false;
-      });
-      // Save the panel sizes to persistent storage
-      Prefs().aiPanelWidth = _aiChatWidth;
-      Prefs().aiPanelHeight = _aiChatHeight;
-    }
-  }
-
-  void _beginAiChatResizeVertical(double globalDy) {
-    setState(() {
-      _isResizingAiChat = true;
-    });
-  }
-
-  void _applyAiChatResizeDeltaVertical(double delta, BuildContext context) {
-    final maxHeight = _aiChatMaxHeight(context);
-    final updated = (_aiChatHeight - delta)
-        .clamp(_aiChatMinHeight, maxHeight)
-        .toDouble();
-    if (updated != _aiChatHeight) {
-      setState(() {
-        _aiChatHeight = updated;
-      });
-    }
   }
 
   Future<void> onLoadEnd() async {
@@ -744,80 +755,12 @@ class ReadingPageState extends ConsumerState<ReadingPage>
       );
     }
     unawaited(_offerRemoteProgressIfAvailable());
-    if (FeatureFlags.readingCoach &&
-        !_inspectionReminderShown &&
-        coach.guide.status == InspectionGuideStatus.notStarted) {
-      _inspectionReminderShown = true;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        readingExperienceDiagnostics.recordUnsolicitedDialog();
-        final messenger = ScaffoldMessenger.of(context);
-        messenger
-          ..clearMaterialBanners()
-          ..showMaterialBanner(
-            MaterialBanner(
-              content: const Text('先用检视阅读快速判断本书主题和阅读目标？全程可只点选项。'),
-              actions: [
-                TextButton(
-                  onPressed: messenger.hideCurrentMaterialBanner,
-                  child: const Text('稍后'),
-                ),
-                TextButton(
-                  onPressed: () async {
-                    messenger.hideCurrentMaterialBanner();
-                    await ref
-                        .read(readingCoachProvider(_book.id).notifier)
-                        .saveGuide(
-                          coach.guide.copyWith(
-                            status: InspectionGuideStatus.dismissed,
-                            updatedAt: DateTime.now().millisecondsSinceEpoch,
-                          ),
-                        );
-                  },
-                  child: const Text('不再提醒'),
-                ),
-                FilledButton(
-                  onPressed: () async {
-                    messenger.hideCurrentMaterialBanner();
-                    await ref
-                        .read(readingCoachProvider(_book.id).notifier)
-                        .saveGuide(
-                          coach.guide.copyWith(
-                            status: InspectionGuideStatus.inProgress,
-                            updatedAt: DateTime.now().millisecondsSinceEpoch,
-                          ),
-                        );
-                    await showReadingCoach();
-                  },
-                  child: const Text('开始检视'),
-                ),
-              ],
-            ),
-          );
-      });
-    }
-    if (Prefs().autoSummaryPreviousContent) {
-      final previousContent = await epubPlayerKey.currentState!.previousContent(
-        2000,
-      );
-      final prompt = generatePromptSummaryThePreviousContent(previousContent);
-      SmartDialog.show(
-        builder: (context) => AlertDialog(
-          title: Text(L10n.of(context).readingPageSummaryPreviousContent),
-          content: AiStream(prompt: prompt),
-        ),
-        onDismiss: () {
-          cancelActiveAiRequest();
-        },
-      );
-    }
   }
 
   Future<void> _offerRemoteProgressIfAvailable({bool manual = false}) async {
     if (!mounted || (!manual && widget.cfi != null)) return;
     if (_checkingRemoteProgress) return;
-    final syncEnabled =
-        Prefs().cloudBaseSyncEnabled ||
+    final syncEnabled = Prefs().cloudBaseSyncEnabled ||
         Prefs().selfHostedProgressSyncEnabled ||
         Prefs().webdavStatus;
     if (!syncEnabled) {
@@ -917,50 +860,45 @@ class ReadingPageState extends ConsumerState<ReadingPage>
     epubPlayerKey.currentState?.goToCfi(remote.cfi);
   }
 
-  List<Widget> _buildAiChatTrailing(BuildContext context) {
-    return [
-      if (Prefs().readingAgentBetaEnabled)
-        IconButton(
-          onPressed: _showReadingAgentPanel,
-          icon: const Icon(Icons.manage_history_outlined),
-          tooltip: '阅读 Agent 动作记录',
-        ),
-      IconButton(
-        onPressed: () {
-          setState(() {
-            Prefs().aiPanelPosition =
-                Prefs().aiPanelPosition == AiPanelPositionEnum.right
-                ? AiPanelPositionEnum.bottom
-                : AiPanelPositionEnum.right;
-          });
-        },
-        icon: Icon(
-          Prefs().aiPanelPosition == AiPanelPositionEnum.right
-              ? Icons.arrow_downward
-              : Icons.arrow_forward,
-        ),
-        tooltip: Prefs().aiPanelPosition == AiPanelPositionEnum.right
-            ? L10n.of(context).aiShowAtBottom
-            : L10n.of(context).aiShowAtRight,
-      ),
-      IconButton(
-        onPressed: () {
-          aiWorkspaceController.hide();
-        },
-        icon: const Icon(Icons.close),
-      ),
-    ];
+  void _onAiWorkspaceChanged() {
+    if (!mounted) return;
+    if (_workspaceWasVisible && !aiWorkspaceController.visible) {
+      aiChatKey.currentState?.stopGenerating();
+      FocusManager.instance.primaryFocus?.unfocus();
+    }
+    if (aiWorkspaceController.surface == AiWorkspaceSurface.book &&
+        (_lastWorkspaceSurface != AiWorkspaceSurface.book ||
+            _bookMaterials == null)) {
+      _bookMaterials = _loadBookMaterials();
+    }
+    _workspaceWasVisible = aiWorkspaceController.visible;
+    _lastWorkspaceSurface = aiWorkspaceController.surface;
+    setState(() {});
   }
 
-  void _onAiWorkspaceChanged() {
-    if (mounted) setState(() {});
+  Future<void> _ensureReadingSession() async {
+    if (!readingAgentRuntime.isActive ||
+        readingAgentRuntime.state.bookId != _book.id) {
+      await (_startingReadingSession ??= readingAgentRuntime
+          .start(bookId: _book.id, bookTitle: _book.title)
+          .whenComplete(() => _startingReadingSession = null));
+    }
+    if (!mounted) return;
+    final player = epubPlayerKey.currentState;
+    if (player != null) {
+      readingAgentRuntime.captureRequestLocation(
+        cfi: player.cfi,
+        chapterHref: player.chapterHref,
+        chapterTitle: player.chapterTitle,
+        totalProgress: player.percentage,
+        chapterProgress: player.chapterTotalPages > 0
+            ? player.chapterCurrentPage / player.chapterTotalPages
+            : 0,
+      );
+    }
   }
 
   Widget _buildAiWorkspace({List<Widget>? trailing}) {
-    final maxWidth = _aiChatMaxWidth(context);
-    final maxHeight = _aiChatMaxHeight(context);
-    _aiChatWidth = _aiChatWidth.clamp(_aiChatMinWidth, maxWidth);
-    _aiChatHeight = _aiChatHeight.clamp(_aiChatMinHeight, maxHeight);
     return AiReadingWorkspace(
       key: const ValueKey('ai-reading-workspace'),
       controller: aiWorkspaceController,
@@ -980,18 +918,26 @@ class ReadingPageState extends ConsumerState<ReadingPage>
           epubPlayerKey.currentState?.chapterContentByHref(href) ??
           Future.value(''),
       onNavigateChapter: (target) {
-        if (target.startsWith('epubcfi(')) {
-          epubPlayerKey.currentState?.goToCfi(target);
-        } else {
-          epubPlayerKey.currentState?.goToHref(target);
-        }
+        _navigateBookSource(target);
       },
       onDifficultySaved: (item) => epubPlayerKey.currentState
           ?.addDifficultyAnnotation(id: item.id, cfi: item.cfi),
       onDifficultyResolved: (item) =>
           epubPlayerKey.currentState?.removeAnnotation('difficulty:${item.id}'),
       closureRegistry: widget.closureRegistry,
-      trailing: trailing ?? _buildAiChatTrailing(context),
+      currentChapterTitle: epubPlayerKey.currentState?.chapterTitle,
+      currentProgress: _visibleReadingProgress,
+      onInputFocused: () => aiWorkspaceController.setSheetExpanded(true),
+      onOpenBook: _showBookHub,
+      onReturnToQuestion: ReaderCommandGateway.instance
+              .canReturnToPreviousLocation(bookId: _book.id)
+          ? () {
+              ReaderCommandGateway.instance
+                  .returnToPreviousLocation(bookId: _book.id);
+              setState(() {});
+            }
+          : null,
+      trailing: trailing ?? const [],
     );
   }
 
@@ -999,29 +945,28 @@ class ReadingPageState extends ConsumerState<ReadingPage>
     final state = readingAgentRuntime.state;
     final closure = _closurePolicy;
     final goal = state.activeGoal;
-    final pending =
-        state.pendingProfileCount +
+    final pending = state.pendingProfileCount +
         (closure.checkpointTriggersCapsule ? state.pendingCheckpointCount : 0) +
         (closure.showKnowledgeCards ? state.dueKnowledgeCardCount : 0);
     final coveragePending = _readingCoverage?.setupPending == true;
-    final startPercent = ((_readingCoverage?.initializedAtProgress ?? 0) * 100)
-        .round();
+    final startPercent =
+        ((_readingCoverage?.initializedAtProgress ?? 0) * 100).round();
     final title = coveragePending
         ? '你从本书 $startPercent% 开始使用阅读 Agent，可选择建立前情档案'
         : goal?.title ??
-              (pending > 0
-                  ? '有 $pending 项待处理'
-                  : _resumeContextAvailable
-                  ? '可恢复上次阅读上下文'
-                  : state.unresolvedDifficultyCount > 0
-                  ? '${state.unresolvedDifficultyCount} 个问题待解决'
-                  : '最近动作可撤销');
+            (pending > 0
+                ? '有 $pending 项待处理'
+                : _resumeContextAvailable
+                    ? '可恢复上次阅读上下文'
+                    : state.unresolvedDifficultyCount > 0
+                        ? '${state.unresolvedDifficultyCount} 个问题待解决'
+                        : '最近动作可撤销');
     final semantics = coveragePending
         ? '阅读 Agent，$title'
         : goal == null
-        ? '阅读 Agent，$title'
-        : '阅读目标：${goal.title}，进度 ${(goal.progress * 100).round()}%'
-              '${pending > 0 ? '，$pending 项待处理' : ''}';
+            ? '阅读 Agent，$title'
+            : '阅读目标：${goal.title}，进度 ${(goal.progress * 100).round()}%'
+                '${pending > 0 ? '，$pending 项待处理' : ''}';
     return Align(
       alignment: Alignment.topCenter,
       child: Semantics(
@@ -1106,9 +1051,7 @@ class ReadingPageState extends ConsumerState<ReadingPage>
       return;
     }
     final now = DateTime.now().millisecondsSinceEpoch;
-    await ref
-        .read(readingCoachProvider(_book.id).notifier)
-        .saveQuiz(
+    await ref.read(readingCoachProvider(_book.id).notifier).saveQuiz(
           ChapterQuiz(
             id: '${_book.id}-${previousHref.hashCode}-$now',
             bookId: _book.id,
@@ -1139,9 +1082,7 @@ class ReadingPageState extends ConsumerState<ReadingPage>
         prompt: generatePromptMindmap().buildString(),
       ),
       // User custom prompts (enabled only)
-      ...Prefs().userPrompts
-          .where((p) => p.enabled)
-          .map(
+      ...Prefs().userPrompts.where((p) => p.enabled).map(
             (userPrompt) => AiQuickPromptChip(
               icon: Icons.person_outline,
               label: userPrompt.name,
@@ -1156,8 +1097,16 @@ class ReadingPageState extends ConsumerState<ReadingPage>
     bool sendImmediate = false,
     ReadingContextSnapshot? selection,
   }) async {
-    final workspaceContext = navigatorKey.currentContext!;
+    final workspaceContext = context;
     final shouldShowFullscreen = !_usesAiSplitLayout(workspaceContext);
+    try {
+      await _ensureReadingSession();
+    } catch (_) {
+      // Reading help remains usable; sourced writes reject an absent session.
+    }
+    if (!mounted) return;
+    ref.read(aiChatProvider.notifier).ensureBookScope(_book.id);
+    aiWorkspaceController.switchSurface(AiWorkspaceSurface.assistant);
 
     final snapshot = selection;
     if (snapshot != null) {
@@ -1171,7 +1120,9 @@ class ReadingPageState extends ConsumerState<ReadingPage>
     if (!shouldShowFullscreen) {
       final maxWidth = _aiChatMaxWidth(navigatorKey.currentContext!);
       final maxHeight = _aiChatMaxHeight(navigatorKey.currentContext!);
-      _aiChatWidth = _aiChatWidth.clamp(_aiChatMinWidth, maxWidth);
+      _aiChatWidth = ReadingWorkspaceHost.effectiveWidth(
+              MediaQuery.sizeOf(context).width, _aiChatWidth)
+          .clamp(_aiChatMinWidth, maxWidth);
       _aiChatHeight = _aiChatHeight.clamp(_aiChatMinHeight, maxHeight);
     }
     aiWorkspaceController.show(fullscreen: shouldShowFullscreen);
@@ -1183,8 +1134,7 @@ class ReadingPageState extends ConsumerState<ReadingPage>
   }
 
   Future<void> showReadingCoach() async {
-    if (!FeatureFlags.readingCoach) return;
-    aiWorkspaceController.showCoach();
+    aiWorkspaceController.showPractice();
     await showAiChat();
   }
 
@@ -1207,9 +1157,11 @@ class ReadingPageState extends ConsumerState<ReadingPage>
       createdAt: now,
       updatedAt: now,
     );
-    final saved = await ref
-        .read(readingCoachProvider(_book.id).notifier)
-        .saveDifficulty(difficulty);
+    await _ensureReadingSession();
+    final mutation = await agentActionService.saveDifficulty(difficulty,
+        sourceProgress: snapshot.progress,
+        visibleFromProgress: snapshot.progress);
+    final saved = mutation.value;
     epubPlayerKey.currentState?.addDifficultyAnnotation(
       id: saved.id,
       cfi: saved.cfi,
@@ -1223,9 +1175,9 @@ class ReadingPageState extends ConsumerState<ReadingPage>
         ? (entry.contextSnapshot!['metadata'] as Map)['cfi']?.toString()
         : null;
     if (cfi != null && cfi.isNotEmpty) {
-      epubPlayerKey.currentState?.goToCfi(cfi);
+      _navigateBookSource(cfi);
     } else if (entry.chapterHref?.isNotEmpty == true) {
-      epubPlayerKey.currentState?.goToHref(entry.chapterHref!);
+      _navigateBookSource(entry.chapterHref!);
     }
   }
 
@@ -1233,7 +1185,7 @@ class ReadingPageState extends ConsumerState<ReadingPage>
     ReadingChapterCheckpoint checkpoint,
   ) async {
     final closure = _closurePolicy;
-    final reflection = TextEditingController();
+    var reflectionText = '';
     MasteryLevel level = MasteryLevel.familiar;
     var createKnowledgeCard = closure.defaultCreateKnowledgeCard;
     final confirmed = await showDialog<bool>(
@@ -1263,7 +1215,7 @@ class ReadingPageState extends ConsumerState<ReadingPage>
                       setDialogState(() => level = value ?? level),
                 ),
               TextField(
-                controller: reflection,
+                onChanged: (value) => reflectionText = value,
                 maxLines: 3,
                 decoration: InputDecoration(
                   labelText: closure.checkpoint.reflectionLabel,
@@ -1296,75 +1248,34 @@ class ReadingPageState extends ConsumerState<ReadingPage>
       ),
     );
     if (confirmed != true) return;
-    final now = DateTime.now().millisecondsSinceEpoch;
-    await readingAgentRepository.completeCheckpoint(
-      checkpoint,
-      completed: true,
-      reflection: reflection.text.trim(),
-    );
-    if (closure.checkpoint.showsMastery) {
-      await readingAgentRepository.saveMastery(
-        MasteryState(
-          id: '${checkpoint.bookId}-${checkpoint.chapterHref.hashCode}',
-          bookId: checkpoint.bookId,
-          chapterHref: checkpoint.chapterHref,
-          topic: checkpoint.chapterTitle.isEmpty
-              ? checkpoint.chapterHref
-              : checkpoint.chapterTitle,
-          level: level,
-          score: level.index / (MasteryLevel.values.length - 1),
-          nextReviewAt: createKnowledgeCard
-              ? now + const Duration(days: 1).inMilliseconds
-              : null,
-          updatedAt: now,
-        ),
+    try {
+      await _ensureReadingSession();
+      final mutation = await agentActionService.finishChapterCheckpoint(
+        checkpoint: checkpoint,
+        reflection: reflectionText,
+        masteryLevel: closure.checkpoint.showsMastery ? level : null,
+        createKnowledgeCard: createKnowledgeCard,
+        saveMemory: closure.checkpoint.saveReflectionAsMemory,
+        memoryTitle:
+            '${checkpoint.chapterTitle} · ${closure.checkpoint.memoryTitleSuffix}',
       );
+      if (mounted) _showAgentUndoSnackBar(mutation.action);
+    } catch (_) {
+      if (mounted) AnxToast.show(L10n.of(context).readingAssistantSaveFailed);
     }
-    final reflectionText = reflection.text.trim();
-    if (createKnowledgeCard && reflectionText.isNotEmpty) {
-      await readingAgentRepository.saveKnowledgeCard(
-        KnowledgeCard(
-          id: '${checkpoint.id}-recall',
-          bookId: checkpoint.bookId,
-          front: '请回忆：${checkpoint.chapterTitle}',
-          back: reflectionText,
-          chapterHref: checkpoint.chapterHref,
-          dueAt: now + const Duration(days: 1).inMilliseconds,
-          createdAt: now,
-          updatedAt: now,
-        ),
-      );
-    }
-    if (reflectionText.isNotEmpty &&
-        closure.checkpoint.saveReflectionAsMemory) {
-      await agentActionService.appendMemory(
-        ReadingMemoryDocument(
-          id: '${checkpoint.id}-reflection',
-          bookId: checkpoint.bookId,
-          title:
-              '${checkpoint.chapterTitle} · ${closure.checkpoint.memoryTitleSuffix}',
-          markdown: reflectionText,
-          sourceRefs: [checkpoint.chapterHref],
-          createdAt: now,
-          updatedAt: now,
-        ),
-      );
-    }
-    readingAgentRuntime.checkpointResolved();
   }
 
   Future<void> _reviewKnowledgeCard(KnowledgeCard card, bool remembered) async {
-    final now = DateTime.now().millisecondsSinceEpoch;
-    final interval = remembered ? (card.intervalDays * 2).clamp(2, 60) : 1;
-    await readingAgentRepository.saveKnowledgeCard(
-      card.copyWith(
-        intervalDays: interval,
-        repetitions: card.repetitions + 1,
-        dueAt: now + Duration(days: interval).inMilliseconds,
-        updatedAt: now,
-      ),
-    );
-    readingAgentRuntime.knowledgeCardReviewed();
+    try {
+      await _ensureReadingSession();
+      final mutation = await agentActionService.reviewKnowledgeCard(
+        card,
+        remembered: remembered,
+      );
+      if (mounted) _showAgentUndoSnackBar(mutation.action);
+    } catch (_) {
+      if (mounted) AnxToast.show(L10n.of(context).readingAssistantSaveFailed);
+    }
   }
 
   Future<void> _createMarkdownMemory() async {
@@ -1653,7 +1564,7 @@ class ReadingPageState extends ConsumerState<ReadingPage>
     if (result.length < 6) {
       final manifest =
           await epubPlayerKey.currentState?.readingAgentChapterManifest() ??
-          const <ReadingAgentChapterManifestItem>[];
+              const <ReadingAgentChapterManifestItem>[];
       if (manifest.length > result.length) {
         result
           ..clear()
@@ -1690,27 +1601,25 @@ class ReadingPageState extends ConsumerState<ReadingPage>
       for (final unit in structure.units) unit.chapter.href: unit,
     };
     return [
-          for (var index = 0; index < unique.length; index++)
-            FictionBackfillChapter(
-              href: unique[index].href,
-              title: unique[index].title,
-              startProgress: unique[index].startProgress,
-              // The current partial chapter is excluded because fetching its full
-              // text could cross the safe boundary.
-              endProgress: index + 1 < unique.length
-                  ? unique[index + 1].startProgress
-                  : 1,
-              workId: unitsByHref[unique[index].href]?.workId,
-              workTitle: unitsByHref[unique[index].href]?.workTitle,
-              volumeId: unitsByHref[unique[index].href]?.volumeId,
-              arcId: unitsByHref[unique[index].href]?.arcId,
-              sceneId: unitsByHref[unique[index].href]?.sceneId,
-              semanticKind:
-                  unitsByHref[unique[index].href]?.semanticKind ??
-                  ReadingChapterSemanticKind.narrative,
-              isNavigationDocument: unique[index].isNavigationDocument,
-            ),
-        ]
+      for (var index = 0; index < unique.length; index++)
+        FictionBackfillChapter(
+          href: unique[index].href,
+          title: unique[index].title,
+          startProgress: unique[index].startProgress,
+          // The current partial chapter is excluded because fetching its full
+          // text could cross the safe boundary.
+          endProgress:
+              index + 1 < unique.length ? unique[index + 1].startProgress : 1,
+          workId: unitsByHref[unique[index].href]?.workId,
+          workTitle: unitsByHref[unique[index].href]?.workTitle,
+          volumeId: unitsByHref[unique[index].href]?.volumeId,
+          arcId: unitsByHref[unique[index].href]?.arcId,
+          sceneId: unitsByHref[unique[index].href]?.sceneId,
+          semanticKind: unitsByHref[unique[index].href]?.semanticKind ??
+              ReadingChapterSemanticKind.narrative,
+          isNavigationDocument: unique[index].isNavigationDocument,
+        ),
+    ]
         .where(
           (chapter) =>
               !chapter.isNavigationDocument &&
@@ -1793,8 +1702,8 @@ class ReadingPageState extends ConsumerState<ReadingPage>
     final worldState = readingAgentRuntime.state;
     final currentProgress =
         worldState.bookId == _book.id && worldState.totalProgress > 0
-        ? worldState.totalProgress.clamp(0, 1).toDouble()
-        : _book.readingPercentage.clamp(0, 1).toDouble();
+            ? worldState.totalProgress.clamp(0, 1).toDouble()
+            : _book.readingPercentage.clamp(0, 1).toDouble();
     // This lower bound is installation-local. Synced Artifact coverage and a
     // remote device's farthest position must not silently redefine what this
     // device may scan. No local opt-out means the manual action starts at 0%.
@@ -1807,6 +1716,21 @@ class ReadingPageState extends ConsumerState<ReadingPage>
       fromProgress: fromProgress,
     );
     if (!mounted) return;
+    final cloudProvider = fictionBackfillService.previewProvider(ref);
+    final hybrid = FictionHybridExtractionService(
+        ref: ref, verificationProviderId: cloudProvider?.id);
+    final extractionProvider = hybrid.provider;
+    final destination = extractionProvider ?? cloudProvider;
+    if (destination == null) {
+      AnxToast.show(L10n.of(context).readingPracticeProviderUnavailable);
+      return;
+    }
+    final estimate =
+        fictionBackfillService.estimateCloudPreview(chapters.length);
+    final verificationDisclosure = extractionProvider != null &&
+            cloudProvider != null
+        ? '\n${L10n.of(context).readingMaterialsVerifierDestination(_materialsDestination(cloudProvider))}'
+        : '';
     final percent = (currentProgress * 100).round();
     final fromPercent = (fromProgress * 100).round();
     final confirmed = await showDialog<bool>(
@@ -1814,7 +1738,7 @@ class ReadingPageState extends ConsumerState<ReadingPage>
       builder: (dialogContext) => AlertDialog(
         title: const Text('确认整理已读部分'),
         content: Text(
-          '将读取 $fromPercent%～$percent% 内已完整读完的 ${chapters.length} 个目录章节并调用 AI 建立人物、关系和悬念档案。为避免越过边界，当前尚未读完的章节不会读取。\n\n生成内容属于 Agent 推断，可在动作记录中撤销。',
+          '将读取 $fromPercent%～$percent% 内已完整读完的 ${chapters.length} 个目录章节并调用 AI 建立人物、关系和悬念档案。为避免越过边界，当前尚未读完的章节不会读取。\n\n生成内容属于 Agent 推断，可在动作记录中撤销。\n\n${_materialsDestination(destination)}$verificationDisclosure\n${L10n.of(context).readingMaterialsEstimate('${estimate.baselineInputTokens}')}',
         ),
         actions: [
           TextButton(
@@ -1830,20 +1754,18 @@ class ReadingPageState extends ConsumerState<ReadingPage>
     );
     if (confirmed != true || chapters.isEmpty) return;
     if (!mounted) return;
-    final hybrid = FictionHybridExtractionService(ref: ref);
-    final extractionProvider = hybrid.provider;
     var allowFullTextCloudFallback = false;
     final cloudPreviewContent = <String, String>{};
     if (extractionProvider == null) {
       final estimate = fictionBackfillService.estimateCloudPreview(
         chapters.length,
       );
-      allowFullTextCloudFallback =
-          await showDialog<bool>(
+      allowFullTextCloudFallback = await showDialog<bool>(
             context: context,
             builder: (dialogContext) => AlertDialog(
               title: const Text('轻量提取引擎不可用'),
               content: Text(
+                '${_materialsDestination(cloudProvider!)}\n\n'
                 '当前没有可用的本地/小模型提取引擎。\n\n'
                 '如果继续，将把 $fromPercent%～$percent% 的 ${chapters.length} 个已读章节发送给通用线上模型。'
                 '按当前分批计划预计输入约 ${estimate.baselineInputTokens} Token（${estimate.requestCount} 批）；'
@@ -1864,7 +1786,6 @@ class ReadingPageState extends ConsumerState<ReadingPage>
           false;
       if (!allowFullTextCloudFallback) return;
     }
-    SmartDialog.showLoading(msg: '正在整理已读章节…');
     try {
       final now = DateTime.now().millisecondsSinceEpoch;
       final sessionId = readingAgentRuntime.state.sessionId;
@@ -1884,15 +1805,15 @@ class ReadingPageState extends ConsumerState<ReadingPage>
       final effectiveFromProgress = restoredTask == null
           ? fromProgress
           : ((restoredTask.payload['fromProgress'] as num?)?.toDouble() ??
-                    fromProgress)
-                .clamp(0, currentProgress)
-                .toDouble();
+                  fromProgress)
+              .clamp(0, currentProgress)
+              .toDouble();
       final effectiveSafeBoundary = restoredTask == null
           ? currentProgress
           : ((restoredTask.payload['safeBoundary'] as num?)?.toDouble() ??
-                    currentProgress)
-                .clamp(effectiveFromProgress, currentProgress)
-                .toDouble();
+                  currentProgress)
+              .clamp(effectiveFromProgress, currentProgress)
+              .toDouble();
       final effectiveChapters = await _eligibleBackfillChapters(
         effectiveSafeBoundary,
         fromProgress: effectiveFromProgress,
@@ -1910,21 +1831,12 @@ class ReadingPageState extends ConsumerState<ReadingPage>
           loadChapter: (href) => cloudPreviewContent[href] != null
               ? Future.value(cloudPreviewContent[href]!)
               : epubPlayerKey.currentState?.chapterContentByHref(href) ??
-                    Future.value(''),
-          generate: useHybrid
-              ? hybrid.generate
-              : (prompt) => aiGenerateText(
-                  [ChatMessage.humanText(prompt)],
-                  ref: ref,
-                  readingMode: ReadingAiMode.general,
-                  task: AiContextTask.fictionBackfill,
-                  // The user has explicitly approved this full-text cloud
-                  // path after the extraction engine was unavailable. Do not
-                  // silently try another provider with the same chapter.
-                  allowFallback: false,
-                  outputContract: const AiOutputContract.json(),
-                ),
+                  Future.value(''),
+          generate: useHybrid ? hybrid.generate : null,
           sessionId: sessionId,
+          taskId: execution.taskId,
+          providerId: cloudProvider?.id,
+          ref: ref,
           ingestedAt: now,
           fromProgress: effectiveFromProgress,
           batchSize: useHybrid ? 1 : 5,
@@ -1933,34 +1845,28 @@ class ReadingPageState extends ConsumerState<ReadingPage>
           // Both extraction routes require exact source evidence. The hybrid
           // route may additionally send only ambiguous short evidence to the
           // cloud verifier; the regular cloud route never accepts ambiguity.
-          validateCandidate: useHybrid
-              ? hybrid.validate
-              : hybrid.validateDirect,
+          validateCandidate:
+              useHybrid ? hybrid.validate : hybrid.validateDirect,
           artifactMetadata: useHybrid ? hybrid.artifactMetadata : const {},
-          onBatchCompleted:
-              ({
-                required artifacts,
-                required checkpoints,
-                required completedChapters,
-                required totalChapters,
-              }) async {
-                execution.safePoint();
-                for (final artifact in artifacts) {
-                  await agentActionService.saveArtifact(artifact);
-                }
-                for (final checkpoint in checkpoints) {
-                  await readingAgentRepository.saveSystemArtifact(checkpoint);
-                }
-                await execution.update(
-                  progress: totalChapters == 0
-                      ? 1
-                      : completedChapters / totalChapters,
-                  checkpoint: {'completedChapters': completedChapters},
-                );
-                SmartDialog.showLoading(
-                  msg: '正在整理已读章节 $completedChapters/$totalChapters…',
-                );
-              },
+          onBatchCompleted: ({
+            required artifacts,
+            required checkpoints,
+            required completedChapters,
+            required totalChapters,
+          }) async {
+            execution.safePoint();
+            for (final artifact in artifacts) {
+              await agentActionService.saveArtifact(artifact);
+            }
+            for (final checkpoint in checkpoints) {
+              await readingAgentRepository.saveSystemArtifact(checkpoint);
+            }
+            await execution.update(
+              progress:
+                  totalChapters == 0 ? 1 : completedChapters / totalChapters,
+              checkpoint: {'completedChapters': completedChapters},
+            );
+          },
           existingArtifacts: existingArtifacts,
         );
       }
@@ -1998,8 +1904,6 @@ class ReadingPageState extends ConsumerState<ReadingPage>
       }
     } catch (error) {
       if (mounted) AnxToast.show('整理失败：$error');
-    } finally {
-      SmartDialog.dismiss();
     }
   }
 
@@ -2361,13 +2265,16 @@ class ReadingPageState extends ConsumerState<ReadingPage>
                         style: const TextStyle(fontWeight: FontWeight.w600),
                       ),
                       FutureBuilder<List<ReadingChapterCheckpoint>>(
-                        future: readingAgentRepository.pendingCheckpoints(
-                          _book.id,
-                        ),
+                        future: _loadBookMaterials().then((result) =>
+                            result.$2.outcomes?.pendingCheckpoints ?? const []),
                         builder: (context, snapshot) => Column(
                           children: [
                             for (final checkpoint
-                                in (snapshot.data ?? const []).take(3))
+                                in (snapshot.connectionState ==
+                                            ConnectionState.done
+                                        ? snapshot.data ?? const []
+                                        : const <ReadingChapterCheckpoint>[])
+                                    .take(3))
                               ListTile(
                                 contentPadding: EdgeInsets.zero,
                                 leading: const Icon(Icons.fact_check_outlined),
@@ -2401,8 +2308,10 @@ class ReadingPageState extends ConsumerState<ReadingPage>
                         future: ref.read(readingCoachProvider(_book.id).future),
                         builder: (context, snapshot) {
                           final items =
-                              (snapshot.data?.difficulties ??
-                                      const <ReadingDifficulty>[])
+                              (snapshot.connectionState == ConnectionState.done
+                                      ? snapshot.data?.difficulties ??
+                                          const <ReadingDifficulty>[]
+                                      : const <ReadingDifficulty>[])
                                   .where(
                                     (item) =>
                                         item.status ==
@@ -2423,9 +2332,9 @@ class ReadingPageState extends ConsumerState<ReadingPage>
                                   subtitle: Text(item.chapterTitle ?? '未知章节'),
                                   onTap: () => ReaderCommandGateway.instance
                                       .navigateToCfi(
-                                        bookId: _book.id,
-                                        cfi: item.cfi,
-                                      ),
+                                    bookId: _book.id,
+                                    cfi: item.cfi,
+                                  ),
                                   trailing: IconButton(
                                     tooltip: '标记已解决',
                                     icon: const Icon(
@@ -2464,12 +2373,15 @@ class ReadingPageState extends ConsumerState<ReadingPage>
                         style: TextStyle(fontWeight: FontWeight.w600),
                       ),
                       FutureBuilder<List<KnowledgeCard>>(
-                        future: readingAgentRepository.dueKnowledgeCards(
-                          _book.id,
-                        ),
+                        future: _loadBookMaterials().then((result) =>
+                            result.$2.outcomes?.knowledgeCards ?? const []),
                         builder: (context, snapshot) => Column(
                           children: [
-                            for (final card in (snapshot.data ?? const []).take(
+                            for (final card in (snapshot.connectionState ==
+                                        ConnectionState.done
+                                    ? snapshot.data ?? const []
+                                    : const <KnowledgeCard>[])
+                                .take(
                               3,
                             ))
                               ListTile(
@@ -2526,14 +2438,20 @@ class ReadingPageState extends ConsumerState<ReadingPage>
                         ),
                       ],
                     ),
-                    if (state.markdownMemorySummary.isNotEmpty) ...[
-                      for (final title in state.markdownMemorySummary)
-                        ListTile(
-                          contentPadding: EdgeInsets.zero,
-                          leading: const Icon(Icons.description_outlined),
-                          title: Text(title),
-                        ),
-                    ],
+                    FutureBuilder<List<ReadingMemoryDocument>>(
+                      future: _loadBookMaterials().then(
+                          (result) => result.$2.outcomes?.memories ?? const []),
+                      builder: (context, snapshot) => Column(children: [
+                        if (snapshot.connectionState == ConnectionState.done)
+                          for (final memory in snapshot.data ??
+                              const <ReadingMemoryDocument>[])
+                            ListTile(
+                              contentPadding: EdgeInsets.zero,
+                              leading: const Icon(Icons.description_outlined),
+                              title: Text(memory.title),
+                            ),
+                      ]),
+                    ),
                     if (state.pendingProfileCount > 0) ...[
                       const Divider(height: 32),
                       const Text(
@@ -2564,10 +2482,10 @@ class ReadingPageState extends ConsumerState<ReadingPage>
                                         onPressed: () async {
                                           await agentActionService
                                               .setProfileStatus(
-                                                key: item.key,
-                                                status: ReaderProfileStatus
-                                                    .rejected,
-                                              );
+                                            key: item.key,
+                                            status:
+                                                ReaderProfileStatus.rejected,
+                                          );
                                           readingAgentRuntime
                                               .profileCandidateResolved();
                                           setSheetState(() {});
@@ -2579,10 +2497,10 @@ class ReadingPageState extends ConsumerState<ReadingPage>
                                         onPressed: () async {
                                           await agentActionService
                                               .setProfileStatus(
-                                                key: item.key,
-                                                status: ReaderProfileStatus
-                                                    .confirmed,
-                                              );
+                                            key: item.key,
+                                            status:
+                                                ReaderProfileStatus.confirmed,
+                                          );
                                           readingAgentRuntime
                                               .profileCandidateResolved();
                                           setSheetState(() {});
@@ -2628,21 +2546,21 @@ class ReadingPageState extends ConsumerState<ReadingPage>
                                 ),
                                 trailing:
                                     action.status == AgentActionStatus.applied
-                                    ? TextButton(
-                                        onPressed: () async {
-                                          final result =
-                                              await agentActionService.undo(
+                                        ? TextButton(
+                                            onPressed: () async {
+                                              final result =
+                                                  await agentActionService.undo(
                                                 action,
                                               );
-                                          if (!context.mounted) return;
-                                          AnxToast.show(
-                                            _undoResultLabel(result),
-                                          );
-                                          setSheetState(() {});
-                                        },
-                                        child: const Text('撤销'),
-                                      )
-                                    : Text(action.status.name),
+                                              if (!context.mounted) return;
+                                              AnxToast.show(
+                                                _undoResultLabel(result),
+                                              );
+                                              setSheetState(() {});
+                                            },
+                                            child: const Text('撤销'),
+                                          )
+                                        : Text(action.status.name),
                               ),
                           ],
                         );
@@ -2660,6 +2578,8 @@ class ReadingPageState extends ConsumerState<ReadingPage>
   }
 
   Future<void> _showReadingOutcomes() async {
+    await _ensureReadingSession();
+    if (!mounted) return;
     await Navigator.push(
       context,
       MaterialPageRoute(
@@ -2695,139 +2615,358 @@ class ReadingPageState extends ConsumerState<ReadingPage>
   }
 
   Future<void> _showBookHub() async {
-    final outcomes = readingOutcomesService.load(_book.id);
-    final wideLayout = MediaQuery.sizeOf(context).width >= 700;
-    final disableAnimations = MediaQuery.disableAnimationsOf(context);
-    String? recordedActionFingerprint;
+    showOrHideAppBarAndBottomBar(false);
+    _bookMaterials = _loadBookMaterials();
+    aiWorkspaceController.showSurface(
+      AiWorkspaceSurface.book,
+      wide: _usesAiSplitLayout(context),
+    );
+  }
 
-    Widget content(BuildContext overlayContext) =>
-        FutureBuilder<ReadingOutcomesSnapshot>(
-          future: outcomes,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState != ConnectionState.done) {
-              return Center(
-                child: disableAnimations
-                    ? const Text('正在读取本书状态…')
-                    : const CircularProgressIndicator(),
-              );
-            }
-            if (snapshot.hasError) {
-              return const Center(child: Text('暂时无法读取本书状态'));
-            }
-            final state = snapshot.requireData;
-            final visibleProgress = readingAgentRuntime.state.totalProgress > 0
-                ? readingAgentRuntime.state.totalProgress
-                : _book.readingPercentage;
-            final atlas = fictionStoryAtlasService.fromArtifacts(
-              state.artifacts,
-              visibleAtProgress: visibleProgress,
-              arcScoped: _readingProfile?.usesArcScopedStoryAtlas == true,
-            );
-            final nextAction = const NextReadingActionResolver().resolve(
+  Future<(ReadingOutcomesSnapshot, BookMaterialsSnapshot)>
+      _loadBookMaterials() async {
+    final progress = _visibleReadingProgress;
+    final cfi = epubPlayerKey.currentState?.cfi;
+    final state = await readingOutcomesService.load(_book.id);
+    final materials = await bookWikiService.loadMaterials(
+      _book.id,
+      visibleAtProgress: progress,
+      closure: _closurePolicy,
+      outcomes: state,
+      currentCfi: cfi,
+    );
+    return (
+      materials.outcomes ?? ReadingOutcomesSnapshot(loadedAt: state.loadedAt),
+      materials
+    );
+  }
+
+  void _navigateBookSource(String target) {
+    final gateway = ReaderCommandGateway.instance;
+    final navigated = target.startsWith('epubcfi(')
+        ? gateway.navigateToCfi(bookId: _book.id, cfi: target)
+        : gateway.navigateToHref(bookId: _book.id, href: target);
+    if (!navigated) {
+      AnxToast.show(L10n.of(context).readingWorkspaceSourceUnavailable);
+    }
+    if (mounted) setState(() {});
+  }
+
+  Future<void> _openBookMaterial(BookMaterialItem requested) async {
+    // Recheck after a location change; an old list cannot widen visibility.
+    final (_, materials) = await _loadBookMaterials();
+    if (!mounted ||
+        materials.visibleAtProgress > _visibleReadingProgress + .000001) {
+      return;
+    }
+    final item =
+        materials.items.where((entry) => entry.id == requested.id).firstOrNull;
+    if (!mounted || item == null) return;
+    final entry = item.wikiEntry;
+    final note = item.noteItem;
+    if (entry != null) {
+      await Navigator.push(
+          context,
+          MaterialPageRoute<void>(
+            builder: (_) => BookWikiEntryPage(
+                book: _book,
+                entry: entry,
+                onOpenLocation: (target) async {
+                  Navigator.pop(context);
+                  _navigateBookSource(target);
+                }),
+          ));
+    } else if (note != null) {
+      await Navigator.push(
+          context,
+          MaterialPageRoute<void>(
+              builder: (_) => Scaffold(
+                    appBar: AppBar(title: Text(item.title), actions: [
+                      if (item.location?.isNotEmpty == true)
+                        IconButton(
+                          tooltip: L10n.of(context).readingMemoryViewSources,
+                          icon: const Icon(Icons.menu_book_outlined),
+                          onPressed: () {
+                            Navigator.pop(context);
+                            _navigateBookSource(item.location!);
+                          },
+                        ),
+                    ]),
+                    body: SafeArea(child: ReadingNoteDetail(item: note)),
+                  )));
+    } else if (item.difficulty != null) {
+      final difficulty = item.difficulty!;
+      // A saved question is a reader record, never an exact book quotation.
+      // Keep its original locator and avoid manufacturing new source evidence.
+      final l10n = L10n.of(context);
+      await Navigator.push(
+          context,
+          MaterialPageRoute<void>(
+              builder: (_) => Scaffold(
+                    appBar: AppBar(
+                        title: Text(l10n.readingCompanionRecords),
+                        actions: [
+                          IconButton(
+                              tooltip: l10n.readingMemoryViewSources,
+                              icon: const Icon(Icons.menu_book_outlined),
+                              onPressed: () {
+                                Navigator.pop(context);
+                                _navigateBookSource(difficulty.cfi);
+                              }),
+                        ]),
+                    body:
+                        ListView(padding: const EdgeInsets.all(24), children: [
+                      Text(difficulty.text,
+                          style: Theme.of(context).textTheme.titleLarge),
+                      if (difficulty.chapterTitle?.isNotEmpty == true) ...[
+                        const SizedBox(height: 8),
+                        Text(difficulty.chapterTitle!),
+                      ],
+                      if (difficulty.context?.isNotEmpty == true) ...[
+                        const SizedBox(height: 24),
+                        Text(l10n.readingCompanionSavedContext,
+                            style: Theme.of(context).textTheme.titleMedium),
+                        const SizedBox(height: 8),
+                        SelectableText(difficulty.context!),
+                      ],
+                      if (difficulty.note?.isNotEmpty == true) ...[
+                        const SizedBox(height: 24),
+                        Text(l10n.readingCompanionSavedAnswer,
+                            style: Theme.of(context).textTheme.titleMedium),
+                        const SizedBox(height: 8),
+                        SelectableText(difficulty.note!),
+                      ],
+                      const SizedBox(height: 24),
+                      OutlinedButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            unawaited(showReadingCoach());
+                          },
+                          child: Text(l10n.readingCompanionExercises)),
+                    ]),
+                  )));
+    }
+    if (mounted) setState(() => _bookMaterials = _loadBookMaterials());
+  }
+
+  Future<void> _showBookSettings() async {
+    final l10n = L10n.of(context);
+    final action = await showModalBottomSheet<String>(
+      context: context,
+      showDragHandle: !MediaQuery.disableAnimationsOf(context),
+      builder: (sheetContext) => SafeArea(
+          child: ListView(shrinkWrap: true, children: [
+        ListTile(
+            title: Text(l10n.readingWorkspaceSettings,
+                style: Theme.of(context).textTheme.titleLarge)),
+        ListTile(
+            leading: const Icon(Icons.memory_outlined),
+            title: Text(l10n.readingWorkspaceContext),
+            onTap: () => Navigator.pop(sheetContext, 'context')),
+        ListTile(
+            leading: const Icon(Icons.tune_outlined),
+            title: Text(l10n.readingWorkspaceReaderOptions),
+            onTap: () => Navigator.pop(sheetContext, 'preferences')),
+        ListTile(
+            leading: const Icon(Icons.ios_share_outlined),
+            title: Text(l10n.readingWorkspaceLibrary),
+            onTap: () => Navigator.pop(sheetContext, 'library')),
+      ])),
+    );
+    if (!mounted) return;
+    switch (action) {
+      case 'context':
+        await _showReadingContextPack();
+      case 'preferences':
+        await _ensureReadingSession();
+        if (mounted) await _showReadingAgentPanel();
+      case 'library':
+        await _showBookWiki();
+    }
+  }
+
+  Widget _buildBookDirectory() =>
+      FutureBuilder<(ReadingOutcomesSnapshot, BookMaterialsSnapshot)>(
+        future: _bookMaterials,
+        builder: (context, snapshot) {
+          final l10n = L10n.of(context);
+          if (snapshot.hasError) {
+            return Center(
+                child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(mainAxisSize: MainAxisSize.min, children: [
+                Text(l10n.readingWorkspaceLoadFailed),
+                TextButton(
+                    onPressed: () =>
+                        setState(() => _bookMaterials = _loadBookMaterials()),
+                    child: Text(l10n.readingWorkspaceRetry)),
+              ]),
+            ));
+          }
+          if (snapshot.connectionState != ConnectionState.done ||
+              !snapshot.hasData) {
+            return Center(child: Text(l10n.readingWorkspaceLoading));
+          }
+          final (state, materials) = snapshot.requireData;
+          final atlas = fictionStoryAtlasService.fromArtifacts(state.artifacts,
+              visibleAtProgress: materials.visibleAtProgress,
+              arcScoped: _readingProfile?.usesArcScopedStoryAtlas == true);
+          final next = const NextReadingActionResolver().resolve(
               bookId: _book.id,
               outcomes: state,
               closure: _closurePolicy,
               coverage: _readingCoverage,
               atlas: atlas,
-              resumeContextAvailable: state.artifacts.any(
-                (artifact) =>
-                    artifact.kind == ReadingArtifactKinds.resumeContext &&
-                    artifact.isVisibleAtProgress(visibleProgress),
-              ),
-            );
-            if (recordedActionFingerprint != nextAction.completionFingerprint) {
-              recordedActionFingerprint = nextAction.completionFingerprint;
-              readingExperienceDiagnostics.recordNextActionShown();
-            }
-            return ReadingBookHubContent(
-              book: _book,
-              state: state,
-              closure: _closurePolicy,
-              nextAction: nextAction,
-              atlas: atlas,
-              syncing: _syncingRemoteProgress,
-              syncEnabled: Prefs().cloudBaseSyncEnabled || Prefs().webdavStatus,
-              syncNeedsManualResolution: Sync().automaticConflictPending,
-              onNextAction: () async {
-                readingExperienceDiagnostics.recordNextActionExecuted();
-                Navigator.pop(overlayContext);
-                await _handleBookHubNextAction(nextAction);
-              },
-              onOpenOutcomes: () async {
-                Navigator.pop(overlayContext);
-                await _showReadingOutcomes();
-              },
-              onOpenWiki: () async {
-                Navigator.pop(overlayContext);
-                await _showBookWiki();
-              },
-              onOpenContextPack: () async {
-                Navigator.pop(overlayContext);
-                await _showReadingContextPack();
-              },
-              onOpenStoryArchive: () async {
-                Navigator.pop(overlayContext);
-                await _showReadingOutcomes();
-              },
-              onSync: () async {
-                Navigator.pop(overlayContext);
-                await _offerRemoteProgressIfAvailable(manual: true);
-              },
-              onOpenReadingSettings: () async {
-                Navigator.pop(overlayContext);
-                await _showReadingAgentPanel();
-              },
-            );
-          },
-        );
-
-    if (!wideLayout) {
-      await showModalBottomSheet<void>(
-        context: context,
-        isScrollControlled: true,
-        showDragHandle: true,
-        builder: (sheetContext) => SafeArea(
-          child: SizedBox(
-            height: MediaQuery.sizeOf(sheetContext).height * .82,
-            child: content(sheetContext),
-          ),
-        ),
+              resumeContextAvailable: state.artifacts.any((item) =>
+                  item.kind == ReadingArtifactKinds.resumeContext &&
+                  item.isVisibleAtProgress(materials.visibleAtProgress)));
+          return ReadingBookHubContent(
+            key: const ValueKey('book-material-directory'),
+            book: _book,
+            state: state,
+            materials: materials,
+            closure: _closurePolicy,
+            nextAction: next,
+            atlas: atlas,
+            syncing: _syncingRemoteProgress,
+            syncEnabled: Prefs().cloudBaseSyncEnabled || Prefs().webdavStatus,
+            syncNeedsManualResolution: Sync().automaticConflictPending,
+            onNextAction: () => _handleBookHubNextAction(next),
+            onOpenOutcomes: _showReadingOutcomes,
+            onOpenWiki: _showBookWiki,
+            onOpenContextPack: _showReadingContextPack,
+            onOpenMaterial: _openBookMaterial,
+            initialSearch: aiWorkspaceController.bookQuery,
+            onSearchChanged: (query) => aiWorkspaceController.bookQuery = query,
+            onOpenExercises: showReadingCoach,
+            onOrganizeStory: () async {
+              await _ensureReadingSession();
+              final coverage = _readingCoverage;
+              if (coverage != null) {
+                await _confirmAndBackfill(coverage);
+              } else {
+                await _showCoverageSetup();
+              }
+            },
+            onOrganizeKnowledge: () async {
+              await _ensureReadingSession();
+              if (mounted) await _generateBookWiki(false);
+            },
+            onResumeTask: _resumeReadingTask,
+            onOpenStoryArchive: () async {
+              await Navigator.push(
+                  context,
+                  MaterialPageRoute<void>(
+                      builder: (_) => FictionCharacterGraphPage(
+                          book: _book,
+                          initialAtlas: atlas,
+                          readingProfile: _readingProfile,
+                          onOpenLocation: (target) async {
+                            Navigator.pop(context);
+                            _navigateBookSource(target);
+                          })));
+            },
+            onOpenTimeline: () async {
+              await Navigator.push(
+                  context,
+                  MaterialPageRoute<void>(
+                      builder: (_) => FictionStoryTimelinePage(
+                          book: _book,
+                          initialAtlas: atlas,
+                          readingProfile: _readingProfile,
+                          onOpenLocation: (target) async {
+                            Navigator.pop(context);
+                            _navigateBookSource(target);
+                          })));
+            },
+            onSync: () => _offerRemoteProgressIfAvailable(manual: true),
+            onOpenReadingSettings: _showBookSettings,
+          );
+        },
       );
-      return;
-    }
 
-    await showGeneralDialog<void>(
-      context: context,
-      barrierDismissible: true,
-      barrierLabel: '关闭本书面板',
-      transitionDuration: disableAnimations
-          ? Duration.zero
-          : const Duration(milliseconds: 180),
-      pageBuilder: (dialogContext, _, __) => Align(
-        alignment: Alignment.centerRight,
-        child: SafeArea(
-          child: Material(
-            elevation: 8,
-            color: Theme.of(dialogContext).colorScheme.surface,
-            child: SizedBox(
-              width: 440,
-              height: double.infinity,
-              child: content(dialogContext),
-            ),
-          ),
-        ),
-      ),
-      transitionBuilder: (context, animation, _, child) {
-        if (disableAnimations) return child;
-        return SlideTransition(
-          position: Tween<Offset>(
-            begin: const Offset(1, 0),
-            end: Offset.zero,
-          ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOut)),
-          child: child,
-        );
-      },
-    );
+  Widget _buildReadingWorkspace() {
+    final l10n = L10n.of(context);
+    final wide = _usesAiSplitLayout(context);
+    return PageStorage(
+        bucket: _workspaceStorage,
+        child: Column(children: [
+          SizedBox(
+              height: 48,
+              child: Row(children: [
+                const SizedBox(width: 8),
+                for (final surface in AiWorkspaceSurface.values)
+                  TextButton(
+                      onPressed: () {
+                        if (surface == AiWorkspaceSurface.assistant) {
+                          unawaited(showAiChat());
+                        } else {
+                          unawaited(_showBookHub());
+                        }
+                      },
+                      style: TextButton.styleFrom(
+                          foregroundColor: aiWorkspaceController.surface ==
+                                  surface
+                              ? Theme.of(context).colorScheme.primary
+                              : Theme.of(context).colorScheme.onSurfaceVariant),
+                      child: Text(surface == AiWorkspaceSurface.assistant
+                          ? 'AI'
+                          : l10n.readingWorkspaceBook)),
+                const Spacer(),
+                if (ReaderCommandGateway.instance
+                    .canReturnToPreviousLocation(bookId: _book.id))
+                  IconButton(
+                      tooltip: l10n.readingAssistantReturn,
+                      icon: const Icon(Icons.keyboard_return),
+                      onPressed: () {
+                        ReaderCommandGateway.instance
+                            .returnToPreviousLocation(bookId: _book.id);
+                        setState(() {});
+                      }),
+                if (wide)
+                  PopupMenuButton<AiPanelPositionEnum>(
+                    tooltip: l10n.readingWorkspaceMove,
+                    icon: const Icon(Icons.dock_outlined),
+                    onSelected: (position) =>
+                        setState(() => Prefs().aiPanelPosition = position),
+                    itemBuilder: (_) => [
+                      PopupMenuItem(
+                          value: AiPanelPositionEnum.right,
+                          child: Text(l10n.aiShowAtRight)),
+                      PopupMenuItem(
+                          value: AiPanelPositionEnum.bottom,
+                          child: Text(l10n.aiShowAtBottom)),
+                    ],
+                  )
+                else
+                  IconButton(
+                      tooltip: aiWorkspaceController.sheetExpanded
+                          ? l10n.readingWorkspaceCollapse
+                          : l10n.readingWorkspaceExpand,
+                      icon: Icon(aiWorkspaceController.sheetExpanded
+                          ? Icons.unfold_less
+                          : Icons.unfold_more),
+                      onPressed: () {
+                        FocusManager.instance.primaryFocus?.unfocus();
+                        aiWorkspaceController.setSheetExpanded(
+                            !aiWorkspaceController.sheetExpanded);
+                      }),
+                IconButton(
+                    tooltip: l10n.readingWorkspaceClose,
+                    icon: const Icon(Icons.close),
+                    onPressed: aiWorkspaceController.hide),
+              ])),
+          const Divider(height: 1),
+          Expanded(
+              child: IndexedStack(
+                  index: aiWorkspaceController.surface.index,
+                  children: [
+                _buildAiWorkspace(),
+                _bookMaterials == null
+                    ? const SizedBox.shrink()
+                    : _buildBookDirectory(),
+              ])),
+        ]));
   }
 
   Future<void> _handleBookHubNextAction(NextReadingAction action) async {
@@ -2867,7 +3006,21 @@ class ReadingPageState extends ConsumerState<ReadingPage>
     }
   }
 
-  Future<void> _generateBookWiki(bool fullBook) async {
+  String _materialsDestination(AiProvider provider) {
+    final l10n = L10n.of(context);
+    return l10n.readingMaterialsDestination(
+      provider.title,
+      provider.model,
+      provider.deployment == AiProviderDeployment.localPrivate
+          ? l10n.readingPracticeLocalDestination
+          : l10n.readingPracticeCloudDestination,
+    );
+  }
+
+  Future<void> _generateBookWiki(
+    bool fullBook, {
+    bool contextPack = false,
+  }) async {
     final localProgress = readingAgentRuntime.state.totalProgress > 0
         ? readingAgentRuntime.state.totalProgress
         : _book.readingPercentage;
@@ -2879,15 +3032,20 @@ class ReadingPageState extends ConsumerState<ReadingPage>
         )
         .toList(growable: false);
     if (!mounted) return;
+    final provider = bookWikiGenerationService.previewProvider(ref);
+    if (provider == null) {
+      AnxToast.show(L10n.of(context).readingPracticeProviderUnavailable);
+      return;
+    }
     final estimatedTokens = chapters.length * 3000;
+    final artifactLabel = contextPack ? '上下文' : 'Wiki';
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: Text(fullBook ? '确认生成全书 Wiki' : '确认生成已读 Wiki'),
+        title:
+            Text(fullBook ? '确认生成全书 $artifactLabel' : '确认生成已读 $artifactLabel'),
         content: Text(
-          fullBook
-              ? '将读取全书 ${chapters.length} 个章节，可能包含未读内容并产生剧透。预计输入约 $estimatedTokens Token，可随时取消后重新开始。'
-              : '将读取 0%～${(boundary * 100).round()}% 内 ${chapters.length} 个已完整读完的章节，不读取后文。预计输入约 $estimatedTokens Token。',
+          '${fullBook ? '将读取全书 ${chapters.length} 个章节，可能包含未读内容并产生剧透。预计输入约 $estimatedTokens Token，可随时取消后重新开始。' : '将读取 0%～${(boundary * 100).round()}% 内 ${chapters.length} 个已完整读完的章节，不读取后文。预计输入约 $estimatedTokens Token。'}\n\n${_materialsDestination(provider)}',
         ),
         actions: [
           TextButton(
@@ -2904,25 +3062,28 @@ class ReadingPageState extends ConsumerState<ReadingPage>
     if (confirmed != true || chapters.isEmpty || !mounted) return;
     final sessionId = readingAgentRuntime.state.sessionId;
     if (sessionId == null) return;
-    SmartDialog.showLoading(msg: '正在生成书籍 Wiki…');
     try {
-      final inputs = <BookWikiChapter>[];
-      for (final chapter in chapters) {
-        final content =
-            await (epubPlayerKey.currentState?.chapterContentByHref(
-                  chapter.href,
-                  maxCharacters: 24000,
-                ) ??
-                Future.value(''));
-        if (content.trim().isEmpty) continue;
-        inputs.add(
-          BookWikiChapter(
-            href: chapter.href,
-            title: chapter.title,
-            progress: chapter.startProgress,
-            content: content,
-          ),
-        );
+      await readingTaskScheduler.restore();
+      final existingTask = readingTaskScheduler.tasks
+          .where(
+        (task) =>
+            task.bookId == _book.id &&
+            task.type == 'wiki.book_generate' &&
+            !task.isTerminal,
+      )
+          .fold<ReadingTask?>(null, (current, task) {
+        if (current == null || task.updatedAt > current.updatedAt) return task;
+        return current;
+      });
+      if (existingTask != null) {
+        if (mounted) {
+          AnxToast.show(
+            existingTask.status == ReadingTaskStatus.paused
+                ? '已有暂停的生成任务，请在本书 AI 上下文中继续'
+                : '已有生成任务正在进行，请在本书 AI 上下文中查看进度',
+          );
+        }
+        return;
       }
       final now = DateTime.now().millisecondsSinceEpoch;
       await readingTaskScheduler.submit<int>(
@@ -2936,76 +3097,226 @@ class ReadingPageState extends ConsumerState<ReadingPage>
           payload: {
             'scope': fullBook ? 'full_book' : 'read_boundary',
             'safeBoundary': boundary,
+            'chapterCount': chapters.length,
+            'estimatedInputTokens': estimatedTokens,
+            'purpose': contextPack ? 'context_pack' : 'book_wiki',
+            'sessionId': sessionId,
+            'providerId': provider.id,
+          },
+          checkpoint: {
+            'stage': 'preparing_chapters',
+            'completedChapters': 0,
+            'totalChapters': chapters.length,
           },
           createdAt: now,
           updatedAt: now,
         ),
-        (execution) => bookWikiGenerationService.generate(
-          bookId: _book.id,
-          chapters: inputs,
-          safeBoundary: boundary,
-          sessionId: sessionId,
-          scope: fullBook
-              ? BookWikiGenerationScope.fullBook
-              : BookWikiGenerationScope.readBoundary,
-          generate: (prompt) => aiGenerateText(
-            [ChatMessage.humanText(prompt)],
-            ref: ref,
-            readingMode: ReadingAiMode.general,
-            task: AiContextTask.fictionBackfill,
-            allowFallback: false,
-            outputContract: const AiOutputContract.json(),
-          ),
-          onProgress: (done, total, href) async {
-            execution.safePoint();
-            await execution.update(
-              progress: total == 0 ? 1 : done / total,
-              checkpoint: {'completedChapters': done, 'lastChapterHref': href},
-            );
-          },
-        ),
+        _executeBookWikiTask,
       );
       aiContextAssembler.invalidateBookContext(_book.id);
-    } finally {
-      SmartDialog.dismiss();
+    } on ReadingTaskCancelled {
+      // Cancellation is a deliberate user action; the task card remains
+      // available so the user can see the terminal state and prior results.
+    } catch (error) {
+      if (mounted) AnxToast.show('生成未完成：$error');
     }
   }
 
-  Future<void> _showBookWiki() => Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (_) => BookWikiPage(
-        book: _book,
-        visibleProgress: readingAgentRuntime.state.totalProgress,
-        onGenerate: _generateBookWiki,
-        onOpenLocation: (target) async {
-          if (target.startsWith('epubcfi(')) {
-            epubPlayerKey.currentState?.goToCfi(target);
-          } else if (target.isNotEmpty) {
-            epubPlayerKey.currentState?.goToHref(target);
-          }
+  /// Shared executor for newly submitted and process-restored Wiki/context
+  /// tasks. It reconstructs the chapter manifest from the current reader and
+  /// resumes safely from durable hashes, so a paused task is not tied to the
+  /// closure of the page that originally created it.
+  Future<int> _executeBookWikiTask(
+    ReadingTaskExecutionContext execution, {
+    String? confirmedProviderId,
+  }) async {
+    final task = execution.task;
+    final payload = task.payload;
+    final fullBook = payload['scope']?.toString() == 'full_book';
+    final boundary = ((payload['safeBoundary'] as num?)?.toDouble() ?? 0)
+        .clamp(0, 1)
+        .toDouble();
+    final chapters = (await _eligibleBackfillChapters(boundary))
+        .where(
+          (chapter) =>
+              BookWikiGenerationService.isEligibleChapterTitle(chapter.title),
+        )
+        .toList(growable: false);
+    final sessionId = payload['sessionId']?.toString().trim().isNotEmpty == true
+        ? payload['sessionId']!.toString()
+        : readingAgentRuntime.state.sessionId ?? 'task-${task.id}';
+    final inputs = <BookWikiChapter>[];
+    for (var index = 0; index < chapters.length; index++) {
+      final chapter = chapters[index];
+      execution.safePoint();
+      await execution.update(
+        progress: chapters.isEmpty ? 0 : index / chapters.length * .05,
+        checkpoint: {
+          ...execution.task.checkpoint,
+          'stage': 'reading_chapter',
+          'readingChapterIndex': index + 1,
+          'totalChapters': chapters.length,
+          'currentChapterHref': chapter.href,
+          'currentChapterTitle': chapter.title,
         },
-      ),
-    ),
-  );
+      );
+      final content = await (epubPlayerKey.currentState?.chapterContentByHref(
+            chapter.href,
+            maxCharacters: 24000,
+          ) ??
+          Future.value(''));
+      if (content.trim().isEmpty) continue;
+      inputs.add(
+        BookWikiChapter(
+          href: chapter.href,
+          title: chapter.title,
+          progress: chapter.startProgress,
+          content: content,
+        ),
+      );
+    }
+    final result = await bookWikiGenerationService.generate(
+      bookId: _book.id,
+      chapters: inputs,
+      safeBoundary: boundary,
+      sessionId: sessionId,
+      taskId: execution.taskId,
+      providerId: confirmedProviderId ?? payload['providerId']?.toString(),
+      ref: ref,
+      scope: fullBook
+          ? BookWikiGenerationScope.fullBook
+          : BookWikiGenerationScope.readBoundary,
+      onProgress: (done, total, href) async {
+        execution.safePoint();
+        final nextProgress = total == 0 ? 1.0 : .05 + .95 * done / total;
+        await execution.update(
+          progress: math.max(execution.task.progress, nextProgress),
+          checkpoint: {
+            ...execution.task.checkpoint,
+            'completedChapters': done,
+            'totalChapters': total,
+            'lastChapterHref': href,
+          },
+        );
+      },
+      onStage: ({
+        required completedUnits,
+        required totalUnits,
+        required chapterHref,
+        required chapterTitle,
+        required chunkIndex,
+        required chunkCount,
+        required stage,
+      }) async {
+        execution.safePoint();
+        final nextProgress =
+            totalUnits == 0 ? 1.0 : .05 + .95 * completedUnits / totalUnits;
+        await execution.update(
+          progress: math.max(execution.task.progress, nextProgress),
+          checkpoint: {
+            ...execution.task.checkpoint,
+            'completedUnits': completedUnits,
+            'totalUnits': totalUnits,
+            'currentChapterHref': chapterHref,
+            'currentChapterTitle': chapterTitle,
+            'chunkIndex': chunkIndex,
+            'chunkCount': chunkCount,
+            'stage': stage,
+          },
+        );
+      },
+    );
+    aiContextAssembler.invalidateBookContext(_book.id);
+    return result;
+  }
+
+  Future<void> _showBookWiki() => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => BookWikiPage(
+            book: _book,
+            visibleProgress: _visibleReadingProgress,
+            onGenerate: _generateBookWiki,
+            onResumeTask: _resumeReadingTask,
+            onOpenLocation: (target) async {
+              Navigator.pop(context);
+              _navigateBookSource(target);
+            },
+          ),
+        ),
+      );
 
   Future<void> _showReadingContextPack() => Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (_) => ReadingContextPackPage(
-        book: _book,
-        visibleProgress: readingAgentRuntime.state.totalProgress > 0
-            ? readingAgentRuntime.state.totalProgress
-            : _book.readingPercentage,
-        chapterHref: readingAgentRuntime.state.chapterHref,
-        // Wiki generation already owns user confirmation, task
-        // checkpointing and validated writes. The context pack is a
-        // read-only projection of that same traceable source set.
-        onGenerate: () => _generateBookWiki(false),
-        onGenerateFullBook: () => _generateBookWiki(true),
+        context,
+        MaterialPageRoute(
+          builder: (_) => ReadingContextPackPage(
+            book: _book,
+            visibleProgress: readingAgentRuntime.state.totalProgress > 0
+                ? readingAgentRuntime.state.totalProgress
+                : _book.readingPercentage,
+            chapterHref: readingAgentRuntime.state.chapterHref,
+            // Wiki generation already owns user confirmation, task
+            // checkpointing and validated writes. The context pack is a
+            // read-only projection of that same traceable source set.
+            onGenerate: () => _generateBookWiki(false, contextPack: true),
+            onGenerateFullBook: () =>
+                _generateBookWiki(true, contextPack: true),
+            onResumeTask: _resumeReadingTask,
+          ),
+        ),
+      );
+
+  Future<void> _resumeReadingTask(ReadingTask task) async {
+    await _ensureReadingSession();
+    if (!mounted || task.bookId != _book.id) return;
+    if (task.type == 'wiki.book_generate') {
+      await _resumeBookWikiTask(task);
+    } else if (task.type == 'fiction.backfill') {
+      final coverage = _readingCoverage;
+      if (coverage != null) await _confirmAndBackfill(coverage);
+    } else {
+      await readingTaskScheduler.resume(task.id);
+    }
+  }
+
+  Future<void> _resumeBookWikiTask(ReadingTask task) async {
+    if (task.bookId != _book.id || task.type != 'wiki.book_generate') return;
+    final provider = bookWikiGenerationService.previewProvider(ref);
+    if (provider == null) {
+      AnxToast.show(L10n.of(context).readingPracticeProviderUnavailable);
+      return;
+    }
+    final l10n = L10n.of(context);
+    final boundary = (task.payload['safeBoundary'] as num?)?.toDouble() ?? 0;
+    final allowed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.readingMaterialsResumeTitle),
+        content: Text(
+            '${l10n.readingMaterialsResumeScope('${(boundary * 100).round()}', '${task.payload['chapterCount'] ?? 0}')}\n\n${_materialsDestination(provider)}\n${l10n.readingMaterialsEstimate('${task.payload['estimatedInputTokens'] ?? 0}')}'),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: Text(l10n.commonCancel)),
+          FilledButton(
+              onPressed: () => Navigator.pop(dialogContext, true),
+              child: Text(l10n.readingMaterialsResumeTitle)),
+        ],
       ),
-    ),
-  );
+    );
+    if (allowed != true || !mounted) return;
+    try {
+      await readingTaskScheduler.resumeWith<int>(
+        task.id,
+        (execution) =>
+            _executeBookWikiTask(execution, confirmedProviderId: provider.id),
+      );
+    } on ReadingTaskCancelled {
+      // The task card already exposes the terminal cancelled state.
+    } catch (error) {
+      if (mounted) AnxToast.show('继续生成失败：$error');
+    }
+  }
 
   void _showAgentUndoSnackBar(AgentAction action) {
     if (!mounted) return;
@@ -3025,22 +3336,22 @@ class ReadingPageState extends ConsumerState<ReadingPage>
   }
 
   String _agentActionLabel(AgentActionType type) => switch (type) {
-    AgentActionType.goal => '阅读目标',
-    AgentActionType.profile => '阅读偏好',
-    AgentActionType.note => 'AI 笔记',
-    AgentActionType.difficulty => '阅读难点',
-    AgentActionType.memory => 'Markdown 记忆',
-    AgentActionType.artifact => '阅读档案',
-    AgentActionType.wiki => '书籍 Wiki',
-  };
+        AgentActionType.goal => '阅读目标',
+        AgentActionType.profile => '阅读偏好',
+        AgentActionType.note => 'AI 笔记',
+        AgentActionType.difficulty => '阅读难点',
+        AgentActionType.memory => 'Markdown 记忆',
+        AgentActionType.artifact => '阅读档案',
+        AgentActionType.wiki => '书籍 Wiki',
+      };
 
   String _undoResultLabel(UndoResult result) => switch (result) {
-    UndoResult.undone => '已撤销',
-    UndoResult.alreadyUndone => '该动作已撤销',
-    UndoResult.expired => '撤销期限已过',
-    UndoResult.conflict => '内容之后已被修改，未覆盖你的修改',
-    UndoResult.missing => '找不到该动作',
-  };
+        UndoResult.undone => '已撤销',
+        UndoResult.alreadyUndone => '该动作已撤销',
+        UndoResult.expired => '撤销期限已过',
+        UndoResult.conflict => '内容之后已被修改，未覆盖你的修改',
+        UndoResult.missing => '找不到该动作',
+      };
 
   void updateState() {
     if (mounted) {
@@ -3058,7 +3369,9 @@ class ReadingPageState extends ConsumerState<ReadingPage>
       onPressed: () async {
         final shouldShowAsSplit = _usesAiSplitLayout(context);
 
-        if (shouldShowAsSplit && aiWorkspaceController.visible) {
+        if (shouldShowAsSplit &&
+            aiWorkspaceController.visible &&
+            aiWorkspaceController.surface == AiWorkspaceSurface.assistant) {
           aiWorkspaceController.hide();
           return;
         }
@@ -3097,7 +3410,7 @@ class ReadingPageState extends ConsumerState<ReadingPage>
                   actions: [
                     if (EnvVar.enableAIFeature) aiButton,
                     IconButton(
-                      tooltip: '本书',
+                      tooltip: L10n.of(context).readingWorkspaceBook,
                       onPressed: _showBookHub,
                       icon: const Icon(Icons.library_books_outlined),
                     ),
@@ -3267,13 +3580,22 @@ class ReadingPageState extends ConsumerState<ReadingPage>
     return PopScope<void>(
       canPop: !isMobileAiVisible,
       onPopInvokedWithResult: (didPop, _) {
-        if (!didPop && isMobileAiVisible) aiWorkspaceController.hide();
+        if (!didPop && isMobileAiVisible) {
+          if (MediaQuery.viewInsetsOf(context).bottom > 0) {
+            FocusManager.instance.primaryFocus?.unfocus();
+          } else if (aiWorkspaceController.surface ==
+                  AiWorkspaceSurface.assistant &&
+              aiWorkspaceController.view != AiWorkspaceView.chat) {
+            aiWorkspaceController.showChat();
+          } else {
+            aiWorkspaceController.hide();
+          }
+        }
       },
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         body: Hero(
-          tag:
-              widget.heroTag ??
+          tag: widget.heroTag ??
               (Prefs().openBookAnimation ? _book.coverFullPath : heroTag),
           child: FittedBox(
             fit: BoxFit.scaleDown,
@@ -3302,218 +3624,102 @@ class ReadingPageState extends ConsumerState<ReadingPage>
                 ),
                 body: Stack(
                   children: [
-                    AxisFlex(
-                      axis: Prefs().aiPanelPosition == AiPanelPositionEnum.right
-                          ? Axis.horizontal
-                          : Axis.vertical,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Expanded(
-                          child: MouseRegion(
-                            onHover: (PointerHoverEvent detail) {
-                              if (!Prefs().showMenuOnHover) return;
-                              var y = detail.position.dy;
-                              if (y < 30 ||
-                                  y > MediaQuery.of(context).size.height - 30) {
-                                showOrHideAppBarAndBottomBar(true);
-                              }
-                            },
-                            child: Focus(
-                              focusNode: _readerFocusNode,
-                              onKeyEvent: _handleReaderKeyEvent,
-                              child: Stack(
-                                children: [
-                                  EpubPlayer(
-                                    key: epubPlayerKey,
-                                    book: _book,
-                                    cfi: widget.cfi,
-                                    showOrHideAppBarAndBottomBar:
-                                        showOrHideAppBarAndBottomBar,
-                                    onLoadEnd: onLoadEnd,
-                                    initialThemes: widget.initialThemes,
-                                    updateParent: updateState,
-                                    onChapterChanged: _onChapterChanged,
-                                    onReadingLocationChanged:
-                                        ({
-                                          required cfi,
-                                          required chapterHref,
-                                          required chapterTitle,
-                                          required totalProgress,
-                                          required chapterProgress,
-                                        }) {
-                                          if (!Prefs()
-                                              .readingAgentBetaEnabled) {
-                                            return;
-                                          }
-                                          readingAgentRuntime.observeLocation(
-                                            cfi: cfi,
-                                            chapterHref: chapterHref,
-                                            chapterTitle: chapterTitle,
-                                            totalProgress: totalProgress,
-                                            chapterProgress: chapterProgress,
-                                          );
-                                        },
-                                    onSelectionCreated:
-                                        (SelectionSnapshot selection) {
-                                          if (!Prefs()
-                                              .readingAgentBetaEnabled) {
-                                            return;
-                                          }
-                                          readingAgentRuntime.selectionCreated(
-                                            ReadingSelectionState(
-                                              text: selection.text,
-                                              cfi: selection.cfi,
-                                              surroundingText:
-                                                  selection.contextText,
-                                            ),
-                                          );
-                                        },
-                                    onSelectionCleared: () {
-                                      if (Prefs().readingAgentBetaEnabled) {
-                                        readingAgentRuntime.selectionCleared();
-                                      }
-                                    },
-                                  ),
-                                  if (_isResizingAiChat)
-                                    SizedBox.expand(
-                                      child: Container(
-                                        color: Theme.of(
-                                          context,
-                                        ).colorScheme.surface.withAlpha(1),
-                                      ),
+                    ReadingWorkspaceHost(
+                      visible: aiWorkspaceController.visible,
+                      expanded: aiWorkspaceController.sheetExpanded,
+                      atBottom:
+                          Prefs().aiPanelPosition == AiPanelPositionEnum.bottom,
+                      panelWidth: _aiChatWidth,
+                      panelHeight: _aiChatHeight,
+                      onResize: (delta) {
+                        setState(() {
+                          if (Prefs().aiPanelPosition ==
+                              AiPanelPositionEnum.right) {
+                            _aiChatWidth =
+                                (_effectiveAiPanelWidth(context) + delta)
+                                    .clamp(360.0, _aiChatMaxWidth(context));
+                            Prefs().aiPanelWidth = _aiChatWidth;
+                          } else {
+                            _aiChatHeight = (_aiChatHeight + delta)
+                                .clamp(200.0, _aiChatMaxHeight(context));
+                            Prefs().aiPanelHeight = _aiChatHeight;
+                          }
+                        });
+                      },
+                      panel:
+                          PointerInterceptor(child: _buildReadingWorkspace()),
+                      reader: MouseRegion(
+                        onHover: (PointerHoverEvent detail) {
+                          if (!Prefs().showMenuOnHover) return;
+                          var y = detail.position.dy;
+                          if (y < 30 ||
+                              y > MediaQuery.of(context).size.height - 30) {
+                            showOrHideAppBarAndBottomBar(true);
+                          }
+                        },
+                        child: Focus(
+                          focusNode: _readerFocusNode,
+                          onKeyEvent: _handleReaderKeyEvent,
+                          child: Stack(
+                            children: [
+                              EpubPlayer(
+                                key: epubPlayerKey,
+                                book: _book,
+                                cfi: widget.cfi,
+                                showOrHideAppBarAndBottomBar:
+                                    showOrHideAppBarAndBottomBar,
+                                onLoadEnd: onLoadEnd,
+                                initialThemes: widget.initialThemes,
+                                updateParent: updateState,
+                                onChapterChanged: _onChapterChanged,
+                                onReadingLocationChanged: ({
+                                  required cfi,
+                                  required chapterHref,
+                                  required chapterTitle,
+                                  required totalProgress,
+                                  required chapterProgress,
+                                }) {
+                                  // Invalidate synchronously on backtracking so a
+                                  // previously loaded directory cannot show later sources.
+                                  if (_bookMaterials != null) {
+                                    setState(() =>
+                                        _bookMaterials = _loadBookMaterials());
+                                  }
+                                  if (!readingAgentRuntime.isActive) {
+                                    return;
+                                  }
+                                  readingAgentRuntime.observeLocation(
+                                    cfi: cfi,
+                                    chapterHref: chapterHref,
+                                    chapterTitle: chapterTitle,
+                                    totalProgress: totalProgress,
+                                    chapterProgress: chapterProgress,
+                                  );
+                                },
+                                onSelectionCreated:
+                                    (SelectionSnapshot selection) {
+                                  if (!readingAgentRuntime.isActive) {
+                                    return;
+                                  }
+                                  readingAgentRuntime.selectionCreated(
+                                    ReadingSelectionState(
+                                      text: selection.text,
+                                      cfi: selection.cfi,
+                                      surroundingText: selection.contextText,
                                     ),
-                                ],
+                                  );
+                                },
+                                onSelectionCleared: () {
+                                  if (readingAgentRuntime.isActive) {
+                                    readingAgentRuntime.selectionCleared();
+                                  }
+                                },
                               ),
-                            ),
-                          ),
-                        ),
-                        if (_usesAiSplitLayout(context) &&
-                            aiWorkspaceController.visible)
-                          GestureDetector(
-                            behavior: HitTestBehavior.translucent,
-                            onHorizontalDragStart:
-                                Prefs().aiPanelPosition ==
-                                    AiPanelPositionEnum.right
-                                ? (details) {
-                                    _beginAiChatResize(
-                                      details.globalPosition.dx,
-                                    );
-                                  }
-                                : null,
-                            onHorizontalDragUpdate:
-                                Prefs().aiPanelPosition ==
-                                    AiPanelPositionEnum.right
-                                ? (details) {
-                                    _applyAiChatResizeDelta(
-                                      details.delta.dx,
-                                      context,
-                                    );
-                                  }
-                                : null,
-                            onHorizontalDragEnd:
-                                Prefs().aiPanelPosition ==
-                                    AiPanelPositionEnum.right
-                                ? (_) {
-                                    _endAiChatResize();
-                                  }
-                                : null,
-                            onHorizontalDragCancel:
-                                Prefs().aiPanelPosition ==
-                                    AiPanelPositionEnum.right
-                                ? () {
-                                    _endAiChatResize();
-                                  }
-                                : null,
-                            onVerticalDragStart:
-                                Prefs().aiPanelPosition ==
-                                    AiPanelPositionEnum.bottom
-                                ? (details) {
-                                    _beginAiChatResizeVertical(
-                                      details.globalPosition.dy,
-                                    );
-                                  }
-                                : null,
-                            onVerticalDragUpdate:
-                                Prefs().aiPanelPosition ==
-                                    AiPanelPositionEnum.bottom
-                                ? (details) {
-                                    _applyAiChatResizeDeltaVertical(
-                                      details.delta.dy,
-                                      context,
-                                    );
-                                  }
-                                : null,
-                            onVerticalDragEnd:
-                                Prefs().aiPanelPosition ==
-                                    AiPanelPositionEnum.bottom
-                                ? (_) {
-                                    _endAiChatResize();
-                                  }
-                                : null,
-                            onVerticalDragCancel:
-                                Prefs().aiPanelPosition ==
-                                    AiPanelPositionEnum.bottom
-                                ? () {
-                                    _endAiChatResize();
-                                  }
-                                : null,
-                            child: MouseRegion(
-                              cursor:
-                                  Prefs().aiPanelPosition ==
-                                      AiPanelPositionEnum.right
-                                  ? SystemMouseCursors.resizeColumn
-                                  : SystemMouseCursors.resizeRow,
-                              child:
-                                  Prefs().aiPanelPosition ==
-                                      AiPanelPositionEnum.right
-                                  ? VerticalDivider(width: 2, thickness: 1)
-                                  : Divider(height: 2, thickness: 1),
-                            ),
-                          ),
-                        if (_usesAiSplitLayout(context))
-                          Offstage(
-                            offstage: !aiWorkspaceController.visible,
-                            child: SizedBox(
-                              key: const ValueKey('ai-chat-panel'),
-                              width:
-                                  Prefs().aiPanelPosition ==
-                                      AiPanelPositionEnum.right
-                                  ? _effectiveAiPanelWidth(context)
-                                  : null,
-                              height:
-                                  Prefs().aiPanelPosition ==
-                                      AiPanelPositionEnum.bottom
-                                  ? _aiChatHeight
-                                  : null,
-                              child: _buildAiWorkspace(),
-                            ),
-                          ),
-                      ],
-                    ),
-                    if (!_usesAiSplitLayout(context))
-                      Positioned.fill(
-                        child: Offstage(
-                          offstage: !aiWorkspaceController.visible,
-                          child: PointerInterceptor(
-                            child: _buildAiWorkspace(
-                              trailing: [
-                                if (Prefs().readingAgentBetaEnabled)
-                                  IconButton(
-                                    onPressed: _showReadingAgentPanel,
-                                    icon: const Icon(
-                                      Icons.manage_history_outlined,
-                                    ),
-                                    tooltip: '阅读 Agent 动作记录',
-                                  ),
-                                IconButton(
-                                  onPressed: aiWorkspaceController.hide,
-                                  icon: const Icon(Icons.close),
-                                ),
-                              ],
-                            ),
+                            ],
                           ),
                         ),
                       ),
+                    ),
                     controller,
                     // TTS floating action button: always in the tree when toolbar
                     // is hidden; TtsFab handles its own show/hide internally so

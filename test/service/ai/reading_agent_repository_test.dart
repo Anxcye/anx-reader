@@ -6,6 +6,7 @@ import 'package:anx_reader/models/reading_agent.dart';
 import 'package:anx_reader/models/book_note.dart';
 import 'package:anx_reader/models/reading_coach.dart';
 import 'package:anx_reader/models/reading_note.dart';
+import 'package:anx_reader/models/reading_memory.dart';
 import 'package:anx_reader/service/ai/reading_agent_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
@@ -28,7 +29,10 @@ void main() {
     db = await databaseFactoryFfi.openDatabase(p.join(tempDir.path, 'test.db'));
     for (final sql in [
       createNoteSQL,
+      createReadingGuidesSQL,
+      createReadingQuizzesSQL,
       createReadingDifficultiesSQL,
+      createReadingMemorySQL,
       createReadingNotesWorkspaceSQL,
       createReadingNoteAiOrganizerSQL,
       createReadingAgentSQL,
@@ -63,6 +67,302 @@ void main() {
         createdAt: now,
         updatedAt: now,
       );
+
+  ReadingChapterCheckpoint checkpoint() => ReadingChapterCheckpoint(
+      id: 'checkpoint',
+      bookId: 1,
+      chapterHref: 'one.xhtml',
+      chapterTitle: 'One',
+      progress: .4,
+      createdAt: now,
+      updatedAt: now);
+
+  test('chapter closure persists and undoes all records and source anchors',
+      () async {
+    final pending = checkpoint();
+    await repository.upsertCheckpoint(pending);
+    final mutation = await repository.finishChapterCheckpoint(
+        checkpoint: pending.copyWith(reflection: 'My reflection'),
+        mastery: MasteryState(
+            id: 'mastery',
+            bookId: 1,
+            chapterHref: 'one.xhtml',
+            topic: 'One',
+            level: MasteryLevel.familiar,
+            updatedAt: now),
+        card: KnowledgeCard(
+            id: 'card',
+            bookId: 1,
+            chapterHref: 'one.xhtml',
+            front: 'Recall',
+            back: 'My reflection',
+            createdAt: now,
+            updatedAt: now),
+        memory: ReadingMemoryDocument(
+            id: 'memory',
+            bookId: 1,
+            title: 'Reflection',
+            markdown: 'My reflection',
+            sourceRefs: ['checkpoint:checkpoint'],
+            createdAt: now,
+            updatedAt: now),
+        sessionId: 's1');
+    expect(mutation.value.status, ReadingCheckpointStatus.completed);
+    expect((await db.query('tb_reading_checkpoints')).single['reflection'],
+        'My reflection');
+    expect(await repository.masteryStates(1), hasLength(1));
+    expect(await repository.knowledgeCards(1), hasLength(1));
+    expect((await repository.memoryDocuments(1)).single.sourceRefs,
+        ['checkpoint:checkpoint']);
+    final anchors = await repository.artifacts(1);
+    expect(anchors, hasLength(3));
+    for (final anchor in anchors) {
+      expect(anchor.sourceStartCfi, isNull);
+      expect(anchor.sourceProgress, .4);
+      expect(anchor.visibleFromProgress, .4);
+      expect(anchor.payload['checkpointId'], pending.id);
+    }
+    expect(await repository.undo(mutation.action.id), UndoResult.undone);
+    expect((await repository.pendingCheckpoints(1)).single.reflection, isEmpty);
+    expect(await repository.masteryStates(1), isEmpty);
+    expect(await repository.knowledgeCards(1), isEmpty);
+    expect(await repository.memoryDocuments(1), isEmpty);
+    expect(await repository.artifacts(1), isEmpty);
+    expect(await repository.undo(mutation.action.id), UndoResult.alreadyUndone);
+  });
+
+  test('chapter closure rejects stale boundaries and rolls back ID conflicts',
+      () async {
+    final pending = checkpoint();
+    await repository.upsertCheckpoint(pending);
+    await expectLater(
+        repository.finishChapterCheckpoint(
+            checkpoint: pending.copyWith(progress: .2), sessionId: 's1'),
+        throwsStateError);
+    await repository.saveKnowledgeCard(KnowledgeCard(
+        id: 'foreign',
+        bookId: 2,
+        front: 'Other book',
+        back: 'Private',
+        createdAt: now,
+        updatedAt: now));
+    await expectLater(
+        repository.finishChapterCheckpoint(
+            checkpoint: pending.copyWith(reflection: 'Must roll back'),
+            card: KnowledgeCard(
+                id: 'foreign',
+                bookId: 1,
+                chapterHref: pending.chapterHref,
+                front: 'Recall',
+                back: 'Answer',
+                createdAt: now,
+                updatedAt: now),
+            sessionId: 's1'),
+        throwsStateError);
+    expect((await repository.pendingCheckpoints(1)).single.reflection, isEmpty);
+    expect((await repository.knowledgeCards(2)).single.back, 'Private');
+    expect(await repository.artifacts(1), isEmpty);
+    expect(await db.query('tb_agent_actions'), isEmpty);
+  });
+
+  test('chapter closure undo conflict never partially rolls back records',
+      () async {
+    final pending = checkpoint();
+    await repository.upsertCheckpoint(pending);
+    final mutation = await repository.finishChapterCheckpoint(
+        checkpoint: pending,
+        card: KnowledgeCard(
+            id: 'card',
+            bookId: 1,
+            chapterHref: pending.chapterHref,
+            front: 'Recall',
+            back: 'Original',
+            createdAt: now,
+            updatedAt: now),
+        sessionId: 's1');
+    await db.update('tb_knowledge_cards', {'back': 'User correction'},
+        where: 'id = ?', whereArgs: ['card']);
+    expect(await repository.undo(mutation.action.id), UndoResult.conflict);
+    expect(await repository.pendingCheckpoints(1), isEmpty);
+    expect((await repository.knowledgeCards(1)).single.back, 'User correction');
+    expect(await repository.artifacts(1), hasLength(2));
+  });
+
+  test('knowledge-card review has conflict-safe and idempotent undo', () async {
+    final card = KnowledgeCard(
+        id: 'card',
+        bookId: 1,
+        front: 'Question',
+        back: 'Answer',
+        dueAt: now,
+        createdAt: now,
+        updatedAt: now);
+    await repository.saveKnowledgeCard(card);
+    final reviewed = card.copyWith(
+        repetitions: 1, intervalDays: 2, dueAt: now + 2000, updatedAt: now + 1);
+    final mutation =
+        await repository.reviewKnowledgeCard(reviewed, sessionId: 's1');
+    expect((await repository.knowledgeCards(1)).single.repetitions, 1);
+    expect(await repository.undo(mutation.action.id), UndoResult.undone);
+    expect((await repository.knowledgeCards(1)).single.repetitions, 0);
+    expect(await repository.undo(mutation.action.id), UndoResult.alreadyUndone);
+    final second =
+        await repository.reviewKnowledgeCard(reviewed, sessionId: 's1');
+    await db.update('tb_knowledge_cards', {'back': 'User correction'},
+        where: 'id = ?', whereArgs: ['card']);
+    expect(await repository.undo(second.action.id), UndoResult.conflict);
+  });
+
+  test('pending question and exact source anchor persist and undo atomically',
+      () async {
+    final question = ReadingDifficulty(
+        id: 'question',
+        bookId: 1,
+        cfi: 'epubcfi(/6/2)',
+        text: 'Why?',
+        createdAt: now,
+        updatedAt: now);
+    final mutation = await repository.saveDifficulty(question,
+        sessionId: 's1', sourceProgress: .4, visibleFromProgress: .4);
+    final anchor = (await repository.artifacts(1)).single;
+    expect(anchor.kind, ReadingArtifactKinds.sourceAnchor);
+    expect(
+        anchor.payload, {'sourceKind': 'difficulty', 'sourceId': 'question'});
+    expect(anchor.sourceStartCfi, question.cfi);
+    expect(anchor.sourceProgress, .4);
+    expect(anchor.sourceTextSnapshot, isEmpty);
+    expect(await repository.undo(mutation.action.id), UndoResult.undone);
+    expect(await repository.artifacts(1), isEmpty);
+    expect(await db.query('tb_reading_difficulties'), isEmpty);
+    expect(await repository.undo(mutation.action.id), UndoResult.alreadyUndone);
+    await expectLater(
+        repository.saveDifficulty(question,
+            sessionId: 's1', sourceProgress: .8, visibleFromProgress: .4),
+        throwsArgumentError);
+    expect(await db.query('tb_reading_difficulties'), isEmpty);
+  });
+
+  test('practice records capture relations, review history and bulk deletion',
+      () async {
+    final guide =
+        InspectionReadingGuide(bookId: 1, note: 'Before', updatedAt: now);
+    final guideAction = await repository.savePracticeRecord(
+        kind: ReadingPracticeRecordKind.guide,
+        bookId: 1,
+        targetId: '1',
+        values: guide.toDb(),
+        sessionId: 's1');
+    expect(await repository.undo(guideAction.action.id), UndoResult.undone);
+    expect(await db.query('tb_reading_guides'), isEmpty);
+    final source = ReadingMemorySource(
+        id: 'source',
+        bookId: 1,
+        type: ReadingMemorySourceType.difficulty,
+        sourceRef: 'difficulty',
+        cfi: 'epubcfi(/6/2)',
+        text: 'Record',
+        contentHash: 'hash',
+        createdAt: now);
+    await repository.savePracticeRecord(
+        kind: ReadingPracticeRecordKind.source,
+        bookId: 1,
+        targetId: source.id,
+        values: source.toDb(),
+        sessionId: 's1');
+    final topic = ReadingMemoryTopic(
+        id: 'topic',
+        bookId: 1,
+        title: 'Topic',
+        summary: 'Summary',
+        status: ReadingMemoryItemStatus.suggested,
+        batchId: 'batch',
+        sourceIds: ['source'],
+        createdAt: now,
+        updatedAt: now);
+    await repository.savePracticeRecord(
+        kind: ReadingPracticeRecordKind.topic,
+        bookId: 1,
+        targetId: topic.id,
+        values: topic.toDb(),
+        sourceIds: topic.sourceIds,
+        sessionId: 's1');
+    final card = ReadingKnowledgeCard(
+        id: 'memory-card',
+        bookId: 1,
+        topicId: topic.id,
+        question: 'Q',
+        answer: 'A',
+        status: ReadingMemoryItemStatus.active,
+        sourceIds: ['source'],
+        nextReviewAt: now,
+        createdAt: now,
+        updatedAt: now);
+    await repository.savePracticeRecord(
+        kind: ReadingPracticeRecordKind.card,
+        bookId: 1,
+        targetId: card.id,
+        values: card.toDb(),
+        sourceIds: card.sourceIds,
+        sessionId: 's1');
+    final review = ReadingCardReview(
+        id: 'review',
+        cardId: card.id,
+        bookId: 1,
+        rating: ReadingReviewRating.remembered,
+        previousStage: 1,
+        nextStage: 2,
+        previousReviewAt: now,
+        nextReviewAt: now + 1000,
+        reviewedAt: now);
+    final reviewed = await repository.savePracticeRecord(
+        kind: ReadingPracticeRecordKind.card,
+        bookId: 1,
+        targetId: card.id,
+        values: card.copyWith(reviewStage: 2, updatedAt: now + 1).toDb(),
+        review: review.toDb(),
+        expectedUpdatedAt: now,
+        sessionId: 's1');
+    expect(await db.query('tb_reading_card_reviews'), hasLength(1));
+    expect(await repository.undo(reviewed.action.id), UndoResult.undone);
+    expect(await db.query('tb_reading_card_reviews'), isEmpty);
+    expect(
+        (await db.query('tb_reading_knowledge_cards')).single['review_stage'],
+        1);
+    final cleared = await repository.deletePracticeMemory(1, sessionId: 's1');
+    expect(await db.query('tb_reading_memory_sources'), isEmpty);
+    expect(await db.query('tb_reading_card_sources'), isEmpty);
+    expect(await repository.undo(cleared.action.id), UndoResult.undone);
+    expect(await db.query('tb_reading_memory_sources'), hasLength(1));
+    expect(await db.query('tb_reading_card_sources'), hasLength(1));
+    await expectLater(
+        repository.savePracticeRecord(
+            kind: ReadingPracticeRecordKind.card,
+            bookId: 2,
+            targetId: card.id,
+            values: card.toDb(),
+            sessionId: 's2'),
+        throwsStateError);
+  });
+
+  test('resolving a difficulty journals status instead of reopening it',
+      () async {
+    final original = ReadingDifficulty(
+        id: 'difficulty',
+        bookId: 1,
+        cfi: 'epubcfi(/6/2)',
+        text: 'Question',
+        createdAt: now,
+        updatedAt: now);
+    await repository.saveDifficulty(original, sessionId: 's1');
+    final resolved = await repository.updateDifficultyStatus(
+        original.copyWith(
+            status: ReadingDifficultyStatus.resolved, updatedAt: now + 1),
+        sessionId: 's1');
+    expect(resolved.value.status, ReadingDifficultyStatus.resolved);
+    expect(await repository.undo(resolved.action.id), UndoResult.undone);
+    final rows = await db.query('tb_reading_difficulties');
+    expect(rows.single['status'], ReadingDifficultyStatus.unresolved.name);
+  });
 
   test('replacing and undoing an active goal restores the prior goal',
       () async {

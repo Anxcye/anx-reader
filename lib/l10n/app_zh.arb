@@ -1019,5 +1019,244 @@
     "readingRemoteProgressSyncDisabled": "请先在同步设置中开启一种阅读进度同步服务",
     "readingRemoteProgressSyncFailed": "同步阅读进度失败：{error}",
     "@readingRemoteProgressSyncFailed": {"placeholders": {"error": {"type": "String"}}},
-    "readingRemoteProgressNotFound": "没有发现更远的其他设备进度"
+    "readingRemoteProgressNotFound": "没有发现更远的其他设备进度",
+  "readingAssistantTitle": "阅读帮助",
+  "readingAssistantScope": "当前阅读位置",
+  "readingAssistantSelectionScope": "当前选区",
+  "readingAssistantExplainCurrent": "解释当前内容",
+  "readingAssistantRecall": "回顾已读",
+  "readingAssistantExplore": "深入探讨",
+  "readingAssistantExplainSelection": "解释这段",
+  "readingAssistantConnect": "联系上下文",
+  "readingAssistantMore": "更多",
+  "readingAssistantOptions": "回答方式",
+  "readingAssistantPractice": "阅读练习",
+  "readingAssistantNewChat": "新对话",
+  "readingAssistantSaveNote": "保存笔记",
+  "readingAssistantSaveQuestion": "暂存问题",
+  "readingAssistantReturn": "返回提问处",
+  "readingAssistantRemoveQuote": "移除引用",
+  "readingAssistantEmpty": "需要什么帮助，继续读下去？",
+  "readingAssistantEvidence": "来源与分析",
+  "readingAssistantNeedSource": "请先选择一段原文，以便保留准确来源。",
+  "readingAssistantSaveFailed": "保存失败，对话内容已保留。",
+  "readingAssistantUndo": "撤销",
+  "readingAssistantSavedQuestion": "问题已暂存",
+  "readingAssistantStop": "停止生成",
+  "readingAssistantSend": "发送问题",
+  "readingWorkspaceBook": "本书",
+  "readingWorkspaceExpand": "展开面板",
+  "readingWorkspaceCollapse": "收起面板",
+  "readingWorkspaceClose": "返回阅读",
+  "readingWorkspaceLoading": "正在读取已有资料…",
+  "readingWorkspaceLoadFailed": "暂时无法读取资料，请重试。",
+  "readingWorkspaceRetry": "重试",
+  "readingWorkspaceSettings": "本书设置",
+  "readingWorkspaceContext": "AI 使用的资料",
+  "readingWorkspaceReaderOptions": "阅读偏好与动作记录",
+  "readingWorkspaceLibrary": "全部本书资料与导出",
+  "readingWorkspaceMove": "面板位置",
+  "readingWorkspaceSourceUnavailable": "原文位置暂不可用。",
+  "readingAssistantOriginalSource": "原文依据",
+  "readingAssistantExternalSource": "外部资料",
+  "readingCompanionBook": "本书",
+  "readingCompanionSearchMaterials": "搜索本书已有资料",
+  "readingCompanionSafeScope": "仅显示当前阅读位置可见的资料",
+  "readingCompanionChapters": "章节与回顾",
+  "readingCompanionCharacters": "人物与关系",
+  "readingCompanionPlot": "情节与线索",
+  "readingCompanionConcepts": "概念与观点",
+  "readingCompanionRecords": "我的记录",
+  "readingCompanionAvailableMaterials": "可建立的资料",
+  "readingCompanionOrganizeStory": "整理人物与情节",
+  "readingCompanionOrganizeKnowledge": "整理概念与章节",
+  "readingCompanionRecordsEmpty": "保存的笔记、想法和问题会出现在这里。",
+  "readingCompanionSearchEmpty": "没有找到匹配的已有资料",
+  "readingCompanionExercises": "阅读练习",
+  "readingCompanionExercisesHint": "按需使用读前向导、自测与复习",
+  "readingCompanionBookSettings": "本书设置",
+  "readingCompanionReadingPreferences": "阅读偏好",
+  "readingCompanionAiMaterials": "AI 使用的资料",
+  "readingCompanionProgress": "阅读进展",
+  "readingCompanionRelations": "查看人物关系图",
+  "readingCompanionTimeline": "查看故事时间线",
+  "readingCompanionSync": "同步状态",
+  "readingCompanionSyncNow": "手动同步",
+  "readingCompanionSyncRunning": "正在获取远端进度…",
+  "readingCompanionSyncIdle": "自动同步在阅读结束或空闲时执行",
+  "readingCompanionSyncConflict": "检测到冲突，请手动选择同步方向",
+  "readingCompanionSyncOff": "未启用同步",
+  "readingCompanionStart": "开始",
+  "readingCompanionClearSearch": "清除搜索",
+  "readingAssistantGenerationFailed": "回答未完成，问题和已有内容已保留。",
+  "readingAssistantOtherBook": "其他书籍的会话",
+  "readingAssistantOtherBookHelp": "可先查看历史内容，或打开原书后继续。",
+  "readingAssistantViewHistory": "查看历史",
+  "readingAssistantOpenBook": "打开原书",
+  "readingTaskProgressPreparing": "正在准备章节内容",
+  "readingTaskProgressReading": "正在读取章节",
+  "readingTaskProgressAnalyzing": "正在分析章节",
+  "readingTaskProgressGenerating": "正在生成当前片段",
+  "readingTaskProgressChunkComplete": "已完成片段",
+  "readingTaskProgressChapterComplete": "章节已完成",
+  "readingTaskProgressSkipped": "章节已跳过",
+  "readingTaskProgressQueued": "等待开始",
+  "readingTaskProgressWorking": "处理中",
+  "readingTaskProgressTask": "整理本书资料",
+  "readingTaskProgressResumeFailed": "无法继续任务：{error}",
+  "@readingTaskProgressResumeFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "readingTaskProgressPreparingHint": "读取完成后将按章节和片段显示进度。",
+  "readingTaskProgressCompleted": "已完成",
+  "readingTaskProgressFailed": "失败：{error}",
+  "@readingTaskProgressFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "readingTaskProgressUnknownError": "未知错误",
+  "readingTaskProgressCancelled": "已取消",
+  "readingTaskProgressPaused": "已暂停",
+  "readingTaskProgressPause": "暂停生成",
+  "readingTaskProgressCancel": "取消生成",
+  "readingTaskProgressResume": "继续生成",
+  "readingTaskProgressChunks": "{chapter} · 片段 {index}/{count} · 总片段 {completed}/{total}",
+  "@readingTaskProgressChunks": {
+    "placeholders": {
+      "chapter": {
+        "type": "String"
+      },
+      "index": {
+        "type": "String"
+      },
+      "count": {
+        "type": "String"
+      },
+      "completed": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "readingTaskProgressChapters": "{chapter} · 章节 {index}/{total}",
+  "@readingTaskProgressChapters": {
+    "placeholders": {
+      "chapter": {
+        "type": "String"
+      },
+      "index": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "readingTaskProgressFailedHint": "已有成果已保留。可重新发起任务。",
+  "readingTaskProgressCancelledHint": "任务已取消，已写入的成果仍然保留。",
+  "readingCompanionSavedContext": "保存的上下文",
+  "readingCompanionSavedAnswer": "保存的回答 · AI 推断",
+  "readingPracticeExtractionUnavailable": "轻量提取引擎不可用",
+  "readingPracticeTopicCloudScope": "本次将把已收集且在已读范围内的阅读记忆发送给通用模型。此授权仅限本次，不改变后续提取设置。",
+  "readingPracticeAllowOnce": "仅授权本次",
+  "readingPracticeChaptersUnavailable": "章节内容尚未准备好",
+  "readingPracticeGuideScopeTitle": "授权导读的章节范围",
+  "readingPracticeGuideScope": "本次将从全书最多六章各读取最多 800 字符的样本，并发送给已配置的 AI 模型，可能包含未读内容。导读可能提及后文。授权仅限本次预览，结果不会作为当前阅读位置的依据。",
+  "readingPracticeGuideGenerated": "阅读导读预览",
+  "readingPracticeGuideFailed": "生成失败，已保留原有向导",
+  "readingPracticeRecordsNeeded": "先完成主动问题、自测或暂存难点",
+  "readingPracticeSynthesisGenerated": "阅读成果已生成",
+  "readingPracticeSynthesisFailed": "生成失败，已保留原有成果",
+  "readingPracticeQuizScopeTitle": "授权本次处理章节片段",
+  "readingPracticeQuizScope": "本次将把“{chapter}”最多 6000 字符的章节片段发送给已配置的 AI 模型，生成三道自测题，可能包含当前位置之后的文字。结果仅在本次练习中预览，不会进入较早进度的阅读总结。",
+  "@readingPracticeQuizScope": {
+    "placeholders": {
+      "chapter": {
+        "type": "String"
+      }
+    }
+  },
+  "readingPracticeQuizGenerating": "正在生成三道自测题",
+  "readingPracticeQuizGenerated": "自测已生成",
+  "readingPracticeQuizFailed": "生成自测失败，已有题目已保留",
+  "readingPracticeTopics": "主题",
+  "readingPracticeStructure": "结构",
+  "readingPracticePlan": "阅读计划",
+  "readingPracticeExecutionPreview": "模型去向：{provider} · {model} · {destination}\n章节数量：{chapters} · 原文上限：{characters} 字符\n预计每次输入不超过 {tokens} tokens；校验失败最多重试一次。",
+  "@readingPracticeExecutionPreview": {
+    "placeholders": {
+      "provider": {
+        "type": "String"
+      },
+      "model": {
+        "type": "String"
+      },
+      "destination": {
+        "type": "String"
+      },
+      "chapters": {
+        "type": "String"
+      },
+      "characters": {
+        "type": "String"
+      },
+      "tokens": {
+        "type": "String"
+      }
+    }
+  },
+  "readingPracticeProviderUnavailable": "尚未配置 AI",
+  "readingPracticeLocalDestination": "本地或私有部署",
+  "readingPracticeCloudDestination": "云端部署",
+  "readingMaterialsDestination": "模型去向：{provider} · {model} · {destination}",
+  "@readingMaterialsDestination": {
+    "placeholders": {
+      "provider": {
+        "type": "String"
+      },
+      "model": {
+        "type": "String"
+      },
+      "destination": {
+        "type": "String"
+      }
+    }
+  },
+  "readingMaterialsEstimate": "预计输入约 {tokens} tokens；重试可能增加用量。",
+  "@readingMaterialsEstimate": {
+    "placeholders": {
+      "tokens": {
+        "type": "String"
+      }
+    }
+  },
+  "readingMaterialsResumeScope": "继续处理已确认的 0%～{progress}% 范围，共 {chapters} 章？",
+  "@readingMaterialsResumeScope": {
+    "placeholders": {
+      "progress": {
+        "type": "String"
+      },
+      "chapters": {
+        "type": "String"
+      }
+    }
+  },
+  "readingMaterialsResumeTitle": "继续整理资料？",
+  "readingMaterialsVerifierDestination": "含糊候选可能将短证据交给以下模型核查，输入预算不超过提取输入的 20%：{destination}",
+  "@readingMaterialsVerifierDestination": {
+    "placeholders": {
+      "destination": {
+        "type": "String"
+      }
+    }
+  }
 }

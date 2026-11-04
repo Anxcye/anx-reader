@@ -4,7 +4,7 @@ enum ReadingEvidenceMatchStrategy {
   sentenceWindow,
 }
 
-enum EvidenceSourceKind { bookText, web }
+enum EvidenceSourceKind { bookText, web, readerRecord }
 
 /// Shared source semantics for specialist evidence, resolved book text,
 /// ReadingArtifact sources and Book Wiki sources. Domain payloads stay in
@@ -21,6 +21,7 @@ class EvidenceEnvelope {
     this.endOffset,
     this.exactText = '',
     this.sourceUrl,
+    this.sourceRef,
     this.sourceProgress = 0,
     this.visibleFromProgress = 0,
     this.matchStrategy = ReadingEvidenceMatchStrategy.exact,
@@ -41,6 +42,7 @@ class EvidenceEnvelope {
   final int? endOffset;
   final String exactText;
   final String? sourceUrl;
+  final String? sourceRef;
   final double sourceProgress;
   final double visibleFromProgress;
   final ReadingEvidenceMatchStrategy matchStrategy;
@@ -55,6 +57,9 @@ class EvidenceEnvelope {
             (chapterHref?.isNotEmpty == true || cfi?.isNotEmpty == true) &&
             exactText.isNotEmpty,
         EvidenceSourceKind.web => sourceUrl?.isNotEmpty == true,
+        EvidenceSourceKind.readerRecord => bookId != null &&
+            sourceRef?.isNotEmpty == true &&
+            exactText.isNotEmpty,
       };
 
   bool isVisibleAtProgress(double progress) =>

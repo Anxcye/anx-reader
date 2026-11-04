@@ -4,6 +4,14 @@
 > 适用范围：AI 对话、Reading Agent、Reading Skill、阅读闭环、小说 Story Atlas、书籍 Wiki、阅读记忆、笔记整理、翻译、搜索、模型供应商、Token、任务、证据、同步与撤销。
 > 当前 SQLite 版本：22，以 `lib/dao/database.dart` 的 `currentDbVersion` 为准。
 
+## 阅读界面入口更新（2026-11）
+
+阅读内入口统一为同一 `AI｜本书` 面板。AI 为当前阅读现场提供明确触发的简短回答、
+引用和保存；本书通过 `BookWikiService.loadMaterials` 汇集五类本地可见资料。
+关系图/时间线和阅读练习从目录深入，AI 上下文包移至本书设置。打开、检索、切换
+和普通翻页都不调用模型。响应式 host 保留 WebView 与工作台状态；来源网关保留
+第一次跳转前的位置。该投影复用原 Wiki/Artifact/Memory/Note 数据，无新增表或同步格式。
+
 ## 0. 文档定位与阅读顺序
 
 本文是 AI 子系统的统一入口，回答四个问题：
@@ -30,7 +38,7 @@
 上下文，不是新的正文副本，也不替代用户浏览的 Wiki。节点带稳定 kind、来源、
 `sourceProgress`、`visibleFromProgress` 和事实/推断标识。
 
-“本书 → AI 上下文”是只读入口；打开它不生成内容。用户确认建立/更新后复用已存在
+“本书 → 本书设置 → AI 使用的资料”是只读入口；打开它不生成内容。用户确认建立/更新后复用已存在
 的 Wiki 增量任务，因此仍由 `ReadingTaskScheduler`、`ReadingChunker`、证据校验和
 `AgentActionService` 负责任务、来源、撤销和同步。显式 AI 对话通过
 `AiContextAssembler.withBookContext` 加入有上限的本地缓存投影；没有包或读取失败时

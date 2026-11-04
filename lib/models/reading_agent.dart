@@ -407,6 +407,7 @@ class BookReadingCoverage {
 }
 
 abstract final class ReadingArtifactKinds {
+  static const sourceAnchor = 'reading.source_anchor';
   static const character = 'fiction.character';
   static const relationship = 'fiction.relationship';
   static const event = 'fiction.event';

@@ -15,6 +15,21 @@ abstract final class ReadingEvidenceAdapter {
             (source.cfi?.isEmpty ?? true)) {
       return null;
     }
+    final rawVisible = source.metadata['visibleFromProgress'];
+    final rawProgress = source.metadata['sourceProgress'];
+    if ((rawVisible != null && (rawVisible is! num || !rawVisible.isFinite)) ||
+        (rawProgress != null &&
+            (rawProgress is! num || !rawProgress.isFinite))) {
+      return null;
+    }
+    if (rawVisible is num && (rawVisible < 0 || rawVisible > 1) ||
+        rawProgress is num && (rawProgress < 0 || rawProgress > 1)) {
+      return null;
+    }
+    final sourceProgress = rawProgress is num ? rawProgress.toDouble() : 0.0;
+    final storedVisible = rawVisible is num ? rawVisible.toDouble() : 0.0;
+    final inherited =
+        storedVisible > sourceProgress ? storedVisible : sourceProgress;
     return EvidenceEnvelope(
       id: 'note-source:${source.noteId}:${source.createdAt}',
       sourceKind: EvidenceSourceKind.bookText,
@@ -23,7 +38,9 @@ abstract final class ReadingEvidenceAdapter {
       chapterTitle: source.chapterTitle,
       cfi: source.cfi,
       exactText: source.textSnapshot,
-      visibleFromProgress: visibleFromProgress,
+      sourceProgress: sourceProgress,
+      visibleFromProgress:
+          inherited > visibleFromProgress ? inherited : visibleFromProgress,
       producer: 'readingNote',
     );
   }

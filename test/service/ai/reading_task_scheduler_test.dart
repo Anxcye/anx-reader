@@ -114,16 +114,59 @@ void main() {
 
     expect(scheduler.task('durable')!.status, ReadingTaskStatus.paused);
     expect(scheduler.task('durable')!.checkpoint, {'chapter': 4});
+    expect(scheduler.canResume('durable'), isFalse);
+    expect(scheduler.canResume('unknown'), isFalse);
     scheduler.registerExecutor<String>('test', (context) async {
       expect(context.task.checkpoint, {'chapter': 4});
       await context.update(progress: 1, checkpoint: const {'chapter': 10});
       return 'done';
     });
+    expect(scheduler.canResume('durable'), isTrue);
     await scheduler.resume('durable');
     await _waitForStatus(scheduler, 'durable', ReadingTaskStatus.completed);
+    expect(scheduler.canResume('durable'), isFalse);
 
     expect(store.values['durable']!.progress, 1);
     expect(store.values['durable']!.checkpoint, {'chapter': 10});
+  });
+
+  test('progress remains monotonic and completed tasks become visible at 100%',
+      () async {
+    final scheduler = ReadingTaskScheduler(now: _clock());
+    addTearDown(scheduler.dispose);
+    final future = scheduler.submit<void>(_task('monotonic'), (context) async {
+      await context.update(progress: .7, checkpoint: const {'stage': 'chunk'});
+      await context.update(progress: .2, checkpoint: const {'stage': 'late'});
+    });
+
+    await future;
+
+    final task = scheduler.task('monotonic')!;
+    expect(task.status, ReadingTaskStatus.completed);
+    expect(task.progress, 1);
+    expect(task.checkpoint, {'stage': 'late'});
+  });
+
+  test('executor registered before restore is attached to paused work',
+      () async {
+    final store = _MemoryTaskStore();
+    final paused = _task(
+      'pre-registered',
+      persistence: ReadingTaskPersistence.durable,
+    ).transition(ReadingTaskStatus.paused, now: 2);
+    await store.save(paused);
+    final scheduler = ReadingTaskScheduler(store: store, now: _clock());
+    addTearDown(scheduler.dispose);
+    scheduler.registerExecutor<String>('test', (_) async => 'restored');
+
+    await scheduler.restore();
+    await scheduler.resume('pre-registered');
+    await _waitForStatus(
+      scheduler,
+      'pre-registered',
+      ReadingTaskStatus.completed,
+    );
+    expect(scheduler.task('pre-registered')!.progress, 1);
   });
 }
 

@@ -31,16 +31,43 @@ API Key、工具执行或自动写库权限，并沿用摘要/完整两级渐进
 形成成果 → 明确下一步。新功能和重构不得以增加常驻入口、主动弹窗或后台工作
 作为默认代价。
 
-### AI＋本书入口
+### AI＋本书入口（2026-11 交互重设计）
 
-- 阅读工具栏的 AI 领域一级入口只保留 `AI` 和 `本书`。AI 处理当前问题、选区
-  解释和阅读方法；本书承载状态、唯一下一行动、成果、Wiki、Story Atlas、同步
-  和二级设置。复制、书签和书籍详情等传统阅读控制保持不变。
-- 手机以底部 Sheet 打开本书面板，平板和桌面以右侧面板打开。页面关闭后继续
-  使用原 WebView、CFI、选区和控制栏状态；来源导航统一经过
-  `ReaderCommandGateway`。
-- 打开本书面板、成果、Wiki、人物档案或时间线都只是读取已有投影，禁止自动
-  扫描正文或调用模型。
+阅读内 AI 的连续路径为：读到疑问 → 就地帮助 → 查看依据 → 明确保存 → 继续阅读。
+工具栏保留 `AI｜本书`，共用 `ReadingWorkspaceHost`；现有
+`AiWorkspaceController` 同时持有目的地、子页、草稿、选区、搜索和展开状态。
+切换、关闭和旋转只改变布局约束，保持同一 WebView 与工作台子树。
+
+- 可用宽度至少 840dp 默认右侧并排，初始 40%，限制 360–520dp，正文至少
+  400dp。有效的用户尺寸和底部分栏偏好继续生效。窄屏默认 56% 高度，提供
+  展开、收起、关闭按钮；输入时展开，返回先收键盘，再退出子页或面板。
+- AI 顶部仅显示章节/范围、历史和更多。阅读方法、闭环和专家配置收进“回答方式”；
+  深入分析、核查、翻译收进更多。首页模型配置和通用 AI 入口保持原有归属。
+- 空会话最多三个情境动作，由 Closure 声明的 `contextualPrompts` /
+  `selectionPrompts` 提供；新增书类不修改页面分支。新选区作为可移除引用，
+  不覆盖问题草稿。打开面板或选择文字都不请求模型，也不主动打开键盘。
+- 回答要求先简短解释，再提供必要细节；本书原文与外部来源跟随回答展示。
+  保存笔记/暂存问题必须明确点击，经受验证的 AgentAction 写入，并提供撤销。
+  普通生成关闭面板即停止；长任务继续由 scheduler 的任务卡暂停、继续和取消。
+  失败保留问题、已有内容和部分回答，原位重试。异书会话不能串入当前书。
+- “本书”为当前安全进度下的统一目录：章节与回顾、人物与关系、情节与线索、
+  概念与观点、我的记录。空分组收进“可建立的资料”；本地搜索仅过滤当前书
+  已有可见投影，不扫描正文、不调用模型。人物图/时间线是深入视图，阅读练习
+  是次级可选入口，AI 上下文包位于本书设置。
+- Wiki、Artifact、记忆、笔记保留原始 ID、来源身份及编辑入口，只按稳定来源 ID
+  去重。没有可验证进度边界的派生内容不默认展示；回退阅读位置立即重建安全
+  投影，来源打开前再次校验。同步冲突只在面板底部显示处理入口。
+- 来源统一经过 `ReaderCommandGateway`；连续查看多个来源仍保留最初提问处，
+  一次“返回提问处”即可回去。关闭帮助不会重建阅读器或主动改变正文位置。
+- 资料整理沿用对应 Wiki / Story Atlas 任务，确认范围、章节数、模型去向和用量；
+  不提供一键生成所有资料。全书处理、全文云端回退继续独立确认。
+- Material 原主题/字体，8/16/24dp 间距，主要按钮至少 48dp。E-INK 使用静态
+  文字、明确边框和按钮，不依赖拖动、动画或连续刷新；大字体允许内容滚动。
+- 旧的开书自动摘要偏好不再触发模型或弹窗，检视阅读提示也不随开书主动出现。
+  读前向导、回顾和自测均从明确动作进入。任务恢复重新展示范围和模型去向。
+- 单条引文不能证明整章内容都可见，历史问题、卡片与反思只继承精确来源或
+  已验证的 checkpoint 锚点。Wiki 的 content/generation 指纹仅标识版本，
+  可见性继续由其原文证据决定；稳定来源 ID 点击后解析为真实 CFI/章节位置。
 
 ### 唯一下一阅读行动
 
@@ -74,6 +101,9 @@ API Key、工具执行或自动写库权限，并沿用摘要/完整两级渐进
   位置指纹每个阅读会话最多自动提示一次，默认继续当前位置。
 - AI 长任务保持单任务运行，并在 chunk/进度安全点让出事件循环；可见进度最多
   每秒刷新一次。进入后台不自动恢复云端请求。
+- Wiki 与“本书 AI 上下文”共用持久任务进度卡：任务先写入调度器再读取 EPUB，
+  页面只订阅 `ReadingTaskScheduler.changes`。离开一个页面不会隐藏任务；从进程重启
+  恢复为暂停的任务必须由当前阅读页重新注册 executor，并由用户点击继续。
 
 ### 显示、离线和诊断
 
@@ -111,6 +141,10 @@ API Key、工具执行或自动写库权限，并沿用摘要/完整两级渐进
 - Fiction backfill is the first durable workload using the scheduler. Its
   existing per-batch Artifact checkpoints remain the data-level source of
   truth, while `ReadingTask` tracks scheduling state and visible progress.
+- Book Wiki/context generation is also durable. `wiki.book_generate` stores its
+  scope, safe boundary, session and purpose in the payload, and stage/checkpoint
+  metadata (chapter, chunk, total units) in the task. The shared progress card is
+  the only UI projection; it never starts model work by being opened.
 
 ## Reading Agent Beta — Phase 1
 
@@ -703,8 +737,7 @@ merge rules; the server only isolates and returns packages.
 ### 本书 AI 上下文包
 
 AI 上下文包是 Wiki、Story Atlas Artifact、Markdown 记忆和阅读成果的 AI 专用
-只读压缩投影，不是另一份正文，也不是用户浏览 Wiki 的替代品。入口位于“本书”
-面板；打开页面只读取本地节点，不调用模型。用户确认“从已读部分建立/更新”后，
+只读压缩投影，不是另一份正文，也不是用户浏览 Wiki 的替代品。入口位于“本书 → 本书设置 → AI 使用的资料”；打开页面只读取本地节点，不调用模型。用户确认“从已读部分建立/更新”后，
 复用现有 Wiki 增量任务的章节边界、checkpoint、证据校验、AgentAction、同步和
 撤销能力。
 

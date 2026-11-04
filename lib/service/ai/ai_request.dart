@@ -16,6 +16,12 @@ enum AiProviderRole {
 
 enum AiFallbackPolicy { none, configuredProvider, confirmBeforeFullTextCloud }
 
+enum AiFailureDelivery { errorText, streamError }
+
+class AiGenerationFailure implements Exception {
+  const AiGenerationFailure();
+}
+
 enum AiOutputKind { text, json }
 
 class AiOutputContract {
@@ -27,7 +33,7 @@ class AiOutputContract {
   const AiOutputContract.text() : this();
 
   const AiOutputContract.json({int schemaVersion = 1})
-    : this(kind: AiOutputKind.json, schemaVersion: schemaVersion);
+      : this(kind: AiOutputKind.json, schemaVersion: schemaVersion);
 
   final AiOutputKind kind;
   final int schemaVersion;
@@ -74,19 +80,19 @@ class AiRequest {
     this.sourceScope,
     this.outputContract = const AiOutputContract.text(),
     this.fallbackPolicy = AiFallbackPolicy.configuredProvider,
+    this.failureDelivery = AiFailureDelivery.errorText,
     this.overrideConfig,
     this.regenerate = false,
     this.useAgent = false,
     this.ref,
     this.readingMode,
     this.readingSkill,
-  }) : workloadId = workloadId ?? _defaultWorkload(contextTask),
-       trace =
-           trace ??
-           AiTraceContext(
-             workloadId: workloadId ?? _defaultWorkload(contextTask),
-             bookId: sourceScope?.bookId,
-           );
+  })  : workloadId = workloadId ?? _defaultWorkload(contextTask),
+        trace = trace ??
+            AiTraceContext(
+              workloadId: workloadId ?? _defaultWorkload(contextTask),
+              bookId: sourceScope?.bookId,
+            );
 
   final List<ChatMessage> messages;
   final String workloadId;
@@ -97,6 +103,7 @@ class AiRequest {
   final AiSourceScope? sourceScope;
   final AiOutputContract outputContract;
   final AiFallbackPolicy fallbackPolicy;
+  final AiFailureDelivery failureDelivery;
   final Map<String, String>? overrideConfig;
   final bool regenerate;
   final bool useAgent;
@@ -108,18 +115,18 @@ class AiRequest {
       fallbackPolicy == AiFallbackPolicy.configuredProvider;
 
   static String _defaultWorkload(AiContextTask task) => switch (task) {
-    AiContextTask.readingChat => 'reading.chat',
-    AiContextTask.translation => 'translation.selection',
-    AiContextTask.chapterReview => 'reading.chapter_review',
-    AiContextTask.fictionBackfill => 'fiction.story_atlas',
-    AiContextTask.noteOrganizer => 'reading_note.organize',
-    AiContextTask.expertAnalysis => 'reading.analysis',
-    AiContextTask.lightweightExtraction => 'extraction.lightweight',
-    AiContextTask.cloudVerification => 'extraction.cloud_verification',
-    AiContextTask.internalSummary => 'context.rolling_summary',
-    AiContextTask.bookContext => 'context.book_pack_generate',
-    AiContextTask.general => 'ai.general',
-  };
+        AiContextTask.readingChat => 'reading.chat',
+        AiContextTask.translation => 'translation.selection',
+        AiContextTask.chapterReview => 'reading.chapter_review',
+        AiContextTask.fictionBackfill => 'fiction.story_atlas',
+        AiContextTask.noteOrganizer => 'reading_note.organize',
+        AiContextTask.expertAnalysis => 'reading.analysis',
+        AiContextTask.lightweightExtraction => 'extraction.lightweight',
+        AiContextTask.cloudVerification => 'extraction.cloud_verification',
+        AiContextTask.internalSummary => 'context.rolling_summary',
+        AiContextTask.bookContext => 'context.book_pack_generate',
+        AiContextTask.general => 'ai.general',
+      };
 }
 
 class AiResponseMetadata {
@@ -213,6 +220,11 @@ abstract final class AiWorkloadDescriptorRegistry {
       contextTask: AiContextTask.expertAnalysis,
       allowsWebSearch: true,
     ),
+    'reading.mode_suggestion': AiWorkloadDescriptor(
+      id: 'reading.mode_suggestion',
+      contextTask: AiContextTask.general,
+      fallbackPolicy: AiFallbackPolicy.none,
+    ),
     'translation.selection': AiWorkloadDescriptor(
       id: 'translation.selection',
       contextTask: AiContextTask.translation,
@@ -248,6 +260,36 @@ abstract final class AiWorkloadDescriptorRegistry {
       providerRole: AiProviderRole.localExtraction,
       outputContract: AiOutputContract.json(),
       fallbackPolicy: AiFallbackPolicy.none,
+    ),
+    'reading_memory.topic_cloud': AiWorkloadDescriptor(
+      id: 'reading_memory.topic_cloud',
+      contextTask: AiContextTask.lightweightExtraction,
+      outputContract: AiOutputContract.json(),
+      fallbackPolicy: AiFallbackPolicy.none,
+    ),
+    'reading_memory.card_generation': AiWorkloadDescriptor(
+      id: 'reading_memory.card_generation',
+      contextTask: AiContextTask.noteOrganizer,
+      outputContract: AiOutputContract.json(),
+      fallbackPolicy: AiFallbackPolicy.none,
+    ),
+    'reading_practice.inspection_guide': AiWorkloadDescriptor(
+      id: 'reading_practice.inspection_guide',
+      contextTask: AiContextTask.bookContext,
+      outputContract: AiOutputContract.json(),
+      fallbackPolicy: AiFallbackPolicy.confirmBeforeFullTextCloud,
+    ),
+    'reading_practice.synthesis': AiWorkloadDescriptor(
+      id: 'reading_practice.synthesis',
+      contextTask: AiContextTask.chapterReview,
+      outputContract: AiOutputContract.json(),
+      fallbackPolicy: AiFallbackPolicy.none,
+    ),
+    'reading_practice.chapter_quiz': AiWorkloadDescriptor(
+      id: 'reading_practice.chapter_quiz',
+      contextTask: AiContextTask.chapterReview,
+      outputContract: AiOutputContract.json(),
+      fallbackPolicy: AiFallbackPolicy.confirmBeforeFullTextCloud,
     ),
     'reading_note.organize': AiWorkloadDescriptor(
       id: 'reading_note.organize',

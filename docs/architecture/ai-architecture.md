@@ -4,6 +4,28 @@
 
 开发者快速索引：先看 [`ai-system-map.md`](ai-system-map.md) 的 AI 全景、处理流程和演进建议，再用 [`feature-map.md`](feature-map.md) 检查“不要重复实现”项，最后回到本文阅读当前 AI 执行链路的实现细节。
 
+## 阅读助手与本书目录交互（2026-11）
+
+阅读页只负责共享面板的呈现与现有服务的调用。`ReadingWorkspaceHost` 在响应式布局
+和隐藏时保留 reader/panel 子树；`AiWorkspaceController` 管理 assistant/book、子页、
+草稿、引用、展开与本地查询。页面不得根据新增书类增加情境动作分支；Closure 的
+`ReadingQuickPromptSpec` 列表声明动作及选区目标。
+
+统一目录属于 `BookWikiService.loadMaterials` 的只读投影，而非新存储层。
+`BookMaterialsSnapshot` 保存稳定来源身份、目录分组、允许的操作和安全的 outcomes。
+Wiki、Artifact、Markdown 记忆、来源笔记及问题采用同一当前可见进度；无法验证来源
+边界的派生记录默认隐藏。搜索只过滤这个投影，来源打开前再次加载校验。
+请求前 `captureRequestLocation` 同步固定当前位置；普通阅读事件不调用模型。
+
+短回答仍走 AiChat → AiRequestGateway/ContextAssembler → 原 runner。
+`AiFailureDelivery` 默认保持旧错误文本兼容，阅读对话选择 `streamError`，仅在
+fallback 耗尽后抛受控失败，使 UI 保留最后成功片段与原问题。来源笔记和
+暂存问题由明确保存动作进入 ValidatedAiMutation/AgentActionService，复用现有日志、
+同步与撤销；sourceProgress / visibleFromProgress 写入既有笔记 metadata。
+阅读练习复用既有成果与方法配置，不代表自动执行任务。长任务仍使用 scheduler 的
+checkpoint、独立确认与暂停恢复。`canResume` 不为未知同步任务制造隐式 executor。
+目录刷新只响应位置、显式写入和任务终态，不触发新的模型工作。
+
 ## 1. 目标与原则
 
 Anx Reader 的 AI 不是阅读页上的一次性问答按钮，而是由阅读现场、可选的阅读方法、受控工具和可撤销写入组成的本地优先运行时。核心原则是：
@@ -208,7 +230,7 @@ AI 设置中的 Token 用量面板展示本月输入、输出、合计和请求�
 
 `ReadingTaskScheduler` 为阅读 AI 工作提供单一状态机和优先级队列。任务状态为 `queued/running/paused/completed/failed/cancelled`，优先级为 `background/normal/userInitiated/critical`；同优先级 FIFO，高优先级在下一个安全点协作式抢占可暂停任务。暂停、取消与恢复不直接杀死数据库事务或正在返回的 provider 响应。
 
-短任务可以是内存态，长任务使用 `tb_reading_tasks` 保存输入 payload、checkpoint、进度、尝试次数和错误。进程重启后，原 queued/running 任务统一恢复为 paused，避免应用启动时自动调用云模型；任务类型重新注册 executor 并经用户恢复后才继续。小说档案回填已接入此调度层，Artifact 批次 checkpoint 继续承担幂等数据恢复。
+短任务可以是内存态，长任务使用 `tb_reading_tasks` 保存输入 payload、checkpoint、进度、尝试次数和错误。进程重启后，原 queued/running 任务统一恢复为 paused，避免应用启动时自动调用云模型；任务类型重新注册 executor 并经用户恢复后才继续。小说档案回填已接入此调度层，Artifact 批次 checkpoint 继续承担幂等数据恢复。Wiki/本书上下文使用 `wiki.book_generate`，由当前阅读页重新注册可访问 EPUB WebView 的 executor；Wiki 与上下文页订阅同一任务流和共享进度卡，不会因页面切换而丢失可见性。
 
 ## 11. 安全、隐私与低打扰边界
 
@@ -267,3 +289,43 @@ AI 设置中的 Token 用量面板展示本月输入、输出、合计和请求�
 - 新数据是否声明同步合并规则和 tombstone 行为？
 - 新书类/Skill/工具/Provider 是否通过扩展契约而无需修改阅读页核心？
 - 是否补充测试、文档索引和 `git diff --check`？
+
+## 16. 阅读现场的来源锚点与练习写入扩展
+
+阅读页与工作台不再持有 Wiki/故事档案的 provider 回调或练习 prompt。领域服务
+负责注册请求、上下文预算、确定性解析和有限修复，页面只传显式范围、reader
+文本加载能力和 scheduler 的 task/session 标识。`AiRequestGateway.generalProvider`
+只读解析待确认的模型去向；确认后的 provider ID 固定传入请求，失败不会自动
+切换供应商。练习同样复用此解析入口。普通开书事件不触发旧自动摘要或检视提示。
+
+统一目录将 `artifact:`/`wiki:` 等来源标识解析为原始位置和逐字证据，不能把
+标识当作章节 href。Wiki 的 content/generation SHA-1 指纹只用于幂等版本判断，
+不是独立 Evidence，也不能据此推定可见进度；必须保留其实际来源。
+
+`ReadingDifficulty` 的旧表没有进度字段，运行时位置事件也不持久化。
+不能在重新打开目录时用当前位置或章节标题猜测历史问题的来源边界。
+复用 `ReadingArtifactKinds.sourceAnchor`（`reading.source_anchor`）作为通用、
+不参与目录内容投影的来源锚点：固定 `payload.sourceKind/sourceId`，精确 CFI、
+`sourceProgress/visibleFromProgress` 与既有 Evidence 边界一致。当前首个消费者
+为 `sourceKind: difficulty`。仅在用户明确保存、且来源与当前已验证快照匹配时建立，
+与目标记录同事务保存、同步捕获及撤销；旧内容来源不明时继续隐藏。该扩展不新增表，
+不改写原始问题/context，也不由翻页事件触发。
+
+章节回顾复用该锚点边界：checkpoint、mastery、knowledgeCard 只能从事务内校验的
+既有 checkpoint 继承其章节与明确 progress，同时保留 checkpointId。旧 checkpoint
+没有精确 CFI 时不得伪造当前 CFI，也不得将该边界推广到章节的其他资料。
+完成 checkpoint、掌握程度、可选复习卡、反思文档及其来源锚点共用一个 memory
+动作快照和原子事务；任何关联记录并发修改都会使整体撤销冲突，避免部分回滚。
+反思文档通过稳定 `checkpoint:<id>` 引用继承边界。
+
+阅读练习复用固定注册的 record kind 和现有 memory action journal，统一捕获
+guide、quiz、source、topic、card、复习排程/历史、来源关系及保留主题时的笔记反向引用。
+写入必须通过 `ValidatedAiMutation` 和 `AgentActionService`；快照在事务内校验书籍、
+并发修改与来源，再原子保存/撤销。删除整本练习资料也捕获全部关联快照。
+阅读记录片段使用 `EvidenceSourceKind.readerRecord` 及稳定 `sourceRef`，避免把用户笔记
+或 AI 回答伪装为书中原文；其可见边界从精确 CFI 或已验证笔记来源继承，
+不从章节名称或当前进度猜测。未知同步种类仍保留且安全忽略。
+
+练习的 guide/quiz 与 reading-memory source/topic/card/review 表仍沿用既有本地存储范围；
+本轮统一动作与撤销不新增这些表的跨设备同步格式。来源锚点复用已有 Artifact 同步和
+tombstone；原有已同步实体的同步覆盖保持不变。

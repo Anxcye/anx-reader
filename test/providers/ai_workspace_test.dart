@@ -5,6 +5,28 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
+  test('shared surfaces retain independent navigation and drafts', () async {
+    SharedPreferences.setMockInitialValues({});
+    await Prefs().initPrefs();
+    final controller = AiWorkspaceController(bookId: 99);
+    controller.setDraft('Keep this question');
+    controller.setChatScrollOffset(72);
+    controller.showHistory();
+    controller.showSurface(AiWorkspaceSurface.book, wide: true);
+    controller.bookQuery = 'characters';
+    controller.setSheetExpanded(true);
+    controller.hide();
+    controller.showSurface(AiWorkspaceSurface.assistant, wide: false);
+    expect(controller.view, AiWorkspaceView.history);
+    expect(controller.draft, 'Keep this question');
+    expect(controller.chatScrollOffset, 72);
+    expect(controller.bookQuery, 'characters');
+    expect(controller.sheetExpanded, isTrue);
+    controller.showPractice();
+    expect(controller.view, AiWorkspaceView.coach);
+    expect(controller.surface, AiWorkspaceSurface.assistant);
+    controller.dispose();
+  });
   setUp(() async {
     SharedPreferences.setMockInitialValues({});
     await Prefs().initPrefs();

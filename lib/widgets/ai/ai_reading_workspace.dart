@@ -1,11 +1,8 @@
-import 'dart:convert';
-
 import 'package:anx_reader/config/shared_preference_provider.dart';
-import 'package:anx_reader/dao/book_note.dart';
 import 'package:anx_reader/enums/hint_key.dart';
 import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/models/ai_quick_prompt_chip.dart';
-import 'package:anx_reader/models/book_note.dart';
+import 'package:anx_reader/models/ai_provider.dart';
 import 'package:anx_reader/page/settings_page/ai.dart';
 import 'package:anx_reader/page/reading_agent_help_page.dart';
 import 'package:anx_reader/providers/ai_history.dart';
@@ -14,21 +11,20 @@ import 'package:anx_reader/providers/ai_workspace.dart';
 import 'package:anx_reader/providers/reading_coach.dart';
 import 'package:anx_reader/providers/reading_memory.dart';
 import 'package:anx_reader/providers/book_toc.dart';
+import 'package:anx_reader/providers/current_reading.dart';
 import 'package:anx_reader/service/ai/ai_history.dart';
-import 'package:anx_reader/service/ai/index.dart';
-import 'package:anx_reader/service/ai/ai_request.dart';
 import 'package:anx_reader/service/ai/reading_ai_models.dart';
 import 'package:anx_reader/service/ai/reading_frameworks.dart';
 import 'package:anx_reader/service/ai/reading_experts.dart';
 import 'package:anx_reader/service/ai/reading_skills.dart';
-import 'package:anx_reader/service/ai/reading_coach_policy.dart';
 import 'package:anx_reader/service/ai/reading_closure_policy.dart';
+import 'package:anx_reader/service/ai/reading_experience_profile_service.dart';
 import 'package:anx_reader/service/ai/reading_coach_phase2.dart';
+import 'package:anx_reader/service/ai/reading_practice_ai_service.dart';
 import 'package:anx_reader/models/toc_item.dart';
 import 'package:anx_reader/models/reading_coach.dart';
 import 'package:anx_reader/models/reading_memory.dart';
-import 'package:anx_reader/service/ai/reading_memory_ai_service.dart';
-import 'package:anx_reader/service/ai/ai_extraction_engine.dart';
+import 'package:anx_reader/models/reading_agent.dart';
 import 'package:anx_reader/service/ai/agent_action_service.dart';
 import 'package:anx_reader/service/ai/reading_agent_runtime.dart';
 import 'package:anx_reader/service/reading_note/reading_note_capture_service.dart';
@@ -38,7 +34,6 @@ import 'package:anx_reader/widgets/ai/ai_chat_stream.dart';
 import 'package:anx_reader/widgets/reading_note/quick_capture_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:langchain_core/chat_models.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class AiReadingWorkspace extends ConsumerStatefulWidget {
@@ -60,6 +55,11 @@ class AiReadingWorkspace extends ConsumerStatefulWidget {
     this.onDifficultyResolved,
     this.closureRegistry = const ReadingClosurePolicyRegistry(),
     this.sendImmediate = false,
+    this.currentChapterTitle,
+    this.currentProgress,
+    this.onInputFocused,
+    this.onReturnToQuestion,
+    this.onOpenBook,
   });
 
   final AiWorkspaceController controller;
@@ -71,7 +71,7 @@ class AiReadingWorkspace extends ConsumerStatefulWidget {
   final List<Widget>? trailing;
   final Future<void> Function(AiChatHistoryEntry entry)? onOpenBookSession;
   final Future<void> Function(AiChatHistoryEntry entry)?
-  onRestoreReadingContext;
+      onRestoreReadingContext;
   final Future<String> Function(String href)? onFetchChapter;
   final Future<String> Function(String href)? onFetchChapterSample;
   final ValueChanged<String>? onNavigateChapter;
@@ -79,6 +79,11 @@ class AiReadingWorkspace extends ConsumerStatefulWidget {
   final ValueChanged<ReadingDifficulty>? onDifficultyResolved;
   final ReadingClosurePolicyRegistry closureRegistry;
   final bool sendImmediate;
+  final String? currentChapterTitle;
+  final double? currentProgress;
+  final VoidCallback? onInputFocused;
+  final VoidCallback? onReturnToQuestion;
+  final VoidCallback? onOpenBook;
 
   @override
   ConsumerState<AiReadingWorkspace> createState() => _AiReadingWorkspaceState();
@@ -99,6 +104,9 @@ class _AiReadingWorkspaceState extends ConsumerState<AiReadingWorkspace> {
   bool _rememberExpertSelection = false;
   final Set<String> _revealedCards = {};
   String? _reviewedCardAwaitingAdvance;
+  ReadingContextSnapshot? _submittedSource;
+  String? _submittedQuestion;
+  String? _nextQuestionTitle;
 
   @override
   void initState() {
@@ -126,27 +134,20 @@ class _AiReadingWorkspaceState extends ConsumerState<AiReadingWorkspace> {
     }
     _requestedModeSuggestion = true;
     setState(() {});
-    final selection = widget.controller.pendingSelection;
-    final result = await aiGenerateText(
-      [
-        ChatMessage.humanText('''只输出 general、history、psychology、finance 之一，不要解释。
-根据少量书籍元数据建议 AI 阅读模式：
-书名：${widget.bookTitle}
-作者：${widget.bookAuthor}
-简介：${widget.bookDescription ?? ''}
-当前章节：${selection?.chapterTitle ?? ''}
-少量正文：${selection?.surroundingText ?? selection?.selectedText ?? ''}'''),
-      ],
-      useAgent: false,
-      ref: ref,
-    );
-    if (!mounted) return;
-    final normalized = result.trim().toLowerCase();
-    for (final mode in ReadingAiMode.values) {
-      if (normalized == mode.name || normalized.contains(mode.name)) {
-        widget.controller.setSuggestedMode(mode);
-        return;
-      }
+    try {
+      final mode = await readingExperienceProfileService.suggestAnswerMode(
+          bookId: widget.controller.bookId,
+          title: widget.bookTitle,
+          author: widget.bookAuthor,
+          description: widget.bookDescription,
+          selection: widget.controller.pendingSelection,
+          ref: ref);
+      if (!mounted) return;
+      if (mode != null) widget.controller.setSuggestedMode(mode);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _requestedModeSuggestion = false);
+      AnxToast.show(L10n.of(context).commonFailed);
     }
   }
 
@@ -156,6 +157,9 @@ class _AiReadingWorkspaceState extends ConsumerState<AiReadingWorkspace> {
     if (oldWidget.controller != widget.controller) {
       oldWidget.controller.removeListener(_changed);
       widget.controller.addListener(_changed);
+      _submittedSource = null;
+      _submittedQuestion = null;
+      _nextQuestionTitle = null;
       _analysisDepth = widget.controller.analysisDepth;
       _analysisOutput = widget.controller.outputTemplate;
       _showAnalysisConfig = false;
@@ -183,11 +187,26 @@ class _AiReadingWorkspaceState extends ConsumerState<AiReadingWorkspace> {
       child: IndexedStack(
         index: controller.view.index,
         children: [
-          _buildChat(),
-          _buildCoach(),
-          _buildHistory(),
-          _buildSessionDetail(),
-          _buildAgentsAndSources(),
+          TickerMode(
+            enabled: controller.view == AiWorkspaceView.chat,
+            child: _buildChat(),
+          ),
+          TickerMode(
+            enabled: controller.view == AiWorkspaceView.coach,
+            child: _buildCoach(),
+          ),
+          TickerMode(
+            enabled: controller.view == AiWorkspaceView.history,
+            child: _buildHistory(),
+          ),
+          TickerMode(
+            enabled: controller.view == AiWorkspaceView.sessionDetail,
+            child: _buildSessionDetail(),
+          ),
+          TickerMode(
+            enabled: controller.view == AiWorkspaceView.agentsAndSources,
+            child: _buildAgentsAndSources(),
+          ),
         ],
       ),
     );
@@ -195,31 +214,227 @@ class _AiReadingWorkspaceState extends ConsumerState<AiReadingWorkspace> {
 
   Widget _buildChat() {
     final pending = widget.controller.pendingSelection;
-    return Column(
+    final l10n = L10n.of(context);
+    final chapter = pending?.chapterTitle ?? widget.currentChapterTitle;
+    final scope = pending == null
+        ? l10n.readingAssistantScope
+        : l10n.readingAssistantSelectionScope;
+    return AiChatStream(
+      key: widget.chatKey,
+      readingCompanion: true,
+      initialMessage: widget.controller.draft,
+      sendImmediate: widget.sendImmediate,
+      onDraftChanged: widget.controller.setDraft,
+      initialScrollOffset: widget.controller.chatScrollOffset,
+      onScrollOffsetChanged: widget.controller.setChatScrollOffset,
+      onSaveAnswer: _saveAnswerAsNote,
+      onSaveQuestion: _saveAnswerAsQuestion,
+      answerSources: _buildAnswerSources(),
+      onInputFocused: widget.onInputFocused,
+      onRequestStarted: (message) {
+        _submittedSource = widget.controller.pendingSelection ??
+            _submittedSource ??
+            _currentLocationSnapshot();
+        _submittedQuestion = _nextQuestionTitle ??
+            message
+                .split(
+                  '\n\n先用简短、直接的回答帮助继续阅读',
+                )
+                .first
+                .trim();
+        _nextQuestionTitle = null;
+        widget.controller.clearPendingSelection();
+      },
+      onNewConversation: () {
+        _submittedSource = null;
+        _submittedQuestion = null;
+      },
+      onReturnToQuestion: widget.onReturnToQuestion,
+      pendingContext: pending == null ? null : _buildSelectionCard(pending),
+      quickPromptChips: [
+        for (final spec in _currentClosurePolicy().contextualPrompts.take(3))
+          AiQuickPromptChip(
+            icon: Icons.menu_book_outlined,
+            label: _contextPromptLabel(spec),
+            prompt: spec.buildCompanionPrompt(),
+          ),
+      ],
+      title: chapter?.isNotEmpty == true ? chapter : l10n.readingAssistantTitle,
+      subtitle:
+          '$scope${widget.currentProgress == null ? '' : ' · ${(widget.currentProgress! * 100).round()}%'}',
+      onOpenHistory: widget.controller.showHistory,
+      onOpenAgents: widget.controller.showAgentsAndSources,
+      onOpenCoach: widget.controller.showPractice,
+      onShowMore: _showMoreActions,
+      trailing: widget.trailing,
+    );
+  }
+
+  Widget _buildAnswerSources() {
+    final sessionId = ref.read(aiChatProvider.notifier).currentSessionId;
+    final entry = ref
+        .watch(aiHistoryProvider)
+        .asData
+        ?.value
+        .where((item) => item.id == sessionId)
+        .firstOrNull;
+    final source = _submittedSource;
+    final citations = entry?.citations ?? const <Map<String, dynamic>>[];
+    if (source == null && citations.isEmpty) return const SizedBox.shrink();
+    return ExpansionTile(
+      tilePadding: EdgeInsets.zero,
+      title: Text(L10n.of(context).readingAssistantEvidence,
+          style: Theme.of(context).textTheme.labelLarge),
       children: [
-        if (widget.controller.suggestedMode != null) _buildModeSuggestion(),
-        _buildReadingClosureBar(),
-        _buildReadingSkillBar(),
-        _buildCurrentAgentTrace(),
-        if (pending != null) _buildSelectionCard(pending),
-        Expanded(
-          child: AiChatStream(
-            key: widget.chatKey,
-            initialMessage: widget.controller.draft,
-            sendImmediate: widget.sendImmediate,
-            onDraftChanged: widget.controller.setDraft,
-            initialScrollOffset: widget.controller.chatScrollOffset,
-            onScrollOffsetChanged: widget.controller.setChatScrollOffset,
-            onSaveAnswer: _saveAnswerAsNote,
-            quickPromptChips: widget.quickPromptChips,
-            title: _modeLabel(widget.controller.mode),
-            onOpenHistory: widget.controller.showHistory,
-            onOpenAgents: widget.controller.showAgentsAndSources,
-            onOpenCoach: widget.controller.showCoach,
-            trailing: widget.trailing,
+        if (source != null && _isUsableSource(source))
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: const Icon(Icons.menu_book_outlined, size: 20),
+            title: Text(L10n.of(context).readingAssistantOriginalSource),
+            subtitle: Text(
+                '${source.chapterTitle ?? ''}\n${source.selectedText ?? ''}',
+                maxLines: 4,
+                overflow: TextOverflow.ellipsis),
+            onTap: () {
+              final cfi = source.metadata['cfi'].toString();
+              if (widget.onNavigateChapter != null) {
+                widget.onNavigateChapter!(cfi);
+              } else {
+                ReaderCommandGateway.instance
+                    .navigateToCfi(bookId: widget.controller.bookId, cfi: cfi);
+              }
+            },
+          ),
+        for (final citation in citations)
+          if (Uri.tryParse(citation['url']?.toString() ?? '') case final uri?
+              when uri.scheme == 'https' || uri.scheme == 'http')
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.open_in_new, size: 20),
+              title: Text(citation['title']?.toString() ?? uri.host,
+                  maxLines: 2, overflow: TextOverflow.ellipsis),
+              subtitle: Text(
+                  '${L10n.of(context).readingAssistantExternalSource} · ${uri.host}'),
+              onTap: () => launchUrl(uri),
+            ),
+      ],
+    );
+  }
+
+  String _contextPromptLabel(ReadingQuickPromptSpec spec) {
+    final l10n = L10n.of(context);
+    return switch (spec.id) {
+      'reading.explain_current' => l10n.readingAssistantExplainCurrent,
+      'reading.recall_read' => l10n.readingAssistantRecall,
+      'reading.explore' => l10n.readingAssistantExplore,
+      'reading.explain_selection' => l10n.readingAssistantExplainSelection,
+      'reading.connect_selection' => l10n.readingAssistantConnect,
+      _ => spec.label,
+    };
+  }
+
+  void _runSelectionAction(
+      ReadingContextSnapshot snapshot, SelectionAiAction action) {
+    if (action == SelectionAiAction.addNote) {
+      _saveSelectionAsNote(snapshot);
+      return;
+    }
+    final prompt = ReadingQuickPromptSpec.concisePrompt(
+      widget.controller.buildActionPrompt(action),
+    );
+    _nextQuestionTitle = switch (action) {
+      SelectionAiAction.explain =>
+        L10n.of(context).readingAssistantExplainSelection,
+      SelectionAiAction.contextualize =>
+        L10n.of(context).readingAssistantConnect,
+      _ => _actionLabel(action),
+    };
+    final started = widget.chatKey.currentState?.sendPrompt(prompt) ?? false;
+    if (!started) _nextQuestionTitle = null;
+    if (started) widget.controller.clearPendingSelection();
+  }
+
+  Future<void> _showMoreActions() async {
+    final snapshot = widget.controller.pendingSelection ?? _submittedSource;
+    await showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (sheetContext) => SafeArea(
+        child: ConstrainedBox(
+          constraints:
+              BoxConstraints(maxHeight: MediaQuery.sizeOf(context).height * .8),
+          child: ListView(
+            shrinkWrap: true,
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+            children: [
+              Text(L10n.of(context).readingAssistantMore,
+                  style: Theme.of(context).textTheme.titleLarge),
+              if (snapshot != null) ...[
+                for (final action
+                    in widget.controller.mode.agentProfile.actionOrder)
+                  ListTile(
+                    title: Text(_actionLabel(action)),
+                    onTap: () {
+                      Navigator.pop(sheetContext);
+                      widget.controller.setPendingSelection(snapshot);
+                      _runSelectionAction(snapshot, action);
+                    },
+                  ),
+                ListTile(
+                  leading: const Icon(Icons.auto_awesome_outlined),
+                  title: Text(_actionLabel(SelectionAiAction.deepAnalyze)),
+                  onTap: () {
+                    Navigator.pop(sheetContext);
+                    widget.controller.setPendingSelection(snapshot);
+                    _openAnalysisConfig(snapshot);
+                  },
+                ),
+              ],
+              ListTile(
+                leading: const Icon(Icons.bookmark_add_outlined),
+                title: Text(L10n.of(context).readingAssistantSaveQuestion),
+                onTap: () {
+                  Navigator.pop(sheetContext);
+                  final draft = widget
+                          .chatKey.currentState?.inputController.text
+                          .trim() ??
+                      '';
+                  final location = snapshot ?? _currentLocationSnapshot();
+                  if (location == null) {
+                    _showSaveMessage(
+                        L10n.of(context).readingAssistantNeedSource);
+                    return;
+                  }
+                  _saveDifficulty(location,
+                      question: draft.isNotEmpty
+                          ? draft
+                          : _submittedQuestion ??
+                              L10n.of(context)
+                                  .readingAssistantExplainSelection);
+                },
+              ),
+              for (final spec in _currentClosurePolicy().quickPrompts)
+                ListTile(
+                  title: Text(spec.label),
+                  onTap: () {
+                    Navigator.pop(sheetContext);
+                    widget.chatKey.currentState
+                        ?.sendPrompt(spec.buildCompanionPrompt());
+                  },
+                ),
+              ListTile(
+                leading: const Icon(Icons.tune_outlined),
+                title: Text(L10n.of(context).readingAssistantOptions),
+                onTap: () {
+                  Navigator.pop(sheetContext);
+                  widget.controller.showAgentsAndSources();
+                },
+              ),
+            ],
           ),
         ),
-      ],
+      ),
     );
   }
 
@@ -690,8 +905,7 @@ class _AiReadingWorkspaceState extends ConsumerState<AiReadingWorkspace> {
     final generatedTopics = (report?['topics'] as List?)
         ?.map((value) => value.toString())
         .toList(growable: false);
-    final topics =
-        generatedTopics ??
+    final topics = generatedTopics ??
         const ['核心概念与知识体系', '作者试图解决的问题', '一套可实践的方法', '我还不确定'];
     const goals = ['了解全貌', '学习知识', '解决问题', '批判分析', '休闲阅读'];
     return _buildCoachSection(
@@ -848,7 +1062,7 @@ class _AiReadingWorkspaceState extends ConsumerState<AiReadingWorkspace> {
                     label: option,
                     selected:
                         guide.answers[entry.key]?.selected.contains(option) ==
-                        true,
+                            true,
                     multiple: entry.value.$3,
                     onTap: () => _answerQuestion(
                       guide,
@@ -1120,8 +1334,8 @@ class _AiReadingWorkspaceState extends ConsumerState<AiReadingWorkspace> {
               onChanged: _organizingMemory
                   ? null
                   : (value) => setState(
-                      () => _includeAiBlocksInMemory = value == true,
-                    ),
+                        () => _includeAiBlocksInMemory = value == true,
+                      ),
               contentPadding: EdgeInsets.zero,
               controlAffinity: ListTileControlAffinity.leading,
               title: Text(l10n.readingMemoryIncludeAiBlocks),
@@ -1228,6 +1442,14 @@ class _AiReadingWorkspaceState extends ConsumerState<AiReadingWorkspace> {
     );
   }
 
+  double get _practiceBoundary {
+    final reading = ref.read(currentReadingProvider);
+    if (reading.book?.id == widget.controller.bookId) {
+      return reading.percentage ?? widget.currentProgress ?? 0;
+    }
+    return widget.currentProgress ?? 0;
+  }
+
   Future<void> _organizeMemory({required bool includeUsed}) async {
     final l10n = L10n.of(context);
     setState(() => _organizingMemory = true);
@@ -1243,27 +1465,23 @@ class _AiReadingWorkspaceState extends ConsumerState<AiReadingWorkspace> {
         AnxToast.show(l10n.readingMemoryNotEnoughSources);
         return;
       }
-      final service = ReadingMemoryAiService();
-      final prompt = service.topicPrompt(sources);
-      var useExtractionEngine = aiExtractionEngine.resolveProvider(ref) != null;
-      if (!useExtractionEngine) {
+      final service = ReadingPracticeAiService();
+      var allowCloud = false;
+      if (service.topicCloudConfirmationRequired(ref)) {
         if (!mounted) return;
-        final allowCloud =
-            await showDialog<bool>(
+        allowCloud = await showDialog<bool>(
               context: context,
               builder: (dialogContext) => AlertDialog(
-                title: const Text('轻量提取引擎不可用'),
-                content: const Text(
-                  '主题聚类通常由本地或小参数模型处理。若继续，本次收集的阅读记忆内容将发送给通用线上模型；以后仍不会自动切换。',
-                ),
+                title: Text(l10n.readingPracticeExtractionUnavailable),
+                content: Text(l10n.readingPracticeTopicCloudScope),
                 actions: [
-                  FilledButton.tonal(
-                    onPressed: () => Navigator.pop(dialogContext, false),
-                    child: const Text('取消／稍后处理'),
-                  ),
                   TextButton(
+                    onPressed: () => Navigator.pop(dialogContext, false),
+                    child: Text(l10n.commonCancel),
+                  ),
+                  FilledButton(
                     onPressed: () => Navigator.pop(dialogContext, true),
-                    child: const Text('仅本次使用线上模型'),
+                    child: Text(l10n.readingPracticeAllowOnce),
                   ),
                 ],
               ),
@@ -1271,27 +1489,17 @@ class _AiReadingWorkspaceState extends ConsumerState<AiReadingWorkspace> {
             false;
         if (!allowCloud) return;
       }
-      final batchId = DateTime.now().millisecondsSinceEpoch.toString();
-      final topics = await _generateMemoryStructured(
-        prompt: prompt,
-        correction: '输出 2-8 个主题，每项必须包含 title、summary 和输入中的 sourceIds。',
-        parser: (response) => service.parseTopics(
-          response,
-          bookId: widget.controller.bookId,
-          batchId: batchId,
-          allowedSourceIds: sources.map((s) => s.id).toSet(),
-          now: int.parse(batchId),
-        ),
-        useExtractionEngine: useExtractionEngine,
+      final topics = await service.organizeMemory(
+        bookId: widget.controller.bookId,
+        visibleAtProgress: _practiceBoundary,
+        sources: sources,
+        allowCloudFallback: allowCloud,
+        ref: ref,
       );
       await notifier.saveTopics(topics);
-      if (mounted) {
-        AnxToast.show(l10n.readingMemoryTopicsGenerated);
-      }
+      if (mounted) AnxToast.show(l10n.readingMemoryTopicsGenerated);
     } catch (_) {
-      if (mounted) {
-        AnxToast.show(l10n.readingMemoryOrganizeFailed);
-      }
+      if (mounted) AnxToast.show(l10n.readingMemoryOrganizeFailed);
     } finally {
       if (mounted) setState(() => _organizingMemory = false);
     }
@@ -1303,21 +1511,12 @@ class _AiReadingWorkspaceState extends ConsumerState<AiReadingWorkspace> {
   ) async {
     final l10n = L10n.of(context);
     try {
-      final sources = state.sources
-          .where((source) => topic.sourceIds.contains(source.id))
-          .toList();
-      final service = ReadingMemoryAiService();
-      final prompt = service.cardPrompt(topic, sources);
-      final cards = await _generateMemoryStructured(
-        prompt: prompt,
-        correction: '输出 3-8 张卡片，每项必须包含 question、answer 和输入中的 sourceIds。',
-        parser: (response) => service.parseCards(
-          response,
-          bookId: widget.controller.bookId,
-          topic: topic,
-          allowedSourceIds: topic.sourceIds.toSet(),
-          now: DateTime.now().millisecondsSinceEpoch,
-        ),
+      final cards = await ReadingPracticeAiService().generateCards(
+        bookId: widget.controller.bookId,
+        visibleAtProgress: _practiceBoundary,
+        topic: topic,
+        sources: state.sources,
+        ref: ref,
       );
       await ref
           .read(readingMemoryProvider(widget.controller.bookId).notifier)
@@ -1325,44 +1524,6 @@ class _AiReadingWorkspaceState extends ConsumerState<AiReadingWorkspace> {
       if (mounted) AnxToast.show(l10n.readingMemoryCardsGenerated);
     } catch (_) {
       if (mounted) AnxToast.show(l10n.readingMemoryCardsGenerateFailed);
-    }
-  }
-
-  Future<List<T>> _generateMemoryStructured<T>({
-    required String prompt,
-    required String correction,
-    required List<T> Function(String response) parser,
-    bool useExtractionEngine = false,
-  }) async {
-    Future<String> generate(String value) async {
-      if (!useExtractionEngine) {
-        return aiGenerateText(
-          [ChatMessage.humanText(value)],
-          useAgent: false,
-          ref: ref,
-          outputContract: const AiOutputContract.json(),
-        );
-      }
-      final extracted = await aiExtractionEngine.extract(
-        taskId: AiExtractionTaskIds.readingMemoryTopics,
-        prompt: value,
-        ref: ref,
-      );
-      if (!extracted.isValid) {
-        throw FormatException(extracted.validationErrors.join('；'));
-      }
-      return extracted.raw;
-    }
-
-    var response = await generate(prompt);
-    try {
-      return parser(response);
-    } on FormatException {
-      response = await generate('''返回未通过校验。请只输出合法 JSON 数组，不要解释。
-$correction
-原始任务：$prompt
-待纠正返回：$response''');
-      return parser(response);
     }
   }
 
@@ -1411,11 +1572,11 @@ $correction
                   Icon(
                     selected
                         ? (multiple
-                              ? Icons.check_box
-                              : Icons.radio_button_checked)
+                            ? Icons.check_box
+                            : Icons.radio_button_checked)
                         : (multiple
-                              ? Icons.check_box_outline_blank
-                              : Icons.radio_button_unchecked),
+                            ? Icons.check_box_outline_blank
+                            : Icons.radio_button_unchecked),
                     size: 20,
                   ),
                   const SizedBox(width: 10),
@@ -1425,9 +1586,8 @@ $correction
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        fontWeight: selected
-                            ? FontWeight.w700
-                            : FontWeight.w400,
+                        fontWeight:
+                            selected ? FontWeight.w700 : FontWeight.w400,
                       ),
                     ),
                   ),
@@ -1440,229 +1600,214 @@ $correction
     );
   }
 
+  String _practicePreviewText(ReadingPracticeExecutionPreview preview) {
+    final l10n = L10n.of(context);
+    final provider = preview.provider;
+    return l10n.readingPracticeExecutionPreview(
+      provider?.title ?? l10n.readingPracticeProviderUnavailable,
+      provider?.model ?? '—',
+      provider?.deployment == AiProviderDeployment.localPrivate
+          ? l10n.readingPracticeLocalDestination
+          : l10n.readingPracticeCloudDestination,
+      '${preview.chapterCount}',
+      '${preview.maxSourceCharacters}',
+      '${preview.estimatedInputTokenLimit}',
+    );
+  }
+
   Future<void> _generatePersonalizedGuide(InspectionReadingGuide guide) async {
-    final chapters = _flattenToc(
-      ref.read(bookTocProvider),
-    ).where((item) => item.href.trim().isNotEmpty).toList(growable: false);
+    final l10n = L10n.of(context);
+    final chapters = _flattenToc(ref.read(bookTocProvider))
+        .where((item) => item.href.trim().isNotEmpty)
+        .toList(growable: false);
     if (chapters.isEmpty || widget.onFetchChapterSample == null) {
-      AnxToast.show('目录尚未准备好');
+      AnxToast.show(l10n.readingPracticeChaptersUnavailable);
       return;
     }
+    final service = ReadingPracticeAiService();
+    final executionPreview = service.previewGuide(
+        representativeChapterIndexes(chapters.length).length, ref);
+    // This authorization occurs before fetching samples, including unread text.
+    final allowed = await showDialog<bool>(
+          context: context,
+          builder: (dialogContext) => AlertDialog(
+            title: Text(l10n.readingPracticeGuideScopeTitle),
+            content: Text(
+                '${l10n.readingPracticeGuideScope}\n\n${_practicePreviewText(executionPreview)}'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext, false),
+                child: Text(l10n.commonCancel),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(dialogContext, true),
+                child: Text(l10n.readingPracticeAllowOnce),
+              ),
+            ],
+          ),
+        ) ??
+        false;
+    if (!allowed || !mounted) return;
     setState(() => _generatingGuide = true);
     try {
-      final samples = <Map<String, String>>[];
+      final samples = <ReadingPracticeChapter>[];
       for (final index in representativeChapterIndexes(chapters.length)) {
         final chapter = chapters[index];
         final content = await widget.onFetchChapterSample!(chapter.href);
-        if (content.trim().isEmpty) continue;
-        samples.add({
-          'title': chapter.label,
-          'href': chapter.href,
-          'sample': boundedChapterSample(content),
-        });
+        if (content.trim().isNotEmpty) {
+          samples.add(ReadingPracticeChapter(
+              title: chapter.label, href: chapter.href, content: content));
+        }
       }
-      final toc = chapters
-          .map((item) => {'title': item.label, 'href': item.href})
-          .toList(growable: false);
-      final prompt =
-          '''根据书籍元数据、目录和限量章节样本生成低输入检视阅读向导。
-只输出 JSON 对象，不要 Markdown。格式：
-{"bookType":"类型","coreQuestion":"核心问题","topics":["主题1","主题2","主题3"],"structure":["结构1","结构2"],"keyChapters":[{"title":"章节名","href":"目录中的原始href","reason":"原因"}],"plan":["步骤1","步骤2"],"questionOptions":{"whole":["选项1","选项2","选项3"],"detail":["选项1","选项2","选项3"],"truth":["选项1","选项2","选项3"],"relation":["选项1","选项2","选项3"]}}
-要求：选项必须具体对应本书、短且互不重复；不得编造目录 href；每组 3-5 项。
-书名：${widget.bookTitle}
-作者：${widget.bookAuthor}
-简介：${widget.bookDescription ?? ''}
-目录：${jsonEncode(toc)}
-章节样本：${jsonEncode(samples)}''';
-      final report = await _generateStructured(
-        prompt: prompt,
-        correctionRule: '必须输出检视向导 JSON 对象，保留目录原始 href，四组问题各含 3-5 个选项。',
-        parser: parsePersonalizedGuideResponse,
+      final report = await service.generateGuide(
+        bookId: widget.controller.bookId,
+        title: widget.bookTitle,
+        author: widget.bookAuthor,
+        description: widget.bookDescription ?? '',
+        chapters: samples,
+        fullBookSamplesAuthorized: allowed,
+        executionPreview: executionPreview,
+        ref: ref,
       );
-      final knownHrefs = chapters.map((chapter) => chapter.href).toSet();
-      final keyChapters = report['keyChapters'] as List;
-      if (keyChapters.any(
-        (chapter) =>
-            chapter is! Map ||
-            !knownHrefs.contains(chapter['href']?.toString() ?? ''),
-      )) {
-        throw const FormatException('AI returned an unknown chapter href');
-      }
-      await _updateGuide(
-        guide.copyWith(
-          report: {
-            ...?guide.report,
-            ...report,
-            'generatedAt': DateTime.now().millisecondsSinceEpoch,
-          },
-          status: InspectionGuideStatus.inProgress,
-          updatedAt: DateTime.now().millisecondsSinceEpoch,
+      await _updateGuide(guide.copyWith(
+        report: {
+          ...?guide.report,
+          ...report,
+          'generatedAt': DateTime.now().millisecondsSinceEpoch
+        },
+        status: InspectionGuideStatus.inProgress,
+        updatedAt: DateTime.now().millisecondsSinceEpoch,
+      ));
+      if (!mounted) return;
+      await showDialog<void>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          scrollable: true,
+          title: Text(l10n.readingPracticeGuideGenerated),
+          content: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(report['coreQuestion']?.toString() ?? ''),
+              const SizedBox(height: 16),
+              _buildResultList(l10n.readingPracticeTopics, report['topics']),
+              _buildResultList(
+                  l10n.readingPracticeStructure, report['structure']),
+              _buildResultList(l10n.readingPracticePlan, report['plan']),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: Text(l10n.commonOk),
+            )
+          ],
         ),
       );
-      if (mounted) AnxToast.show('个性化向导已生成');
     } catch (_) {
-      if (mounted) AnxToast.show('生成失败，已保留原有向导');
+      if (mounted) AnxToast.show(l10n.readingPracticeGuideFailed);
     } finally {
       if (mounted) setState(() => _generatingGuide = false);
     }
   }
 
   Future<void> _generateReadingSynthesis(ReadingCoachState state) async {
-    final answered = state.guide.answers.map(
-      (id, answer) => MapEntry(id, answer.selected),
-    );
-    if (answered.isEmpty &&
+    final l10n = L10n.of(context);
+    if (state.guide.answers.isEmpty &&
         state.quizzes.where((quiz) => quiz.completed).isEmpty &&
         state.difficulties.isEmpty) {
-      AnxToast.show('先完成主动问题、自测或暂存难点');
+      AnxToast.show(l10n.readingPracticeRecordsNeeded);
       return;
     }
     setState(() => _generatingSynthesis = true);
     try {
-      final evidence = {
-        'book': {
-          'title': widget.bookTitle,
-          'author': widget.bookAuthor,
-          'goal': state.guide.goalChoice,
-          'guide': state.guide.report,
+      final synthesis = await ReadingPracticeAiService().generateSynthesis(
+        bookId: widget.controller.bookId,
+        visibleAtProgress: _practiceBoundary,
+        title: widget.bookTitle,
+        author: widget.bookAuthor,
+        guide: state.guide,
+        quizzes: state.quizzes,
+        difficulties: state.difficulties,
+        ref: ref,
+      );
+      await _updateGuide(state.guide.copyWith(
+        report: {
+          ...?state.guide.report,
+          'synthesis': synthesis,
+          'synthesisGeneratedAt': DateTime.now().millisecondsSinceEpoch,
+          'synthesisSourceProgress': _practiceBoundary,
+          'synthesisVisibleFromProgress': _practiceBoundary
         },
-        'activeAnswers': answered,
-        'quizzes': state.quizzes
-            .take(30)
-            .map(
-              (quiz) => {
-                'chapter': quiz.chapterTitle,
-                'mastery': quiz.mastery?.name,
-              },
-            )
-            .toList(growable: false),
-        'difficulties': state.difficulties
-            .take(30)
-            .map(
-              (item) => {
-                'text': item.text,
-                'type': item.type.name,
-                'status': item.status.name,
-              },
-            )
-            .toList(growable: false),
-      };
-      final prompt = '''根据用户已有阅读记录生成整本书成果，不补写用户没有表达的个人观点。
-只输出 JSON 对象，不要 Markdown。格式：
-{"summary":"理解变化总结","keyIdeas":["观点1","观点2","观点3"],"actions":["行动1"],"openQuestions":["待核查问题1"]}
-要求：关键观点 3-6 项，行动 1-4 项，待核查问题 1-4 项；明确区分用户选择和模型归纳。
-阅读记录：${jsonEncode(evidence)}''';
-      final synthesis = await _generateStructured(
-        prompt: prompt,
-        correctionRule:
-            '必须输出成果 JSON 对象，包含 summary、keyIdeas、actions、openQuestions。',
-        parser: parseReadingSynthesisResponse,
-      );
-      await _updateGuide(
-        state.guide.copyWith(
-          report: {
-            ...?state.guide.report,
-            'synthesis': synthesis,
-            'synthesisGeneratedAt': DateTime.now().millisecondsSinceEpoch,
-          },
-          updatedAt: DateTime.now().millisecondsSinceEpoch,
-        ),
-      );
-      if (mounted) AnxToast.show('阅读成果已生成');
+        updatedAt: DateTime.now().millisecondsSinceEpoch,
+      ));
+      if (mounted) AnxToast.show(l10n.readingPracticeSynthesisGenerated);
     } catch (_) {
-      if (mounted) AnxToast.show('生成失败，已保留原有成果');
+      if (mounted) AnxToast.show(l10n.readingPracticeSynthesisFailed);
     } finally {
       if (mounted) setState(() => _generatingSynthesis = false);
     }
   }
 
-  Future<Map<String, dynamic>> _generateStructured({
-    required String prompt,
-    required String correctionRule,
-    required Map<String, dynamic> Function(String response) parser,
-  }) async {
-    var response = await aiGenerateText(
-      [ChatMessage.humanText(prompt)],
-      useAgent: false,
-      ref: ref,
-      outputContract: const AiOutputContract.json(),
-    );
-    try {
-      return parser(response);
-    } on FormatException {
-      response = await aiGenerateText(
-        [
-          ChatMessage.humanText('''下面返回未通过格式校验。请纠正后只输出合法 JSON，不要解释。
-$correctionRule
-原始任务：$prompt
-待纠正返回：$response'''),
-        ],
-        useAgent: false,
-        ref: ref,
-        outputContract: const AiOutputContract.json(),
-      );
-      return parser(response);
-    }
-  }
-
   List<TocItem> _flattenToc(List<TocItem> items) => [
-    for (final item in items) ...[item, ..._flattenToc(item.subitems)],
-  ];
+        for (final item in items) ...[item, ..._flattenToc(item.subitems)],
+      ];
 
   Future<void> _generateQuiz(ChapterQuiz quiz) async {
-    final content = await widget.onFetchChapter?.call(quiz.chapterHref) ?? '';
-    if (!mounted || content.trim().isEmpty) {
-      AnxToast.show('无法读取章节内容');
-      return;
-    }
-    AnxToast.show('正在生成 3 道选择题');
-    final prompt =
-        '''根据下面章节生成 3 道低输入阅读自测题。
-只输出 JSON 数组，不要 Markdown。每项格式：
-{"id":"q1","question":"问题","options":["选项1","选项2","选项3","暂不确定"],"correct":["选项1"],"multiple":false}
-要求：问题依次覆盖主旨、论证路径、联系或批评；每题 3-5 个短选项；必须包含“暂不确定”；错误项来自常见误解。
-章节：${quiz.chapterTitle ?? ''}
-正文：$content''';
-    var response = await aiGenerateText(
-      [ChatMessage.humanText(prompt)],
-      useAgent: false,
-      ref: ref,
-      outputContract: const AiOutputContract.json(),
-    );
-    if (!mounted) return;
+    final l10n = L10n.of(context);
+    final service = ReadingPracticeAiService();
+    final executionPreview = service.previewQuiz(ref);
+    final allowed = await showDialog<bool>(
+          context: context,
+          builder: (dialogContext) => AlertDialog(
+            title: Text(l10n.readingPracticeQuizScopeTitle),
+            content: Text(
+                '${l10n.readingPracticeQuizScope(quiz.chapterTitle ?? '')}\n\n'
+                '${_practicePreviewText(executionPreview)}'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext, false),
+                child: Text(l10n.commonCancel),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(dialogContext, true),
+                child: Text(l10n.readingPracticeAllowOnce),
+              ),
+            ],
+          ),
+        ) ??
+        false;
+    if (!allowed || !mounted) return;
     try {
-      List<Map<String, dynamic>> questions;
-      try {
-        questions = parseChapterQuizResponse(response);
-      } on FormatException {
-        response = await aiGenerateText(
-          [
-            ChatMessage.humanText('''下面返回未通过格式校验。请纠正后只输出合法 JSON 数组，不要解释。
-必须恰好 3 题，每题 id 唯一，包含 question、3-5 个 options、correct 和 multiple；options 必须包含“暂不确定”，correct 必须来自 options。
-原始任务：$prompt
-待纠正返回：$response'''),
-          ],
-          useAgent: false,
-          ref: ref,
-          outputContract: const AiOutputContract.json(),
-        );
-        questions = parseChapterQuizResponse(response);
+      final content = await widget.onFetchChapter?.call(quiz.chapterHref) ?? '';
+      if (!mounted || content.trim().isEmpty) {
+        if (mounted) AnxToast.show(l10n.readingPracticeChaptersUnavailable);
+        return;
       }
+      AnxToast.show(l10n.readingPracticeQuizGenerating);
+      final questions = await service.generateQuiz(
+        bookId: widget.controller.bookId,
+        visibleAtProgress: _practiceBoundary,
+        quiz: quiz,
+        content: content,
+        chapterAuthorized: allowed,
+        executionPreview: executionPreview,
+        ref: ref,
+      );
+      if (!mounted) return;
+      final generated = ChapterQuiz(
+        id: quiz.id,
+        bookId: quiz.bookId,
+        chapterHref: quiz.chapterHref,
+        chapterTitle: quiz.chapterTitle,
+        questions: questions,
+        updatedAt: DateTime.now().millisecondsSinceEpoch,
+      );
       await ref
           .read(readingCoachProvider(quiz.bookId).notifier)
-          .saveQuiz(
-            ChapterQuiz(
-              id: quiz.id,
-              bookId: quiz.bookId,
-              chapterHref: quiz.chapterHref,
-              chapterTitle: quiz.chapterTitle,
-              questions: questions,
-              updatedAt: DateTime.now().millisecondsSinceEpoch,
-            ),
-          );
-      if (mounted) AnxToast.show('自测已生成');
+          .saveQuiz(generated);
+      if (mounted) await _showQuizSheet(generated);
     } catch (_) {
-      AnxToast.show('题目格式异常，可稍后重试');
+      if (mounted) AnxToast.show(l10n.readingPracticeQuizFailed);
     }
   }
 
@@ -1733,8 +1878,7 @@ $correctionRule
                     width: double.infinity,
                     height: 48,
                     child: FilledButton(
-                      onPressed:
-                          answers.length < quiz.questions.length ||
+                      onPressed: answers.length < quiz.questions.length ||
                               answers.values.any((value) => value.isEmpty)
                           ? null
                           : () async {
@@ -1746,8 +1890,8 @@ $correctionRule
                                         .map((value) => value.toString())
                                         .toSet();
                                 if (answers[id]?.toSet().containsAll(
-                                          expected,
-                                        ) ==
+                                              expected,
+                                            ) ==
                                         true &&
                                     expected.containsAll(answers[id]!)) {
                                   correct++;
@@ -1756,8 +1900,8 @@ $correctionRule
                               final mastery = correct >= 3
                                   ? ReadingMasteryLevel.solid
                                   : correct >= 2
-                                  ? ReadingMasteryLevel.developing
-                                  : ReadingMasteryLevel.needsReview;
+                                      ? ReadingMasteryLevel.developing
+                                      : ReadingMasteryLevel.needsReview;
                               await ref
                                   .read(
                                     readingCoachProvider(quiz.bookId).notifier,
@@ -1776,6 +1920,10 @@ $correctionRule
                                           DateTime.now().millisecondsSinceEpoch,
                                     ),
                                   );
+                              _showPracticeSaved(ref
+                                  .read(readingCoachProvider(quiz.bookId)
+                                      .notifier)
+                                  .lastAction);
                               if (sheetContext.mounted) {
                                 Navigator.pop(sheetContext);
                               }
@@ -1809,14 +1957,12 @@ $correctionRule
             current.analysisDepth == null)) {
       return const SizedBox.shrink();
     }
-    final frameworkLabels = current.frameworks
-        .map((value) {
-          final framework = ReadingFramework.fromJson(value);
-          return framework == null
-              ? value
-              : const ReadingFrameworkRegistry().get(framework).label;
-        })
-        .join('、');
+    final frameworkLabels = current.frameworks.map((value) {
+      final framework = ReadingFramework.fromJson(value);
+      return framework == null
+          ? value
+          : const ReadingFrameworkRegistry().get(framework).label;
+    }).join('、');
     return ExpansionTile(
       initiallyExpanded: false,
       leading: const Icon(Icons.hub_outlined, size: 18),
@@ -1909,86 +2055,58 @@ $correctionRule
   }
 
   Widget _buildSelectionCard(ReadingContextSnapshot snapshot) {
-    final actions = widget.controller.mode.agentProfile.actionOrder.take(4);
-    return Card(
-      margin: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        side: BorderSide(color: Theme.of(context).dividerColor),
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        border: Border.all(color: Theme.of(context).dividerColor),
         borderRadius: BorderRadius.circular(12),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                const Icon(Icons.format_quote, size: 18),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    snapshot.selectedText ?? '',
-                    maxLines: 3,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                IconButton(
-                  visualDensity: VisualDensity.compact,
-                  onPressed: widget.controller.clearPendingSelection,
-                  icon: const Icon(Icons.close, size: 18),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 6,
-              runSpacing: 6,
-              children: [
-                for (final action in actions)
-                  ActionChip(
-                    label: Text(_actionLabel(action)),
-                    onPressed: () {
-                      if (action == SelectionAiAction.addNote) {
-                        _saveSelectionAsNote(snapshot);
-                        return;
-                      }
-                      final prompt = widget.controller.buildActionPrompt(
-                        action,
-                      );
-                      final started =
-                          widget.chatKey.currentState?.sendPrompt(prompt) ??
-                          false;
-                      if (started) {
-                        widget.controller.clearPendingSelection();
-                      }
-                    },
-                  ),
-                ActionChip(
-                  avatar: const Icon(Icons.auto_awesome, size: 16),
-                  label: const Text('深度分析'),
-                  onPressed: () => _openAnalysisConfig(snapshot),
-                ),
-                ActionChip(
-                  avatar: const Icon(Icons.inventory_2_outlined, size: 16),
-                  label: const Text('暂存难点'),
-                  onPressed: () => _saveDifficulty(snapshot),
-                ),
-              ],
-            ),
-            if (_showAnalysisConfig) ...[
-              const Divider(height: 24),
-              ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxHeight: MediaQuery.sizeOf(context).height * 0.55,
-                ),
-                child: SingleChildScrollView(
-                  child: _buildAnalysisConfig(snapshot),
-                ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Icon(Icons.format_quote, size: 20),
+              const SizedBox(width: 8),
+              Expanded(
+                  child: Text(snapshot.selectedText ?? '',
+                      maxLines: 3, overflow: TextOverflow.ellipsis)),
+              IconButton(
+                tooltip: L10n.of(context).readingAssistantRemoveQuote,
+                onPressed: widget.controller.clearPendingSelection,
+                icon: const Icon(Icons.close, size: 20),
               ),
             ],
+          ),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final spec in _currentClosurePolicy()
+                  .selectionPrompts
+                  .where((spec) => spec.selectionAction != null)
+                  .take(2))
+                OutlinedButton(
+                  style:
+                      OutlinedButton.styleFrom(minimumSize: const Size(0, 48)),
+                  onPressed: () =>
+                      _runSelectionAction(snapshot, spec.selectionAction!),
+                  child: Text(_contextPromptLabel(spec)),
+                ),
+              TextButton(
+                style: TextButton.styleFrom(minimumSize: const Size(0, 48)),
+                onPressed: _showMoreActions,
+                child: Text(L10n.of(context).readingAssistantMore),
+              ),
+            ],
+          ),
+          if (_showAnalysisConfig) ...[
+            const Divider(height: 24),
+            _buildAnalysisConfig(snapshot),
           ],
-        ),
+        ],
       ),
     );
   }
@@ -1996,8 +2114,7 @@ $correctionRule
   Widget _buildAnalysisConfig(ReadingContextSnapshot snapshot) {
     const registry = ReadingFrameworkRegistry();
     final maxFrameworks = Prefs().readingAnalysisMaxFrameworks;
-    final researchEnabled =
-        Prefs().readingResearchWebSearch &&
+    final researchEnabled = Prefs().readingResearchWebSearch &&
         Prefs().readingWebSearchConfig.enabled;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -2190,7 +2307,9 @@ $correctionRule
     );
     ref.read(aiChatProvider.notifier).setReadingAnalysisRequest(request);
     final prompt = widget.controller.buildDeepAnalysisPrompt(request);
+    _nextQuestionTitle = _actionLabel(SelectionAiAction.deepAnalyze);
     final started = widget.chatKey.currentState?.sendPrompt(prompt) ?? false;
+    if (!started) _nextQuestionTitle = null;
     if (started) {
       widget.controller.clearPendingSelection();
       setState(() => _showAnalysisConfig = false);
@@ -2231,8 +2350,8 @@ $correctionRule
           final visible = widget.controller.showAllHistory
               ? entries
               : entries
-                    .where((entry) => entry.bookId == widget.controller.bookId)
-                    .toList(growable: false);
+                  .where((entry) => entry.bookId == widget.controller.bookId)
+                  .toList(growable: false);
           if (visible.isEmpty) {
             return Center(child: Text(L10n.of(context).noConversationTip));
           }
@@ -2318,7 +2437,9 @@ $correctionRule
             Text(
               '框架：${entry.frameworks.map((value) {
                 final framework = ReadingFramework.fromJson(value);
-                return framework == null ? value : const ReadingFrameworkRegistry().get(framework).label;
+                return framework == null
+                    ? value
+                    : const ReadingFrameworkRegistry().get(framework).label;
               }).join('、')}',
             ),
           if (entry.outputTemplate != null)
@@ -2353,11 +2474,16 @@ $correctionRule
           icon: const Icon(Icons.arrow_back, size: 20),
           label: const Text('返回'),
         ),
-        title: const Text('专家与来源'),
+        title: Text(L10n.of(context).readingAssistantOptions),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          if (widget.controller.suggestedMode != null) _buildModeSuggestion(),
+          _buildReadingClosureBar(),
+          _buildReadingSkillBar(),
+          _buildCurrentAgentTrace(),
+          const SizedBox(height: 16),
           DropdownButtonFormField<ReadingAiMode>(
             initialValue: widget.controller.mode,
             decoration: const InputDecoration(labelText: '阅读模式'),
@@ -2383,33 +2509,31 @@ $correctionRule
             children: ReadingExpertRegistry()
                 .forMode(widget.controller.mode)
                 .map((expert) {
-                  final selected = widget.controller.selectedExpertIds.contains(
-                    expert.id,
+              final selected = widget.controller.selectedExpertIds.contains(
+                expert.id,
+              );
+              return FilterChip(
+                label: Text(expert.title),
+                selected: selected,
+                onSelected: (value) {
+                  final ids = [...widget.controller.selectedExpertIds];
+                  if (value) {
+                    final limit = widget.controller.analysisDepth ==
+                            ReadingAnalysisDepth.quick
+                        ? 1
+                        : 3;
+                    if (ids.length >= limit) ids.removeAt(0);
+                    ids.add(expert.id);
+                  } else {
+                    ids.remove(expert.id);
+                  }
+                  widget.controller.setExpertSelection(
+                    ids,
+                    persist: _rememberExpertSelection,
                   );
-                  return FilterChip(
-                    label: Text(expert.title),
-                    selected: selected,
-                    onSelected: (value) {
-                      final ids = [...widget.controller.selectedExpertIds];
-                      if (value) {
-                        final limit =
-                            widget.controller.analysisDepth ==
-                                ReadingAnalysisDepth.quick
-                            ? 1
-                            : 3;
-                        if (ids.length >= limit) ids.removeAt(0);
-                        ids.add(expert.id);
-                      } else {
-                        ids.remove(expert.id);
-                      }
-                      widget.controller.setExpertSelection(
-                        ids,
-                        persist: _rememberExpertSelection,
-                      );
-                    },
-                  );
-                })
-                .toList(growable: false),
+                },
+              );
+            }).toList(growable: false),
           ),
           CheckboxListTile(
             contentPadding: EdgeInsets.zero,
@@ -2517,10 +2641,9 @@ $correctionRule
           ),
           const Divider(),
           Text('可信来源', style: Theme.of(context).textTheme.titleMedium),
-          for (final domain
-              in Prefs()
-                  .readingTrustedSourcePack(widget.controller.mode)
-                  .domains)
+          for (final domain in Prefs()
+              .readingTrustedSourcePack(widget.controller.mode)
+              .domains)
             ListTile(
               dense: true,
               contentPadding: EdgeInsets.zero,
@@ -2550,25 +2673,25 @@ $correctionRule
   }
 
   Future<void> _restoreSession(AiChatHistoryEntry entry) async {
-    if (entry.bookId != null && entry.bookId != widget.controller.bookId) {
+    if (entry.bookId == null) {
+      widget.controller.showSessionDetail(entry);
+      return;
+    }
+    if (entry.bookId != widget.controller.bookId) {
       final openBook = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('这是另一本书的会话'),
-          content: Text(
-            widget.onOpenBookSession == null
-                ? '会话属于《${entry.bookTitle ?? ''}》。当前版本需先从书架打开该书，才能恢复当时的阅读位置；也可以只恢复对话。'
-                : '是否打开《${entry.bookTitle ?? ''}》并恢复当时的阅读上下文？',
-          ),
+          title: Text(L10n.of(context).readingAssistantOtherBook),
+          content: Text(L10n.of(context).readingAssistantOtherBookHelp),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text('仅恢复对话'),
+              child: Text(L10n.of(context).readingAssistantViewHistory),
             ),
             if (widget.onOpenBookSession != null)
               FilledButton(
                 onPressed: () => Navigator.pop(context, true),
-                child: const Text('打开该书'),
+                child: Text(L10n.of(context).readingAssistantOpenBook),
               ),
           ],
         ),
@@ -2577,7 +2700,14 @@ $correctionRule
         await widget.onOpenBookSession!(entry);
         return;
       }
+      if (openBook == false && mounted) {
+        widget.controller.showSessionDetail(entry);
+      }
+      return;
     }
+    _submittedSource = null;
+    _submittedQuestion = null;
+    _nextQuestionTitle = null;
     await widget.chatKey.currentState?.restoreSession(entry);
     await widget.onRestoreReadingContext?.call(entry);
     final restoredMode = ReadingAiMode.fromJson(entry.readingMode);
@@ -2594,10 +2724,28 @@ $correctionRule
     await widget.chatKey.currentState?.scrollToBottom(waitForLayout: true);
   }
 
-  Future<void> _updateGuide(InspectionReadingGuide guide) {
-    return ref
-        .read(readingCoachProvider(widget.controller.bookId).notifier)
-        .saveGuide(guide);
+  Future<void> _updateGuide(InspectionReadingGuide guide) async {
+    final notifier =
+        ref.read(readingCoachProvider(widget.controller.bookId).notifier);
+    await notifier.saveGuide(guide);
+    _showPracticeSaved(notifier.lastAction);
+  }
+
+  void _showPracticeSaved(AgentAction? action) {
+    if (!mounted || action == null) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(L10n.of(context).commonSaved),
+      action: SnackBarAction(
+        label: L10n.of(context).readingAssistantUndo,
+        onPressed: () async {
+          await agentActionService.undo(action);
+          if (!mounted) return;
+          ref.invalidate(readingCoachProvider(widget.controller.bookId));
+          ref.invalidate(readingMemoryProvider(widget.controller.bookId));
+          setState(() => _reviewedCardAwaitingAdvance = null);
+        },
+      ),
+    ));
   }
 
   Future<void> _answerQuestion(
@@ -2634,32 +2782,106 @@ $correctionRule
     );
   }
 
-  Future<void> _saveDifficulty(ReadingContextSnapshot snapshot) async {
-    final text = snapshot.selectedText?.trim() ?? '';
+  bool _isUsableSource(ReadingContextSnapshot? snapshot) {
+    return snapshot?.selectedText?.trim().isNotEmpty == true &&
+        _isUsableLocation(snapshot);
+  }
+
+  ReadingContextSnapshot? _currentLocationSnapshot() {
+    final reading = ref.read(currentReadingProvider);
+    if (reading.book?.id != widget.controller.bookId) return null;
+    return ReadingContextSnapshot(
+      bookId: widget.controller.bookId.toString(),
+      chapterTitle: reading.chapterTitle,
+      chapterHref: reading.chapterHref,
+      progress: reading.percentage,
+      metadata: {'cfi': reading.cfi},
+    );
+  }
+
+  bool _isUsableLocation(ReadingContextSnapshot? snapshot) {
+    if (snapshot == null ||
+        snapshot.bookId != widget.controller.bookId.toString() ||
+        !readingAgentRuntime.isActive ||
+        readingAgentRuntime.state.bookId != widget.controller.bookId) {
+      return false;
+    }
     final cfi = snapshot.metadata['cfi']?.toString() ?? '';
-    if (text.isEmpty || cfi.isEmpty) {
-      AnxToast.show('无法读取选区位置');
+    final progress = snapshot.progress;
+    return cfi.startsWith('epubcfi(') &&
+        cfi.endsWith(')') &&
+        progress != null &&
+        progress.isFinite &&
+        progress >= 0 &&
+        progress <= 1 &&
+        progress <=
+            (widget.currentProgress ??
+                    readingAgentRuntime.state.totalProgress) +
+                .000001;
+  }
+
+  Future<void> _saveAnswerAsQuestion(String answer) async {
+    final snapshot = _submittedSource;
+    if (!_isUsableLocation(snapshot)) {
+      _showSaveMessage(L10n.of(context).readingAssistantNeedSource);
+      return;
+    }
+    await _saveDifficulty(snapshot!,
+        answer: answer, question: _submittedQuestion);
+  }
+
+  Future<void> _saveDifficulty(ReadingContextSnapshot snapshot,
+      {String? answer, String? question}) async {
+    if (!_isUsableLocation(snapshot)) {
+      _showSaveMessage(L10n.of(context).readingAssistantNeedSource);
       return;
     }
     final now = DateTime.now().millisecondsSinceEpoch;
-    final difficulty = ReadingDifficulty(
-      id: '${widget.controller.bookId}-$now',
-      bookId: widget.controller.bookId,
-      cfi: cfi,
-      text: text,
-      chapterHref: snapshot.chapterHref,
-      chapterTitle: snapshot.chapterTitle,
-      context: snapshot.surroundingText,
-      createdAt: now,
-      updatedAt: now,
-    );
-    final saved = await ref
-        .read(readingCoachProvider(widget.controller.bookId).notifier)
-        .saveDifficulty(difficulty);
-    if (!mounted) return;
-    widget.onDifficultySaved?.call(saved);
-    widget.controller.clearPendingSelection();
-    AnxToast.show(saved.id == difficulty.id ? '已暂存难点' : '该难点已存在');
+    try {
+      final mutation = await agentActionService.saveDifficulty(
+          ReadingDifficulty(
+            id: '${widget.controller.bookId}-$now',
+            bookId: widget.controller.bookId,
+            cfi: snapshot.metadata['cfi'].toString(),
+            text: question?.trim().isNotEmpty == true
+                ? question!.trim()
+                : L10n.of(context).readingAssistantExplainSelection,
+            chapterHref: snapshot.chapterHref,
+            chapterTitle: snapshot.chapterTitle,
+            context: [snapshot.selectedText, snapshot.surroundingText]
+                .whereType<String>()
+                .where((text) => text.trim().isNotEmpty)
+                .join('\n\n'),
+            type: ReadingDifficultyType.question,
+            note: answer,
+            createdAt: now,
+            updatedAt: now,
+          ),
+          sourceProgress: snapshot.progress,
+          visibleFromProgress: snapshot.progress);
+      if (!mounted) return;
+      widget.onDifficultySaved?.call(mutation.value);
+      widget.controller.clearPendingSelection();
+      ref.invalidate(readingCoachProvider(widget.controller.bookId));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(L10n.of(context).readingAssistantSavedQuestion),
+        action: SnackBarAction(
+          label: L10n.of(context).readingAssistantUndo,
+          onPressed: () async {
+            await agentActionService.undo(mutation.action);
+            ref.invalidate(readingCoachProvider(widget.controller.bookId));
+          },
+        ),
+      ));
+    } catch (_) {
+      if (mounted) {
+        _showSaveMessage(L10n.of(context).readingAssistantSaveFailed);
+      }
+    }
+  }
+
+  void _showSaveMessage(String text) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
   }
 
   Widget _buildDifficultyTile(ReadingDifficulty item) {
@@ -2683,6 +2905,7 @@ $correctionRule
               updatedAt: DateTime.now().millisecondsSinceEpoch,
             );
             await notifier.updateDifficulty(resolvedItem);
+            _showPracticeSaved(notifier.lastAction);
             widget.onDifficultyResolved?.call(resolvedItem);
             return;
           }
@@ -2693,6 +2916,7 @@ $correctionRule
               updatedAt: DateTime.now().millisecondsSinceEpoch,
             ),
           );
+          _showPracticeSaved(notifier.lastAction);
         },
         itemBuilder: (context) => [
           for (final type in ReadingDifficultyType.values)
@@ -2730,41 +2954,48 @@ $correctionRule
   }
 
   String _difficultyTypeLabel(ReadingDifficultyType type) => switch (type) {
-    ReadingDifficultyType.concept => '概念不懂',
-    ReadingDifficultyType.argument => '论证没跟上',
-    ReadingDifficultyType.background => '背景缺失',
-    ReadingDifficultyType.question => '有疑问',
-    ReadingDifficultyType.later => '稍后再想',
-  };
+        ReadingDifficultyType.concept => '概念不懂',
+        ReadingDifficultyType.argument => '论证没跟上',
+        ReadingDifficultyType.background => '背景缺失',
+        ReadingDifficultyType.question => '有疑问',
+        ReadingDifficultyType.later => '稍后再想',
+      };
 
   String _masteryLabel(ReadingMasteryLevel? mastery) => switch (mastery) {
-    ReadingMasteryLevel.needsReview => '待复习',
-    ReadingMasteryLevel.developing => '基本掌握',
-    ReadingMasteryLevel.solid => '理解扎实',
-    null => '已完成',
-  };
+        ReadingMasteryLevel.needsReview => '待复习',
+        ReadingMasteryLevel.developing => '基本掌握',
+        ReadingMasteryLevel.solid => '理解扎实',
+        null => '已完成',
+      };
 
   Future<void> _setTopicStatus(
     ReadingMemoryTopic item,
     ReadingMemoryItemStatus status,
-  ) => ref
-      .read(readingMemoryProvider(widget.controller.bookId).notifier)
-      .setTopicStatus(item, status);
+  ) async {
+    final notifier =
+        ref.read(readingMemoryProvider(widget.controller.bookId).notifier);
+    await notifier.setTopicStatus(item, status);
+    _showPracticeSaved(notifier.lastAction);
+  }
 
   Future<void> _setCardStatus(
     ReadingKnowledgeCard item,
     ReadingMemoryItemStatus status,
-  ) => ref
-      .read(readingMemoryProvider(widget.controller.bookId).notifier)
-      .setCardStatus(item, status);
+  ) async {
+    final notifier =
+        ref.read(readingMemoryProvider(widget.controller.bookId).notifier);
+    await notifier.setCardStatus(item, status);
+    _showPracticeSaved(notifier.lastAction);
+  }
 
   Future<void> _rateCard(
     ReadingKnowledgeCard card,
     ReadingReviewRating rating,
   ) async {
-    await ref
-        .read(readingMemoryProvider(widget.controller.bookId).notifier)
-        .review(card, rating);
+    final notifier =
+        ref.read(readingMemoryProvider(widget.controller.bookId).notifier);
+    await notifier.review(card, rating);
+    _showPracticeSaved(notifier.lastAction);
     if (mounted) {
       setState(() {
         _revealedCards.remove(card.id);
@@ -2778,9 +3009,8 @@ $correctionRule
     List<ReadingMemorySource> sources,
   ) async {
     final l10n = L10n.of(context);
-    final selected = sources
-        .where((source) => ids.contains(source.id))
-        .toList();
+    final selected =
+        sources.where((source) => ids.contains(source.id)).toList();
     await showModalBottomSheet<void>(
       context: context,
       builder: (sheetContext) => SafeArea(
@@ -2809,14 +3039,12 @@ $correctionRule
                   maxLines: 4,
                   overflow: TextOverflow.ellipsis,
                 ),
-                trailing:
-                    source.isAvailable &&
+                trailing: source.isAvailable &&
                         (source.cfi?.isNotEmpty == true ||
                             source.chapterHref?.isNotEmpty == true)
                     ? const Icon(Icons.chevron_right)
                     : null,
-                onTap:
-                    source.isAvailable &&
+                onTap: source.isAvailable &&
                         (source.cfi?.isNotEmpty == true ||
                             source.chapterHref?.isNotEmpty == true)
                     ? () {
@@ -2849,10 +3077,11 @@ $correctionRule
   }
 
   String _reviewRatingLabel(ReadingReviewRating rating) => switch (rating) {
-    ReadingReviewRating.hard => L10n.of(context).readingMemoryHard,
-    ReadingReviewRating.remembered => L10n.of(context).readingMemoryRemembered,
-    ReadingReviewRating.mastered => L10n.of(context).readingMemoryMastered,
-  };
+        ReadingReviewRating.hard => L10n.of(context).readingMemoryHard,
+        ReadingReviewRating.remembered =>
+          L10n.of(context).readingMemoryRemembered,
+        ReadingReviewRating.mastered => L10n.of(context).readingMemoryMastered,
+      };
 
   void _setMode(ReadingAiMode mode) {
     widget.controller.setMode(mode);
@@ -2888,9 +3117,9 @@ $correctionRule
   }
 
   Future<void> _saveAnswerAsNote(String answer) async {
-    final snapshot = widget.controller.lastSelection;
-    if (snapshot == null) {
-      AnxToast.show('请先从阅读页选择一段内容');
+    final snapshot = _submittedSource;
+    if (!_isUsableSource(snapshot)) {
+      _showSaveMessage(L10n.of(context).readingAssistantNeedSource);
       return;
     }
     final sessionId = ref.read(aiChatProvider.notifier).currentSessionId;
@@ -2900,65 +3129,31 @@ $correctionRule
         ?.value
         .where((item) => item.id == sessionId)
         .firstOrNull;
-    final sourceLines =
-        entry?.citations
-            .map((source) => source['url']?.toString())
-            .whereType<String>()
-            .take(3)
-            .join('\n') ??
-        '';
-    final analysisLine = entry?.analysisDepth == null
-        ? ''
-        : '深度分析：${_analysisDepthLabel(ReadingAnalysisDepth.fromJson(entry!.analysisDepth))} · ${entry.frameworks.map((value) {
-            final framework = ReadingFramework.fromJson(value);
-            return framework == null ? value : const ReadingFrameworkRegistry().get(framework).label;
-          }).join('、')}\n';
-    final normalized = answer.replaceAll(RegExp(r'\s+'), ' ').trim();
-    final summary = normalized.length <= 480
-        ? normalized
-        : '${normalized.substring(0, 480)}...';
-    final now = DateTime.now();
-    if (Prefs().readingAgentBetaEnabled && readingAgentRuntime.isActive) {
-      final sourceText = snapshot.selectedText?.trim() ?? '';
-      final cfi = snapshot.metadata['cfi']?.toString() ?? '';
-      if (sourceText.isEmpty || cfi.isEmpty) {
-        AnxToast.show('请先从阅读页选择一段内容');
-        return;
-      }
-      await agentActionService.createSourcedNote(
+    try {
+      final mutation = await agentActionService.createSourcedNote(
         bookId: widget.controller.bookId,
-        sourceText: sourceText,
-        cfi: cfi,
+        sourceText: snapshot!.selectedText!.trim(),
+        cfi: snapshot.metadata['cfi'].toString(),
         chapterTitle: snapshot.chapterTitle ?? '',
         chapterHref: snapshot.chapterHref,
-        body:
-            'AI 摘要：$summary\n'
-            '$analysisLine'
-            '${sourceLines.isEmpty ? '' : '来源：\n$sourceLines\n'}'
-            '会话：anx-ai-session://${sessionId ?? ''}',
-        model: 'ai-workspace',
+        body: answer,
+        model: entry?.model ?? 'ai-workspace',
+        sourceProgress: snapshot.progress,
+        visibleFromProgress: snapshot.progress,
       );
-      if (mounted) AnxToast.show(L10n.of(context).commonSaveSuccess);
-      return;
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(L10n.of(context).commonSaveSuccess),
+        action: SnackBarAction(
+          label: L10n.of(context).readingAssistantUndo,
+          onPressed: () => agentActionService.undo(mutation.action),
+        ),
+      ));
+    } catch (_) {
+      if (mounted) {
+        _showSaveMessage(L10n.of(context).readingAssistantSaveFailed);
+      }
     }
-    await bookNoteDao.save(
-      BookNote(
-        bookId: widget.controller.bookId,
-        content: snapshot.selectedText ?? '',
-        cfi: snapshot.metadata['cfi']?.toString() ?? '',
-        chapter: snapshot.chapterTitle ?? '',
-        type: 'highlight',
-        color: Prefs().annotationColor,
-        readerNote:
-            'AI 摘要：$summary\n'
-            '$analysisLine'
-            '${sourceLines.isEmpty ? '' : '来源：\n$sourceLines\n'}'
-            '会话：anx-ai-session://${sessionId ?? ''}',
-        createTime: now,
-        updateTime: now,
-      ),
-    );
-    if (mounted) AnxToast.show(L10n.of(context).commonSaveSuccess);
   }
 
   String _historyTitle(AiChatHistoryEntry entry) {
@@ -2970,49 +3165,49 @@ $correctionRule
   }
 
   String _modeLabel(ReadingAiMode mode) => switch (mode) {
-    ReadingAiMode.general => '通用陪读',
-    ReadingAiMode.history => '历史陪读',
-    ReadingAiMode.psychology => '心理陪读',
-    ReadingAiMode.finance => '理财陪读',
-  };
+        ReadingAiMode.general => '通用陪读',
+        ReadingAiMode.history => '历史陪读',
+        ReadingAiMode.psychology => '心理陪读',
+        ReadingAiMode.finance => '理财陪读',
+      };
 
   String _actionLabel(SelectionAiAction action) => switch (action) {
-    SelectionAiAction.explain => '解释',
-    SelectionAiAction.summarize => '总结',
-    SelectionAiAction.contextualize =>
-      widget.controller.mode == ReadingAiMode.history ? '时间线/背景' : '联系全书',
-    SelectionAiAction.factCheck =>
-      widget.controller.mode == ReadingAiMode.history ? '史料核查' : '事实核查',
-    SelectionAiAction.analyze =>
-      widget.controller.mode == ReadingAiMode.psychology
-          ? '反思对话'
-          : widget.controller.mode == ReadingAiMode.finance
-          ? '验证假设/风险'
-          : '分析',
-    SelectionAiAction.translate => '翻译',
-    SelectionAiAction.connectToBook => '联系全书',
-    SelectionAiAction.addNote => '加入笔记',
-    SelectionAiAction.sourceLookup => '查典籍',
-    SelectionAiAction.timeline => '时间线',
-    SelectionAiAction.reflection => '反思对话',
-    SelectionAiAction.exercise => '生成练习',
-    SelectionAiAction.validateAssumption => '验证假设',
-    SelectionAiAction.calculate => '计算',
-    SelectionAiAction.riskCheck => '风险检查',
-    SelectionAiAction.deepAnalyze => '深度分析',
-  };
+        SelectionAiAction.explain => '解释',
+        SelectionAiAction.summarize => '总结',
+        SelectionAiAction.contextualize =>
+          widget.controller.mode == ReadingAiMode.history ? '时间线/背景' : '联系全书',
+        SelectionAiAction.factCheck =>
+          widget.controller.mode == ReadingAiMode.history ? '史料核查' : '事实核查',
+        SelectionAiAction.analyze =>
+          widget.controller.mode == ReadingAiMode.psychology
+              ? '反思对话'
+              : widget.controller.mode == ReadingAiMode.finance
+                  ? '验证假设/风险'
+                  : '分析',
+        SelectionAiAction.translate => '翻译',
+        SelectionAiAction.connectToBook => '联系全书',
+        SelectionAiAction.addNote => '加入笔记',
+        SelectionAiAction.sourceLookup => '查典籍',
+        SelectionAiAction.timeline => '时间线',
+        SelectionAiAction.reflection => '反思对话',
+        SelectionAiAction.exercise => '生成练习',
+        SelectionAiAction.validateAssumption => '验证假设',
+        SelectionAiAction.calculate => '计算',
+        SelectionAiAction.riskCheck => '风险检查',
+        SelectionAiAction.deepAnalyze => '深度分析',
+      };
 
   String _analysisDepthLabel(ReadingAnalysisDepth depth) => switch (depth) {
-    ReadingAnalysisDepth.quick => '快读',
-    ReadingAnalysisDepth.standard => '精读',
-    ReadingAnalysisDepth.deep => '深读',
-    ReadingAnalysisDepth.research => '研究',
-  };
+        ReadingAnalysisDepth.quick => '快读',
+        ReadingAnalysisDepth.standard => '精读',
+        ReadingAnalysisDepth.deep => '深读',
+        ReadingAnalysisDepth.research => '研究',
+      };
 
   String _analysisOutputLabel(ReadingOutputTemplate output) => switch (output) {
-    ReadingOutputTemplate.learningNote => '学习笔记',
-    ReadingOutputTemplate.argumentAnalysis => '论证分析',
-    ReadingOutputTemplate.conceptMap => '概念图',
-    ReadingOutputTemplate.practicePlan => '实践计划',
-  };
+        ReadingOutputTemplate.learningNote => '学习笔记',
+        ReadingOutputTemplate.argumentAnalysis => '论证分析',
+        ReadingOutputTemplate.conceptMap => '概念图',
+        ReadingOutputTemplate.practicePlan => '实践计划',
+      };
 }

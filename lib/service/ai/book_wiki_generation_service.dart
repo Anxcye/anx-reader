@@ -1,11 +1,18 @@
+import 'package:anx_reader/models/ai_provider.dart';
 import 'dart:convert';
 import 'package:anx_reader/models/reading_chunk.dart';
 import 'package:crypto/crypto.dart';
 import 'package:anx_reader/models/book_wiki.dart';
 import 'package:anx_reader/service/ai/agent_action_service.dart';
+import 'package:anx_reader/service/ai/ai_context_assembler.dart';
+import 'package:anx_reader/service/ai/ai_request.dart';
+import 'package:anx_reader/service/ai/ai_request_gateway.dart';
 import 'package:anx_reader/service/ai/reading_agent_repository.dart';
+import 'package:anx_reader/service/ai/reading_ai_models.dart';
 import 'package:anx_reader/service/ai/reading_chunker.dart';
 import 'package:anx_reader/service/ai/reading_evidence_resolver.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:langchain_core/chat_models.dart';
 
 class BookWikiChapter {
   const BookWikiChapter({
@@ -19,8 +26,17 @@ class BookWikiChapter {
 }
 
 typedef BookWikiTextGenerator = Future<String> Function(String prompt);
-typedef BookWikiProgressCallback =
-    Future<void> Function(int completed, int total, String chapterHref);
+typedef BookWikiProgressCallback = Future<void> Function(
+    int completed, int total, String chapterHref);
+typedef BookWikiStageCallback = Future<void> Function({
+  required int completedUnits,
+  required int totalUnits,
+  required String chapterHref,
+  required String chapterTitle,
+  required int chunkIndex,
+  required int chunkCount,
+  required String stage,
+});
 
 /// Bounded, user-triggered Wiki generation. The service never loads chapters
 /// itself, so opening a page cannot accidentally invoke a model.
@@ -28,19 +44,26 @@ class BookWikiGenerationService {
   BookWikiGenerationService({
     AgentActionService? actions,
     ReadingAgentRepository? repository,
-  }) : _actions = actions ?? agentActionService,
-       _repository = repository ?? readingAgentRepository;
+    AiRequestGateway gateway = aiRequestGateway,
+    AiContextAssembler? assembler,
+  })  : _actions = actions ?? agentActionService,
+        _repository = repository ?? readingAgentRepository,
+        _gateway = gateway,
+        _assembler = assembler ?? AiContextAssembler();
   final AgentActionService _actions;
   final ReadingAgentRepository _repository;
+  final AiRequestGateway _gateway;
+  final AiContextAssembler _assembler;
+  AiProvider? previewProvider([WidgetRef? ref]) =>
+      _gateway.generalProvider(ref);
+
   static const _chunker = ReadingChunker();
   static const _evidenceResolver = ReadingEvidenceResolver();
   static const _pipelineVersion = 'book-wiki.v2';
 
   static bool isEligibleChapterTitle(String title) {
-    final normalized = title
-        .replaceAll(RegExp(r'\s+'), '')
-        .trim()
-        .toLowerCase();
+    final normalized =
+        title.replaceAll(RegExp(r'\s+'), '').trim().toLowerCase();
     return !{
       '封面',
       '版权',
@@ -60,10 +83,14 @@ class BookWikiGenerationService {
     required int bookId,
     required List<BookWikiChapter> chapters,
     required double safeBoundary,
-    required BookWikiTextGenerator generate,
+    BookWikiTextGenerator? generate,
     required String sessionId,
+    String? taskId,
+    String? providerId,
+    WidgetRef? ref,
     BookWikiGenerationScope scope = BookWikiGenerationScope.readBoundary,
     BookWikiProgressCallback? onProgress,
+    BookWikiStageCallback? onStage,
   }) async {
     var count = 0;
     final existing = await _repository.bookWikiEntries(bookId);
@@ -74,8 +101,31 @@ class BookWikiGenerationService {
               isEligibleChapterTitle(item.title),
         )
         .toList(growable: false);
+    // Split once up front so the scheduler can expose progress while a
+    // chapter is still being processed. This is a local deterministic
+    // operation and does not change the model input or token budget.
+    final prepared = [
+      for (final chapter in eligible)
+        (
+          chapter: chapter,
+          chunks: _chunker.split(
+            bookId: bookId,
+            chapterHref: chapter.href,
+            chapterTitle: chapter.title,
+            content: chapter.content,
+            sourceProgress: chapter.progress,
+          ),
+        ),
+    ];
+    final totalUnits = prepared.fold<int>(
+      0,
+      (sum, item) => sum + item.chunks.length,
+    );
+    var completedUnits = 0;
     var completed = 0;
-    for (final chapter in eligible) {
+    for (final item in prepared) {
+      final chapter = item.chapter;
+      final chunks = item.chunks;
       final contentHash = sha1.convert(utf8.encode(chapter.content)).toString();
       final generationHash = sha1
           .convert(
@@ -89,31 +139,62 @@ class BookWikiGenerationService {
             e.sources.any((source) => source.chapterHref == chapter.href) &&
             e.sourceArtifactIds.contains('generation:$generationHash'),
       )) {
+        completedUnits += chunks.length;
+        await onStage?.call(
+          completedUnits: completedUnits,
+          totalUnits: totalUnits,
+          chapterHref: chapter.href,
+          chapterTitle: chapter.title,
+          chunkIndex: chunks.length,
+          chunkCount: chunks.length,
+          stage: 'skipped',
+        );
         completed++;
         await onProgress?.call(completed, eligible.length, chapter.href);
         continue;
       }
-      final chunks = _chunker.split(
-        bookId: bookId,
+      await onStage?.call(
+        completedUnits: completedUnits,
+        totalUnits: totalUnits,
         chapterHref: chapter.href,
         chapterTitle: chapter.title,
-        content: chapter.content,
-        sourceProgress: chapter.progress,
+        chunkIndex: 0,
+        chunkCount: chunks.length,
+        stage: 'chapter_started',
       );
       final entriesForChapter = <String, BookWikiEntry>{};
-      for (final chunk in chunks) {
+      for (var chunkIndex = 0; chunkIndex < chunks.length; chunkIndex++) {
+        final chunk = chunks[chunkIndex];
         // Keep long Wiki jobs cooperative with the reader UI and scheduler.
         await Future<void>.delayed(Duration.zero);
+        await onStage?.call(
+          completedUnits: completedUnits,
+          totalUnits: totalUnits,
+          chapterHref: chapter.href,
+          chapterTitle: chapter.title,
+          chunkIndex: chunkIndex + 1,
+          chunkCount: chunks.length,
+          stage: 'chunk_started',
+        );
         final prompt =
             '将以下章节片段整理为 JSON 数组，每项字段 kind,title,summary,contentMarkdown,evidence。evidence 必须是原文逐字短证据。kind 只能是 wiki.chapter/wiki.concept/wiki.argument/wiki.method/wiki.theme/wiki.question。不要创造原文不存在的事实。章节：${chapter.title}\n片段：\n${chunk.content}';
         final decoded = await _decodeChunkWithRetry(
-          generate: generate,
+          generate: generate ??
+              (prompt) => _generateText(
+                    prompt,
+                    bookId: bookId,
+                    sessionId: sessionId,
+                    taskId: taskId,
+                    providerId: providerId,
+                    chapterHref: chapter.href,
+                    safeBoundary: safeBoundary,
+                    ref: ref,
+                  ),
           prompt: prompt,
           chunk: chunk,
           chapterTitle: chapter.title,
         );
-        if (decoded == null) continue;
-        for (final item in decoded) {
+        for (final item in decoded ?? const <Map<String, dynamic>>[]) {
           final kind = item['kind']?.toString() ?? '';
           final title = item['title']?.toString().trim() ?? '';
           if (title.isEmpty || !BookWikiEntryKinds.supported.contains(kind)) {
@@ -134,8 +215,7 @@ class BookWikiGenerationService {
             kind: kind,
             title: title,
             summary: item['summary']?.toString() ?? '',
-            contentMarkdown:
-                item['contentMarkdown']?.toString() ??
+            contentMarkdown: item['contentMarkdown']?.toString() ??
                 item['summary']?.toString() ??
                 '',
             sortKey:
@@ -169,6 +249,16 @@ class BookWikiGenerationService {
                   sources: [...previous.sources, ...entry.sources],
                 );
         }
+        completedUnits++;
+        await onStage?.call(
+          completedUnits: completedUnits,
+          totalUnits: totalUnits,
+          chapterHref: chapter.href,
+          chapterTitle: chapter.title,
+          chunkIndex: chunkIndex + 1,
+          chunkCount: chunks.length,
+          stage: 'chunk_completed',
+        );
       }
       for (final entry in entriesForChapter.values) {
         final now = DateTime.now().millisecondsSinceEpoch;
@@ -191,8 +281,58 @@ class BookWikiGenerationService {
       }
       completed++;
       await onProgress?.call(completed, eligible.length, chapter.href);
+      await onStage?.call(
+        completedUnits: completedUnits,
+        totalUnits: totalUnits,
+        chapterHref: chapter.href,
+        chapterTitle: chapter.title,
+        chunkIndex: chunks.length,
+        chunkCount: chunks.length,
+        stage: 'chapter_completed',
+      );
     }
     return count;
+  }
+
+  Future<String> _generateText(
+    String prompt, {
+    required int bookId,
+    required String sessionId,
+    required String? taskId,
+    String? providerId,
+    required String chapterHref,
+    required double safeBoundary,
+    WidgetRef? ref,
+  }) {
+    const workload = 'wiki.book_generate';
+    final descriptor = AiWorkloadDescriptorRegistry.find(workload)!;
+    final messages = _assembler.assemble([ChatMessage.humanText(prompt)],
+        task: descriptor.contextTask,
+        cacheScope: 'wiki:$bookId:${taskId ?? sessionId}').messages;
+    return _gateway.executeText(AiRequest(
+      messages: messages,
+      workloadId: workload,
+      trace: AiTraceContext(
+          workloadId: workload,
+          taskId: taskId,
+          sessionId: sessionId,
+          bookId: bookId),
+      contextTask: descriptor.contextTask,
+      providerId: providerId,
+      providerRole: descriptor.providerRole,
+      outputContract: descriptor.outputContract,
+      // The caller already confirmed this source scope. An unavailable
+      // provider must not silently send its chapter text to another one.
+      fallbackPolicy: AiFallbackPolicy.none,
+      failureDelivery: AiFailureDelivery.streamError,
+      sourceScope: AiSourceScope(
+          bookId: bookId,
+          chapterHref: chapterHref,
+          chapterRefs: [chapterHref],
+          safeBoundary: safeBoundary),
+      readingMode: ReadingAiMode.general,
+      ref: ref,
+    ));
   }
 
   /// A malformed or length-truncated response must only retry the current

@@ -24,7 +24,9 @@ class ReadingMemoryRepository {
   final BookNoteDao _noteDao;
   final ReadingNoteDao _formalNoteDao;
   Future<List<ReadingMemorySource>> collectSources(int bookId,
-      {bool includeUsed = false, bool includeAiBlocks = true}) async {
+      {bool includeUsed = false,
+      bool includeAiBlocks = true,
+      bool persist = true}) async {
     final now = DateTime.now().millisecondsSinceEpoch;
     final candidates = <ReadingMemorySource>[];
     for (final item in await _coachDao.selectDifficulties(bookId)) {
@@ -64,7 +66,7 @@ class ReadingMemoryRepository {
     }
     final deduped =
         {for (final item in candidates) item.contentHash: item}.values.toList();
-    await _dao.saveSources(deduped);
+    if (persist) await _dao.saveSources(deduped);
     final used = includeUsed
         ? const <String>{}
         : (await _dao.usedSourceIds(bookId)).toSet();

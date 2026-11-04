@@ -12,7 +12,6 @@ import 'package:anx_reader/providers/ai_history.dart';
 import 'package:anx_reader/providers/ai_providers.dart';
 import 'package:anx_reader/service/ai/ai_services.dart';
 import 'package:anx_reader/service/ai/ai_history.dart';
-import 'package:anx_reader/service/ai/index.dart';
 import 'package:anx_reader/utils/env_var.dart';
 import 'package:anx_reader/utils/toast/common.dart';
 import 'package:anx_reader/utils/ai_reasoning_parser.dart';
@@ -49,6 +48,16 @@ class AiChatStream extends ConsumerStatefulWidget {
     this.initialScrollOffset = 0,
     this.onScrollOffsetChanged,
     this.onSaveAnswer,
+    this.onSaveQuestion,
+    this.readingCompanion = false,
+    this.subtitle,
+    this.pendingContext,
+    this.onInputFocused,
+    this.onRequestStarted,
+    this.onNewConversation,
+    this.onShowMore,
+    this.onReturnToQuestion,
+    this.answerSources,
   });
 
   final String? initialMessage;
@@ -63,6 +72,16 @@ class AiChatStream extends ConsumerStatefulWidget {
   final double initialScrollOffset;
   final ValueChanged<double>? onScrollOffsetChanged;
   final ValueChanged<String>? onSaveAnswer;
+  final ValueChanged<String>? onSaveQuestion;
+  final bool readingCompanion;
+  final String? subtitle;
+  final Widget? pendingContext;
+  final VoidCallback? onInputFocused;
+  final ValueChanged<String>? onRequestStarted;
+  final VoidCallback? onNewConversation;
+  final VoidCallback? onShowMore;
+  final VoidCallback? onReturnToQuestion;
+  final Widget? answerSources;
 
   @override
   ConsumerState<AiChatStream> createState() => AiChatStreamState();
@@ -76,6 +95,10 @@ class AiChatStreamState extends ConsumerState<AiChatStream> {
   StreamSubscription<List<ChatMessage>>? _messageSubscription;
   late final ScrollController _scrollController;
   bool _isStreaming = false;
+  bool _generationFailed = false;
+  List<ChatMessage> _lastVisibleMessages = const [];
+  bool _deferVisibleChunks = false;
+  List<ChatMessage> _deferredVisibleMessages = const [];
   late List<String> _suggestedPrompts;
   late List<String> _starterPrompts;
   double _fontSize = 14.0;
@@ -391,13 +414,23 @@ class AiChatStreamState extends ConsumerState<AiChatStream> {
     });
   }
 
-  void _sendMessage({bool isRegenerate = false}) {
-    if (_isStreaming) {
-      return;
+  bool _sendMessage({bool isRegenerate = false}) {
+    if (_isStreaming) return false;
+    if (inputController.text.trim().isEmpty) return false;
+    if (widget.readingCompanion &&
+        ref.read(aiProvidersProvider.notifier).getRunnableSelectedProvider() ==
+            null) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(L10n.of(context).aiProviderNoRunnable),
+        action: SnackBarAction(
+          label: L10n.of(context).aiProviderConfigure,
+          onPressed: _openGlobalAiSettings,
+        ),
+      ));
+      return false;
     }
-
-    if (inputController.text.trim().isEmpty) return;
     final message = inputController.text.trim();
+    widget.onRequestStarted?.call(message);
     inputController.clear();
     widget.onDraftChanged?.call('');
 
@@ -413,26 +446,44 @@ class AiChatStreamState extends ConsumerState<AiChatStream> {
       _messageController = controller;
       _messageStream = controller.stream;
       _isStreaming = true;
+      _generationFailed = false;
+      _lastVisibleMessages = ref.read(aiChatProvider).asData?.value ?? const [];
+      _deferVisibleChunks = widget.readingCompanion &&
+          (Prefs().reduceMotion || MediaQuery.disableAnimationsOf(context));
+      _deferredVisibleMessages = const [];
     });
 
+    var receivedFirstChunk = false;
     _messageSubscription = stream.listen(
       (event) {
-        controller.add(event);
-        _scrollToBottom();
+        _lastVisibleMessages = event;
+        if (!_deferVisibleChunks) {
+          controller.add(event);
+          _scrollToBottom();
+        } else if (!receivedFirstChunk) {
+          _deferredVisibleMessages =
+              event.isNotEmpty && event.last is AIChatMessage
+                  ? event.take(event.length - 1).toList()
+                  : event;
+          controller.add(_deferredVisibleMessages);
+        }
+        receivedFirstChunk = true;
       },
       onError: (error, stack) {
-        controller.addError(error, stack);
         if (!controller.isClosed) {
+          if (_deferVisibleChunks) controller.add(_lastVisibleMessages);
           controller.close();
         }
         if (mounted) {
           setState(() {
             _isStreaming = false;
+            _generationFailed = true;
           });
         }
       },
       onDone: () {
         if (!controller.isClosed) {
+          if (_deferVisibleChunks) controller.add(_lastVisibleMessages);
           controller.close();
         }
         if (mounted) {
@@ -443,6 +494,7 @@ class AiChatStreamState extends ConsumerState<AiChatStream> {
       },
       cancelOnError: false,
     );
+    return true;
   }
 
   void _useQuickPrompt(String prompt) {
@@ -457,9 +509,16 @@ class AiChatStreamState extends ConsumerState<AiChatStream> {
 
   bool sendPrompt(String prompt) {
     if (_isStreaming) return false;
+    final previousDraft = inputController.text;
     setDraft(prompt);
-    _sendMessage();
-    return true;
+    final started = _sendMessage();
+    if (!started) setDraft(previousDraft);
+    return started;
+  }
+
+  /// The host hides this persistent widget without disposing it.
+  void stopGenerating() {
+    if (_isStreaming) _cancelStreaming();
   }
 
   Future<void> restoreSession(AiChatHistoryEntry entry) async {
@@ -491,6 +550,8 @@ class AiChatStreamState extends ConsumerState<AiChatStream> {
     if (!mounted) return;
     setState(() {
       _messageStream = null;
+      _generationFailed = false;
+      _lastVisibleMessages = const [];
     });
     _scrollToBottom();
   }
@@ -499,6 +560,7 @@ class AiChatStreamState extends ConsumerState<AiChatStream> {
     if (_isStreaming) {
       return;
     }
+    widget.onNewConversation?.call();
     _messageSubscription?.cancel();
     _messageSubscription = null;
     _messageController?.close();
@@ -506,6 +568,8 @@ class AiChatStreamState extends ConsumerState<AiChatStream> {
     setState(() {
       ref.read(aiChatProvider.notifier).clear();
       _messageStream = null;
+      _generationFailed = false;
+      _lastVisibleMessages = const [];
       _suggestedPrompts = _pickSuggestedPrompts();
     });
   }
@@ -542,7 +606,8 @@ class AiChatStreamState extends ConsumerState<AiChatStream> {
 
   void _cancelStreaming() {
     if (!_isStreaming) return;
-    cancelActiveAiRequest();
+    // Cancel this chat's stream. The runner releases its own request in its
+    // finally block; the global cancel helper also stops scheduled book tasks.
     _messageSubscription?.cancel();
     _messageSubscription = null;
     _messageController?.close();
@@ -699,36 +764,38 @@ class AiChatStreamState extends ConsumerState<AiChatStream> {
       ),
     );
     Widget inputBox = FilledContainer(
-      padding: const EdgeInsets.all(4),
+      padding: EdgeInsets.all(widget.readingCompanion ? 12 : 4),
       radius: 15,
       child: SafeArea(
         child: Column(
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                SizedBox.shrink(),
-                Expanded(
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    reverse: true,
-                    child: Row(
-                      spacing: 8,
-                      children: quickPrompts.map((prompt) {
-                        return ActionChip(
-                          // labelPadding: EdgeInsets.all(0),
-                          label: Text(prompt['label']!),
-                          onPressed: () => _useQuickPrompt(prompt['prompt']!),
-                        );
-                      }).toList(),
+            if (!widget.readingCompanion)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  SizedBox.shrink(),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      reverse: true,
+                      child: Row(
+                        spacing: 8,
+                        children: quickPrompts.map((prompt) {
+                          return ActionChip(
+                            // labelPadding: EdgeInsets.all(0),
+                            label: Text(prompt['label']!),
+                            onPressed: () => _useQuickPrompt(prompt['prompt']!),
+                          );
+                        }).toList(),
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
             SizedBox(height: 4),
             TextField(
               controller: inputController,
+              onTap: widget.onInputFocused,
               onChanged: widget.onDraftChanged,
               decoration: InputDecoration(
                 isDense: true,
@@ -747,8 +814,8 @@ class AiChatStreamState extends ConsumerState<AiChatStream> {
                 Expanded(
                   child: Row(
                     children: [
-                      Flexible(child: aiService),
-                      if (currentProvider != null)
+                      if (!widget.readingCompanion) Flexible(child: aiService),
+                      if (!widget.readingCompanion && currentProvider != null)
                         IconButton(
                           icon: const Icon(Icons.tune, size: 16),
                           padding: EdgeInsets.zero,
@@ -774,6 +841,9 @@ class AiChatStreamState extends ConsumerState<AiChatStream> {
                   ),
                 ),
                 IconButton(
+                  tooltip: _isStreaming
+                      ? L10n.of(context).readingAssistantStop
+                      : L10n.of(context).readingAssistantSend,
                   icon: Icon(_isStreaming ? Icons.stop : Icons.send, size: 18),
                   onPressed: _isStreaming ? _cancelStreaming : _sendMessage,
                 ),
@@ -786,6 +856,36 @@ class AiChatStreamState extends ConsumerState<AiChatStream> {
 
     Widget buildEmptyState() {
       final theme = Theme.of(context);
+      if (widget.readingCompanion) {
+        if (widget.pendingContext != null) return const SizedBox.shrink();
+        return Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(L10n.of(context).readingAssistantEmpty,
+                    style: theme.textTheme.titleMedium),
+                const SizedBox(height: 16),
+                for (final chip in widget.quickPromptChips.take(3))
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size(0, 48),
+                        alignment: Alignment.centerLeft,
+                      ),
+                      icon: Icon(chip.icon, size: 20),
+                      label: Text(chip.label),
+                      onPressed: () => sendPrompt(chip.prompt),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        );
+      }
 
       Widget buildQuickChipColumn() {
         if (widget.quickPromptChips.isEmpty) {
@@ -862,44 +962,105 @@ class AiChatStreamState extends ConsumerState<AiChatStream> {
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        title: Text(widget.title ?? L10n.of(context).aiChat),
-        leading: IconButton(
-          icon: const Icon(Icons.history),
-          tooltip: L10n.of(context).history,
-          onPressed: widget.onOpenHistory ??
-              () => _scaffoldKey.currentState?.openDrawer(),
-        ),
-        actions: [
-          if (FeatureFlags.readingCoach && widget.onOpenCoach != null)
-            IconButton(
-              key: const ValueKey('ai-reading-coach'),
-              icon: const Icon(Icons.school_outlined),
-              tooltip: '阅读教练',
-              onPressed: widget.onOpenCoach,
+      appBar: widget.readingCompanion
+          ? AppBar(
+              automaticallyImplyLeading: false,
+              title: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(widget.title ?? L10n.of(context).readingAssistantTitle,
+                      maxLines: 1, overflow: TextOverflow.ellipsis),
+                  if (widget.subtitle?.isNotEmpty == true)
+                    Text(widget.subtitle!,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.labelSmall),
+                ],
+              ),
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.history),
+                  tooltip: L10n.of(context).history,
+                  onPressed: widget.onOpenHistory,
+                ),
+                PopupMenuButton<String>(
+                  key: const ValueKey('ai-reading-more'),
+                  tooltip: L10n.of(context).readingAssistantMore,
+                  onSelected: (value) {
+                    switch (value) {
+                      case 'options':
+                        widget.onOpenAgents?.call();
+                      case 'more':
+                        widget.onShowMore?.call();
+                      case 'practice':
+                        widget.onOpenCoach?.call();
+                      case 'new':
+                        _clearMessage();
+                      case 'font':
+                        _showFontSizeMenu(context);
+                    }
+                  },
+                  itemBuilder: (_) => [
+                    PopupMenuItem(
+                        value: 'options',
+                        child: Text(L10n.of(context).readingAssistantOptions)),
+                    PopupMenuItem(
+                        value: 'more',
+                        child: Text(L10n.of(context).readingAssistantMore)),
+                    if (widget.onOpenCoach != null)
+                      PopupMenuItem(
+                          value: 'practice',
+                          child:
+                              Text(L10n.of(context).readingAssistantPractice)),
+                    PopupMenuItem(
+                        value: 'new',
+                        child: Text(L10n.of(context).readingAssistantNewChat)),
+                    PopupMenuItem(
+                        value: 'font',
+                        child: Text(L10n.of(context).aiChatFontSize)),
+                  ],
+                ),
+                ...?widget.trailing,
+              ],
+            )
+          : AppBar(
+              title: Text(widget.title ?? L10n.of(context).aiChat),
+              leading: IconButton(
+                icon: const Icon(Icons.history),
+                tooltip: L10n.of(context).history,
+                onPressed: widget.onOpenHistory ??
+                    () => _scaffoldKey.currentState?.openDrawer(),
+              ),
+              actions: [
+                if (FeatureFlags.readingCoach && widget.onOpenCoach != null)
+                  IconButton(
+                    key: const ValueKey('ai-reading-coach'),
+                    icon: const Icon(Icons.school_outlined),
+                    tooltip: '阅读教练',
+                    onPressed: widget.onOpenCoach,
+                  ),
+                IconButton(
+                  key: const ValueKey('ai-reading-settings'),
+                  icon: const Icon(Icons.settings_outlined),
+                  tooltip: widget.onOpenAgents == null ? 'AI 设置' : '专家与来源设置',
+                  onPressed: widget.onOpenAgents ?? _openGlobalAiSettings,
+                ),
+                IconButton(
+                  icon: const Icon(Icons.edit_document),
+                  tooltip: '新对话',
+                  onPressed: _clearMessage,
+                ),
+                Builder(
+                  builder: (context) => IconButton(
+                    key: const ValueKey('ai-font-settings'),
+                    icon: const Icon(Icons.text_fields),
+                    tooltip: L10n.of(context).aiChatFontSize,
+                    onPressed: () => _showFontSizeMenu(context),
+                  ),
+                ),
+                if (widget.trailing != null) ...widget.trailing!,
+              ],
             ),
-          IconButton(
-            key: const ValueKey('ai-reading-settings'),
-            icon: const Icon(Icons.settings_outlined),
-            tooltip: widget.onOpenAgents == null ? 'AI 设置' : '专家与来源设置',
-            onPressed: widget.onOpenAgents ?? _openGlobalAiSettings,
-          ),
-          IconButton(
-            icon: const Icon(Icons.edit_document),
-            tooltip: '新对话',
-            onPressed: _clearMessage,
-          ),
-          Builder(
-            builder: (context) => IconButton(
-              key: const ValueKey('ai-font-settings'),
-              icon: const Icon(Icons.text_fields),
-              tooltip: L10n.of(context).aiChatFontSize,
-              onPressed: () => _showFontSizeMenu(context),
-            ),
-          ),
-          if (widget.trailing != null) ...widget.trailing!,
-        ],
-      ),
       drawer: widget.onOpenHistory == null
           ? Drawer(child: _buildHistoryDrawer(context))
           : null,
@@ -908,16 +1069,39 @@ class AiChatStreamState extends ConsumerState<AiChatStream> {
           ? _buildDataSharingConsent(context)
           : Column(
               children: [
+                if (widget.onReturnToQuestion != null)
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: TextButton.icon(
+                      onPressed: widget.onReturnToQuestion,
+                      icon: const Icon(Icons.undo, size: 18),
+                      label: Text(L10n.of(context).readingAssistantReturn),
+                    ),
+                  ),
+                if (widget.pendingContext != null)
+                  Flexible(
+                    flex: 0,
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                          maxHeight: MediaQuery.sizeOf(context).height * .32),
+                      child:
+                          SingleChildScrollView(child: widget.pendingContext),
+                    ),
+                  ),
                 Expanded(
                   child: _messageStream != null
                       ? StreamBuilder<List<ChatMessage>>(
                           stream: _messageStream,
                           builder: (context, snapshot) {
-                            if (!snapshot.hasData) {
+                            final messages = snapshot.data ??
+                                (_isStreaming && _deferVisibleChunks
+                                    ? _deferredVisibleMessages
+                                    : _lastVisibleMessages);
+                            if (!snapshot.hasData &&
+                                messages.isEmpty &&
+                                !_generationFailed) {
                               return _loadingPlaceholder();
                             }
-
-                            final messages = snapshot.data!;
                             if (messages.isEmpty) {
                               return buildEmptyState();
                             }
@@ -934,10 +1118,33 @@ class AiChatStreamState extends ConsumerState<AiChatStream> {
                               return _buildMessageList(messages);
                             },
                             loading: _loadingPlaceholder,
-                            error: (error, stack) =>
-                                Center(child: Text('error: $error')),
+                            error: (error, stack) => Center(
+                              child: Text(L10n.of(context)
+                                  .readingAssistantGenerationFailed),
+                            ),
                           ),
                 ),
+                if (_isStreaming && _deferVisibleChunks)
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Text(L10n.of(context).aiThinkingHint),
+                  ),
+                if (_generationFailed)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(L10n.of(context)
+                              .readingAssistantGenerationFailed),
+                        ),
+                        TextButton(
+                          onPressed: _regenerateLastMessage,
+                          child: Text(L10n.of(context).commonRetry),
+                        ),
+                      ],
+                    ),
+                  ),
                 inputBox,
               ],
             ),
@@ -1019,7 +1226,7 @@ class AiChatStreamState extends ConsumerState<AiChatStream> {
       itemBuilder: (context, index) {
         final message = messages[index];
         final isLatest = index == messages.length - 1;
-        final isStreaming = _messageStream != null && isLatest;
+        final isStreaming = _isStreaming && isLatest;
         return _buildMessageItem(
           message,
           index,
@@ -1084,9 +1291,14 @@ class AiChatStreamState extends ConsumerState<AiChatStream> {
                             selectionControls: MaterialTextSelectionControls(),
                           )
                         : _buildAssistantTimeline(parsed, isStreaming),
+                    if (!isUser &&
+                        identical(message, lastAssistantMessage) &&
+                        !isStreaming &&
+                        widget.answerSources != null)
+                      widget.answerSources!,
                     if (!isUser)
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
+                      Wrap(
+                        alignment: WrapAlignment.end,
                         children: [
                           if (identical(message, lastAssistantMessage))
                             TextButton(
@@ -1097,10 +1309,22 @@ class AiChatStreamState extends ConsumerState<AiChatStream> {
                             onPressed: () => _copyMessageContent(content),
                             child: Text(L10n.of(context).commonCopy),
                           ),
-                          if (widget.onSaveAnswer != null)
+                          if (widget.onSaveAnswer != null &&
+                              (!widget.readingCompanion ||
+                                  identical(message, lastAssistantMessage)) &&
+                              !isStreaming)
                             TextButton(
                               onPressed: () => widget.onSaveAnswer!(content),
-                              child: const Text('加入笔记'),
+                              child: Text(
+                                  L10n.of(context).readingAssistantSaveNote),
+                            ),
+                          if (widget.onSaveQuestion != null &&
+                              identical(message, lastAssistantMessage) &&
+                              !isStreaming)
+                            TextButton(
+                              onPressed: () => widget.onSaveQuestion!(content),
+                              child: Text(L10n.of(context)
+                                  .readingAssistantSaveQuestion),
                             ),
                         ],
                       ),

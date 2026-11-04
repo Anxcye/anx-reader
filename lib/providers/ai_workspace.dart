@@ -10,6 +10,8 @@ import 'package:flutter/foundation.dart';
 
 enum AiWorkspaceView { chat, coach, history, sessionDetail, agentsAndSources }
 
+enum AiWorkspaceSurface { assistant, book }
+
 class AiWorkspaceController extends ChangeNotifier {
   AiWorkspaceController({
     required this.bookId,
@@ -19,14 +21,18 @@ class AiWorkspaceController extends ChangeNotifier {
         outputTemplate = Prefs().readingOutputTemplateForBook(bookId),
         readingProfile = readingExperienceProfileService.cached(bookId) {
     selectedExpertIds = Prefs().activeReadingExpertIds;
-    if (selectedExpertIds.isEmpty)
+    if (selectedExpertIds.isEmpty) {
       selectedExpertIds = Prefs().readingExpertIdsForBook(bookId);
+    }
     expertSelectionManual = selectedExpertIds.isNotEmpty;
   }
 
   final int bookId;
   final Future<void> Function(String? moduleId)? onClosureModuleChanged;
   AiWorkspaceView view = AiWorkspaceView.chat;
+  AiWorkspaceSurface surface = AiWorkspaceSurface.assistant;
+  bool sheetExpanded = false;
+  String bookQuery = '';
   ReadingAiMode mode;
   ReadingAnalysisDepth analysisDepth;
   ReadingOutputTemplate outputTemplate;
@@ -65,6 +71,29 @@ class AiWorkspaceController extends ChangeNotifier {
   }
 
   void showChat() => _setView(AiWorkspaceView.chat);
+  void showSurface(AiWorkspaceSurface value, {required bool wide}) {
+    surface = value;
+    show(fullscreen: !wide);
+  }
+
+  void switchSurface(AiWorkspaceSurface value) {
+    if (surface == value) return;
+    surface = value;
+    notifyListeners();
+  }
+
+  void setSheetExpanded(bool value) {
+    if (sheetExpanded == value) return;
+    sheetExpanded = value;
+    notifyListeners();
+  }
+
+  // Explicit practice is available without re-enabling automatic coach prompts.
+  void showPractice() {
+    surface = AiWorkspaceSurface.assistant;
+    _setView(AiWorkspaceView.coach);
+  }
+
   void showCoach() => _setView(
         FeatureFlags.readingCoach
             ? AiWorkspaceView.coach
@@ -223,6 +252,7 @@ class AiWorkspaceController extends ChangeNotifier {
   void setPendingSelection(ReadingContextSnapshot snapshot) {
     pendingSelection = snapshot;
     lastSelection = snapshot;
+    surface = AiWorkspaceSurface.assistant;
     view = AiWorkspaceView.chat;
     notifyListeners();
   }

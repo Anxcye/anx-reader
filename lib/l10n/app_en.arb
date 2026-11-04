@@ -1163,5 +1163,244 @@
   "readingRemoteProgressSyncDisabled": "Enable a reading progress synchronization service in Sync settings first",
   "readingRemoteProgressSyncFailed": "Could not sync reading progress: {error}",
   "@readingRemoteProgressSyncFailed": {"placeholders": {"error": {"type": "String"}}},
-  "readingRemoteProgressNotFound": "No farther progress was found on another device"
+  "readingRemoteProgressNotFound": "No farther progress was found on another device",
+  "readingAssistantTitle": "Reading help",
+  "readingAssistantScope": "Current reading position",
+  "readingAssistantSelectionScope": "Selected passage",
+  "readingAssistantExplainCurrent": "Explain here",
+  "readingAssistantRecall": "Recall what I read",
+  "readingAssistantExplore": "Explore further",
+  "readingAssistantExplainSelection": "Explain this passage",
+  "readingAssistantConnect": "Connect to context",
+  "readingAssistantMore": "More",
+  "readingAssistantOptions": "Answer options",
+  "readingAssistantPractice": "Reading practice",
+  "readingAssistantNewChat": "New conversation",
+  "readingAssistantSaveNote": "Save note",
+  "readingAssistantSaveQuestion": "Save question",
+  "readingAssistantReturn": "Back to question",
+  "readingAssistantRemoveQuote": "Remove quotation",
+  "readingAssistantEmpty": "What would help you keep reading?",
+  "readingAssistantEvidence": "Sources and analysis",
+  "readingAssistantNeedSource": "Select a passage to keep its original source.",
+  "readingAssistantSaveFailed": "Could not save. Your conversation is still here.",
+  "readingAssistantUndo": "Undo",
+  "readingAssistantSavedQuestion": "Question saved",
+  "readingAssistantStop": "Stop generating",
+  "readingAssistantSend": "Send question",
+  "readingWorkspaceBook": "This book",
+  "readingWorkspaceExpand": "Expand panel",
+  "readingWorkspaceCollapse": "Collapse panel",
+  "readingWorkspaceClose": "Back to reading",
+  "readingWorkspaceLoading": "Loading saved materials…",
+  "readingWorkspaceLoadFailed": "Could not load materials. Try again.",
+  "readingWorkspaceRetry": "Retry",
+  "readingWorkspaceSettings": "Book settings",
+  "readingWorkspaceContext": "Materials used by AI",
+  "readingWorkspaceReaderOptions": "Reading preferences and action history",
+  "readingWorkspaceLibrary": "All book materials and export",
+  "readingWorkspaceMove": "Panel position",
+  "readingWorkspaceSourceUnavailable": "The original location is unavailable.",
+  "readingAssistantOriginalSource": "Original passage",
+  "readingAssistantExternalSource": "External source",
+  "readingCompanionBook": "This book",
+  "readingCompanionSearchMaterials": "Search saved material",
+  "readingCompanionSafeScope": "Only material visible at your reading position",
+  "readingCompanionChapters": "Chapters & recaps",
+  "readingCompanionCharacters": "People & relationships",
+  "readingCompanionPlot": "Events & clues",
+  "readingCompanionConcepts": "Concepts & arguments",
+  "readingCompanionRecords": "My notes & questions",
+  "readingCompanionAvailableMaterials": "Material you can build",
+  "readingCompanionOrganizeStory": "Organize people and events",
+  "readingCompanionOrganizeKnowledge": "Organize concepts and chapters",
+  "readingCompanionRecordsEmpty": "Saved notes, thoughts and questions appear here.",
+  "readingCompanionSearchEmpty": "No saved material matches this search.",
+  "readingCompanionExercises": "Reading practice",
+  "readingCompanionExercisesHint": "Optional guides, questions and review",
+  "readingCompanionBookSettings": "Book settings",
+  "readingCompanionReadingPreferences": "Reading preferences",
+  "readingCompanionAiMaterials": "Material used by AI",
+  "readingCompanionProgress": "Reading progress",
+  "readingCompanionRelations": "View relationship graph",
+  "readingCompanionTimeline": "View timeline",
+  "readingCompanionSync": "Sync status",
+  "readingCompanionSyncNow": "Sync now",
+  "readingCompanionSyncRunning": "Checking remote progress…",
+  "readingCompanionSyncIdle": "Automatic sync waits until reading ends or becomes idle.",
+  "readingCompanionSyncConflict": "Sync conflict needs your choice.",
+  "readingCompanionSyncOff": "Sync is off",
+  "readingCompanionStart": "Start",
+  "readingCompanionClearSearch": "Clear search",
+  "readingAssistantGenerationFailed": "The answer stopped. Your question and existing content are kept.",
+  "readingAssistantOtherBook": "Conversation from another book",
+  "readingAssistantOtherBookHelp": "View this history, or open its book to continue.",
+  "readingAssistantViewHistory": "View history",
+  "readingAssistantOpenBook": "Open book",
+  "readingTaskProgressPreparing": "Preparing chapters",
+  "readingTaskProgressReading": "Reading chapter",
+  "readingTaskProgressAnalyzing": "Analyzing chapter",
+  "readingTaskProgressGenerating": "Generating current section",
+  "readingTaskProgressChunkComplete": "Section complete",
+  "readingTaskProgressChapterComplete": "Chapter complete",
+  "readingTaskProgressSkipped": "Chapter skipped",
+  "readingTaskProgressQueued": "Waiting to start",
+  "readingTaskProgressWorking": "Working",
+  "readingTaskProgressTask": "Organizing materials",
+  "readingTaskProgressResumeFailed": "Unable to resume task: {error}",
+  "@readingTaskProgressResumeFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "readingTaskProgressPreparingHint": "Progress will appear by chapter and section once reading finishes.",
+  "readingTaskProgressCompleted": "Completed",
+  "readingTaskProgressFailed": "Failed: {error}",
+  "@readingTaskProgressFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "readingTaskProgressUnknownError": "Unknown error",
+  "readingTaskProgressCancelled": "Cancelled",
+  "readingTaskProgressPaused": "Paused",
+  "readingTaskProgressPause": "Pause task",
+  "readingTaskProgressCancel": "Cancel task",
+  "readingTaskProgressResume": "Resume task",
+  "readingTaskProgressChunks": "{chapter} · Section {index}/{count} · Total {completed}/{total}",
+  "@readingTaskProgressChunks": {
+    "placeholders": {
+      "chapter": {
+        "type": "String"
+      },
+      "index": {
+        "type": "String"
+      },
+      "count": {
+        "type": "String"
+      },
+      "completed": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "readingTaskProgressChapters": "{chapter} · Chapter {index}/{total}",
+  "@readingTaskProgressChapters": {
+    "placeholders": {
+      "chapter": {
+        "type": "String"
+      },
+      "index": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "readingTaskProgressFailedHint": "Existing results are kept. You can start a new task.",
+  "readingTaskProgressCancelledHint": "Task cancelled. Saved results are kept.",
+  "readingCompanionSavedContext": "Saved context",
+  "readingCompanionSavedAnswer": "Saved answer · AI inference",
+  "readingPracticeExtractionUnavailable": "Extraction engine unavailable",
+  "readingPracticeTopicCloudScope": "This request will send the selected reading memories to your general AI model. It will not change your future extraction settings.",
+  "readingPracticeAllowOnce": "Allow this request",
+  "readingPracticeChaptersUnavailable": "Chapter content is not available yet.",
+  "readingPracticeGuideScopeTitle": "Allow chapter samples for this guide?",
+  "readingPracticeGuideScope": "This guide uses samples from up to six chapters across the book, including unread chapters. It sends at most 800 characters per chapter to your configured AI model. The guide may mention later content. Only this preview is authorized; the result will not become evidence for your current reading position.",
+  "readingPracticeGuideGenerated": "Reading guide preview",
+  "readingPracticeGuideFailed": "Generation failed. Your previous guide is kept.",
+  "readingPracticeRecordsNeeded": "Answer a reading question, finish a quiz, or save a question first.",
+  "readingPracticeSynthesisGenerated": "Reading reflection is ready.",
+  "readingPracticeSynthesisFailed": "Generation failed. Your previous reflection is kept.",
+  "readingPracticeQuizScopeTitle": "Allow chapter sample processing?",
+  "readingPracticeQuizScope": "A sample of up to 6,000 characters from “{chapter}” will be sent to your configured AI model to create three questions. This may include text after your current position. The result is shown in this practice preview and will not enter earlier reading summaries.",
+  "@readingPracticeQuizScope": {
+    "placeholders": {
+      "chapter": {
+        "type": "String"
+      }
+    }
+  },
+  "readingPracticeQuizGenerating": "Creating three practice questions…",
+  "readingPracticeQuizGenerated": "Practice questions are ready.",
+  "readingPracticeQuizFailed": "Questions could not be generated. Existing questions are kept.",
+  "readingPracticeTopics": "Topics",
+  "readingPracticeStructure": "Structure",
+  "readingPracticePlan": "Reading plan",
+  "readingPracticeExecutionPreview": "Destination: {provider} · {model} · {destination}\nChapters: {chapters} · Source limit: {characters} characters\nEstimated input limit: {tokens} tokens per call; at most one repair call.",
+  "@readingPracticeExecutionPreview": {
+    "placeholders": {
+      "provider": {
+        "type": "String"
+      },
+      "model": {
+        "type": "String"
+      },
+      "destination": {
+        "type": "String"
+      },
+      "chapters": {
+        "type": "String"
+      },
+      "characters": {
+        "type": "String"
+      },
+      "tokens": {
+        "type": "String"
+      }
+    }
+  },
+  "readingPracticeProviderUnavailable": "No AI provider configured",
+  "readingPracticeLocalDestination": "local device / private deployment",
+  "readingPracticeCloudDestination": "cloud deployment",
+  "readingMaterialsDestination": "Model destination: {provider} · {model} · {destination}",
+  "@readingMaterialsDestination": {
+    "placeholders": {
+      "provider": {
+        "type": "String"
+      },
+      "model": {
+        "type": "String"
+      },
+      "destination": {
+        "type": "String"
+      }
+    }
+  },
+  "readingMaterialsEstimate": "Estimated input: about {tokens} tokens. Retries may use more.",
+  "@readingMaterialsEstimate": {
+    "placeholders": {
+      "tokens": {
+        "type": "String"
+      }
+    }
+  },
+  "readingMaterialsResumeScope": "Continue the confirmed range up to {progress}% ({chapters} chapters)?",
+  "@readingMaterialsResumeScope": {
+    "placeholders": {
+      "progress": {
+        "type": "String"
+      },
+      "chapters": {
+        "type": "String"
+      }
+    }
+  },
+  "readingMaterialsResumeTitle": "Continue organizing materials?",
+  "readingMaterialsVerifierDestination": "Ambiguous candidates may send short evidence to this verifier (input budget at most 20% of extraction): {destination}",
+  "@readingMaterialsVerifierDestination": {
+    "placeholders": {
+      "destination": {
+        "type": "String"
+      }
+    }
+  }
 }

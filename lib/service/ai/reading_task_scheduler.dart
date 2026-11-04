@@ -4,8 +4,8 @@ import 'package:anx_reader/dao/reading_task.dart';
 import 'package:anx_reader/models/reading_task.dart';
 import 'package:anx_reader/service/reading_experience_diagnostics.dart';
 
-typedef ReadingTaskExecutor<T> =
-    Future<T> Function(ReadingTaskExecutionContext context);
+typedef ReadingTaskExecutor<T> = Future<T> Function(
+    ReadingTaskExecutionContext context);
 
 class ReadingTaskExecutionContext {
   ReadingTaskExecutionContext._(this._scheduler, this.taskId, this._control);
@@ -52,8 +52,8 @@ class ReadingTaskCancelled implements Exception {
 
 class ReadingTaskScheduler {
   ReadingTaskScheduler({ReadingTaskStore? store, int Function()? now})
-    : _store = store,
-      _now = now ?? (() => DateTime.now().millisecondsSinceEpoch);
+      : _store = store,
+        _now = now ?? (() => DateTime.now().millisecondsSinceEpoch);
 
   final ReadingTaskStore? _store;
   final int Function() _now;
@@ -75,6 +75,14 @@ class ReadingTaskScheduler {
 
   ReadingTask? task(String id) => _entries[id]?.task;
 
+  bool canResume(String id) {
+    final entry = _entries[id];
+    return entry != null &&
+        entry.task.status == ReadingTaskStatus.paused &&
+        (entry.executor != null ||
+            _registeredExecutors.containsKey(entry.task.type));
+  }
+
   /// Restores durable work without silently restarting it. Work that was
   /// queued or running before process death becomes paused and must be resumed
   /// explicitly after its executor is registered again.
@@ -86,7 +94,14 @@ class ReadingTaskScheduler {
         task = task.transition(ReadingTaskStatus.paused, now: _now());
         await _store.save(task);
       }
-      _entries[task.id] = _ScheduledTask(task);
+      // A feature may register its executor before the first restore (for
+      // example in a test or a lazily opened reader). Attach it immediately;
+      // otherwise a paused task would appear resumable but fail from the
+      // generic task card until the feature is opened a second time.
+      _entries[task.id] = _ScheduledTask(
+        task,
+        executor: _registeredExecutors[task.type],
+      );
     }
     _restored = true;
     _emit();
@@ -198,15 +213,14 @@ class ReadingTaskScheduler {
     if (_pumping || _runningId != null) return;
     _pumping = true;
     try {
-      final candidates =
-          _entries.values
-              .where(
-                (entry) =>
-                    entry.task.status == ReadingTaskStatus.queued &&
-                    entry.executor != null,
-              )
-              .toList()
-            ..sort((a, b) => _compareTasks(a.task, b.task));
+      final candidates = _entries.values
+          .where(
+            (entry) =>
+                entry.task.status == ReadingTaskStatus.queued &&
+                entry.executor != null,
+          )
+          .toList()
+        ..sort((a, b) => _compareTasks(a.task, b.task));
       if (candidates.isEmpty) return;
       final entry = candidates.first;
       _runningId = entry.task.id;
@@ -227,8 +241,8 @@ class ReadingTaskScheduler {
       entry.control.cancelRequested
           ? throw const ReadingTaskCancelled()
           : entry.control.pauseRequested
-          ? throw const ReadingTaskPaused()
-          : null;
+              ? throw const ReadingTaskPaused()
+              : null;
       await _transition(entry, ReadingTaskStatus.completed);
       if (!entry.completer.isCompleted) entry.completer.complete(result);
     } on ReadingTaskPaused {
@@ -274,8 +288,17 @@ class ReadingTaskScheduler {
   }) async {
     final entry = _entries[id];
     if (entry == null || entry.task.status != ReadingTaskStatus.running) return;
+    // A long task can report chapter and chunk clocks from different
+    // callbacks. Never let a late callback make the visible progress move
+    // backwards; the durable checkpoint remains the source of truth after a
+    // page is reopened.
+    final nextProgress = progress == null
+        ? entry.task.progress
+        : progress > entry.task.progress
+            ? progress
+            : entry.task.progress;
     entry.task = entry.task.copyWith(
-      progress: progress,
+      progress: nextProgress,
       checkpoint: checkpoint,
       updatedAt: _now(),
     );
@@ -296,6 +319,9 @@ class ReadingTaskScheduler {
     ReadingTaskStatus status, {
     String? error,
   }) async {
+    if (status == ReadingTaskStatus.completed && entry.task.progress < 1) {
+      entry.task = entry.task.copyWith(progress: 1, updatedAt: _now());
+    }
     entry.task = entry.task.transition(status, now: _now(), error: error);
     if (entry.task.isTerminal) _lastProgressEmission.remove(entry.task.id);
     await _persist(entry.task);

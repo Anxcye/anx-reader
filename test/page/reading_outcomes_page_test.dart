@@ -1,10 +1,13 @@
 import 'package:anx_reader/models/book.dart';
+import 'package:anx_reader/models/book_materials.dart';
+import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/models/next_reading_action.dart';
 import 'package:anx_reader/models/reading_agent.dart';
 import 'package:anx_reader/models/reading_coach.dart';
 import 'package:anx_reader/page/reading_outcomes_page.dart';
 import 'package:anx_reader/service/ai/reading_outcomes_service.dart';
 import 'package:anx_reader/service/ai/reading_closure_policy.dart';
+import 'package:anx_reader/service/ai/book_wiki_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -16,6 +19,22 @@ class _FakeReadingOutcomesService extends ReadingOutcomesService {
 
   @override
   Future<ReadingOutcomesSnapshot> load(int bookId) async => snapshot;
+}
+
+class _FakeMaterialsService extends BookWikiService {
+  @override
+  Future<BookMaterialsSnapshot> loadMaterials(
+    int bookId, {
+    required double visibleAtProgress,
+    ReadingClosurePolicyDefinition? closure,
+    ReadingOutcomesSnapshot? outcomes,
+    String? currentCfi,
+  }) async =>
+      BookMaterialsSnapshot(
+        bookId: bookId,
+        visibleAtProgress: visibleAtProgress,
+        outcomes: outcomes,
+      );
 }
 
 const _historyClosure = ReadingClosurePolicyDefinition(
@@ -146,9 +165,13 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         child: MaterialApp(
+          locale: const Locale('zh'),
+          localizationsDelegates: L10n.localizationsDelegates,
+          supportedLocales: L10n.supportedLocales,
           home: ReadingOutcomesPage(
             book: pageBook ?? book,
             service: _FakeReadingOutcomesService(snapshot),
+            materialsService: _FakeMaterialsService(),
             closureIdOverride: closureId,
             closureRegistry: registry,
           ),
@@ -223,7 +246,8 @@ void main() {
       closureId: ReadingClosureIds.fictionImmersion,
     );
 
-    expect(find.text('小说沉浸闭环'), findsOneWidget);
+    expect(find.text('小说沉浸闭环'), findsNothing);
+    expect(find.text('回答方式'), findsOneWidget);
     expect(find.text('小说故事档案'), findsOneWidget);
     expect(find.text('人物关系图'), findsOneWidget);
     expect(find.text('故事时间线'), findsOneWidget);
@@ -243,7 +267,7 @@ void main() {
       closureId: ReadingClosureIds.psychologyReflection,
     );
 
-    expect(find.text('心理学概念与反思闭环'), findsOneWidget);
+    expect(find.text('心理学概念与反思闭环'), findsNothing);
     expect(find.text('概念清晰度'), findsWidgets);
     await tester.scrollUntilVisible(
       find.text('待澄清概念与反思'),
@@ -266,6 +290,9 @@ void main() {
       ),
     );
 
+    expect(find.text('历史证据闭环'), findsNothing);
+    await tester.tap(find.text('回答方式'));
+    await tester.pumpAndSettle();
     expect(find.text('历史证据闭环'), findsOneWidget);
     expect(find.text('下一步 · 继续“理解本章”'), findsOneWidget);
     expect(find.text('史料目标'), findsOneWidget);

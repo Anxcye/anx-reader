@@ -34,10 +34,10 @@ enum ReadingClosureType {
   psychologyReflection;
 
   String get stableId => switch (this) {
-    fictionImmersion => ReadingClosureIds.fictionImmersion,
-    knowledgeArgument => ReadingClosureIds.knowledgeArgument,
-    psychologyReflection => ReadingClosureIds.psychologyReflection,
-  };
+        fictionImmersion => ReadingClosureIds.fictionImmersion,
+        knowledgeArgument => ReadingClosureIds.knowledgeArgument,
+        psychologyReflection => ReadingClosureIds.psychologyReflection,
+      };
 
   static ReadingClosureType? fromJson(Object? value) {
     final id = ReadingClosureIds.normalize(value);
@@ -142,11 +142,54 @@ class ReadingQuickPromptSpec {
     required this.id,
     required this.label,
     required this.prompt,
+    this.selectionAction,
   });
 
   final String id;
   final String label;
   final String prompt;
+  final SelectionAiAction? selectionAction;
+
+  /// Presentation-independent defaults. Opening a surface only reads these;
+  /// only an explicit invocation submits the resulting prompt to the gateway.
+  static const contextualDefaults = [
+    ReadingQuickPromptSpec(
+      id: 'reading.explain_current',
+      label: '解释当前内容',
+      prompt: '解释我当前正在读的内容，先说明最值得理解的一点，再按需解释术语。',
+    ),
+    ReadingQuickPromptSpec(
+      id: 'reading.recall_read',
+      label: '回顾已读',
+      prompt: '根据当前阅读位置之前已有的资料，简短回顾与当前章节有关的前文。资料不足时说明，不编造已读内容。',
+    ),
+    ReadingQuickPromptSpec(
+      id: 'reading.explore',
+      label: '深入探讨',
+      prompt: '围绕当前内容提出一个值得深入思考的问题，联系已有上下文探讨其依据与含义。',
+    ),
+  ];
+
+  static const selectionDefaults = [
+    ReadingQuickPromptSpec(
+      id: 'reading.explain_selection',
+      label: '解释这段',
+      prompt: '',
+      selectionAction: SelectionAiAction.explain,
+    ),
+    ReadingQuickPromptSpec(
+      id: 'reading.connect_selection',
+      label: '联系上下文',
+      prompt: '',
+      selectionAction: SelectionAiAction.contextualize,
+    ),
+  ];
+
+  String buildCompanionPrompt() => concisePrompt(prompt);
+
+  static String concisePrompt(String instruction) => '''$instruction
+
+先用简短、直接的回答帮助继续阅读，用户追问时再展开。仅使用当前书和当前允许阅读范围；不要因模型已知全书而透露后文。明确区分原文依据、AI 推断和外部资料，无法定位的引用不要编造。''';
 }
 
 class ReadingClosurePolicyDefinition {
@@ -160,6 +203,8 @@ class ReadingClosurePolicyDefinition {
     required this.outcomeSections,
     required this.quickPrompts,
     required this.systemGuidance,
+    this.contextualPrompts = ReadingQuickPromptSpec.contextualDefaults,
+    this.selectionPrompts = ReadingQuickPromptSpec.selectionDefaults,
     this.capabilities = const {},
     this.heroMasteryLabel = '平均掌握',
     this.heroUnresolvedLabel = '未解决',
@@ -182,6 +227,8 @@ class ReadingClosurePolicyDefinition {
   final List<ReadingOutcomeSectionSpec> outcomeSections;
   final List<ReadingQuickPromptSpec> quickPrompts;
   final String systemGuidance;
+  final List<ReadingQuickPromptSpec> contextualPrompts;
+  final List<ReadingQuickPromptSpec> selectionPrompts;
   final Set<ReadingClosureCapability> capabilities;
   final String heroMasteryLabel;
   final String heroUnresolvedLabel;

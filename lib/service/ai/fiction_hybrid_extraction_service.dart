@@ -13,9 +13,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:langchain_core/chat_models.dart';
 
 class FictionHybridExtractionService {
-  FictionHybridExtractionService({required this.ref});
+  FictionHybridExtractionService({
+    required this.ref,
+    this.verificationProviderId,
+  });
 
   final WidgetRef ref;
+  final String? verificationProviderId;
   int _baselineInputTokens = 0;
   int _cloudVerificationInputTokens = 0;
   final Set<String> _baselineFingerprints = {};
@@ -33,13 +37,13 @@ class FictionHybridExtractionService {
   AiProvider? get provider => aiExtractionEngine.resolveProvider(ref);
 
   Map<String, dynamic> get artifactMetadata => {
-    'pipelineVersion': AiExtractionEngine.pipelineVersion,
-    if (provider case final value?) ...{
-      'extractorProvider': value.id,
-      'extractorModel': value.model,
-      'extractorDeployment': value.deployment.name,
-    },
-  };
+        'pipelineVersion': AiExtractionEngine.pipelineVersion,
+        if (provider case final value?) ...{
+          'extractorProvider': value.id,
+          'extractorModel': value.model,
+          'extractorDeployment': value.deployment.name,
+        },
+      };
 
   Future<String> generate(String prompt) async {
     final baseline = aiContextAssembler.estimateTokens(prompt);
@@ -111,8 +115,7 @@ class FictionHybridExtractionService {
     Map<String, dynamic> payload,
     String evidence,
   ) async {
-    final prompt =
-        '''你只复核一条小说人物关系候选，不得使用证据之外的知识。
+    final prompt = '''你只复核一条小说人物关系候选，不得使用证据之外的知识。
 候选：${jsonEncode(payload)}
 原文证据：${jsonEncode(evidence)}
 只返回 JSON：{"decision":"accept|reject|normalize","relation":"必要时的简短中文关系"}。
@@ -135,6 +138,7 @@ class FictionHybridExtractionService {
         AiTokenUsageRole.cloudVerification,
         () => aiGenerateTextWithMetadata(
           [ChatMessage.humanText(prompt)],
+          identifier: verificationProviderId,
           ref: ref,
           task: AiContextTask.cloudVerification,
           outputContract: const AiOutputContract.json(),
@@ -207,8 +211,7 @@ class FictionCandidateRuleValidator {
         result['entityType'],
       );
       final name = normalizePerson(result['name']);
-      final aliases =
-          (result['aliases'] as List?)
+      final aliases = (result['aliases'] as List?)
               ?.map((e) => e.toString().trim())
               .where((e) => e.isNotEmpty)
               .toSet() ??
@@ -266,10 +269,9 @@ class FictionCandidateRuleValidator {
       if (participants is List) {
         result['participants'] = participants.map(normalizePerson).toList();
       }
-      final inferredTrack =
-          RegExp(
-            r'宇宙|文明|技术|科学|星际|外星|行星|物理规律',
-          ).hasMatch('${result['title']} ${result['summary']} $type')
+      final inferredTrack = RegExp(
+        r'宇宙|文明|技术|科学|星际|外星|行星|物理规律',
+      ).hasMatch('${result['title']} ${result['summary']} $type')
           ? FictionEventTrackIds.worldbuilding
           : FictionEventTrackIds.caseInvestigation;
       result['track'] = FictionEventTrackIds.normalize(
@@ -318,11 +320,11 @@ class FictionCandidateRuleValidator {
   }
 
   static String _stageForEvent(String eventType) => switch (eventType) {
-    '冲突' => FictionEventStageIds.conflict,
-    '揭示' => FictionEventStageIds.revelation,
-    '转折' => FictionEventStageIds.turningPoint,
-    _ => FictionEventStageIds.other,
-  };
+        '冲突' => FictionEventStageIds.conflict,
+        '揭示' => FictionEventStageIds.revelation,
+        '转折' => FictionEventStageIds.turningPoint,
+        _ => FictionEventStageIds.other,
+      };
 
   static String _normalizeStage(Object? value, String eventType) {
     final stage = value?.toString().trim() ?? '';
@@ -338,9 +340,9 @@ class FictionCandidateRuleValidator {
     required String chapterContent,
   }) {
     FictionCandidateRuleVerdict reject() => FictionCandidateRuleVerdict(
-      FictionCandidateRuleStatus.rejected,
-      payload,
-    );
+          FictionCandidateRuleStatus.rejected,
+          payload,
+        );
     final evidence = payload['evidence']?.toString().trim() ?? '';
     if (evidence.isEmpty ||
         evidence.length > 80 ||
@@ -502,11 +504,9 @@ class FictionCandidateRuleValidator {
         r'([\u3400-\u9fff]{2,4})[，,\s]+字\s*([\u3400-\u9fff]{1,4})([^。！？\n]{0,24})',
       ),
     ];
-    for (
-      var patternIndex = 0;
-      patternIndex < identityPatterns.length;
-      patternIndex++
-    ) {
+    for (var patternIndex = 0;
+        patternIndex < identityPatterns.length;
+        patternIndex++) {
       final pattern = identityPatterns[patternIndex];
       for (final match in pattern.allMatches(chapterContent)) {
         late final String canonical;
@@ -546,9 +546,8 @@ class FictionCandidateRuleValidator {
           'aliases': const <String>[],
           if (courtesy.isNotEmpty) 'courtesyNames': courtesy.toList(),
           if (artNames.isNotEmpty) 'artNames': artNames.toList(),
-          'evidence': evidence.length <= 80
-              ? evidence
-              : evidence.substring(0, 80),
+          'evidence':
+              evidence.length <= 80 ? evidence : evidence.substring(0, 80),
         };
       }
     }

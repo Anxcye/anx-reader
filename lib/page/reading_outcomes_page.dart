@@ -7,11 +7,12 @@ import 'package:anx_reader/page/fiction_character_graph_page.dart';
 import 'package:anx_reader/page/fiction_story_timeline_page.dart';
 import 'package:anx_reader/page/book_wiki_page.dart';
 import 'package:anx_reader/service/ai/fiction_story_atlas_service.dart';
-import 'package:anx_reader/service/ai/reading_agent_repository.dart';
+import 'package:anx_reader/service/ai/agent_action_service.dart';
+import 'package:anx_reader/service/ai/book_wiki_service.dart';
+import 'package:anx_reader/l10n/generated/L10n.dart';
 import 'package:anx_reader/service/ai/reading_ai_models.dart';
 import 'package:anx_reader/service/ai/reading_closure_policy.dart';
 import 'package:anx_reader/service/ai/reading_experience_profile_service.dart';
-import 'package:anx_reader/service/ai/reading_coach_repository.dart';
 import 'package:anx_reader/service/ai/reading_outcomes_service.dart';
 import 'package:anx_reader/models/next_reading_action.dart';
 import 'package:anx_reader/service/ai/next_reading_action_resolver.dart';
@@ -35,6 +36,8 @@ class ReadingOutcomesPage extends ConsumerStatefulWidget {
     this.onOrganizeStoryArchive,
     this.coverage,
     this.visibleProgress,
+    this.actions,
+    this.materialsService,
   });
 
   final Book book;
@@ -50,6 +53,8 @@ class ReadingOutcomesPage extends ConsumerStatefulWidget {
   final Future<void> Function()? onOrganizeStoryArchive;
   final BookReadingCoverage? coverage;
   final double? visibleProgress;
+  final AgentActionService? actions;
+  final BookWikiService? materialsService;
 
   @override
   ConsumerState<ReadingOutcomesPage> createState() =>
@@ -58,7 +63,7 @@ class ReadingOutcomesPage extends ConsumerStatefulWidget {
 
 class _ReadingOutcomesPageState extends ConsumerState<ReadingOutcomesPage> {
   late Future<ReadingOutcomesSnapshot> _snapshot;
-  final _coachRepository = ReadingCoachRepository();
+  AgentActionService get _actions => widget.actions ?? agentActionService;
   BookReadingProfile? _readingProfile;
   String? _lastShownNextActionFingerprint;
   static const _nextActionResolver = NextReadingActionResolver();
@@ -66,10 +71,24 @@ class _ReadingOutcomesPageState extends ConsumerState<ReadingOutcomesPage> {
   @override
   void initState() {
     super.initState();
-    _snapshot = (widget.service ?? readingOutcomesService).load(widget.book.id);
+    _snapshot = _loadSnapshot();
     if (widget.service == null && widget.closureIdOverride == null) {
       _loadReadingProfile();
     }
+  }
+
+  Future<ReadingOutcomesSnapshot> _loadSnapshot() async {
+    final raw =
+        await (widget.service ?? readingOutcomesService).load(widget.book.id);
+    final materials =
+        await (widget.materialsService ?? bookWikiService).loadMaterials(
+      widget.book.id,
+      visibleAtProgress:
+          widget.visibleProgress ?? widget.book.readingPercentage,
+      currentCfi: widget.book.lastReadPosition,
+      outcomes: raw,
+    );
+    return materials.outcomes!;
   }
 
   Future<void> _loadReadingProfile() async {
@@ -117,9 +136,7 @@ class _ReadingOutcomesPageState extends ConsumerState<ReadingOutcomesPage> {
   }
 
   Future<void> _reload() async {
-    final next = (widget.service ?? readingOutcomesService).load(
-      widget.book.id,
-    );
+    final next = _loadSnapshot();
     setState(() => _snapshot = next);
     await next;
   }
@@ -146,31 +163,45 @@ class _ReadingOutcomesPageState extends ConsumerState<ReadingOutcomesPage> {
   }
 
   Future<void> _resolveDifficulty(ReadingDifficulty difficulty) async {
-    await _coachRepository.updateDifficulty(
-      difficulty.copyWith(
-        status: ReadingDifficultyStatus.resolved,
-        updatedAt: DateTime.now().millisecondsSinceEpoch,
-      ),
-    );
-    if (!mounted) return;
-    AnxToast.show('已标记为解决');
-    await _reload();
+    try {
+      final mutation = await _actions.resolveDifficulty(difficulty);
+      if (!mounted) return;
+      _showUndo(mutation.action, L10n.of(context).commonSaved);
+      await _reload();
+    } catch (_) {
+      if (mounted) AnxToast.show(L10n.of(context).readingAssistantSaveFailed);
+    }
   }
 
   Future<void> _reviewCard(KnowledgeCard card, bool remembered) async {
-    final now = DateTime.now().millisecondsSinceEpoch;
-    final interval = remembered ? (card.intervalDays * 2).clamp(2, 60) : 1;
-    await readingAgentRepository.saveKnowledgeCard(
-      card.copyWith(
-        intervalDays: interval,
-        repetitions: card.repetitions + 1,
-        dueAt: now + Duration(days: interval).inMilliseconds,
-        updatedAt: now,
+    try {
+      final mutation =
+          await _actions.reviewKnowledgeCard(card, remembered: remembered);
+      if (!mounted) return;
+      _showUndo(mutation.action, L10n.of(context).readingMemoryReviewRecorded);
+      await _reload();
+    } catch (_) {
+      if (mounted) AnxToast.show(L10n.of(context).readingAssistantSaveFailed);
+    }
+  }
+
+  void _showUndo(AgentAction action, String label) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(label),
+      action: SnackBarAction(
+        label: L10n.of(context).commonUndo,
+        onPressed: () async {
+          final result = await _actions.undo(action);
+          if (!mounted) return;
+          if (result == UndoResult.undone ||
+              result == UndoResult.alreadyUndone) {
+            await _reload();
+          } else {
+            AnxToast.show(L10n.of(context).readingAssistantSaveFailed);
+          }
+        },
       ),
-    );
-    if (!mounted) return;
-    AnxToast.show(remembered ? '$interval 天后再次复习' : '明天再次复习');
-    await _reload();
+    ));
   }
 
   @override
@@ -291,43 +322,51 @@ class _ReadingOutcomesPageState extends ConsumerState<ReadingOutcomesPage> {
             ),
           ),
           const SizedBox(height: 8),
-          Card(
-            elevation: 0,
-            child: ListTile(
-              leading: const Icon(Icons.all_inclusive),
-              title: Text(closure.title),
-              subtitle: Text(
-                '${pinnedClosureId == null ? '自动匹配' : '本书固定'} · ${closure.description}',
+          ExpansionTile(
+            key: const PageStorageKey('outcomes-answer-options'),
+            title: Text(L10n.of(context).readingAssistantOptions),
+            leading: const Icon(Icons.tune_outlined),
+            children: [
+              Card(
+                elevation: 0,
+                child: ListTile(
+                  leading: const Icon(Icons.all_inclusive),
+                  title: Text(closure.title),
+                  subtitle: Text(
+                    '${pinnedClosureId == null ? '自动匹配' : '本书固定'} · ${closure.description}',
+                  ),
+                  trailing: PopupMenuButton<String>(
+                    tooltip: '切换本书阅读闭环',
+                    onSelected: (value) async {
+                      await _setClosureModule(value == 'auto' ? null : value);
+                    },
+                    itemBuilder: (context) => [
+                      const PopupMenuItem(value: 'auto', child: Text('自动匹配')),
+                      for (final item in widget.closureRegistry.definitions)
+                        PopupMenuItem(value: item.id, child: Text(item.title)),
+                    ],
+                  ),
+                ),
               ),
-              trailing: PopupMenuButton<String>(
-                tooltip: '切换本书阅读闭环',
-                onSelected: (value) async {
-                  await _setClosureModule(value == 'auto' ? null : value);
-                },
-                itemBuilder: (context) => [
-                  const PopupMenuItem(value: 'auto', child: Text('自动匹配')),
-                  for (final item in widget.closureRegistry.definitions)
-                    PopupMenuItem(value: item.id, child: Text(item.title)),
-                ],
+              const SizedBox(height: 8),
+              Card(
+                elevation: 0,
+                child: ListTile(
+                  leading: const Icon(Icons.auto_stories_outlined),
+                  title: Text(skill.primary.title),
+                  subtitle: Text(
+                    '${skill.pinned ? '本书固定' : '自动匹配'} · ${skill.primary.description}\n'
+                    '可形成：${skill.primary.closureContributions.map(_contributionLabel).join('、')}',
+                  ),
+                  isThreeLine: true,
+                  trailing: const Icon(Icons.help_outline),
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                        builder: (_) => const ReadingSkillHelpPage()),
+                  ),
+                ),
               ),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Card(
-            elevation: 0,
-            child: ListTile(
-              leading: const Icon(Icons.auto_stories_outlined),
-              title: Text(skill.primary.title),
-              subtitle: Text(
-                '${skill.pinned ? '本书固定' : '自动匹配'} · ${skill.primary.description}\n'
-                '可形成：${skill.primary.closureContributions.map(_contributionLabel).join('、')}',
-              ),
-              isThreeLine: true,
-              trailing: const Icon(Icons.help_outline),
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const ReadingSkillHelpPage()),
-              ),
-            ),
+            ],
           ),
           const SizedBox(height: 16),
           if (closure.supports(ReadingClosureCapability.storyAtlas)) ...[

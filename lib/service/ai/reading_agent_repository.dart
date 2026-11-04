@@ -6,6 +6,7 @@ import 'package:anx_reader/models/reading_coach.dart';
 import 'package:anx_reader/models/book_note.dart';
 import 'package:anx_reader/models/reading_note.dart';
 import 'package:anx_reader/models/book_wiki.dart';
+import 'package:anx_reader/service/ai/reading_source_anchor_validator.dart';
 import 'package:crypto/crypto.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:uuid/uuid.dart';
@@ -17,6 +18,18 @@ const supportedReaderProfileKeys = {
   'outputStructure',
   'interruptionTolerance',
 };
+
+enum ReadingPracticeRecordKind {
+  guide('tb_reading_guides', 'book_id'),
+  quiz('tb_reading_quizzes', 'id'),
+  topic('tb_reading_memory_topics', 'id'),
+  card('tb_reading_knowledge_cards', 'id'),
+  source('tb_reading_memory_sources', 'id');
+
+  const ReadingPracticeRecordKind(this.table, this.key);
+  final String table;
+  final String key;
+}
 
 class ReadingAgentRepository {
   ReadingAgentRepository({
@@ -162,6 +175,129 @@ class ReadingAgentRepository {
     return updated;
   }
 
+  Future<AgentMutation<ReadingChapterCheckpoint>> finishChapterCheckpoint({
+    required ReadingChapterCheckpoint checkpoint,
+    MasteryState? mastery,
+    KnowledgeCard? card,
+    ReadingMemoryDocument? memory,
+    required String sessionId,
+  }) =>
+      _dao.write((txn) async {
+        final stored = await _queryOne(
+            txn, 'tb_reading_checkpoints', 'id = ?', [checkpoint.id]);
+        if (stored == null ||
+            stored['book_id'] != checkpoint.bookId ||
+            stored['chapter_href'] != checkpoint.chapterHref ||
+            (stored['progress'] as num).toDouble() != checkpoint.progress ||
+            !checkpoint.progress.isFinite ||
+            checkpoint.progress < 0 ||
+            checkpoint.progress > 1 ||
+            checkpoint.chapterHref.isEmpty ||
+            stored['updated_at'] != checkpoint.updatedAt ||
+            stored['status'] != ReadingCheckpointStatus.pending.name ||
+            (mastery != null &&
+                (mastery.bookId != checkpoint.bookId ||
+                    mastery.chapterHref != checkpoint.chapterHref)) ||
+            (card != null &&
+                (card.bookId != checkpoint.bookId ||
+                    card.chapterHref != checkpoint.chapterHref)) ||
+            (memory != null &&
+                (memory.bookId != checkpoint.bookId ||
+                    memory.sourceRefs.length != 1 ||
+                    memory.sourceRefs.single !=
+                        'checkpoint:${checkpoint.id}'))) {
+          throw StateError(
+              'Checkpoint identity, boundary or state changed before completion');
+        }
+        final now = _clock();
+        final updated = checkpoint.copyWith(
+            status: ReadingCheckpointStatus.completed, updatedAt: now);
+        final anchors = <ReadingArtifact>[];
+        for (final (kind, id) in <(String, String)>[
+          ('checkpoint', checkpoint.id),
+          if (mastery != null) ('mastery', mastery.id),
+          if (card != null) ('knowledgeCard', card.id),
+        ]) {
+          final anchor = ReadingArtifact(
+              id: 'source-anchor:$kind:$id',
+              bookId: checkpoint.bookId,
+              moduleId: 'reading.sources',
+              kind: ReadingArtifactKinds.sourceAnchor,
+              payload: {
+                'sourceKind': kind,
+                'sourceId': id,
+                'checkpointId': checkpoint.id
+              },
+              epistemicStatus: ReadingArtifactEpistemicStatus.userReflection,
+              chapterHref: checkpoint.chapterHref,
+              sourceProgress: checkpoint.progress,
+              visibleFromProgress: checkpoint.progress,
+              ingestedAt: now,
+              sessionId: sessionId,
+              createdAt: now,
+              updatedAt: now);
+          ReadingSourceAnchorValidator.validate(anchor);
+          anchors.add(anchor);
+        }
+        final descriptor = <String, dynamic>{
+          'checkpoint': checkpoint.id,
+          if (mastery != null) 'mastery': mastery.id,
+          if (card != null) 'card': card.id,
+          if (memory != null) 'memory': memory.id,
+          'anchors': anchors.map((anchor) => anchor.id).toList()
+        };
+        final before = await _chapterClosureSnapshot(txn, descriptor);
+        for (final (table, row) in <(String, Map<String, Object?>)>[
+          ('tb_reading_checkpoints', updated.toDb()),
+          if (mastery != null) ('tb_reading_mastery', mastery.toDb()),
+          if (card != null) ('tb_knowledge_cards', card.toDb()),
+          if (memory != null) ('tb_reading_memory_documents', memory.toDb()),
+          for (final anchor in anchors) ('tb_reading_artifacts', anchor.toDb()),
+        ]) {
+          if (row['book_id'] != checkpoint.bookId) {
+            throw StateError('Closure belongs to another book');
+          }
+          final existing = await _queryOne(txn, table, 'id = ?', [row['id']]);
+          if (existing != null && existing['book_id'] != checkpoint.bookId) {
+            throw StateError('Closure target belongs to another book');
+          }
+          await txn.insert(table, row,
+              conflictAlgorithm: ConflictAlgorithm.replace);
+        }
+        final after = await _chapterClosureSnapshot(txn, descriptor);
+        final action = _action(
+            type: AgentActionType.memory,
+            targetId: checkpoint.id,
+            bookId: checkpoint.bookId,
+            sessionId: sessionId,
+            before: before,
+            after: after,
+            now: now);
+        await _insertAction(txn, action, now);
+        return AgentMutation(value: updated, action: action);
+      });
+
+  static const _closureTables = {
+    'checkpoint': 'tb_reading_checkpoints',
+    'mastery': 'tb_reading_mastery',
+    'card': 'tb_knowledge_cards',
+    'memory': 'tb_reading_memory_documents'
+  };
+
+  Future<Map<String, dynamic>> _chapterClosureSnapshot(
+          Transaction txn, Map<String, dynamic> descriptor) async =>
+      {
+        'chapterClosure': descriptor,
+        for (final entry in _closureTables.entries)
+          if (descriptor[entry.key] != null)
+            entry.key: await _queryOne(
+                txn, entry.value, 'id = ?', [descriptor[entry.key]]),
+        'anchors': [
+          for (final id in descriptor['anchors'] as List)
+            await _queryOne(txn, 'tb_reading_artifacts', 'id = ?', [id])
+        ],
+      };
+
   Future<MasteryState> saveMastery(MasteryState state) async {
     await _dao.write((txn) async => txn.insert(
         'tb_reading_mastery', state.toDb(),
@@ -175,6 +311,245 @@ class ReadingAgentRepository {
         conflictAlgorithm: ConflictAlgorithm.replace));
     return card;
   }
+
+  Future<AgentMutation<KnowledgeCard>> reviewKnowledgeCard(
+    KnowledgeCard card, {
+    required String sessionId,
+    int? expectedUpdatedAt,
+  }) =>
+      _dao.write((txn) async {
+        final before =
+            await _queryOne(txn, 'tb_knowledge_cards', 'id = ?', [card.id]);
+        if (before == null || before['book_id'] != card.bookId) {
+          throw StateError('Knowledge card is unavailable for this book');
+        }
+        if (expectedUpdatedAt != null &&
+            before['updated_at'] != expectedUpdatedAt) {
+          throw StateError('Knowledge card changed before this review');
+        }
+        await txn.update('tb_knowledge_cards', card.toDb(),
+            where: 'id = ?', whereArgs: [card.id]);
+        final action = _action(
+          type: AgentActionType.memory,
+          targetId: card.id,
+          bookId: card.bookId,
+          sessionId: sessionId,
+          before: {'knowledgeCard': before},
+          after: {'knowledgeCard': card.toDb()},
+          now: _clock(),
+        );
+        await _insertAction(txn, action, _clock());
+        return AgentMutation(value: card, action: action);
+      });
+
+  /// Registered practice records reuse the existing memory action journal.
+  /// A review and its schedule, or a kept topic and its note backlinks, are
+  /// captured and restored together in one transaction.
+  Future<AgentMutation<Map<String, Object?>>> savePracticeRecord({
+    required ReadingPracticeRecordKind kind,
+    required int bookId,
+    required String targetId,
+    required Map<String, Object?> values,
+    required String sessionId,
+    Map<String, Object?>? review,
+    List<String>? sourceIds,
+    int? expectedUpdatedAt,
+    bool createOnly = false,
+  }) =>
+      _dao.write((txn) async {
+        final before = await _practiceSnapshot(txn, kind, targetId,
+            reviewId: review?['id']?.toString());
+        final row = before['row'] as Map?;
+        if ((row != null && row['book_id'] != bookId) ||
+            values['book_id'] != bookId ||
+            (values[kind.key] != null &&
+                values[kind.key].toString() != targetId) ||
+            (review != null &&
+                (review['book_id'] != bookId ||
+                    review['card_id'] != targetId))) {
+          throw StateError('Practice record belongs to another book');
+        }
+        if (expectedUpdatedAt != null &&
+            row?['updated_at'] != expectedUpdatedAt) {
+          throw StateError('Practice record changed before this action');
+        }
+        final saved = <String, Object?>{
+          if (row != null) ...Map<String, Object?>.from(row),
+          if (!createOnly || row == null) ...values
+        };
+        if (kind == ReadingPracticeRecordKind.guide && row != null) {
+          final incoming = values['report'];
+          if (incoming == null) {
+            saved['report'] = row['report'];
+          } else {
+            final parsed = jsonDecode(incoming.toString());
+            if (parsed is Map &&
+                !parsed.containsKey('sourceProgress') &&
+                parsed.keys
+                    .every((key) => key.toString().startsWith('synthesis'))) {
+              final previous = row['report'] == null
+                  ? const {}
+                  : jsonDecode(row['report'].toString());
+              saved['report'] =
+                  jsonEncode({if (previous is Map) ...previous, ...parsed});
+            }
+          }
+        }
+        await txn.insert(kind.table, saved,
+            conflictAlgorithm: ConflictAlgorithm.replace);
+        if (sourceIds != null && (!createOnly || row == null)) {
+          final (table, key) = kind == ReadingPracticeRecordKind.topic
+              ? ('tb_reading_topic_sources', 'topic_id')
+              : ('tb_reading_card_sources', 'card_id');
+          if (kind != ReadingPracticeRecordKind.topic &&
+              kind != ReadingPracticeRecordKind.card) {
+            throw ArgumentError('Only topics and cards have source relations');
+          }
+          await txn.delete(table, where: '$key = ?', whereArgs: [targetId]);
+          for (final source in sourceIds.toSet()) {
+            final stored = await _queryOne(
+                txn, 'tb_reading_memory_sources', 'id = ?', [source]);
+            if (stored?['book_id'] != bookId) {
+              throw StateError('Unknown memory source');
+            }
+            await txn.insert(table, {key: targetId, 'source_id': source});
+          }
+        }
+        if (review != null) await txn.insert('tb_reading_card_reviews', review);
+        if (kind == ReadingPracticeRecordKind.topic &&
+            saved['status'] == 'kept') {
+          final sources = await txn.rawQuery(
+              '''SELECT s.* FROM tb_reading_memory_sources s
+        JOIN tb_reading_topic_sources ts ON ts.source_id = s.id
+        JOIN tb_reading_notes n ON n.id = s.source_ref AND n.book_id = s.book_id
+        WHERE ts.topic_id = ? AND s.book_id = ? AND s.source_type = ?''',
+              [targetId, bookId, 'readingNote']);
+          for (final source in sources) {
+            await txn.insert(
+                'tb_reading_note_sources',
+                ReadingNoteSource(
+                  noteId: source['source_ref'].toString(),
+                  type: ReadingNoteSourceType.memoryTopic,
+                  sourceRef: targetId,
+                  chapterHref: source['chapter_href'] as String?,
+                  chapterTitle: source['chapter_title'] as String?,
+                  cfi: source['cfi'] as String?,
+                  textSnapshot: source['text_snapshot'].toString(),
+                  createdAt: _clock(),
+                ).toDb(),
+                conflictAlgorithm: ConflictAlgorithm.replace);
+          }
+        }
+        final after = await _practiceSnapshot(txn, kind, targetId,
+            reviewId: review?['id']?.toString());
+        final action = _action(
+            type: AgentActionType.memory,
+            targetId: targetId,
+            bookId: bookId,
+            sessionId: sessionId,
+            before: before,
+            after: after,
+            now: _clock());
+        await _insertAction(txn, action, _clock());
+        return AgentMutation(value: saved, action: action);
+      });
+
+  Future<Map<String, dynamic>> _practiceSnapshot(
+          Transaction txn, ReadingPracticeRecordKind kind, String targetId,
+          {String? reviewId}) async =>
+      {
+        'practice': kind.name,
+        'row': await _queryOne(txn, kind.table, '${kind.key} = ?', [targetId]),
+        if (reviewId != null) ...{
+          'reviewId': reviewId,
+          'review': await _queryOne(
+              txn, 'tb_reading_card_reviews', 'id = ?', [reviewId]),
+        },
+        if (kind == ReadingPracticeRecordKind.topic)
+          'noteSources': await txn.query('tb_reading_note_sources',
+              where: 'source_type = ? AND source_ref = ?',
+              whereArgs: ['memoryTopic', targetId],
+              orderBy: 'note_id'),
+        if (kind == ReadingPracticeRecordKind.topic ||
+            kind == ReadingPracticeRecordKind.card)
+          'sourceIds': await txn.query(
+              kind == ReadingPracticeRecordKind.topic
+                  ? 'tb_reading_topic_sources'
+                  : 'tb_reading_card_sources',
+              columns: ['source_id'],
+              where: kind == ReadingPracticeRecordKind.topic
+                  ? 'topic_id = ?'
+                  : 'card_id = ?',
+              whereArgs: [targetId],
+              orderBy: 'source_id'),
+      };
+
+  Future<Map<String, dynamic>> _memoryBookSnapshot(
+          Transaction txn, int bookId) async =>
+      {
+        'practiceMemoryBook': bookId,
+        'rows': {
+          for (final table in const [
+            'tb_reading_memory_sources',
+            'tb_reading_memory_topics',
+            'tb_reading_knowledge_cards',
+            'tb_reading_card_reviews'
+          ])
+            table: await txn.query(table,
+                where: 'book_id = ?', whereArgs: [bookId], orderBy: 'id'),
+          'tb_reading_topic_sources': await txn.rawQuery(
+              '''SELECT s.* FROM tb_reading_topic_sources s
+        JOIN tb_reading_memory_topics t ON t.id = s.topic_id WHERE t.book_id = ? ORDER BY topic_id, source_id''',
+              [bookId]),
+          'tb_reading_card_sources': await txn.rawQuery(
+              '''SELECT s.* FROM tb_reading_card_sources s
+        JOIN tb_reading_knowledge_cards c ON c.id = s.card_id WHERE c.book_id = ? ORDER BY card_id, source_id''',
+              [bookId]),
+          'tb_reading_note_sources':
+              await txn.rawQuery('''SELECT s.* FROM tb_reading_note_sources s
+        JOIN tb_reading_notes n ON n.id = s.note_id WHERE n.book_id = ? AND s.source_type = ?
+        ORDER BY note_id, source_type, source_ref''', [bookId, 'memoryTopic']),
+        },
+      };
+
+  Future<void> _clearMemoryBook(Transaction txn, int bookId) async {
+    await txn
+        .rawDelete('''DELETE FROM tb_reading_topic_sources WHERE topic_id IN
+      (SELECT id FROM tb_reading_memory_topics WHERE book_id = ?)''', [bookId]);
+    await txn.rawDelete('''DELETE FROM tb_reading_card_sources WHERE card_id IN
+      (SELECT id FROM tb_reading_knowledge_cards WHERE book_id = ?)''',
+        [bookId]);
+    await txn.rawDelete(
+        '''DELETE FROM tb_reading_note_sources WHERE source_type = ?
+      AND note_id IN (SELECT id FROM tb_reading_notes WHERE book_id = ?)''',
+        ['memoryTopic', bookId]);
+    for (final table in const [
+      'tb_reading_card_reviews',
+      'tb_reading_knowledge_cards',
+      'tb_reading_memory_topics',
+      'tb_reading_memory_sources'
+    ]) {
+      await txn.delete(table, where: 'book_id = ?', whereArgs: [bookId]);
+    }
+  }
+
+  Future<AgentMutation<int>> deletePracticeMemory(int bookId,
+          {required String sessionId}) =>
+      _dao.write((txn) async {
+        final before = await _memoryBookSnapshot(txn, bookId);
+        await _clearMemoryBook(txn, bookId);
+        final after = await _memoryBookSnapshot(txn, bookId);
+        final action = _action(
+            type: AgentActionType.memory,
+            targetId: 'practice-memory:$bookId',
+            bookId: bookId,
+            sessionId: sessionId,
+            before: before,
+            after: after,
+            now: _clock());
+        await _insertAction(txn, action, _clock());
+        return AgentMutation(value: bookId, action: action);
+      });
 
   Future<AgentMutation<ReadingMemoryDocument>> appendMemory(
       ReadingMemoryDocument document,
@@ -205,6 +580,9 @@ class ReadingAgentRepository {
     ReadingArtifact artifact, {
     required String sessionId,
   }) async {
+    if (artifact.kind == ReadingArtifactKinds.sourceAnchor) {
+      ReadingSourceAnchorValidator.validate(artifact);
+    }
     if (artifact.id.isEmpty ||
         artifact.bookId <= 0 ||
         artifact.moduleId.trim().isEmpty ||
@@ -242,6 +620,9 @@ class ReadingAgentRepository {
   /// fiction location). This is not AI-authored content and therefore does not
   /// create an Agent undo entry.
   Future<ReadingArtifact> saveSystemArtifact(ReadingArtifact artifact) async {
+    if (artifact.kind == ReadingArtifactKinds.sourceAnchor) {
+      ReadingSourceAnchorValidator.validate(artifact);
+    }
     if (artifact.id.isEmpty ||
         artifact.bookId <= 0 ||
         artifact.payload.isEmpty) {
@@ -482,6 +863,8 @@ class ReadingAgentRepository {
   Future<AgentMutation<ReadingDifficulty>> saveDifficulty(
     ReadingDifficulty difficulty, {
     required String sessionId,
+    double? sourceProgress,
+    double? visibleFromProgress,
   }) async {
     if (difficulty.bookId <= 0 ||
         difficulty.cfi.trim().isEmpty ||
@@ -505,19 +888,88 @@ class ReadingAgentRepository {
               : existing;
       await txn.insert('tb_reading_difficulties', saved.toDb(),
           conflictAlgorithm: ConflictAlgorithm.replace);
+      Map<String, Object?>? anchorBefore;
+      ReadingArtifact? anchor;
+      if (sourceProgress != null) {
+        final anchorId = 'source-anchor:difficulty:${saved.id}';
+        anchorBefore =
+            await _queryOne(txn, 'tb_reading_artifacts', 'id = ?', [anchorId]);
+        anchor = ReadingArtifact(
+            id: anchorId,
+            bookId: saved.bookId,
+            moduleId: 'reading.sources',
+            kind: ReadingArtifactKinds.sourceAnchor,
+            payload: {'sourceKind': 'difficulty', 'sourceId': saved.id},
+            epistemicStatus: ReadingArtifactEpistemicStatus.userReflection,
+            sourceStartCfi: saved.cfi,
+            sourceEndCfi: saved.cfi,
+            discoveredAtCfi: saved.cfi,
+            sourceProgress: sourceProgress,
+            visibleFromProgress: visibleFromProgress ?? sourceProgress,
+            ingestedAt: now,
+            sessionId: sessionId,
+            createdAt: now,
+            updatedAt: now);
+        ReadingSourceAnchorValidator.validate(anchor);
+        await txn.insert('tb_reading_artifacts', anchor.toDb(),
+            conflictAlgorithm: ConflictAlgorithm.replace);
+      }
       final action = _action(
         type: AgentActionType.difficulty,
         targetId: saved.id,
         bookId: saved.bookId,
         sessionId: sessionId,
-        before: before,
-        after: saved.toDb(),
+        before: anchor == null
+            ? before
+            : {
+                if (before != null) ...before,
+                '_difficultyExisted': before != null,
+                '_sourceAnchor': anchorBefore,
+              },
+        after: {
+          ...saved.toDb(),
+          if (anchor != null) ...{
+            '_difficultyExisted': true,
+            '_sourceAnchor': anchor.toDb()
+          },
+        },
         now: now,
       );
       await _insertAction(txn, action, now);
       return AgentMutation(value: saved, action: action);
     });
   }
+
+  Future<AgentMutation<ReadingDifficulty>> updateDifficultyStatus(
+    ReadingDifficulty difficulty, {
+    required String sessionId,
+    bool includeType = false,
+  }) =>
+      _dao.write((txn) async {
+        final before = await _queryOne(
+            txn, 'tb_reading_difficulties', 'id = ?', [difficulty.id]);
+        if (before == null || before['book_id'] != difficulty.bookId) {
+          throw StateError('Difficulty is unavailable for this book');
+        }
+        final saved = ReadingDifficulty.fromDb(before).copyWith(
+          status: difficulty.status,
+          type: includeType ? difficulty.type : null,
+          updatedAt: difficulty.updatedAt,
+        );
+        await txn.update('tb_reading_difficulties', saved.toDb(),
+            where: 'id = ?', whereArgs: [difficulty.id]);
+        final action = _action(
+          type: AgentActionType.difficulty,
+          targetId: difficulty.id,
+          bookId: difficulty.bookId,
+          sessionId: sessionId,
+          before: before,
+          after: saved.toDb(),
+          now: _clock(),
+        );
+        await _insertAction(txn, action, _clock());
+        return AgentMutation(value: saved, action: action);
+      });
 
   Future<UndoResult> undo(String actionId) async {
     final now = _clock();
@@ -618,9 +1070,37 @@ class ReadingAgentRepository {
         if (value != null && owned != null) value['ownedAnnotationId'] = owned;
         return value;
       case AgentActionType.difficulty:
-        return _queryOne(
+        final value = await _queryOne(
             txn, 'tb_reading_difficulties', 'id = ?', [action.targetId]);
+        if (value != null &&
+            action.afterSnapshot?.containsKey('_sourceAnchor') == true) {
+          final anchor = action.afterSnapshot!['_sourceAnchor'] as Map;
+          value['_sourceAnchor'] = await _queryOne(
+              txn, 'tb_reading_artifacts', 'id = ?', [anchor['id']]);
+          value['_difficultyExisted'] = true;
+        }
+        return value;
       case AgentActionType.memory:
+        final closure = action.afterSnapshot?['chapterClosure'];
+        if (closure is Map) {
+          return _chapterClosureSnapshot(
+              txn, Map<String, dynamic>.from(closure));
+        }
+        final memoryBook = action.afterSnapshot?['practiceMemoryBook'];
+        if (memoryBook is int) return _memoryBookSnapshot(txn, memoryBook);
+        final practice = action.afterSnapshot?['practice'];
+        if (practice is String) {
+          return _practiceSnapshot(
+              txn,
+              ReadingPracticeRecordKind.values.byName(practice),
+              action.targetId,
+              reviewId: action.afterSnapshot?['reviewId'] as String?);
+        }
+        if (action.afterSnapshot?['knowledgeCard'] is Map) {
+          final card = await _queryOne(
+              txn, 'tb_knowledge_cards', 'id = ?', [action.targetId]);
+          return card == null ? null : {'knowledgeCard': card};
+        }
         return _queryOne(
             txn, 'tb_reading_memory_documents', 'id = ?', [action.targetId]);
       case AgentActionType.artifact:
@@ -702,7 +1182,25 @@ class ReadingAgentRepository {
         }
         return;
       case AgentActionType.difficulty:
-        if (action.beforeSnapshot == null) {
+        final before = action.beforeSnapshot == null
+            ? null
+            : Map<String, dynamic>.from(action.beforeSnapshot!);
+        final hasAnchor = before?.containsKey('_sourceAnchor') == true;
+        final anchorBefore = before?.remove('_sourceAnchor');
+        final existed = before?.remove('_difficultyExisted');
+        if (hasAnchor) {
+          final afterAnchor = action.afterSnapshot!['_sourceAnchor'] as Map;
+          await txn.delete('tb_reading_artifacts',
+              where: 'id = ?', whereArgs: [afterAnchor['id']]);
+          if (anchorBefore is Map) {
+            await txn.insert('tb_reading_artifacts',
+                Map<String, Object?>.from(anchorBefore));
+          } else if (action.bookId != null) {
+            await _recordSyncDeletion(txn, 'artifact',
+                afterAnchor['id'].toString(), action.bookId!, syncDeviceId);
+          }
+        }
+        if (before == null || existed == false) {
           await txn.delete('tb_reading_difficulties',
               where: 'id = ?', whereArgs: [action.targetId]);
           if (action.bookId != null) {
@@ -710,12 +1208,111 @@ class ReadingAgentRepository {
                 action.bookId!, syncDeviceId);
           }
         } else {
-          await txn.insert('tb_reading_difficulties',
-              Map<String, Object?>.from(action.beforeSnapshot!),
+          await txn.insert(
+              'tb_reading_difficulties', Map<String, Object?>.from(before),
               conflictAlgorithm: ConflictAlgorithm.replace);
         }
         return;
       case AgentActionType.memory:
+        final closure = action.beforeSnapshot?['chapterClosure'];
+        if (closure is Map) {
+          final before = action.beforeSnapshot!;
+          for (final entry in _closureTables.entries) {
+            final id = closure[entry.key];
+            if (id == null) continue;
+            await txn.delete(entry.value, where: 'id = ?', whereArgs: [id]);
+            final row = before[entry.key];
+            if (row is Map) {
+              await txn.insert(entry.value, Map<String, Object?>.from(row));
+            } else if (action.bookId != null) {
+              await _recordSyncDeletion(
+                  txn,
+                  entry.key == 'card' ? 'knowledgeCard' : entry.key,
+                  id.toString(),
+                  action.bookId!,
+                  syncDeviceId);
+            }
+          }
+          final ids = closure['anchors'] as List;
+          final anchors = before['anchors'] as List;
+          for (var index = 0; index < ids.length; index++) {
+            await txn.delete('tb_reading_artifacts',
+                where: 'id = ?', whereArgs: [ids[index]]);
+            final row = anchors[index];
+            if (row is Map) {
+              await txn.insert(
+                  'tb_reading_artifacts', Map<String, Object?>.from(row));
+            } else if (action.bookId != null) {
+              await _recordSyncDeletion(txn, 'artifact', ids[index].toString(),
+                  action.bookId!, syncDeviceId);
+            }
+          }
+          return;
+        }
+        final memoryBook = action.beforeSnapshot?['practiceMemoryBook'];
+        if (memoryBook is int) {
+          await _clearMemoryBook(txn, memoryBook);
+          final rows = action.beforeSnapshot!['rows'] as Map;
+          for (final table in rows.keys) {
+            for (final row in rows[table] as List) {
+              await txn.insert(
+                  table.toString(), Map<String, Object?>.from(row as Map));
+            }
+          }
+          return;
+        }
+        final practice = action.beforeSnapshot?['practice'];
+        if (practice is String) {
+          final kind = ReadingPracticeRecordKind.values.byName(practice);
+          final before = action.beforeSnapshot!;
+          await txn.delete(kind.table,
+              where: '${kind.key} = ?', whereArgs: [action.targetId]);
+          final row = before['row'];
+          if (row is Map) {
+            await txn.insert(kind.table, Map<String, Object?>.from(row));
+          }
+          final reviewId = before['reviewId'];
+          if (reviewId != null) {
+            await txn.delete('tb_reading_card_reviews',
+                where: 'id = ?', whereArgs: [reviewId]);
+            final review = before['review'];
+            if (review is Map) {
+              await txn.insert(
+                  'tb_reading_card_reviews', Map<String, Object?>.from(review));
+            }
+          }
+          if (kind == ReadingPracticeRecordKind.topic) {
+            await txn.delete('tb_reading_note_sources',
+                where: 'source_type = ? AND source_ref = ?',
+                whereArgs: ['memoryTopic', action.targetId]);
+            for (final source in before['noteSources'] as List? ?? const []) {
+              await txn.insert('tb_reading_note_sources',
+                  Map<String, Object?>.from(source as Map));
+            }
+          }
+          if (kind == ReadingPracticeRecordKind.topic ||
+              kind == ReadingPracticeRecordKind.card) {
+            final (table, key) = kind == ReadingPracticeRecordKind.topic
+                ? ('tb_reading_topic_sources', 'topic_id')
+                : ('tb_reading_card_sources', 'card_id');
+            await txn
+                .delete(table, where: '$key = ?', whereArgs: [action.targetId]);
+            for (final source in before['sourceIds'] as List? ?? const []) {
+              await txn.insert(table, {
+                key: action.targetId,
+                ...Map<String, Object?>.from(source as Map)
+              });
+            }
+          }
+          return;
+        }
+        final card = action.beforeSnapshot?['knowledgeCard'];
+        if (card is Map) {
+          await txn.insert(
+              'tb_knowledge_cards', Map<String, Object?>.from(card),
+              conflictAlgorithm: ConflictAlgorithm.replace);
+          return;
+        }
         await txn.delete('tb_reading_memory_documents',
             where: 'id = ?', whereArgs: [action.targetId]);
         if (action.beforeSnapshot == null && action.bookId != null) {

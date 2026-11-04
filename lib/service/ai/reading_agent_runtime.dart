@@ -184,6 +184,7 @@ class ReadingAgentRuntimeController extends ChangeNotifier {
 
   Future<void> start({required int bookId, required String bookTitle}) async {
     await finish();
+    _lastSettledKey = null;
     aiContextAssembler.cache.invalidateScope('reading-world:$bookId');
     final now = DateTime.now();
     final sessionId = '$bookId-${now.microsecondsSinceEpoch}';
@@ -249,6 +250,28 @@ class ReadingAgentRuntimeController extends ChangeNotifier {
     };
     _locationTimer?.cancel();
     _locationTimer = Timer(locationDebounce, _settleLocation);
+  }
+
+  /// Captures a user-requested reading context immediately. Ordinary reader
+  /// observations still use [observeLocation]'s debounce; a save or question
+  /// must validate against the location the user actually submitted.
+  void captureRequestLocation({
+    required String cfi,
+    required String chapterHref,
+    required String chapterTitle,
+    required double totalProgress,
+    required double chapterProgress,
+  }) {
+    observeLocation(
+      cfi: cfi,
+      chapterHref: chapterHref,
+      chapterTitle: chapterTitle,
+      totalProgress: totalProgress,
+      chapterProgress: chapterProgress,
+    );
+    _locationTimer?.cancel();
+    _locationTimer = null;
+    _settleLocation();
   }
 
   void observeChapterChanged(
@@ -338,6 +361,12 @@ class ReadingAgentRuntimeController extends ChangeNotifier {
     notifyListeners();
   }
 
+  void checkpointReopened() {
+    _state = _state.copyWith(
+        pendingCheckpointCount: _state.pendingCheckpointCount + 1);
+    notifyListeners();
+  }
+
   void knowledgeCardReviewed() {
     if (_state.dueKnowledgeCardCount == 0) return;
     _state = _state.copyWith(
@@ -345,10 +374,24 @@ class ReadingAgentRuntimeController extends ChangeNotifier {
     notifyListeners();
   }
 
+  void knowledgeCardReviewUndone() {
+    _state = _state.copyWith(
+      dueKnowledgeCardCount: _state.dueKnowledgeCardCount + 1,
+    );
+    notifyListeners();
+  }
+
   void difficultyResolved() {
     if (_state.unresolvedDifficultyCount == 0) return;
     _state = _state.copyWith(
         unresolvedDifficultyCount: _state.unresolvedDifficultyCount - 1);
+    notifyListeners();
+  }
+
+  void difficultyReopened() {
+    _state = _state.copyWith(
+      unresolvedDifficultyCount: _state.unresolvedDifficultyCount + 1,
+    );
     notifyListeners();
   }
 
@@ -550,6 +593,9 @@ class ReaderCommandGateway {
     _navigateToCfi!(target);
     return true;
   }
+
+  bool canReturnToPreviousLocation({required int bookId}) =>
+      bookId == _bookId && _returnCfi != null && _navigateToCfi != null;
 
   void _rememberReturnPosition() {
     _returnCfi ??= _currentCfi?.call();
