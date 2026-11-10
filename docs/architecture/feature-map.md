@@ -14,6 +14,27 @@ namespaced string ID（`story.*`、`stage.*`、`relation.*`）；旧短 ID 在�
 按书籍特征选择案件线、家庭线、历史线、科幻世界观线或人物成长线；对应轨道尚无数据时，
 时间线安全回退为全部故事线。
 
+## 阅读选区交互更新（2026-11）
+
+- `Prefs.swipeToTurnPage` 默认 false，与翻页动画分离；配置经 `configureSelection`
+  传入 renderer，由既有 `SelectionRangeController` 仲裁滑动选句/翻页。连续滚动的
+  纵向滚动及原长按偏好保留；音量键默认翻页，用户明确禁用仍生效。
+- `SelectionRangeController` 是 DOM 范围权威；快照包含 session/revision、端点/跨页能力
+  与可验证的当前可见页进度。显式命令调整端点、延伸/撤回、显示末尾和 CFI 恢复。
+  原生折叠、迟到词边界和跨页回调不得覆盖更新的会话。普通阅读输入零模型调用。
+- `AiWorkspaceController` 持有选区工具和临时结果子页；同一 Overlay 就地更新，
+  `ReadingWorkspaceHost` 保留原 AI/本书子树。`SelectionPanel` 只渲染冻结来源。
+- `ReadingLookupRouter` 先 offlineOnly；网络/翻译/发音由明确动作授权。选区范围
+  不依赖联网状态，字典 HTML 结果不加载外部图片、样式或音频。
+- 手动标记经 `AgentActionService.saveManualAnnotation/deleteManualAnnotation` 和
+  既有事务/动作日志写入，原生批注与 source/user 笔记投影原子保存；相同 CFI 去重，
+  版本冲突拒绝撤销，删除保留独立笔记。没有新增业务表、同步类型或格式。
+- 选区 AI 意图复用已有 SelectionAiAction/Gateway/ContextAssembler/runner，来源冻结，
+  快捷发送保留草稿。无法验证选区终点边界时先通过显式本地导航显示末尾。
+- 回归入口：`node assets/foliate-js/tests/run-selection-browser.cjs`、选区模型/偏好/
+  控制器及 context_menu Widget 测试、批注动作仓库/运行时测试。
+
+
 ## 阅读内 AI 交互收敛（2026-11）
 
 - `ReadingWorkspaceHost` 保持 reader/panel 的 Element 身份，840dp 切换并排与 56%

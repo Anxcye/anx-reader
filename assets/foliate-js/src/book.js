@@ -52,7 +52,7 @@ import './view.js'
 import { FootnoteHandler } from './footnotes.js'
 import { Overlayer } from './overlayer.js'
 import { collapse, compare, fromRange, toRange } from './epubcfi.js'
-import { SelectionRangeController } from './selection-range.js'
+import { SelectionRangeController, createSelectionPageAdapter } from './selection-range.js'
 const { configure, ZipReader, BlobReader, TextWriter, BlobWriter } =
   await import('./vendor/zip.js')
 const { EPUB } = await import('./epub.js')
@@ -127,70 +127,23 @@ const _collapseWhitespace = (text) =>
     ? text.replace(/\s+/g, ' ').trim()
     : '';
 
-const _sliceWithWindow = (text, start, end) => {
-  if (!text) return '';
-  const safeStart = Math.max(0, Math.min(text.length, start));
-  const safeEnd = Math.max(safeStart, Math.min(text.length, end));
-  return text.slice(safeStart, safeEnd);
-};
-
 const buildRangeContextText = (range) => {
   if (!range) return '';
 
-  const selectionText = range.toString().trim();
-  const startNode = range.startContainer;
-  const endNode = range.endContainer;
-  const startText = startNode?.textContent ?? '';
-  const endText = endNode?.textContent ?? '';
-
-  let contextText = '';
-
-  if (startNode === endNode) {
-    const segment = _sliceWithWindow(
-      startText,
-      range.startOffset - CONTEXT_WINDOW_CHARS,
-      range.endOffset + CONTEXT_WINDOW_CHARS
-    );
-    contextText = _collapseWhitespace(segment);
-  } else {
-    const startSegment = _collapseWhitespace(
-      _sliceWithWindow(
-        startText,
-        range.startOffset - CONTEXT_WINDOW_CHARS,
-        range.startOffset + CONTEXT_WINDOW_CHARS
-      )
-    );
-    const endSegment = _collapseWhitespace(
-      _sliceWithWindow(
-        endText,
-        range.endOffset - CONTEXT_WINDOW_CHARS,
-        range.endOffset + CONTEXT_WINDOW_CHARS
-      )
-    );
-    const parts = [
-      startSegment,
-      selectionText,
-      endSegment
-    ].filter(Boolean);
-    contextText = parts.join(' ');
-  }
-
-  if (!contextText && selectionText) {
-    contextText = selectionText;
-  }
-
-  contextText = _collapseWhitespace(contextText);
-
-  if (contextText.length > MAX_CONTEXT_CHARS) {
-    return contextText.slice(0, MAX_CONTEXT_CHARS);
-  }
-
-  return contextText;
+  // A paragraph can continue beyond the visible page. Only include context
+  // before the exact range; nearby following text is not evidence of reading.
+  const preceding = range.cloneRange();
+  preceding.selectNodeContents(range.startContainer);
+  preceding.setEnd(range.startContainer, range.startOffset);
+  const beforeSelection = preceding.toString().slice(-CONTEXT_WINDOW_CHARS);
+  const contextText = _collapseWhitespace(beforeSelection + range.toString());
+  return contextText.slice(0, MAX_CONTEXT_CHARS);
 };
 
 const selectionControllers = new Map()
 let activeSelectionController = null
 let selectionConfiguration = {
+  swipeToTurnPage: false,
   longPressMode: 'word',
   eInkMode: false,
   platform: 'android',
@@ -224,6 +177,7 @@ const handleSelection = (view, doc, index, controller = selectionControllers.get
 
   const contextText = buildRangeContextText(range);
 
+  controller?.recordSelectionReport(range)
   const selectionMeta = controller ? controller.snapshot() : {
     sessionId: 0,
     rangeType: 'custom',
@@ -232,7 +186,6 @@ const handleSelection = (view, doc, index, controller = selectionControllers.get
     canMoveNext: false,
     supportsRangeSelection: false,
   }
-  controller?.recordSelectionReport(range)
   activeSelectionController = controller || null
 
   onSelectionEnd({
@@ -243,79 +196,19 @@ const handleSelection = (view, doc, index, controller = selectionControllers.get
     pos: position,
     text,
     contextText,
+    pointerType: doc.__anxSelectionPointerType || 'unknown',
     ...selectionMeta,
     supportsRangeSelection: selectionMeta.supportsRangeSelection && !doc.__isFootNote,
   });
   return true;
 };
 
-const AUTO_PAGE_DELAY_MS = 1000;
-const AUTO_PAGE_SCREEN_BOTTOM_THRESHOLD = 0.9;
-const AUTO_PAGE_POST_NEXT_RECHECK_INTERVAL_MS = 120;
-const AUTO_PAGE_POST_NEXT_RECHECK_MAX_ATTEMPTS = 12;
-const AUTO_PAGE_POST_NEXT_RECHECK_INITIAL_DELAY_MS = 80;
-
-const getAutoPageState = (view) => {
-  if (!view.__anxAutoPageState) {
-    view.__anxAutoPageState = {
-      sessionId: 0,
-      currentPageKey: null,
-      triggeredPages: new Set(),
-      pendingFromPageKey: null,
-      pendingTimer: null,
-      postNextRecheckTimer: null,
-      postNextRecheckAttempts: 0,
-      awaitingPageAdvanceFromKey: null,
-    };
-  }
-  return view.__anxAutoPageState;
-};
-
-const clearAutoPageTimer = (state) => {
-  if (!state.pendingTimer) return;
-  clearTimeout(state.pendingTimer);
-  state.pendingTimer = null;
-};
-
-const clearAutoPagePostNextRecheck = (state) => {
-  if (!state.postNextRecheckTimer) return;
-  clearTimeout(state.postNextRecheckTimer);
-  state.postNextRecheckTimer = null;
-};
-
-const resetAutoPageSessionState = (state) => {
-  state.currentPageKey = null;
-  state.triggeredPages.clear();
-  state.pendingFromPageKey = null;
-  state.postNextRecheckAttempts = 0;
-  state.awaitingPageAdvanceFromKey = null;
-};
-
-const startAutoPageSession = (view) => {
-  const state = getAutoPageState(view);
-  clearAutoPageTimer(state);
-  clearAutoPagePostNextRecheck(state);
-  state.sessionId += 1;
-  resetAutoPageSessionState(state);
-  return state;
-};
-
-const stopAutoPageSession = (view) => {
-  const state = getAutoPageState(view);
-  clearAutoPageTimer(state);
-  clearAutoPagePostNextRecheck(state);
-  resetAutoPageSessionState(state);
-};
-
-const getAutoPageLocationKey = (lastLocation, index) => {
-  if (!lastLocation) return `index:${index}:none`;
-  const cfi = lastLocation.cfi ?? '';
-  const current = lastLocation.location?.current ?? '';
-  const chapter = lastLocation.chapterLocation?.current ?? '';
-  return `index:${index}|cfi:${cfi}|loc:${current}|chapter:${chapter}`;
-};
+const consumeSelectionNavigation = () => activeSelectionController?.consumeNavigation() || false
 
 const setSelectionHandler = (view, doc, index) => {
+  doc.addEventListener('pointerdown', event => {
+    doc.__anxSelectionPointerType = event.pointerType || 'unknown'
+  }, { capture: true })
   let hasActiveSelection = false;
   let lastPointerUpRange = null;
   doc.__anxSelectionClearedAt = 0;
@@ -325,6 +218,7 @@ const setSelectionHandler = (view, doc, index) => {
     doc,
     index,
     longPressMode: selectionConfiguration.longPressMode,
+    pageAdapter: createSelectionPageAdapter(view, doc, index),
     emitSelection: () => handleSelection(view, doc, index, rangeController),
     requestWordBoundary: payload => {
       activeSelectionController = rangeController
@@ -332,6 +226,7 @@ const setSelectionHandler = (view, doc, index) => {
     },
   })
   selectionControllers.set(doc, rangeController)
+  rangeController.configure(selectionConfiguration)
   rangeController.install()
 
   const isDesktop = navigator.platform.includes('Mac') || navigator.platform.includes('Win')
@@ -359,12 +254,18 @@ const setSelectionHandler = (view, doc, index) => {
       return;
     }
 
+    // Paginator relocation can transiently collapse native selection. An
+    // explicit clear invalidates lastReportedSelection first; only that clear
+    // may end a pending extension or endpoint-navigation session.
+    if (rangeController.extending && rangeController.restoreReportedSelection()) return;
     if (!hasActiveSelection) return;
     hasActiveSelection = false;
     lastPointerUpRange = null;
     doc.__anxSelectionClearedAt = Date.now();
     doc.__anxSuppressClick = true;
-    stopAutoPageSession(view);
+    rangeController.lastReportedSelection = null;
+    rangeController.extensionHistory = [];
+    rangeController.revision += 1;
     callFlutter('onSelectionCleared');
   };
 
@@ -555,144 +456,9 @@ const setSelectionHandler = (view, doc, index) => {
       scheduleAndroidSelection(hasNativeSelectionStarted ? 700 : 500);
     });
   }
-  // doc.addEventListener('selectionchange', () => handleSelection(view, doc, index));
-
-  if (!view.isFixedLayout) {
-    // go to the next page when selecting to the end of a page
-    // this makes it possible to select across pages
-
-    doc.addEventListener('selectstart', () => {
-      const container = view.shadowRoot.querySelector('foliate-paginator').shadowRoot.querySelector("#container");
-      if (!container) return;
-      globalThis.originalScrollLeft = container.scrollLeft;
-      startAutoPageSession(view);
-    });
-
-
-    doc.addEventListener('selectionchange', () => {
-      if (view.renderer.getAttribute('flow') !== 'paginated') return
-      const { lastLocation } = view
-      if (!lastLocation) return
-
-      const selRange = getSelectionRange(doc.getSelection())
-      if (!selRange) return
-      if (!lastLocation.range) return;
-
-      const container = view.shadowRoot.querySelector('foliate-paginator').shadowRoot.querySelector("#container");
-      if (!container) return;
-
-      const state = getAutoPageState(view);
-      if (state.sessionId === 0) {
-        startAutoPageSession(view);
-      }
-
-      const pageKey = getAutoPageLocationKey(lastLocation, index);
-      if (state.currentPageKey !== pageKey) {
-        if (
-          state.awaitingPageAdvanceFromKey
-          && state.awaitingPageAdvanceFromKey !== pageKey
-        ) {
-          state.awaitingPageAdvanceFromKey = null;
-          state.postNextRecheckAttempts = 0;
-          clearAutoPagePostNextRecheck(state);
-        }
-        state.currentPageKey = pageKey;
-      }
-
-      if (state.pendingFromPageKey && state.pendingFromPageKey !== pageKey) {
-        clearAutoPageTimer(state);
-        state.pendingFromPageKey = null;
-      }
-
-      let compareToPageEnd;
-      try {
-        compareToPageEnd = selRange.compareBoundaryPoints(Range.END_TO_END, lastLocation.range);
-      } catch {
-        return;
-      }
-      const rangeReachedPageEnd = compareToPageEnd >= 0;
-      const selectionPos = getPosition(selRange);
-      const nearScreenBottom = selectionPos.bottom >= AUTO_PAGE_SCREEN_BOTTOM_THRESHOLD;
-      const reachedCurrentPageBottom = rangeReachedPageEnd && nearScreenBottom;
-
-      if (!reachedCurrentPageBottom && state.pendingFromPageKey === pageKey) {
-        clearAutoPageTimer(state);
-        state.pendingFromPageKey = null;
-      }
-
-      if (reachedCurrentPageBottom) {
-        if (state.pendingFromPageKey === pageKey) {
-          if (state.pendingTimer) return;
-          state.pendingFromPageKey = null;
-        }
-        if (state.triggeredPages.has(pageKey)) return;
-
-        state.pendingFromPageKey = pageKey;
-        clearAutoPagePostNextRecheck(state);
-        state.awaitingPageAdvanceFromKey = null;
-        state.postNextRecheckAttempts = 0;
-        clearAutoPageTimer(state);
-        const scheduledSessionId = state.sessionId;
-        state.pendingTimer = setTimeout(async () => {
-          state.pendingTimer = null;
-          if (scheduledSessionId !== state.sessionId) return;
-          state.triggeredPages.add(pageKey);
-          try {
-            await view.next();
-            const latestContainer = view.shadowRoot.querySelector('foliate-paginator').shadowRoot.querySelector("#container");
-            if (latestContainer) {
-              globalThis.originalScrollLeft = latestContainer.scrollLeft;
-            }
-          } finally {
-            if (state.pendingFromPageKey === pageKey) {
-              state.pendingFromPageKey = null;
-            }
-            state.awaitingPageAdvanceFromKey = pageKey;
-            state.postNextRecheckAttempts = 0;
-            clearAutoPagePostNextRecheck(state);
-            const runPostNextSelectionRecheck = () => {
-              state.postNextRecheckTimer = null;
-              if (scheduledSessionId !== state.sessionId) return;
-              if (state.awaitingPageAdvanceFromKey !== pageKey) return;
-              state.postNextRecheckAttempts += 1;
-              try {
-                doc.dispatchEvent(new Event('selectionchange'));
-              } catch {
-                return;
-              }
-              if (state.postNextRecheckAttempts >= AUTO_PAGE_POST_NEXT_RECHECK_MAX_ATTEMPTS) return;
-              state.postNextRecheckTimer = setTimeout(
-                runPostNextSelectionRecheck,
-                AUTO_PAGE_POST_NEXT_RECHECK_INTERVAL_MS,
-              );
-            };
-            state.postNextRecheckTimer = setTimeout(
-              runPostNextSelectionRecheck,
-              AUTO_PAGE_POST_NEXT_RECHECK_INITIAL_DELAY_MS,
-            );
-          }
-        }, AUTO_PAGE_DELAY_MS);
-        return;
-      }
-
-      const preventScroll = () => {
-        const selRange = getSelectionRange(doc.getSelection());
-        if (!selRange || !view.lastLocation || !view.lastLocation.range) return;
-
-        if (view.lastLocation.range.startContainer === selRange.endContainer) {
-          container.scrollLeft = globalThis.originalScrollLeft;
-        }
-      };
-
-      container.addEventListener('scroll', preventScroll);
-
-      doc.addEventListener('pointerup', () => {
-        container.removeEventListener('scroll', preventScroll);
-      }, { once: true });
-    })
-
-  }
+  rangeController.installGestureGuard()
 }
+
 const isZip = async file => {
   const arr = new Uint8Array(await file.slice(0, 4).arrayBuffer())
   return arr[0] === 0x50 && arr[1] === 0x4b && arr[2] === 0x03 && arr[3] === 0x04
@@ -1480,6 +1246,9 @@ class Reader {
 
     if (importing) return
 
+    this.view.renderer?.setAttribute?.('swipe-to-turn-page',
+      String(selectionConfiguration.swipeToTurnPage === true))
+
     this.view.addEventListener('load', this.#onLoad.bind(this))
     this.view.addEventListener('relocate', this.#onRelocate.bind(this))
     this.view.addEventListener('click-view', this.#onClickView.bind(this))
@@ -1735,6 +1504,10 @@ class Reader {
 
   #onRelocate({ detail }) {
     const { cfi, fraction, location, tocItem, pageItem, chapterLocation } = detail
+    // Layout may temporarily collapse native selection. Restore its DOM range
+    // without navigating or moving the reader.
+    const controller = selectionControllers.get(this.#doc)
+    if (controller && !controller.extending) controller.restoreReportedSelection()
     const loc = pageItem
       ? `Page ${pageItem.label}`
       : `Loc ${location.current}`
@@ -1910,6 +1683,7 @@ class Reader {
 
 
   #onTouchStart = ({ detail: e }) => {
+    if (getSelectionRange(this.#doc?.getSelection?.())) return;
     if (this.#ignoreTouch()) return;
 
     this.#bookMarkExists = !!document.getElementById('bookmark-icon');
@@ -1924,6 +1698,7 @@ class Reader {
   }
 
   #onTouchMove = ({ detail: e }) => {
+    if (getSelectionRange(this.#doc?.getSelection?.())) return;
     if (this.#ignoreTouch()) return;
 
     const mainView = this.view.shadowRoot.children[0]
@@ -1946,7 +1721,9 @@ class Reader {
   }
 
   #onTouchEnd = ({ detail: e }) => {
+    if (getSelectionRange(this.#doc?.getSelection?.())) return;
     if (this.#ignoreTouch()) {
+      if (!selectionConfiguration.swipeToTurnPage) return;
       if (e.touchState.direction === 'vertical') {
         const renderer = this.view.renderer;
         const scrollTop = renderer.shadowRoot.querySelector('#container').scrollTop;
@@ -2289,9 +2066,9 @@ window.goToCfi = cfi => reader.view.goTo(cfi)
 
 window.goToPercent = percent => reader.view.goToFraction(percent)
 
-window.nextPage = () => reader.view.next()
+window.nextPage = () => consumeSelectionNavigation() || reader.view.next()
 
-window.prevPage = () => reader.view.prev()
+window.prevPage = () => consumeSelectionNavigation() || reader.view.prev()
 
 window.setScroll = () => {
   style.scroll = true
@@ -2329,11 +2106,20 @@ window.showContextMenu = () => {
 
 window.getSelection = () => reader.getSelection()
 
-window.clearSelection = () => reader.view.deselect()
+window.clearSelection = () => {
+  selectionControllers.forEach(controller => {
+    controller.lastReportedSelection = null
+    controller.extensionHistory = []
+    controller.revision += 1
+  })
+  reader.view.deselect()
+}
 
 window.configureSelection = config => {
   selectionConfiguration = { ...selectionConfiguration, ...(config || {}) }
   selectionControllers.forEach(controller => controller.configure(selectionConfiguration))
+  globalThis.reader?.view?.renderer?.setAttribute?.('swipe-to-turn-page',
+    String(selectionConfiguration.swipeToTurnPage === true))
   return true
 }
 
@@ -2365,6 +2151,50 @@ window.moveSelectionSentence = direction => {
 window.moveSelectionCharacter = direction => {
   if (!activeSelectionController) return false
   return activeSelectionController.moveCharacter(Number(direction) < 0 ? -1 : 1)
+}
+
+window.adjustSelectionBoundary = (endpoint, direction, unit = 'character') => {
+  if (endpoint && typeof endpoint === 'object') {
+    const config = endpoint
+    return activeSelectionController?.adjustBoundary(config.endpoint, Number(config.direction), config.unit || 'character') || false
+  }
+  return activeSelectionController?.adjustBoundary(endpoint, Number(direction), unit) || false
+}
+
+window.extendSelectionPage = () => activeSelectionController?.extendPage() || false
+
+window.undoSelectionExtension = () => activeSelectionController?.undoExtension() || false
+
+window.showSelectionEnd = () => activeSelectionController?.showEnd() || false
+
+window.restoreSelection = async cfi => {
+  if (typeof cfi !== 'string' || !cfi.startsWith('epubcfi(')) return false
+  const view = reader.view
+  const previous = activeSelectionController
+  const sessionId = previous?.sessionId || 0
+  const revision = previous?.revision || 0
+  let resolved
+  try { resolved = view.resolveCFI(cfi) } catch (_) { return false }
+  if (!resolved || typeof resolved.anchor !== 'function') return false
+  let content = view.renderer.getContents().find(item => item.index === resolved.index)
+  if (!content) {
+    await view.goTo(cfi)
+    // A new user selection wins over an asynchronous return/rotation restore.
+    if (activeSelectionController !== previous || (previous && previous.sessionId !== sessionId)) return false
+    content = view.renderer.getContents().find(item => item.index === resolved.index)
+  }
+  const controller = content && selectionControllers.get(content.doc)
+  if (!controller) return false
+  let range
+  try { range = resolved.anchor(content.doc) } catch (_) { return false }
+  if (!range || range.collapsed) return false
+  if (controller !== previous) {
+    controller.sessionId = sessionId || controller.sessionId
+    controller.revision = Math.max(controller.revision, revision)
+    controller.rangeType = previous?.rangeType || 'custom'
+  }
+  activeSelectionController = controller
+  return controller.restoreRange(range)
 }
 
 window.applyResolvedWord = result => {

@@ -168,9 +168,6 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
   bool bookmarkExists = false;
   WritingModeEnum writingMode = WritingModeEnum.horizontalTb;
   String? _lastSelectionContextText;
-  BookNote? _selectionAutoMarkNote;
-  int? _selectionAutoMarkSessionId;
-  Future<void> _selectionAutoMarkMutation = Future<void>.value();
   bool _selectionClearLocked = false;
   bool _selectionClearPending = false;
   int _selectionMenuGeneration = 0;
@@ -189,17 +186,19 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
   Timer? _currentPageTranslationTimer;
   bool _webViewReady = false;
   StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
+  String? _lastSelectionPreferences;
+
+  String get _selectionPreferences =>
+      '${Prefs().longPressSelectionMode.name}:${Prefs().swipeToTurnPage}:${Prefs().eInkMode}';
 
   Future<void> configureSelection() async {
     if (!_webViewReady) return;
-    final connectivity = await Connectivity().checkConnectivity();
-    final offline = connectivity.contains(ConnectivityResult.none);
-    final longPressMode =
-        offline ? 'word' : Prefs().longPressSelectionMode.name;
+    final longPressMode = Prefs().longPressSelectionMode.name;
+    _lastSelectionPreferences = _selectionPreferences;
     await webViewController.evaluateJavascript(source: '''
       window.configureSelection && window.configureSelection({
         longPressMode: ${jsonEncode(longPressMode)},
-        offlineDictionaryMode: $offline,
+        swipeToTurnPage: ${Prefs().swipeToTurnPage},
         eInkMode: ${Prefs().eInkMode},
         platform: ${jsonEncode(AnxPlatform.type.name)}
       });
@@ -227,50 +226,47 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
     );
   }
 
-  Future<int?> upsertSelectionAutoMark(SelectionSnapshot snapshot) async {
-    if (!Prefs().autoMarkSelection || !snapshot.supportsRangeSelection) {
-      return null;
-    }
-    int? result;
-    _selectionAutoMarkMutation = _selectionAutoMarkMutation.then((_) async {
-      if (_selectionAutoMarkSessionId != snapshot.sessionId) {
-        _selectionAutoMarkNote = null;
-        _selectionAutoMarkSessionId = snapshot.sessionId;
-      }
-      final previous = _selectionAutoMarkNote;
-      final note = BookNote(
-        id: previous?.id,
-        bookId: widget.book.id,
-        content: snapshot.text,
-        cfi: snapshot.cfi,
-        chapter: chapterTitle,
-        type: previous?.type ?? Prefs().annotationType,
-        color: previous?.color ?? Prefs().annotationColor,
-        createTime: previous?.createTime ?? DateTime.now(),
-        updateTime: DateTime.now(),
-      );
-      try {
-        if (previous != null && previous.cfi != note.cfi) {
-          removeAnnotation(previous.cfi);
-        }
-        final id = await bookNoteDao.save(note);
-        note.setId(id);
-        _selectionAutoMarkNote = note;
-        addAnnotation(note);
-        result = id;
-      } catch (error, stack) {
-        AnxLog.warning('Failed to update temporary auto mark: $error\n$stack');
-        if (previous != null) addAnnotation(previous);
-        result = previous?.id;
-      }
-    });
-    await _selectionAutoMarkMutation;
-    return result;
+  Future<void> adjustSelectionBoundary(
+      String endpoint, int direction, String unit) async {
+    await webViewController.evaluateJavascript(
+        source:
+            'window.adjustSelectionBoundary && window.adjustSelectionBoundary(${jsonEncode(endpoint)}, ${direction < 0 ? -1 : 1}, ${jsonEncode(unit)});');
   }
 
-  void finalizeSelectionAutoMark() {
-    _selectionAutoMarkNote = null;
-    _selectionAutoMarkSessionId = null;
+  Future<void> extendSelectionPage() async {
+    await webViewController.evaluateJavascript(
+        source: 'window.extendSelectionPage && window.extendSelectionPage();');
+  }
+
+  Future<void> undoSelectionExtension() async {
+    await webViewController.evaluateJavascript(
+        source:
+            'window.undoSelectionExtension && window.undoSelectionExtension();');
+  }
+
+  Future<void> restoreSelection(String cfi) async {
+    _selectionClearPending = false;
+    _selectionClearLocked = false;
+    await webViewController.evaluateJavascript(
+        source:
+            'window.restoreSelection && window.restoreSelection(${jsonEncode(cfi)});');
+  }
+
+  Future<void> showSelectionEnd() async {
+    await webViewController.evaluateJavascript(
+        source: 'window.showSelectionEnd && window.showSelectionEnd();');
+  }
+
+  void clearReaderSelection() {
+    _selectionClearLocked = false;
+    _selectionClearPending = false;
+    _selectionMenuGeneration++;
+    widget.onSelectionCleared?.call();
+    removeOverlay();
+    if (_webViewReady) {
+      unawaited(
+          webViewController.evaluateJavascript(source: 'clearSelection()'));
+    }
   }
 
   late bool _lastEInkMode;
@@ -284,11 +280,25 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
   bool get _isTopOfNavigationStack =>
       ModalRoute.of(context)?.isCurrent ?? false;
 
+  bool _consumeSelectionPageTurn() {
+    final workspace = readingPageKey.currentState?.aiWorkspaceController;
+    if (workspace?.selectionPanelPage != null) return true;
+    if (workspace?.selectionDockVisible == true) {
+      clearReaderSelection();
+      return true;
+    }
+    return false;
+  }
+
   void prevPage() {
+    if (_consumeSelectionPageTurn()) return;
+    readingPageKey.currentState?.aiWorkspaceController.clearSelectionUndo();
     webViewController.evaluateJavascript(source: 'prevPage()');
   }
 
   void nextPage() {
+    if (_consumeSelectionPageTurn()) return;
+    readingPageKey.currentState?.aiWorkspaceController.clearSelectionUndo();
     webViewController.evaluateJavascript(source: 'nextPage()');
   }
 
@@ -368,6 +378,9 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
   }
 
   void _handleTranslationPrefsChanged() {
+    if (_lastSelectionPreferences != _selectionPreferences) {
+      unawaited(configureSelection());
+    }
     final nextEInkMode = Prefs().isEInkMode;
     if (nextEInkMode != _lastEInkMode) {
       _lastEInkMode = nextEInkMode;
@@ -911,10 +924,8 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
 
   void onClick(Map<String, dynamic> location) {
     readingPageKey.currentState?.resetAwakeTimer();
-    if (contextMenuEntry != null) {
-      removeOverlay();
-      return;
-    }
+    if (_consumeSelectionPageTurn()) return;
+    readingPageKey.currentState?.aiWorkspaceController.clearSelectionUndo();
     final x = location['x'];
     final y = location['y'];
     final part = coordinatesToPart(x, y);
@@ -1162,31 +1173,13 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
         handlerName: 'onSelectionEnd',
         callback: (args) async {
           final menuGeneration = ++_selectionMenuGeneration;
-          removeOverlay(preserveAutoMarkSession: true);
           if (args.isEmpty || args.first is! Map) {
             AnxLog.warning('Selection menu ignored: invalid WebView payload');
             return;
           }
           final location = Map<String, dynamic>.from(args.first as Map);
           final snapshot = SelectionSnapshot.fromJson(location);
-          final offline = (await Connectivity().checkConnectivity())
-              .contains(ConnectivityResult.none);
           if (!mounted || menuGeneration != _selectionMenuGeneration) return;
-          // If preferences request sentence/paragraph selection, disconnected
-          // lookup still uses the exact touch unit. Re-select as a word; the
-          // resulting callback opens one menu only.
-          if (offline &&
-              (snapshot.rangeType == SelectionRangeType.sentence ||
-                  snapshot.rangeType == SelectionRangeType.paragraph)) {
-            await webViewController.evaluateJavascript(
-              source: '''
-                window.configureSelection && window.configureSelection({offlineDictionaryMode: true});
-                (window.selectOfflineDictionaryAtLastTouch && window.selectOfflineDictionaryAtLastTouch()) ||
-                  (window.changeSelectionRange && window.changeSelectionRange('word'));
-              ''',
-            );
-            return;
-          }
           final cfi = snapshot.cfi;
           final text = snapshot.text;
           final footnote = location['footnote'] == true;
@@ -1222,7 +1215,6 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
               writingMode.isVertical ? Axis.vertical : Axis.horizontal,
               contextText: _lastSelectionContextText,
               selectionSnapshot: snapshot,
-              offlineDictionaryMode: offline,
               isCurrentRequest: () =>
                   mounted && menuGeneration == _selectionMenuGeneration,
             ).catchError((Object error, StackTrace stack) {
@@ -1726,10 +1718,9 @@ class EpubPlayerState extends ConsumerState<EpubPlayer>
     });
   }
 
-  void removeOverlay({bool preserveAutoMarkSession = false}) {
+  void removeOverlay() {
     _selectionClearLocked = false;
     _selectionClearPending = false;
-    if (!preserveAutoMarkSession) finalizeSelectionAutoMark();
     if (contextMenuEntry == null || contextMenuEntry?.mounted == false) return;
     contextMenuEntry?.remove();
     contextMenuEntry = null;

@@ -14,6 +14,9 @@ Future<void> showSelectionMenuSettingsDialog(BuildContext context) async {
         String label(SelectionMenuAction action) {
           final l10n = L10n.of(context);
           return switch (action) {
+            SelectionMenuAction.highlight => l10n.selectionHighlight,
+            SelectionMenuAction.bringToQuestion =>
+              l10n.selectionBringToQuestion,
             SelectionMenuAction.lookupOrTranslate =>
               l10n.selectionMenuLookupOrTranslate,
             SelectionMenuAction.addToVocabulary =>

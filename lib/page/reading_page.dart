@@ -1,4 +1,12 @@
 import 'dart:async';
+
+import 'package:anx_reader/enums/selection_menu_action.dart';
+import 'package:anx_reader/service/tts/tts_handler.dart';
+import 'package:anx_reader/service/vocabulary_capture_service.dart';
+import 'package:anx_reader/widgets/book_share/excerpt_share_service.dart';
+import 'package:anx_reader/widgets/context_menu/selection_panel.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'dart:math' as math;
 
 import 'package:anx_reader/config/shared_preference_provider.dart';
@@ -530,16 +538,59 @@ class ReadingPageState extends ConsumerState<ReadingPage>
   //   }
   // }
 
+  final Set<PhysicalKeyboardKey> _consumedSelectionKeys = {};
+
   KeyEventResult _handleReaderKeyEvent(FocusNode node, KeyEvent event) {
+    if (_consumedSelectionKeys.contains(event.physicalKey)) {
+      if (event is KeyUpEvent) _consumedSelectionKeys.remove(event.physicalKey);
+      return KeyEventResult.handled;
+    }
     if (!_readerFocusNode.hasFocus) {
       return KeyEventResult.ignored;
     }
 
+    final logicalKey = event.logicalKey;
+    final volumeUp = event.physicalKey == PhysicalKeyboardKey.audioVolumeUp ||
+        logicalKey == LogicalKeyboardKey.audioVolumeUp;
+    final volumeDown =
+        event.physicalKey == PhysicalKeyboardKey.audioVolumeDown ||
+            logicalKey == LogicalKeyboardKey.audioVolumeDown;
     if (event is! KeyDownEvent) {
+      return Prefs().volumeKeyTurnPage && (volumeUp || volumeDown)
+          ? KeyEventResult.handled
+          : KeyEventResult.ignored;
+    }
+    if (HardwareKeyboard.instance.isShiftPressed &&
+        aiWorkspaceController.selectionDockVisible &&
+        {
+          LogicalKeyboardKey.arrowLeft,
+          LogicalKeyboardKey.arrowRight,
+          LogicalKeyboardKey.arrowUp,
+          LogicalKeyboardKey.arrowDown
+        }.contains(logicalKey)) {
       return KeyEventResult.ignored;
     }
-
-    final logicalKey = event.logicalKey;
+    final pagingKey = {
+          LogicalKeyboardKey.arrowRight,
+          LogicalKeyboardKey.arrowDown,
+          LogicalKeyboardKey.pageDown,
+          LogicalKeyboardKey.space,
+          LogicalKeyboardKey.arrowLeft,
+          LogicalKeyboardKey.arrowUp,
+          LogicalKeyboardKey.pageUp,
+        }.contains(logicalKey) ||
+        (Prefs().volumeKeyTurnPage && (volumeUp || volumeDown));
+    if (pagingKey && aiWorkspaceController.selectionDockVisible) {
+      _consumedSelectionKeys.add(event.physicalKey);
+      epubPlayerKey.currentState?.clearReaderSelection();
+      return KeyEventResult.handled;
+    }
+    if (logicalKey == LogicalKeyboardKey.escape &&
+        (aiWorkspaceController.selection != null ||
+            aiWorkspaceController.visible)) {
+      _dismissTopReadingHelp();
+      return KeyEventResult.handled;
+    }
 
     if (logicalKey == LogicalKeyboardKey.arrowRight ||
         logicalKey == LogicalKeyboardKey.arrowDown ||
@@ -585,11 +636,11 @@ class ReadingPageState extends ConsumerState<ReadingPage>
     }
 
     if (Prefs().volumeKeyTurnPage) {
-      if (event.physicalKey == PhysicalKeyboardKey.audioVolumeUp) {
+      if (volumeUp) {
         epubPlayerKey.currentState?.prevPage();
         return KeyEventResult.handled;
       }
-      if (event.physicalKey == PhysicalKeyboardKey.audioVolumeDown) {
+      if (volumeDown) {
         epubPlayerKey.currentState?.nextPage();
         return KeyEventResult.handled;
       }
@@ -1092,10 +1143,11 @@ class ReadingPageState extends ConsumerState<ReadingPage>
     ];
   }
 
-  Future<void> showAiChat({
+  Future<bool> showAiChat({
     String? content,
     bool sendImmediate = false,
     ReadingContextSnapshot? selection,
+    bool Function()? isCurrent,
   }) async {
     final workspaceContext = context;
     final shouldShowFullscreen = !_usesAiSplitLayout(workspaceContext);
@@ -1104,7 +1156,7 @@ class ReadingPageState extends ConsumerState<ReadingPage>
     } catch (_) {
       // Reading help remains usable; sourced writes reject an absent session.
     }
-    if (!mounted) return;
+    if (!mounted || isCurrent?.call() == false) return false;
     ref.read(aiChatProvider.notifier).ensureBookScope(_book.id);
     aiWorkspaceController.switchSurface(AiWorkspaceSurface.assistant);
 
@@ -1130,6 +1182,360 @@ class ReadingPageState extends ConsumerState<ReadingPage>
       WidgetsBinding.instance.addPostFrameCallback((_) {
         aiChatKey.currentState?.sendPrompt(content);
       });
+    }
+    return true;
+  }
+
+  bool get selectionAiGenerating =>
+      aiChatKey.currentState?.isGenerating ?? false;
+
+  void finishSelection() {
+    epubPlayerKey.currentState?.clearReaderSelection();
+    aiWorkspaceController.dismissSelectionPanel();
+    aiWorkspaceController.hide();
+    FocusManager.instance.primaryFocus?.unfocus();
+  }
+
+  Future<void> openSelectionPanel(
+    SelectionPanelPage page, {
+    SelectionSnapshot? target,
+    int? annotationId,
+  }) async {
+    final source = target ??
+        aiWorkspaceController.selectionTarget ??
+        aiWorkspaceController.selection;
+    if (source == null) return;
+    final id = target != null
+        ? annotationId
+        : aiWorkspaceController.selectionTargetAnnotationId ??
+            aiWorkspaceController.selectionAnnotationId;
+    final player = epubPlayerKey.currentState;
+    final sameTarget = aiWorkspaceController.selectionTarget == source;
+    final chapter = sameTarget
+        ? aiWorkspaceController.selectionTargetChapterTitle
+        : player?.chapterTitle ?? '';
+    final href = sameTarget
+        ? aiWorkspaceController.selectionTargetChapterHref
+        : player?.chapterHref ?? '';
+    epubPlayerKey.currentState?.setSelectionClearLocked(true);
+    aiWorkspaceController.selectionOffline = true;
+    aiWorkspaceController.selectionTargetChapterTitle = chapter;
+    aiWorkspaceController.selectionTargetChapterHref = href;
+    aiWorkspaceController.openSelectionPanel(page,
+        target: source, annotationId: id);
+    final revision = aiWorkspaceController.selectionPanelRevision;
+    final operationFailed = L10n.of(context).selectionOperationFailed;
+    bool stillCurrent() =>
+        mounted &&
+        aiWorkspaceController.selectionPanelRevision == revision &&
+        aiWorkspaceController.selectionTarget == source &&
+        aiWorkspaceController.selectionPanelPage == page;
+    if (page == SelectionPanelPage.lookup) {
+      try {
+        final offline = (await Connectivity().checkConnectivity())
+            .contains(ConnectivityResult.none);
+        if (!stillCurrent()) return;
+        aiWorkspaceController.selectionOffline = offline;
+        aiWorkspaceController.setSelectionFeedback();
+      } catch (_) {
+        // Local help remains available without connectivity status.
+      }
+    }
+    if (id != null &&
+        (page == SelectionPanelPage.note || page == SelectionPanelPage.style)) {
+      aiWorkspaceController.setSelectionFeedback(busy: true);
+      try {
+        await _ensureReadingSession();
+        if (!stillCurrent()) return;
+        final note = await AgentActionService().readAnnotation(id);
+        if (!stillCurrent()) return;
+        if (note == null || note.bookId != _book.id) {
+          throw StateError('Annotation unavailable');
+        }
+        aiWorkspaceController.selectionEditingAnnotation = note;
+        aiWorkspaceController.selectionNoteDraft = note.readerNote ?? '';
+        aiWorkspaceController.setSelectionFeedback();
+      } catch (_) {
+        if (stillCurrent()) {
+          aiWorkspaceController.setSelectionFeedback(error: operationFailed);
+        }
+      }
+    }
+  }
+
+  ReadingContextSnapshot _selectionContext(SelectionSnapshot source) {
+    final player = epubPlayerKey.currentState;
+    return ReadingContextSnapshot(
+      bookId: _book.id.toString(),
+      bookTitle: _book.title,
+      author: _book.author,
+      chapterTitle: aiWorkspaceController.selectionTarget == source
+          ? aiWorkspaceController.selectionTargetChapterTitle
+          : player?.chapterTitle,
+      chapterHref: aiWorkspaceController.selectionTarget == source
+          ? aiWorkspaceController.selectionTargetChapterHref
+          : player?.chapterHref,
+      selectedText: source.text,
+      surroundingText: source.contextText,
+      progress: source.visibleFromProgress ?? player?.percentage,
+      capturedAt: DateTime.now().millisecondsSinceEpoch,
+      metadata: {
+        'cfi': source.cfi,
+        'selectionSessionId': source.sessionId,
+        'selectionRevision': source.revision
+      },
+    );
+  }
+
+  bool _selectionWithinVisibleBoundary(SelectionSnapshot source) {
+    if (source.revision > 0 && source.sourceProgress == null) {
+      aiWorkspaceController.setSelectionFeedback(
+          error: L10n.of(context).selectionShowEndFirst);
+      return false;
+    }
+    return true;
+  }
+
+  Future<void> handleSelectionAction(SelectionMenuAction action) async {
+    final source = aiWorkspaceController.selectionTarget ??
+        aiWorkspaceController.selection;
+    if (source == null || aiWorkspaceController.selectionBusy) return;
+    final targetId = aiWorkspaceController.selectionTarget != null
+        ? aiWorkspaceController.selectionTargetAnnotationId
+        : aiWorkspaceController.selectionAnnotationId;
+    switch (action) {
+      case SelectionMenuAction.highlight:
+        await _saveSelectionAnnotation(source: source, annotationId: targetId);
+      case SelectionMenuAction.lookupOrTranslate:
+        await openSelectionPanel(SelectionPanelPage.lookup,
+            target: source, annotationId: targetId);
+      case SelectionMenuAction.ai:
+      case SelectionMenuAction.bringToQuestion:
+        if (!_selectionWithinVisibleBoundary(source)) return;
+        final snapshot = _selectionContext(source);
+        final revision = aiWorkspaceController.selectionPanelRevision;
+        bool stillCurrent() =>
+            mounted &&
+            aiWorkspaceController.selectionPanelRevision == revision &&
+            (aiWorkspaceController.selectionTarget ??
+                    aiWorkspaceController.selection) ==
+                source;
+        if (action == SelectionMenuAction.ai && selectionAiGenerating) {
+          // The invoking button explicitly says Stop and explain selection.
+          aiChatKey.currentState?.stopGenerating();
+        }
+        epubPlayerKey.currentState?.setSelectionClearLocked(true);
+        aiWorkspaceController.selectionDockVisible = false;
+        final opened =
+            await showAiChat(selection: snapshot, isCurrent: stillCurrent);
+        if (!mounted || !opened) return;
+        if (action == SelectionMenuAction.ai) {
+          aiWorkspaceController.requestSelectionAction(
+              snapshot, SelectionAiAction.explain);
+        }
+      case SelectionMenuAction.note:
+        await openSelectionPanel(SelectionPanelPage.note,
+            target: source, annotationId: targetId);
+      case SelectionMenuAction.copy:
+        await Clipboard.setData(ClipboardData(text: source.text));
+        finishSelection();
+      case SelectionMenuAction.webSearch:
+        await openSelectionPanel(SelectionPanelPage.search,
+            target: source, annotationId: targetId);
+      case SelectionMenuAction.paragraphTranslate:
+        if (!_selectionWithinVisibleBoundary(source)) return;
+        await openSelectionPanel(SelectionPanelPage.lookup,
+            target: source, annotationId: targetId);
+      case SelectionMenuAction.saveDifficulty:
+        if (!_selectionWithinVisibleBoundary(source)) return;
+        await saveReadingDifficulty(_selectionContext(source));
+        if (mounted) finishSelection();
+      case SelectionMenuAction.addToVocabulary:
+        aiWorkspaceController.setSelectionFeedback(busy: true);
+        try {
+          // Capturing the already selected word does not authorize enrichment.
+          await VocabularyCaptureService.captureQuick(
+            word: source.text,
+            bookId: _book.id.toString(),
+            bookTitle: _book.title,
+            chapterId: epubPlayerKey.currentState?.chapterHref,
+            chapterTitle: epubPlayerKey.currentState?.chapterTitle,
+            contextText: source.contextText,
+            position: source.cfi,
+            dictionaryLookup: (_) async => null,
+            translateLookup: (_, {contextText}) async => '',
+          );
+          if (mounted) finishSelection();
+        } catch (_) {
+          if (mounted) {
+            aiWorkspaceController.setSelectionFeedback(
+                error: L10n.of(context).selectionOperationFailed);
+          }
+        } finally {
+          if (mounted) {
+            aiWorkspaceController.setSelectionFeedback(
+                error: aiWorkspaceController.selectionError);
+          }
+        }
+      case SelectionMenuAction.narrate:
+        final player = epubPlayerKey.currentState;
+        if (player == null) return;
+        try {
+          await audioHandler.stop();
+          await TtsHandler().init(() => player.initTts(fromCfi: source.cfi),
+              player.ttsNext, player.ttsPrev);
+          await audioHandler.play();
+          if (mounted) finishSelection();
+        } catch (_) {
+          if (mounted) {
+            aiWorkspaceController.setSelectionFeedback(
+                error: L10n.of(context).selectionOperationFailed);
+          }
+        }
+      case SelectionMenuAction.share:
+        final chapter = epubPlayerKey.currentState?.chapterTitle;
+        finishSelection();
+        if (!mounted) return;
+        await ExcerptShareService.showShareExcerpt(
+            context: context,
+            bookTitle: _book.title,
+            author: _book.author,
+            excerpt: source.text,
+            chapter: chapter ?? '');
+    }
+  }
+
+  Future<void> _saveSelectionAnnotation(
+      {SelectionSnapshot? source,
+      int? annotationId,
+      bool delete = false}) async {
+    source ??= aiWorkspaceController.selectionTarget ??
+        aiWorkspaceController.selection;
+    if (source == null ||
+        aiWorkspaceController.selectionBusy ||
+        !_selectionWithinVisibleBoundary(source)) {
+      return;
+    }
+    final snapshot = source;
+    final id = annotationId ??
+        aiWorkspaceController.selectionTargetAnnotationId ??
+        aiWorkspaceController.selectionAnnotationId;
+    final editor = aiWorkspaceController.selectionEditingAnnotation;
+    if (id != null &&
+        (aiWorkspaceController.selectionPanelPage == SelectionPanelPage.note ||
+            aiWorkspaceController.selectionPanelPage ==
+                SelectionPanelPage.style) &&
+        editor == null) {
+      aiWorkspaceController.setSelectionFeedback(
+          error: L10n.of(context).selectionOperationFailed);
+      return;
+    }
+    final chapter = aiWorkspaceController.selectionTarget == snapshot
+        ? aiWorkspaceController.selectionTargetChapterTitle
+        : epubPlayerKey.currentState?.chapterTitle ?? '';
+    final href = aiWorkspaceController.selectionTarget == snapshot
+        ? aiWorkspaceController.selectionTargetChapterHref
+        : epubPlayerKey.currentState?.chapterHref;
+    final type = aiWorkspaceController.selectionStyleType ??
+        editor?.type ??
+        Prefs().annotationType;
+    final color = aiWorkspaceController.selectionStyleColor ??
+        editor?.color ??
+        Prefs().annotationColor;
+    final body =
+        aiWorkspaceController.selectionPanelPage == SelectionPanelPage.note
+            ? aiWorkspaceController.selectionNoteDraft
+            : null;
+    aiWorkspaceController.setSelectionFeedback(busy: true);
+    try {
+      await _ensureReadingSession();
+      if (!mounted) return;
+      final service = AgentActionService();
+      final mutation = delete && id != null
+          ? await service.deleteManualAnnotation(
+              bookId: _book.id,
+              annotationId: id,
+              expectedUpdatedAt: editor?.updateTime)
+          : await service.saveManualAnnotation(
+              bookId: _book.id,
+              text: snapshot.text,
+              cfi: snapshot.cfi,
+              chapter: chapter,
+              chapterHref: href,
+              color: color,
+              type: type,
+              readerNote: body,
+              annotationId: id,
+              sourceProgress:
+                  snapshot.sourceProgress ?? _visibleReadingProgress,
+              visibleFromProgress:
+                  snapshot.visibleFromProgress ?? _visibleReadingProgress,
+              expectedUpdatedAt: editor?.updateTime);
+      if (!mounted) return;
+      if (!delete) {
+        Prefs().annotationType = type;
+        Prefs().annotationColor = color;
+      }
+      if (aiWorkspaceController.selection?.sessionId == snapshot.sessionId &&
+          aiWorkspaceController.selection?.revision == snapshot.revision) {
+        finishSelection();
+      }
+      aiWorkspaceController.setSelectionFeedback();
+      aiWorkspaceController.setSelectionUndo(() async {
+        if (aiWorkspaceController.selectionBusy) return;
+        aiWorkspaceController.setSelectionFeedback(busy: true);
+        try {
+          final result = await service.undo(mutation.action);
+          if (!mounted) return;
+          if (result == UndoResult.undone ||
+              result == UndoResult.alreadyUndone) {
+            aiWorkspaceController.clearSelectionUndo();
+          } else {
+            aiWorkspaceController.selectionUndoFailed = true;
+          }
+          _bookMaterials = _loadBookMaterials();
+        } catch (_) {
+          if (mounted) aiWorkspaceController.selectionUndoFailed = true;
+        } finally {
+          if (mounted) aiWorkspaceController.setSelectionFeedback();
+        }
+      });
+      _bookMaterials = _loadBookMaterials();
+    } catch (_) {
+      if (mounted) {
+        aiWorkspaceController.setSelectionFeedback(
+            error: L10n.of(context).selectionOperationFailed);
+      }
+    }
+  }
+
+  void _returnToSelection() {
+    FocusManager.instance.primaryFocus?.unfocus();
+    aiWorkspaceController.returnToSelection();
+    // The DOM may have collapsed while a keyboard/result panel had focus.
+    final selection = aiWorkspaceController.selection;
+    if (selection != null) {
+      epubPlayerKey.currentState?.restoreSelection(selection.cfi);
+    }
+  }
+
+  void _dismissTopReadingHelp() {
+    if (MediaQuery.viewInsetsOf(context).bottom > 0) {
+      FocusManager.instance.primaryFocus?.unfocus();
+    } else if (aiWorkspaceController.selectionPanelPage != null) {
+      if (!aiWorkspaceController.popSelectionPanel()) _returnToSelection();
+    } else if (aiWorkspaceController.selectionDockVisible &&
+        aiWorkspaceController.selectionToolPage != SelectionToolPage.actions) {
+      aiWorkspaceController.setSelectionToolPage(SelectionToolPage.actions);
+    } else if (aiWorkspaceController.visible &&
+        aiWorkspaceController.surface == AiWorkspaceSurface.assistant &&
+        aiWorkspaceController.view != AiWorkspaceView.chat) {
+      aiWorkspaceController.showChat();
+    } else if (aiWorkspaceController.visible &&
+        aiWorkspaceController.selection != null) {
+      _returnToSelection();
+    } else {
+      finishSelection();
     }
   }
 
@@ -2892,27 +3298,41 @@ class ReadingPageState extends ConsumerState<ReadingPage>
         bucket: _workspaceStorage,
         child: Column(children: [
           SizedBox(
-              height: 48,
+              height: Prefs().eInkMode ? 56 : 48,
               child: Row(children: [
                 const SizedBox(width: 8),
-                for (final surface in AiWorkspaceSurface.values)
-                  TextButton(
-                      onPressed: () {
-                        if (surface == AiWorkspaceSurface.assistant) {
-                          unawaited(showAiChat());
-                        } else {
-                          unawaited(_showBookHub());
-                        }
-                      },
-                      style: TextButton.styleFrom(
-                          foregroundColor: aiWorkspaceController.surface ==
-                                  surface
-                              ? Theme.of(context).colorScheme.primary
-                              : Theme.of(context).colorScheme.onSurfaceVariant),
-                      child: Text(surface == AiWorkspaceSurface.assistant
-                          ? 'AI'
-                          : l10n.readingWorkspaceBook)),
-                const Spacer(),
+                if (aiWorkspaceController.selectionPanelPage != null ||
+                    (aiWorkspaceController.selection != null &&
+                        !aiWorkspaceController.selectionDockVisible))
+                  Expanded(
+                      child: TextButton.icon(
+                          onPressed: _returnToSelection,
+                          icon: const Icon(Icons.arrow_back),
+                          label: Text(l10n.selectionReturn)))
+                else
+                  for (final surface in AiWorkspaceSurface.values)
+                    TextButton(
+                        onPressed: () {
+                          if (surface == AiWorkspaceSurface.assistant) {
+                            unawaited(showAiChat());
+                          } else {
+                            unawaited(_showBookHub());
+                          }
+                        },
+                        style: TextButton.styleFrom(
+                            foregroundColor:
+                                aiWorkspaceController.surface == surface
+                                    ? Theme.of(context).colorScheme.primary
+                                    : Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant),
+                        child: Text(surface == AiWorkspaceSurface.assistant
+                            ? 'AI'
+                            : l10n.readingWorkspaceBook)),
+                if (aiWorkspaceController.selectionPanelPage == null &&
+                    (aiWorkspaceController.selection == null ||
+                        aiWorkspaceController.selectionDockVisible))
+                  const Spacer(),
                 if (ReaderCommandGateway.instance
                     .canReturnToPreviousLocation(bookId: _book.id))
                   IconButton(
@@ -2952,19 +3372,44 @@ class ReadingPageState extends ConsumerState<ReadingPage>
                             !aiWorkspaceController.sheetExpanded);
                       }),
                 IconButton(
-                    tooltip: l10n.readingWorkspaceClose,
+                    tooltip: l10n.selectionContinue,
                     icon: const Icon(Icons.close),
-                    onPressed: aiWorkspaceController.hide),
+                    onPressed: finishSelection),
               ])),
           const Divider(height: 1),
           Expanded(
               child: IndexedStack(
-                  index: aiWorkspaceController.surface.index,
+                  index: aiWorkspaceController.selectionPanelPage != null
+                      ? 2
+                      : aiWorkspaceController.surface.index,
                   children: [
                 _buildAiWorkspace(),
                 _bookMaterials == null
                     ? const SizedBox.shrink()
                     : _buildBookDirectory(),
+                SelectionPanel(
+                    controller: aiWorkspaceController,
+                    generating: selectionAiGenerating,
+                    bookTitle: _book.title,
+                    chapterTitle:
+                        aiWorkspaceController.selectionTargetChapterTitle,
+                    chapterHref:
+                        aiWorkspaceController.selectionTargetChapterHref,
+                    offline: aiWorkspaceController.selectionOffline,
+                    onAction: handleSelectionAction,
+                    onSave: () => _saveSelectionAnnotation(),
+                    onDelete: () => _saveSelectionAnnotation(delete: true),
+                    onStyle: () => openSelectionPanel(SelectionPanelPage.style),
+                    onSearch: (engine) async {
+                      final target = aiWorkspaceController.selectionTarget;
+                      if (target == null) return;
+                      await Prefs()
+                          .prefs
+                          .setString('webSearchEngine', engine.code);
+                      await launchUrl(engine.buildSearchUri(target.text),
+                          mode: LaunchMode.externalApplication);
+                      if (mounted) finishSelection();
+                    }),
               ])),
         ]));
   }
@@ -3575,22 +4020,13 @@ class ReadingPageState extends ConsumerState<ReadingPage>
       ),
     );
 
-    final isMobileAiVisible =
-        !_usesAiSplitLayout(context) && aiWorkspaceController.visible;
+    final hasSelection = aiWorkspaceController.selection != null;
+    final hasHelp = aiWorkspaceController.visible;
     return PopScope<void>(
-      canPop: !isMobileAiVisible,
+      canPop: !hasSelection && !hasHelp,
       onPopInvokedWithResult: (didPop, _) {
-        if (!didPop && isMobileAiVisible) {
-          if (MediaQuery.viewInsetsOf(context).bottom > 0) {
-            FocusManager.instance.primaryFocus?.unfocus();
-          } else if (aiWorkspaceController.surface ==
-                  AiWorkspaceSurface.assistant &&
-              aiWorkspaceController.view != AiWorkspaceView.chat) {
-            aiWorkspaceController.showChat();
-          } else {
-            aiWorkspaceController.hide();
-          }
-        }
+        if (didPop) return;
+        _dismissTopReadingHelp();
       },
       child: Scaffold(
         resizeToAvoidBottomInset: false,
@@ -3710,6 +4146,7 @@ class ReadingPageState extends ConsumerState<ReadingPage>
                                   );
                                 },
                                 onSelectionCleared: () {
+                                  aiWorkspaceController.clearReaderSelection();
                                   if (readingAgentRuntime.isActive) {
                                     readingAgentRuntime.selectionCleared();
                                   }
@@ -3721,6 +4158,48 @@ class ReadingPageState extends ConsumerState<ReadingPage>
                       ),
                     ),
                     controller,
+                    if (aiWorkspaceController.selectionUndo != null)
+                      Positioned(
+                          left: 16,
+                          right: 16,
+                          bottom: MediaQuery.paddingOf(context).bottom + 16,
+                          child: PointerInterceptor(
+                              child: Material(
+                            color: Prefs().eInkMode
+                                ? Colors.white
+                                : Theme.of(context).colorScheme.surface,
+                            shape: Border.all(
+                                color: Theme.of(context).colorScheme.onSurface),
+                            child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 4),
+                                child: Row(children: [
+                                  Expanded(
+                                      child: Text(aiWorkspaceController
+                                              .selectionUndoFailed
+                                          ? L10n.of(context)
+                                              .selectionUndoConflict
+                                          : L10n.of(context).selectionSaved)),
+                                  TextButton(
+                                      onPressed: aiWorkspaceController
+                                                  .selectionBusy ||
+                                              aiWorkspaceController
+                                                  .selectionUndoFailed
+                                          ? null
+                                          : aiWorkspaceController.selectionUndo,
+                                      style: TextButton.styleFrom(
+                                          minimumSize: Size(
+                                              48, Prefs().eInkMode ? 56 : 48)),
+                                      child:
+                                          Text(L10n.of(context).selectionUndo)),
+                                  IconButton(
+                                      tooltip: L10n.of(context)
+                                          .readingWorkspaceClose,
+                                      onPressed: aiWorkspaceController
+                                          .clearSelectionUndo,
+                                      icon: const Icon(Icons.close)),
+                                ])),
+                          ))),
                     // TTS floating action button: always in the tree when toolbar
                     // is hidden; TtsFab handles its own show/hide internally so
                     // its State (expanded flag) is never destroyed mid-session.

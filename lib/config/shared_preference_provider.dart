@@ -833,6 +833,8 @@ class Prefs extends ChangeNotifier {
   }
 
   set enabledSelectionMenuActions(Set<SelectionMenuAction> actions) {
+    prefs.setStringList('selectionMenuKnownActions',
+        SelectionMenuAction.values.map((action) => action.name).toList());
     prefs.setStringList(
       'enabledSelectionMenuActions',
       SelectionMenuAction.values
@@ -846,14 +848,23 @@ class Prefs extends ChangeNotifier {
   Set<SelectionMenuAction> get enabledSelectionMenuActions {
     final stored = prefs.getStringList('enabledSelectionMenuActions');
     if (stored == null) return SelectionMenuAction.values.toSet();
+    final known = prefs.getStringList('selectionMenuKnownActions') ??
+        SelectionMenuAction.values
+            .where((action) =>
+                action != SelectionMenuAction.highlight &&
+                action != SelectionMenuAction.bringToQuestion)
+            .map((action) => action.name)
+            .toList();
     return SelectionMenuAction.values
-        .where((action) => stored.contains(action.name))
+        .where((action) =>
+            stored.contains(action.name) || !known.contains(action.name))
         .toSet();
   }
 
   void resetSelectionMenuActions() {
     prefs.remove('selectionMenuActionOrder');
     prefs.remove('enabledSelectionMenuActions');
+    prefs.remove('selectionMenuKnownActions');
     notifyListeners();
   }
 
@@ -1280,8 +1291,15 @@ class Prefs extends ChangeNotifier {
   }
 
   bool get volumeKeyTurnPage {
-    return prefs.getBool('volumeKeyTurnPage') ?? false;
+    return prefs.getBool('volumeKeyTurnPage') ?? true;
   }
+
+  set swipeToTurnPage(bool enabled) {
+    prefs.setBool('swipeToTurnPage', enabled);
+    notifyListeners();
+  }
+
+  bool get swipeToTurnPage => prefs.getBool('swipeToTurnPage') ?? false;
 
   set keyboardShortcutTurnPage(bool status) {
     prefs.setBool('keyboardShortcutTurnPage', status);

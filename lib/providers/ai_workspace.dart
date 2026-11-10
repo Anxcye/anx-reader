@@ -7,10 +7,16 @@ import 'package:anx_reader/service/ai/reading_experience_profile_service.dart';
 import 'package:anx_reader/models/reading_agent.dart';
 import 'package:anx_reader/service/ai/reading_skills.dart';
 import 'package:flutter/foundation.dart';
+import 'package:anx_reader/models/selection_snapshot.dart';
+import 'package:anx_reader/models/book_note.dart';
 
 enum AiWorkspaceView { chat, coach, history, sessionDetail, agentsAndSources }
 
 enum AiWorkspaceSurface { assistant, book }
+
+enum SelectionToolPage { actions, range }
+
+enum SelectionPanelPage { more, lookup, style, note, search }
 
 class AiWorkspaceController extends ChangeNotifier {
   AiWorkspaceController({
@@ -54,6 +60,210 @@ class AiWorkspaceController extends ChangeNotifier {
   double chatScrollOffset = 0;
   bool visible = false;
   bool mobileFullscreen = false;
+
+  SelectionSnapshot? selection;
+  int? selectionAnnotationId;
+  bool selectionFootnote = false;
+  bool selectionDockAtTop = false;
+  bool selectionUsesMouse = false;
+  bool selectionDockVisible = false;
+  SelectionToolPage selectionToolPage = SelectionToolPage.actions;
+  SelectionPanelPage? selectionPanelPage;
+  int selectionPanelRevision = 0;
+  SelectionSnapshot? selectionTarget;
+  int? selectionTargetAnnotationId;
+  String selectionNoteDraft = '';
+  String? selectionStyleType;
+  String? selectionStyleColor;
+  String selectionTargetChapterTitle = '';
+  String selectionTargetChapterHref = '';
+  bool selectionOffline = false;
+  BookNote? selectionEditingAnnotation;
+  String? selectionError;
+  bool selectionBusy = false;
+  String selectionEndpoint = 'end';
+  String selectionUnit = 'character';
+  VoidCallback? selectionUndo;
+  bool selectionUndoFailed = false;
+  SelectionAiAction? _requestedSelectionAction;
+  bool _selectionPreviousVisibility = false;
+  bool _selectionPreviousExpanded = false;
+  final List<SelectionPanelPage> _selectionPanelHistory = [];
+
+  /// Selection updates are local. They never submit a request or persist data.
+  bool updateSelection(
+    SelectionSnapshot value, {
+    int? annotationId,
+    bool footnote = false,
+    bool dockAtTop = false,
+    bool nearbyMenu = false,
+  }) {
+    final previous = selection;
+    if (previous?.sessionId == value.sessionId &&
+        value.revision < previous!.revision) {
+      return false;
+    }
+    final fresh = previous?.sessionId != value.sessionId;
+    if (fresh || previous?.revision != value.revision) {
+      selectionPanelRevision++;
+      selectionBusy = false;
+    }
+    selection = value;
+    selectionAnnotationId =
+        fresh ? annotationId : annotationId ?? selectionAnnotationId;
+    selectionFootnote = footnote;
+    selectionDockVisible = selectionPanelPage == null;
+    if (fresh) {
+      selectionUsesMouse = nearbyMenu;
+      selectionDockAtTop = dockAtTop;
+      selectionToolPage = SelectionToolPage.actions;
+      selectionError = null;
+      if (selectionPanelPage == null) {
+        _selectionPreviousVisibility = visible;
+        _selectionPreviousExpanded = sheetExpanded;
+        selectionEditingAnnotation = null;
+        selectionStyleType = null;
+        selectionStyleColor = null;
+        selectionNoteDraft = '';
+      }
+    }
+    clearSelectionUndo(notify: false);
+    notifyListeners();
+    return true;
+  }
+
+  void clearReaderSelection() {
+    selectionPanelRevision++;
+    selection = null;
+    selectionAnnotationId = null;
+    selectionDockVisible = false;
+    selectionToolPage = SelectionToolPage.actions;
+    if (selectionPanelPage == null) {
+      selectionEditingAnnotation = null;
+      selectionStyleType = null;
+      selectionStyleColor = null;
+      selectionNoteDraft = '';
+    }
+    notifyListeners();
+  }
+
+  void setSelectionToolPage(SelectionToolPage value) {
+    selectionToolPage = value;
+    notifyListeners();
+  }
+
+  void setSelectionRangeOptions({String? endpoint, String? unit}) {
+    selectionEndpoint = endpoint ?? selectionEndpoint;
+    selectionUnit = unit ?? selectionUnit;
+    notifyListeners();
+  }
+
+  void openSelectionPanel(SelectionPanelPage page,
+      {SelectionSnapshot? target, int? annotationId}) {
+    if (target == null && selection == null) return;
+    selectionPanelRevision++;
+    if (selectionPanelPage == null) {
+      _selectionPreviousVisibility = visible;
+      _selectionPreviousExpanded = sheetExpanded;
+      _selectionPanelHistory.clear();
+    } else if (selectionPanelPage != page) {
+      _selectionPanelHistory.add(selectionPanelPage!);
+    }
+    final previousTarget = selectionTarget;
+    selectionTarget = target ?? previousTarget ?? selection;
+    selectionTargetAnnotationId = target != null
+        ? annotationId
+        : previousTarget != null
+            ? selectionTargetAnnotationId
+            : selectionAnnotationId;
+    selectionEditingAnnotation = null;
+    selectionNoteDraft = '';
+    selectionStyleType = null;
+    selectionStyleColor = null;
+    selectionPanelPage = page;
+    selectionDockVisible = false;
+    selectionError = null;
+    visible = true;
+    notifyListeners();
+  }
+
+  bool popSelectionPanel() {
+    if (_selectionPanelHistory.isEmpty) return false;
+    selectionPanelRevision++;
+    selectionPanelPage = _selectionPanelHistory.removeLast();
+    selectionError = null;
+    selectionBusy = false;
+    notifyListeners();
+    return true;
+  }
+
+  void returnToSelection() {
+    selectionPanelRevision++;
+    _selectionPanelHistory.clear();
+    selectionBusy = false;
+    sheetExpanded = _selectionPreviousExpanded;
+    selectionPanelPage = null;
+    selectionTarget = null;
+    selectionTargetAnnotationId = null;
+    visible = _selectionPreviousVisibility;
+    selectionDockVisible = selection != null;
+    selectionError = null;
+    notifyListeners();
+  }
+
+  void dismissSelectionPanel() {
+    selectionPanelRevision++;
+    _selectionPanelHistory.clear();
+    selectionBusy = false;
+    if (selectionPanelPage != null) {
+      sheetExpanded = _selectionPreviousExpanded;
+      selectionPanelPage = null;
+      selectionTarget = null;
+      selectionTargetAnnotationId = null;
+      visible = _selectionPreviousVisibility;
+    }
+    clearReaderSelection();
+  }
+
+  void setSelectionFeedback({bool busy = false, String? error}) {
+    selectionBusy = busy;
+    selectionError = error;
+    notifyListeners();
+  }
+
+  void setSelectionUndo(VoidCallback action) {
+    selectionUndo = action;
+    selectionUndoFailed = false;
+    notifyListeners();
+  }
+
+  void clearSelectionUndo({bool notify = true}) {
+    selectionUndo = null;
+    selectionUndoFailed = false;
+    if (notify) notifyListeners();
+  }
+
+  void requestSelectionAction(
+      ReadingContextSnapshot source, SelectionAiAction action) {
+    pendingSelection = source;
+    lastSelection = source;
+    _requestedSelectionAction = action;
+    selectionDockVisible = false;
+    selectionPanelRevision++;
+    selectionPanelPage = null;
+    selectionTarget = null;
+    selectionTargetAnnotationId = null;
+    surface = AiWorkspaceSurface.assistant;
+    view = AiWorkspaceView.chat;
+    visible = true;
+    notifyListeners();
+  }
+
+  SelectionAiAction? takeRequestedSelectionAction() {
+    final action = _requestedSelectionAction;
+    _requestedSelectionAction = null;
+    return action;
+  }
 
   void show({required bool fullscreen}) {
     visible = true;
@@ -250,6 +460,12 @@ class AiWorkspaceController extends ChangeNotifier {
   }
 
   void setPendingSelection(ReadingContextSnapshot snapshot) {
+    selectionPanelRevision++;
+    selectionPanelPage = null;
+    selectionTarget = null;
+    selectionTargetAnnotationId = null;
+    selectionDockVisible = false;
+    selectionBusy = false;
     pendingSelection = snapshot;
     lastSelection = snapshot;
     surface = AiWorkspaceSurface.assistant;

@@ -32,9 +32,13 @@ class SelectionActionPolicy {
       if (action == SelectionMenuAction.addToVocabulary) {
         return isDictionaryLookup && vocabularyEnabled;
       }
-      if (action == SelectionMenuAction.ai) return aiEnabled;
+      if (action == SelectionMenuAction.ai ||
+          action == SelectionMenuAction.bringToQuestion) {
+        return aiEnabled;
+      }
       if (footnote &&
-          (action == SelectionMenuAction.saveDifficulty ||
+          (action == SelectionMenuAction.highlight ||
+              action == SelectionMenuAction.saveDifficulty ||
               action == SelectionMenuAction.note)) {
         return false;
       }

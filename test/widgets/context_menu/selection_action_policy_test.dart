@@ -3,7 +3,7 @@ import 'package:anx_reader/enums/selection_menu_action.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('word selection prioritizes lookup, vocabulary, and AI', () {
+  test('word selection prioritizes explicit mark, lookup, and explanation', () {
     final policy = SelectionActionPolicy.forSelection(
       'reading',
       aiEnabled: true,
@@ -13,15 +13,17 @@ void main() {
 
     expect(policy.isDictionaryLookup, isTrue);
     expect(policy.primaryActions, [
+      SelectionMenuAction.highlight,
       SelectionMenuAction.lookupOrTranslate,
-      SelectionMenuAction.addToVocabulary,
       SelectionMenuAction.ai,
     ]);
     expect(policy.moreActions, contains(SelectionMenuAction.copy));
     expect(policy.moreActions, contains(SelectionMenuAction.saveDifficulty));
   });
 
-  test('passage selection prioritizes translation, AI, and copy', () {
+  test(
+      'passage selection prioritizes explicit mark, translation, and explanation',
+      () {
     final policy = SelectionActionPolicy.forSelection(
       'A selected sentence with several words.',
       aiEnabled: true,
@@ -31,9 +33,9 @@ void main() {
 
     expect(policy.isDictionaryLookup, isFalse);
     expect(policy.primaryActions, [
+      SelectionMenuAction.highlight,
       SelectionMenuAction.lookupOrTranslate,
       SelectionMenuAction.ai,
-      SelectionMenuAction.copy,
     ]);
   });
 

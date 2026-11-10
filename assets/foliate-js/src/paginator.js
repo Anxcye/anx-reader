@@ -960,6 +960,12 @@ export class Paginator extends HTMLElement {
     })
     this.dispatchEvent(forwarded)
 
+    if (!this.scrolled && this.getAttribute('swipe-to-turn-page') !== 'true' &&
+        globalThis.visualViewport.scale <= 1) {
+      if (e.touches.length === 1) e.preventDefault()
+      return
+    }
+
     if (state.pinched) return
     state.pinched = globalThis.visualViewport.scale > 1
     if (state.pinched) return
@@ -1011,6 +1017,10 @@ export class Paginator extends HTMLElement {
     }))
 
     this.#touchScrolled = false
+    if (!this.scrolled && this.getAttribute('swipe-to-turn-page') !== 'true') {
+      this.#touchState = null
+      return
+    }
     if (this.scrolled) {
       this.#touchState = null
       return

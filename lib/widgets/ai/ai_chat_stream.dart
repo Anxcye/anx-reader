@@ -507,12 +507,17 @@ class AiChatStreamState extends ConsumerState<AiChatStream> {
     inputController.selection = TextSelection.collapsed(offset: text.length);
   }
 
-  bool sendPrompt(String prompt) {
+  bool get isGenerating => _isStreaming;
+
+  bool sendPrompt(String prompt, {bool preserveDraft = false}) {
     if (_isStreaming) return false;
     final previousDraft = inputController.text;
     setDraft(prompt);
     final started = _sendMessage();
-    if (!started) setDraft(previousDraft);
+    if (!started || preserveDraft) {
+      setDraft(previousDraft);
+      widget.onDraftChanged?.call(previousDraft);
+    }
     return started;
   }
 

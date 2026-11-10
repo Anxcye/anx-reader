@@ -601,9 +601,13 @@ class ReaderCommandGateway {
     _returnCfi ??= _currentCfi?.call();
   }
 
-  void showAnnotation(BookNote note) => _addAnnotation?.call(note);
+  void showAnnotation(BookNote note) {
+    if (note.bookId == _bookId) _addAnnotation?.call(note);
+  }
 
-  void hideAnnotation(String key) => _removeAnnotation?.call(key);
+  void hideAnnotation(String key, {int? bookId}) {
+    if (bookId == null || bookId == _bookId) _removeAnnotation?.call(key);
+  }
 
   void showDifficulty({required String id, required String cfi}) =>
       _addDifficultyAnnotation?.call(id: id, cfi: cfi);

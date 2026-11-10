@@ -845,6 +845,12 @@ class ReadingAgentRepository {
       final after = await _noteSnapshot(txn, document.note.id);
       if (annotationId != null) {
         after!['ownedAnnotationId'] = annotationId;
+        // Only annotations created by this transaction are owned by its undo.
+        after['ownedAnnotationCreated'] = ownedAnnotation != null;
+        after['ownedAnnotation'] =
+            await _queryOne(txn, 'tb_notes', 'id = ?', [annotationId]);
+        after['ownedAnnotationDocuments'] =
+            await _annotationDocuments(txn, annotationId);
       }
       final action = _action(
         type: AgentActionType.note,
@@ -858,6 +864,232 @@ class ReadingAgentRepository {
       await _insertAction(txn, action, now);
       return AgentMutation(value: document, action: action);
     });
+  }
+
+  Future<BookNote?> readAnnotation(int id) => _dao.querySingle(
+        'tb_notes',
+        mapper: BookNote.fromDb,
+        where: 'id = ?',
+        whereArgs: [id],
+      );
+
+  Future<BookNote?> annotationAt(int bookId, String cfi) => _dao.querySingle(
+        'tb_notes',
+        mapper: BookNote.fromDb,
+        where: 'book_id = ? AND cfi = ?',
+        whereArgs: [bookId, cfi],
+        orderBy: 'id',
+      );
+
+  /// Manual selections share the existing note action journal. Both the native
+  /// annotation and its source-note projection commit (and undo) atomically.
+  Future<AgentMutation<BookNote>> saveManualAnnotation(
+    BookNote annotation, {
+    required String sessionId,
+    BookNote? expected,
+    String? chapterHref,
+    double? sourceProgress,
+    double? visibleFromProgress,
+    bool updateReaderNote = false,
+  }) =>
+      _dao.write((txn) async {
+        final now = _clock();
+        var originalId = annotation.id;
+        if (originalId == null) {
+          final duplicate = await _queryOne(txn, 'tb_notes',
+              'book_id = ? AND cfi = ?', [annotation.bookId, annotation.cfi]);
+          originalId = duplicate?['id'] as int?;
+        }
+        final before = originalId == null
+            ? null
+            : await _annotationSnapshot(txn, originalId);
+        final original = before?['annotation'];
+        if (originalId != null &&
+            (original is! Map ||
+                original['book_id'] != annotation.bookId ||
+                (annotation.id != null && expected == null) ||
+                (expected != null &&
+                    _hash(original) != _hash(expected.toMap())))) {
+          throw StateError('Annotation changed before saving');
+        }
+        final saved = BookNote.fromDb(annotation.toMap());
+        // Existing selection identity and exact source always belong to the
+        // stored annotation, not to a later selection/menu callback.
+        if (original is Map) {
+          final previous = BookNote.fromDb(Map<String, dynamic>.from(original));
+          saved.id = previous.id;
+          saved.content = previous.content;
+          saved.cfi = previous.cfi;
+          saved.chapter = previous.chapter;
+          saved.createTime = previous.createTime;
+          if (!updateReaderNote) saved.readerNote = previous.readerNote;
+        }
+        saved.id = await txn.insert('tb_notes', saved.toMap(),
+            conflictAlgorithm: ConflictAlgorithm.replace);
+        final documents = await _annotationDocuments(txn, saved.id!);
+        if (documents.isEmpty) {
+          final noteId = _uuid.v4();
+          await _insertDocument(
+              txn,
+              ReadingNoteDocument(
+                note: ReadingNote(
+                    id: noteId,
+                    bookId: saved.bookId,
+                    title: '',
+                    status: ReadingNoteStatus.active,
+                    captureKind: ReadingNoteCaptureKind.highlight,
+                    isFavorite: false,
+                    createdAt: now,
+                    updatedAt: now),
+                blocks: [
+                  ReadingNoteBlock(
+                      id: _uuid.v4(),
+                      noteId: noteId,
+                      type: ReadingNoteBlockType.quote,
+                      content: saved.content,
+                      sortOrder: 0,
+                      origin: ReadingNoteBlockOrigin.source,
+                      createdAt: now,
+                      updatedAt: now),
+                  ReadingNoteBlock(
+                      id: _uuid.v4(),
+                      noteId: noteId,
+                      type: ReadingNoteBlockType.text,
+                      content: saved.readerNote ?? '',
+                      sortOrder: 1,
+                      origin: ReadingNoteBlockOrigin.user,
+                      createdAt: now,
+                      updatedAt: now),
+                ],
+                sources: [
+                  ReadingNoteSource(
+                      noteId: noteId,
+                      type: ReadingNoteSourceType.annotation,
+                      sourceRef: saved.id!.toString(),
+                      chapterHref: chapterHref,
+                      chapterTitle: saved.chapter,
+                      cfi: saved.cfi,
+                      textSnapshot: saved.content,
+                      metadata: {
+                        if (sourceProgress != null)
+                          'sourceProgress': sourceProgress,
+                        if (visibleFromProgress != null)
+                          'visibleFromProgress': visibleFromProgress,
+                      },
+                      createdAt: now),
+                ],
+              ));
+        } else if (updateReaderNote) {
+          for (final document in documents) {
+            final note = document['note'] as Map;
+            final blocks = await txn.query('tb_reading_note_blocks',
+                where: 'note_id = ? AND block_type = ? AND origin = ?',
+                whereArgs: [note['id'], 'text', 'user'],
+                orderBy: 'sort_order, id',
+                limit: 1);
+            if (blocks.isNotEmpty) {
+              await txn.update('tb_reading_note_blocks',
+                  {'content': saved.readerNote ?? '', 'updated_at': now},
+                  where: 'id = ?', whereArgs: [blocks.first['id']]);
+            } else {
+              final last = await txn.rawQuery(
+                  'SELECT MAX(sort_order) AS last_order FROM '
+                  'tb_reading_note_blocks WHERE note_id = ?',
+                  [note['id']]);
+              await txn.insert(
+                  'tb_reading_note_blocks',
+                  ReadingNoteBlock(
+                          id: _uuid.v4(),
+                          noteId: note['id'].toString(),
+                          type: ReadingNoteBlockType.text,
+                          content: saved.readerNote ?? '',
+                          sortOrder:
+                              ((last.first['last_order'] as num?)?.toInt() ??
+                                      -1) +
+                                  1,
+                          origin: ReadingNoteBlockOrigin.user,
+                          createdAt: now,
+                          updatedAt: now)
+                      .toDb());
+            }
+            await txn.update('tb_reading_notes', {'updated_at': now},
+                where: 'id = ?', whereArgs: [note['id']]);
+          }
+        }
+        final after = await _annotationSnapshot(txn, saved.id!);
+        final action = _action(
+            type: AgentActionType.note,
+            targetId: 'annotation:${saved.id}',
+            bookId: saved.bookId,
+            sessionId: sessionId,
+            before: before ??
+                {'annotationId': saved.id, 'annotation': null, 'documents': []},
+            after: after,
+            now: now);
+        await _insertAction(txn, action, now);
+        return AgentMutation(value: saved, action: action);
+      });
+
+  Future<AgentMutation<BookNote>> deleteManualAnnotation(
+    BookNote annotation, {
+    required String sessionId,
+  }) =>
+      _dao.write((txn) async {
+        final id = annotation.id;
+        if (id == null) throw ArgumentError('Annotation requires an id');
+        final before = await _annotationSnapshot(txn, id);
+        if (_hash(before['annotation']) != _hash(annotation.toMap())) {
+          throw StateError('Annotation changed before deletion');
+        }
+        for (final document in before['documents'] as List) {
+          if (!_isOwnedHighlightProjection(
+              Map<String, dynamic>.from(document), annotation)) {
+            continue;
+          }
+          final noteId = (document['note'] as Map)['id'].toString();
+          await _deleteDocument(txn, noteId);
+        }
+        await txn.delete('tb_notes', where: 'id = ?', whereArgs: [id]);
+        final now = _clock();
+        final action = _action(
+            type: AgentActionType.note,
+            targetId: 'annotation:$id',
+            bookId: annotation.bookId,
+            sessionId: sessionId,
+            before: before,
+            after: await _annotationSnapshot(txn, id),
+            now: now);
+        await _insertAction(txn, action, now);
+        return AgentMutation(value: annotation, action: action);
+      });
+
+  bool _isOwnedHighlightProjection(
+      Map<String, dynamic> document, BookNote annotation) {
+    final note = document['note'] as Map;
+    final sources = document['sources'] as List;
+    final blocks = document['blocks'] as List;
+    return (annotation.readerNote?.trim().isEmpty ?? true) &&
+        note['title'] == '' &&
+        note['status'] == 'active' &&
+        note['capture_kind'] == 'highlight' &&
+        note['is_favorite'] == 0 &&
+        (document['tags'] as List).isEmpty &&
+        (document['revisions'] as List).isEmpty &&
+        sources.length == 1 &&
+        sources.single['source_type'] == 'annotation' &&
+        sources.single['source_ref'] == annotation.id.toString() &&
+        blocks.length <= 2 &&
+        blocks.any((block) =>
+            block['block_type'] == 'quote' &&
+            block['origin'] == 'source' &&
+            block['content'] == annotation.content) &&
+        blocks.every((block) =>
+            (block['block_type'] == 'quote' &&
+                block['origin'] == 'source' &&
+                block['content'] == annotation.content) ||
+            (block['block_type'] == 'text' &&
+                block['origin'] == 'user' &&
+                (block['content'] as String).trim().isEmpty));
   }
 
   Future<AgentMutation<ReadingDifficulty>> saveDifficulty(
@@ -1065,9 +1297,53 @@ class ReadingAgentRepository {
         return _queryOne(txn, 'tb_reader_profile_items', 'profile_key = ?',
             [action.targetId]);
       case AgentActionType.note:
+        final annotationId = action.afterSnapshot?['annotationId'];
+        if (annotationId is int) {
+          final snapshot = await _annotationSnapshot(txn, annotationId);
+          final attachedIds = {
+            for (final document in snapshot['documents'] as List)
+              (document['note'] as Map)['id'].toString()
+          };
+          final trackedIds = <String>{};
+          for (final previous in [
+            action.beforeSnapshot,
+            action.afterSnapshot
+          ]) {
+            for (final document
+                in previous?['documents'] as List? ?? const []) {
+              trackedIds.add((document['note'] as Map)['id'].toString());
+            }
+          }
+          final detached = <Map<String, dynamic>>[];
+          for (final id in trackedIds.toList()..sort()) {
+            if (attachedIds.contains(id)) continue;
+            final document = await _noteSnapshot(txn, id);
+            if (document != null) detached.add(document);
+          }
+          if (detached.isNotEmpty) snapshot['detachedDocuments'] = detached;
+          return snapshot;
+        }
         final value = await _noteSnapshot(txn, action.targetId);
         final owned = action.afterSnapshot?['ownedAnnotationId'];
         if (value != null && owned != null) value['ownedAnnotationId'] = owned;
+        if (value != null &&
+            action.afterSnapshot?.containsKey('ownedAnnotationCreated') ==
+                true) {
+          value['ownedAnnotationCreated'] =
+              action.afterSnapshot!['ownedAnnotationCreated'];
+        }
+        if (value != null &&
+            action.afterSnapshot?.containsKey('ownedAnnotation') == true) {
+          value['ownedAnnotation'] =
+              await _queryOne(txn, 'tb_notes', 'id = ?', [owned]);
+        }
+        if (value != null &&
+            owned is int &&
+            action.afterSnapshot?.containsKey('ownedAnnotationDocuments') ==
+                true) {
+          value['ownedAnnotationDocuments'] =
+              await _annotationDocuments(txn, owned);
+        }
         return value;
       case AgentActionType.difficulty:
         final value = await _queryOne(
@@ -1175,9 +1451,31 @@ class ReadingAgentRepository {
         }
         return;
       case AgentActionType.note:
+        final annotationId = action.afterSnapshot?['annotationId'];
+        if (annotationId is int) {
+          final snapshot = action.beforeSnapshot!;
+          final current = await _annotationDocuments(txn, annotationId);
+          final beforeDocuments = snapshot['documents'] as List;
+          for (final document in current) {
+            final id = (document['note'] as Map)['id'].toString();
+            await _deleteDocument(txn, id);
+          }
+          await txn
+              .delete('tb_notes', where: 'id = ?', whereArgs: [annotationId]);
+          final annotation = snapshot['annotation'];
+          if (annotation is Map) {
+            await txn.insert('tb_notes', Map<String, Object?>.from(annotation));
+          }
+          for (final document in beforeDocuments) {
+            await _restoreDocumentSnapshot(
+                txn, Map<String, dynamic>.from(document));
+          }
+          return;
+        }
         await _deleteDocument(txn, action.targetId);
         final owned = action.afterSnapshot?['ownedAnnotationId'];
-        if (owned is int) {
+        if (owned is int &&
+            action.afterSnapshot?['ownedAnnotationCreated'] != false) {
           await txn.delete('tb_notes', where: 'id = ?', whereArgs: [owned]);
         }
         return;
@@ -1469,6 +1767,55 @@ class ReadingAgentRepository {
       'sources': sources,
       'tags': tags,
     };
+  }
+
+  Future<List<Map<String, dynamic>>> _annotationDocuments(
+      Transaction txn, int annotationId) async {
+    final rows = await txn.query('tb_reading_note_sources',
+        columns: ['note_id'],
+        where: 'source_type = ? AND source_ref = ?',
+        whereArgs: ['annotation', annotationId.toString()],
+        orderBy: 'note_id');
+    final documents = <Map<String, dynamic>>[];
+    for (final row in rows) {
+      final id = row['note_id'].toString();
+      final document = await _noteSnapshot(txn, id);
+      if (document == null) continue;
+      document['revisions'] = await txn.query('tb_reading_note_revisions',
+          where: 'note_id = ?', whereArgs: [id], orderBy: 'id');
+      documents.add(document);
+    }
+    return documents;
+  }
+
+  Future<Map<String, dynamic>> _annotationSnapshot(
+          Transaction txn, int id) async =>
+      {
+        'annotationId': id,
+        'annotation': await _queryOne(txn, 'tb_notes', 'id = ?', [id]),
+        'documents': await _annotationDocuments(txn, id),
+      };
+
+  Future<void> _restoreDocumentSnapshot(
+      Transaction txn, Map<String, dynamic> snapshot) async {
+    final note = Map<String, dynamic>.from(snapshot['note'] as Map);
+    await _deleteDocument(txn, note['id'].toString());
+    await txn.insert('tb_reading_notes', note);
+    for (final entry in const {
+      'blocks': 'tb_reading_note_blocks',
+      'sources': 'tb_reading_note_sources',
+      'revisions': 'tb_reading_note_revisions',
+    }.entries) {
+      for (final row in snapshot[entry.key] as List? ?? const []) {
+        await txn.insert(entry.value, Map<String, Object?>.from(row as Map));
+      }
+    }
+    for (final tag in snapshot['tags'] as List? ?? const []) {
+      await txn.insert('tb_reading_tags', Map<String, Object?>.from(tag as Map),
+          conflictAlgorithm: ConflictAlgorithm.ignore);
+      await txn.insert(
+          'tb_reading_note_tags', {'note_id': note['id'], 'tag_id': tag['id']});
+    }
   }
 
   Future<void> _deleteDocument(Transaction txn, String noteId) async {

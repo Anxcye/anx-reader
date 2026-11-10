@@ -1,0 +1,588 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Selection range browser regression</title>
+<pre id="results">RUNNING</pre>
+<script type="module">
+import { SelectionRangeController, selectionAlgorithms, createSelectionPageAdapter } from '../src/selection-range.js'
+import '../src/paginator.js'
+
+const results = []
+const test = async (name, run) => {
+  try { await run(); results.push({ name, passed: true }) }
+  catch (error) { results.push({ name, passed: false, error: String(error.stack || error) }) }
+}
+const equal = (actual, expected) => {
+  if (JSON.stringify(actual) !== JSON.stringify(expected)) throw Error(`Expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`)
+}
+const truthy = value => { if (!value) throw Error('Expected truthy value') }
+const frame = document.createElement('iframe')
+frame.srcdoc = '<p id="first">第一句。第二句！<em>第三句。</em></p><p id="second">Dr. Smith reads 3.14 books. Next sentence.</p><p id="unicode">A👩🏽‍💻é🇨🇳Z</p>'
+document.body.append(frame)
+await new Promise(resolve => frame.onload = resolve)
+const doc = frame.contentDocument
+const first = doc.querySelector('#first').firstChild
+const second = doc.querySelector('#second').firstChild
+const unicode = doc.querySelector('#unicode').firstChild
+let page = 0
+let pendingAdvance = null
+const visible = () => {
+  const range = doc.createRange()
+  range.setStart(first, 0)
+  if (page === 0) range.setEnd(first, 4)
+  else if (page === 1) range.setEnd(first, 8)
+  else if (page === 2) range.setEnd(second, second.length)
+  else range.setEnd(unicode, unicode.length)
+  return range
+}
+const controller = new SelectionRangeController({
+  doc, index: 2,
+  emitSelection: () => controller.recordSelectionReport(doc.getSelection().getRangeAt(0)),
+  pageAdapter: {
+    state: () => ({ canExtendNextPage: page < 3, flow: 'paginated' }),
+    capture: () => page,
+    restore: async previous => { page = previous },
+    advance: async () => {
+      if (pendingAdvance) await pendingAdvance
+      page++
+      return visible()
+    },
+  },
+})
+controller.install()
+controller.sessionId = 1
+const select = (node, start, end, endNode = node) => {
+  const range = doc.createRange()
+  range.setStart(node, start)
+  range.setEnd(endNode, end)
+  truthy(controller.applyRange(range))
+}
+const text = () => doc.getSelection().toString()
+
+// Execute only the production context helper without booting the reader.
+const bookSource = await (await fetch('../src/book.js')).text()
+const helperStart = bookSource.indexOf('const CONTEXT_WINDOW_CHARS =')
+const helperEnd = bookSource.indexOf('const selectionControllers =', helperStart)
+const buildRangeContextText = new Function(`${bookSource.slice(helperStart, helperEnd)}; return buildRangeContextText`)()
+
+await test('Context excludes unread next-page text in the same paragraph node', () => {
+  const viewport = doc.createElement('div')
+  viewport.style.cssText = 'height:48px;width:120px;overflow:hidden;font:20px/24px monospace'
+  viewport.innerHTML = '<p style="margin:0">Seen. Selected. UNREAD_NEXT_PAGE.</p>'
+  doc.body.append(viewport)
+  try {
+    const node = viewport.firstChild.firstChild
+    const range = doc.createRange()
+    range.setStart(node, 6)
+    range.setEnd(node, 15)
+    const future = doc.createRange()
+    future.setStart(node, 16)
+    future.setEnd(node, node.length)
+    truthy(future.getBoundingClientRect().top >= viewport.getBoundingClientRect().bottom)
+    equal(buildRangeContextText(range), 'Seen. Selected.')
+  } finally { viewport.remove() }
+})
+await test('Multi-node context includes exact range once and no text after its end', () => {
+  const paragraph = doc.createElement('p')
+  paragraph.innerHTML = 'Seen. <em>Selected</em><strong> exact tail UNREAD_END_NODE</strong><span>UNREAD_NEXT_NODE</span>'
+  doc.body.append(paragraph)
+  try {
+    const range = doc.createRange()
+    range.setStart(paragraph.firstChild, 6)
+    range.setEnd(paragraph.querySelector('strong').firstChild, 11)
+    equal(buildRangeContextText(range), 'Seen. Selected exact tail')
+    // Element-container offsets count children, rather than string characters.
+    range.setStart(paragraph, 1)
+    equal(buildRangeContextText(range), 'Seen. Selected exact tail')
+  } finally { paragraph.remove() }
+})
+
+await test('Chinese sentence punctuation', () => {
+  const bounds = selectionAlgorithms.sentenceBounds(first.textContent, 5)
+  equal(first.textContent.slice(bounds.start, bounds.end), '第二句！')
+})
+await test('English abbreviation and decimal stay in sentence', () => {
+  const bounds = selectionAlgorithms.sentenceBounds(second.textContent, 9)
+  equal(second.textContent.slice(bounds.start, bounds.end), 'Dr. Smith reads 3.14 books.')
+})
+await test('Graphemes remain whole including joined emoji and combining marks', () => {
+  equal(selectionAlgorithms.graphemeSegments(unicode.textContent).map(item => unicode.textContent.slice(item.start, item.end)), ['A', '👩🏽‍💻', 'é', '🇨🇳', 'Z'])
+  select(unicode, 0, 1)
+  truthy(controller.adjustBoundary('end', 1, 'character'))
+  equal(text(), 'A👩🏽‍💻')
+  truthy(controller.adjustBoundary('end', 1, 'character'))
+  equal(text(), 'A👩🏽‍💻é')
+})
+await test('Chrome 83 fallback keeps emoji and combining clusters', () => {
+  const segmenter = Intl.Segmenter
+  try {
+    Intl.Segmenter = undefined
+    equal(selectionAlgorithms.graphemeSegments(unicode.textContent).map(item => unicode.textContent.slice(item.start, item.end)), ['A', '👩🏽‍💻', 'é', '🇨🇳', 'Z'])
+  } finally { Intl.Segmenter = segmenter }
+})
+await test('Start/end adjustment never crosses the opposite endpoint', () => {
+  select(first, 0, 1)
+  equal(controller.adjustBoundary('start', 1, 'character'), false)
+  equal(controller.adjustBoundary('end', -1, 'character'), false)
+  equal(text(), '第')
+})
+await test('Endpoint expansion crosses inline elements and paragraphs', () => {
+  select(first, 4, 8)
+  truthy(controller.adjustBoundary('end', 1, 'sentence'))
+  equal(text(), '第二句！第三句。')
+  truthy(controller.adjustBoundary('end', 1, 'sentence'))
+  truthy(text().endsWith('Dr. Smith reads 3.14 books.'))
+})
+await test('Endpoint adjustment preserves session and advances revision', () => {
+  select(first, 0, 4)
+  const before = controller.snapshot()
+  truthy(controller.adjustBoundary('end', 1, 'sentence'))
+  equal(controller.sessionId, before.sessionId)
+  equal(controller.snapshot().revision, before.revision + 1)
+})
+await test('Legacy next sentence replaces instead of extends', () => {
+  select(first, 0, 4)
+  truthy(controller.moveSentence(1))
+  equal(text(), '第二句！')
+})
+await test('Cross-page extension fixes start and undo restores range and page', async () => {
+  page = 0
+  select(first, 1, 3)
+  truthy(await controller.extendPage())
+  equal(page, 1)
+  equal(text(), '一句。第二句！')
+  truthy(controller.snapshot().canUndoExtension)
+  truthy(await controller.extendPage())
+  equal(page, 2)
+  truthy(text().endsWith('Next sentence.'))
+  truthy(await controller.undoExtension())
+  equal(page, 1)
+  equal(text(), '一句。第二句！')
+  truthy(await controller.undoExtension())
+  equal(page, 0)
+  equal(text(), '一句')
+})
+await test('Chapter end disables further extension', async () => {
+  page = 3
+  select(unicode, 0, unicode.length)
+  equal(await controller.extendPage(), false)
+  equal(page, 3)
+})
+await test('Late extension cannot replace a newer selection', async () => {
+  page = 0
+  select(first, 0, 4)
+  let release
+  pendingAdvance = new Promise(resolve => { release = resolve })
+  const extending = controller.extendPage()
+  select(first, 4, 8)
+  release()
+  equal(await extending, false)
+  pendingAdvance = null
+  equal(text(), '第二句！')
+  equal(page, 0)
+})
+await test('Unsupported layout safely reports no extension', () => {
+  const unsupported = new SelectionRangeController({ doc, index: 0, emitSelection: () => {} })
+  equal(unsupported.snapshot().canExtendNextPage, false)
+  equal(unsupported.snapshot().extensionUnavailableReason, 'unsupportedLayout')
+})
+await test('PDF boundary controls stay within current text layer', () => {
+  const layer = doc.createElement('div')
+  layer.className = 'textLayer'
+  layer.textContent = 'PDF'
+  doc.body.append(layer)
+  const outside = doc.createElement('p')
+  outside.textContent = 'Other page'
+  doc.body.append(outside)
+  select(layer.firstChild, 0, 3)
+  equal(controller.adjustBoundary('end', 1, 'character'), false)
+  equal(text(), 'PDF')
+  layer.remove()
+  outside.remove()
+})
+await test('Reflow restoration does not navigate or change range', () => {
+  select(first, 0, 4)
+  doc.getSelection().removeAllRanges()
+  truthy(controller.restoreReportedSelection())
+  equal(text(), '第一句。')
+})
+await test('Page adapter blocks chapter traversal and unknown source progress', async () => {
+  page = 0
+  select(first, 0, 4)
+  let advances = 0
+  const renderer = {
+    scrolled: false, page: 1, pages: 6,
+    getAttribute: () => 'paginated',
+    getContents: () => [{ doc, index: 2 }],
+    scrollToAnchor: async () => {},
+  }
+  const view = {
+    isFixedLayout: false, renderer,
+    lastLocation: { range: visible(), fraction: .25, cfi: 'page-0' },
+    next: async () => { advances++; page++; view.lastLocation.range = visible() },
+  }
+  const adapter = createSelectionPageAdapter(view, doc, 2)
+  truthy(adapter.state().canExtendNextPage)
+  equal(adapter.state().sourceProgress, .25)
+  select(second, 0, 10)
+  equal(adapter.state().sourceProgress, null)
+  renderer.page = 4
+  equal(adapter.state().canExtendNextPage, false)
+  equal(adapter.state().extensionUnavailableReason, 'chapterEnd')
+  equal(await adapter.advance(), null)
+  equal(advances, 0)
+  view.isFixedLayout = true
+  equal(adapter.state().extensionUnavailableReason, 'unsupportedLayout')
+})
+controller.installGestureGuard()
+const touchEvent = (type, x, y) => {
+  const event = new Event(type, { bubbles: true, cancelable: true })
+  Object.defineProperty(event, 'touches', { value: type === 'touchend' ? [] : [{ clientX: x, clientY: y }] })
+  return event
+}
+await test('Default swipe selects one sentence and consumes the entire gesture', () => {
+  controller.consumeNavigation()
+  const previousCaret = doc.caretRangeFromPoint
+  const previousEmit = controller.emitSelection
+  let reports = 0, pageMoves = 0
+  const node = first.parentElement
+  const count = () => { pageMoves++ }
+  doc.caretRangeFromPoint = () => {
+    const caret = doc.createRange()
+    caret.setStart(first, 5)
+    caret.collapse(true)
+    return caret
+  }
+  controller.emitSelection = () => { reports++ }
+  for (const type of ['touchmove', 'touchend', 'click']) node.addEventListener(type, count)
+  try {
+    controller.configure({ swipeToTurnPage: false })
+    node.dispatchEvent(touchEvent('touchstart', 20, 20))
+    const move = touchEvent('touchmove', 90, 22)
+    node.dispatchEvent(move)
+    truthy(move.defaultPrevented)
+    node.dispatchEvent(touchEvent('touchend', 90, 22))
+    node.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }))
+    equal(text(), '第二句！')
+    equal(controller.rangeType, 'sentence')
+    equal(controller.trigger, 'swipe')
+    equal(reports, 1)
+    equal(pageMoves, 0)
+  } finally {
+    controller.consumeNavigation()
+    doc.caretRangeFromPoint = previousCaret
+    controller.emitSelection = previousEmit
+    for (const type of ['touchmove', 'touchend', 'click']) node.removeEventListener(type, count)
+  }
+})
+await test('Default short text drag consumes its click without selecting or paging', () => {
+  controller.consumeNavigation()
+  const node = first.parentElement
+  node.dispatchEvent(touchEvent('touchstart', 20, 20))
+  node.dispatchEvent(touchEvent('touchmove', 30, 20))
+  const end = touchEvent('touchend', 30, 20)
+  node.dispatchEvent(end)
+  truthy(end.defaultPrevented)
+  truthy(doc.getSelection().isCollapsed)
+})
+await test('Opting into swipe pages bypasses sentence selection', () => {
+  controller.consumeNavigation()
+  controller.configure({ swipeToTurnPage: true })
+  try {
+    const node = first.parentElement
+    node.dispatchEvent(touchEvent('touchstart', 20, 20))
+    const move = touchEvent('touchmove', 90, 22)
+    node.dispatchEvent(move)
+    equal(move.defaultPrevented, false)
+    node.dispatchEvent(touchEvent('touchend', 90, 22))
+    truthy(doc.getSelection().isCollapsed)
+  } finally { controller.configure({ swipeToTurnPage: false }) }
+})
+await test('Continuous vertical scroll remains available while horizontal swipes select', () => {
+  controller.consumeNavigation()
+  const state = controller.pageAdapter.state
+  controller.pageAdapter.state = () => ({ ...state(), flow: 'scrolled' })
+  try {
+    const node = first.parentElement
+    node.dispatchEvent(touchEvent('touchstart', 20, 20))
+    const move = touchEvent('touchmove', 22, 90)
+    node.dispatchEvent(move)
+    equal(move.defaultPrevented, false)
+    node.dispatchEvent(touchEvent('touchend', 22, 90))
+    truthy(doc.getSelection().isCollapsed)
+  } finally { controller.pageAdapter.state = state }
+})
+await test('Stationary long press keeps its configured word or sentence preference', () => {
+  const previousCaret = doc.caretRangeFromPoint
+  doc.caretRangeFromPoint = () => {
+    const caret = doc.createRange()
+    caret.setStart(second, 5)
+    caret.collapse(true)
+    return caret
+  }
+  try {
+    for (const mode of ['word', 'sentence']) {
+      controller.consumeNavigation()
+      controller.configure({ longPressMode: mode, swipeToTurnPage: false })
+      second.parentElement.dispatchEvent(touchEvent('touchstart', 20, 20))
+      select(second, 5, 6)
+      truthy(controller.expandLongPressSelection())
+      equal(controller.rangeType, mode)
+      equal(controller.trigger, 'longPress')
+      equal(text(), mode === 'word' ? 'Smith' : 'Dr. Smith reads 3.14 books.')
+    }
+  } finally {
+    controller.consumeNavigation()
+    controller.configure({ longPressMode: 'word' })
+    doc.caretRangeFromPoint = previousCaret
+  }
+})
+await test('Paginator disables native page drag and snapping unless explicitly enabled', async () => {
+  const paginator = document.createElement('foliate-paginator')
+  let snaps = 0
+  paginator.snap = () => { snaps++ }
+  const gesture = type => {
+    const event = new Event(type, { bubbles: true, cancelable: true })
+    const touch = { clientX: 90, clientY: 20, screenX: type === 'touchstart' ? 20 : 90, screenY: 20 }
+    Object.defineProperty(event, 'touches', { value: type === 'touchend' ? [] : [touch] })
+    Object.defineProperty(event, 'changedTouches', { value: [touch] })
+    paginator.dispatchEvent(event)
+    return event
+  }
+  gesture('touchstart')
+  truthy(gesture('touchmove').defaultPrevented)
+  gesture('touchend')
+  await new Promise(resolve => requestAnimationFrame(resolve))
+  equal(snaps, 0)
+  paginator.setAttribute('swipe-to-turn-page', 'true')
+  gesture('touchstart')
+  equal(gesture('touchmove').defaultPrevented, false)
+  gesture('touchend')
+  await new Promise(resolve => requestAnimationFrame(resolve))
+  equal(snaps, 1)
+})
+await test('Outside touch consumes start, end and synthetic click without paging', () => {
+  select(first, 0, 4)
+  let propagated = 0
+  const count = () => { propagated++ }
+  for (const type of ['touchstart', 'touchend', 'click']) doc.body.addEventListener(type, count)
+  const event = touchEvent('touchstart', 500, 500)
+  doc.body.dispatchEvent(event)
+  truthy(event.defaultPrevented)
+  truthy(doc.getSelection().isCollapsed)
+  doc.body.dispatchEvent(touchEvent('touchend', 500, 500))
+  doc.body.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }))
+  equal(propagated, 0)
+  for (const type of ['touchstart', 'touchend', 'click']) doc.body.removeEventListener(type, count)
+})
+await test('A fresh gesture is not swallowed by the previous selection dismissal', () => {
+  select(first, 0, 4)
+  doc.body.dispatchEvent(touchEvent('touchstart', 500, 500))
+  doc.body.dispatchEvent(touchEvent('touchend', 500, 500))
+  let propagated = 0
+  const count = () => { propagated++ }
+  doc.body.addEventListener('touchstart', count)
+  doc.body.addEventListener('click', count)
+  doc.body.dispatchEvent(touchEvent('touchstart', 500, 500))
+  doc.body.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }))
+  equal(propagated, 2)
+  equal(doc.__anxSuppressClick, false)
+  doc.body.removeEventListener('touchstart', count)
+  doc.body.removeEventListener('click', count)
+})
+await test('Native handle adjustment is preserved and does not reach page gestures', () => {
+  select(first, 0, 4)
+  const rect = doc.getSelection().getRangeAt(0).getBoundingClientRect()
+  const x = rect.left + 1, y = rect.top + 1
+  const start = touchEvent('touchstart', x, y)
+  doc.body.dispatchEvent(start)
+  equal(start.defaultPrevented, false)
+  controller.markNativeSelectionStarted()
+  select(first, 0, 8)
+  const move = touchEvent('touchmove', x + 10, y)
+  doc.body.dispatchEvent(move)
+  equal(move.defaultPrevented, false)
+  doc.body.dispatchEvent(touchEvent('touchend', x + 10, y))
+  equal(text(), '第一句。第二句！')
+})
+await test('Ordinary swipe consumes selection, and only the next navigation may turn', () => {
+  select(first, 0, 4)
+  const rect = doc.getSelection().getRangeAt(0).getBoundingClientRect()
+  doc.body.dispatchEvent(touchEvent('touchstart', rect.left + 1, rect.top + 1))
+  controller.nativeSelectionStarted = false
+  const move = touchEvent('touchmove', rect.left + 90, rect.top + 1)
+  doc.body.dispatchEvent(move)
+  truthy(move.defaultPrevented)
+  doc.body.dispatchEvent(touchEvent('touchend', rect.left + 90, rect.top + 1))
+  truthy(doc.getSelection().isCollapsed)
+  equal(controller.consumeNavigation(), false)
+})
+await test('Closing selection while extension is pending cannot resurrect it', async () => {
+  page = 0
+  select(first, 0, 4)
+  let release
+  pendingAdvance = new Promise(resolve => { release = resolve })
+  const extending = controller.extendPage()
+  truthy(controller.consumeNavigation())
+  release()
+  equal(await extending, false)
+  pendingAdvance = null
+  truthy(doc.getSelection().isCollapsed)
+  equal(page, 0)
+})
+await test('Failed page advance rolls back page and keeps the original selection', async () => {
+  page = 0
+  select(first, 0, 4)
+  const advance = controller.pageAdapter.advance
+  controller.pageAdapter.advance = async () => { page = 1; throw Error('page advance failed') }
+  try {
+    let failure
+    try { await controller.extendPage() } catch (error) { failure = error }
+    truthy(failure)
+    equal(page, 0)
+    equal(text(), '第一句。')
+    equal(controller.extending, false)
+  } finally { controller.pageAdapter.advance = advance }
+})
+await test('Failed extension undo preserves its undo record and original page', async () => {
+  page = 0
+  select(first, 0, 4)
+  truthy(await controller.extendPage())
+  const restore = controller.pageAdapter.restore
+  let calls = 0
+  controller.pageAdapter.restore = async previous => {
+    calls++
+    if (calls === 1) { page = previous; throw Error('page restore failed') }
+    await restore(previous)
+  }
+  try {
+    let failure
+    try { await controller.undoExtension() } catch (error) { failure = error }
+    truthy(failure)
+    equal(page, 1)
+    equal(text(), '第一句。第二句！')
+    truthy(controller.snapshot().canUndoExtension)
+    equal(controller.extending, false)
+  } finally { controller.pageAdapter.restore = restore }
+  truthy(await controller.undoExtension())
+})
+await test('Canceled undo cannot resurrect selection after the reader dismissed it', async () => {
+  page = 0
+  select(first, 0, 4)
+  truthy(await controller.extendPage())
+  const restore = controller.pageAdapter.restore
+  let release
+  controller.pageAdapter.restore = async previous => {
+    await new Promise(resolve => { release = resolve })
+    await restore(previous)
+  }
+  try {
+    const undoing = controller.undoExtension()
+    controller.consumeNavigation()
+    release()
+    equal(await undoing, false)
+    truthy(doc.getSelection().isCollapsed)
+  } finally { controller.pageAdapter.restore = restore }
+})
+await test('Showing the exact selection end refreshes its safe progress without new text', async () => {
+  page = 0
+  select(second, 0, 10)
+  let reports = 0
+  const view = {
+    isFixedLayout: false,
+    lastLocation: { range: visible(), fraction: .25 },
+    renderer: {
+      scrolled: false, page: 1, pages: 6,
+      getAttribute: () => 'paginated', getContents: () => [{ doc, index: 2 }],
+      scrollToAnchor: async endpoint => {
+        truthy(endpoint.collapsed)
+        truthy(endpoint.endContainer === second)
+        equal(endpoint.endOffset, 10)
+        const covered = doc.createRange()
+        covered.setStart(second, 0)
+        covered.setEnd(second, second.length)
+        view.lastLocation = { range: covered, fraction: .5 }
+      },
+    },
+  }
+  const endpointController = new SelectionRangeController({
+    doc, index: 2, pageAdapter: createSelectionPageAdapter(view, doc, 2),
+    emitSelection: () => { reports++; endpointController.recordSelectionReport(doc.getSelection().getRangeAt(0)) },
+  })
+  endpointController.recordSelectionReport(doc.getSelection().getRangeAt(0))
+  equal(endpointController.snapshot().sourceProgress, null)
+  truthy(await endpointController.showEnd())
+  equal(endpointController.snapshot().sourceProgress, .5)
+  equal(text(), 'Dr. Smith ')
+  equal(reports, 1)
+})
+await test('Exact range restoration preserves session and reports a fresh revision', () => {
+  select(first, 0, 4)
+  const original = doc.getSelection().getRangeAt(0).cloneRange()
+  const sessionId = controller.sessionId
+  const revision = controller.revision
+  controller.consumeNavigation()
+  truthy(controller.restoreRange(original))
+  equal(controller.sessionId, sessionId)
+  truthy(controller.revision > revision)
+  equal(text(), '第一句。')
+})
+await test('Late word-boundary resolution cannot overwrite a newer paragraph range', () => {
+  select(first, 0, 1)
+  const caretRangeFromPoint = doc.caretRangeFromPoint
+  let request
+  const requestWordBoundary = controller.requestWordBoundary
+  doc.caretRangeFromPoint = () => {
+    const caret = doc.createRange()
+    caret.setStart(first, 0)
+    caret.collapse(true)
+    return caret
+  }
+  controller.requestWordBoundary = payload => { request = payload }
+  try {
+    truthy(controller.selectAtPoint(0, 0, 'word', 'rangeButton'))
+    truthy(request)
+    truthy(controller.changeRange('paragraph'))
+    equal(controller.applyResolvedWord({ sessionId: request.sessionId, startOffset: 0, endOffset: 3 }), false)
+    equal(text(), '第一句。第二句！第三句。')
+  } finally {
+    doc.caretRangeFromPoint = caretRangeFromPoint
+    controller.requestWordBoundary = requestWordBoundary
+  }
+})
+await test('Unknown bridge boundary commands leave the range untouched', () => {
+  select(first, 0, 4)
+  equal(controller.adjustBoundary('middle', 1, 'character'), false)
+  equal(controller.adjustBoundary('end', 0, 'character'), false)
+  equal(controller.adjustBoundary('end', undefined, 'character'), false)
+  equal(controller.adjustBoundary('end', 1, 'unknown'), false)
+  equal(text(), '第一句。')
+})
+await test('One page key press including repeats only dismisses selection', () => {
+  select(first, 0, 4)
+  let pageTurns = 0
+  const count = () => { pageTurns++ }
+  doc.body.addEventListener('keydown', count)
+  const press = new KeyboardEvent('keydown', { key: 'PageDown', code: 'PageDown', bubbles: true, cancelable: true })
+  doc.body.dispatchEvent(press)
+  truthy(press.defaultPrevented)
+  truthy(doc.getSelection().isCollapsed)
+  const repeat = new KeyboardEvent('keydown', { key: 'PageDown', code: 'PageDown', repeat: true, bubbles: true, cancelable: true })
+  doc.body.dispatchEvent(repeat)
+  truthy(repeat.defaultPrevented)
+  equal(pageTurns, 0)
+  doc.body.dispatchEvent(new KeyboardEvent('keyup', { key: 'PageDown', code: 'PageDown', bubbles: true, cancelable: true }))
+  doc.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'PageDown', code: 'PageDown', bubbles: true, cancelable: true }))
+  equal(pageTurns, 1)
+  doc.body.removeEventListener('keydown', count)
+})
+await test('Shift-arrow native selection adjustment is not consumed', () => {
+  select(first, 0, 4)
+  const event = new KeyboardEvent('keydown', { key: 'ArrowRight', code: 'ArrowRight', shiftKey: true, bubbles: true, cancelable: true })
+  doc.body.dispatchEvent(event)
+  equal(event.defaultPrevented, false)
+  equal(text(), '第一句。')
+})
+const failures = results.filter(item => !item.passed)
+document.querySelector('#results').textContent = JSON.stringify({ passed: results.length - failures.length, failed: failures.length, results }, null, 2)
+document.title = failures.length ? 'FAIL' : 'PASS'
+</script>

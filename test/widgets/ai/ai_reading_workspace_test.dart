@@ -365,6 +365,109 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  for (final requestedBeforeMount in [false, true]) {
+    testWidgets(
+        'selection intent sends once with frozen source and preserves draft '
+        'beforeMount=$requestedBeforeMount', (tester) async {
+      final chat = _RecordingChat();
+      final controller = AiWorkspaceController(bookId: 7);
+      // Persisted settings avoid relying on an unrelated mode suggestion to
+      // notify the workspace about an intent that predates its listener.
+      controller.setMode(ReadingAiMode.general);
+      controller.setDraft('Do not replace this unfinished question');
+      final chatKey = GlobalKey<AiChatStreamState>();
+      const source = ReadingContextSnapshot(
+        bookId: '7',
+        bookTitle: 'Book',
+        chapterTitle: 'Original chapter',
+        chapterHref: 'chapter-one.xhtml',
+        selectedText: 'Only this exact passage.',
+        surroundingText: 'The context visible at the time of selection.',
+        progress: .27,
+        metadata: {
+          'cfi': 'epubcfi(/6/2!/4/8,/1:2,/1:26)',
+          'sourceProgress': .26,
+          'visibleFromProgress': .27,
+        },
+      );
+      if (requestedBeforeMount) {
+        controller.requestSelectionAction(source, SelectionAiAction.explain);
+      }
+      await tester.pumpWidget(_workspace(chat, controller, chatKey));
+      await tester.pumpAndSettle();
+      if (!requestedBeforeMount) {
+        expect(chat.requests, isEmpty);
+        expect(chat.contextOverrides, isEmpty);
+        controller.requestSelectionAction(source, SelectionAiAction.explain);
+        await tester.pumpAndSettle();
+      }
+
+      expect(chat.requests, hasLength(1));
+      expect(chat.requests.single, contains('Only this exact passage.'));
+      expect(chat.requests.single, contains('Original chapter'));
+      expect(chat.contextOverrides, [same(source)]);
+      expect(chat.contextAtRequests, [same(source)]);
+      expect(chat.contextAtRequests.single!.metadata['cfi'],
+          'epubcfi(/6/2!/4/8,/1:2,/1:26)');
+      expect(chat.contextAtRequests.single!.progress, .27);
+      expect(chat.contextAtRequests.single!.metadata['sourceProgress'], .26);
+      expect(
+          chat.contextAtRequests.single!.metadata['visibleFromProgress'], .27);
+      expect(controller.pendingSelection, isNull);
+      expect(controller.draft, 'Do not replace this unfinished question');
+      expect(chatKey.currentState!.inputController.text,
+          'Do not replace this unfinished question');
+      expect(tester.testTextInput.isVisible, isFalse);
+
+      controller.showHistory();
+      controller.showChat();
+      await tester.pumpAndSettle();
+      await tester.binding.setSurfaceSize(const Size(1024, 768));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      await tester.pumpAndSettle();
+      expect(chat.requests, hasLength(1));
+      expect(chat.contextOverrides, hasLength(1));
+      expect(controller.draft, 'Do not replace this unfinished question');
+      expect(tester.takeException(), isNull);
+    });
+  }
+
+  testWidgets('rejected selection intent leaves draft and source unconsumed',
+      (tester) async {
+    Prefs().saveAiProviders([
+      const AiProvider(
+              id: 'missing',
+              title: 'Missing',
+              url: 'https://example.com/v1',
+              protocol: AiProtocol.openai,
+              model: 'test')
+          .toJson(),
+    ]);
+    final chat = _RecordingChat();
+    final controller = AiWorkspaceController(bookId: 7);
+    controller.setDraft('Question still being composed');
+    final chatKey = GlobalKey<AiChatStreamState>();
+    const source = ReadingContextSnapshot(
+      bookId: '7',
+      selectedText: 'Keep this quote too.',
+      progress: .3,
+      metadata: {'cfi': 'epubcfi(/6/2)'},
+    );
+    await tester.pumpWidget(_workspace(chat, controller, chatKey));
+    await tester.pumpAndSettle();
+
+    controller.requestSelectionAction(source, SelectionAiAction.explain);
+    await tester.pumpAndSettle();
+    expect(chat.requests, isEmpty);
+    expect(chat.contextOverrides, isEmpty);
+    expect(controller.pendingSelection, same(source));
+    expect(controller.draft, 'Question still being composed');
+    expect(chatKey.currentState!.inputController.text,
+        'Question still being composed');
+    expect(find.text('Configure providers'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('a failed answer keeps partial text and retries in place',
       (tester) async {
     final chat = _RecordingChat(failFirst: true);
@@ -454,6 +557,14 @@ class _RecordingChat extends AiChat {
   final Completer<void>? completion;
   final bool emitIntermediate;
   final List<String> requests = [];
+  final List<ReadingContextSnapshot?> contextOverrides = [];
+  final List<ReadingContextSnapshot?> contextAtRequests = [];
+
+  @override
+  void setReadingContextOverride(ReadingContextSnapshot? snapshot) {
+    contextOverrides.add(snapshot);
+    super.setReadingContextOverride(snapshot);
+  }
 
   @override
   List<ChatMessage> build() => [];
@@ -462,6 +573,7 @@ class _RecordingChat extends AiChat {
   Stream<List<ChatMessage>> sendMessageStream(
       String message, WidgetRef widgetRef, bool isRegenerate) async* {
     requests.add(message);
+    contextAtRequests.add(contextOverrides.lastOrNull);
     if (emitIntermediate) {
       final partial = [
         ChatMessage.humanText(message),
@@ -482,6 +594,28 @@ class _RecordingChat extends AiChat {
     if (completion != null) await completion!.future;
   }
 }
+
+Widget _workspace(_RecordingChat chat, AiWorkspaceController controller,
+        GlobalKey<AiChatStreamState> chatKey) =>
+    ProviderScope(
+      overrides: [aiChatProvider.overrideWith(() => chat)],
+      child: MaterialApp(
+        navigatorKey: navigatorKey,
+        localizationsDelegates: L10n.localizationsDelegates,
+        supportedLocales: L10n.supportedLocales,
+        home: Scaffold(
+          body: AiReadingWorkspace(
+            controller: controller,
+            chatKey: chatKey,
+            quickPromptChips: const [],
+            bookTitle: 'Book',
+            bookAuthor: 'Author',
+            currentChapterTitle: 'Later live chapter',
+            currentProgress: .8,
+          ),
+        ),
+      ),
+    );
 
 Future<void> _capture(WidgetTester tester, GlobalKey key, String name) async {
   await tester.runAsync(() async {

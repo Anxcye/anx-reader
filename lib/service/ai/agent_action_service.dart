@@ -105,6 +105,125 @@ class AgentActionService {
     return value;
   }
 
+  Future<BookNote?> readAnnotation(int id) async {
+    final annotation = await _repository.readAnnotation(id);
+    return annotation?.bookId == _runtime.state.bookId ? annotation : null;
+  }
+
+  Future<AgentMutation<BookNote>> saveManualAnnotation({
+    required int bookId,
+    required String text,
+    required String cfi,
+    required String chapter,
+    required String color,
+    required String type,
+    int? annotationId,
+    String? readerNote,
+    String? chapterHref,
+    double? sourceProgress,
+    double? visibleFromProgress,
+    DateTime? expectedUpdatedAt,
+  }) async {
+    _requireCurrentBook(bookId);
+    final sessionId = _sessionId;
+    final existing = annotationId == null
+        ? await _repository.annotationAt(bookId, cfi)
+        : await _repository.readAnnotation(annotationId);
+    _requireCurrentBook(bookId);
+    if (_sessionId != sessionId) throw StateError('Reading session changed');
+    if (annotationId != null &&
+        (existing == null ||
+            existing.bookId != bookId ||
+            (expectedUpdatedAt != null &&
+                existing.updateTime != expectedUpdatedAt))) {
+      throw StateError('Annotation is unavailable or changed');
+    }
+    final progress = sourceProgress ?? _runtime.state.totalProgress;
+    final visible = visibleFromProgress ?? progress;
+    if (text.trim().isEmpty ||
+        cfi.trim().isEmpty ||
+        !progress.isFinite ||
+        !visible.isFinite ||
+        progress < 0 ||
+        visible < progress ||
+        visible > 1 ||
+        visible > _runtime.state.totalProgress + .000001) {
+      throw ArgumentError('Invalid annotation source or reading boundary');
+    }
+    final now = DateTime.now();
+    final annotation = BookNote(
+        id: existing?.id,
+        bookId: bookId,
+        content: existing?.content ?? text,
+        cfi: existing?.cfi ?? cfi,
+        chapter: existing?.chapter ?? chapter,
+        type: type,
+        color: color,
+        readerNote: readerNote ?? existing?.readerNote,
+        createTime: existing?.createTime ?? now,
+        updateTime: now);
+    final mutation = await applyValidated(
+      ValidatedAiMutation<BookNote>(
+          actionType: 'annotation_save',
+          targetType: 'reading_note',
+          targetId: annotationId?.toString() ?? 'new',
+          bookId: bookId,
+          value: annotation,
+          authorization: AiMutationAuthorization.explicitUserRequest,
+          visibleProgress: _runtime.state.totalProgress),
+      () => _repository.saveManualAnnotation(annotation,
+          expected: existing,
+          sessionId: sessionId,
+          chapterHref: chapterHref,
+          sourceProgress: progress,
+          visibleFromProgress: visible,
+          updateReaderNote: readerNote != null),
+    );
+    if (_runtime.state.bookId == bookId &&
+        _runtime.state.sessionId == sessionId) {
+      ReaderCommandGateway.instance.showAnnotation(mutation.value);
+      _runtime.actionApplied(mutation.action);
+    }
+    return mutation;
+  }
+
+  Future<AgentMutation<BookNote>> deleteManualAnnotation({
+    required int bookId,
+    required int annotationId,
+    DateTime? expectedUpdatedAt,
+  }) async {
+    _requireCurrentBook(bookId);
+    final sessionId = _sessionId;
+    final annotation = await _repository.readAnnotation(annotationId);
+    _requireCurrentBook(bookId);
+    if (_sessionId != sessionId) throw StateError('Reading session changed');
+    if (annotation == null ||
+        annotation.bookId != bookId ||
+        (expectedUpdatedAt != null &&
+            annotation.updateTime != expectedUpdatedAt)) {
+      throw StateError('Annotation is unavailable or changed');
+    }
+    final mutation = await applyValidated(
+      ValidatedAiMutation<BookNote>(
+          actionType: 'annotation_delete',
+          targetType: 'reading_note',
+          targetId: annotationId.toString(),
+          bookId: bookId,
+          value: annotation,
+          authorization: AiMutationAuthorization.explicitUserRequest,
+          visibleProgress: _runtime.state.totalProgress),
+      () =>
+          _repository.deleteManualAnnotation(annotation, sessionId: sessionId),
+    );
+    if (_runtime.state.bookId == bookId &&
+        _runtime.state.sessionId == sessionId) {
+      ReaderCommandGateway.instance
+          .hideAnnotation(annotation.cfi, bookId: bookId);
+      _runtime.actionApplied(mutation.action);
+    }
+    return mutation;
+  }
+
   Future<AgentMutation<ReadingGoal>> saveGoal(ReadingGoal goal) async {
     final mutation = await applyValidated(
       ValidatedAiMutation<ReadingGoal>(
@@ -873,14 +992,32 @@ class AgentActionService {
   }
 
   Future<UndoResult> undo(AgentAction action) async {
+    final sessionId = _runtime.state.sessionId;
     final result = await _repository.undo(action.id);
-    if (result == UndoResult.undone) {
+    if (result == UndoResult.undone && _runtime.state.sessionId == sessionId) {
       if (action.type == AgentActionType.note) {
-        final sources = action.afterSnapshot?['sources'];
-        if (sources is List && sources.isNotEmpty && sources.first is Map) {
-          final cfi = (sources.first as Map)['cfi']?.toString();
-          if (cfi?.isNotEmpty == true) {
-            ReaderCommandGateway.instance.hideAnnotation(cfi!);
+        if (action.afterSnapshot?['annotationId'] is int) {
+          final before = action.beforeSnapshot?['annotation'];
+          if (before is Map && _runtime.state.bookId == action.bookId) {
+            ReaderCommandGateway.instance.showAnnotation(
+                BookNote.fromDb(Map<String, dynamic>.from(before)));
+          } else if (_runtime.state.bookId == action.bookId) {
+            final after = action.afterSnapshot?['annotation'];
+            if (after is Map && after['cfi'] is String) {
+              ReaderCommandGateway.instance
+                  .hideAnnotation(after['cfi'], bookId: action.bookId);
+            }
+          }
+        } else if (action.afterSnapshot?['ownedAnnotationId'] is int &&
+            action.afterSnapshot?['ownedAnnotationCreated'] != false &&
+            _runtime.state.bookId == action.bookId) {
+          final sources = action.afterSnapshot?['sources'];
+          if (sources is List && sources.isNotEmpty && sources.first is Map) {
+            final cfi = (sources.first as Map)['cfi']?.toString();
+            if (cfi?.isNotEmpty == true) {
+              ReaderCommandGateway.instance
+                  .hideAnnotation(cfi!, bookId: action.bookId);
+            }
           }
         }
       } else if (action.type == AgentActionType.difficulty) {

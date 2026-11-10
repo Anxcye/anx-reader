@@ -1,14 +1,16 @@
 enum SelectionMenuAction {
+  highlight,
   lookupOrTranslate,
-  addToVocabulary,
   ai,
+  addToVocabulary,
   copy,
   webSearch,
   paragraphTranslate,
   narrate,
   saveDifficulty,
   note,
-  share;
+  share,
+  bringToQuestion;
 
   static List<SelectionMenuAction> decodeOrder(List<String>? values) {
     final decoded = <SelectionMenuAction>[];

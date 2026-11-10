@@ -104,14 +104,16 @@ class _OtherSettingsState extends State<OtherSettings> {
 
         return ListTile(
           contentPadding: EdgeInsets.zero,
-          title: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          title: Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 16,
+            runSpacing: 8,
             children: [
               Text(
                 L10n.of(context).readingPagePageTurningMethod,
                 style: Theme.of(context).textTheme.titleMedium,
               ),
-              const Spacer(),
               AnxSegmentedButton<PageTurnMode>(
                 segments: [
                   SegmentButtonItem(
@@ -208,40 +210,32 @@ class _OtherSettingsState extends State<OtherSettings> {
       });
     }
 
-    Widget autoTranslateSelection() {
-      return ListTile(
-        contentPadding: EdgeInsets.zero,
-        trailing: Switch(
-          value: Prefs().autoTranslateSelection,
-          onChanged: (bool value) => setState(() {
-            Prefs().autoTranslateSelection = value;
-          }),
-        ),
-        title: Text(L10n.of(context).readingPageAutoTranslateSelection),
-      );
-    }
-
     Widget longPressSelectionMode() {
       return ListTile(
         contentPadding: EdgeInsets.zero,
         title: Text(L10n.of(context).readingPageLongPressSelection),
-        subtitle: Text(L10n.of(context).readingPageLongPressSelectionTips),
-        trailing: SegmentedButton<LongPressSelectionMode>(
-          segments: [
-            ButtonSegment(
-              value: LongPressSelectionMode.word,
-              label: Text(L10n.of(context).selectionRangeWord),
-            ),
-            ButtonSegment(
-              value: LongPressSelectionMode.sentence,
-              label: Text(L10n.of(context).selectionRangeSentence),
-            ),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(L10n.of(context).readingPageLongPressSelectionTips),
+            const SizedBox(height: 8),
+            Wrap(spacing: 8, runSpacing: 8, children: [
+              for (final mode in LongPressSelectionMode.values)
+                OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                      minimumSize: Size(48, Prefs().eInkMode ? 56 : 48)),
+                  icon: Icon(Prefs().longPressSelectionMode == mode
+                      ? Icons.radio_button_checked
+                      : Icons.radio_button_unchecked),
+                  label: Text(mode == LongPressSelectionMode.word
+                      ? L10n.of(context).selectionRangeWord
+                      : L10n.of(context).selectionRangeSentence),
+                  onPressed: () => setState(() {
+                    Prefs().longPressSelectionMode = mode;
+                  }),
+                ),
+            ]),
           ],
-          selected: {Prefs().longPressSelectionMode},
-          onSelectionChanged: (selected) {
-            setState(() => Prefs().longPressSelectionMode = selected.first);
-            epubPlayerKey.currentState?.configureSelection();
-          },
         ),
       );
     }
@@ -266,20 +260,6 @@ class _OtherSettingsState extends State<OtherSettings> {
             Prefs().autoSummaryPreviousContent = value;
           }),
         ),
-      );
-    }
-
-    Widget autoMarkSelection() {
-      return ListTile(
-        contentPadding: EdgeInsets.zero,
-        trailing: Switch(
-          value: Prefs().autoMarkSelection,
-          onChanged: (bool value) => setState(() {
-            Prefs().autoMarkSelection = value;
-          }),
-        ),
-        title: Text(L10n.of(context).readingPageAutoMarkSelection),
-        subtitle: Text(L10n.of(context).readingPageAutoMarkSelectionTips),
       );
     }
 
@@ -309,6 +289,18 @@ class _OtherSettingsState extends State<OtherSettings> {
         ),
       );
     }
+
+    Widget swipeTurnPage() => ListTile(
+          contentPadding: EdgeInsets.zero,
+          title: Text(L10n.of(context).readingPageSwipeToTurnPage),
+          subtitle: Text(L10n.of(context).readingPageSwipeToTurnPageHint),
+          trailing: Switch(
+            value: Prefs().swipeToTurnPage,
+            onChanged: (value) => setState(() {
+              Prefs().swipeToTurnPage = value;
+            }),
+          ),
+        );
 
     ListTile swapPageTurnArea() {
       return ListTile(
@@ -359,16 +351,15 @@ class _OtherSettingsState extends State<OtherSettings> {
         children: [
           fullScreen(),
           if (AnxPlatform.isAndroid) keyboardTurnPage(),
+          swipeTurnPage(),
           // if (PageTurnMode.fromCode(Prefs().pageTurnMode) ==
           //     PageTurnMode.simple)
           swapPageTurnArea(),
           showMenuOnHover(),
           if (AnxPlatform.isDesktop) keyboardShortcutTurnPage(),
           autoAdjustReadingTheme(),
-          autoTranslateSelection(),
           longPressSelectionMode(),
           selectionMenuSettings(),
-          autoMarkSelection(),
           autoSummaryPreviousContent(),
           screenTimeout(),
           pageTurningControl(),

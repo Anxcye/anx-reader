@@ -1,592 +1,143 @@
 import 'dart:math' as math;
 
 import 'package:anx_reader/config/shared_preference_provider.dart';
-import 'package:anx_reader/models/reading_lookup.dart';
+import 'package:anx_reader/models/selection_snapshot.dart';
 import 'package:anx_reader/page/reading_page.dart';
+import 'package:anx_reader/providers/ai_workspace.dart';
 import 'package:anx_reader/service/dictionary/reading_lookup_candidate_resolver.dart';
+import 'package:anx_reader/utils/env_var.dart';
 import 'package:anx_reader/utils/platform_utils.dart';
-import 'package:anx_reader/widgets/common/axis_flex.dart';
 import 'package:anx_reader/widgets/context_menu/excerpt_menu.dart';
-import 'package:anx_reader/widgets/context_menu/reader_note_menu.dart';
-import 'package:anx_reader/widgets/context_menu/translation_menu.dart';
+import 'package:anx_reader/widgets/context_menu/selection_action_policy.dart';
 import 'package:flutter/material.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
 
-import 'package:anx_reader/models/selection_snapshot.dart';
-
+/// Installs one toolbar per reader. Subsequent DOM range revisions update the
+/// workspace controller, preserving the toolbar and its chosen screen edge.
 Future<void> showContextMenu(
-    BuildContext context,
-    double left,
-    double top,
-    double right,
-    double bottom,
-    String annoContent,
-    String annoCfi,
-    int? annoId,
-    bool footnote,
-    Axis axis,
-    {String? contextText,
-    SelectionSnapshot? selectionSnapshot,
-    bool offlineDictionaryMode = false,
-    bool Function()? isCurrentRequest}) async {
-  final playerKey = epubPlayerKey.currentState;
-  if (playerKey == null) return;
-  final mediaQuery = MediaQuery.of(context);
-  final overlay = Overlay.of(context);
-  final secondaryContainerColor =
-      Theme.of(context).colorScheme.secondaryContainer;
-  bool isNewNote = false;
-  final lookupCandidate = ReadingLookupCandidateResolver.resolve(
-    annoContent,
-    selection: selectionSnapshot,
-    offline: offlineDictionaryMode,
-  );
-
-  if (annoId == null && selectionSnapshot != null) {
-    annoId = await playerKey.upsertSelectionAutoMark(selectionSnapshot);
-    isNewNote = annoId != null;
+  BuildContext context,
+  double left,
+  double top,
+  double right,
+  double bottom,
+  String annoContent,
+  String annoCfi,
+  int? annoId,
+  bool footnote,
+  Axis axis, {
+  String? contextText,
+  SelectionSnapshot? selectionSnapshot,
+  bool offlineDictionaryMode = false,
+  bool Function()? isCurrentRequest,
+}) async {
+  final player = epubPlayerKey.currentState;
+  final page = readingPageKey.currentState;
+  if (player == null ||
+      page == null ||
+      !context.mounted ||
+      isCurrentRequest?.call() == false) {
+    return;
   }
-
-  // Auto-mark persistence and dictionary setup are asynchronous. A newer
-  // selection may have arrived while they were running; never let the older
-  // request replace the menu for the current selection.
-  if (isCurrentRequest?.call() == false || !context.mounted) return;
-
-  final renderBox =
-      epubPlayerKey.currentContext?.findRenderObject() as RenderBox?;
-  final renderBoxSize = renderBox?.size;
-
-  final double screenHeight = renderBoxSize?.height ?? mediaQuery.size.height;
-  final double screenWidth = renderBoxSize?.width ?? mediaQuery.size.width;
-  final double keyboardInset = mediaQuery.viewInsets.bottom;
-
-  final Offset localToGlobal =
-      renderBox?.localToGlobal(Offset.zero) ?? Offset.zero;
-
-  final viewportRect = Rect.fromLTWH(
-    localToGlobal.dx,
-    localToGlobal.dy,
-    screenWidth,
-    screenHeight,
-  );
-
-  final selectionRect = Rect.fromLTRB(
-    localToGlobal.dx + left * screenWidth,
-    localToGlobal.dy + top * screenHeight,
-    localToGlobal.dx + right * screenWidth,
-    localToGlobal.dy + bottom * screenHeight,
-  );
-
-  const double horizontalMargin = 16;
-  const double verticalMargin = 16;
-  const double gap = 12;
-
-  final double maxMenuWidth =
-      math.min(350, math.max(120, screenWidth - horizontalMargin * 2));
-  final double effectiveHeight = math.max(0, screenHeight - keyboardInset);
-  final double maxHeightCandidate = effectiveHeight - verticalMargin * 2;
-  final double rawMaxHeight = math.min(
-    footnote ? 350 : 550,
-    math.max(200, maxHeightCandidate),
-  );
-  final double maxMenuHeight = math.max(
-    0,
-    math.min(rawMaxHeight, maxHeightCandidate),
-  );
-
-  final menuConstraints = BoxConstraints(
-    maxWidth: maxMenuWidth,
-    maxHeight: maxMenuHeight,
-  );
-
-  final initialPlacement = _resolveMenuPlacement(
-    axis: axis,
-    selectionRect: selectionRect,
-    viewportRect: viewportRect,
-    menuSize: Size(maxMenuWidth, maxMenuHeight),
-    horizontalMargin: horizontalMargin,
-    verticalMargin: verticalMargin,
-    gap: gap,
-    bottomInset: keyboardInset,
-  );
-
-  playerKey.removeOverlay(preserveAutoMarkSession: true);
-
-  void onClose() {
-    playerKey.finalizeSelectionAutoMark();
-    playerKey.webViewController.evaluateJavascript(source: 'clearSelection()');
-    playerKey.removeOverlay();
-  }
-
-  final decoration = BoxDecoration(
-    color: Prefs().eInkMode ? Colors.white : secondaryContainerColor,
-    borderRadius: BorderRadius.circular(10),
-    boxShadow: [
-      if (!Prefs().eInkMode)
-        BoxShadow(
-          color: Colors.black.withValues(alpha: 0.1),
-          spreadRadius: 5,
-          blurRadius: 7,
-          offset: const Offset(0, 3),
-        ),
-      if (Prefs().eInkMode)
-        const BoxShadow(
-          color: Colors.black,
-          spreadRadius: 1,
-          blurRadius: 0,
-        ),
-    ],
-  );
-
-  playerKey.contextMenuEntry = OverlayEntry(builder: (context) {
-    return _ContextMenuOverlay(
-      axis: axis,
-      selectionRect: selectionRect,
-      viewportRect: viewportRect,
-      annoContent: annoContent,
-      annoCfi: annoCfi,
-      annoId: annoId,
+  final controller = page.aiWorkspaceController;
+  final snapshot = selectionSnapshot ??
+      SelectionSnapshot(
+        sessionId: -(annoId ?? 0) - 1,
+        rangeType: SelectionRangeType.custom,
+        trigger: SelectionTrigger.contextMenu,
+        text: annoContent,
+        cfi: annoCfi,
+        contextText: contextText,
+        chapterIndex: -1,
+        canMovePrevious: false,
+        canMoveNext: false,
+        supportsRangeSelection: false,
+      );
+  if (!controller.updateSelection(snapshot,
+      annotationId: annoId,
       footnote: footnote,
-      contextText: contextText,
-      selectionSnapshot: selectionSnapshot,
-      offlineDictionaryMode: offlineDictionaryMode,
-      decoration: decoration,
-      onClose: onClose,
-      menuConstraints: menuConstraints,
-      initialPlacement: initialPlacement,
-      lookupCandidate: lookupCandidate,
-      showTranslationDefault: lookupCandidate.isDictionaryLookup ||
-          (!isNewNote &&
-              Prefs().autoTranslateSelection &&
-              !AnxPlatform.isAndroid),
-      horizontalMargin: horizontalMargin,
-      verticalMargin: verticalMargin,
-      gap: gap,
-      initialBottomInset: keyboardInset,
-    );
-  });
-
-  overlay.insert(playerKey.contextMenuEntry!);
-}
-
-class _MenuPlacement {
-  const _MenuPlacement({required this.offset, required this.shouldReverse});
-
-  final Offset offset;
-  final bool shouldReverse;
-}
-
-double _clampWithin(double value, double min, double max) {
-  if (min > max) {
-    return min;
+      dockAtTop: bottom > .72,
+      nearbyMenu: !Prefs().eInkMode &&
+          (snapshot.pointerType == 'mouse' ||
+              (snapshot.pointerType == 'unknown' && AnxPlatform.isDesktop)))) {
+    return;
   }
-  return value.clamp(min, max);
-}
-
-_MenuPlacement _resolveMenuPlacement({
-  required Axis axis,
-  required Rect selectionRect,
-  required Rect viewportRect,
-  required Size menuSize,
-  required double horizontalMargin,
-  required double verticalMargin,
-  required double gap,
-  required double bottomInset,
-}) {
-  final double menuWidth = menuSize.width;
-  final double menuHeight = menuSize.height;
-
-  final double clampedViewportBottom =
-      math.max(viewportRect.top, viewportRect.bottom - bottomInset);
-
-  if (axis == Axis.horizontal) {
-    final double spaceAbove = selectionRect.top - viewportRect.top;
-    final double spaceBelow = clampedViewportBottom - selectionRect.bottom;
-    final bool placeBelow =
-        (spaceBelow >= menuHeight + gap) || (spaceBelow >= spaceAbove);
-
-    final double minTop = viewportRect.top + verticalMargin;
-    final double maxTop = clampedViewportBottom - menuHeight - verticalMargin;
-    double desiredTop = placeBelow
-        ? selectionRect.bottom + gap
-        : selectionRect.top - menuHeight - gap;
-    desiredTop = _clampWithin(desiredTop, minTop, maxTop);
-
-    final double minLeft = viewportRect.left + horizontalMargin;
-    final double maxLeft = viewportRect.right - menuWidth - horizontalMargin;
-    double desiredLeft = selectionRect.center.dx - menuWidth / 2;
-    desiredLeft = _clampWithin(desiredLeft, minLeft, maxLeft);
-
-    return _MenuPlacement(
-      offset: Offset(desiredLeft, desiredTop),
-      shouldReverse: !placeBelow,
-    );
-  }
-
-  final double spaceLeft = selectionRect.left - viewportRect.left;
-  final double spaceRight = viewportRect.right - selectionRect.right;
-  final bool placeRight =
-      (spaceRight >= menuWidth + gap) || (spaceRight >= spaceLeft);
-
-  final double minLeft = viewportRect.left + horizontalMargin;
-  final double maxLeft = viewportRect.right - menuWidth - horizontalMargin;
-  double desiredLeft = placeRight
-      ? selectionRect.right + gap
-      : selectionRect.left - menuWidth - gap;
-  desiredLeft = _clampWithin(desiredLeft, minLeft, maxLeft);
-
-  final double minTop = viewportRect.top + verticalMargin;
-  final double maxTop = clampedViewportBottom - menuHeight - verticalMargin;
-  double desiredTop = selectionRect.center.dy - menuHeight / 2;
-  desiredTop = _clampWithin(desiredTop, minTop, maxTop);
-
-  return _MenuPlacement(
-    offset: Offset(desiredLeft, desiredTop),
-    shouldReverse: !placeRight,
-  );
-}
-
-class _ContextMenuOverlay extends StatefulWidget {
-  const _ContextMenuOverlay({
-    required this.axis,
-    required this.selectionRect,
-    required this.viewportRect,
-    required this.annoContent,
-    required this.annoCfi,
-    required this.annoId,
-    required this.footnote,
-    this.contextText,
-    this.selectionSnapshot,
-    required this.decoration,
-    required this.onClose,
-    required this.menuConstraints,
-    required this.initialPlacement,
-    required this.showTranslationDefault,
-    required this.offlineDictionaryMode,
-    required this.lookupCandidate,
-    required this.horizontalMargin,
-    required this.verticalMargin,
-    required this.gap,
-    required this.initialBottomInset,
-  });
-
-  final Axis axis;
-  final Rect selectionRect;
-  final Rect viewportRect;
-  final String annoContent;
-  final String annoCfi;
-  final int? annoId;
-  final bool footnote;
-  final String? contextText;
-  final SelectionSnapshot? selectionSnapshot;
-  final BoxDecoration decoration;
-  final VoidCallback onClose;
-  final BoxConstraints menuConstraints;
-  final _MenuPlacement initialPlacement;
-  final bool showTranslationDefault;
-  final bool offlineDictionaryMode;
-  final ReadingLookupCandidate lookupCandidate;
-  final double horizontalMargin;
-  final double verticalMargin;
-  final double gap;
-  final double initialBottomInset;
-
-  @override
-  State<_ContextMenuOverlay> createState() => _ContextMenuOverlayState();
-}
-
-class _ContextMenuOverlayState extends State<_ContextMenuOverlay>
-    with WidgetsBindingObserver {
-  final GlobalKey _menuKey = GlobalKey();
-  final GlobalKey<ReaderNoteMenuState> _readerNoteMenuKey =
-      GlobalKey<ReaderNoteMenuState>();
-
-  late Offset _position;
-  late bool _reverse;
-  late bool _showTranslationMenu;
-  bool _showReaderNoteMenu = false;
-  bool _waitingForFirstMeasurement = true;
-  late BoxConstraints _menuConstraints;
-  late double _bottomInset;
-  int? _noteId;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addObserver(this);
-    _position = widget.initialPlacement.offset;
-    _reverse = widget.initialPlacement.shouldReverse;
-    _showTranslationMenu = widget.showTranslationDefault;
-    _noteId = widget.annoId;
-    _bottomInset = widget.initialBottomInset;
-    _menuConstraints = _buildConstraints(widget.initialBottomInset);
-    _scheduleRecalculate();
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    epubPlayerKey.currentState?.setSelectionClearLocked(false);
-    super.dispose();
-  }
-
-  BoxConstraints _buildConstraints(double bottomInset) {
-    final original = widget.menuConstraints;
-    final double availableHeight = math.max(
-      0,
-      widget.viewportRect.height - bottomInset - widget.verticalMargin * 2,
-    );
-
-    double maxHeight;
-    if (original.hasBoundedHeight) {
-      maxHeight = math.min(original.maxHeight, availableHeight);
-    } else {
-      maxHeight = availableHeight;
-    }
-    maxHeight = math.max(0, maxHeight);
-
-    final double minHeight = math.min(original.minHeight, maxHeight);
-
-    return BoxConstraints(
-      minWidth: original.minWidth,
-      maxWidth: original.maxWidth,
-      minHeight: minHeight,
-      maxHeight: maxHeight,
-    );
-  }
-
-  void _scheduleRecalculate({Duration delay = Duration.zero}) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      if (delay == Duration.zero) {
-        _updatePlacement();
-      } else {
-        Future.delayed(delay, () {
-          if (!mounted) return;
-          _updatePlacement();
-        });
-      }
-    });
-  }
-
-  @override
-  void didChangeMetrics() {
-    if (!mounted) return;
-    _scheduleRecalculate();
-  }
-
-  void _updatePlacement() {
-    final renderBox = _menuKey.currentContext?.findRenderObject() as RenderBox?;
-    final double currentBottomInset = MediaQuery.of(context).viewInsets.bottom;
-    final newConstraints = _buildConstraints(currentBottomInset);
-
-    if (renderBox == null) {
-      final bool needsStateUpdate =
-          (_bottomInset - currentBottomInset).abs() > 0.5 ||
-              _menuConstraints.maxHeight != newConstraints.maxHeight;
-
-      if (needsStateUpdate) {
-        setState(() {
-          _bottomInset = currentBottomInset;
-          _menuConstraints = newConstraints;
-        });
-      }
-      return;
-    }
-
-    final size = renderBox.size;
-    final placement = _resolveMenuPlacement(
-      axis: widget.axis,
-      selectionRect: widget.selectionRect,
-      viewportRect: widget.viewportRect,
-      menuSize: size,
-      horizontalMargin: widget.horizontalMargin,
-      verticalMargin: widget.verticalMargin,
-      gap: widget.gap,
-      bottomInset: currentBottomInset,
-    );
-
-    final bool positionChanged =
-        (_position.dx - placement.offset.dx).abs() > 0.5 ||
-            (_position.dy - placement.offset.dy).abs() > 0.5;
-
-    final bool bottomInsetChanged =
-        (_bottomInset - currentBottomInset).abs() > 0.5;
-
-    final bool constraintsChanged =
-        _menuConstraints.maxHeight != newConstraints.maxHeight;
-
-    final bool shouldUpdate = _waitingForFirstMeasurement ||
-        positionChanged ||
-        _reverse != placement.shouldReverse ||
-        bottomInsetChanged ||
-        constraintsChanged;
-
-    if (shouldUpdate) {
-      setState(() {
-        _position = placement.offset;
-        _reverse = placement.shouldReverse;
-        _bottomInset = currentBottomInset;
-        _menuConstraints = newConstraints;
-        _waitingForFirstMeasurement = false;
-      });
-    }
-  }
-
-  void _showTranslationMenuPanel() {
-    if (_showTranslationMenu) return;
-    setState(() {
-      _showTranslationMenu = true;
-    });
-    _scheduleRecalculate();
-  }
-
-  void _toggleReaderNoteMenu({bool? show}) {
-    final target = show ?? !_showReaderNoteMenu;
-    epubPlayerKey.currentState?.setSelectionClearLocked(target);
-    setState(() {
-      _showReaderNoteMenu = target;
-    });
-    _scheduleRecalculate(
-      delay: _showReaderNoteMenu
-          ? const Duration(milliseconds: 300)
-          : Duration.zero,
-    );
-  }
-
-  Future<void> _openReaderNoteMenu(int noteId) async {
-    _toggleReaderNoteMenu(show: true);
-    if (_readerNoteMenuKey.currentState == null) {
-      await Future.delayed(const Duration(milliseconds: 50));
-    }
-    await _readerNoteMenuKey.currentState?.showNoteDialog(noteId);
-    _scheduleRecalculate(delay: const Duration(milliseconds: 300));
-  }
-
-  void _handleNoteCreated(int noteId) {
-    if (_noteId == noteId) {
-      return;
-    }
-    setState(() {
-      _noteId = noteId;
-    });
-  }
-
-  void _handleReaderNoteVisibilityChange(bool visible) {
-    epubPlayerKey.currentState?.setSelectionClearLocked(visible);
-    if (_showReaderNoteMenu == visible) {
-      return;
-    }
-    setState(() {
-      _showReaderNoteMenu = visible;
-    });
-    _scheduleRecalculate(
-      delay: visible ? const Duration(milliseconds: 300) : Duration.zero,
-    );
-  }
-
-  void _handleReaderNoteSizeChanged() {
-    _scheduleRecalculate();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Positioned(
-      left: _position.dx,
-      top: _position.dy,
-      child: PointerInterceptor(
-        child: Stack(
-          children: [
-            GestureDetector(
-              onTap: widget.onClose,
-              child: IgnorePointer(
-                ignoring: _waitingForFirstMeasurement,
-                child: Opacity(
-                  opacity: _waitingForFirstMeasurement ? 0 : 1,
-                  child: Container(
-                    key: _menuKey,
-                    color: Colors.transparent,
-                    constraints: _menuConstraints,
-                    child: AxisFlex(
-                      axis: flipAxis(widget.axis),
-                      reverse: _reverse,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        AxisFlex(
-                          axis: flipAxis(widget.axis),
-                          reverse: _reverse,
-                          children: [
-                            AxisFlex(
-                              axis: widget.axis,
-                              children: [
-                                ExcerptMenu(
-                                  annoCfi: widget.annoCfi,
-                                  annoContent: widget.annoContent,
-                                  id: widget.annoId,
-                                  onClose: widget.onClose,
-                                  footnote: widget.footnote,
-                                  decoration: widget.decoration,
-                                  showTranslationMenu:
-                                      _showTranslationMenuPanel,
-                                  toggleReaderNoteMenu: _toggleReaderNoteMenu,
-                                  openReaderNoteMenu: _openReaderNoteMenu,
-                                  onNoteCreated: _handleNoteCreated,
-                                  onLayoutChanged: _scheduleRecalculate,
-                                  axis: widget.axis,
-                                  reverse: _reverse,
-                                  contextText: widget.contextText,
-                                  selectionSnapshot: widget.selectionSnapshot,
-                                  offlineDictionaryMode:
-                                      widget.offlineDictionaryMode,
-                                  lookupCandidate: widget.lookupCandidate,
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                        if (_showReaderNoteMenu) ...[
-                          const SizedBox.square(dimension: 10),
-                          AxisFlex(
-                            axis: widget.axis,
-                            children: [
-                              ReaderNoteMenu(
-                                key: _readerNoteMenuKey,
-                                noteId: _noteId,
-                                decoration: widget.decoration,
-                                axis: widget.axis,
-                                onVisibilityChange:
-                                    _handleReaderNoteVisibilityChange,
-                                onSizeChanged: _handleReaderNoteSizeChanged,
-                              ),
-                            ],
-                          ),
-                        ],
-                        if (_showTranslationMenu) ...[
-                          const SizedBox.square(dimension: 10),
-                          AxisFlex(
-                            axis: widget.axis,
-                            children: [
-                              TranslationMenu(
-                                content: widget.annoContent,
-                                decoration: widget.decoration,
-                                axis: widget.axis,
-                                contextText: widget.contextText,
-                                position: widget.annoCfi,
-                                offline: widget.offlineDictionaryMode,
-                                candidate: widget.lookupCandidate,
-                              ),
-                            ],
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  player.setSelectionClearLocked(controller.selectionPanelPage != null);
+  if (player.contextMenuEntry?.mounted == true) return;
+  final overlay = Overlay.of(context);
+  final entry = OverlayEntry(
+      builder: (context) => ListenableBuilder(
+            listenable: controller,
+            builder: (context, _) {
+              if (!controller.selectionDockVisible ||
+                  controller.selection == null) {
+                return const SizedBox.shrink();
+              }
+              final renderBox = epubPlayerKey.currentContext?.findRenderObject()
+                  as RenderBox?;
+              final origin =
+                  renderBox?.localToGlobal(Offset.zero) ?? Offset.zero;
+              final size = renderBox?.size ?? MediaQuery.sizeOf(context);
+              final width = math.min(
+                  controller.selectionUsesMouse ? 440.0 : 640.0,
+                  size.width - 16);
+              final selected = controller.selection!;
+              final candidate = ReadingLookupCandidateResolver.resolve(
+                  selected.text,
+                  selection: selected);
+              final policy = SelectionActionPolicy.forSelection(selected.text,
+                  aiEnabled: EnvVar.enableAIFeature,
+                  vocabularyEnabled: Prefs().bottomNavigatorShowVocabulary,
+                  footnote: controller.selectionFootnote,
+                  actionOrder: Prefs().selectionMenuActionOrder,
+                  enabledActions: Prefs().enabledSelectionMenuActions,
+                  candidate: candidate);
+              final keyboard = MediaQuery.viewInsetsOf(context).bottom;
+              final safe = MediaQuery.paddingOf(context);
+              // Mouse menus use their initial nearby edge; touch docks stay fixed for
+              // the session even when the selected text or toolbar height changes.
+              final atTop = controller.selectionDockAtTop;
+              final nearbyTop = controller.selectionUsesMouse
+                  ? origin.dy +
+                      math.min(size.height * .55, bottom * size.height + 12)
+                  : origin.dy + safe.top + 8;
+              return Positioned(
+                left: origin.dx + (size.width - width) / 2,
+                top: atTop || controller.selectionUsesMouse ? nearbyTop : null,
+                bottom: !atTop && !controller.selectionUsesMouse
+                    ? math.max(
+                            safe.bottom,
+                            MediaQuery.sizeOf(context).height -
+                                origin.dy -
+                                size.height) +
+                        keyboard +
+                        8
+                    : null,
+                width: width,
+                child: PointerInterceptor(
+                    child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                      maxHeight: math.max(
+                          80, size.height - keyboard - safe.vertical - 24)),
+                  child: SingleChildScrollView(
+                      child: ExcerptMenu(
+                    controller: controller,
+                    actions: policy.primaryActions,
+                    dictionary: policy.isDictionaryLookup,
+                    generating: page.selectionAiGenerating,
+                    onAction: (action) => page.handleSelectionAction(action),
+                    onMore: () =>
+                        page.openSelectionPanel(SelectionPanelPage.more),
+                    onClose: page.finishSelection,
+                    onRange: player.changeSelectionRange,
+                    onAdjust: player.adjustSelectionBoundary,
+                    onExtend: player.extendSelectionPage,
+                    onUndoExtension: player.undoSelectionExtension,
+                    onShowEnd: player.showSelectionEnd,
+                  )),
+                )),
+              );
+            },
+          ));
+  player.contextMenuEntry = entry;
+  overlay.insert(entry);
 }

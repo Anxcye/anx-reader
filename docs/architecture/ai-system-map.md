@@ -4,6 +4,26 @@
 > 适用范围：AI 对话、Reading Agent、Reading Skill、阅读闭环、小说 Story Atlas、书籍 Wiki、阅读记忆、笔记整理、翻译、搜索、模型供应商、Token、任务、证据、同步与撤销。
 > 当前 SQLite 版本：22，以 `lib/dao/database.dart` 的 `currentDbVersion` 为准。
 
+## 阅读选区交互更新（2026-11）
+
+- 默认点击/音量键翻页、滑动文字选句；滑动翻页需在设置中明确开启。滑动选句与
+  长按共用 DOM 选区控制器和操作栏，只产生本地选区事件，不保存或请求模型。
+- `SelectionRangeController` 是 DOM 范围权威；快照包含 session/revision、端点/跨页能力
+  与可验证的当前可见页进度。显式命令调整端点、延伸/撤回、显示末尾和 CFI 恢复。
+  原生折叠、迟到词边界和跨页回调不得覆盖更新的会话。普通阅读输入零模型调用。
+- `AiWorkspaceController` 持有选区工具和临时结果子页；同一 Overlay 就地更新，
+  `ReadingWorkspaceHost` 保留原 AI/本书子树。`SelectionPanel` 只渲染冻结来源。
+- `ReadingLookupRouter` 先 offlineOnly；网络/翻译/发音由明确动作授权。选区范围
+  不依赖联网状态，字典 HTML 结果不加载外部图片、样式或音频。
+- 手动标记经 `AgentActionService.saveManualAnnotation/deleteManualAnnotation` 和
+  既有事务/动作日志写入，原生批注与 source/user 笔记投影原子保存；相同 CFI 去重，
+  版本冲突拒绝撤销，删除保留独立笔记。没有新增业务表、同步类型或格式。
+- 选区 AI 意图复用已有 SelectionAiAction/Gateway/ContextAssembler/runner，来源冻结，
+  快捷发送保留草稿。无法验证选区终点边界时先通过显式本地导航显示末尾。
+- 回归入口：`node assets/foliate-js/tests/run-selection-browser.cjs`、选区模型/偏好/
+  控制器及 context_menu Widget 测试、批注动作仓库/运行时测试。
+
+
 ## 阅读界面入口更新（2026-11）
 
 阅读内入口统一为同一 `AI｜本书` 面板。AI 为当前阅读现场提供明确触发的简短回答、

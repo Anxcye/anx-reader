@@ -121,6 +121,9 @@ class _AiReadingWorkspaceState extends ConsumerState<AiReadingWorkspace> {
         description: widget.bookDescription,
       );
     }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _changed();
+    });
   }
 
   Future<void> _suggestModeWithAi() async {
@@ -164,6 +167,9 @@ class _AiReadingWorkspaceState extends ConsumerState<AiReadingWorkspace> {
       _analysisOutput = widget.controller.outputTemplate;
       _showAnalysisConfig = false;
       _analysisFrameworks.clear();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _changed();
+      });
     }
   }
 
@@ -177,6 +183,18 @@ class _AiReadingWorkspaceState extends ConsumerState<AiReadingWorkspace> {
   void _changed() {
     if (!mounted) return;
     setState(() {});
+    final action = widget.controller.takeRequestedSelectionAction();
+    final source = widget.controller.pendingSelection;
+    if (action != null && source != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted ||
+            !widget.controller.visible ||
+            widget.controller.pendingSelection != source) {
+          return;
+        }
+        _runSelectionAction(source, action);
+      });
+    }
   }
 
   @override
@@ -235,6 +253,10 @@ class _AiReadingWorkspaceState extends ConsumerState<AiReadingWorkspace> {
         _submittedSource = widget.controller.pendingSelection ??
             _submittedSource ??
             _currentLocationSnapshot();
+        ref.read(aiChatProvider.notifier).setReadingContextOverride(
+            _submittedSource?.selectedText?.trim().isNotEmpty == true
+                ? _submittedSource
+                : null);
         _submittedQuestion = _nextQuestionTitle ??
             message
                 .split(
@@ -349,7 +371,9 @@ class _AiReadingWorkspaceState extends ConsumerState<AiReadingWorkspace> {
         L10n.of(context).readingAssistantConnect,
       _ => _actionLabel(action),
     };
-    final started = widget.chatKey.currentState?.sendPrompt(prompt) ?? false;
+    final started =
+        widget.chatKey.currentState?.sendPrompt(prompt, preserveDraft: true) ??
+            false;
     if (!started) _nextQuestionTitle = null;
     if (started) widget.controller.clearPendingSelection();
   }

@@ -2,15 +2,54 @@ import 'dart:io';
 
 import 'package:anx_reader/dao/database.dart';
 import 'package:anx_reader/dao/reading_agent.dart';
+import 'package:anx_reader/dao/reading_coach.dart';
+import 'package:anx_reader/config/shared_preference_provider.dart';
 import 'package:anx_reader/models/reading_agent.dart';
 import 'package:anx_reader/models/book_note.dart';
 import 'package:anx_reader/models/reading_coach.dart';
 import 'package:anx_reader/models/reading_note.dart';
 import 'package:anx_reader/models/reading_memory.dart';
 import 'package:anx_reader/service/ai/reading_agent_repository.dart';
+import 'package:anx_reader/service/ai/agent_action_service.dart';
+import 'package:anx_reader/service/ai/reading_agent_runtime.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+class _SwitchingAnnotationRepository extends ReadingAgentRepository {
+  _SwitchingAnnotationRepository(ReadingAgentDao dao) : super(dao: dao);
+  Future<void> Function()? afterSave;
+  Future<void> Function()? afterDelete;
+
+  @override
+  Future<AgentMutation<BookNote>> saveManualAnnotation(BookNote annotation,
+      {required String sessionId,
+      BookNote? expected,
+      String? chapterHref,
+      double? sourceProgress,
+      double? visibleFromProgress,
+      bool updateReaderNote = false}) async {
+    final mutation = await super.saveManualAnnotation(annotation,
+        sessionId: sessionId,
+        expected: expected,
+        chapterHref: chapterHref,
+        sourceProgress: sourceProgress,
+        visibleFromProgress: visibleFromProgress,
+        updateReaderNote: updateReaderNote);
+    await afterSave?.call();
+    return mutation;
+  }
+
+  @override
+  Future<AgentMutation<BookNote>> deleteManualAnnotation(BookNote annotation,
+      {required String sessionId}) async {
+    final mutation =
+        await super.deleteManualAnnotation(annotation, sessionId: sessionId);
+    await afterDelete?.call();
+    return mutation;
+  }
+}
 
 void main() {
   late Directory tempDir;
@@ -19,9 +58,11 @@ void main() {
   late ReadingAgentRepository repository;
   var now = 1000000;
 
-  setUpAll(() {
+  setUpAll(() async {
     TestWidgetsFlutterBinding.ensureInitialized();
     sqfliteFfiInit();
+    SharedPreferences.setMockInitialValues({});
+    await Prefs().initPrefs();
   });
 
   setUp(() async {
@@ -517,6 +558,451 @@ void main() {
     expect(await db.query('tb_reading_notes'), isEmpty);
     expect(await db.query('tb_reading_note_blocks'), isEmpty);
     expect(await db.query('tb_reading_note_sources'), isEmpty);
+  });
+
+  BookNote manualAnnotation({int? id, String color = 'ffff00', String? body}) =>
+      BookNote(
+          id: id,
+          bookId: 1,
+          content: 'Exact selected source',
+          cfi: 'epubcfi(/6/2!/4/2:0,/4/2:12)',
+          chapter: 'Chapter one',
+          type: 'highlight',
+          color: color,
+          readerNote: body,
+          createTime: DateTime.fromMillisecondsSinceEpoch(now),
+          updateTime: DateTime.fromMillisecondsSinceEpoch(now));
+
+  test('manual highlight atomically captures source and undo removes only it',
+      () async {
+    final unrelated = await db.insert(
+        'tb_notes', (manualAnnotation()..cfi = 'epubcfi(/6/other)').toMap());
+    final saved = await repository.saveManualAnnotation(manualAnnotation(),
+        sessionId: 'manual-session',
+        sourceProgress: .4,
+        visibleFromProgress: .4);
+    expect(saved.value.id, isNot(unrelated));
+    final source = (await db.query('tb_reading_note_sources')).single;
+    expect(source['source_type'], 'annotation');
+    expect(source['source_ref'], saved.value.id.toString());
+    expect(source['metadata'], contains('"sourceProgress":0.4'));
+    expect(
+        (await db.query('tb_reading_note_blocks')).map((row) => row['origin']),
+        ['source', 'user']);
+    expect(await repository.undo(saved.action.id), UndoResult.undone);
+    expect((await db.query('tb_notes')).single['id'], unrelated);
+    expect(await db.query('tb_reading_notes'), isEmpty);
+    expect(await db.query('tb_reading_note_sources'), isEmpty);
+  });
+
+  test('manual style edit preserves source and undo restores previous values',
+      () async {
+    final created = await repository.saveManualAnnotation(
+        manualAnnotation(body: 'My note'),
+        sessionId: 'session',
+        sourceProgress: .3,
+        visibleFromProgress: .3);
+    final old = created.value;
+    final modified =
+        manualAnnotation(id: old.id, color: '00ff00', body: 'My note')
+          ..content = 'A stale menu must not replace source'
+          ..cfi = 'epubcfi(/6/200)';
+    final saved = await repository.saveManualAnnotation(modified,
+        sessionId: 'session', expected: old);
+    expect(saved.value.content, old.content);
+    expect(saved.value.cfi, old.cfi);
+    expect(saved.value.readerNote, 'My note');
+    expect(saved.value.createTime, old.createTime);
+    expect(await db.query('tb_reading_notes'), hasLength(1));
+    expect(await repository.undo(saved.action.id), UndoResult.undone);
+    expect((await repository.readAnnotation(old.id!))!.color, old.color);
+    expect(await repository.undo(created.action.id), UndoResult.undone);
+  });
+
+  test('manual note edit updates user block and undo preserves original note',
+      () async {
+    final created = await repository.saveManualAnnotation(
+        manualAnnotation(body: 'Before'),
+        sessionId: 'session');
+    final old = created.value;
+    final saved = await repository.saveManualAnnotation(
+        manualAnnotation(id: old.id, body: 'After'),
+        sessionId: 'session',
+        expected: old,
+        updateReaderNote: true);
+    expect(
+        (await db.query('tb_reading_note_blocks',
+                where: 'origin = ?', whereArgs: ['user']))
+            .single['content'],
+        'After');
+    expect(await repository.undo(saved.action.id), UndoResult.undone);
+    expect((await repository.readAnnotation(old.id!))!.readerNote, 'Before');
+    expect(
+        (await db.query('tb_reading_note_blocks',
+                where: 'origin = ?', whereArgs: ['user']))
+            .single['content'],
+        'Before');
+  });
+
+  test('manual delete undo restores original annotation and note identities',
+      () async {
+    final created = await repository.saveManualAnnotation(
+        manualAnnotation(body: 'Keep original'),
+        sessionId: 'session');
+    final before = (await db.query('tb_reading_notes')).single;
+    final deleted = await repository.deleteManualAnnotation(created.value,
+        sessionId: 'session');
+    expect(await repository.readAnnotation(created.value.id!), isNull);
+    expect(await db.query('tb_reading_notes'), hasLength(1));
+    expect(await repository.undo(deleted.action.id), UndoResult.undone);
+    expect((await repository.readAnnotation(created.value.id!))!.readerNote,
+        'Keep original');
+    expect((await db.query('tb_reading_notes')).single, before);
+    expect((await db.query('tb_reading_note_sources')).single['source_ref'],
+        created.value.id.toString());
+  });
+
+  test('manual undo refuses later annotation or mapped-note edits', () async {
+    final created = await repository.saveManualAnnotation(manualAnnotation(),
+        sessionId: 'session');
+    await db.update('tb_notes', {'reader_note': 'Changed on another device'},
+        where: 'id = ?', whereArgs: [created.value.id]);
+    expect(await repository.undo(created.action.id), UndoResult.conflict);
+    expect(await db.query('tb_reading_notes'), hasLength(1));
+
+    final second = await repository.saveManualAnnotation(manualAnnotation(),
+        sessionId: 'session');
+    final source = (await db.query('tb_reading_note_sources',
+            where: 'source_ref = ?', whereArgs: [second.value.id.toString()]))
+        .single;
+    await db.update('tb_reading_note_blocks', {'content': 'Later reflection'},
+        where: 'note_id = ? AND origin = ?',
+        whereArgs: [source['note_id'], 'user']);
+    expect(await repository.undo(second.action.id), UndoResult.conflict);
+    expect(await repository.readAnnotation(second.value.id!), isNotNull);
+  });
+
+  test(
+      'manual mutation rejects stale expected annotation without partial write',
+      () async {
+    final created = await repository.saveManualAnnotation(manualAnnotation(),
+        sessionId: 'session');
+    await db.update('tb_notes', {'color': 'ff0000'},
+        where: 'id = ?', whereArgs: [created.value.id]);
+    await expectLater(
+        repository.saveManualAnnotation(
+            manualAnnotation(id: created.value.id, color: '00ff00'),
+            sessionId: 'session',
+            expected: created.value),
+        throwsStateError);
+    await expectLater(
+        repository.deleteManualAnnotation(created.value, sessionId: 'session'),
+        throwsStateError);
+    expect(
+        (await repository.readAnnotation(created.value.id!))!.color, 'ff0000');
+    expect(await db.query('tb_agent_actions'), hasLength(1));
+  });
+
+  test('delete undo refuses a reused document identity without deleting it',
+      () async {
+    final created = await repository.saveManualAnnotation(manualAnnotation(),
+        sessionId: 'session');
+    final note = (await db.query('tb_reading_notes')).single;
+    final deleted = await repository.deleteManualAnnotation(created.value,
+        sessionId: 'session');
+    await db
+        .insert('tb_reading_notes', {...note, 'title': 'Unrelated new note'});
+    expect(await repository.undo(deleted.action.id), UndoResult.conflict);
+    expect((await db.query('tb_reading_notes')).single['title'],
+        'Unrelated new note');
+    expect(await repository.readAnnotation(created.value.id!), isNull);
+  });
+
+  test('delete undo preserves tags and revision history', () async {
+    final created = await repository.saveManualAnnotation(manualAnnotation(),
+        sessionId: 'session');
+    final noteId = (await db.query('tb_reading_notes')).single['id'];
+    await db.insert('tb_reading_tags', {
+      'id': 'tag',
+      'name': 'Important',
+      'normalized_name': 'important',
+      'created_at': now,
+      'updated_at': now,
+    });
+    await db
+        .insert('tb_reading_note_tags', {'note_id': noteId, 'tag_id': 'tag'});
+    await db.insert('tb_reading_note_revisions', {
+      'id': 'revision',
+      'note_id': noteId,
+      'title': 'Earlier title',
+      'body': 'Earlier body',
+      'tags': '[]',
+      'status': 'active',
+      'created_at': now,
+    });
+    final deleted = await repository.deleteManualAnnotation(created.value,
+        sessionId: 'session');
+    expect(await db.query('tb_reading_note_revisions'), hasLength(1));
+    expect(await repository.undo(deleted.action.id), UndoResult.undone);
+    expect((await db.query('tb_reading_note_tags')).single['tag_id'], 'tag');
+    expect((await db.query('tb_reading_note_revisions')).single['body'],
+        'Earlier body');
+  });
+
+  test('manual action service enforces book, progress and stale editor guards',
+      () async {
+    final runtime = ReadingAgentRuntimeController(
+        repository: repository,
+        readingCoachDao: ReadingCoachDao(databaseProvider: () async => db));
+    addTearDown(runtime.dispose);
+    await runtime.start(bookId: 1, bookTitle: 'Book');
+    runtime.captureRequestLocation(
+        cfi: 'epubcfi(/6/2)',
+        chapterHref: 'one.xhtml',
+        chapterTitle: 'One',
+        totalProgress: .4,
+        chapterProgress: .4);
+    final service =
+        AgentActionService(repository: repository, runtime: runtime);
+    Future<AgentMutation<BookNote>> save(
+            {int bookId = 1,
+            double progress = .4,
+            int? id,
+            DateTime? expected}) =>
+        service.saveManualAnnotation(
+            bookId: bookId,
+            text: 'Selected source',
+            cfi: 'epubcfi(/6/2)',
+            chapter: 'One',
+            color: 'ffff00',
+            type: 'highlight',
+            annotationId: id,
+            sourceProgress: progress,
+            expectedUpdatedAt: expected);
+    await expectLater(save(bookId: 2), throwsStateError);
+    await expectLater(save(progress: .6), throwsArgumentError);
+    expect(await db.query('tb_notes'), isEmpty);
+    final created = await save();
+    expect(runtime.state.lastAgentAction?.id, created.action.id);
+    await expectLater(
+        save(
+            id: created.value.id,
+            expected: DateTime.fromMillisecondsSinceEpoch(0)),
+        throwsStateError);
+    await expectLater(
+        service.deleteManualAnnotation(
+            bookId: 2, annotationId: created.value.id!),
+        throwsStateError);
+    await expectLater(
+        service.deleteManualAnnotation(
+            bookId: 1,
+            annotationId: created.value.id!,
+            expectedUpdatedAt: DateTime.fromMillisecondsSinceEpoch(0)),
+        throwsStateError);
+    expect(await db.query('tb_agent_actions'), hasLength(1));
+    expect(await service.undo(created.action), UndoResult.undone);
+    expect(await db.query('tb_notes'), isEmpty);
+  });
+
+  test('manual action undo repaints restored annotation after style or delete',
+      () async {
+    final runtime = ReadingAgentRuntimeController(
+        repository: repository,
+        readingCoachDao: ReadingCoachDao(databaseProvider: () async => db));
+    addTearDown(runtime.dispose);
+    await runtime.start(bookId: 1, bookTitle: 'Book');
+    runtime.captureRequestLocation(
+        cfi: 'epubcfi(/6/2)',
+        chapterHref: 'one.xhtml',
+        chapterTitle: 'One',
+        totalProgress: .4,
+        chapterProgress: .4);
+    final paints = <BookNote>[];
+    final hidden = <String>[];
+    ReaderCommandGateway.instance.register(
+        bookId: 1,
+        navigateToCfi: (_) {},
+        navigateToHref: (_) {},
+        isValidHref: (_) => true,
+        currentCfi: () => 'epubcfi(/6/2)',
+        addAnnotation: paints.add,
+        removeAnnotation: hidden.add,
+        addDifficultyAnnotation: ({required id, required cfi}) {});
+    addTearDown(() => ReaderCommandGateway.instance.unregister(1));
+    final service =
+        AgentActionService(repository: repository, runtime: runtime);
+    final created = await service.saveManualAnnotation(
+        bookId: 1,
+        text: 'Selected source',
+        cfi: 'epubcfi(/6/2)',
+        chapter: 'One',
+        color: 'ffff00',
+        type: 'highlight');
+    final modified = await service.saveManualAnnotation(
+        bookId: 1,
+        text: 'Selected source',
+        cfi: 'epubcfi(/6/2)',
+        chapter: 'One',
+        color: '00ff00',
+        type: 'highlight',
+        annotationId: created.value.id);
+    expect(paints.last.color, '00ff00');
+    expect(await service.undo(modified.action), UndoResult.undone);
+    expect(paints.last.color, 'ffff00');
+    final deleted = await service.deleteManualAnnotation(
+        bookId: 1, annotationId: created.value.id!);
+    expect(hidden.last, created.value.cfi);
+    expect(await service.undo(deleted.action), UndoResult.undone);
+    expect(paints.last.id, created.value.id);
+    expect(await service.undo(created.action), UndoResult.undone);
+    expect(hidden.last, created.value.cfi);
+  });
+
+  ReadingNoteDocument sourcedDocument(String id) => ReadingNoteDocument(
+          note: ReadingNote(
+              id: id,
+              bookId: 1,
+              title: 'A note',
+              status: ReadingNoteStatus.active,
+              captureKind: ReadingNoteCaptureKind.manual,
+              isFavorite: false,
+              createdAt: now,
+              updatedAt: now),
+          sources: [
+            ReadingNoteSource(
+                noteId: id,
+                type: ReadingNoteSourceType.aiSession,
+                sourceRef: 'session',
+                cfi: 'epubcfi(/6/2)',
+                textSnapshot: 'Exact source',
+                createdAt: now)
+          ]);
+
+  test('note undo preserves an annotation referenced by an existing ID',
+      () async {
+    final annotationId =
+        await db.insert('tb_notes', manualAnnotation().toMap());
+    final saved = await repository.createNote(sourcedDocument('reference-note'),
+        sessionId: 'session', ownedAnnotationId: annotationId);
+    expect(await repository.undo(saved.action.id), UndoResult.undone);
+    expect(await repository.readAnnotation(annotationId), isNotNull);
+    expect(await db.query('tb_reading_notes'), isEmpty);
+  });
+
+  test('AI source note undo protects a later edit to its owned annotation',
+      () async {
+    final saved = await repository.createNote(sourcedDocument('ai-source-note'),
+        sessionId: 'session', ownedAnnotation: manualAnnotation());
+    final annotationId = saved.action.afterSnapshot!['ownedAnnotationId'];
+    await db.update('tb_notes', {'reader_note': 'A later user thought'},
+        where: 'id = ?', whereArgs: [annotationId]);
+    expect(await repository.undo(saved.action.id), UndoResult.conflict);
+    expect(await db.query('tb_reading_notes'), hasLength(1));
+    expect((await repository.readAnnotation(annotationId as int))!.readerNote,
+        'A later user thought');
+  });
+
+  test('re-marking the exact CFI updates identity and undo keeps original',
+      () async {
+    final original = await repository.saveManualAnnotation(
+        manualAnnotation(body: 'Original reflection'),
+        sessionId: 'session');
+    final saved = await repository.saveManualAnnotation(
+        manualAnnotation(color: '00ff00'),
+        sessionId: 'session');
+    expect(saved.value.id, original.value.id);
+    expect(saved.value.readerNote, 'Original reflection');
+    expect(await db.query('tb_notes'), hasLength(1));
+    expect(await db.query('tb_reading_notes'), hasLength(1));
+    expect(await repository.undo(saved.action.id), UndoResult.undone);
+    expect((await repository.readAnnotation(original.value.id!))!.color,
+        original.value.color);
+    expect((await repository.readAnnotation(original.value.id!))!.readerNote,
+        'Original reflection');
+  });
+
+  test('marker deletion preserves composite and independently enriched notes',
+      () async {
+    final created = await repository.saveManualAnnotation(manualAnnotation(),
+        sessionId: 'session');
+    final noteId = (await db.query('tb_reading_notes')).single['id'];
+    await db.insert('tb_reading_note_sources', {
+      'note_id': noteId,
+      'source_type': 'aiSession',
+      'source_ref': 'another-source',
+      'cfi': 'epubcfi(/6/other)',
+      'text_snapshot': 'Independent source',
+      'metadata': '{}',
+      'created_at': now,
+    });
+    final deleted = await repository.deleteManualAnnotation(created.value,
+        sessionId: 'session');
+    expect(await repository.readAnnotation(created.value.id!), isNull);
+    expect(await db.query('tb_reading_notes'), hasLength(1));
+    expect(await db.query('tb_reading_note_sources'), hasLength(2));
+    await db.update('tb_reading_notes', {'title': 'Later independent edit'},
+        where: 'id = ?', whereArgs: [noteId]);
+    expect(await repository.undo(deleted.action.id), UndoResult.conflict);
+    expect((await db.query('tb_reading_notes')).single['title'],
+        'Later independent edit');
+  });
+
+  test(
+      'manual commits after a book switch cannot repaint or notify new session',
+      () async {
+    final switching = _SwitchingAnnotationRepository(dao);
+    final runtime = ReadingAgentRuntimeController(
+        repository: switching,
+        readingCoachDao: ReadingCoachDao(databaseProvider: () async => db));
+    addTearDown(runtime.dispose);
+    final paints = <BookNote>[];
+    final hidden = <String>[];
+    void register(int bookId) => ReaderCommandGateway.instance.register(
+        bookId: bookId,
+        navigateToCfi: (_) {},
+        navigateToHref: (_) {},
+        isValidHref: (_) => true,
+        currentCfi: () => 'epubcfi(/6/2)',
+        addAnnotation: paints.add,
+        removeAnnotation: hidden.add,
+        addDifficultyAnnotation: ({required id, required cfi}) {});
+    addTearDown(() {
+      ReaderCommandGateway.instance.unregister(1);
+      ReaderCommandGateway.instance.unregister(2);
+    });
+    Future<void> start(int bookId) async {
+      await runtime.start(bookId: bookId, bookTitle: 'Book $bookId');
+      runtime.captureRequestLocation(
+          cfi: 'epubcfi(/6/2)',
+          chapterHref: 'one.xhtml',
+          chapterTitle: 'One',
+          totalProgress: .4,
+          chapterProgress: .4);
+      register(bookId);
+    }
+
+    await start(1);
+    final service = AgentActionService(repository: switching, runtime: runtime);
+    switching.afterSave = () => start(2);
+    final saved = await service.saveManualAnnotation(
+        bookId: 1,
+        text: 'Source',
+        cfi: 'epubcfi(/6/2)',
+        chapter: 'One',
+        color: 'ffff00',
+        type: 'highlight');
+    expect(await repository.readAnnotation(saved.value.id!), isNotNull);
+    expect(runtime.state.bookId, 2);
+    expect(runtime.state.lastAgentAction, isNull);
+    expect(paints, isEmpty);
+    await start(1);
+    switching.afterDelete = () => start(2);
+    await service.deleteManualAnnotation(
+        bookId: 1, annotationId: saved.value.id!);
+    expect(await repository.readAnnotation(saved.value.id!), isNull);
+    expect(runtime.state.bookId, 2);
+    expect(runtime.state.lastAgentAction, isNull);
+    expect(hidden, isEmpty);
   });
 
   test('agent note undo also removes its owned annotation', () async {
