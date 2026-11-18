@@ -1,3 +1,5 @@
+import { PageCurlController, shouldCommitCurl } from './page-curl.js'
+
 const wait = ms => new Promise(resolve => setTimeout(resolve, ms))
 
 const lerp = (min, max, x) => x * (max - min) + min
@@ -5,12 +7,24 @@ const easeOutSine = x => Math.sin((x * Math.PI) / 2)
 // const easeOutSine = x => 1 - (1 - x) * (1 - x);
 const animate = (a, b, duration, ease, render) => new Promise(resolve => {
   let start
+  let done = false
+  const finish = () => {
+    if (done) return
+    done = true
+    clearTimeout(watchdog)
+    render(b)
+    resolve()
+  }
+  // requestAnimationFrame may never fire in a hidden WebView; without this
+  // fallback the animation hangs forever and wedges the whole paginator.
+  const watchdog = setTimeout(finish, duration + 800)
   const step = now => {
+    if (done) return
     start ??= now
     const fraction = Math.min(1, (now - start) / duration)
     render(lerp(a, b, ease(fraction)))
     if (fraction < 1) requestAnimationFrame(step)
-    else resolve()
+    else finish()
   }
   requestAnimationFrame(step)
 })
@@ -223,6 +237,9 @@ class View {
   get document() {
     return this.#iframe.contentDocument
   }
+  get iframe() {
+    return this.#iframe
+  }
   async load(src, afterLoad, beforeRender) {
     if (typeof src !== 'string') throw new Error(`${src} is not string`)
     return new Promise(resolve => {
@@ -428,7 +445,7 @@ export class Paginator extends HTMLElement {
   static observedAttributes = [
     'flow', 'gap', 'top-margin', 'bottom-margin', 'background-color',
     'max-inline-size', 'max-block-size', 'max-column-count', 'column-threshold', 'bgimg-url',
-    'bgimg-blur', 'bgimg-opacity', 'bgimg-fit',
+    'bgimg-blur', 'bgimg-opacity', 'bgimg-fit', 'page-turn-mode',
   ]
   #root = this.attachShadow({ mode: 'open' })
   #observer = new ResizeObserver(() => this.render())
@@ -458,6 +475,14 @@ export class Paginator extends HTMLElement {
   #loadingPrev = false
   #pendingRelocate = null
   #isSnapping = false
+  #pageTurnMode = 'slide'
+  #curlLayer
+  #curlController
+  #curlTurn
+  #curlTimer
+  #curlChapterReady = false
+  #curlDocumentObserver
+  #silentCurlOffset
   constructor() {
     super()
     this.#root.innerHTML = `<style>
@@ -525,6 +550,14 @@ export class Paginator extends HTMLElement {
         #container::-webkit-scrollbar {
             display: none;  /* Safari and Chrome */
         }
+        #curl-layer {
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+            overflow: hidden;
+            visibility: hidden;
+            pointer-events: none;
+        }
         :host([flow="scrolled"]) #container {
             grid-column: 1 / -1;
             grid-row: 2;
@@ -561,17 +594,23 @@ export class Paginator extends HTMLElement {
         <div id="top">
             <div id="background" part="filter"></div>
             <div id="container"></div>
+            <div id="curl-layer" aria-hidden="true"></div>
         </div>
         `
 
     this.#top = this.#root.getElementById('top')
     this.#background = this.#root.getElementById('background')
     this.#container = this.#root.getElementById('container')
+    this.#curlLayer = this.#root.getElementById('curl-layer')
     // this.#header = this.#root.getElementById('header')
     // this.#footer = this.#root.getElementById('footer')
 
     this.#observer.observe(this.#container)
     this.#container.addEventListener('scroll', () => {
+      const silent = this.#silentCurlOffset
+      this.#silentCurlOffset = undefined
+      if (this.#curlTurn || (silent != null && this.scrollProp === 'scrollLeft'
+        && Math.abs(silent - this.#container.scrollLeft) < 1)) return
       if (this.#ignoreNativeScroll) return
       if (this.#justAnchored) {
         this.#justAnchored = false
@@ -587,23 +626,31 @@ export class Paginator extends HTMLElement {
     })
 
     const opts = { passive: false }
-    this.addEventListener('touchstart', this.#onTouchStart.bind(this), opts)
-    this.addEventListener('touchmove', this.#onTouchMove.bind(this), opts)
-    this.addEventListener('touchend', this.#onTouchEnd.bind(this), opts)
+    const attachTouch = target => {
+      target.addEventListener('touchstart', this.#onTouchStart.bind(this), opts)
+      target.addEventListener('touchmove', this.#onTouchMove.bind(this), opts)
+      target.addEventListener('touchend', this.#onTouchEnd.bind(this), opts)
+      target.addEventListener('touchcancel', this.#onTouchCancel.bind(this), opts)
+    }
+    attachTouch(this)
     this.addEventListener('load', ({ detail: { doc } }) => {
-      doc.addEventListener('touchstart', this.#onTouchStart.bind(this), opts)
-      doc.addEventListener('touchmove', this.#onTouchMove.bind(this), opts)
-      doc.addEventListener('touchend', this.#onTouchEnd.bind(this), opts)
+      attachTouch(doc)
     })
 
     this.#mediaQueryListener = () => {
       if (!this.#view) return
       this.#applyBackground()
+      this.#refreshCurl()
     }
     this.#mediaQuery.addEventListener('change', this.#mediaQueryListener)
   }
-  attributeChangedCallback(name, _, value) {
+  attributeChangedCallback(name, oldValue, value) {
     switch (name) {
+      case 'page-turn-mode':
+        if (oldValue === value) break
+        this.#pageTurnMode = value ?? 'slide'
+        this.#refreshCurl()
+        break
       case 'flow':
         this.render()
         break
@@ -641,13 +688,18 @@ export class Paginator extends HTMLElement {
     applyBackground(this.#background, url, blur, opacity, fit)
   }
   #createView() {
+    this.#curlChapterReady = false
+    this.#refreshCurl()
     if (this.#view) {
       this.#view.destroy()
       this.#container.removeChild(this.#view.element)
     }
     this.#view = new View({
       container: this,
-      onExpand: () => this.scrollToAnchor(this.#anchor),
+      onExpand: () => {
+        this.#refreshCurl()
+        return this.scrollToAnchor(this.#anchor)
+      },
     })
     this.#container.append(this.#view.element)
     return this.#view
@@ -746,11 +798,98 @@ export class Paginator extends HTMLElement {
   }
   render() {
     if (!this.#view) return
+    this.#refreshCurl()
     this.#view.render(this.#beforeRender({
       vertical: this.#vertical,
       rtl: this.#rtl,
     }))
     this.scrollToAnchor(this.#anchor)
+  }
+  #canCurl() {
+    return this.#pageTurnMode === 'curl' && this.#curlChapterReady
+      && !this.scrolled && !this.#vertical && !this.#rtl && this.bookDir !== 'rtl'
+  }
+  #refreshCurl() {
+    clearTimeout(this.#curlTimer)
+    this.#cancelCurl()
+    this.#curlController?.invalidate()
+    this.#curlDocumentObserver?.disconnect()
+    if (!this.#canCurl()) return
+
+    const view = this.#view
+    const doc = view.document
+    if (!doc?.body) return
+    // Coalesce font, image and resize notifications while the live view reflows.
+    this.#curlTimer = setTimeout(() => {
+      this.#curlController ??= new PageCurlController(this.#curlLayer, () => this.#refreshCurl())
+      try {
+        this.#curlController.prepare({ doc, iframe: view.iframe, overlay: view.overlayer?.element })
+      } catch {
+        this.#curlController.invalidate()
+      }
+    }, 64)
+    this.#curlDocumentObserver ??= new MutationObserver(records => {
+      if (records.some(record => record.type !== 'attributes'
+        || record.oldValue !== record.target.getAttribute(record.attributeName))) this.#refreshCurl()
+    })
+    this.#curlDocumentObserver.observe(doc.documentElement, {
+      attributes: true, attributeOldValue: true, characterData: true, childList: true, subtree: true,
+    })
+  }
+  #setCurlOffset(offset) {
+    if (Math.abs(this.#container.scrollLeft - offset) < 0.5) return
+    this.#container.scrollLeft = offset
+    this.#silentCurlOffset = this.#container.scrollLeft
+  }
+  #beginCurl(direction, bottom, distance = 0, lift = 0) {
+    if (!this.#canCurl() || !this.#curlController || this.#curlTurn
+      || this.#locked || this.#isSnapping || this.#ignoreNativeScroll) return
+    const { page, pages, size } = this
+    const next = page + direction
+    // Page 0 and the last page are chapter boundary gutters.
+    if (page < 1 || page >= pages - 1 || next < 1 || next >= pages - 1) return
+
+    const original = this.#container.scrollLeft
+    if (Math.abs(original - page * size) > 2) return
+    const target = next * size
+    const viewport = this.#container.getBoundingClientRect()
+    const offset = this.#view.iframe.getBoundingClientRect().left - viewport.left
+    const paper = getComputedStyle(this.#top).backgroundColor
+    const dark = this.#mediaQuery.matches
+    if (!this.#curlController.begin({
+      width: size, height: viewport.height, offset, direction, bottom,
+      background: this.#background,
+      paper: paper === 'rgba(0, 0, 0, 0)' ? (dark ? '#202020' : '#fff') : paper,
+      dark,
+    })) return
+
+    cancelAnimationFrame(this.#pendingScrollFrame)
+    this.#pendingScrollFrame = null
+    const turn = { direction, bottom, width: size, original, target }
+    this.#curlTurn = turn
+    this.#curlController.paintNow(distance, lift)
+    this.#setCurlOffset(target)
+    return turn
+  }
+  #cancelCurl() {
+    if (!this.#curlTurn) return
+    this.#setCurlOffset(this.#curlTurn.original)
+    this.#curlController.end()
+    this.#curlTurn = null
+  }
+  async #finishCurl(turn, commit) {
+    if (turn !== this.#curlTurn) return
+    // The settle animation runs on rAF; if it stalls or fails, still release
+    // the turn state so later page turns are not blocked forever.
+    const finished = await Promise.race([
+      this.#curlController.settle(commit).catch(() => false),
+      wait(commit ? 1800 : 1300).then(() => false),
+    ])
+    if (turn !== this.#curlTurn) return
+    this.#curlTurn = null
+    this.#setCurlOffset(finished && commit ? turn.target : turn.original)
+    this.#curlController.end()
+    if (finished && commit) this.#afterScroll('page')
   }
   get scrolled() {
     return this.getAttribute('flow') === 'scrolled'
@@ -859,6 +998,10 @@ export class Paginator extends HTMLElement {
       })
   }
   #onTouchStart(e) {
+    if (this.#curlTurn) {
+      if (this.#touchState?.curl && e.touches.length > 1) this.#cancelCurl()
+      return
+    }
     const touch = e.changedTouches[0]
     const scrollProp = this.scrollProp
     this.#touchState = {
@@ -870,6 +1013,7 @@ export class Paginator extends HTMLElement {
       startTouch: {
         x: e.touches[0].screenX,
         y: e.touches[0].screenY,
+        clientY: e.touches[0].clientY,
       },
       delta: { x: 0, y: 0 },
       startScroll: this.#container[scrollProp],
@@ -961,6 +1105,35 @@ export class Paginator extends HTMLElement {
 
     if (this.scrolled) return
 
+    if (state.curl) {
+      e.preventDefault()
+      if (state.curl === this.#curlTurn) this.#curlController.update(
+        -deltaX * state.curl.direction, deltaY * (state.curl.bottom ? -1 : 1))
+      return
+    }
+    if (horizontalDrag && horizontalAxis && !this.#touchScrolled
+      && e.cancelable && this.#canCurl()) {
+      const selection = this.#view.document.getSelection()
+      if (selection && !selection.isCollapsed) return
+      const viewport = this.#container.getBoundingClientRect()
+      const frameTop = e.currentTarget === this.#view.document
+        ? this.#view.iframe.getBoundingClientRect().top : 0
+      const y = frameTop + state.startTouch.clientY - viewport.top
+      const bottom = y >= viewport.height / 2
+      try {
+        state.curl = this.#beginCurl(deltaX < 0 ? 1 : -1, bottom,
+          absDeltaX, deltaY * (bottom ? -1 : 1))
+      } catch (error) {
+        console.warn('page curl failed to start:', error)
+        this.#cancelCurl()
+        state.curl = null
+      }
+      if (state.curl) {
+        e.preventDefault()
+        return
+      }
+    }
+
     if (verticalDrag && horizontalAxis) {
       e.preventDefault()
       // Lock horizontal position during vertical drag (direction locking)
@@ -982,6 +1155,7 @@ export class Paginator extends HTMLElement {
   }
   #onTouchEnd(e) {
     const state = this.#touchState
+    if (!state) return
     this.dispatchEvent(new CustomEvent('doctouchend', {
       detail: {
         touch: e.changedTouches[0],
@@ -992,6 +1166,22 @@ export class Paginator extends HTMLElement {
     }))
 
     this.#touchScrolled = false
+    if (state.curl) {
+      this.#touchState = null
+      const turn = state.curl
+      if (this.#curlTurn !== turn) return
+      const touch = e.changedTouches[0]
+      const distance = (state.startTouch.x - touch.screenX) * turn.direction
+      const lift = (touch.screenY - state.startTouch.y) * (turn.bottom ? -1 : 1)
+      const velocity = e.timeStamp - state.t < 90 ? state.vx * turn.direction : 0
+      this.#curlController.paintNow(distance, lift)
+      void this.#finishCurl(turn, shouldCommitCurl(distance, turn.width, velocity))
+      return
+    }
+    if (this.#canCurl() && state.direction === 'none') {
+      this.#touchState = null
+      return
+    }
     if (this.scrolled) {
       this.#touchState = null
       this.#touchScrolled = false
@@ -1026,6 +1216,12 @@ export class Paginator extends HTMLElement {
           .finally(() => { this.#touchState = null })
       else this.#touchState = null
     })
+  }
+  #onTouchCancel() {
+    if (!this.#touchState?.curl) return
+    this.#cancelCurl()
+    this.#touchState = null
+    this.#touchScrolled = false
   }
   // allows one to process rects as if they were LTR and horizontal
   #getRectMapper() {
@@ -1113,6 +1309,7 @@ export class Paginator extends HTMLElement {
     return this.#scrollTo(offset, reason, smooth)
   }
   async scrollToAnchor(anchor, select) {
+    this.#cancelCurl()
     this.#anchor = anchor
     const rects = uncollapse(anchor)?.getClientRects?.()
     // if anchor is an element or a range
@@ -1262,6 +1459,10 @@ export class Paginator extends HTMLElement {
     }
     await this.scrollToAnchor((typeof anchor === 'function'
       ? anchor(this.#view.document) : anchor) ?? 0, select)
+    if (src) {
+      this.#curlChapterReady = true
+      this.#refreshCurl()
+    }
   }
   #canGoToIndex(index) {
     return index >= 0 && index <= this.sections.length - 1
@@ -1285,7 +1486,7 @@ export class Paginator extends HTMLElement {
     }
   }
   async goTo(target) {
-    if (this.#locked) return
+    if (this.#locked || this.#curlTurn) return
     const resolved = await target
     if (this.#canGoToIndex(resolved.index)) return this.#goTo(resolved)
   }
@@ -1323,17 +1524,33 @@ export class Paginator extends HTMLElement {
       if (this.sections[index]?.linear !== 'no') return index
   }
   async #turnPage(dir, distance) {
-    // if (this.#locked) return
+    if (this.#pageTurnMode === 'curl') {
+      if (this.#locked || this.#isSnapping || this.#curlTurn) return
+      if (this.#view?.document?.body) {
+        let turn = null
+        try {
+          turn = this.#beginCurl(dir, true)
+        } catch (error) {
+          // A curl failure must never kill the page turn itself: fall back to
+          // the ordinary animated scroll.
+          console.warn('page curl failed to start:', error)
+          this.#cancelCurl()
+        }
+        if (turn) return this.#finishCurl(turn, true)
+      }
+    }
     this.#locked = true
-    const prev = dir === -1
-    const shouldGo = await (prev ? this.#scrollPrev(distance) : this.#scrollNext(distance))
-    
-    if (shouldGo) await this.#goTo({
-      index: this.#adjacentIndex(dir),
-      anchor: prev ? () => 1 : () => 0,
-    })
-    if (shouldGo || !this.hasAttribute('animated')) await wait(100)
-    this.#locked = false
+    try {
+      const prev = dir === -1
+      const shouldGo = await (prev ? this.#scrollPrev(distance) : this.#scrollNext(distance))
+      if (shouldGo) await this.#goTo({
+        index: this.#adjacentIndex(dir),
+        anchor: prev ? () => 1 : () => 0,
+      })
+      if (shouldGo || !this.hasAttribute('animated')) await wait(100)
+    } finally {
+      this.#locked = false
+    }
   }
   prev(distance) {
     return this.#turnPage(-1, distance)
@@ -1365,6 +1582,7 @@ export class Paginator extends HTMLElement {
   }
   setStyles(styles) {
     this.#styles = styles
+    this.#refreshCurl()
     const $$styles = this.#styleMap.get(this.#view?.document)
     if (!$$styles) return
     const [$beforeStyle, $style] = $$styles
@@ -1377,14 +1595,19 @@ export class Paginator extends HTMLElement {
     this.#applyBackground()
 
     // needed because the resize observer doesn't work in Firefox
-    this.#view?.document?.fonts?.ready?.then(() => this.#view.expand())
+    const view = this.#view
+    view.document?.fonts?.ready?.then(() => {
+      if (view === this.#view) view.expand()
+    })
   }
   get writingMode() {
     return this.#view?.writingMode
   }
   destroy() {
     this.#observer.unobserve(this)
-    this.#view.destroy()
+    this.#curlChapterReady = false
+    this.#refreshCurl()
+    this.#view?.destroy()
     this.#view = null
     this.sections[this.#index]?.unload?.()
     this.#mediaQuery.removeEventListener('change', this.#mediaQueryListener)

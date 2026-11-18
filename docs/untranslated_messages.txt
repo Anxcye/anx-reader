@@ -1,5 +1,6 @@
 {
   "ar": [
+    "pageCurl",
     "bookDetailFileFormat",
     "filePickerFailed",
     "settingsAiProviderReasoningEffort",
@@ -51,6 +52,7 @@
   ],
 
   "de": [
+    "pageCurl",
     "bookDetailFileFormat",
     "filePickerFailed",
     "settingsAiProviderReasoningEffort",
@@ -102,6 +104,7 @@
   ],
 
   "es": [
+    "pageCurl",
     "bookDetailFileFormat",
     "filePickerFailed",
     "settingsAiProviderReasoningEffort",
@@ -153,6 +156,7 @@
   ],
 
   "fr": [
+    "pageCurl",
     "bookDetailFileFormat",
     "filePickerFailed",
     "settingsAiProviderReasoningEffort",
@@ -204,6 +208,7 @@
   ],
 
   "it": [
+    "pageCurl",
     "bookDetailFileFormat",
     "filePickerFailed",
     "settingsAiProviderReasoningEffort",
@@ -255,6 +260,7 @@
   ],
 
   "ja": [
+    "pageCurl",
     "bookDetailFileFormat",
     "filePickerFailed",
     "settingsAiProviderReasoningEffort",
@@ -306,6 +312,7 @@
   ],
 
   "ko": [
+    "pageCurl",
     "bookDetailFileFormat",
     "filePickerFailed",
     "settingsAiProviderReasoningEffort",
@@ -357,6 +364,7 @@
   ],
 
   "pt": [
+    "pageCurl",
     "bookDetailFileFormat",
     "filePickerFailed",
     "settingsAiProviderReasoningEffort",
@@ -408,6 +416,7 @@
   ],
 
   "ro": [
+    "pageCurl",
     "bookDetailFileFormat",
     "filePickerFailed",
     "settingsAiProviderReasoningEffort",
@@ -459,6 +468,7 @@
   ],
 
   "ru": [
+    "pageCurl",
     "bookDetailFileFormat",
     "filePickerFailed",
     "settingsAiProviderReasoningEffort",
@@ -510,6 +520,7 @@
   ],
 
   "tr": [
+    "pageCurl",
     "bookDetailFileFormat",
     "filePickerFailed",
     "settingsAiProviderReasoningEffort",

@@ -24,7 +24,8 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 enum PageTurn {
   noAnimation,
   slide,
-  scroll;
+  scroll,
+  curl;
 
   String getLabel(BuildContext context) {
     switch (this) {
@@ -34,6 +35,8 @@ enum PageTurn {
         return L10n.of(context).slide;
       case PageTurn.scroll:
         return L10n.of(context).scroll;
+      case PageTurn.curl:
+        return L10n.of(context).pageCurl;
     }
   }
 }

@@ -110,6 +110,7 @@
   "noAnimation": "无动画",
   "slide": "滑动翻页",
   "scroll": "滚动翻页",
+  "pageCurl": "仿真翻页",
   "bookDeleted": "书籍已删除",
   "importNBooksSelected": "{count, plural, other{选择了 {count} 本书}}",
   "importSupportTypes": "支持 {types}",

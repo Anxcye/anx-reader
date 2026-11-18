@@ -110,6 +110,7 @@
   "noAnimation": "No Animation",
   "slide": "Slide",
   "scroll": "Scroll",
+  "pageCurl": "Page Curl",
   "bookDeleted": "Book deleted",
   "importNBooksSelected": "{count, plural, one{1 book selected} other{{count} books selected}}",
   "importSupportTypes": "Support types: {types}",
