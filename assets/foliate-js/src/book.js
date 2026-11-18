@@ -1854,7 +1854,8 @@ const callFlutter = (name, data) => {
 const setStyle = (oldStyle) => {
   const turn = {
     scroll: false,
-    animated: true
+    animated: true,
+    mode: 'slide',
   }
 
   switch (style.pageTurnStyle) {
@@ -1870,9 +1871,13 @@ const setStyle = (oldStyle) => {
       turn.scroll = false
       turn.animated = false
       break
+    case 'curl':
+      turn.mode = reader.view.isFixedLayout ? 'slide' : 'curl'
+      break
   }
 
   reader.view.renderer.setAttribute('flow', turn.scroll ? 'scrolled' : 'paginated')
+  reader.view.renderer.setAttribute('page-turn-mode', turn.mode)
   reader.view.renderer.setAttribute('top-margin', `${style.topMargin}px`)
   reader.view.renderer.setAttribute('bottom-margin', `${style.bottomMargin}px`)
   reader.view.renderer.setAttribute('gap', `${style.sideMargin}%`)

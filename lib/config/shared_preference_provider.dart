@@ -529,9 +529,11 @@ class Prefs extends ChangeNotifier {
   }
 
   PageTurn get pageTurnStyle {
-    String? style = prefs.getString('pageTurnStyle');
-    if (style == null) return PageTurn.slide;
-    return PageTurn.values.firstWhere((element) => element.name == style);
+    final style = prefs.get('pageTurnStyle');
+    return PageTurn.values.firstWhere(
+      (element) => element.name == style,
+      orElse: () => PageTurn.slide,
+    );
   }
 
   set font(FontModel font) {
