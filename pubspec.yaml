@@ -168,6 +168,7 @@ dependency_overrides:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  path_provider_platform_interface: ^2.1.2
   flutter_lints: ^5.0.0
   build_runner: ^2.4.13
   custom_lint: ^0.7.5

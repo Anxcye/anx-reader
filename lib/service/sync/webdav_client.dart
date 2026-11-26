@@ -74,8 +74,10 @@ class WebdavClient extends SyncClientBase {
 
   @override
   Future<void> testFullCapabilities() async {
-    const testDir = 'anx/.test';
-    const testFile = '$testDir/test.txt';
+    final timestamp = DateTime.now().microsecondsSinceEpoch;
+    // Some servers ignore hidden paths; isolate each test in a visible folder.
+    final testDir = 'anx/connection-test-$timestamp';
+    final testFile = '$testDir/test.txt';
     io.File? localTestFile;
     io.File? downloadTestFile;
 
@@ -84,7 +86,6 @@ class WebdavClient extends SyncClientBase {
 
       // 1. Create local temporary test file
       final tempDir = await getAnxTempDir();
-      final timestamp = DateTime.now().millisecondsSinceEpoch;
       localTestFile = io.File('${tempDir.path}/webdav_test_$timestamp.txt');
 
       final testContent = 'Anx Reader WebDAV Test\n'
